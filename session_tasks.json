@@ -1,0 +1,47 @@
+{
+  "_readme": "Edit this file to customize your pre-stream checklist. Add, remove, or rename tasks freely. Keywords are what Bolt listens for — say any of them out loud to check off that task.",
+  "tasks": [
+    {
+      "id": "obs_setup",
+      "task": "Set up OBS — scenes, sources, audio levels",
+      "keywords": ["obs", "scene", "scenes", "audio", "levels", "setup", "set up", "sources"],
+      "done": false
+    },
+    {
+      "id": "twitch_title",
+      "task": "Set Twitch title and game category",
+      "keywords": ["title", "twitch", "game", "category", "set", "updated"],
+      "done": false
+    },
+    {
+      "id": "streamlabs",
+      "task": "Check Streamlabs alerts are on",
+      "keywords": ["streamlabs", "alerts", "alert", "donations", "on"],
+      "done": false
+    },
+    {
+      "id": "tiktok_idea",
+      "task": "Pick a TikTok clip idea to aim for this session",
+      "keywords": ["tiktok", "clip", "idea", "moment", "viral", "content"],
+      "done": false
+    },
+    {
+      "id": "socials",
+      "task": "Announce the stream on socials",
+      "keywords": ["announced", "posted", "tweet", "social", "twitter", "instagram", "x"],
+      "done": false
+    },
+    {
+      "id": "stream_check",
+      "task": "Do a quick test — video, mic, delay",
+      "keywords": ["test", "delay", "mic", "video", "stream check", "checked", "quality"],
+      "done": false
+    },
+    {
+      "id": "session",
+      "task": "Set a session goal (viewers, clip, milestone)",
+      "keywords": ["goal", "goals", "milestone", "viewers", "target", "aim"],
+      "done": false
+    }
+  ]
+}

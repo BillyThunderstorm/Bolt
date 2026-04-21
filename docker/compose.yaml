@@ -1,0 +1,6 @@
+services:
+  folderwatcher:
+    image: folderwatcher
+    build:
+      context: .
+      dockerfile: ./Dockerfile
