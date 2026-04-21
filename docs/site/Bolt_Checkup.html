@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foxy Checkup · BillyandRandy</title>
+
+  <!-- Load live Foxy stats — written by launch.py on every startup -->
+  <!-- If this file doesn't exist yet, the page shows dashes gracefully -->
+  <script src="../data/foxy_data.js" onerror="window.FOXY_DATA=null;"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #0a0a12;
+      --panel:  #12121e;
+      --card:   #1a1a2e;
+      --border: #2a2a4a;
+      --text:   #e8e8ff;
+      --muted:  #7070a0;
+      --accent: #a78bfa;
+      --green:  #34d399;
+      --yellow: #fbbf24;
+      --red:    #f87171;
+      --blue:   #60a5fa;
+      --pink:   #f472b6;
+      --orange: #fb923c;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BUBBLES ── */
+    #bubbles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .bubble {
+      position: absolute; border-radius: 50%; opacity: 0.05;
+      animation: floatUp linear infinite;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(110vh) scale(1); opacity: 0.05; }
+      50%  { opacity: 0.09; }
+      100% { transform: translateY(-20vh) scale(1.2); opacity: 0; }
+    }
+
+    .wrap {
+      position: relative; z-index: 1;
+      max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex; align-items: center; gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .avatar-wrap { position: relative; width: 80px; height: 80px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .shimmer-ring {
+      position: absolute; width: 100px; height: 100px; border-radius: 50%;
+      border: 2px solid rgba(167,139,250,0.3);
+      animation: shimmerPulse 2.5s ease-in-out infinite;
+    }
+    @keyframes shimmerPulse {
+      0%,100% { transform: scale(1); opacity: 0.3; }
+      50%      { transform: scale(1.3); opacity: 0; }
+    }
+    .avatar-ring {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: conic-gradient(#a78bfa, #f472b6, #fb923c, #fbbf24, #34d399, #60a5fa, #a78bfa);
+      padding: 3px; animation: spinRing 5s linear infinite;
+    }
+    @keyframes spinRing { to { transform: rotate(360deg); } }
+    .avatar-inner {
+      width: 100%; height: 100%; border-radius: 50%;
+      background: var(--panel);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
+    }
+    header h1 { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.5px; }
+    header p  { color: var(--muted); font-size: 0.88rem; margin-top: 0.2rem; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.3);
+      color: var(--accent); border-radius: 999px;
+      font-size: 0.7rem; font-weight: 600; padding: 0.25rem 0.75rem;
+      letter-spacing: 0.5px; margin-top: 0.4rem;
+    }
+
+    /* ── REFRESH BAR ── */
+    .refresh-bar {
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 0.5rem; margin-bottom: 1.2rem;
+      font-size: 0.72rem; color: var(--muted);
+    }
+    .refresh-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s ease-in-out infinite; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 0.85rem;
+    }
+
+    /* ── STATUS ROW ── */
+    .status-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.85rem; margin-bottom: 2rem;
+    }
+    .status-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1rem 1.1rem;
+      display: flex; align-items: center; gap: 0.8rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .status-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green  { background: var(--green);  box-shadow: 0 0 8px var(--green); }
+    .dot-yellow { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+    .dot-red    { background: var(--red);    box-shadow: 0 0 8px var(--red); }
+    .dot-pulse  { animation: dotPulse 1.5s ease-in-out infinite; }
+    @keyframes dotPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.6); } }
+    .status-info strong { display: block; font-size: 0.86rem; font-weight: 700; }
+    .status-info span   { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── CARDS GRID ── */
+    .cards-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.2rem; margin-bottom: 2rem;
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; padding: 1.4rem 1.5rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .card:hover { transform: translateY(-3px); border-color: rgba(167,139,250,0.45); }
+    .card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; }
+    .card-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .icon-purple { background: rgba(167,139,250,0.15); }
+    .icon-green  { background: rgba(52,211,153,0.15); }
+    .icon-yellow { background: rgba(251,191,36,0.15); }
+    .icon-pink   { background: rgba(244,114,182,0.15); }
+    .icon-blue   { background: rgba(96,165,250,0.15); }
+    .icon-orange { background: rgba(251,146,60,0.15); }
+    .card-title  { font-size: 0.92rem; font-weight: 700; }
+
+    /* ── STAT NUMBERS ── */
+    .stats-row { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .stat-item { text-align: center; }
+    .stat-num  { font-size: 1.9rem; font-weight: 800; line-height: 1; }
+    .stat-lbl  { font-size: 0.66rem; color: var(--muted); margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .c-purple { color: var(--accent); }
+    .c-green  { color: var(--green); }
+    .c-yellow { color: var(--yellow); }
+    .c-pink   { color: var(--pink); }
+    .c-blue   { color: var(--blue); }
+    .c-orange { color: var(--orange); }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap { margin-top: 0.75rem; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 0.73rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .progress-bar   { height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+    .progress-fill  { height: 100%; border-radius: 99px; transition: width 0.9s cubic-bezier(0.34,1.56,0.64,1); }
+
+    /* ── CHECK LIST ── */
+    .check-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+    .check-item { display: flex; align-items: center; gap: 0.65rem; font-size: 0.82rem; }
+    .check-item.done { color: var(--green); }
+    .check-item.warn { color: var(--yellow); }
+    .check-item.miss { color: var(--muted); }
+
+    /* ── TOP CLIP ── */
+    .top-clip-box {
+      background: rgba(167,139,250,0.07); border: 1px solid rgba(167,139,250,0.2);
+      border-radius: 12px; padding: 0.85rem 1rem; margin-top: 0.5rem;
+    }
+    .top-clip-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .top-clip-score { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── PHASE TIMELINE ── */
+    .phase-row { display: flex; flex-direction: column; gap: 0.55rem; }
+    .phase-item { display: flex; align-items: center; gap: 0.7rem; font-size: 0.82rem; }
+    .phase-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .phase-done   { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .phase-active { background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: dotPulse 1.5s ease-in-out infinite; }
+    .phase-next   { background: rgba(255,255,255,0.1); }
+
+    /* ── FOOTER ── */
+    footer {
+      margin-top: 3rem; text-align: center;
+      font-size: 0.66rem; letter-spacing: 3px;
+      color: rgba(112,112,160,0.4); text-transform: uppercase;
+      display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+    }
+    footer::before, footer::after {
+      content: ""; flex: 1; height: 1px;
+      background: linear-gradient(to right, transparent, rgba(167,139,250,0.15), transparent);
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.5rem; }
+      .stat-num  { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="bubbles"></div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="avatar-wrap">
+      <div class="shimmer-ring"></div>
+      <div class="avatar-ring">
+        <div class="avatar-inner">🦊</div>
+      </div>
+    </div>
+    <div>
+      <h1>Foxy Checkup</h1>
+      <p>BillyandRandy · AI Producer Dashboard</p>
+      <div class="badge">🦊 PHASE 3 — VOICE + PERSONALITY ACTIVE</div>
+    </div>
+  </header>
+
+  <!-- REFRESH INFO -->
+  <div class="refresh-bar">
+    <div class="refresh-dot"></div>
+    <span id="refresh-label">Auto-refreshes every 60 seconds</span>
+    <span style="color:var(--border)">·</span>
+    <span id="last-updated">—</span>
+  </div>
+
+  <!-- STATUS ROW -->
+  <div class="section-title">System Status</div>
+  <div class="status-row">
+    <div class="status-card">
+      <div class="status-dot dot-green dot-pulse" id="dot-twitch"></div>
+      <div class="status-info">
+        <strong>Twitch API</strong>
+        <span id="status-twitch">Checking…</span>
+      </div>
+    </div>
+    <div class="status-card">
+      <div class="status-dot dot-green" id="dot-obs"></div>
+      <div class="status-info">
+        <strong>OBS</strong>
+        <span id="status-obs">Checking…</span>
+      </div>
+    </div>
+    <div class="status-card">
+      <div class="status-dot dot-green" id="dot-discord"></div>
+      <div class="status-info">
+        <strong>Discord Alerts</strong>
+        <span id="status-discord">Checking…</span>
+      </div>
+    </div>
+    <div class="status-card">
+      <div class="status-dot dot-green" id="dot-ai"></div>
+      <div class="status-info">
+        <strong>Foxy AI</strong>
+        <span id="status-ai">Checking…</span>
+      </div>
+    </div>
+    <div class="status-card">
+      <div class="status-dot" id="dot-chatbot"></div>
+      <div class="status-info">
+        <strong>Chat Bot</strong>
+        <span id="status-chatbot">Checking…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARDS GRID -->
+  <div class="cards-grid">
+
+    <!-- STATS CARD -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-purple">📊</div>
+        <span class="card-title">Session Stats</span>
+      </div>
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-num c-purple" id="stat-clips">—</div>
+          <div class="stat-lbl">Clips</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num c-green" id="stat-vertical">—</div>
+          <div class="stat-lbl">TikTok</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num c-yellow" id="stat-highlights">—</div>
+          <div class="stat-lbl">Highlights</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num c-pink" id="stat-queue">—</div>
+          <div class="stat-lbl">Queued</div>
+        </div>
+      </div>
+      <div id="top-clip-wrap" style="display:none;">
+        <div class="top-clip-box">
+          <div class="top-clip-title" id="top-clip-title">—</div>
+          <div class="top-clip-score" id="top-clip-score">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- API KEYS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-green">🔑</div>
+        <span class="card-title">API Keys</span>
+      </div>
+      <ul class="check-list" id="api-keys-list">
+        <li class="check-item miss">Loading…</li>
+      </ul>
+    </div>
+
+    <!-- PHASE ROADMAP -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-pink">🗺</div>
+        <span class="card-title">Phase Roadmap</span>
+      </div>
+      <div class="phase-row">
+        <div class="phase-item">
+          <div class="phase-dot phase-done"></div>
+          <span><strong style="color:var(--green)">Phase 1</strong> — Dashboard + personality shell</span>
+        </div>
+        <div class="phase-item">
+          <div class="phase-dot phase-done"></div>
+          <span><strong style="color:var(--green)">Phase 2</strong> — Live API connections (Twitch, OBS, Streamlabs)</span>
+        </div>
+        <div class="phase-item">
+          <div class="phase-dot phase-active"></div>
+          <span><strong style="color:var(--accent)">Phase 3</strong> — Voice + Jarvis personality (active now)</span>
+        </div>
+        <div class="phase-item">
+          <div class="phase-dot phase-next"></div>
+          <span style="color:var(--muted)"><strong>Phase 4</strong> — Self-improving memory</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GOAL TRACKER -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-yellow">🎯</div>
+        <span class="card-title">Goals</span>
+      </div>
+      <div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Phase 3 complete</span><span id="p3-pct" class="c-accent">—</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="p3-bar" style="width:0%; background:linear-gradient(90deg,#a78bfa,#f472b6);"></div></div>
+        </div>
+        <div class="progress-wrap" style="margin-top:1rem;">
+          <div class="progress-label"><span>First 10 clips</span><span id="clips-pct" class="c-yellow">—</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="clips-bar" style="width:0%; background:linear-gradient(90deg,#fbbf24,#fb923c);"></div></div>
+        </div>
+        <div class="progress-wrap" style="margin-top:1rem;">
+          <div class="progress-label"><span>TikTok queue</span><span id="queue-pct" class="c-blue">—</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="queue-bar" style="width:0%; background:linear-gradient(90deg,#60a5fa,#34d399);"></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cards-grid -->
+
+</div><!-- /wrap -->
+
+<footer>FOXY · BILLYANDRANDY · AI PRODUCER · PHASE 3</footer>
+
+<script>
+  // ── BUBBLES ──────────────────────────────────────────────────────────────────
+  (function() {
+    const c = document.getElementById('bubbles');
+    const colors = ['#a78bfa','#f472b6','#60a5fa','#34d399','#fbbf24','#fb923c'];
+    for (let i = 0; i < 16; i++) {
+      const b = document.createElement('div');
+      b.className = 'bubble';
+      const size = 40 + Math.random() * 100;
+      b.style.cssText = `
+        width:${size}px;height:${size}px;
+        left:${Math.random()*100}%;bottom:0;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        animation-duration:${14+Math.random()*18}s;
+        animation-delay:-${Math.random()*25}s;
+      `;
+      c.appendChild(b);
+    }
+  })();
+
+  // ── POPULATE FROM FOXY_DATA ───────────────────────────────────────────────────
+  function populate() {
+    const d = window.FOXY_DATA;
+
+    if (!d) {
+      // Data file doesn't exist yet — show instructions
+      document.getElementById('last-updated').textContent = 'Run launch.py to generate live data';
+      setAllDots('yellow', 'Not yet loaded');
+
+      // Still show static values
+      document.getElementById('api-keys-list').innerHTML = `
+        <li class="check-item warn">⚠ Run launch.py to see live key status</li>`;
+      return;
+    }
+
+    // ── Last updated ─────────────────────────────────────────────────────────
+    document.getElementById('last-updated').textContent = 'Updated: ' + d.generated_at;
+
+    // ── Stats ────────────────────────────────────────────────────────────────
+    animateCount('stat-clips',      d.clips_made      || 0);
+    animateCount('stat-vertical',   d.vertical_clips  || 0);
+    animateCount('stat-highlights', d.highlights      || 0);
+    animateCount('stat-queue',      d.ready_to_post   || 0);
+
+    // ── Top clip ─────────────────────────────────────────────────────────────
+    if (d.top_clip) {
+      document.getElementById('top-clip-wrap').style.display = 'block';
+      document.getElementById('top-clip-title').textContent = d.top_clip.title || 'Untitled clip';
+      document.getElementById('top-clip-score').textContent =
+        'Virality score: ' + (d.top_clip.score || 0).toFixed(0) + ' / 100  ·  Top ranked clip';
+    }
+
+    // ── API keys ─────────────────────────────────────────────────────────────
+    const keys = d.api_keys || {};
+    const keyLabels = {
+      twitch:     'Twitch API',
+      obs:        'OBS WebSocket',
+      streamlabs: 'Streamlabs',
+      discord:    'Discord Alerts',
+      anthropic:  'Anthropic AI',
+      tiktok:     'TikTok Token',
+      bot_token:  'Twitch Chat Bot',
+    };
+    const list = document.getElementById('api-keys-list');
+    list.innerHTML = Object.entries(keyLabels).map(([k, label]) => {
+      const ok = keys[k];
+      return `<li class="check-item ${ok ? 'done' : 'miss'}">
+        <span>${ok ? '✓' : '○'}</span> ${label}${!ok && k==='tiktok' ? ' <span style="color:var(--muted);font-size:0.7rem;">(manual posting active)</span>' : ''}
+      </li>`;
+    }).join('');
+
+    // ── Status dots ──────────────────────────────────────────────────────────
+    setDot('dot-twitch',   'status-twitch',   keys.twitch,     'Connected', 'Add to .env');
+    setDot('dot-obs',      'status-obs',      keys.obs,        'Password set', 'Add OBS_PASSWORD');
+    setDot('dot-discord',  'status-discord',  keys.discord,    'Webhook active', 'Add to .env');
+    setDot('dot-ai',       'status-ai',       keys.anthropic,  'Claude connected', 'Add API key');
+    setDot('dot-chatbot',  'status-chatbot',  keys.bot_token,  'Token set', 'Run get_twitch_token.py');
+
+    // ── Goals / progress bars ────────────────────────────────────────────────
+    const clips = d.clips_made || 0;
+    const clipsGoal = 10;
+    const clipsPct  = Math.min(100, Math.round(clips / clipsGoal * 100));
+    setProgress('clips-bar', 'clips-pct', clipsPct, clips + ' / ' + clipsGoal);
+
+    const queue = d.ready_to_post || 0;
+    const queuePct = Math.min(100, Math.round(queue / 5 * 100));
+    setProgress('queue-bar', 'queue-pct', queuePct, queue + ' ready');
+
+    // Phase 3 progress — keys configured is a good proxy
+    const configuredKeys = Object.values(keys).filter(Boolean).length;
+    const p3Pct = Math.min(100, Math.round((configuredKeys / 5) * 60 + (keys.bot_token ? 40 : 0)));
+    setProgress('p3-bar', 'p3-pct', p3Pct, p3Pct + '%');
+  }
+
+  function setDot(dotId, statusId, ok, okLabel, failLabel) {
+    const dot = document.getElementById(dotId);
+    const txt = document.getElementById(statusId);
+    if (ok) {
+      dot.className = 'status-dot dot-green';
+      txt.textContent = okLabel;
+    } else {
+      dot.className = 'status-dot dot-yellow';
+      txt.textContent = failLabel;
+    }
+  }
+
+  function setAllDots(color, label) {
+    ['twitch','obs','discord','ai','chatbot'].forEach(k => {
+      const dot = document.getElementById('dot-' + k);
+      const txt = document.getElementById('status-' + k);
+      if (dot) dot.className = 'status-dot dot-' + color;
+      if (txt) txt.textContent = label;
+    });
+  }
+
+  function setProgress(barId, pctId, pct, label) {
+    const bar = document.getElementById(barId);
+    const lbl = document.getElementById(pctId);
+    if (bar) bar.style.width = pct + '%';
+    if (lbl) lbl.textContent = label;
+  }
+
+  function animateCount(id, target, duration = 900) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (target === 0) { el.textContent = '0'; return; }
+    let start = null;
+    const step = ts => {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      el.textContent = Math.round(p * target);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  // ── AUTO-REFRESH every 60 seconds ────────────────────────────────────────────
+  // Reloads the page so the <script src="foxy_data.js"> gets the latest data.
+  // launch.py writes foxy_data.js on every startup — so after you run Foxy,
+  // the page will show fresh numbers on the next refresh cycle.
+  let countdown = 60;
+  setInterval(() => {
+    countdown--;
+    document.getElementById('refresh-label').textContent =
+      `Auto-refreshes in ${countdown}s`;
+    if (countdown <= 0) {
+      location.reload();
+    }
+  }, 1000);
+
+  // ── RUN ──────────────────────────────────────────────────────────────────────
+  window.addEventListener('load', populate);
+</script>
+</body>
+</html>

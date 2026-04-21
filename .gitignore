@@ -1,0 +1,36 @@
+# ── Secrets — NEVER commit these ─────────────────────────────────────────────
+.env
+
+# ── Video files — too large for GitHub ───────────────────────────────────────
+recordings/
+clips/
+vertical_clips/
+*.mp4
+*.mkv
+*.mov
+*.avi
+
+# ── Runtime output — generated automatically, no need to track ───────────────
+data/
+logs/
+__pycache__/
+*.pyc
+*.pyo
+
+# ── Mac system files ──────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+
+# ── Archive / backups — too large for GitHub ─────────────────────────────────
+_Archive/
+
+# ── Python virtual environment ────────────────────────────────────────────────
+.venv/
+.venv-1/
+venv/
+env/
+
+# ── Editor / IDE ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp

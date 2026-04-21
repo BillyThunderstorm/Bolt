@@ -1,0 +1,16 @@
+#!/bin/bash
+# FoxyBot macOS App Launcher
+# Finds the launch.sh in the same folder as the .app bundle and runs it in a Terminal window.
+
+# Resolve the .app bundle directory (3 levels up from Contents/MacOS/)
+APP_BUNDLE="$(cd "$(dirname "$0")/../.." && pwd)"
+FOXY_DIR="$(dirname "$APP_BUNDLE")"
+LAUNCH_SCRIPT="$FOXY_DIR/launch.sh"
+
+# Run the launch script inside a new Terminal window using osascript
+osascript <<EOF
+tell application "Terminal"
+    activate
+    do script "bash '$LAUNCH_SCRIPT'"
+end tell
+EOF

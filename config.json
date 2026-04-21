@@ -1,0 +1,31 @@
+{
+  "game": "Marvel Rivals",
+  "recordings_folder": "recordings",
+  "clips_folder": "clips",
+  "vertical_clips_folder": "vertical_clips",
+  "tiktok_style": "letterbox",
+  "auto_format_tiktok": true,
+  "max_clips_per_session": 5,
+  "min_clip_score": 50,
+  "highlight": {
+    "energy_multiplier": 2.5,
+    "min_gap_seconds": 8,
+    "pad_before": 12,
+    "pad_after": 20
+  },
+  "whisper_model": "base",
+  "hashtags": [
+    "gaming", "clips", "viral", "trending", "MarvelRivals", "fyp"
+  ],
+  "peak_notifications": {
+    "enabled": true,
+    "windows": [
+      { "label": "Morning",   "start_hour": 7,  "end_hour": 9  },
+      { "label": "Lunch",     "start_hour": 12, "end_hour": 14 },
+      { "label": "Prime Time","start_hour": 19, "end_hour": 22 }
+    ],
+    "check_interval_minutes": 15,
+    "discord_enabled": true
+  },
+  "notes": "TikTok auto-posting removed. Bolt notifies you at peak hours — you post manually. API keys live in .env."
+}

@@ -1,0 +1,21 @@
+# Core clip pipeline
+librosa
+moviepy
+faster_whisper
+numpy
+opencv-python
+
+# API connections
+python-dotenv
+requests
+anthropic
+
+# Twitch chat bot (Phase 3)
+# Pinned to v2.x — v3 changed the Bot API significantly
+twitchio<3.0.0
+
+# Twitch / Streamlabs
+websocket-client
+
+# Timezone support (Python < 3.9)
+backports.zoneinfo; python_version < "3.9"

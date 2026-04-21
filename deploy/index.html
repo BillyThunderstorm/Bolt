@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foxy — Your AI Producer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0d0d0f;
+            --card: #16161a;
+            --border: #2a2a35;
+            --accent: #ff6b35;
+            --purple: #9b59f7;
+            --green: #2ecc71;
+            --yellow: #f1c40f;
+            --red: #e74c3c;
+            --text: #e8e8f0;
+            --muted: #888899;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .bg-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.08;
+            animation: drift 12s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-glow-1 { background: var(--purple); top: -200px; left: -200px; }
+        .bg-glow-2 { background: var(--accent); bottom: -200px; right: -200px; animation-delay: -6s; }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(40px, 40px); }
+        }
+
+        /* ── Header ── */
+        header {
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(13,13,15,0.85);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .avatar-ring {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #ff6b35, #9b59f7, #3498db, #2ecc71, #ff6b35);
+            padding: 3px;
+            animation: spin 4s linear infinite;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .avatar-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .header-text h1 {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b35, #9b59f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-text p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .header-right {
+            margin-left: auto;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse-dot 2s infinite;
+        }
+
+        .dot.yellow { background: var(--yellow); animation: none; }
+        .dot.red { background: var(--red); animation: none; }
+
+        @keyframes pulse-dot {
+            0%   { box-shadow: 0 0 0 0 rgba(46,204,113,0.5); }
+            70%  { box-shadow: 0 0 0 7px rgba(46,204,113,0); }
+            100% { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+        }
+
+        .clock {
+            font-size: 13px;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── Voice Controls ── */
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .voice-btn {
+            background: rgba(155,89,247,0.12);
+            border: 1px solid rgba(155,89,247,0.25);
+            border-radius: 8px;
+            color: var(--purple);
+            cursor: pointer;
+            font-size: 15px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .voice-btn:hover { background: rgba(155,89,247,0.22); }
+        .voice-btn.muted { background: rgba(255,255,255,0.05); border-color: var(--border); color: var(--muted); }
+
+        .voice-select {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 11px;
+            padding: 4px 8px;
+            cursor: pointer;
+            max-width: 160px;
+            outline: none;
+        }
+        .voice-select option { background: #1a1a22; }
+
+        /* ── Main ── */
+        main {
+            padding: 28px 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .greeting {
+            margin-bottom: 26px;
+        }
+
+        .greeting h2 {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .greeting p {
+            color: var(--muted);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        /* ── Grid ── */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .span-2 { grid-column: span 2; }
+        .span-3 { grid-column: span 3; }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover { border-color: rgba(155,89,247,0.35); }
+
+        .card-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .card-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .card-title { font-size: 14px; font-weight: 600; }
+        .card-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+        /* ── Checklist ── */
+        .checklist { display: flex; flex-direction: column; gap: 8px; }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 9px;
+            cursor: pointer;
+            transition: background 0.15s;
+            user-select: none;
+        }
+
+        .check-item:hover { background: rgba(255,255,255,0.06); }
+        .check-item.done { opacity: 0.45; }
+
+        .check-box {
+            width: 19px;
+            height: 19px;
+            border-radius: 5px;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+
+        .check-item.done .check-box {
+            background: var(--green);
+            border-color: var(--green);
+            color: #000;
+        }
+
+        .check-label { font-size: 13px; flex: 1; }
+        .check-tag   { font-size: 10px; color: var(--muted); }
+
+        /* ── Goals ── */
+        .goal-item { margin-bottom: 14px; }
+        .goal-item:last-of-type { margin-bottom: 0; }
+
+        .goal-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 7px;
+            align-items: center;
+        }
+
+        .goal-row span:last-child { color: var(--muted); }
+
+        .goal-edit-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 11px;
+            padding: 1px 5px;
+            border-radius: 4px;
+            transition: color 0.15s;
+            margin-left: 6px;
+        }
+        .goal-edit-btn:hover { color: var(--purple); }
+
+        .goal-inputs {
+            display: none;
+            gap: 6px;
+            margin-bottom: 7px;
+        }
+        .goal-inputs.visible { display: flex; }
+
+        .goal-input {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 12px;
+            padding: 4px 8px;
+            width: 70px;
+            outline: none;
+            font-family: inherit;
+        }
+        .goal-input:focus { border-color: rgba(155,89,247,0.5); }
+
+        .goal-save-btn {
+            background: rgba(46,204,113,0.15);
+            border: none;
+            border-radius: 6px;
+            color: var(--green);
+            cursor: pointer;
+            font-size: 11px;
+            padding: 4px 10px;
+            font-family: inherit;
+        }
+
+        .bar {
+            height: 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--purple), var(--accent));
+            transition: width 0.4s ease;
+        }
+
+        .goal-tip {
+            margin-top: 14px;
+            padding: 10px 12px;
+            background: rgba(155,89,247,0.08);
+            border-radius: 9px;
+            font-size: 12px;
+            color: #c5b8f8;
+            line-height: 1.5;
+        }
+
+        /* ── Platform Status ── */
+        .platform-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .platform-row:last-child { border-bottom: none; }
+
+        .platform-name {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 13px;
+        }
+
+        /* ── Performance ── */
+        .perf-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .perf-stat {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 13px;
+            text-align: center;
+        }
+
+        .perf-num   { font-size: 20px; font-weight: 700; margin-bottom: 3px; }
+        .perf-label { font-size: 10px; color: var(--muted); }
+        .perf-delta { font-size: 10px; margin-top: 3px; }
+        .up   { color: var(--green); }
+        .down { color: var(--red); }
+
+        .foxy-take {
+            background: rgba(155,89,247,0.08);
+            border: 1px solid rgba(155,89,247,0.18);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 13px;
+            color: #c5b8f8;
+            line-height: 1.6;
+        }
+
+        .foxy-take strong { color: #fff; }
+
+        /* ── Ideas ── */
+        .idea-item {
+            display: flex;
+            gap: 9px;
+            align-items: flex-start;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 9px;
+            margin-bottom: 7px;
+        }
+
+        .idea-item:last-child { margin-bottom: 0; }
+
+        .badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            white-space: nowrap;
+        }
+
+        .badge-hot   { background: rgba(255,107,53,0.15); color: var(--accent); }
+        .badge-trend { background: rgba(155,89,247,0.15); color: var(--purple); }
+        .badge-you   { background: rgba(46,204,113,0.15); color: var(--green); }
+
+        .idea-text { font-size: 13px; line-height: 1.5; }
+
+        /* ── Affiliates ── */
+        .aff-item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .aff-item:last-child { border-bottom: none; }
+
+        .aff-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .aff-info { flex: 1; }
+        .aff-name   { font-size: 13px; font-weight: 500; }
+        .aff-detail { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+        .aff-badge {
+            font-size: 10px;
+            padding: 3px 10px;
+            border-radius: 999px;
+        }
+
+        .aff-active  { background: rgba(46,204,113,0.15); color: var(--green); }
+        .aff-pending { background: rgba(241,196,15,0.15); color: var(--yellow); }
+        .aff-consider{ background: rgba(155,89,247,0.15); color: var(--purple); }
+
+        /* ── Chat ── */
+        .chat-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            padding: 13px 16px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input:focus { border-color: rgba(155,89,247,0.5); }
+        .chat-input::placeholder { color: var(--muted); }
+
+        .chat-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: linear-gradient(135deg, var(--purple), var(--accent));
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+
+        .chat-btn:hover { opacity: 0.82; }
+
+        /* ── Mock data banner ── */
+        .mock-banner {
+            background: rgba(241,196,15,0.07);
+            border: 1px solid rgba(241,196,15,0.2);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: #d4b44a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── Toast ── */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 13px 18px;
+            font-size: 13px;
+            max-width: 320px;
+            z-index: 999;
+            transform: translateY(60px);
+            opacity: 0;
+            transition: all 0.28s ease;
+            line-height: 1.5;
+        }
+
+        #toast.show { transform: translateY(0); opacity: 1; }
+
+        /* ── Today's Tasks ── */
+        .task-add-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .task-add-input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 9px 13px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .task-add-input:focus { border-color: rgba(155,89,247,0.5); }
+        .task-add-input::placeholder { color: var(--muted); }
+
+        .task-add-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, var(--purple), var(--accent));
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: opacity 0.2s;
+        }
+        .task-add-btn:hover { opacity: 0.82; }
+
+        .task-list { display: flex; flex-direction: column; gap: 7px; }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 9px;
+            transition: background 0.15s;
+            group: true;
+        }
+
+        .task-item:hover { background: rgba(255,255,255,0.06); }
+
+        .task-item.done .task-label {
+            text-decoration: line-through;
+            color: var(--muted);
+        }
+
+        .task-check {
+            width: 19px;
+            height: 19px;
+            border-radius: 5px;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .task-item.done .task-check {
+            background: var(--green);
+            border-color: var(--green);
+            color: #000;
+        }
+
+        .task-label {
+            font-size: 13px;
+            flex: 1;
+            cursor: pointer;
+            line-height: 1.4;
+        }
+
+        .task-delete {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 13px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+        .task-item:hover .task-delete { opacity: 1; }
+        .task-delete:hover { color: var(--red); }
+
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .task-clear-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 11px;
+            font-family: inherit;
+            padding: 3px 8px;
+            border-radius: 5px;
+            transition: color 0.15s, background 0.15s;
+        }
+        .task-clear-btn:hover { color: var(--red); background: rgba(231,76,60,0.08); }
+
+        .task-empty {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            padding: 16px 0;
+        }
+
+        /* ── Speaking indicator ── */
+        .speaking-ring {
+            animation: spin 1.5s linear infinite, pulse-ring 1.5s ease-in-out infinite !important;
+        }
+        @keyframes pulse-ring {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<!-- ── Header ── -->
+<header>
+    <div class="avatar-ring" id="avatarRing" onclick="foxyGreet()" title="Click to hear Foxy's greeting">
+        <div class="avatar-inner">🦊</div>
+    </div>
+    <div class="header-text">
+        <h1>Foxy</h1>
+        <p>Your AI Producer &amp; Manager</p>
+    </div>
+    <div class="header-right">
+        <div class="voice-controls">
+            <button class="voice-btn" id="muteBtn" onclick="toggleMute()" title="Toggle voice">🔊</button>
+            <select class="voice-select" id="voiceSelect" onchange="onVoiceSelected()" title="Choose Foxy's voice"></select>
+        </div>
+        <div class="status-pill"><div class="dot"></div> Foxy Online</div>
+        <div class="status-pill"><div class="dot yellow"></div> TikTok Pending</div>
+        <div class="clock" id="clock">--:-- --</div>
+    </div>
+</header>
+
+<!-- ── Main ── -->
+<main>
+
+    <div class="greeting">
+        <h2 id="greeting">Good morning, Billy 👋</h2>
+        <p>Here's your producer briefing. Let's make today count.</p>
+    </div>
+
+    <div class="mock-banner">
+        ⚠️ <span><strong>Phase 1 mode:</strong> Performance stats are placeholders — real API data connects in Phase 2. Goal numbers below are editable and saved to your device.</span>
+    </div>
+
+    <div class="grid">
+
+        <!-- Today's Tasks (full width, top of page) -->
+        <div class="card span-3">
+            <div class="card-head">
+                <div class="card-icon" style="background:rgba(255,107,53,0.1)">📋</div>
+                <div>
+                    <div class="card-title">Today's Tasks</div>
+                    <div class="card-sub" id="task-progress">0 of 0 completed</div>
+                </div>
+            </div>
+            <div class="task-add-row">
+                <input class="task-add-input" id="taskInput" type="text" placeholder="Add a task — paste from your briefing or type your own..." />
+                <button class="task-add-btn" onclick="addTask()" title="Add task">+</button>
+            </div>
+            <div class="task-list" id="taskList"></div>
+            <div class="task-footer">
+                <span id="task-done-count"></span>
+                <button class="task-clear-btn" onclick="clearDoneTasks()">Clear completed</button>
+            </div>
+        </div>
+
+        <!-- Pre-show Checklist -->
+        <div class="card">
+            <div class="card-head">
+                <div class="card-icon" style="background:rgba(46,204,113,0.1)">✅</div>
+                <div>
+                    <div class="card-title">Pre-Show Checklist</div>
+                    <div class="card-sub">Tap each item to confirm</div>
+                </div>
+            </div>
+            <div class="checklist">
+                <div class="check-item" onclick="toggleCheck(this)">
+                    <div class="check-box">✓</div>
+                    <span class="check-label">OBS running &amp; scene set</span>
+                    <span class="check-tag">OBS</span>
+                </div>
+                <div class="check-item" onclick="toggleCheck(this)">
+                    <div class="check-box">✓</div>
+                    <span class="check-label">Streamlabs alerts active</span>
+                    <span class="check-tag">Streamlabs</span>
+                </div>
+                <div class="check-item" onclick="toggleCheck(this)">
+                    <div class="check-box">✓</div>
+                    <span class="check-label">Twitch stream key set</span>
+                    <span class="check-tag">Twitch</span>
+                </div>
+                <div class="check-item" onclick="toggleCheck(this)">
+                    <div class="check-box">✓</div>
+                    <span class="check-label">TikTok Live ready</span>
+                    <span class="check-tag">TikTok</span>
+                </div>
+                <div class="check-item" onclick="toggleCheck(this)">
+                    <div class="check-box">✓</div>
+                    <span class="check-label">Kick channel configured</span>
+                    <span class="check-tag">Kick</span>
+                </div>
+                <div class="check-item" onclick="toggleCheck(this)">
+                    <div class="check-box">✓</div>
+                    <span class="check-label">Audio levels balanced</span>
+                    <span class="check-tag">Audio</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Goal Tracker -->
+        <div class="card">
+            <div class="card-head">
+                <div class="card-icon" style="background:rgba(155,89,247,0.1)">🎯</div>
+                <div>
+                    <div class="card-title">Goal Tracker</div>
+                    <div class="card-sub">Click ✏️ to update your real numbers</div>
+                </div>
+            </div>
+
+            <!-- Twitch Followers -->
+            <div class="goal-item">
+                <div class="goal-row">
+                    <span>Twitch Followers</span>
+                    <span>
+                        <span id="twitch-display">347 / 500</span>
+                        <button class="goal-edit-btn" onclick="toggleGoalEdit('twitch')">✏️</button>
+                    </span>
+                </div>
+                <div class="goal-inputs" id="twitch-inputs">
+                    <input class="goal-input" id="twitch-current" type="number" placeholder="Current" />
+                    <input class="goal-input" id="twitch-goal" type="number" placeholder="Goal" />
+                    <button class="goal-save-btn" onclick="saveGoal('twitch')">Save</button>
+                </div>
+                <div class="bar"><div class="bar-fill" id="twitch-bar" style="width:69%"></div></div>
+            </div>
+
+            <!-- TikTok Followers -->
+            <div class="goal-item">
+                <div class="goal-row">
+                    <span>TikTok Followers</span>
+                    <span>
+                        <span id="tiktok-display">1,200 / 5,000</span>
+                        <button class="goal-edit-btn" onclick="toggleGoalEdit('tiktok')">✏️</button>
+                    </span>
+                </div>
+                <div class="goal-inputs" id="tiktok-inputs">
+                    <input class="goal-input" id="tiktok-current" type="number" placeholder="Current" />
+                    <input class="goal-input" id="tiktok-goal" type="number" placeholder="Goal" />
+                    <button class="goal-save-btn" onclick="saveGoal('tiktok')">Save</button>
+                </div>
+                <div class="bar"><div class="bar-fill" id="tiktok-bar" style="width:24%"></div></div>
+            </div>
+
+            <!-- Videos This Month -->
+            <div class="goal-item">
+                <div class="goal-row">
+                    <span>Videos This Month</span>
+                    <span>
+                        <span id="videos-display">6 / 12</span>
+                        <button class="goal-edit-btn" onclick="toggleGoalEdit('videos')">✏️</button>
+                    </span>
+                </div>
+                <div class="goal-inputs" id="videos-inputs">
+                    <input class="goal-input" id="videos-current" type="number" placeholder="Current" />
+                    <input class="goal-input" id="videos-goal" type="number" placeholder="Goal" />
+                    <button class="goal-save-btn" onclick="saveGoal('videos')">Save</button>
+                </div>
+                <div class="bar"><div class="bar-fill" id="videos-bar" style="width:50%"></div></div>
+            </div>
+
+            <!-- Stream Hours -->
+            <div class="goal-item">
+                <div class="goal-row">
+                    <span>Stream Hours</span>
+                    <span>
+                        <span id="hours-display">18 / 30</span>
+                        <button class="goal-edit-btn" onclick="toggleGoalEdit('hours')">✏️</button>
+                    </span>
+                </div>
+                <div class="goal-inputs" id="hours-inputs">
+                    <input class="goal-input" id="hours-current" type="number" placeholder="Current" />
+                    <input class="goal-input" id="hours-goal" type="number" placeholder="Goal" />
+                    <button class="goal-save-btn" onclick="saveGoal('hours')">Save</button>
+                </div>
+                <div class="bar"><div class="bar-fill" id="hours-bar" style="width:60%"></div></div>
+            </div>
+
+            <div class="goal-tip" id="goal-tip">
+                💡 You're 69% to Twitch Affiliate! 5 more followers puts you past 70%.
+            </div>
+        </div>
+
+        <!-- Platform Status -->
+        <div class="card">
+            <div class="card-head">
+                <div class="card-icon" style="background:rgba(52,152,219,0.1)">📡</div>
+                <div>
+                    <div class="card-title">Platform Status</div>
+                    <div class="card-sub">Connection overview</div>
+                </div>
+            </div>
+            <div class="platform-row">
+                <div class="platform-name">🟣 Twitch</div>
+                <div class="status-pill"><div class="dot yellow"></div> API Key Set</div>
+            </div>
+            <div class="platform-row">
+                <div class="platform-name">🎵 TikTok</div>
+                <div class="status-pill"><div class="dot yellow"></div> API Pending</div>
+            </div>
+            <div class="platform-row">
+                <div class="platform-name">🟢 Kick</div>
+                <div class="status-pill"><div class="dot red"></div> Not Connected</div>
+            </div>
+            <div class="platform-row">
+                <div class="platform-name">🎮 Streamlabs</div>
+                <div class="status-pill"><div class="dot yellow"></div> Not Verified</div>
+            </div>
+            <div class="platform-row">
+                <div class="platform-name">⚫ OBS</div>
+                <div class="status-pill"><div class="dot yellow"></div> Local Only</div>
+            </div>
+        </div>
+
+        <!-- Performance Report (wide) -->
+        <div class="card span-2">
+            <div class="card-head">
+                <div class="card-icon" style="background:rgba(255,107,53,0.1)">📊</div>
+                <div>
+                    <div class="card-title">Performance Report</div>
+                    <div class="card-sub">Placeholder — real data connects in Phase 2</div>
+                </div>
+            </div>
+            <div class="perf-grid">
+                <div class="perf-stat">
+                    <div class="perf-num">—</div>
+                    <div class="perf-label">TikTok Views</div>
+                    <div class="perf-delta" style="color:var(--muted)">API Pending</div>
+                </div>
+                <div class="perf-stat">
+                    <div class="perf-num">—</div>
+                    <div class="perf-label">Twitch Viewers</div>
+                    <div class="perf-delta" style="color:var(--muted)">Phase 2</div>
+                </div>
+                <div class="perf-stat">
+                    <div class="perf-num">—</div>
+                    <div class="perf-label">Engagement</div>
+                    <div class="perf-delta" style="color:var(--muted)">Phase 2</div>
+                </div>
+                <div class="perf-stat">
+                    <div class="perf-num">—</div>
+                    <div class="perf-label">New Followers</div>
+                    <div class="perf-delta" style="color:var(--muted)">Phase 2</div>
+                </div>
+                <div class="perf-stat">
+                    <div class="perf-num">—</div>
+                    <div class="perf-label">Videos Posted</div>
+                    <div class="perf-delta" style="color:var(--muted)">Phase 2</div>
+                </div>
+                <div class="perf-stat">
+                    <div class="perf-num">—</div>
+                    <div class="perf-label">Stream Time</div>
+                    <div class="perf-delta" style="color:var(--muted)">Phase 2</div>
+                </div>
+            </div>
+            <div class="foxy-take">
+                <strong>Foxy's Take:</strong> Performance data will pull live from Twitch and TikTok once Phase 2 API connections are active. Once wired up, this section will show real views, follower growth, and engagement — and Foxy will analyze the trends automatically.
+            </div>
+        </div>
+
+        <!-- Content Ideas -->
+        <div class="card">
+            <div class="card-head">
+                <div class="card-icon" style="background:rgba(241,196,15,0.1)">💡</div>
+                <div>
+                    <div class="card-title">Content Ideas</div>
+                    <div class="card-sub">Trends + your style</div>
+                </div>
+            </div>
+            <div class="idea-item">
+                <span class="badge badge-hot">🔥 Hot</span>
+                <span class="idea-text">React to the most controversial gaming takes on TikTok this week</span>
+            </div>
+            <div class="idea-item">
+                <span class="badge badge-trend">📈 Trend</span>
+                <span class="idea-text">"I tried playing [game] with only one hand" challenge format</span>
+            </div>
+            <div class="idea-item">
+                <span class="badge badge-you">✨ You</span>
+                <span class="idea-text">Behind the scenes — show your stream setup and how Foxy works</span>
+            </div>
+            <div class="idea-item">
+                <span class="badge badge-hot">🔥 Hot</span>
+                <span class="idea-text">Ranking every controller you've used, worst to best</span>
+            </div>
+        </div>
+
+        <!-- Affiliate Tracker (wide) -->
+        <div class="card span-2">
+            <div class="card-head">
+                <div class="card-icon" style="background:rgba(46,204,113,0.1)">🤝</div>
+                <div>
+                    <div class="card-title">Affiliate &amp; Partnership Tracker</div>
+                    <div class="card-sub">Current deals and opportunities</div>
+                </div>
+            </div>
+            <div class="aff-item">
+                <div class="aff-logo">🎮</div>
+                <div class="aff-info">
+                    <div class="aff-name">Gamer Supps</div>
+                    <div class="aff-detail">Code: BILLY · 10% commission · Pays monthly</div>
+                </div>
+                <span class="aff-badge aff-active">Active</span>
+            </div>
+            <div class="aff-item">
+                <div class="aff-logo">🖥️</div>
+                <div class="aff-info">
+                    <div class="aff-name">Elgato</div>
+                    <div class="aff-detail">Applied 2 weeks ago · Awaiting response</div>
+                </div>
+                <span class="aff-badge aff-pending">Pending</span>
+            </div>
+            <div class="aff-item">
+                <div class="aff-logo">🎧</div>
+                <div class="aff-info">
+                    <div class="aff-name">Logitech G</div>
+                    <div class="aff-detail">Strong fit — reach out via their creator portal</div>
+                </div>
+                <span class="aff-badge aff-consider">Consider</span>
+            </div>
+        </div>
+
+        <!-- Self-Improvement -->
+        <div class="card">
+            <div class="card-head">
+                <div class="card-icon" style="background:rgba(255,107,53,0.1)">⚡</div>
+                <div>
+                    <div class="card-title">Foxy Upgrades</div>
+                    <div class="card-sub">Ways to improve the system</div>
+                </div>
+            </div>
+            <div class="idea-item">
+                <span class="badge badge-trend">Phase 2</span>
+                <span class="idea-text">Connect real TikTok &amp; Twitch analytics API</span>
+            </div>
+            <div class="idea-item">
+                <span class="badge badge-trend">Phase 3</span>
+                <span class="idea-text">Add Foxy's voice via ElevenLabs</span>
+            </div>
+            <div class="idea-item">
+                <span class="badge badge-trend">Phase 4</span>
+                <span class="idea-text">Memory system — Foxy remembers across sessions</span>
+            </div>
+            <div class="idea-item">
+                <span class="badge badge-you">Now</span>
+                <span class="idea-text">Complete TikTok developer app approval</span>
+            </div>
+        </div>
+
+        <!-- Ask Foxy (full width) -->
+        <div class="card span-3">
+            <div class="card-head">
+                <div class="card-icon" style="background:rgba(155,89,247,0.1)">🦊</div>
+                <div>
+                    <div class="card-title">Ask Foxy</div>
+                    <div class="card-sub">Phase 2 — AI brain connecting soon</div>
+                </div>
+            </div>
+            <div class="chat-row">
+                <input class="chat-input" type="text" placeholder="Ask Foxy about your stream, content strategy, goals..." />
+                <button class="chat-btn" onclick="sendChat()">→</button>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// TODAY'S TASKS
+// Saved in localStorage so they persist until you clear them.
+// Each task: { id, text, done }
+// ═══════════════════════════════════════════
+function loadTasks() {
+    return JSON.parse(localStorage.getItem('foxy-tasks') || '[]');
+}
+
+function saveTasks(tasks) {
+    localStorage.setItem('foxy-tasks', JSON.stringify(tasks));
+}
+
+function renderTasks() {
+    const tasks = loadTasks();
+    const list = document.getElementById('taskList');
+    const done = tasks.filter(t => t.done).length;
+    const total = tasks.length;
+
+    document.getElementById('task-progress').textContent =
+        total === 0 ? 'No tasks yet' : `${done} of ${total} completed`;
+    document.getElementById('task-done-count').textContent =
+        done > 0 ? `${done} done ✓` : '';
+
+    if (tasks.length === 0) {
+        list.innerHTML = '<div class="task-empty">No tasks yet — add from today\'s briefing or type your own</div>';
+        return;
+    }
+
+    list.innerHTML = tasks.map(t => `
+        <div class="task-item ${t.done ? 'done' : ''}" id="task-${t.id}">
+            <div class="task-check" onclick="toggleTask('${t.id}')">
+                ${t.done ? '✓' : ''}
+            </div>
+            <span class="task-label" onclick="toggleTask('${t.id}')">${t.text}</span>
+            <button class="task-delete" onclick="deleteTask('${t.id}')" title="Remove">✕</button>
+        </div>
+    `).join('');
+
+    // Speak encouragement when all tasks done
+    if (total > 0 && done === total) {
+        foxySpeak("All tasks done, Billy. That's how it's done.");
+    }
+}
+
+function addTask() {
+    const input = document.getElementById('taskInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const tasks = loadTasks();
+    tasks.push({ id: Date.now().toString(), text, done: false });
+    saveTasks(tasks);
+    renderTasks();
+    input.value = '';
+    input.focus();
+}
+
+function toggleTask(id) {
+    const tasks = loadTasks();
+    const t = tasks.find(t => t.id === id);
+    if (t) t.done = !t.done;
+    saveTasks(tasks);
+    renderTasks();
+}
+
+function deleteTask(id) {
+    const tasks = loadTasks().filter(t => t.id !== id);
+    saveTasks(tasks);
+    renderTasks();
+}
+
+function clearDoneTasks() {
+    const tasks = loadTasks().filter(t => !t.done);
+    saveTasks(tasks);
+    renderTasks();
+    toast('✅ Completed tasks cleared');
+}
+
+// Enter key to add task
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('taskInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') addTask();
+    });
+});
+
+renderTasks();
+
+// ═══════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════
+function tick() {
+    const now = new Date();
+    let h = now.getHours();
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const ap = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    document.getElementById('clock').textContent = `${h}:${m} ${ap}`;
+}
+tick();
+setInterval(tick, 1000);
+
+// ═══════════════════════════════════════════
+// GREETING
+// ═══════════════════════════════════════════
+const hourNow = new Date().getHours();
+const greetWord = hourNow < 12 ? 'Good morning' : hourNow < 17 ? 'Good afternoon' : hourNow < 21 ? 'Good evening' : 'Late night grind';
+document.getElementById('greeting').textContent = `${greetWord}, Billy 👋`;
+
+// ═══════════════════════════════════════════
+// VOICE SYSTEM
+// Why this works: browsers load voices asynchronously.
+// If you call getVoices() immediately, you get an empty list
+// and the voice selection silently fails. We wait for the
+// 'voiceschanged' event, which fires once voices are ready.
+// ═══════════════════════════════════════════
+let foxyVoice = null;
+let voiceMuted = (localStorage.getItem('foxy-muted') === 'true');
+let voicesReady = false;
+
+// Priority order for voice selection — we try each in sequence
+// Nathan (Enhanced) is Billy's pick: best quality male voice on macOS
+const VOICE_PREFERENCES = [
+    'Nathan',          // ✅ Billy's pick — Enhanced quality male voice
+    'Nicky',           // macOS enhanced fallback
+    'Ava',             // macOS premium fallback
+    'Samantha',        // classic macOS default
+];
+
+function loadVoices() {
+    const voices = speechSynthesis.getVoices();
+    if (voices.length === 0) return;
+    voicesReady = true;
+
+    // Build the dropdown with all English voices
+    const select = document.getElementById('voiceSelect');
+    const savedVoiceName = localStorage.getItem('foxy-voice-name');
+    select.innerHTML = '';
+
+    const englishVoices = voices.filter(v => v.lang.startsWith('en'));
+    const allVoices = englishVoices.length > 0 ? englishVoices : voices;
+
+    allVoices.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        opt.textContent = v.name;
+        select.appendChild(opt);
+    });
+
+    // Try to restore saved voice first
+    if (savedVoiceName) {
+        const saved = allVoices.find(v => v.name === savedVoiceName);
+        if (saved) {
+            foxyVoice = saved;
+            select.value = saved.name;
+            updateMuteBtn();
+            return;
+        }
+    }
+
+    // Otherwise find best match from preferences
+    for (const pref of VOICE_PREFERENCES) {
+        const match = voices.find(v => v.name === pref || v.name.includes(pref));
+        if (match) {
+            foxyVoice = match;
+            select.value = match.name;
+            break;
+        }
+    }
+
+    // Last resort — first English voice
+    if (!foxyVoice && allVoices.length > 0) {
+        foxyVoice = allVoices[0];
+        select.value = allVoices[0].name;
+    }
+
+    updateMuteBtn();
+}
+
+// Try loading immediately, then listen for the async event
+if (speechSynthesis.getVoices().length > 0) {
+    loadVoices();
+} else {
+    speechSynthesis.addEventListener('voiceschanged', loadVoices, { once: true });
+}
+
+function onVoiceSelected() {
+    const select = document.getElementById('voiceSelect');
+    const voices = speechSynthesis.getVoices();
+    foxyVoice = voices.find(v => v.name === select.value) || null;
+    if (foxyVoice) {
+        localStorage.setItem('foxy-voice-name', foxyVoice.name);
+        foxySpeak(`Voice set to ${foxyVoice.name}. I'm Foxy, your AI producer.`);
+    }
+}
+
+function foxySpeak(text) {
+    if (voiceMuted) return;
+    if (!voicesReady) {
+        // Retry once voices load
+        speechSynthesis.addEventListener('voiceschanged', () => foxySpeak(text), { once: true });
+        return;
+    }
+    speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (foxyVoice) utterance.voice = foxyVoice;
+    utterance.rate = 0.95;
+    utterance.pitch = 1.05;
+    utterance.volume = 1.0;
+
+    // Animate the fox ring while speaking
+    const ring = document.getElementById('avatarRing');
+    ring.classList.add('speaking-ring');
+    utterance.onend = () => ring.classList.remove('speaking-ring');
+    utterance.onerror = () => ring.classList.remove('speaking-ring');
+
+    speechSynthesis.speak(utterance);
+}
+
+function toggleMute() {
+    voiceMuted = !voiceMuted;
+    localStorage.setItem('foxy-muted', voiceMuted);
+    updateMuteBtn();
+    if (!voiceMuted) foxySpeak("Foxy's voice is back online.");
+}
+
+function updateMuteBtn() {
+    const btn = document.getElementById('muteBtn');
+    if (voiceMuted) {
+        btn.textContent = '🔇';
+        btn.classList.add('muted');
+        btn.title = 'Voice muted — click to unmute';
+    } else {
+        btn.textContent = '🔊';
+        btn.classList.remove('muted');
+        btn.title = 'Voice on — click to mute';
+    }
+}
+
+function foxyGreet() {
+    const greets = [
+        `${greetWord} Billy. I'm Foxy, your AI producer. Ready when you are.`,
+        `Hey Billy. Let's make today count. Check your checklist and let's get moving.`,
+        `Foxy here. You've got content to make and goals to hit. Let's go.`,
+    ];
+    foxySpeak(greets[Math.floor(Math.random() * greets.length)]);
+}
+
+// Auto-greet on load (slight delay so voices finish loading)
+setTimeout(() => {
+    foxySpeak(`${greetWord} Billy. I'm Foxy, your AI producer. Here's your briefing.`);
+}, 1200);
+
+updateMuteBtn();
+
+// ═══════════════════════════════════════════
+// CHECKLIST
+// ═══════════════════════════════════════════
+function toggleCheck(el) {
+    el.classList.toggle('done');
+    const total = document.querySelectorAll('.check-item').length;
+    const done  = document.querySelectorAll('.check-item.done').length;
+    if (done === total) {
+        toast('✅ All checks done — you\'re ready to go live!');
+        foxySpeak("All checks complete. You're ready to go live, Billy.");
+    }
+}
+
+// ═══════════════════════════════════════════
+// GOAL TRACKER — editable, saved to localStorage
+// ═══════════════════════════════════════════
+const GOALS = {
+    twitch: { label: 'Twitch Followers', default: { current: 347, goal: 500 } },
+    tiktok: { label: 'TikTok Followers', default: { current: 1200, goal: 5000 } },
+    videos: { label: 'Videos This Month', default: { current: 6, goal: 12 } },
+    hours:  { label: 'Stream Hours',      default: { current: 18, goal: 30 } },
+};
+
+function loadGoals() {
+    Object.keys(GOALS).forEach(key => {
+        const saved = localStorage.getItem(`foxy-goal-${key}`);
+        const data = saved ? JSON.parse(saved) : GOALS[key].default;
+        renderGoal(key, data.current, data.goal);
+    });
+    updateGoalTip();
+}
+
+function renderGoal(key, current, goal) {
+    const pct = goal > 0 ? Math.min(100, Math.round((current / goal) * 100)) : 0;
+    const fmt = n => n >= 1000 ? (n/1000).toFixed(1).replace(/\.0$/, '') + 'K' : String(n);
+    document.getElementById(`${key}-display`).textContent = `${fmt(current)} / ${fmt(goal)}`;
+    document.getElementById(`${key}-bar`).style.width = pct + '%';
+}
+
+function toggleGoalEdit(key) {
+    const inputs = document.getElementById(`${key}-inputs`);
+    inputs.classList.toggle('visible');
+    if (inputs.classList.contains('visible')) {
+        const saved = localStorage.getItem(`foxy-goal-${key}`);
+        const data = saved ? JSON.parse(saved) : GOALS[key].default;
+        document.getElementById(`${key}-current`).value = data.current;
+        document.getElementById(`${key}-goal`).value = data.goal;
+        document.getElementById(`${key}-current`).focus();
+    }
+}
+
+function saveGoal(key) {
+    const current = parseInt(document.getElementById(`${key}-current`).value) || 0;
+    const goal    = parseInt(document.getElementById(`${key}-goal`).value) || 1;
+    localStorage.setItem(`foxy-goal-${key}`, JSON.stringify({ current, goal }));
+    renderGoal(key, current, goal);
+    document.getElementById(`${key}-inputs`).classList.remove('visible');
+    updateGoalTip();
+    toast(`✅ ${GOALS[key].label} updated!`);
+}
+
+function updateGoalTip() {
+    const saved = localStorage.getItem('foxy-goal-twitch');
+    const data = saved ? JSON.parse(saved) : GOALS.twitch.default;
+    const pct = Math.round((data.current / data.goal) * 100);
+    const remaining = data.goal - data.current;
+    let tip = '';
+    if (remaining <= 0) {
+        tip = `🎉 Twitch goal hit! Time to set a new target.`;
+    } else {
+        tip = `💡 You're ${pct}% to your Twitch goal. ${remaining} more ${remaining === 1 ? 'follower' : 'followers'} to go!`;
+    }
+    document.getElementById('goal-tip').textContent = tip;
+}
+
+loadGoals();
+
+// ═══════════════════════════════════════════
+// CHAT
+// ═══════════════════════════════════════════
+const FOXY_REPLIES = [
+    "The AI brain is connecting in Phase 2, Billy. But I heard you — keep posting.",
+    "Phase 2 is where I get smart. For now, stay consistent and trust the process.",
+    "I can't answer that yet, but I'm building toward it. Keep creating.",
+    "That's a great question. I'll be able to answer it properly once Phase 2 APIs are live.",
+];
+
+function sendChat() {
+    const input = document.querySelector('.chat-input');
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    const reply = FOXY_REPLIES[Math.floor(Math.random() * FOXY_REPLIES.length)];
+    toast(`🦊 ${reply}`);
+    foxySpeak(reply);
+}
+
+document.querySelector('.chat-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendChat();
+});
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+let toastTimer = null;
+function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
+}
+</script>
+
+</body>
+</html>
