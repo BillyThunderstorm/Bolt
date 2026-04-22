@@ -712,7 +712,24 @@
     <div class="header-right">
         <div class="voice-controls">
             <button class="voice-btn" id="muteBtn" onclick="toggleMute()" title="Toggle voice">🔊</button>
-            <select class="voice-select" id="voiceSelect" onchange="onVoiceSelected()" title="Choose Bolt's voice"></select>
+            <button class="voice-btn" id="elBtn" onclick="openELSetup()" title="ElevenLabs voice setup" style="font-size:11px;padding:4px 8px;">🎙️ EL</button>
+            <select class="voice-select" id="voiceSelect" onchange="onVoiceSelected()" title="Choose fallback voice (when ElevenLabs is off)"></select>
+        </div>
+
+        <!-- ElevenLabs Setup Modal -->
+        <div id="elModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+            <div style="background:#1a1a22;border:1px solid #9b59f7;border-radius:16px;padding:28px 32px;max-width:400px;width:90%;box-shadow:0 0 40px rgba(155,89,247,0.3);">
+                <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:6px;">🎙️ ElevenLabs Voice</div>
+                <div style="font-size:13px;color:#888;margin-bottom:18px;">Paste your API key — it saves locally in your browser only. Never sent to GitHub or shared.</div>
+                <input id="elKeyInput" type="password" placeholder="sk_..." style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid #444;background:#0d0d14;color:#fff;font-size:13px;margin-bottom:10px;box-sizing:border-box;" />
+                <input id="elVoiceInput" type="text" placeholder="Voice ID (default: pNInz6obpgDQGcFmaJgB)" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid #444;background:#0d0d14;color:#888;font-size:13px;margin-bottom:18px;box-sizing:border-box;" />
+                <div style="display:flex;gap:10px;">
+                    <button onclick="saveELKey()" style="flex:1;padding:10px;border-radius:8px;background:#9b59f7;border:none;color:#fff;font-weight:700;cursor:pointer;">Save & Test</button>
+                    <button onclick="clearELKey()" style="padding:10px 16px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid #444;color:#888;cursor:pointer;">Clear</button>
+                    <button onclick="closeELSetup()" style="padding:10px 16px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid #444;color:#888;cursor:pointer;">Cancel</button>
+                </div>
+                <div id="elStatus" style="margin-top:12px;font-size:12px;color:#888;min-height:16px;"></div>
+            </div>
         </div>
         <div class="status-pill"><div class="dot"></div> Bolt Online</div>
         <div class="status-pill"><div class="dot yellow"></div> TikTok Pending</div>
@@ -729,7 +746,7 @@
     </div>
 
     <div class="mock-banner">
-        ⚠️ <span><strong>Phase 1 mode:</strong> Performance stats are placeholders — real API data connects in Phase 2. Goal numbers below are editable and saved to your device.</span>
+        ⚠️ <span><strong>Phase 2 mode:</strong> Twitch + OBS connected. Click ✏️ on any goal to update your numbers — saved locally to your device.</span>
     </div>
 
     <div class="grid">
@@ -807,12 +824,15 @@
                 </div>
             </div>
 
-            <!-- Twitch Followers -->
+            <!-- GOAL: Twitch Affiliate -->
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--purple);margin:4px 0 10px;">🟣 Twitch Affiliate Requirements</div>
+
+            <!-- Followers -->
             <div class="goal-item">
                 <div class="goal-row">
-                    <span>Twitch Followers</span>
+                    <span>Followers <span style="font-size:10px;color:var(--muted)">(need 50)</span></span>
                     <span>
-                        <span id="twitch-display">347 / 500</span>
+                        <span id="twitch-display">0 / 50</span>
                         <button class="goal-edit-btn" onclick="toggleGoalEdit('twitch')">✏️</button>
                     </span>
                 </div>
@@ -821,15 +841,87 @@
                     <input class="goal-input" id="twitch-goal" type="number" placeholder="Goal" />
                     <button class="goal-save-btn" onclick="saveGoal('twitch')">Save</button>
                 </div>
-                <div class="bar"><div class="bar-fill" id="twitch-bar" style="width:69%"></div></div>
+                <div class="bar"><div class="bar-fill" id="twitch-bar" style="width:0%"></div></div>
+            </div>
+
+            <!-- Stream Days -->
+            <div class="goal-item">
+                <div class="goal-row">
+                    <span>Stream Days This Month <span style="font-size:10px;color:var(--muted)">(need 7)</span></span>
+                    <span>
+                        <span id="streamdays-display">0 / 7</span>
+                        <button class="goal-edit-btn" onclick="toggleGoalEdit('streamdays')">✏️</button>
+                    </span>
+                </div>
+                <div class="goal-inputs" id="streamdays-inputs">
+                    <input class="goal-input" id="streamdays-current" type="number" placeholder="Current" />
+                    <input class="goal-input" id="streamdays-goal" type="number" placeholder="Goal" />
+                    <button class="goal-save-btn" onclick="saveGoal('streamdays')">Save</button>
+                </div>
+                <div class="bar"><div class="bar-fill" id="streamdays-bar" style="width:0%"></div></div>
+            </div>
+
+            <!-- Avg Viewers -->
+            <div class="goal-item">
+                <div class="goal-row">
+                    <span>Avg Concurrent Viewers <span style="font-size:10px;color:var(--muted)">(need 3)</span></span>
+                    <span>
+                        <span id="avgviewers-display">0 / 3</span>
+                        <button class="goal-edit-btn" onclick="toggleGoalEdit('avgviewers')">✏️</button>
+                    </span>
+                </div>
+                <div class="goal-inputs" id="avgviewers-inputs">
+                    <input class="goal-input" id="avgviewers-current" type="number" placeholder="Current" />
+                    <input class="goal-input" id="avgviewers-goal" type="number" placeholder="Goal" />
+                    <button class="goal-save-btn" onclick="saveGoal('avgviewers')">Save</button>
+                </div>
+                <div class="bar"><div class="bar-fill" id="avgviewers-bar" style="width:0%"></div></div>
+            </div>
+
+            <!-- Broadcast Minutes -->
+            <div class="goal-item">
+                <div class="goal-row">
+                    <span>Broadcast Minutes <span style="font-size:10px;color:var(--muted)">(need 500)</span></span>
+                    <span>
+                        <span id="broadcastmins-display">0 / 500</span>
+                        <button class="goal-edit-btn" onclick="toggleGoalEdit('broadcastmins')">✏️</button>
+                    </span>
+                </div>
+                <div class="goal-inputs" id="broadcastmins-inputs">
+                    <input class="goal-input" id="broadcastmins-current" type="number" placeholder="Current" />
+                    <input class="goal-input" id="broadcastmins-goal" type="number" placeholder="Goal" />
+                    <button class="goal-save-btn" onclick="saveGoal('broadcastmins')">Save</button>
+                </div>
+                <div class="bar"><div class="bar-fill" id="broadcastmins-bar" style="width:0%"></div></div>
+            </div>
+
+            <!-- GOAL: Brand Deal -->
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin:16px 0 10px;">🤝 First Brand Deal — Skincare Focus</div>
+
+            <!-- Brands Contacted -->
+            <div class="goal-item">
+                <div class="goal-row">
+                    <span>Brands Contacted</span>
+                    <span>
+                        <span id="brands-display">0 / 10</span>
+                        <button class="goal-edit-btn" onclick="toggleGoalEdit('brands')">✏️</button>
+                    </span>
+                </div>
+                <div class="goal-inputs" id="brands-inputs">
+                    <input class="goal-input" id="brands-current" type="number" placeholder="Current" />
+                    <input class="goal-input" id="brands-goal" type="number" placeholder="Goal" />
+                    <button class="goal-save-btn" onclick="saveGoal('brands')">Save</button>
+                </div>
+                <div class="bar"><div class="bar-fill" id="brands-bar" style="background:var(--accent);width:0%"></div></div>
             </div>
 
             <!-- TikTok Followers -->
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin:16px 0 10px;">📈 Growth</div>
             <div class="goal-item">
                 <div class="goal-row">
                     <span>TikTok Followers</span>
                     <span>
-                        <span id="tiktok-display">1,200 / 5,000</span>
+                        <span id="tiktok-display">0 / 1,000</span>
                         <button class="goal-edit-btn" onclick="toggleGoalEdit('tiktok')">✏️</button>
                     </span>
                 </div>
@@ -838,45 +930,44 @@
                     <input class="goal-input" id="tiktok-goal" type="number" placeholder="Goal" />
                     <button class="goal-save-btn" onclick="saveGoal('tiktok')">Save</button>
                 </div>
-                <div class="bar"><div class="bar-fill" id="tiktok-bar" style="width:24%"></div></div>
+                <div class="bar"><div class="bar-fill" id="tiktok-bar" style="background:var(--green);width:0%"></div></div>
             </div>
 
-            <!-- Videos This Month -->
+            <!-- Amazon Affiliate -->
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#FF9900;margin:16px 0 10px;">🛒 Amazon Associates</div>
             <div class="goal-item">
                 <div class="goal-row">
-                    <span>Videos This Month</span>
+                    <span>Links Shared This Month</span>
                     <span>
-                        <span id="videos-display">6 / 12</span>
-                        <button class="goal-edit-btn" onclick="toggleGoalEdit('videos')">✏️</button>
+                        <span id="amazon-display">0 / 20</span>
+                        <button class="goal-edit-btn" onclick="toggleGoalEdit('amazon')">✏️</button>
                     </span>
                 </div>
-                <div class="goal-inputs" id="videos-inputs">
-                    <input class="goal-input" id="videos-current" type="number" placeholder="Current" />
-                    <input class="goal-input" id="videos-goal" type="number" placeholder="Goal" />
-                    <button class="goal-save-btn" onclick="saveGoal('videos')">Save</button>
+                <div class="goal-inputs" id="amazon-inputs">
+                    <input class="goal-input" id="amazon-current" type="number" placeholder="Current" />
+                    <input class="goal-input" id="amazon-goal" type="number" placeholder="Goal" />
+                    <button class="goal-save-btn" onclick="saveGoal('amazon')">Save</button>
                 </div>
-                <div class="bar"><div class="bar-fill" id="videos-bar" style="width:50%"></div></div>
+                <div class="bar"><div class="bar-fill" id="amazon-bar" style="background:#FF9900;width:0%"></div></div>
             </div>
-
-            <!-- Stream Hours -->
             <div class="goal-item">
                 <div class="goal-row">
-                    <span>Stream Hours</span>
+                    <span>Est. Earnings This Month</span>
                     <span>
-                        <span id="hours-display">18 / 30</span>
-                        <button class="goal-edit-btn" onclick="toggleGoalEdit('hours')">✏️</button>
+                        <span id="amazonearnings-display">$0 / $25</span>
+                        <button class="goal-edit-btn" onclick="toggleGoalEdit('amazonearnings')">✏️</button>
                     </span>
                 </div>
-                <div class="goal-inputs" id="hours-inputs">
-                    <input class="goal-input" id="hours-current" type="number" placeholder="Current" />
-                    <input class="goal-input" id="hours-goal" type="number" placeholder="Goal" />
-                    <button class="goal-save-btn" onclick="saveGoal('hours')">Save</button>
+                <div class="goal-inputs" id="amazonearnings-inputs">
+                    <input class="goal-input" id="amazonearnings-current" type="number" placeholder="Current ($)" />
+                    <input class="goal-input" id="amazonearnings-goal" type="number" placeholder="Goal ($)" />
+                    <button class="goal-save-btn" onclick="saveGoal('amazonearnings')">Save</button>
                 </div>
-                <div class="bar"><div class="bar-fill" id="hours-bar" style="width:60%"></div></div>
+                <div class="bar"><div class="bar-fill" id="amazonearnings-bar" style="background:#FF9900;width:0%"></div></div>
             </div>
 
             <div class="goal-tip" id="goal-tip">
-                💡 You're 69% to Twitch Affiliate! 5 more followers puts you past 70%.
+                💡 Twitch Affiliate needs: 50 followers, 7 stream days, 3 avg viewers, 500 broadcast mins — all in the same 30-day window. Update your numbers above after each stream.
             </div>
         </div>
 
@@ -1177,23 +1268,147 @@ const greetWord = hourNow < 12 ? 'Good morning' : hourNow < 17 ? 'Good afternoon
 document.getElementById('greeting').textContent = `${greetWord}, Billy 👋`;
 
 // ═══════════════════════════════════════════
-// VOICE SYSTEM
-// Why this works: browsers load voices asynchronously.
-// If you call getVoices() immediately, you get an empty list
-// and the voice selection silently fails. We wait for the
-// 'voiceschanged' event, which fires once voices are ready.
+// VOICE SYSTEM — ElevenLabs + Web Speech fallback
+//
+// How it works:
+//   1. If you've saved an ElevenLabs API key (via the 🎙️ EL button),
+//      boltSpeak() sends text to ElevenLabs → plays the audio.
+//   2. If no EL key is set, it falls back to the browser's built-in
+//      Web Speech API (macOS voices like Nathan).
+//   3. The key is stored in YOUR browser's localStorage — it never
+//      appears in the code or gets pushed to GitHub.
 // ═══════════════════════════════════════════
+
 let boltVoice = null;
 let voiceMuted = (localStorage.getItem('bolt-muted') === 'true');
 let voicesReady = false;
 
-// Priority order for voice selection — we try each in sequence
-// Nathan (Enhanced) is Billy's pick: best quality male voice on macOS
+// ── ElevenLabs setup ──────────────────────────────────────────
+// Default voice ID is Adam (the one already in your .env)
+const EL_DEFAULT_VOICE = 'pNInz6obpgDQGcFmaJgB';
+
+function getELKey()     { return localStorage.getItem('bolt-el-key') || ''; }
+function getELVoice()   { return localStorage.getItem('bolt-el-voice') || EL_DEFAULT_VOICE; }
+function hasELKey()     { return !!getELKey(); }
+
+function openELSetup() {
+    const modal = document.getElementById('elModal');
+    modal.style.display = 'flex';
+    document.getElementById('elKeyInput').value = getELKey();
+    document.getElementById('elVoiceInput').value = getELVoice();
+    document.getElementById('elStatus').textContent = '';
+    updateELBtn();
+}
+function closeELSetup() {
+    document.getElementById('elModal').style.display = 'none';
+}
+function clearELKey() {
+    localStorage.removeItem('bolt-el-key');
+    localStorage.removeItem('bolt-el-voice');
+    document.getElementById('elKeyInput').value = '';
+    document.getElementById('elVoiceInput').value = '';
+    document.getElementById('elStatus').textContent = '✅ ElevenLabs cleared — using Web Speech fallback.';
+    updateELBtn();
+}
+
+async function saveELKey() {
+    const key   = document.getElementById('elKeyInput').value.trim();
+    const voice = document.getElementById('elVoiceInput').value.trim() || EL_DEFAULT_VOICE;
+    const statusEl = document.getElementById('elStatus');
+
+    if (!key) { statusEl.textContent = '⚠️ Paste your API key first.'; return; }
+
+    statusEl.textContent = '🔄 Testing key…';
+
+    // Quick test call
+    try {
+        const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'xi-api-key': key },
+            body: JSON.stringify({ text: "Bolt online. ElevenLabs connected.", model_id: "eleven_monolingual_v1",
+                voice_settings: { stability: 0.5, similarity_boost: 0.75 } })
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            statusEl.textContent = `❌ Error ${res.status}: ${err.detail?.message || 'Check your key or voice ID.'}`;
+            return;
+        }
+
+        const blob = await res.blob();
+        const audio = new Audio(URL.createObjectURL(blob));
+        audio.play();
+
+        localStorage.setItem('bolt-el-key', key);
+        localStorage.setItem('bolt-el-voice', voice);
+        statusEl.textContent = '✅ Connected! ElevenLabs is now Bolt\'s voice.';
+        updateELBtn();
+
+        // Close after a moment
+        setTimeout(closeELSetup, 2000);
+
+    } catch (e) {
+        statusEl.textContent = `❌ Network error: ${e.message}`;
+    }
+}
+
+function updateELBtn() {
+    const btn = document.getElementById('elBtn');
+    if (hasELKey()) {
+        btn.style.background = 'rgba(155,89,247,0.25)';
+        btn.style.borderColor = '#9b59f7';
+        btn.style.color = '#9b59f7';
+        btn.title = 'ElevenLabs connected — click to change';
+    } else {
+        btn.style.background = '';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+        btn.title = 'Set up ElevenLabs voice';
+    }
+}
+
+// ── ElevenLabs speak ──────────────────────────────────────────
+let elAudio = null;
+
+async function boltSpeakEL(text) {
+    const key   = getELKey();
+    const voice = getELVoice();
+    if (!key) return false;  // signal: fall back to Web Speech
+
+    try {
+        // Cancel any ongoing audio
+        if (elAudio) { elAudio.pause(); elAudio = null; }
+
+        const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'xi-api-key': key },
+            body: JSON.stringify({ text, model_id: "eleven_monolingual_v1",
+                voice_settings: { stability: 0.5, similarity_boost: 0.75 } })
+        });
+
+        if (!res.ok) return false;  // fall back to Web Speech on error
+
+        const blob = await res.blob();
+        elAudio = new Audio(URL.createObjectURL(blob));
+
+        const ring = document.getElementById('avatarRing');
+        ring.classList.add('speaking-ring');
+        elAudio.onended = () => ring.classList.remove('speaking-ring');
+        elAudio.onerror = () => ring.classList.remove('speaking-ring');
+        elAudio.play();
+        return true;
+
+    } catch (e) {
+        return false;  // network error — fall back
+    }
+}
+
+// ── Web Speech fallback ───────────────────────────────────────
 const VOICE_PREFERENCES = [
-    'Nathan',          // ✅ Billy's pick — Enhanced quality male voice
-    'Nicky',           // macOS enhanced fallback
-    'Ava',             // macOS premium fallback
-    'Samantha',        // classic macOS default
+    'Nathan',          // Billy's pick — Enhanced quality male voice
+    'Nicky',
+    'Ava',
+    'Samantha',
 ];
 
 function loadVoices() {
@@ -1201,7 +1416,6 @@ function loadVoices() {
     if (voices.length === 0) return;
     voicesReady = true;
 
-    // Build the dropdown with all English voices
     const select = document.getElementById('voiceSelect');
     const savedVoiceName = localStorage.getItem('bolt-voice-name');
     select.innerHTML = '';
@@ -1216,28 +1430,16 @@ function loadVoices() {
         select.appendChild(opt);
     });
 
-    // Try to restore saved voice first
     if (savedVoiceName) {
         const saved = allVoices.find(v => v.name === savedVoiceName);
-        if (saved) {
-            boltVoice = saved;
-            select.value = saved.name;
-            updateMuteBtn();
-            return;
-        }
+        if (saved) { boltVoice = saved; select.value = saved.name; updateMuteBtn(); return; }
     }
 
-    // Otherwise find best match from preferences
     for (const pref of VOICE_PREFERENCES) {
         const match = voices.find(v => v.name === pref || v.name.includes(pref));
-        if (match) {
-            boltVoice = match;
-            select.value = match.name;
-            break;
-        }
+        if (match) { boltVoice = match; select.value = match.name; break; }
     }
 
-    // Last resort — first English voice
     if (!boltVoice && allVoices.length > 0) {
         boltVoice = allVoices[0];
         select.value = allVoices[0].name;
@@ -1246,7 +1448,6 @@ function loadVoices() {
     updateMuteBtn();
 }
 
-// Try loading immediately, then listen for the async event
 if (speechSynthesis.getVoices().length > 0) {
     loadVoices();
 } else {
@@ -1259,14 +1460,23 @@ function onVoiceSelected() {
     boltVoice = voices.find(v => v.name === select.value) || null;
     if (boltVoice) {
         localStorage.setItem('bolt-voice-name', boltVoice.name);
-        boltSpeak(`Voice set to ${boltVoice.name}. I'm Bolt, your AI producer.`);
+        boltSpeak(`Fallback voice set to ${boltVoice.name}.`);
     }
 }
 
-function boltSpeak(text) {
+// ── Main speak function — ElevenLabs first, Web Speech fallback ──
+async function boltSpeak(text) {
     if (voiceMuted) return;
+
+    // Try ElevenLabs first
+    if (hasELKey()) {
+        const success = await boltSpeakEL(text);
+        if (success) return;
+        // If it failed, fall through to Web Speech
+    }
+
+    // Web Speech fallback
     if (!voicesReady) {
-        // Retry once voices load
         speechSynthesis.addEventListener('voiceschanged', () => boltSpeak(text), { once: true });
         return;
     }
@@ -1277,10 +1487,9 @@ function boltSpeak(text) {
     utterance.pitch = 1.05;
     utterance.volume = 1.0;
 
-    // Animate the fox ring while speaking
     const ring = document.getElementById('avatarRing');
     ring.classList.add('speaking-ring');
-    utterance.onend = () => ring.classList.remove('speaking-ring');
+    utterance.onend  = () => ring.classList.remove('speaking-ring');
     utterance.onerror = () => ring.classList.remove('speaking-ring');
 
     speechSynthesis.speak(utterance);
@@ -1305,6 +1514,9 @@ function updateMuteBtn() {
         btn.title = 'Voice on — click to mute';
     }
 }
+
+// Initialize EL button state on load
+updateELBtn();
 
 function boltGreet() {
     const greets = [
@@ -1339,10 +1551,18 @@ function toggleCheck(el) {
 // GOAL TRACKER — editable, saved to localStorage
 // ═══════════════════════════════════════════
 const GOALS = {
-    twitch: { label: 'Twitch Followers', default: { current: 347, goal: 500 } },
-    tiktok: { label: 'TikTok Followers', default: { current: 1200, goal: 5000 } },
-    videos: { label: 'Videos This Month', default: { current: 6, goal: 12 } },
-    hours:  { label: 'Stream Hours',      default: { current: 18, goal: 30 } },
+    // Twitch Affiliate requirements
+    twitch:        { label: 'Twitch Followers',          default: { current: 0, goal: 50 } },
+    streamdays:    { label: 'Stream Days',               default: { current: 0, goal: 7 } },
+    avgviewers:    { label: 'Avg Concurrent Viewers',    default: { current: 0, goal: 3 } },
+    broadcastmins: { label: 'Broadcast Minutes',         default: { current: 0, goal: 500 } },
+    // Brand deal
+    brands:        { label: 'Brands Contacted',          default: { current: 0, goal: 10 } },
+    // Growth
+    tiktok:        { label: 'TikTok Followers',          default: { current: 0, goal: 1000 } },
+    // Amazon Associates
+    amazon:        { label: 'Amazon Links Shared',       default: { current: 0, goal: 20 } },
+    amazonearnings:{ label: 'Amazon Est. Earnings ($)',  default: { current: 0, goal: 25 }, prefix: '$' },
 };
 
 function loadGoals() {
@@ -1357,7 +1577,8 @@ function loadGoals() {
 function renderGoal(key, current, goal) {
     const pct = goal > 0 ? Math.min(100, Math.round((current / goal) * 100)) : 0;
     const fmt = n => n >= 1000 ? (n/1000).toFixed(1).replace(/\.0$/, '') + 'K' : String(n);
-    document.getElementById(`${key}-display`).textContent = `${fmt(current)} / ${fmt(goal)}`;
+    const prefix = (GOALS[key] && GOALS[key].prefix) ? GOALS[key].prefix : '';
+    document.getElementById(`${key}-display`).textContent = `${prefix}${fmt(current)} / ${prefix}${fmt(goal)}`;
     document.getElementById(`${key}-bar`).style.width = pct + '%';
 }
 
