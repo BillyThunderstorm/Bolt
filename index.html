@@ -713,7 +713,27 @@
         <div class="voice-controls">
             <button class="voice-btn" id="muteBtn" onclick="toggleMute()" title="Toggle voice">🔊</button>
             <button class="voice-btn" id="elBtn" onclick="openELSetup()" title="ElevenLabs voice setup" style="font-size:11px;padding:4px 8px;">🎙️ EL</button>
+            <button class="voice-btn" onclick="openTwitchTokenModal()" title="Get Twitch bot token" style="font-size:11px;padding:4px 8px;">🟣 Token</button>
             <select class="voice-select" id="voiceSelect" onchange="onVoiceSelected()" title="Choose fallback voice (when ElevenLabs is off)"></select>
+        </div>
+
+        <!-- Twitch Token Modal -->
+        <div id="twitchTokenModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+            <div style="background:#1a1a22;border:1px solid #9b59f7;border-radius:16px;padding:28px 32px;max-width:440px;width:90%;box-shadow:0 0 40px rgba(155,89,247,0.3);">
+                <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:6px;">🟣 Get Twitch Bot Token</div>
+                <div style="font-size:13px;color:#888;margin-bottom:18px;">Click the button below — Twitch will ask you to authorize, then redirect back here with your token ready to copy.</div>
+                <button onclick="openTwitchAuth()" style="width:100%;padding:12px;border-radius:8px;background:#9147ff;border:none;color:#fff;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:16px;">🔐 Authorize with Twitch</button>
+                <div id="twitchTokenResult" style="display:none;">
+                    <div style="font-size:12px;color:#2ecc71;margin-bottom:8px;">✅ Token captured! Copy this into your .env as TWITCH_BOT_TOKEN:</div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <input id="twitchTokenDisplay" type="text" readonly style="flex:1;padding:10px 12px;border-radius:8px;border:1px solid #2ecc71;background:#0d0d14;color:#2ecc71;font-size:12px;font-family:monospace;" />
+                        <button onclick="copyTwitchToken()" style="padding:10px 14px;border-radius:8px;background:#2ecc71;border:none;color:#000;font-weight:700;cursor:pointer;">Copy</button>
+                    </div>
+                    <div style="font-size:11px;color:#666;margin-top:10px;">Open your .env file and replace TWITCH_BOT_TOKEN= with this value.</div>
+                </div>
+                <div id="twitchTokenStatus" style="margin-top:10px;font-size:12px;color:#888;"></div>
+                <button onclick="closeTwitchToken()" style="margin-top:16px;width:100%;padding:8px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid #333;color:#888;cursor:pointer;">Close</button>
+            </div>
         </div>
 
         <!-- ElevenLabs Setup Modal -->
@@ -1517,6 +1537,60 @@ function updateMuteBtn() {
 
 // Initialize EL button state on load
 updateELBtn();
+
+// ═══════════════════════════════════════════
+// TWITCH TOKEN GRABBER
+// Uses the Implicit Grant Flow — Twitch redirects back to this page
+// with the token in the URL hash. We read it and show it to Billy.
+// The token is never stored — Billy copies it into .env manually.
+// ═══════════════════════════════════════════
+const TWITCH_CLIENT_ID = '0dc6qh57s99baxh1pt4do49hbddna3';
+const TWITCH_REDIRECT   = 'https://billythunderstorm.us';
+const TWITCH_SCOPES     = 'chat:read chat:edit';
+
+function openTwitchTokenModal() {
+    document.getElementById('twitchTokenModal').style.display = 'flex';
+    document.getElementById('twitchTokenResult').style.display = 'none';
+    document.getElementById('twitchTokenStatus').textContent = '';
+}
+function closeTwitchToken() {
+    document.getElementById('twitchTokenModal').style.display = 'none';
+    // Clean the token from the URL so it doesn't sit in history
+    if (window.location.hash.includes('access_token')) {
+        history.replaceState(null, '', window.location.pathname);
+    }
+}
+
+function openTwitchAuth() {
+    const url = `https://id.twitch.tv/oauth2/authorize?client_id=${TWITCH_CLIENT_ID}&redirect_uri=${encodeURIComponent(TWITCH_REDIRECT)}&response_type=token&scope=${encodeURIComponent(TWITCH_SCOPES)}&force_verify=true`;
+    window.location.href = url;
+}
+
+function copyTwitchToken() {
+    const input = document.getElementById('twitchTokenDisplay');
+    navigator.clipboard.writeText(input.value).then(() => {
+        document.getElementById('twitchTokenStatus').textContent = '📋 Copied! Paste it into .env as TWITCH_BOT_TOKEN=';
+    });
+}
+
+// On page load — check if Twitch just redirected back with a token
+(function checkTwitchCallback() {
+    const hash = window.location.hash;
+    if (!hash.includes('access_token')) return;
+
+    const params = new URLSearchParams(hash.replace('#', '?'));
+    const token = params.get('access_token');
+    if (!token) return;
+
+    // Show the modal with the token
+    document.getElementById('twitchTokenModal').style.display = 'flex';
+    document.getElementById('twitchTokenResult').style.display = 'block';
+    document.getElementById('twitchTokenDisplay').value = token;
+    document.getElementById('twitchTokenStatus').textContent = '✅ Twitch redirected you back successfully.';
+
+    // Remove token from URL immediately for security
+    history.replaceState(null, '', window.location.pathname);
+})();
 
 function boltGreet() {
     const greets = [
