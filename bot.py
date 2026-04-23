@@ -219,7 +219,7 @@ def process_recording(recording_path: str, config: dict, creator_brain: str, cha
            reason="Using Whisper to transcribe speech and burn subtitles into clips. "
                   "Subtitles significantly boost watch time and accessibility.")
     try:
-        from modules.Subtitle_Generator import generate_subtitles
+        from modules.Subtitle_Generator import generate_subtitles_with_timestamps as generate_subtitles
         for clip in successful_clips:
             subtitled_path = generate_subtitles(clip.output_file)
             if subtitled_path and subtitled_path != clip.output_file:
