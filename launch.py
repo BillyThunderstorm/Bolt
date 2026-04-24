@@ -96,10 +96,13 @@ def main():
     except Exception as exc:
         notify(f"Checkup data skipped: {exc}", level="info")
 
-    # ── Step 8: Start Bolt's voice + chat bot ────────────────────────────────
+    # ── Step 8: Clean up old clips ────────────────────────────────────────────
+    _cleanup_old_clips()
+
+    # ── Step 9: Start Bolt's voice + chat bot ────────────────────────────────
     _start_personality_layer()
 
-    # ── Step 9: Hand off to bot.py ────────────────────────────────────────────
+    # ── Step 10: Hand off to bot.py ───────────────────────────────────────────
     mode = sys.argv[1] if len(sys.argv) > 1 else "live"
     notify(
         f"Handing off to bot.py (mode={mode})…",
@@ -113,6 +116,47 @@ def main():
     except Exception as exc:
         notify(f"Failed to start bot.py: {exc}", level="error")
         sys.exit(1)
+
+
+# ── Clip cleanup ──────────────────────────────────────────────────────────────
+
+def _cleanup_old_clips(max_age_days: int = 14):
+    """
+    Delete clips and vertical clips older than max_age_days.
+
+    Why auto-delete? Clips pile up fast. After 14 days they're either
+    already posted or not worth posting — keeping them just wastes space.
+    Runs silently on every launch so you never have to think about it.
+    """
+    import time
+    cutoff = time.time() - (max_age_days * 86400)  # 86400 seconds in a day
+    folders = [Path("clips"), Path("vertical_clips")]
+    extensions = {".mp4", ".mkv", ".mov"}
+    deleted = []
+
+    for folder in folders:
+        if not folder.exists():
+            continue
+        for f in folder.iterdir():
+            if f.suffix.lower() in extensions and f.stat().st_mtime < cutoff:
+                try:
+                    f.unlink()
+                    deleted.append(f.name)
+                except Exception:
+                    pass  # skip if file is locked or in use
+
+    if deleted:
+        notify(
+            f"🗑️  Cleaned up {len(deleted)} clip{'s' if len(deleted) != 1 else ''} older than {max_age_days} days.",
+            level="info",
+            reason="Old clips auto-deleted on launch. Anything older than 14 days is assumed posted or skipped."
+        )
+    else:
+        notify(
+            f"✅ No clips older than {max_age_days} days — nothing to clean up.",
+            level="info",
+            reason="Clip folder check passed. All clips are recent."
+        )
 
 
 # ── Phase 3: Personality layer ─────────────────────────────────────────────────
