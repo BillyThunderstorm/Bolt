@@ -182,11 +182,12 @@ def _cut_clip_ffmpeg(
     """
     cmd = [
         "ffmpeg", "-y",
-        "-ss", str(start),
-        "-i", source,
+        "-i", source,          # input FIRST — then seek (slower but audio stays in sync)
+        "-ss", str(start),     # accurate seek after input avoids audio dropout
         "-t", str(duration),
-        "-c", "copy",
-        "-avoid_negative_ts", "make_zero",   # suppresses Opus timestamp warning
+        "-c:v", "copy",        # copy video stream (fast, no quality loss)
+        "-c:a", "aac",         # re-encode audio — fixes sync issues with Opus/OBS recordings
+        "-b:a", "192k",        # good quality audio
         "-movflags", "+faststart",
         output,
     ]

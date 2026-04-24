@@ -9,9 +9,9 @@
   "min_clip_score": 50,
   "highlight": {
     "energy_multiplier": 2.5,
-    "min_gap_seconds": 8,
-    "pad_before": 12,
-    "pad_after": 20
+    "min_gap_seconds": 20,
+    "pad_before": 8,
+    "pad_after": 12
   },
   "whisper_model": "base",
   "hashtags": [
