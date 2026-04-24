@@ -152,10 +152,7 @@ def process_recording(recording_path: str, config: dict, creator_brain: str, cha
         # 🦊 Bolt reacts in chat + speaks when highlights are found
         try:
             from modules.Bolt_Voice import say_event
-            if len(highlights) == 1:
-                say_event("highlight")
-            elif len(highlights) >= 3:
-                say_event("highlight_3")
+            say_event("highlight")
         except Exception:
             pass
 
