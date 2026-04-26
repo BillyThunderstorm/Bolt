@@ -11,12 +11,26 @@ import subprocess
 import numpy as np
 import librosa
 from dataclasses import dataclass
+import json
+from pathlib import Path
 
-WINDOW_SEC    = 2.0    # RMS window size
-HOP_SEC       = 0.5    # step between windows
-SPIKE_MULT    = float(os.getenv("SPIKE_MULTIPLIER", "2.8"))
-MIN_GAP_SEC   = 15.0   # minimum seconds between highlights
-SENSITIVITY   = float(os.getenv("HIGHLIGHT_SENSITIVITY", "0.7"))
+# Load config once
+def _load_detector_config():
+    cfg_path = Path(__file__).parent.parent / "config.json"
+    try:
+        with open(cfg_path) as f:
+            cfg = json.load(f).get("highlight", {})
+        return cfg
+    except Exception:
+        return {}
+
+_CFG = _load_detector_config()
+
+WINDOW_SEC    = 2.0
+HOP_SEC       = 0.5
+SPIKE_MULT    = float(_CFG.get("energy_multiplier", os.getenv("SPIKE_MULTIPLIER", "2.8")))
+MIN_GAP_SEC   = float(_CFG.get("min_gap_seconds", 15.0))
+SENSITIVITY   = float(_CFG.get("sensitivity", os.getenv("HIGHLIGHT_SENSITIVITY", “0.7")))
 
 
 @dataclass
