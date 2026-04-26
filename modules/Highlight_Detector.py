@@ -30,7 +30,7 @@ WINDOW_SEC    = 2.0
 HOP_SEC       = 0.5
 SPIKE_MULT    = float(_CFG.get("energy_multiplier", os.getenv("SPIKE_MULTIPLIER", "2.8")))
 MIN_GAP_SEC   = float(_CFG.get("min_gap_seconds", 15.0))
-SENSITIVITY   = float(_CFG.get("sensitivity", os.getenv("HIGHLIGHT_SENSITIVITY", “0.7")))
+SENSITIVITY   = float(_CFG.get("sensitivity", os.getenv("HIGHLIGHT_SENSITIVITY", "0.7")))
 
 
 @dataclass
