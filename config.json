@@ -6,10 +6,12 @@
   "tiktok_style": "letterbox",
   "auto_format_tiktok": true,
   "max_clips_per_session": 5,
-  "min_clip_score": 50,
+  "min_clip_score": 65,
+  "highlight_sensitivity": 0.55,
   "highlight": {
-    "energy_multiplier": 2.5,
-    "min_gap_seconds": 20,
+    "energy_multiplier": 3.5,
+    "min_gap_seconds": 30,
+    "sensitivity": 0.55,
     "pad_before": 8,
     "pad_after": 12
   },

@@ -113,7 +113,7 @@ def get_twitch_user_token(client_id, client_secret):
     3. Return token to user
     """
 
-    print("\n🦊 Bolt Twitch Token Generator\n")
+    print("\n⚡️ Bolt Twitch Token Generator\n")
     print("=" * 50)
 
     # Step 1: Start local callback server
