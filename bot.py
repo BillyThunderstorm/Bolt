@@ -218,11 +218,11 @@ def process_recording(recording_path: str, config: dict, creator_brain: str, cha
     try:
         from modules.Subtitle_Generator import generate_subtitles_with_timestamps as generate_subtitles
         for clip in successful_clips:
-            subtitled_path = generate_subtitles(clip.output_file)
-            if subtitled_path and subtitled_path != clip.output_file:
-                # Move the title entry over to the new subtitled path
-                clip_titles[subtitled_path] = clip_titles.pop(clip.output_file, {})
-                clip.output_file = subtitled_path   # update in-place
+            segments, transcript = generate_subtitles(clip.output_file)
+            # Store transcript on the clip's title entry for reference
+            # (Subtitle_Generator transcribes audio — it doesn't burn a new video file)
+            if transcript and clip.output_file in clip_titles:
+                clip_titles[clip.output_file]["transcript"] = transcript
     except Exception as e:
         notify_error("Subtitle_Generator", e, recoverable=True)
         # continue without subtitles — clips already in successful_clips as-is
