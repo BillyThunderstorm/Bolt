@@ -228,26 +228,41 @@ def process_recording(recording_path: str, config: dict, creator_brain: str, cha
         # continue without subtitles — clips already in successful_clips as-is
 
     # ── Step E: Rank clips by virality ────────────────────────────────────────
+    #
+    # Why we rank AND cap:
+    #   Ranking sorts by quality (0-100 score). The cap ensures we don't flood
+    #   your queue — one great clip beats five okay ones for TikTok's algorithm.
+    #   Both limits are configurable in config.json:
+    #     "min_post_score"       — quality floor (default 50)
+    #     "max_clips_per_session"— how many to queue per recording (default 5)
+    #
+    max_clips   = config.get("max_clips_per_session", 5)
     notify("Step 5/6 — Ranking clips…", level="info",
            reason="Each clip gets a 0-100 virality score based on visual energy, "
                   "audio peaks, scene changes, and length. "
-                  f"Only clips scoring {min_score}+ will be queued for posting.")
-    ranked_clips = []   # will be List[GeneratedClip] filtered by min_score
+                  f"Only clips scoring {min_score}+ will be queued (max {max_clips} per session).")
+    ranked_clips = []
     try:
         from modules.Clip_Ranker import rank_clips
-        ranked = rank_clips(successful_clips)   # returns sorted List[GeneratedClip]
-        ranked_clips = [c for c in ranked if getattr(c, "score", 0) >= min_score]
-        skipped = len(ranked) - len(ranked_clips)
+        ranked      = rank_clips(successful_clips)   # returns sorted List[GeneratedClip], best first
+        above_floor = [c for c in ranked if getattr(c, "score", 0) >= min_score]
+        ranked_clips = above_floor[:max_clips]        # take only the top N
+        skipped_score = len(ranked) - len(above_floor)
+        skipped_cap   = len(above_floor) - len(ranked_clips)
+        msg = f"{len(ranked_clips)} clip(s) queued"
+        if skipped_score:
+            msg += f", {skipped_score} below score floor"
+        if skipped_cap:
+            msg += f", {skipped_cap} cut by session cap (max {max_clips})"
         notify(
-            f"{len(ranked_clips)} clip(s) above score threshold, "
-            f"{skipped} skipped",
+            msg,
             level="success" if ranked_clips else "warning",
-            reason=f"Threshold is {min_score}/100. "
-                   "Adjust 'min_post_score' in config.json to be more/less selective."
+            reason=f"Score floor: {min_score}/100 · Session cap: {max_clips}. "
+                   "Adjust 'min_post_score' and 'max_clips_per_session' in config.json."
         )
     except Exception as e:
         notify_error("Clip_Ranker", e, recoverable=True)
-        ranked_clips = successful_clips  # use all clips if ranker fails
+        ranked_clips = successful_clips[:max_clips]  # still respect cap if ranker fails
 
     # ── Step F: Format for TikTok + notify Billy at peak hours ───────────────
     #
