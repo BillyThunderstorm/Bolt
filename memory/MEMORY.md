@@ -56,3 +56,11 @@ Currently in early stage (little to no audience yet).
 - Learning-in-public angle
 - Authentic, not performative
 → Context: memory/context/creator-setup.md
+
+## Session Notes
+- [2026-04-27] Phase 3 complete — Bolt_Chat + Bolt_Voice working. ChaoticallyRobotical confirmed as bot account.
+- [2026-04-27] ElevenLabs skipped. edge-tts installed (free, neural quality). Fallback: macOS say.
+- [2026-04-27] Phase 4 started. New modules added: Bolt_Memory.py, Brain_Controller.py.
+- [2026-04-27] Highlight_detector config-loading fix already applied. config.json updated (min_clip_score: 65, max_clips_per_session: 5).
+- [2026-04-27] bot.py updated — now respects max_clips_per_session cap when ranking clips.
+- [2026-04-27] Bolt Notion doc created for cross-session tracking.

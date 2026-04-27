@@ -134,9 +134,9 @@ python3 launch.py            # go
 | TIKTOK_ACCESS_TOKEN | 🚫 Not needed | Auto-posting removed — Billy posts manually |
 | STREAMLABS_SOCKET_TOKEN | ✅ Set | streamlabs.com → Settings → API Settings |
 | DISCORD_WEBHOOK_URL | ✅ Set | Discord → Channel Settings → Integrations |
-| TWITCH_BOT_TOKEN | ⬜ Needs setup | Run: python3 scripts/get_twitch_token.py |
+| TWITCH_BOT_TOKEN | ⬜ Needs setup | Go to twitchtokengenerator.com → Bot Chat Token, then run: python3 scripts/get_twitch_token.py |
 | TWITCH_BOT_NAME | ⬜ Needs setup | The bot's Twitch username (e.g. BoltBot) |
-| Bolt_VOICE | ⬜ Optional | macOS voice name — default: Samantha (run: say -v ?) |
+| Bolt_VOICE | ⬜ Optional | macOS voice name — default: Samantha (run: say -v ?) — ElevenLabs skipped, edge-tts is a free upgrade option |
 | Bolt_VOICE_MUTE | ⬜ Optional | Set to "true" to silence TTS |
 
 ---
