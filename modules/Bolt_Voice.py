@@ -32,6 +32,8 @@ import os
 import subprocess
 import threading
 import queue
+import asyncio
+import tempfile
 import time
 from typing import Optional
 
@@ -50,12 +52,19 @@ except ImportError:
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
-VOICE      = os.getenv("Bolt_VOICE", "Nathan (Enhanced)")
-RATE       = int(os.getenv("Bolt_VOICE_RATE", "175"))   # words per minute
-MUTED      = os.getenv("Bolt_VOICE_MUTE", "false").lower() == "true"
+VOICE           = os.getenv("Bolt_VOICE", "Nathan (Enhanced)")
+RATE            = int(os.getenv("Bolt_VOICE_RATE", "175"))   # words per minute
+MUTED           = os.getenv("Bolt_VOICE_MUTE", "false").lower() == "true"
 
-ELEVENLABS_KEY     = os.getenv("ELEVENLABS_API_KEY", "")
-ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "")  # from ElevenLabs dashboard
+# edge-tts (free, neural quality — installed via pip3 install edge-tts)
+# Pick a voice from: en-US-GuyNeural, en-US-ChristopherNeural, en-US-EricNeural, en-US-AndrewNeural
+# Full list: run `edge-tts --list-voices` in Terminal
+EDGE_TTS_VOICE  = os.getenv("Bolt_EDGE_VOICE", "en-US-ChristopherNeural")
+EDGE_TTS_RATE   = os.getenv("Bolt_EDGE_RATE", "+0%")   # e.g. +10% faster, -10% slower
+
+# ElevenLabs (kept for future use, not active)
+ELEVENLABS_KEY      = os.getenv("ELEVENLABS_API_KEY", "")
+ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "")
 
 
 # ── What Bolt says for each event type ────────────────────────────────────────
@@ -112,19 +121,63 @@ def _start_worker():
 
 def _speak_now(text: str):
     """
-    The actual TTS call. Tries ElevenLabs first if configured,
-    falls back to macOS say command.
+    The actual TTS call. Priority order:
+      1. edge-tts (free, neural quality, internet required)
+      2. macOS say command (free, offline, always available)
+      3. ElevenLabs (optional future upgrade, requires API key)
     """
     if MUTED:
         return
 
-    # ElevenLabs (higher quality, requires API key + internet)
-    if ELEVENLABS_KEY and ELEVENLABS_VOICE_ID:
-        if _try_elevenlabs(text):
-            return
+    # edge-tts first — better voice quality, completely free
+    if _try_edge_tts(text):
+        return
 
-    # macOS say command (free, offline, works immediately)
+    # macOS say as fallback (works offline)
     _try_macos_say(text)
+
+
+def _try_edge_tts(text: str) -> bool:
+    """
+    Speak using Microsoft Edge TTS via the edge-tts Python package.
+
+    Why edge-tts? It uses the same neural voices as Microsoft Edge's
+    read-aloud feature — they sound like real people, not a robot.
+    It's completely free, no API key, just needs an internet connection.
+
+    Install: pip3 install edge-tts --break-system-packages
+    List voices: edge-tts --list-voices (in Terminal)
+
+    Returns True if successful, False if it should fall back to `say`.
+    """
+    try:
+        import edge_tts  # noqa: F401
+    except ImportError:
+        return False  # not installed, skip silently
+
+    try:
+        async def _generate_audio(tmp_path: str):
+            communicate = edge_tts.Communicate(text, EDGE_TTS_VOICE, rate=EDGE_TTS_RATE)
+            await communicate.save(tmp_path)
+
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
+            tmp_path = f.name
+
+        # edge-tts is async — run it in a fresh event loop from this thread
+        asyncio.run(_generate_audio(tmp_path))
+
+        # Play the audio file using macOS afplay (built-in, no install needed)
+        subprocess.run(["afplay", tmp_path], check=True, capture_output=True)
+        os.unlink(tmp_path)
+        return True
+
+    except Exception:
+        # If anything goes wrong (no internet, bad voice name, etc.) fall back quietly
+        try:
+            os.unlink(tmp_path)
+        except Exception:
+            pass
+        return False
 
 
 def _try_macos_say(text: str) -> bool:
@@ -261,12 +314,17 @@ def test_voice():
 if __name__ == "__main__":
     import sys
 
-    print(f"\n  🦊  Bolt Voice — TTS Test")
-    print(f"  Voice:     {VOICE}")
-    print(f"  Rate:      {RATE} wpm")
+    try:
+        import edge_tts as _et
+        edge_available = True
+    except ImportError:
+        edge_available = False
+
+    print(f"\n  🤖  Bolt Voice — TTS Test")
+    print(f"  edge-tts:  {'✓ installed — ' + EDGE_TTS_VOICE if edge_available else '✗ not installed (run: pip3 install edge-tts --break-system-packages)'}")
+    print(f"  Fallback:  macOS say ({VOICE}, {RATE} wpm)")
     print(f"  Muted:     {MUTED}")
     print(f"  Available: {is_available()}")
-    print(f"  ElevenLabs: {'configured ✓' if ELEVENLABS_KEY else 'not set (using macOS say)'}")
     print()
 
     if "--list-events" in sys.argv:
