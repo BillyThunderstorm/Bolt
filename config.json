@@ -8,10 +8,17 @@
   "max_clips_per_session": 5,
   "min_clip_score": 65,
   "highlight_sensitivity": 0.55,
+  "quality_tiers": {
+    "discard_below": 60,
+    "queue_at": 80,
+    "use_ai_titles": false,
+    "_comment": "score < discard_below = discard; score >= queue_at = auto-queue; in between = mid (kept on disk, not auto-notified)"
+  },
   "highlight": {
     "energy_multiplier": 3.5,
     "min_gap_seconds": 30,
     "sensitivity": 0.55,
+    "min_confidence": 0.15,
     "pad_before": 8,
     "pad_after": 12
   },

@@ -72,7 +72,7 @@ def find_recordings(folder: Path) -> list:
 
 def print_header():
     print()
-    print("  🦊  Bolt — Process Recordings")
+    print("  ⚡️  Bolt — Process Recordings")
     print("  ─" * 28)
     print()
 
@@ -161,6 +161,8 @@ def main():
         print("  ○  Bolt_brain.md not found — using generic AI titles")
 
     print()
+
+    brain_controller = BrainController(config, creator_brain)
 
     # ── Process each recording ────────────────────────────────────────────────
     from bot import process_recording
