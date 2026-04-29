@@ -36,6 +36,7 @@ load_dotenv()
 from modules.notifier import notify, notify_startup, notify_error
 from modules.Think_Learn_Decide import ThinkLearnDecideEngine
 
+from modules.Brain_Controller import BrainController
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 BRAIN_FILE  = "Bolt_brain.md"
@@ -149,13 +150,20 @@ def process_recording(
     style       = config.get("tiktok_style", "letterbox")
     min_score   = config.get("min_post_score", 50)
 
+    brain = BrainController()
+
     # ── Step A: Detect highlights ─────────────────────────────────────────────
-    notify("Step 1/6 — Detecting highlights…", level="info",
-           reason="Scanning the video for audio spikes and motion bursts that "
-                  "signal exciting moments worth clipping.")
+    notify(
+        "Step 1/6 — Detecting highlights…",
+        level="info",
+        reason="Scanning the video for audio spikes and motion bursts that "
+               "signal exciting moments worth clipping."
+    )
+
     try:
         from modules.Highlight_Detector import detect_highlights
         highlights = detect_highlights(recording_path, sensitivity=sensitivity)
+
         if not highlights:
             notify(
                 f"No highlights found in {filename}",
@@ -165,9 +173,14 @@ def process_recording(
                        f"{sensitivity} (lower = more sensitive)."
             )
             return
+
         notify(f"Found {len(highlights)} highlight(s) ✓", level="success")
 
-        # 🦊 Bolt reacts in chat + speaks when highlights are found
+        for h in highlights:
+            score = getattr(h, "score", 0)
+            brain.handle("highlight", score=score)
+
+        # Bolt reacts in chat + speaks when highlights are found
         try:
             from modules.Bolt_Voice import say_event
             say_event("highlight")
@@ -318,8 +331,17 @@ def process_recording(
             reason=f"Based on {think_output['memory_signals_used']} memory signals.",
         )
 
+        # ── Tier filter: drop "discard" clips before the decision gate ────
+        # discard-tier clips never enter intelligence's consideration. mid
+        # and queue tier both proceed but with different downstream behavior
+        # (mid stays silent, queue triggers peak-hour pings).
         candidates = []
+        skipped_discard = 0
         for clip in ranked_clips:
+            tier = getattr(clip, "tier", "queue")
+            if tier == "discard":
+                skipped_discard += 1
+                continue
             clip_path = clip.output_file
             title_data = clip_titles.get(clip_path, {})
             candidates.append(
@@ -327,10 +349,20 @@ def process_recording(
                     "action": "queue_clip",
                     "clip_path": clip_path,
                     "score": float(getattr(clip, "score", 0.0)),
+                    "tier": tier,
                     "title": title_data.get("titles", [""])[0] if title_data else "",
                     "hashtags": title_data.get("hashtags", []) if title_data else [],
                     "style": style,
                 }
+            )
+
+        if skipped_discard:
+            notify(
+                f"Skipped {skipped_discard} discard-tier clip(s) before decision gate",
+                level="info",
+                reason="Clips below quality_tiers.discard_below in config.json never "
+                       "reach the intelligence layer or the post queue. Lower the "
+                       "threshold to be more lenient."
             )
 
         proposals = intelligence.propose_actions(candidates)
@@ -398,6 +430,7 @@ def process_recording(
             if clip_path not in approved_paths:
                 continue
             score      = getattr(clip, "score", 50)
+            tier       = getattr(clip, "tier", "queue")
             vertical   = format_for_tiktok(clip_path, style=style)
             title_data = clip_titles.get(clip_path, {})
             best_title = title_data.get("titles", [""])[0]
@@ -407,7 +440,8 @@ def process_recording(
                 clip_path=vertical,
                 title=best_title,
                 hashtags=hashtags,
-                score=score
+                score=score,
+                tier=tier,
             )
             intelligence.learn_from_outcome(
                 "queue_clip",

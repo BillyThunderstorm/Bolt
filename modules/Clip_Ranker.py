@@ -29,6 +29,40 @@ except ImportError:
 
 HISTORY_FILE = "clip_history.json"
 
+# ── Quality tiers ─────────────────────────────────────────────────────────────
+# Three lanes for ranked clips:
+#   discard → never auto-process, never notify, hidden from peak-hour pings
+#   mid     → kept around in case Billy wants to scroll through them manually
+#   queue   → auto-flows through Title/Subtitle/Factory and into Peak_Hour_Notifier
+# Tune in config.json → quality_tiers.{discard_below, queue_at}.
+TIER_DISCARD = "discard"
+TIER_MID     = "mid"
+TIER_QUEUE   = "queue"
+
+def _load_tier_thresholds():
+    cfg_path = Path(__file__).parent.parent / "config.json"
+    try:
+        with open(cfg_path) as f:
+            tiers = json.load(f).get("quality_tiers", {})
+        return (
+            float(tiers.get("discard_below", 60.0)),
+            float(tiers.get("queue_at",      80.0)),
+        )
+    except Exception:
+        return 60.0, 80.0
+
+DISCARD_BELOW, QUEUE_AT = _load_tier_thresholds()
+
+
+def _classify_tier(score: float) -> str:
+    """Map a 0-100 score to a quality tier."""
+    if score < DISCARD_BELOW:
+        return TIER_DISCARD
+    if score >= QUEUE_AT:
+        return TIER_QUEUE
+    return TIER_MID
+
+
 # Bonus points per trigger type (stacks with audio score)
 TRIGGER_BONUS: Dict[str, float] = {
     "kill":         18,
@@ -77,20 +111,37 @@ def rank_clips(
     for clip in scoreable:
         score, breakdown = _score_clip(clip, history)
         clip.score = score  # attach dynamically
+        clip.tier  = _classify_tier(score)  # 'discard' / 'mid' / 'queue'
 
-        level = "success" if score >= min_score else "warning"
         notify_score(
             Path(clip.output_file).name,
             score,
-            breakdown
+            f"{breakdown} → tier={clip.tier}"
         )
-        if score < min_score:
+
+        if clip.tier == TIER_DISCARD:
             notify(
-                f"  Low score ({score:.0f} < {min_score}) — will not auto-post",
+                f"  DISCARD ({score:.0f} < {DISCARD_BELOW:.0f}) — won't auto-process",
                 level="warning",
-                reason="The clip didn't meet the minimum posting threshold. "
-                       "You can still post it manually. Lower min_post_score in "
-                       "config.json to include more clips automatically."
+                reason="Below the discard threshold. The clip file stays on disk "
+                       "but skips Title/Subtitle/Factory and won't trigger peak-hour "
+                       "alerts. Lower quality_tiers.discard_below in config.json to "
+                       "be more lenient."
+            )
+        elif clip.tier == TIER_MID:
+            notify(
+                f"  MID ({score:.0f}) — kept, but won't auto-notify",
+                level="info",
+                reason="Decent clip, just not great. It's available if you scroll "
+                       "the clips folder manually. Only QUEUE-tier clips trigger "
+                       "Peak_Hour_Notifier pings."
+            )
+        else:  # queue
+            notify(
+                f"  QUEUE ({score:.0f}) — auto-processing",
+                level="success",
+                reason="Strong clip — flowing through Title_Generator, "
+                       "Subtitle_Generator, Clip_Factory, and into Peak_Hour_Notifier."
             )
 
     # Sort descending

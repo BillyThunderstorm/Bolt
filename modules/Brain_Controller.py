@@ -51,7 +51,7 @@ except ImportError:
 # ── Tiers ──────────────────────────────────────────────────────────────────────
 
 TIER_1_THRESHOLD = 80   # excellent — pull out all stops
-TIER_2_THRESHOLD = 50   # good — process and queue
+TIER_2_THRESHOLD = 60   # good — process and queue
 # Below TIER_2_THRESHOLD = archive only, skip the queue
 
 

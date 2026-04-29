@@ -60,16 +60,29 @@ CHECK_INTERVAL_MINUTES = int(os.getenv("PEAK_CHECK_INTERVAL_MINUTES", "15"))
 
 # ── Public convenience functions (used by bot.py) ─────────────────────────────
 
-def add_to_queue(clip_path: str, title: str, hashtags: list = None, score: float = 50):
+def add_to_queue(
+    clip_path: str,
+    title: str,
+    hashtags: list = None,
+    score: float = 50,
+    tier: str = "queue",
+):
     """
     Add a finished clip to the ready-to-post list.
 
     This is the main entry point called by bot.py after each clip is processed.
     It delegates to Peak_Hour_Notifier.queue_clip() which handles storage,
     timing, and immediate peak-window alerts.
+
+    Parameters
+    ----------
+    tier : str
+        "queue" (default), "mid", or "discard". Only "queue" triggers
+        peak-hour Discord alerts. "discard" should be filtered upstream
+        in bot.py and never reach this function.
     """
     from modules.Peak_Hour_Notifier import queue_clip
-    return queue_clip(clip_path, title, hashtags=hashtags, score=score)
+    return queue_clip(clip_path, title, hashtags=hashtags, score=score, tier=tier)
 
 
 def get_summary() -> dict:
