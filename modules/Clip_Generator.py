@@ -96,70 +96,96 @@ def generate_clips(
     stem = source.stem
 
     for i, event in enumerate(highlights, start=1):
-        start = max(0.0, event.timestamp - pad_before)
-        end   = min(total_duration, event.timestamp + event.duration + pad_after)
-        duration = end - start
+        # ── Failure recovery: wrap the whole per-clip body ─────────────────
+        # Any exception inside this block (corrupt event field, weird filename,
+        # filesystem hiccup, ffprobe glitch) is caught, logged, and the loop
+        # moves on. One bad highlight should never kill the rest of the batch.
+        try:
+            start = max(0.0, event.timestamp - pad_before)
+            end   = min(total_duration, event.timestamp + event.duration + pad_after)
+            duration = end - start
 
-        notify(
-            f"  Clip {i}/{len(highlights)} — {event.trigger} @ {event.timestamp:.1f}s "
-            f"(score {event.score:.0f})",
-            level="info",
-            reason=f"Window: {start:.1f}s → {end:.1f}s ({duration:.1f}s). "
-                   f"pad_before pulls in the build-up; pad_after captures the reaction."
-        )
-
-        if duration < min_duration:
             notify(
-                f"  Skipping clip {i} — only {duration:.1f}s (min {min_duration}s)",
-                level="warning",
-                reason="The highlight was too short after clamping to file boundaries. "
-                       "Lower min_duration in config or increase pad_before/pad_after."
+                f"  Clip {i}/{len(highlights)} — {event.trigger} @ {event.timestamp:.1f}s "
+                f"(score {event.score:.0f})",
+                level="info",
+                reason=f"Window: {start:.1f}s → {end:.1f}s ({duration:.1f}s). "
+                       f"pad_before pulls in the build-up; pad_after captures the reaction."
+            )
+
+            if duration < min_duration:
+                notify(
+                    f"  Skipping clip {i} — only {duration:.1f}s (min {min_duration}s)",
+                    level="warning",
+                    reason="The highlight was too short after clamping to file boundaries. "
+                           "Lower min_duration in config or increase pad_before/pad_after."
+                )
+                results.append(GeneratedClip(
+                    source_file=str(source), output_file="",
+                    start_time=start, end_time=end, duration=duration,
+                    highlight=event, success=False, error="too_short"
+                ))
+                continue
+
+            if duration > max_duration:
+                notify(
+                    f"  Clamping clip {i} to {max_duration}s (was {duration:.1f}s)",
+                    level="info",
+                    reason="Clip exceeded max_duration. Extra footage trimmed from the end "
+                           "to keep TikTok under the platform upload limit."
+                )
+                end = start + max_duration
+                duration = max_duration
+
+            out_name = f"{stem}_clip{i:02d}_{event.trigger}_{int(event.timestamp)}.mp4"
+            out_path  = str(Path(output_dir) / out_name)
+
+            success, error = _cut_clip_ffmpeg(str(source), out_path, start, duration)
+
+            if success:
+                notify(
+                    f"  ✓ Saved: {out_name}",
+                    level="success",
+                    reason=f"ffmpeg cut {duration:.1f}s at {start:.1f}s without re-encoding "
+                           "(stream copy) for maximum speed. Re-encoding only happens in "
+                           "Clip_Factory when formatting for TikTok."
+                )
+            else:
+                notify(f"  ✗ Failed to cut clip {i}: {error}", level="error",
+                       reason="ffmpeg returned a non-zero exit code. Check that the source "
+                              "file is not corrupted and that ffmpeg is installed.")
+
+            results.append(GeneratedClip(
+                source_file=str(source),
+                output_file=out_path if success else "",
+                start_time=start,
+                end_time=end,
+                duration=duration,
+                highlight=event,
+                success=success,
+                error=error if not success else None,
+            ))
+
+        except Exception as exc:
+            # Don't let one weird event nuke the whole batch — log and continue.
+            notify(
+                f"  ✗ Unexpected error on clip {i}: {exc}",
+                level="error",
+                reason="An exception was raised mid-loop. The clip was skipped and "
+                       "the next highlight will be processed normally. Full traceback "
+                       "is in logs/daily_log.txt if logging is wired in."
             )
             results.append(GeneratedClip(
-                source_file=str(source), output_file="",
-                start_time=start, end_time=end, duration=duration,
-                highlight=event, success=False, error="too_short"
+                source_file=str(source),
+                output_file="",
+                start_time=getattr(event, "timestamp", 0.0),
+                end_time=getattr(event, "timestamp", 0.0),
+                duration=0.0,
+                highlight=event,
+                success=False,
+                error=f"exception: {exc}",
             ))
             continue
-
-        if duration > max_duration:
-            notify(
-                f"  Clamping clip {i} to {max_duration}s (was {duration:.1f}s)",
-                level="info",
-                reason="Clip exceeded max_duration. Extra footage trimmed from the end "
-                       "to keep TikTok under the platform upload limit."
-            )
-            end = start + max_duration
-            duration = max_duration
-
-        out_name = f"{stem}_clip{i:02d}_{event.trigger}_{int(event.timestamp)}.mp4"
-        out_path  = str(Path(output_dir) / out_name)
-
-        success, error = _cut_clip_ffmpeg(str(source), out_path, start, duration)
-
-        if success:
-            notify(
-                f"  ✓ Saved: {out_name}",
-                level="success",
-                reason=f"ffmpeg cut {duration:.1f}s at {start:.1f}s without re-encoding "
-                       "(stream copy) for maximum speed. Re-encoding only happens in "
-                       "Clip_Factory when formatting for TikTok."
-            )
-        else:
-            notify(f"  ✗ Failed to cut clip {i}: {error}", level="error",
-                   reason="ffmpeg returned a non-zero exit code. Check that the source "
-                          "file is not corrupted and that ffmpeg is installed.")
-
-        results.append(GeneratedClip(
-            source_file=str(source),
-            output_file=out_path if success else "",
-            start_time=start,
-            end_time=end,
-            duration=duration,
-            highlight=event,
-            success=success,
-            error=error if not success else None,
-        ))
 
     successful = sum(1 for r in results if r.success)
     notify(

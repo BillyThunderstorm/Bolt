@@ -154,12 +154,25 @@ def _send_discord(message: str):
 
 # ── Public API ─────────────────────────────────────────────────────────────────
 
-def queue_clip(clip_path: str, title: str, hashtags: list = None, score: float = 50) -> dict:
+def queue_clip(
+    clip_path: str,
+    title: str,
+    hashtags: list = None,
+    score: float = 50,
+    tier: str = "queue",
+) -> dict:
     """
     Add a clip to the ready-to-post list.
 
     Called by bot.py after a clip has been processed and scored.
     The clip gets a unique ID so you can mark it posted later.
+
+    Tier semantics (from Clip_Ranker):
+      - "queue"  → counted in peak-hour alerts (pings you on Discord)
+      - "mid"    → saved to disk, visible in --summary, but NEVER pings you
+      - "discard"→ shouldn't reach this function; bot.py is supposed to skip
+                   discard-tier clips before calling. We honor it defensively
+                   anyway by tagging the item but still saving the row.
 
     Returns the item dict that was saved.
     """
@@ -175,6 +188,7 @@ def queue_clip(clip_path: str, title: str, hashtags: list = None, score: float =
         "title":       title,
         "hashtags":    hashtags or [],
         "score":       round(score, 1),
+        "tier":        tier,
         "status":      "ready",
         "queued_at":   now.isoformat(),
         "posted_at":   None,
@@ -183,15 +197,17 @@ def queue_clip(clip_path: str, title: str, hashtags: list = None, score: float =
     _save_ready(data)
 
     notify(
-        f"Clip saved to post queue  [score {score:.0f}]",
+        f"Clip saved to post queue  [score {score:.0f}, tier {tier}]",
         level="success",
         reason=f"Title: '{title}'\n"
                f"     → File: {Path(clip_path).name}\n"
-               f"     → {window_info}"
+               f"     → {window_info}\n"
+               f"     → Will trigger peak alert: {'YES' if tier == 'queue' else 'no (mid-tier)'}"
     )
 
-    # If we're already in a peak window, alert Billy immediately
-    if is_peak:
+    # Only QUEUE tier triggers an immediate peak-window alert.
+    # Mid-tier clips just sit in the queue silently for manual review.
+    if is_peak and tier == "queue":
         alert_peak_window()
 
     return item
@@ -208,11 +224,32 @@ def alert_peak_window():
       - Any time you want to manually check: python -m modules.Peak_Hour_Notifier
     """
     data  = _load_ready()
-    ready = [c for c in data["clips"] if c["status"] == "ready"]
+    # Only QUEUE-tier clips wake Billy up. Mid-tier clips are visible in
+    # --summary for manual review, but never trigger a Discord ping.
+    # Backward compat: clips queued before tier existed have no 'tier' key
+    # — treat those as 'queue' so old data still works.
+    ready = [
+        c for c in data["clips"]
+        if c["status"] == "ready" and c.get("tier", "queue") == "queue"
+    ]
+    mid_count = sum(
+        1 for c in data["clips"]
+        if c["status"] == "ready" and c.get("tier") == "mid"
+    )
 
     if not ready:
-        notify("No clips in post queue", level="info",
-               reason="Process a recording first, or drop an .mp4 into recordings/")
+        if mid_count:
+            notify(
+                f"No QUEUE-tier clips ready — but {mid_count} MID-tier clip(s) sitting on disk",
+                level="info",
+                reason="Mid-tier clips are decent but not great. They live in "
+                       "data/ready_to_post.json with tier='mid'. Browse them manually "
+                       "if you want, or lower quality_tiers.queue_at in config.json "
+                       "to promote more clips into the auto-alert lane."
+            )
+        else:
+            notify("No clips in post queue", level="info",
+                   reason="Process a recording first, or drop an .mp4 into recordings/")
         return
 
     is_peak, window_info = _is_peak_now()

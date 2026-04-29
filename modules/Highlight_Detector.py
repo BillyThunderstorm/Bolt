@@ -32,6 +32,16 @@ SPIKE_MULT    = float(_CFG.get("energy_multiplier", os.getenv("SPIKE_MULTIPLIER"
 MIN_GAP_SEC   = float(_CFG.get("min_gap_seconds", 15.0))
 SENSITIVITY   = float(_CFG.get("sensitivity", os.getenv("HIGHLIGHT_SENSITIVITY", "0.7")))
 
+# ── Hard confidence floor ─────────────────────────────────────────────────────
+# An audio spike that BARELY crosses the energy threshold has near-zero
+# confidence (think: someone coughing during a quiet moment). Without this
+# floor, those events still get cut into clips, transcribed by Whisper, and
+# ranked — wasting cycles on clips that are 99% guaranteed to be junk.
+# Anything below MIN_CONFIDENCE is dropped here, before any clip is generated.
+# Tune in config.json → highlight.min_confidence (default 0.15 = "needs to be
+# at least 15% above the spike threshold to count").
+MIN_CONFIDENCE = float(_CFG.get("min_confidence", 0.15))
+
 
 @dataclass
 class HighlightEvent:
@@ -106,15 +116,27 @@ def detect_highlights(video_path: str, sensitivity: float = SENSITIVITY) -> list
     threshold  = baseline * (SPIKE_MULT * (1.0 - sensitivity + 0.5))
     last_ts    = -MIN_GAP_SEC
     events     = []
+    rejected   = 0   # count how many barely-crossing spikes we dropped
 
     for i, (t, level) in enumerate(zip(times, rms)):
         if level >= threshold and (t - last_ts) >= MIN_GAP_SEC:
             confidence = min(1.0, float(level / threshold) - 1.0)
+
+            # Hard gate: drop near-zero-confidence spikes before they
+            # become clips. Saves ffmpeg + Whisper + ranking cycles.
+            if confidence < MIN_CONFIDENCE:
+                rejected += 1
+                continue
+
             events.append(HighlightEvent(
                 timestamp  = float(t),
                 type       = "audio_spike",
                 confidence = round(confidence, 3),
             ))
             last_ts = t
+
+    if rejected:
+        print(f"[HighlightDetector] {len(events)} highlights kept, "
+              f"{rejected} weak spikes dropped (confidence < {MIN_CONFIDENCE}).")
 
     return events
