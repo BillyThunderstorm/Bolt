@@ -34,6 +34,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from modules.notifier import notify, notify_startup, notify_error
+from modules.Think_Learn_Decide import ThinkLearnDecideEngine
 
 
 # ── Constants ──────────────────────────────────────────────────────────────────
@@ -105,7 +106,13 @@ def load_config() -> dict:
 
 # ── 3. Process a single recording through the full pipeline ───────────────────
 
-def process_recording(recording_path: str, config: dict, creator_brain: str, chat_bot=None):
+def process_recording(
+    recording_path: str,
+    config: dict,
+    creator_brain: str,
+    chat_bot=None,
+    intelligence: ThinkLearnDecideEngine = None,
+):
     """
     Full pipeline for one recording:
       detect → clip → title → subtitle → rank → format → notify
@@ -119,11 +126,22 @@ def process_recording(recording_path: str, config: dict, creator_brain: str, cha
     from pathlib import Path
     filename = Path(recording_path).name
 
+    intelligence = intelligence or ThinkLearnDecideEngine(config)
     notify(
         f"New recording detected: {filename}",
         level="info",
         reason="Starting the full processing pipeline. "
                "This takes a minute depending on clip length."
+    )
+    intelligence.record_event(
+        source="pipeline",
+        intent="recording_detected",
+        action="start_processing",
+        result="started",
+        confidence=1.0,
+        reason=f"Processing started for {filename}",
+        feedback=None,
+        metadata={"recording_path": recording_path},
     )
 
     game        = config.get("game", "Gaming")
@@ -285,8 +303,100 @@ def process_recording(recording_path: str, config: dict, creator_brain: str, cha
         from modules.Clip_Factory import format_for_tiktok
         from modules.Post_Queue import add_to_queue
 
+        think_output = intelligence.think(
+            {
+                "recording": filename,
+                "game": game,
+                "ranked_clip_count": len(ranked_clips),
+                "min_score": min_score,
+            }
+        )
+        intelligence.audit("think", think_output)
+        notify(
+            f"Think step: {think_output['recommended_next_step']}",
+            level="info",
+            reason=f"Based on {think_output['memory_signals_used']} memory signals.",
+        )
+
+        candidates = []
+        for clip in ranked_clips:
+            clip_path = clip.output_file
+            title_data = clip_titles.get(clip_path, {})
+            candidates.append(
+                {
+                    "action": "queue_clip",
+                    "clip_path": clip_path,
+                    "score": float(getattr(clip, "score", 0.0)),
+                    "title": title_data.get("titles", [""])[0] if title_data else "",
+                    "hashtags": title_data.get("hashtags", []) if title_data else [],
+                    "style": style,
+                }
+            )
+
+        proposals = intelligence.propose_actions(candidates)
+        approved_paths = set()
+        for proposal in proposals:
+            proposal_dict = proposal.as_dict()
+            intelligence.audit("proposal", proposal_dict)
+            allowed = intelligence.enforce_action_policy(proposal)
+            if not allowed:
+                intelligence.learn_from_feedback(proposal.action, accepted=False, feedback_text="blocked_by_policy")
+                intelligence.audit("blocked", proposal_dict)
+                notify(
+                    f"Blocked by policy: {proposal.action}",
+                    level="warning",
+                    reason="Action is not in allowlist or is in denylist.",
+                )
+                continue
+
+            approved = intelligence.confirm_action(proposal)
+            if not approved and not os.isatty(0):
+                intelligence.enqueue_pending_proposal(proposal)
+                intelligence.audit("deferred", {"proposal": proposal_dict, "reason": "non_interactive"})
+                notify(
+                    f"Deferred for batch review: {Path(proposal.payload.get('clip_path', '')).name or proposal.action}",
+                    level="info",
+                    reason="Run: python -m modules.Think_Learn_Decide --review-pending",
+                )
+                continue
+            intelligence.learn_from_feedback(
+                proposal.action,
+                accepted=approved,
+                feedback_text="approved_by_user" if approved else "rejected_by_user_or_non_interactive",
+            )
+            intelligence.audit("confirmation", {"proposal": proposal_dict, "approved": approved})
+            clip_path = proposal.payload.get("clip_path", "")
+            if approved and clip_path:
+                approved_paths.add(clip_path)
+            else:
+                notify(
+                    f"Skipped by decision gate: {Path(clip_path).name if clip_path else proposal.action}",
+                    level="info",
+                    reason="Assistive mode requires explicit approval for each action.",
+                )
+
+        if not approved_paths:
+            notify(
+                "No clips approved for queueing",
+                level="warning",
+                reason="Decision gate denied all actions (interactive approval required).",
+            )
+            intelligence.record_event(
+                source="decision_engine",
+                intent="queue_decision",
+                action="queue_clip",
+                result="none_approved",
+                confidence=0.9,
+                reason="No clip actions passed assistive confirmation",
+                feedback=None,
+                metadata={"proposals": [p.as_dict() for p in proposals]},
+            )
+            return
+
         for clip in ranked_clips:
             clip_path  = clip.output_file
+            if clip_path not in approved_paths:
+                continue
             score      = getattr(clip, "score", 50)
             vertical   = format_for_tiktok(clip_path, style=style)
             title_data = clip_titles.get(clip_path, {})
@@ -298,6 +408,15 @@ def process_recording(recording_path: str, config: dict, creator_brain: str, cha
                 title=best_title,
                 hashtags=hashtags,
                 score=score
+            )
+            intelligence.learn_from_outcome(
+                "queue_clip",
+                success=True,
+                details={"clip_path": clip_path, "vertical_path": vertical, "score": score},
+            )
+            intelligence.audit(
+                "execution",
+                {"action": "queue_clip", "clip_path": clip_path, "score": score, "status": "success"},
             )
             notify(
                 f"Ready to post: {Path(clip_path).name}  [score {score:.0f}]",
@@ -374,6 +493,8 @@ def main():
     # Load Billy's profile FIRST — everything else uses it
     creator_brain = load_brain()
     config        = load_config()
+    intelligence  = ThinkLearnDecideEngine(config)
+    intelligence.ingest_all_sources()
 
     game        = config.get("game", "Gaming")
     sensitivity = config.get("highlight_sensitivity", 0.7)
@@ -406,7 +527,7 @@ def main():
             return
         latest = recordings[-1]
         notify(f"Processing mode — running pipeline on: {latest.name}", level="info")
-        process_recording(str(latest), config, creator_brain)
+        process_recording(str(latest), config, creator_brain, intelligence=intelligence)
         return
 
     # Live mode — watch folder for new recordings
@@ -421,7 +542,13 @@ def main():
     try:
         from modules.Watcher import watch_folder
         for recording_path in watch_folder():
-            process_recording(recording_path, config, creator_brain, chat_bot=chat_bot)
+            process_recording(
+                recording_path,
+                config,
+                creator_brain,
+                chat_bot=chat_bot,
+                intelligence=intelligence,
+            )
     except KeyboardInterrupt:
         notify("Bolt stopped by user (Ctrl+C)", level="info")
         try:

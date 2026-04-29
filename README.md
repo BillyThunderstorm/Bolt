@@ -2,6 +2,18 @@ Bolt - Personal Streaming AI Assistant
 
 Your complete streaming enhancement platform with AI-powered highlights, automated clips, intelligent titles, and TikTok integration.
 
+Project Layout (Current)
+
+- `bot.py` and `launch.py` — main entrypoints
+- `modules/` — core pipeline + Think/Learn/Decide system
+- `scripts/` — operational utilities and setup helpers
+- `scripts/legacy/` — archived legacy scripts kept for reference
+- `tests/` — automated tests
+- `docs/` — project docs and setup guides
+- `docs/INDEX.md` — central navigation map
+- `memory/` — persistent memory and context files
+- `data/` and `logs/` — runtime state, models, queue data, audit/event logs
+
 Features You Now Have
 
 Real-Time Highlight Detection
@@ -63,8 +75,8 @@ Configuration:
 └── setup.sh                 # Quick setup script
 
 Documentation:
-├── SETUP_GUIDE.md           # Comprehensive guide
-├── PROJECT_STATUS.md        # Current status
+├── docs/SETUP_GUIDE.md      # Comprehensive guide
+├── docs/PROJECT_STATUS.md   # Current status
 └── README.md                # This file
 ```
 
@@ -297,8 +309,8 @@ Coming Soon (You Can Add)
 
 Support & Documentation
 
-- **Setup**: See `SETUP_GUIDE.md`
-- **Status**: See `PROJECT_STATUS.md`
+- **Setup**: See `docs/SETUP_GUIDE.md`
+- **Status**: See `docs/PROJECT_STATUS.md`
 - **Config**: See `config.json`
 - **Modules**: Check inline documentation
 
