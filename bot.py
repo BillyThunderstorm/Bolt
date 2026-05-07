@@ -9,20 +9,17 @@ hands off here. bot.py does the actual work:
   2. Load config.json    → settings (game, sensitivity, etc.)
   3. Start watching recordings/ folder for new clips
   4. When a new recording appears, run it through the full pipeline:
-       detect highlights → generate clips → generate titles (AI-powered,
-       using Billy's profile) → add subtitles → rank by virality →
-       format for TikTok → notify Billy at peak posting hours
+       detect highlights → generate clips → deduplicate → generate titles
+       → add subtitles → rank by virality → format for TikTok → notify
+       Billy at peak posting hours
 
-Why Bolt_brain.md matters here:
-  Without it, the AI title generator uses a generic "you are a TikTok creator"
-  prompt. With it, Claude knows Billy's actual vibe, his games, his audience,
-  and what kind of titles feel authentic to him vs corporate.
-
-Note on TikTok posting:
-  Bolt does NOT auto-post to TikTok. Instead, it queues ready clips and sends
-  a Discord + terminal alert when it's peak posting time (7-9AM, 12-2PM,
-  7-10PM). You post manually — which keeps you in control and actually gets
-  better reach from TikTok's algorithm.
+Fixes applied (2026-05):
+  - Watcher now persists processed files to disk (no more duplicate clips on restart)
+  - ClipDeduplicator is now wired in after clip generation (was built but never called)
+  - chat_bot.trigger_highlight() moved to AFTER ranking/approval (was firing on raw
+    audio spikes, flooding chat with fake highlights)
+  - Caption .txt files are now written next to each vertical clip so titles are
+    actually accessible — not just buried in data/ready_to_post.json
 """
 
 import os
@@ -35,7 +32,6 @@ load_dotenv()
 
 from modules.notifier import notify, notify_startup, notify_error
 from modules.Think_Learn_Decide import ThinkLearnDecideEngine
-
 from modules.Brain_Controller import BrainController
 
 # ── Constants ──────────────────────────────────────────────────────────────────
@@ -116,15 +112,15 @@ def process_recording(
 ):
     """
     Full pipeline for one recording:
-      detect → clip → title → subtitle → rank → format → notify
+      detect → clip → deduplicate → title → subtitle → rank → format → notify
 
     creator_brain is the Bolt_brain.md content. It gets passed to
     Title_Generator so Claude knows Billy's style when writing titles.
 
     chat_bot is the BoltBot instance (or None). When provided, Bolt
-    reacts in Twitch chat as highlights are detected.
+    reacts in Twitch chat only after a clip has been ranked and approved —
+    not on raw audio spikes.
     """
-    from pathlib import Path
     filename = Path(recording_path).name
 
     intelligence = intelligence or ThinkLearnDecideEngine(config)
@@ -150,7 +146,7 @@ def process_recording(
     style       = config.get("tiktok_style", "letterbox")
     min_score   = config.get("min_post_score", 50)
 
-    brain = BrainController()
+    brain = BrainController(config)
 
     # ── Step A: Detect highlights ─────────────────────────────────────────────
     notify(
@@ -180,16 +176,17 @@ def process_recording(
             score = getattr(h, "score", 0)
             brain.handle("highlight", score=score)
 
-        # Bolt reacts in chat + speaks when highlights are found
+        # Voice alert is fine here — it's local and low-stakes
         try:
             from modules.Bolt_Voice import say_event
             say_event("highlight")
         except Exception:
             pass
 
-        if chat_bot:
-            for _ in highlights:
-                chat_bot.trigger_highlight()
+        # NOTE: chat_bot.trigger_highlight() is intentionally NOT called here.
+        # The audio detector fires on any loud sound — game effects, music, etc.
+        # Chat is only notified in Step F, after a clip has been ranked, approved,
+        # formatted, and confirmed as a real highlight worth posting.
 
     except Exception as e:
         notify_error("Highlight_Detector", e)
@@ -197,13 +194,10 @@ def process_recording(
 
     # ── Step B: Generate clips ────────────────────────────────────────────────
     notify("Step 2/6 — Generating clips…", level="info",
-           reason="Cutting 30-second clips around each highlight moment. "
+           reason="Cutting clips around each highlight moment. "
                   "Padding is added before and after to capture the full play.")
     try:
         from modules.Clip_Generator import generate_clips
-        # generate_clips returns List[GeneratedClip] objects, not raw path strings.
-        # We keep the objects for the ranker (it needs .highlight, .score etc.)
-        # and extract .output_file as a string whenever we need the path.
         clip_results = generate_clips(recording_path, highlights,
                                       min_duration=config.get("min_clip_duration", 15),
                                       max_duration=config.get("max_clip_duration", 60))
@@ -213,11 +207,46 @@ def process_recording(
                    reason="The pipeline ran but all clip attempts failed. "
                           "Check that ffmpeg is installed: brew install ffmpeg")
             return
-        notify(f"{len(successful_clips)} clip(s) generated ✓", level="success",
-               reason="Clips saved to clips/ folder.")
     except Exception as e:
         notify_error("Clip_Generator", e)
         return
+
+    # ── Step B2: Deduplicate ──────────────────────────────────────────────────
+    # ClipDeduplicator checks against seen_clips.json (persisted across sessions).
+    # If a clip's timestamp + file size matches something already processed, it's
+    # dropped here before titles, subtitles, or ranking waste any cycles on it.
+    # This was built but never wired in — that's now fixed.
+    try:
+        from modules.Clip_Deduplicator import ClipDeduplicator
+        dedup = ClipDeduplicator()
+        timestamps = [getattr(c.highlight, "timestamp", None) for c in successful_clips]
+        before_count = len(successful_clips)
+        unique_clips = []
+        for clip, ts in zip(successful_clips, timestamps):
+            if not dedup.is_duplicate(clip.output_file, ts):
+                unique_clips.append(clip)
+        successful_clips = unique_clips
+        removed = before_count - len(successful_clips)
+        if removed:
+            notify(
+                f"Deduplication: {removed} duplicate clip(s) removed, "
+                f"{len(successful_clips)} unique clip(s) continuing",
+                level="info",
+                reason="Duplicates matched previously processed clips in seen_clips.json."
+            )
+        if not successful_clips:
+            notify(
+                "All clips were duplicates — nothing new to process",
+                level="info",
+                reason="This recording was likely already processed in a previous session."
+            )
+            return
+    except Exception as e:
+        notify(f"Deduplicator skipped: {e}", level="warning",
+               reason="Continuing without deduplication. Clips may be duplicates.")
+
+    notify(f"{len(successful_clips)} unique clip(s) ready ✓", level="success",
+           reason="Clips saved to clips/ folder.")
 
     # ── Step C: Generate AI titles (Billy's profile injected here) ────────────
     notify("Step 3/6 — Generating titles…", level="info",
@@ -250,24 +279,13 @@ def process_recording(
         from modules.Subtitle_Generator import generate_subtitles_with_timestamps as generate_subtitles
         for clip in successful_clips:
             segments, transcript = generate_subtitles(clip.output_file)
-            # Store transcript on the clip's title entry for reference
-            # (Subtitle_Generator transcribes audio — it doesn't burn a new video file)
             if transcript and clip.output_file in clip_titles:
                 clip_titles[clip.output_file]["transcript"] = transcript
     except Exception as e:
         notify_error("Subtitle_Generator", e, recoverable=True)
-        # continue without subtitles — clips already in successful_clips as-is
 
     # ── Step E: Rank clips by virality ────────────────────────────────────────
-    #
-    # Why we rank AND cap:
-    #   Ranking sorts by quality (0-100 score). The cap ensures we don't flood
-    #   your queue — one great clip beats five okay ones for TikTok's algorithm.
-    #   Both limits are configurable in config.json:
-    #     "min_post_score"       — quality floor (default 50)
-    #     "max_clips_per_session"— how many to queue per recording (default 5)
-    #
-    max_clips   = config.get("max_clips_per_session", 5)
+    max_clips = config.get("max_clips_per_session", 5)
     notify("Step 5/6 — Ranking clips…", level="info",
            reason="Each clip gets a 0-100 virality score based on visual energy, "
                   "audio peaks, scene changes, and length. "
@@ -275,9 +293,9 @@ def process_recording(
     ranked_clips = []
     try:
         from modules.Clip_Ranker import rank_clips
-        ranked      = rank_clips(successful_clips)   # returns sorted List[GeneratedClip], best first
-        above_floor = [c for c in ranked if getattr(c, "score", 0) >= min_score]
-        ranked_clips = above_floor[:max_clips]        # take only the top N
+        ranked       = rank_clips(successful_clips)
+        above_floor  = [c for c in ranked if getattr(c, "score", 0) >= min_score]
+        ranked_clips = above_floor[:max_clips]
         skipped_score = len(ranked) - len(above_floor)
         skipped_cap   = len(above_floor) - len(ranked_clips)
         msg = f"{len(ranked_clips)} clip(s) queued"
@@ -293,16 +311,9 @@ def process_recording(
         )
     except Exception as e:
         notify_error("Clip_Ranker", e, recoverable=True)
-        ranked_clips = successful_clips[:max_clips]  # still respect cap if ranker fails
+        ranked_clips = successful_clips[:max_clips]
 
     # ── Step F: Format for TikTok + notify Billy at peak hours ───────────────
-    #
-    # No auto-posting. Instead:
-    #   1. Convert clips to vertical 9:16 TikTok format
-    #   2. Save them to the ready-to-post queue (data/ready_to_post.json)
-    #   3. Bolt sends a Discord + terminal alert when it's peak time
-    #   4. Billy posts manually — full control, better algorithm reach
-    #
     if not config.get("auto_format_tiktok", True):
         notify("TikTok formatting disabled — clips saved to clips/", level="info",
                reason="Set 'auto_format_tiktok': true in config.json to enable 9:16 conversion.")
@@ -331,10 +342,6 @@ def process_recording(
             reason=f"Based on {think_output['memory_signals_used']} memory signals.",
         )
 
-        # ── Tier filter: drop "discard" clips before the decision gate ────
-        # discard-tier clips never enter intelligence's consideration. mid
-        # and queue tier both proceed but with different downstream behavior
-        # (mid stays silent, queue triggers peak-hour pings).
         candidates = []
         skipped_discard = 0
         for clip in ranked_clips:
@@ -342,17 +349,17 @@ def process_recording(
             if tier == "discard":
                 skipped_discard += 1
                 continue
-            clip_path = clip.output_file
+            clip_path  = clip.output_file
             title_data = clip_titles.get(clip_path, {})
             candidates.append(
                 {
-                    "action": "queue_clip",
+                    "action":   "queue_clip",
                     "clip_path": clip_path,
-                    "score": float(getattr(clip, "score", 0.0)),
-                    "tier": tier,
-                    "title": title_data.get("titles", [""])[0] if title_data else "",
+                    "score":    float(getattr(clip, "score", 0.0)),
+                    "tier":     tier,
+                    "title":    title_data.get("titles", [""])[0] if title_data else "",
                     "hashtags": title_data.get("hashtags", []) if title_data else [],
-                    "style": style,
+                    "style":    style,
                 }
             )
 
@@ -361,48 +368,51 @@ def process_recording(
                 f"Skipped {skipped_discard} discard-tier clip(s) before decision gate",
                 level="info",
                 reason="Clips below quality_tiers.discard_below in config.json never "
-                       "reach the intelligence layer or the post queue. Lower the "
-                       "threshold to be more lenient."
+                       "reach the intelligence layer or the post queue."
             )
 
-        proposals = intelligence.propose_actions(candidates)
+        proposals      = intelligence.propose_actions(candidates)
         approved_paths = set()
+
         for proposal in proposals:
             proposal_dict = proposal.as_dict()
             intelligence.audit("proposal", proposal_dict)
             allowed = intelligence.enforce_action_policy(proposal)
             if not allowed:
-                intelligence.learn_from_feedback(proposal.action, accepted=False, feedback_text="blocked_by_policy")
+                intelligence.learn_from_feedback(proposal.action, accepted=False,
+                                                 feedback_text="blocked_by_policy")
                 intelligence.audit("blocked", proposal_dict)
-                notify(
-                    f"Blocked by policy: {proposal.action}",
-                    level="warning",
-                    reason="Action is not in allowlist or is in denylist.",
-                )
+                notify(f"Blocked by policy: {proposal.action}", level="warning",
+                       reason="Action is not in allowlist or is in denylist.")
                 continue
 
             approved = intelligence.confirm_action(proposal)
             if not approved and not os.isatty(0):
                 intelligence.enqueue_pending_proposal(proposal)
-                intelligence.audit("deferred", {"proposal": proposal_dict, "reason": "non_interactive"})
+                intelligence.audit("deferred", {"proposal": proposal_dict,
+                                                "reason": "non_interactive"})
                 notify(
-                    f"Deferred for batch review: {Path(proposal.payload.get('clip_path', '')).name or proposal.action}",
+                    f"Deferred for batch review: "
+                    f"{Path(proposal.payload.get('clip_path', '')).name or proposal.action}",
                     level="info",
                     reason="Run: python -m modules.Think_Learn_Decide --review-pending",
                 )
                 continue
+
             intelligence.learn_from_feedback(
                 proposal.action,
                 accepted=approved,
-                feedback_text="approved_by_user" if approved else "rejected_by_user_or_non_interactive",
+                feedback_text="approved_by_user" if approved else "rejected_by_user",
             )
-            intelligence.audit("confirmation", {"proposal": proposal_dict, "approved": approved})
+            intelligence.audit("confirmation", {"proposal": proposal_dict,
+                                                "approved": approved})
             clip_path = proposal.payload.get("clip_path", "")
             if approved and clip_path:
                 approved_paths.add(clip_path)
             else:
                 notify(
-                    f"Skipped by decision gate: {Path(clip_path).name if clip_path else proposal.action}",
+                    f"Skipped by decision gate: "
+                    f"{Path(clip_path).name if clip_path else proposal.action}",
                     level="info",
                     reason="Assistive mode requires explicit approval for each action.",
                 )
@@ -426,14 +436,16 @@ def process_recording(
             return
 
         for clip in ranked_clips:
-            clip_path  = clip.output_file
+            clip_path = clip.output_file
             if clip_path not in approved_paths:
                 continue
+
             score      = getattr(clip, "score", 50)
             tier       = getattr(clip, "tier", "queue")
             vertical   = format_for_tiktok(clip_path, style=style)
             title_data = clip_titles.get(clip_path, {})
-            best_title = title_data.get("titles", [""])[0]
+            titles     = title_data.get("titles", [f"Clip from {game}"])
+            best_title = titles[0]
             hashtags   = title_data.get("hashtags", [])
 
             add_to_queue(
@@ -443,6 +455,35 @@ def process_recording(
                 score=score,
                 tier=tier,
             )
+
+            # ── Write caption .txt file next to the vertical clip ─────────
+            # Titles were generating correctly but only showing in terminal
+            # and getting buried in data/ready_to_post.json. Now each vertical
+            # clip gets a matching .txt file you can open and copy-paste
+            # directly into TikTok — no JSON digging required.
+            try:
+                caption_path = Path(vertical).with_suffix(".txt")
+                hashtag_str  = " ".join(hashtags)
+                alternates   = "\n  ".join(titles[1:]) if len(titles) > 1 else "(none)"
+                caption_text = (
+                    f"TITLE (best option):\n"
+                    f"  {best_title}\n\n"
+                    f"CAPTION (copy this into TikTok):\n"
+                    f"  {best_title} {hashtag_str}\n\n"
+                    f"ALTERNATES:\n"
+                    f"  {alternates}\n\n"
+                    f"SCORE: {score:.0f}/100\n"
+                    f"GAME:  {game}\n"
+                )
+                caption_path.write_text(caption_text, encoding="utf-8")
+                notify(
+                    f"Caption saved: {caption_path.name}",
+                    level="success",
+                    reason="Open this .txt file to copy-paste your title and hashtags into TikTok."
+                )
+            except Exception as cap_err:
+                notify(f"Caption file write failed: {cap_err}", level="warning")
+
             intelligence.learn_from_outcome(
                 "queue_clip",
                 success=True,
@@ -450,7 +491,8 @@ def process_recording(
             )
             intelligence.audit(
                 "execution",
-                {"action": "queue_clip", "clip_path": clip_path, "score": score, "status": "success"},
+                {"action": "queue_clip", "clip_path": clip_path,
+                 "score": score, "status": "success"},
             )
             notify(
                 f"Ready to post: {Path(clip_path).name}  [score {score:.0f}]",
@@ -459,6 +501,14 @@ def process_recording(
                        "     → Bolt will ping you when it's peak time.\n"
                        f"     → Vertical clip saved to: vertical_clips/"
             )
+
+            # ── Notify Twitch chat — ONLY after a clip is confirmed real ──
+            # This replaces the old behavior of firing on every raw audio
+            # spike. Chat now gets one message per clip that actually made
+            # it through ranking, approval, and formatting. No more spam.
+            if chat_bot:
+                chat_bot.trigger_highlight()
+
     except Exception as e:
         notify_error("TikTok formatting / post queue", e)
 
@@ -480,15 +530,15 @@ def _guess_trigger(clip_path: str, highlights: list) -> str:
     """
     name = Path(clip_path).stem.lower()
     trigger_keywords = {
-        "kill":      ["kill", "elim", "downed", "death"],
-        "multi_kill":["multi", "double", "triple", "quad", "penta"],
-        "ace":       ["ace", "wipe", "clutch"],
-        "donation":  ["donation", "donate", "dono"],
-        "raid":      ["raid"],
-        "sub":       ["sub", "subscriber"],
-        "chat_hype": ["chat", "hype"],
-        "reaction":  ["react", "reaction"],
-        "manual":    ["manual", "marked"],
+        "kill":       ["kill", "elim", "downed", "death"],
+        "multi_kill": ["multi", "double", "triple", "quad", "penta"],
+        "ace":        ["ace", "wipe", "clutch"],
+        "donation":   ["donation", "donate", "dono"],
+        "raid":       ["raid"],
+        "sub":        ["sub", "subscriber"],
+        "chat_hype":  ["chat", "hype"],
+        "reaction":   ["react", "reaction"],
+        "manual":     ["manual", "marked"],
     }
     for trigger, keywords in trigger_keywords.items():
         if any(k in name for k in keywords):
@@ -496,20 +546,14 @@ def _guess_trigger(clip_path: str, highlights: list) -> str:
     return "highlight"
 
 
-# ── 4. Phase 3: Chat bot + voice launcher ─────────────────────────────────────
+# ── 4. Chat bot launcher ───────────────────────────────────────────────────────
 
 def _start_chat_bot(creator_brain: str):
     """
     Start Bolt's Twitch chat bot in a background thread.
 
-    Returns the bot instance so we can trigger events on it (highlights, etc.)
+    Returns the bot instance so we can trigger events on it.
     Returns None if the bot can't start (missing token, missing library, etc.)
-
-    Why we do this in bot.py (not just launch.py):
-      launch.py calls os.execv() to hand off to bot.py, which REPLACES the
-      process — any threads launch.py started are gone. So bot.py starts
-      the chat bot fresh. launch.py just checks config and warns if anything
-      is missing before the handoff.
     """
     try:
         from modules.Bolt_Chat import start_chat_bot
@@ -524,7 +568,6 @@ def _start_chat_bot(creator_brain: str):
 # ── 5. Main loop ───────────────────────────────────────────────────────────────
 
 def main():
-    # Load Billy's profile FIRST — everything else uses it
     creator_brain = load_brain()
     config        = load_config()
     intelligence  = ThinkLearnDecideEngine(config)
@@ -536,21 +579,16 @@ def main():
     notify_startup(
         game=game,
         sensitivity=sensitivity,
-        auto_post=False,   # auto-posting removed — Bolt notifies, Billy posts
+        auto_post=False,
         style=config.get("tiktok_style", "letterbox"),
         min_score=config.get("min_post_score", 50),
     )
 
-    # ── Phase 3: Start Bolt's chat bot ────────────────────────────────────────
-    # Connects to Twitch chat so Bolt can react live during the stream.
-    # Runs in a background thread — doesn't block the clip pipeline.
     chat_bot = _start_chat_bot(creator_brain)
 
-    # Check if we're in single-file mode (process one recording and exit)
     mode = sys.argv[1] if len(sys.argv) > 1 else "live"
 
     if mode == "process":
-        # Process the most recent recording in the recordings folder
         recordings_folder = os.getenv("RECORDINGS_FOLDER", "recordings")
         recordings = sorted(Path(recordings_folder).glob("*.mp4")) + \
                      sorted(Path(recordings_folder).glob("*.mkv"))
@@ -564,13 +602,11 @@ def main():
         process_recording(str(latest), config, creator_brain, intelligence=intelligence)
         return
 
-    # Live mode — watch folder for new recordings
     notify(
         "Live mode — watching recordings/ folder for new clips",
         level="startup",
         reason="Bolt is now running. Any new .mp4 or .mkv that appears in "
-               "recordings/ will be processed automatically. "
-               "In live streaming mode, OBS replay buffer saves go straight here."
+               "recordings/ will be processed automatically."
     )
 
     try:

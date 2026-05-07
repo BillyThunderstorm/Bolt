@@ -1,0 +1,30 @@
+services:
+  llm-from-scratch:
+    image: python:3.11-slim
+    container_name: llm_from_scratch
+    volumes:
+      - ./llm_experiments:/workspace
+      - ./data:/workspace/data
+    working_dir: /workspace
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - PYTHONPATH=/workspace
+    ports:
+      - "8889:8888"
+      - "6006:6006"
+    command: >
+      sh -c "
+        pip install --upgrade pip &&
+        pip install torch --index-url https://download.pytorch.org/whl/cpu &&
+        pip install numpy pandas matplotlib jupyter tensorboard anthropic &&
+        /bin/bash
+      "
+    stdin_open: true
+    tty: true
+    networks:
+      - bolt-network
+
+networks:
+  bolt-network:
+    driver: bridge
