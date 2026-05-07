@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Stats Overlay</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* TRANSPARENT BACKGROUND — this is key for OBS browser sources */
+            background: transparent;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .stats-container {
+            /* Main box containing all three stats */
+            position: relative;
+            display: flex;
+            gap: 15px;
+            background: rgba(20, 20, 30, 0.85);
+            /* Adjust opacity: 0.85 = 85% opaque. Change to 0.95 for more solid, 0.7 for more transparent */
+            border-radius: 10px;
+            padding: 20px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            /* Blur effect for a modern look — remove this line if it's too much */
+            overflow: hidden;
+            /* Keeps the Rive border contained within rounded corners */
+        }
+
+        .stats-container::before {
+            /* Reactive border layer — sits behind all stats */
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 2px solid rgba(100, 200, 255, 0.6);
+            border-radius: 10px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .stat-box {
+            position: relative;
+            width: 220px;
+            height: 120px;
+            overflow: hidden;
+            z-index: 2;
+            /* Sits above the reactive border layer */
+        }
+
+        .stat-label,
+        .stat-number {
+            position: relative;
+            z-index: 3;
+            /* Sits above the reactive border + stat-box layer */
+        }
+
+        .stat-box:hover {
+            /* Optional: highlight effect when hovering (useful for testing/design) */
+            background: rgba(60, 80, 120, 0.9);
+            border-color: rgba(100, 200, 255, 0.8);
+        }
+
+        .stat-label {
+            /* The label (KILLS, WINS, DEATHS) */
+            color: rgba(200, 200, 200, 0.7);
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .stat-number {
+            /* The big number (0, 0, 0) */
+            color: #00ff88;
+            /* Bright green — change this to #ff6600 (orange), #ff0088 (pink), #ffff00 (yellow), etc. */
+            font-size: 48px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        /* Color variations for each stat (optional: comment these out if you want all the same color) */
+        .kills .stat-number {
+            color: #ff4444;
+            /* Red for kills */
+        }
+
+        .wins .stat-number {
+            color: #44ff44;
+            /* Green for wins */
+        }
+
+        .deaths .stat-number {
+            color: #ffaa00;
+            /* Orange for deaths */
+        }
+
+        /* Optional: accent colors for labels */
+        .kills .stat-label {
+            color: #ff8888;
+        }
+
+        .wins .stat-label {
+            color: #88ff88;
+        }
+
+        .deaths .stat-label {
+            color: #ffcc88;
+        }
+    </style>
+</head>
+<body>
+    <div class="stats-container">
+        <!-- ONE LARGE RIVE REACTIVE BORDER (wraps entire container) -->
+        <iframe
+          class="reactive-border-rive"
+          src="https://reactive-sources.streamlabs.com/rive?url=https://public.rive.app/community/runtime-files/26089-48747-rgb-win-count.riv&state={%2522Win+Count%2522:%2522vision.common.victories.session%2522}"
+          style="position: absolute; inset: 0; border: none; pointer-events: none; z-index: 1; border-radius: 10px;"
+        ></iframe>
+
+        <!-- KILLS BOX -->
+        <div class="stat-box kills">
+            <div class="stat-label">Kills</div>
+            <div class="stat-number" id="kills">0</div>
+        </div>
+
+        <!-- WINS BOX -->
+        <div class="stat-box wins">
+            <div class="stat-label">Wins</div>
+            <div class="stat-number" id="wins">0</div>
+        </div>
+
+        <!-- DEATHS BOX -->
+        <div class="stat-box deaths">
+            <div class="stat-label">Deaths</div>
+            <div class="stat-number" id="deaths">0</div>
+        </div>
+
+    </div>
+    <script>
+        // ========== HOW TO UPDATE THE NUMBERS ==========
+        //
+        // Option 1 (Manual testing in browser):
+        // Open browser console (F12) and type:
+        //   document.getElementById('kills').innerText = '5';
+        //   document.getElementById('wins').innerText = '2';
+        //   document.getElementById('deaths').innerText = '1';
+        //
+        // Option 2 (StreamDeck integration — we'll do this next):
+        // StreamDeck will send commands that update these values via a Python script
+        //
+        // Option 3 (File-based — read from a JSON file):
+        // We can make this fetch from a file every second
+        // =============================================
+
+        // EXAMPLE: Simulate a kill every 5 seconds (delete this when StreamDeck is wired)
+        // Uncomment the lines below to test that numbers update and animate
+        /*
+        let testKills = 0;
+        setInterval(() => {
+            testKills++;
+            document.getElementById('kills').innerText = testKills;
+        }, 5000);
+        */
+
+        // When ready, we'll replace the above with a function that reads
+        // from a file or listens to StreamDeck button presses
+    </script>
+
+</body>
+</html>
