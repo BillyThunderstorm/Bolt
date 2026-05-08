@@ -40,3 +40,5 @@ llm-env/
 .idea/
 *.swp
 node_modules/
+llm-env/
+llm-env/
