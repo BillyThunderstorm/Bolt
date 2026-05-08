@@ -20,8 +20,8 @@ How it works:
 
 Tier system (how good is this moment?):
   Tier 1 — Excellent (score 80+):  full pipeline, vertical clip, Discord alert
-  Tier 2 — Good (score 50–79):     clip + queue, no special treatment
-  Tier 3 — Below threshold (<50):  archive only, no queue
+  #   Tier 2 — Good (score 60–79):     clip + queue
+#   Tier 3 — Below threshold (<60):  archive only
 
 Usage:
     from modules.Brain_Controller import BrainController
@@ -325,17 +325,9 @@ class BrainController:
     # ── Helpers ───────────────────────────────────────────────────────────────
 
     def _score_to_tier(self, score: float) -> int:
-        """
-        Convert a clip/highlight score (0-100) to a tier (1, 2, or 3).
-
-        Tier 1 = excellent  (80+)  → full pipeline
-        Tier 2 = good       (50+)  → clip + queue
-        Tier 3 = below floor (<50) → archive only
-        """
-        min_score = self.config.get("min_post_score", TIER_2_THRESHOLD)
-        if score >= TIER_1_THRESHOLD:
+        if score >= TIER_1_THRESHOLD:   # 80+
             return 1
-        elif score >= min_score:
+        elif score >= TIER_2_THRESHOLD:  # 60+  ← change this from 50 to TIER_2_THRESHOLD
             return 2
         else:
             return 3
