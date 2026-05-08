@@ -1,0 +1,7 @@
+{
+  "name": "llms-from-scratch",
+  "private": true,
+  "devDependencies": {
+    "wrangler": "^4.90.0"
+  }
+}
