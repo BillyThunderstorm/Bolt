@@ -1,4 +1,4 @@
-# Bolt — ThunderStorm Billy's Streaming AI Assistant
+# Bolt — Billy Thunderstorm's Streaming AI Assistant
 
 Your complete streaming enhancement platform: AI-powered highlight detection, automated clip pipeline, intelligent title generation, and TikTok-ready output. Built to run in the background while you stream, so you can focus on playing.
 
