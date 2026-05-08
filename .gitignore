@@ -29,8 +29,10 @@ _Archive/
 .venv-1/
 venv/
 env/
+llm-env/
 
 # ── Editor / IDE ──────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
+llm-env/
