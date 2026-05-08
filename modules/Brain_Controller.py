@@ -42,7 +42,7 @@ from datetime import datetime
 from typing import Optional
 
 try:
-    from modules.notifier import notify
+    from .notifier import notify
 except ImportError:
     def notify(msg, level="info", reason=None):
         print(f"  [{level.upper()}] {msg}")
@@ -82,7 +82,7 @@ class BrainController:
         """Lazy-load voice module so it doesn't fail if not installed."""
         if self._voice is None:
             try:
-                from modules import Bolt_Voice
+                from . import Bolt_Voice
                 self._voice = Bolt_Voice
             except ImportError:
                 pass
@@ -305,7 +305,7 @@ class BrainController:
 
         elif atype == "memory":
             try:
-                from modules.Bolt_Memory import remember
+                from .Bolt_Memory import remember
                 remember(action.get("fact", ""))
             except Exception:
                 pass
@@ -329,7 +329,8 @@ class BrainController:
             return 1
         elif score >= TIER_2_THRESHOLD:  # 60+  ← change this from 50 to TIER_2_THRESHOLD
             return 2
-        else:
+        else:#   Tier 2 = good       (60+)  → clip + queue
+#   Tier 3 = below floor (<60) → archive only
             return 3
 
     def session_summary(self) -> str:
@@ -352,7 +353,7 @@ if __name__ == "__main__":
         with open(Path(__file__).parent.parent / "config.json") as f:
             config = json.load(f)
     except Exception:
-        config = {"min_post_score": 50}
+        config = {"min_post_score": 60}
 
     brain = BrainController(config)
 
@@ -360,7 +361,6 @@ if __name__ == "__main__":
     print(f"  Tier 1 threshold: {TIER_1_THRESHOLD}+")
     print(f"  Tier 2 threshold: {config.get('min_post_score', TIER_2_THRESHOLD)}+")
     print()
-
     # Simulate some events
     test_events = [
         ("highlight", {"score": 92}),
