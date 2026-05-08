@@ -39,3 +39,4 @@ llm-env/
 .vscode/
 .idea/
 *.swp
+node_modules/
