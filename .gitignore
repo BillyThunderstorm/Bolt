@@ -1,5 +1,8 @@
 # ── Secrets — NEVER commit these ─────────────────────────────────────────────
 .env
+*.env
+docs.env
+archive/docs.env
 
 # ── Video files — too large for GitHub ───────────────────────────────────────
 recordings/
@@ -21,8 +24,9 @@ __pycache__/
 .DS_Store
 .AppleDouble
 
-# ── Archive / backups — too large for GitHub ─────────────────────────────────
+# ── Archive / backups ─────────────────────────────────────────────────────────
 _Archive/
+archive/
 
 # ── Python virtual environment ────────────────────────────────────────────────
 .venv/
@@ -35,4 +39,3 @@ llm-env/
 .vscode/
 .idea/
 *.swp
-llm-env/
