@@ -15,7 +15,7 @@ The "large" part matters: scale changes the behavior. Small models memorize. Lar
 
 ## Why this matters for Bolt
 
-Bolt uses Claude (Anthropic's LLM) as its brain — for writing titles, answering questions, doing recalls from memory. Understanding that Claude is a next-token predictor explains *why* prompts matter so much: every word in the prompt shapes what tokens Claude thinks should come next. Better prompts = better outputs. This is why Bolt's system prompts in Bolt_Chat.py and Bolt_Memory.py are written carefully.
+Bolt uses Claude (Anthropic's LLM) as its brain — for writing titles, answering questions, doing recalls from memory. Understanding that Claude is a next-token predictor explains *why* prompts matter so much: every word in the system prompts in Bolt_Chat.py and Bolt_Memory.py are written carefully. Each prompt shapes what tokens Claude thinks should come next. Better prompts = better outputs.
 
 ## What Billy can do with this
 

@@ -58,6 +58,7 @@ Currently in early stage (little to no audience yet).
 → Context: memory/context/creator-setup.md
 
 ## Session Notes
+- [2026-05-09] I programmed a lot into your brain to upgrade your AL/ML features, I finally understand; we want to use other models when we can because its the cheapest option. However, I still try to learn and retain what I can just in case its information that might be useful to us. all of the models,  files, folders, repos and programming I configured and implemented into your programming today was difficult and tedious, but I finally got it and were slowly getting you the knowledge that you need to succeed. . It was a lot. The testruns went surprisingly better than I expected. Im
 - [2026-04-27] Phase 3 complete — Bolt_Chat + Bolt_Voice working. ChaoticallyRobotical confirmed as bot account.
 - [2026-04-27] ElevenLabs skipped. edge-tts installed (free, neural quality). Fallback: macOS say.
 - [2026-04-27] Phase 4 started. New modules added: Bolt_Memory.py, Brain_Controller.py.
