@@ -1,9 +1,4 @@
 # ── Core clip pipeline ────────────────────────────────────────────────────────
-# librosa        → audio analysis: detects energy peaks and excitement spikes
-# moviepy        → video editing: cuts clips, adds overlays, exports to mp4
-# faster-whisper → speech-to-text: transcribes clips for subtitles and titles
-# numpy          → numerical processing used by librosa and opencv under the hood
-# opencv-python  → computer vision: motion detection and scene change analysis
 librosa
 moviepy
 faster-whisper
@@ -11,46 +6,24 @@ numpy
 opencv-python
 
 # ── AI and language models ────────────────────────────────────────────────────
-# anthropic      → Claude API: powers Bolt's thinking, briefings, and title gen
-# openai         → optional: fallback or secondary model calls if needed
-anthropic
+# openai remains optional for future integrations
 openai
 
 # ── API connections ───────────────────────────────────────────────────────────
-# python-dotenv  → loads your .env file so API keys stay out of your code
-# requests       → HTTP calls to Twitch, TikTok, and other external services
 python-dotenv
 requests
 
 # ── Twitch chat bot ───────────────────────────────────────────────────────────
-# twitchio       → connects Bolt to Twitch chat as a bot
-# Pinned to v2.x — v3 changed the Bot API significantly and would break things
 twitchio<3.0.0
 
 # ── Stream and WebSocket connections ──────────────────────────────────────────
-# websocket-client → connects to OBS WebSocket for real-time stream control
-# obs-websocket-py → higher-level wrapper around the OBS WebSocket protocol
 websocket-client
 obs-websocket-py
 
 # ── Scheduling and system utilities ───────────────────────────────────────────
-# schedule       → runs timed jobs like peak-hour notifications and briefings
-# psutil         → checks CPU/memory usage for performance tracking
-# pytz           → timezone handling for peak hour windows
 schedule
 psutil
 pytz
 
-# ── Notifications ─────────────────────────────────────────────────────────────
-# No external library needed — notifier.py uses Python's built-in urllib
-# to send Discord webhook messages. This is intentional: fewer dependencies,
-# easier to understand, and one less thing that can break.
-
-# ── Data and storage ──────────────────────────────────────────────────────────
-# All runtime data (clip history, rankings, queue) is stored as plain JSON
-# files in the data/ folder. No database needed at this scale.
-
 # ── Timezone support (Python < 3.9) ───────────────────────────────────────────
-# backports.zoneinfo → only needed on Python 3.8 or older
-# If you're on Python 3.9+, this does nothing and can be ignored
 backports.zoneinfo; python_version < "3.9"
