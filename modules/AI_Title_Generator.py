@@ -235,8 +235,4 @@ def _save_model(model: dict):
     with open(VIRAL_MODEL_FILE, "w") as f:
         json.dump(model, f, indent=2)
 
-    if not config.get("use_ai_titles", True):
-    titles = [f"Clip from {game}"]
-    hashtags = []
-else:
-    # existing Claude call
+

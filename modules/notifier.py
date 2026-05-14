@@ -9,6 +9,7 @@ import os
 import json
 import urllib.request
 from datetime import datetime
+from typing import Any, Callable, Optional
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -32,7 +33,7 @@ _session_log = []
 def notify(
     msg: str,
     level: str = "info",
-    reason: str | None = None,
+    reason: Optional[str] = None,
     force_discord: bool = False,
     **kwargs: Any,
 ) -> None:
@@ -87,7 +88,7 @@ def notify_startup(game: str = "Gaming",
 
 
 def notify_highlight(ts: float = 0, level: float = 0,
-                     source: str = "audio_spike", reason: str | None = None, **kwargs):
+                     source: str = "audio_spike", reason: Optional[str] = None, **kwargs):
     mins = int(ts // 60)
     secs = int(ts % 60)
     msg  = f"Highlight detected at {mins}:{secs:02d} — source: {source} (level={level:.4f})"
@@ -96,19 +97,19 @@ def notify_highlight(ts: float = 0, level: float = 0,
 
 def notify_score(clip_name: str, score: float, grade: str,
                  audio: float = 0, motion: float = 0,
-                 duration: float = 0, reason: str | None = None, **kwargs):
+                 duration: float = 0, reason: Optional[str] = None, **kwargs):
     msg = (f"Score: {grade} ({score}/100) — {clip_name} | "
            f"audio={audio:.0f} motion={motion:.0f} dur={duration:.0f}s")
     notify(msg, level="success" if score >= 65 else "info", reason=reason)
 
 
-def notify_title(title: str, method: str = "template", reason: str | None = None, **kwargs):
+def notify_title(title: str, method: str = "template", reason: Optional[str] = None, **kwargs):
     msg = f"Title ({method}): \"{title}\""
     notify(msg, level="info", reason=reason)
 
 
-def notify_post(clip: str, title: str, scheduled: str | None = None,
-                reason: str | None = None, **kwargs):
+def notify_post(clip: str, title: str, scheduled: Optional[str] = None,
+                reason: Optional[str] = None, **kwargs):
     when = f" @ {scheduled}" if scheduled else ""
     msg  = f"Queued for TikTok{when}: \"{title}\" ({clip})"
     notify(msg, level="success", reason=reason)
@@ -135,7 +136,7 @@ def daily_summary():
     notify(msg, level="info", force_discord=bool(errors))
 
 
-def _send_discord(msg: str, level: str, reason: str | None = None):
+def _send_discord(msg: str, level: str, reason: Optional[str] = None):
     emoji = {"error": "❌", "success": "✅", "warning": "⚠️", "startup": "🦊"}.get(level, "ℹ️")
     body  = {"content": f"{emoji} **Bolt** | {msg}" + (f"\n> {reason}" if reason else "")}
     try:
@@ -159,6 +160,5 @@ def _write_log(entry: dict):
     except Exception:
         pass
 
-from typing import Any, Callable
 
-NotifyFn = Callable[[str, str, str | None], None]
+NotifyFn = Callable[[str, str, Optional[str]], None]
