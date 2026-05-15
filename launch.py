@@ -30,11 +30,9 @@ from modules.notifier import notify, notify_startup
 CONFIG_FILE = "config.json"
 ENV_FILE    = ".env"
 
-REQUIRED_KEYS = [
-    ("OBS_PASSWORD",             "OBS WebSocket password"),
-    ("ANTHROPIC_API_KEY",        "Anthropic key for AI titles + Bolt's personality"),
-]
+REQUIRED_KEYS = []
 OPTIONAL_KEYS = [
+    ("OBS_PASSWORD",             "OBS WebSocket password"),
     ("TWITCH_BOT_TOKEN",         "Bolt chat bot (Twitch OAuth token)"),
     ("STREAMLABS_SOCKET_TOKEN",  "Streamlabs token (donations/raids/subs)"),
     ("TWITCH_CLIENT_ID",         "Twitch app credentials (native clip creation)"),
@@ -432,7 +430,8 @@ def _run_setup_wizard():
     # Ensure placeholder keys exist
     for key in ("OBS_PASSWORD", "STREAMLABS_SOCKET_TOKEN", "ANTHROPIC_API_KEY",
                 "TIKTOK_ACCESS_TOKEN", "TWITCH_CLIENT_ID", "TWITCH_OAUTH_TOKEN",
-                "DISCORD_WEBHOOK_URL", "POSTING_TIMEZONE", "MIN_POST_GAP_HOURS"):
+                "TWITCH_CLIENT_SECRET", "DISCORD_WEBHOOK_URL", "POSTING_TIMEZONE",
+                "MIN_POST_GAP_HOURS"):
         existing_env.setdefault(key, "")
 
     if not existing_env.get("POSTING_TIMEZONE"):
@@ -495,8 +494,11 @@ def _check_env_file():
 def _print_checklist(config: dict):
     """Print a ✓ / ○ checklist of configured items."""
     missing = []
+    required_keys = list(REQUIRED_KEYS)
+    if config.get("use_obs_integration", True):
+        required_keys.append(("OBS_PASSWORD", "OBS WebSocket password"))
 
-    for key, label in REQUIRED_KEYS:
+    for key, label in required_keys:
         val = os.getenv(key, "")
         if val:
             notify(f"  ✓ {label}", level="success")
@@ -514,7 +516,7 @@ def _print_checklist(config: dict):
         notify(
             f"{len(missing)} item(s) still to set up:",
             level="info",
-            reason="These are optional but unlock more features. "
+            reason="These are needed for enabled features. Optional services can be added later. "
                    "Edit .env to add them whenever you're ready."
         )
         for item in missing:

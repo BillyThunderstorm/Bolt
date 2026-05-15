@@ -1,225 +1,185 @@
 #!/usr/bin/env python3
 """
-Verification script to test all components of the streaming assistant
-Run this to ensure everything is configured correctly
+Bolt setup verifier.
+
+Run from anywhere with:
+    python3 scripts/verify.py
 """
 
+import importlib
+import json
 import os
 import sys
-import json
 from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+os.chdir(PROJECT_ROOT)
+
+
+def mark(ok, label, detail=""):
+    icon = "PASS" if ok else "FAIL"
+    suffix = f" - {detail}" if detail else ""
+    print(f"  [{icon}] {label}{suffix}")
+
+
 def check_files():
-    """Check if all required files exist"""
-    print("📋 Checking project files...")
-    
+    print("\nChecking project files...")
     required_files = [
-        'bot.py',
-        'config.json',
-        '.env.example',
-        'requirements.txt',
-        'README.md',
-        'SETUP_GUIDE.md',
-        'PROJECT_STATUS.md',
+        "bot.py",
+        "launch.py",
+        "config.json",
+        "requirements.txt",
+        "README.md",
+        "bolt_brain.md",
+        "docs/guides/SETUP_GUIDE.md",
+        "docs/PROJECT_STATUS.md",
     ]
-    
     required_modules = [
-        'modules/Watcher.py',
-        'modules/Highlight_Detector.py',
-        'modules/Clip_Generator.py',
-        'modules/Subtitle_Generator.py',
-        'modules/AI_Title_Generator.py',
-        'modules/Clip_Ranker.py',
-        'modules/TikTok_Poster.py',
-        'modules/OBS_Integration.py',
-        'modules/Clip_Factory.py',
-        'modules/Gaming_Highlights.py',
+        "modules/Watcher.py",
+        "modules/Highlight_Detector.py",
+        "modules/Clip_Generator.py",
+        "modules/Subtitle_Generator.py",
+        "modules/AI_Title_Generator.py",
+        "modules/Title_Generator.py",
+        "modules/Clip_Ranker.py",
+        "modules/Clip_Deduplicator.py",
+        "modules/TikTok_Publisher.py",
+        "modules/OBS_Integration.py",
+        "modules/Clip_Factory.py",
+        "modules/Post_Queue.py",
+        "modules/Peak_Hour_Notifier.py",
+        "modules/Think_Learn_Decide.py",
     ]
-    
     missing = []
-    
-    for file in required_files:
-        if not os.path.exists(file):
-            missing.append(file)
-            print(f"  ❌ {file}")
-        else:
-            print(f"  ✓ {file}")
-    
-    for file in required_modules:
-        if not os.path.exists(file):
-            missing.append(file)
-            print(f"  ❌ {file}")
-        else:
-            print(f"  ✓ {file}")
-    
-    return len(missing) == 0
+    for rel in required_files + required_modules:
+        exists = Path(rel).exists()
+        mark(exists, rel)
+        if not exists:
+            missing.append(rel)
+    return not missing
+
 
 def check_directories():
-    """Check if required directories exist"""
-    print("\n📁 Checking directories...")
-    
-    directories = [
-        'recordings',
-        'clips',
-        'vertical_clips',
-        'modules',
-        'assets',
-    ]
-    
-    all_exist = True
-    for dir in directories:
-        if not os.path.isdir(dir):
-            print(f"  ⚠️  {dir}/ (creating...)")
-            os.makedirs(dir, exist_ok=True)
-        else:
-            print(f"  ✓ {dir}/")
-    
-    return True
-
-def check_config():
-    """Check configuration"""
-    print("\n⚙️  Checking configuration...")
-    
-    if not os.path.exists('config.json'):
-        print("  ❌ config.json not found")
-        return False
-    
-    try:
-        with open('config.json', 'r') as f:
-            config = json.load(f)
-        
-        required_keys = [
-            'game',
-            'auto_rank',
-            'auto_format_tiktok',
-            'highlight_sensitivity',
-        ]
-        
-        for key in required_keys:
-            if key in config:
-                print(f"  ✓ {key}: {config[key]}")
-            else:
-                print(f"  ❌ {key} missing")
-                return False
-        
-        return True
-    except Exception as e:
-        print(f"  ❌ Error reading config: {e}")
-        return False
-
-def check_env():
-    """Check environment setup"""
-    print("\n🔐 Checking environment...")
-    
-    if not os.path.exists('.env'):
-        print("  ⚠️  .env file not found (copy from .env.example)")
-        print("  Create with: cp .env.example .env")
-    else:
-        print("  ✓ .env file exists")
-    
-    env_vars = [
-        'OBS_HOST',
-        'OBS_PORT',
-        'TIKTOK_USERNAME',
-        'TIKTOK_PASSWORD',
-    ]
-    
-    print("  Suggested environment variables:")
-    for var in env_vars:
-        if os.getenv(var):
-            print(f"  ✓ {var} set")
-        else:
-            print(f"  - {var} (not set)")
-
-def test_imports():
-    """Test if all modules can be imported"""
-    print("\n🔌 Testing module imports...")
-    
-    modules = [
-        'modules.Watcher',
-        'modules.Highlight_Detector',
-        'modules.Clip_Generator',
-        'modules.Subtitle_Generator',
-        'modules.Clip_Factory',
-        'modules.Gaming_Highlights',
-    ]
-    
-    # New modules
-    new_modules = [
-        'modules.AI_Title_Generator',
-        'modules.Clip_Ranker',
-        'modules.TikTok_Poster',
-        'modules.OBS_Integration',
-    ]
-    
+    print("\nChecking directories...")
     all_ok = True
-    
-    print("  Core modules:")
-    for module in modules:
-        try:
-            __import__(module)
-            print(f"  ✓ {module}")
-        except Exception as e:
-            print(f"  ❌ {module}: {e}")
-            all_ok = False
-    
-    print("  New modules:")
-    for module in new_modules:
-        try:
-            __import__(module)
-            print(f"  ✓ {module}")
-        except Exception as e:
-            print(f"  ❌ {module}: {e}")
-            all_ok = False
-    
+    for rel in ["recordings", "clips", "vertical_clips", "modules", "assets", "data", "logs", "memory"]:
+        path = Path(rel)
+        if not path.exists():
+            path.mkdir(parents=True, exist_ok=True)
+        ok = path.is_dir()
+        mark(ok, rel + "/")
+        all_ok = all_ok and ok
     return all_ok
 
+
+def check_config():
+    print("\nChecking configuration...")
+    try:
+        config = json.loads(Path("config.json").read_text(encoding="utf-8"))
+    except Exception as exc:
+        mark(False, "config.json", str(exc))
+        return False
+
+    required = ["game", "auto_format_tiktok", "highlight_sensitivity", "max_clips_per_session"]
+    ok = True
+    for key in required:
+        present = key in config
+        mark(present, key, str(config.get(key)) if present else "missing")
+        ok = ok and present
+
+    score = config.get("min_post_score", config.get("min_clip_score"))
+    mark(score is not None, "clip score floor", str(score) if score is not None else "missing min_post_score/min_clip_score")
+    return ok and score is not None
+
+
+def load_env_file():
+    env = {}
+    path = Path(".env")
+    if not path.exists():
+        return env
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        env[key.strip()] = value.strip()
+    return env
+
+
+def check_env():
+    print("\nChecking environment file...")
+    env = load_env_file()
+    if not env:
+        mark(False, ".env", "missing or empty")
+        return False
+
+    placeholders = {"", "your_key_here", "your_client_id_here", "your_client_secret_here", "your_obs_password_here", "your_discord_webhook_here"}
+    optional = [
+        ("OBS_PASSWORD", "needed when OBS integration is enabled"),
+        ("TWITCH_BOT_TOKEN", "enables Twitch chat bot"),
+        ("TWITCH_BOT_NAME", "enables Twitch chat bot"),
+        ("TWITCH_CLIENT_ID", "enables Twitch stats/API"),
+        ("TWITCH_CLIENT_SECRET", "enables Twitch stats/API"),
+        ("DISCORD_WEBHOOK_URL", "enables peak-hour phone/Discord alerts"),
+    ]
+    mark(True, ".env", "present")
+    for key, detail in optional:
+        value = env.get(key, "")
+        configured = value not in placeholders
+        mark(configured, key, "configured" if configured else detail)
+    return True
+
+
+def check_imports():
+    print("\nTesting module imports...")
+    modules = [
+        "modules.notifier",
+        "modules.Watcher",
+        "modules.Highlight_Detector",
+        "modules.Clip_Generator",
+        "modules.Subtitle_Generator",
+        "modules.Clip_Factory",
+        "modules.AI_Title_Generator",
+        "modules.Title_Generator",
+        "modules.Clip_Ranker",
+        "modules.TikTok_Publisher",
+        "modules.OBS_Integration",
+        "modules.Think_Learn_Decide",
+    ]
+    ok = True
+    for name in modules:
+        try:
+            importlib.import_module(name)
+            mark(True, name)
+        except Exception as exc:
+            mark(False, name, str(exc))
+            ok = False
+    return ok
+
+
 def main():
-    """Run all checks"""
-    print("🎮 Streaming AI Assistant - Verification Check")
+    print("Bolt verification")
     print("=" * 50)
-    
     checks = [
         ("Files", check_files),
         ("Directories", check_directories),
         ("Configuration", check_config),
         ("Environment", check_env),
-        ("Module Imports", test_imports),
+        ("Module imports", check_imports),
     ]
-    
-    results = {}
-    for name, check_func in checks:
-        try:
-            results[name] = check_func()
-        except Exception as e:
-            print(f"\n❌ Error during {name} check: {e}")
-            results[name] = False
-    
-    print("\n" + "=" * 50)
-    print("📊 Verification Summary")
+    results = {name: func() for name, func in checks}
+    print("\nSummary")
     print("=" * 50)
-    
     for name, passed in results.items():
-        status = "✅ PASS" if passed else "⚠️  WARNING"
-        print(f"{status}: {name}")
-    
-    all_passed = all(results.values())
-    
-    print("\n" + "=" * 50)
-    if all_passed:
-        print("✅ All checks passed! Ready to run:")
-        print("   python bot.py")
-    else:
-        print("⚠️  Some checks failed. See above for details.")
-        print("\nQuick fixes:")
-        print("  1. Run: chmod +x setup.sh")
-        print("  2. Run: ./setup.sh")
-        print("  3. Configure .env and config.json")
-        print("  4. Run: python bot.py")
-    
-    print("=" * 50)
-    
-    return 0 if all_passed else 1
+        print(f"{'PASS' if passed else 'WARN'}: {name}")
+    if all(results.values()):
+        print("\nBolt basics look good. Next: python3 launch.py --no-checklist")
+        return 0
+    print("\nSome checks still need attention. See FAIL lines above.")
+    return 1
 
-if __name__ == '__main__':
-    sys.exit(main())
+
+if __name__ == "__main__":
+    raise SystemExit(main())

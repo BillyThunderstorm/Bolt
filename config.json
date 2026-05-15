@@ -7,7 +7,7 @@
   "auto_format_tiktok": true,
   "max_clips_per_session": 5,
   "min_clip_score": 65,
-  "highlight_sensitivity": 0.55,
+  "highlight_sensitivity": 0.35,
   "quality_tiers": {
     "discard_below": 60,
     "queue_at": 80,
