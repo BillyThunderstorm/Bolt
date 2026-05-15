@@ -144,7 +144,7 @@ def process_recording(
     game        = config.get("game", "Gaming")
     sensitivity = config.get("highlight_sensitivity", 0.7)
     style       = config.get("tiktok_style", "letterbox")
-    min_score   = config.get("min_post_score", 50)
+    min_score   = config.get("min_post_score", config.get("min_clip_score", 50))
 
     brain = BrainController(config)
 
@@ -307,7 +307,7 @@ def process_recording(
             msg,
             level="success" if ranked_clips else "warning",
             reason=f"Score floor: {min_score}/100 · Session cap: {max_clips}. "
-                   "Adjust 'min_post_score' and 'max_clips_per_session' in config.json."
+                   "Adjust 'min_post_score'/'min_clip_score' and 'max_clips_per_session' in config.json."
         )
     except Exception as e:
         notify_error("Clip_Ranker", e, recoverable=True)
@@ -581,7 +581,7 @@ def main():
         sensitivity=sensitivity,
         auto_post=False,
         style=config.get("tiktok_style", "letterbox"),
-        min_score=config.get("min_post_score", 50),
+        min_score=config.get("min_post_score", config.get("min_clip_score", 50)),
     )
 
     chat_bot = _start_chat_bot(creator_brain)

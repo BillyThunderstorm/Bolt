@@ -8,7 +8,6 @@ Supports two styles:
 """
 
 import os
-from moviepy import VideoFileClip, CompositeVideoClip, ColorClip
 
 TARGET_W = 1080
 TARGET_H = 1920
@@ -21,6 +20,8 @@ def format_for_tiktok(video_path: str,
     """
     Convert clip to vertical 9:16 format. Returns output path.
     """
+    from moviepy import VideoFileClip, CompositeVideoClip, ColorClip
+
     os.makedirs(output_dir, exist_ok=True)
     base     = os.path.splitext(os.path.basename(video_path))[0]
     out_path = os.path.join(output_dir, f"{base}_tiktok.mp4")

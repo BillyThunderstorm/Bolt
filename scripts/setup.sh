@@ -16,7 +16,7 @@ echo "  Bolt — Setup"
 echo "=================================================="
 
 # ── Check we're in the right place ───────────────────────────────────────────
-if [ ! -f "requirement.txt" ]; then
+if [ ! -f "requirements.txt" ]; then
     echo "  ⚠  Run this script from the Bolt root folder."
     echo "     cd path/to/Bolt && bash scripts/setup.sh"
     exit 1
@@ -37,8 +37,8 @@ echo "  ✓ Folders ready"
 
 # ── Install Python dependencies ───────────────────────────────────────────────
 echo "  Installing Python packages..."
-pip3 install -r requirement.txt --break-system-packages --quiet 2>/dev/null \
-    || pip3 install -r requirement.txt --quiet
+pip3 install -r requirements.txt --break-system-packages --quiet 2>/dev/null \
+    || pip3 install -r requirements.txt --quiet
 echo "  ✓ Packages installed"
 
 # ── Set up .env if missing ────────────────────────────────────────────────────
@@ -109,6 +109,6 @@ echo "  1. Edit .env with your API keys"
 echo "     (copy them from your other Mac's .env)"
 echo "  2. Run Bolt: python3 launch.py"
 echo ""
-echo "  Docs: docs/SETUP_GUIDE.md"
+echo "  Docs: docs/guides/SETUP_GUIDE.md"
 echo "=================================================="
 echo ""

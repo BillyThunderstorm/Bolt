@@ -26,6 +26,7 @@ import sys
 import threading
 import time
 from pathlib import Path
+from typing import Optional
 
 # ── Colours for the terminal ───────────────────────────────────────────────────
 GREEN  = "\033[92m"
@@ -175,7 +176,7 @@ class VoiceChecklist:
 
     # ── Voice matching ─────────────────────────────────────────────────────────
 
-    def _match_task(self, spoken: str) -> str | None:
+    def _match_task(self, spoken: str) -> Optional[str]:
         """
         Compare spoken text to all unchecked tasks.
         Returns the task ID if a match is found, else None.

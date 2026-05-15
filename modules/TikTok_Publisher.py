@@ -18,10 +18,6 @@ import mimetypes
 from pathlib import Path
 from typing import Optional, List
 
-try:
-    import requests
-except ImportError:
-    requests = None  # type: ignore
 
 try:
     from modules.notifier import notify, notify_post
@@ -76,6 +72,11 @@ class TikTokPublisher:
 
         Returns dict with keys: success (bool), publish_id, url, error.
         """
+        try:
+            import requests
+        except ImportError:
+            requests = None  # type: ignore
+
         if not requests:
             return {"success": False, "error": "requests library not installed — pip install requests"}
         if not self.token:

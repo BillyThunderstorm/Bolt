@@ -8,8 +8,6 @@ a list of HighlightEvent objects with timestamps and confidence scores.
 import os
 import tempfile
 import subprocess
-import numpy as np
-import librosa
 from dataclasses import dataclass
 import json
 from pathlib import Path
@@ -71,6 +69,9 @@ def detect_highlights(video_path: str, sensitivity: float = SENSITIVITY) -> list
     """
     Analyse audio and return list of HighlightEvent objects.
     """
+    import librosa
+    import numpy as np
+
     # librosa can't read .mkv/.mp4 containers directly —
     # so we use ffmpeg to extract a clean mono WAV first,
     # then load that. The temp file is deleted automatically.
