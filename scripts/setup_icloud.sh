@@ -72,11 +72,11 @@ echo ""
 echo "  Setting up Python environment…"
 cd "$DEST"
 
-if [ ! -f "requirement.txt" ]; then
-    echo "  ⚠  requirement.txt not found — skipping package install"
+if [ ! -f "requirements.txt" ]; then
+    echo "  ⚠  requirements.txt not found — skipping package install"
 else
-    pip3 install -r requirement.txt --break-system-packages --quiet 2>/dev/null \
-        || pip3 install -r requirement.txt --quiet
+    pip3 install -r requirements.txt --break-system-packages --quiet 2>/dev/null \
+        || pip3 install -r requirements.txt --quiet
     echo "  ✓ Python packages installed"
 fi
 

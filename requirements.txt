@@ -1,29 +1,29 @@
-# ── Core clip pipeline ────────────────────────────────────────────────────────
+# Core pipeline
 librosa
 moviepy
 faster-whisper
 numpy
 opencv-python
 
-# ── AI and language models ────────────────────────────────────────────────────
-# openai remains optional for future integrations
+# AI and chat
 openai
-
-# ── API connections ───────────────────────────────────────────────────────────
-python-dotenv
-requests
-
-# ── Twitch chat bot ───────────────────────────────────────────────────────────
+anthropic
 twitchio<3.0.0
 
-# ── Stream and WebSocket connections ──────────────────────────────────────────
+# Runtime integrations
+python-dotenv
+requests
 websocket-client
 obs-websocket-py
+flask
 
-# ── Scheduling and system utilities ───────────────────────────────────────────
+# Voice and optional speech upgrades
+edge-tts
+
+# Scheduling and system utilities
 schedule
 psutil
 pytz
 
-# ── Timezone support (Python < 3.9) ───────────────────────────────────────────
+# Timezone support (Python < 3.9)
 backports.zoneinfo; python_version < "3.9"
