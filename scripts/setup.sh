@@ -68,8 +68,8 @@ TWITCH_BOT_TOKEN=
 TWITCH_BOT_NAME=
 
 # ── Bolt Voice (optional) ─────────────────────────────────────────────────────
-# macOS voice name — run: say -v ? to see options. Default: Samantha
-Bolt_VOICE=Samantha
+# macOS voice name — run: say -v ? to see options. Default: Nathan (Enhanced)
+Bolt_VOICE=Nathan (Enhanced)
 Bolt_VOICE_MUTE=false
 ENVEOF
     echo "  ✓ .env created — open it and fill in your API keys!"
