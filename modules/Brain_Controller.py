@@ -1,45 +1,30 @@
 #!/usr/bin/env python3
 """
-modules/Brain_Controller.py — Bolt's central decision engine (Phase 4)
-=======================================================================
-This is Bolt's "prefrontal cortex." Instead of event-handling logic
-scattered across bot.py, launch.py, and individual modules, ALL decisions
-flow through here.
+modules/Brain_Controller.py — Bolt compatibility decision controller
+======================================================================
+This module keeps the older BrainController API alive, but it now shares
+the same tier vocabulary and memory path as the live Bolt pipeline.
 
-Why this matters:
-  Right now if you want to change how Bolt reacts to a highlight —
-  you'd have to dig through bot.py, Bolt_Voice.py, and Bolt_Chat.py.
-  With Brain_Controller, you change it in ONE place.
+The current runtime uses Think_Learn_Decide as the canonical action layer.
+Brain_Controller exists for legacy callers and standalone testing, but it
+no longer carries a separate tier system or conflicting thresholds.
 
-How it works:
-  1. Something happens (highlight detected, raid incoming, clip ready)
-  2. That event gets sent to Brain_Controller.decide()
-  3. Brain_Controller evaluates it against the current state + config
-  4. It returns a list of actions to take (speak, chat, notify, queue, etc.)
-  5. The caller executes those actions
+Shared tier semantics:
+  - discard  : below quality_tiers.discard_below
+  - mid      : at or above discard_below, but below min_post_score
+  - queue    : at or above min_post_score
+  - alert    : at or above quality_tiers.queue_at
 
-Tier system (how good is this moment?):
-  Tier 1 — Excellent (score 80+):  full pipeline, vertical clip, Discord alert
-  #   Tier 2 — Good (score 60–79):     clip + queue
-#   Tier 3 — Below threshold (<60):  archive only
-
-Usage:
-    from modules.Brain_Controller import BrainController
-
-    brain = BrainController(config, creator_brain)
-
-    actions = brain.decide("highlight", score=85, timestamp=12.4)
-    for action in actions:
-        brain.execute(action)
-
-    # Or shortcut — decide + execute in one call:
-    brain.handle("raid", raider="BigStreamer", count=42)
+Compatibility note:
+  The live bot path should call Think_Learn_Decide directly. This controller
+  mirrors those thresholds and can still emit local speak/chat/notify actions
+  when used directly.
 """
 
 import json
-from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 try:
     from .notifier import notify
@@ -47,30 +32,62 @@ except ImportError:
     def notify(msg, level="info", reason=None):
         print(f"  [{level.upper()}] {msg}")
 
+try:
+    from .Think_Learn_Decide import ThinkLearnDecideEngine, sys_stdin_interactive
+except ImportError:
+    ThinkLearnDecideEngine = None
 
-# ── Tiers ──────────────────────────────────────────────────────────────────────
-
-TIER_1_THRESHOLD = 80   # excellent — pull out all stops
-TIER_2_THRESHOLD = 60   # good — process and queue
-# Below TIER_2_THRESHOLD = archive only, skip the queue
+    def sys_stdin_interactive() -> bool:
+        return False
 
 
-# ── BrainController ────────────────────────────────────────────────────────────
+TIER_DISCARD = "discard"
+TIER_MID = "mid"
+TIER_QUEUE = "queue"
+
+
+def _load_thresholds() -> tuple:
+    cfg_path = Path(__file__).parent.parent / "config.json"
+    try:
+        with open(cfg_path, "r", encoding="utf-8") as fh:
+            config = json.load(fh)
+    except Exception:
+        config = {}
+
+    tiers = config.get("quality_tiers", {})
+    discard_below = float(tiers.get("discard_below", 60.0))
+    min_post_score = float(config.get("min_post_score", config.get("min_clip_score", 65.0)))
+    queue_at = float(tiers.get("queue_at", 80.0))
+
+    min_post_score = max(min_post_score, discard_below)
+    queue_at = max(queue_at, min_post_score)
+    return discard_below, min_post_score, queue_at
+
+
+DISCARD_BELOW, MIN_POST_SCORE, QUEUE_AT = _load_thresholds()
+
 
 class BrainController:
     """
-    Bolt's central decision engine.
+    Legacy-compatible event controller for Bolt.
 
-    All events in Bolt flow through here. Brain_Controller decides
-    what to do and why — then hands off execution to the right modules.
+    The main job here is to keep older callers working while sharing the
+    same thresholds and memory store as Think_Learn_Decide.
     """
 
     def __init__(self, config: dict, creator_brain: str = ""):
-        self.config        = config
+        self.config = config or {}
         self.creator_brain = creator_brain
-        self.state         = self._load_state()
-        self._chat_bot     = None
-        self._voice        = None
+        self.state = self._load_state()
+        self._chat_bot = None
+        self._voice = None
+        self._intelligence = None
+
+        if ThinkLearnDecideEngine is not None:
+            try:
+                self._intelligence = ThinkLearnDecideEngine(self.config)
+            except Exception:
+                self._intelligence = None
 
     # ── Wiring ────────────────────────────────────────────────────────────────
 
@@ -88,20 +105,42 @@ class BrainController:
                 pass
         return self._voice
 
+    def _record_event(
+        self,
+        source: str,
+        intent: str,
+        action: str,
+        result: str,
+        confidence: float,
+        reason: str,
+        feedback: Optional[str],
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        if not self._intelligence:
+            return
+        try:
+            self._intelligence.record_event(
+                source=source,
+                intent=intent,
+                action=action,
+                result=result,
+                confidence=confidence,
+                reason=reason,
+                feedback=feedback,
+                metadata=metadata or {},
+            )
+        except Exception:
+            pass
+
     # ── State persistence ─────────────────────────────────────────────────────
 
     def _state_path(self) -> Path:
         return Path(__file__).parent.parent / "data" / "brain_state.json"
 
     def _load_state(self) -> dict:
-        """
-        Load persisted state from last session.
-        This is how Brain_Controller remembers things like "how many highlights
-        today" or "last raid was 2 hours ago" across runs.
-        """
         try:
-            with open(self._state_path()) as f:
-                return json.load(f)
+            with open(self._state_path(), "r", encoding="utf-8") as fh:
+                return json.load(fh)
         except Exception:
             return {
                 "highlights_today": 0,
@@ -111,13 +150,12 @@ class BrainController:
             }
 
     def _save_state(self):
-        """Persist state to disk so it survives restarts."""
         try:
-            self._state_path().parent.mkdir(exist_ok=True)
-            with open(self._state_path(), "w") as f:
-                json.dump(self.state, f, indent=2)
-        except Exception as e:
-            notify(f"Brain state save failed: {e}", level="warning")
+            self._state_path().parent.mkdir(parents=True, exist_ok=True)
+            with open(self._state_path(), "w", encoding="utf-8") as fh:
+                json.dump(self.state, fh, indent=2)
+        except Exception as exc:
+            notify(f"Brain state save failed: {exc}", level="warning")
 
     # ── Core decision logic ───────────────────────────────────────────────────
 
@@ -125,116 +163,133 @@ class BrainController:
         """
         Given an event + data, return a list of action dicts to execute.
 
-        This is the core of Phase 4. Everything that should happen as a
-        result of an event is decided here — not scattered across modules.
-
-        Events:
-          "highlight"   — a highlight was detected in the recording
-          "clip_ready"  — a clip finished processing and is ready to queue
-          "raid"        — someone raided Billy's channel
-          "sub"         — new subscriber
-          "resub"       — returning subscriber
-          "bits"        — bit donation
-          "stream_start"— stream went live
-          "stream_end"  — stream ended
-          "peak_hour"   — it's now a peak posting window
-          "error"       — something went wrong
+        Tiers mirror the rest of Bolt:
+          - discard: below discard_below
+          - mid    : between discard_below and min_post_score
+          - queue  : at or above min_post_score
+          - alert  : at or above queue_at
         """
         actions = []
-        now     = datetime.now().isoformat()
+        now = datetime.now().isoformat()
 
         if event == "highlight":
-            score = data.get("score", 0)
-            tier  = self._score_to_tier(score)
+            score = float(data.get("score", 0))
+            tier = self._score_to_tier(score)
+            alert = score >= QUEUE_AT
             self.state["highlights_today"] = self.state.get("highlights_today", 0) + 1
             count = self.state["highlights_today"]
 
-            if tier == 1:
-                actions += [
-                    {"type": "speak",   "event": "highlight"},
-                    {"type": "chat",    "msg": "highlight"},
-                    {"type": "notify",  "msg": f"Tier 1 highlight (score {score}) — running full pipeline", "level": "success"},
-                    {"type": "pipeline","mode": "full"},
-                ]
-            elif tier == 2:
-                actions += [
-                    {"type": "speak",   "event": "highlight"},
-                    {"type": "notify",  "msg": f"Tier 2 highlight (score {score}) — clipping and queuing", "level": "info"},
-                    {"type": "pipeline","mode": "clip_only"},
-                ]
-                # Special callout on 3rd highlight of the session
+            self._record_event(
+                source="brain_controller",
+                intent="highlight",
+                action="classify",
+                result=tier,
+                confidence=min(0.99, max(0.5, score / 100.0)),
+                reason=f"Classified highlight with tier={tier}",
+                feedback=None,
+                metadata={"score": score, "tier": tier},
+            )
+
+            if tier == TIER_DISCARD:
+                actions.append(
+                    {
+                        "type": "notify",
+                        "msg": f"Highlight below floor (score {score}) — archiving",
+                        "level": "info",
+                        "reason": "Score is below quality_tiers.discard_below. Archived but not queued.",
+                    }
+                )
+            elif tier == TIER_MID:
+                actions.extend(
+                    [
+                        {"type": "notify", "msg": f"Mid-tier highlight (score {score}) — keeping it local", "level": "info"},
+                        {"type": "pipeline", "mode": "clip_only"},
+                    ]
+                )
                 if count == 3:
                     actions.append({"type": "speak", "event": "highlight_3"})
             else:
-                actions.append({
-                    "type": "notify",
-                    "msg": f"Highlight below threshold (score {score}) — archiving",
-                    "level": "info",
-                    "reason": "Score is below min_post_score. Archived but not queued."
-                })
+                actions.extend(
+                    [
+                        {"type": "speak", "event": "highlight"},
+                        {"type": "notify", "msg": f"Queue-tier highlight (score {score}) — clipping and queuing", "level": "success"},
+                        {"type": "pipeline", "mode": "clip_only"},
+                    ]
+                )
+                if alert:
+                    actions.append({"type": "chat", "msg": "highlight"})
 
         elif event == "clip_ready":
-            score = data.get("score", 0)
-            path  = data.get("path", "")
-            tier  = self._score_to_tier(score)
+            score = float(data.get("score", 0))
+            path = data.get("path", "")
+            tier = self._score_to_tier(score)
             self.state["clips_queued_today"] = self.state.get("clips_queued_today", 0) + 1
 
-            if tier >= 2:
+            self._record_event(
+                source="brain_controller",
+                intent="clip_ready",
+                action="classify",
+                result=tier,
+                confidence=min(0.99, max(0.5, score / 100.0)),
+                reason=f"Classified clip_ready with tier={tier}",
+                feedback=None,
+                metadata={"score": score, "path": path, "tier": tier},
+            )
+
+            if score >= MIN_POST_SCORE:
                 actions += [
-                    {"type": "queue",   "path": path, "score": score},
-                    {"type": "notify",  "msg": f"Clip queued: {Path(path).name} [score {score:.0f}]", "level": "success"},
+                    {"type": "queue", "path": path, "score": score},
+                    {"type": "notify", "msg": f"Clip queued: {Path(path).name} [score {score:.0f}]", "level": "success"},
                 ]
             else:
-                actions.append({"type": "archive", "path": path, "reason": "Below posting threshold"})
+                actions.append({"type": "archive", "path": path, "reason": "Below posting floor"})
 
         elif event == "raid":
             raider = data.get("raider", "someone")
-            count  = data.get("count", 0)
+            count = data.get("count", 0)
             actions += [
-                {"type": "speak",  "event": "raid" if count >= 10 else "raid_small",
-                 "kwargs": {"raider": raider, "count": count}},
-                {"type": "chat",   "msg": "raid", "kwargs": {"raider": raider, "count": count}},
+                {"type": "speak", "event": "raid" if count >= 10 else "raid_small", "kwargs": {"raider": raider, "count": count}},
+                {"type": "chat", "msg": "raid", "kwargs": {"raider": raider, "count": count}},
                 {"type": "notify", "msg": f"Raid from {raider} — {count} viewers", "level": "success"},
             ]
 
         elif event == "sub":
             name = data.get("name", "someone")
             actions += [
-                {"type": "speak",  "event": "sub", "kwargs": {"name": name}},
-                {"type": "chat",   "msg": "sub",   "kwargs": {"name": name}},
+                {"type": "speak", "event": "sub", "kwargs": {"name": name}},
+                {"type": "chat", "msg": "sub", "kwargs": {"name": name}},
                 {"type": "notify", "msg": f"New sub: {name}", "level": "success"},
             ]
 
         elif event == "resub":
-            name   = data.get("name", "someone")
+            name = data.get("name", "someone")
             months = data.get("months", 1)
             actions += [
-                {"type": "speak",  "event": "resub", "kwargs": {"name": name, "months": months}},
+                {"type": "speak", "event": "resub", "kwargs": {"name": name, "months": months}},
                 {"type": "notify", "msg": f"Resub: {name} (month {months})", "level": "success"},
             ]
 
         elif event == "bits":
-            name   = data.get("name", "someone")
+            name = data.get("name", "someone")
             amount = data.get("amount", 0)
             actions += [
-                {"type": "speak",  "event": "bits", "kwargs": {"name": name, "amount": amount}},
+                {"type": "speak", "event": "bits", "kwargs": {"name": name, "amount": amount}},
                 {"type": "notify", "msg": f"Bits: {amount} from {name}", "level": "success"},
             ]
 
         elif event == "stream_start":
             actions += [
-                {"type": "speak",  "event": "going_live"},
+                {"type": "speak", "event": "going_live"},
                 {"type": "notify", "msg": "Stream started — Bolt is monitoring", "level": "startup"},
                 {"type": "memory", "fact": f"Stream started at {now}"},
             ]
 
         elif event == "stream_end":
             highlights = self.state.get("highlights_today", 0)
-            clips      = self.state.get("clips_queued_today", 0)
+            clips = self.state.get("clips_queued_today", 0)
             actions += [
-                {"type": "speak",  "event": "shutdown"},
-                {"type": "notify", "msg": f"Stream ended — {highlights} highlights, {clips} clips queued",
-                 "level": "success"},
+                {"type": "speak", "event": "shutdown"},
+                {"type": "notify", "msg": f"Stream ended — {highlights} highlights, {clips} clips queued", "level": "success"},
                 {"type": "memory", "fact": f"Session ended: {highlights} highlights, {clips} clips queued"},
                 {"type": "reset_state"},
             ]
@@ -244,14 +299,13 @@ class BrainController:
             clips = data.get("clip_count", 0)
             if clips > 0:
                 actions += [
-                    {"type": "speak",  "event": "peak_alert"},
-                    {"type": "notify", "msg": f"Peak hour ({label}) — {clips} clip(s) ready in Discord",
-                     "level": "success"},
+                    {"type": "speak", "event": "peak_alert"},
+                    {"type": "notify", "msg": f"Peak hour ({label}) — {clips} clip(s) ready in Discord", "level": "success"},
                 ]
 
         elif event == "error":
             actions += [
-                {"type": "speak",  "event": "error"},
+                {"type": "speak", "event": "error"},
                 {"type": "notify", "msg": data.get("msg", "An error occurred"), "level": "error"},
             ]
 
@@ -259,24 +313,13 @@ class BrainController:
         return actions
 
     def handle(self, event: str, **data):
-        """
-        Decide + execute in one call. Convenience shortcut.
-
-        Usage:
-            brain.handle("raid", raider="BigStreamer", count=42)
-            brain.handle("highlight", score=87)
-        """
+        """Decide + execute in one call."""
         actions = self.decide(event, **data)
         for action in actions:
             self.execute(action)
 
     def execute(self, action: dict):
-        """
-        Execute a single action dict returned by decide().
-
-        Each action has a "type" key. The rest of the keys are arguments.
-        Adding a new action type is as simple as adding a new elif here.
-        """
+        """Execute a single action dict returned by decide()."""
         atype = action.get("type")
 
         if atype == "speak":
@@ -289,19 +332,18 @@ class BrainController:
             if self._chat_bot:
                 try:
                     msg_type = action.get("msg", "")
-                    kwargs   = action.get("kwargs", {})
+                    kwargs = action.get("kwargs", {})
                     if msg_type == "highlight":
                         self._chat_bot.trigger_highlight()
                     elif msg_type == "raid":
-                        self._chat_bot.trigger_raid(action.get("kwargs", {}).get("raider", ""), 0)
+                        self._chat_bot.trigger_raid(kwargs.get("raider", ""), kwargs.get("count", 0))
                     elif msg_type == "sub":
                         self._chat_bot.trigger_sub(kwargs.get("name", ""))
-                except Exception as e:
-                    notify(f"Chat action failed: {e}", level="warning")
+                except Exception as exc:
+                    notify(f"Chat action failed: {exc}", level="warning")
 
         elif atype == "notify":
-            notify(action.get("msg", ""), level=action.get("level", "info"),
-                   reason=action.get("reason"))
+            notify(action.get("msg", ""), level=action.get("level", "info"), reason=action.get("reason"))
 
         elif atype == "memory":
             try:
@@ -311,30 +353,24 @@ class BrainController:
                 pass
 
         elif atype == "reset_state":
-            self.state["highlights_today"]   = 0
-            self.state["clips_queued_today"]  = 0
-            self.state["last_session"]        = datetime.now().isoformat()
+            self.state["highlights_today"] = 0
+            self.state["clips_queued_today"] = 0
+            self.state["last_session"] = datetime.now().isoformat()
             self._save_state()
 
         elif atype in ("pipeline", "queue", "archive"):
-            # These are handled by the caller (bot.py) — Brain_Controller just
-            # signals the intent, it doesn't run the pipeline itself.
-            # This keeps Brain_Controller lightweight and testable.
             pass
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 
-    def _score_to_tier(self, score: float) -> int:
-        if score >= TIER_1_THRESHOLD:   # 80+
-            return 1
-        elif score >= TIER_2_THRESHOLD:  # 60+  ← change this from 50 to TIER_2_THRESHOLD
-            return 2
-        else:#   Tier 2 = good       (60+)  → clip + queue
-#   Tier 3 = below floor (<60) → archive only
-            return 3
+    def _score_to_tier(self, score: float) -> str:
+        if score < DISCARD_BELOW:
+            return TIER_DISCARD
+        if score < MIN_POST_SCORE:
+            return TIER_MID
+        return TIER_QUEUE
 
     def session_summary(self) -> str:
-        """Return a human-readable summary of the current session."""
         return (
             f"Session started: {self.state.get('session_started', 'unknown')}\n"
             f"Highlights today: {self.state.get('highlights_today', 0)}\n"
@@ -342,32 +378,30 @@ class BrainController:
         )
 
 
-# ── CLI — test from terminal ───────────────────────────────────────────────────
-
 if __name__ == "__main__":
-    import sys, json
-    from pathlib import Path
+    import sys
 
-    # Load real config if available
     try:
-        with open(Path(__file__).parent.parent / "config.json") as f:
-            config = json.load(f)
+        with open(Path(__file__).parent.parent / "config.json", "r", encoding="utf-8") as fh:
+            config = json.load(fh)
     except Exception:
-        config = {"min_post_score": 60}
+        config = {}
 
     brain = BrainController(config)
 
     print("\n  🤖  Brain_Controller — Event Test")
-    print(f"  Tier 1 threshold: {TIER_1_THRESHOLD}+")
-    print(f"  Tier 2 threshold: {config.get('min_post_score', TIER_2_THRESHOLD)}+")
+    print(f"  Discard below: {DISCARD_BELOW:.0f}")
+    print(f"  Queue floor:    {MIN_POST_SCORE:.0f}")
+    print(f"  Alert at:       {QUEUE_AT:.0f}")
     print()
-    # Simulate some events
+
     test_events = [
         ("highlight", {"score": 92}),
-        ("highlight", {"score": 60}),
+        ("highlight", {"score": 72}),
+        ("highlight", {"score": 58}),
         ("highlight", {"score": 30}),
-        ("raid",      {"raider": "BigStreamer", "count": 42}),
-        ("sub",       {"name": "CoolViewer123"}),
+        ("raid", {"raider": "BigStreamer", "count": 42}),
+        ("sub", {"name": "CoolViewer123"}),
     ]
 
     for event, data in test_events:

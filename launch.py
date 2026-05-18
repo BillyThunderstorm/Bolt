@@ -376,16 +376,18 @@ def _run_setup_wizard():
     print("  Create webhook: Discord server → Edit Channel → Integrations → Webhooks\n")
     discord      = input("  Discord webhook URL (Enter to skip): ").strip()
 
-    # ── Step 7: Auto-post ─────────────────────────────────────────────────────
-    print("\nSTEP 7 — TikTok auto-posting")
-    print("  Clips are queued and released at peak engagement hours (7-9am,")
-    print("  12-2pm, 7-10pm ET). You'll need to add TIKTOK_ACCESS_TOKEN to .env")
-    print("  after getting a TikTok developer token. Say 'n' for now if not ready.\n")
-    auto_post    = (input("  Enable TikTok auto-posting? (y/n) [n]: ").strip().lower() or "n") == "y"
+    # ── Step 7: Peak-hour queueing ────────────────────────────────────────────
+    print("\nSTEP 7 — Peak-hour queueing")
+    print("  Bolt no longer auto-posts. It formats clips, saves captions, and")
+    print("  nudges you during peak engagement windows so you can post manually.\n")
+    input("  Press Enter to keep the manual posting flow [Enter]: ")
 
     # ── Write config.json ─────────────────────────────────────────────────────
     config = {
         "game":                  game,
+        "recordings_folder":     "recordings",
+        "clips_folder":          "clips",
+        "vertical_clips_folder": "vertical_clips",
         "highlight_sensitivity": sens_value,
         "use_obs_integration":   use_obs,
         "obs_path":              obs_path,
@@ -393,11 +395,39 @@ def _run_setup_wizard():
         "obs_port":              4455,
         "auto_rank":             True,
         "auto_format_tiktok":    True,
-        "auto_post_tiktok":      auto_post,
         "tiktok_style":          "letterbox",
         "min_clip_duration":     15,
         "max_clip_duration":     60,
-        "min_post_score":        50,
+        "min_clip_score":        65,
+        "min_post_score":        65,
+        "use_voice_checklist":    False,
+        "whisper_model":         "base",
+        "hashtags":              ["gaming", "clips", "viral", "trending", "MarvelRivals", "fyp"],
+        "notes":                 "Bolt formats clips, saves captions, and pings at peak hours for manual posting.",
+        "highlight": {
+            "energy_multiplier": 3.5,
+            "min_gap_seconds": 30,
+            "sensitivity": 0.55,
+            "min_confidence": 0.15,
+            "pad_before": 8,
+            "pad_after": 12,
+        },
+        "quality_tiers": {
+            "discard_below": 60,
+            "queue_at": 80,
+            "use_ai_titles": False,
+            "_comment": "score < discard_below = discard; discard_below <= score < min_post_score = mid; score >= min_post_score and < queue_at = queue without Discord ping; score >= queue_at = auto-queue + Discord alert",
+        },
+        "peak_notifications": {
+            "enabled": True,
+            "windows": [
+                {"label": "Morning", "start_hour": 7, "end_hour": 9},
+                {"label": "Lunch", "start_hour": 12, "end_hour": 14},
+                {"label": "Prime Time", "start_hour": 19, "end_hour": 22},
+            ],
+            "check_interval_minutes": 15,
+            "discord_enabled": True,
+        },
     }
     with open(CONFIG_FILE, "w") as f:
         json.dump(config, f, indent=2)
@@ -416,7 +446,6 @@ def _run_setup_wizard():
         "GAME_NAME":             game,
         "TWITCH_CHANNEL":        twitch_channel,
         "TWITCH_HYPE_THRESHOLD": hype_threshold,
-        "AUTO_POST_TIKTOK":      "true" if auto_post else "false",
     }
     if obs_password:
         updates["OBS_PASSWORD"] = obs_password

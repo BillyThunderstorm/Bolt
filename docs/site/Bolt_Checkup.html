@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Foxy Checkup · BillyandRandy</title>
+  <title>Bolt Checkup · BillyandRandy</title>
 
-  <!-- Load live Foxy stats — written by launch.py on every startup -->
+  <!-- Load live Bolt stats — written by launch.py on every startup -->
   <!-- If this file doesn't exist yet, the page shows dashes gracefully -->
-  <script src="../data/foxy_data.js" onerror="window.FOXY_DATA=null;"></script>
+  <script src="../data/Bolt_data.js" onerror="window.Bolt_DATA=null;"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -230,7 +230,7 @@
       </div>
     </div>
     <div>
-      <h1>Foxy Checkup</h1>
+      <h1>Bolt Checkup</h1>
       <p>BillyandRandy · AI Producer Dashboard</p>
       <div class="badge">🦊 PHASE 3 — VOICE + PERSONALITY ACTIVE</div>
     </div>
@@ -271,7 +271,7 @@
     <div class="status-card">
       <div class="status-dot dot-green" id="dot-ai"></div>
       <div class="status-info">
-        <strong>Foxy AI</strong>
+        <strong>Bolt AI</strong>
         <span id="status-ai">Checking…</span>
       </div>
     </div>
@@ -404,9 +404,9 @@
     }
   })();
 
-  // ── POPULATE FROM FOXY_DATA ───────────────────────────────────────────────────
+  // ── POPULATE FROM Bolt_DATA ───────────────────────────────────────────────────
   function populate() {
-    const d = window.FOXY_DATA;
+    const d = window.Bolt_DATA;
 
     if (!d) {
       // Data file doesn't exist yet — show instructions
@@ -521,8 +521,8 @@
   }
 
   // ── AUTO-REFRESH every 60 seconds ────────────────────────────────────────────
-  // Reloads the page so the <script src="foxy_data.js"> gets the latest data.
-  // launch.py writes foxy_data.js on every startup — so after you run Foxy,
+  // Reloads the page so the <script src="Bolt_data.js"> gets the latest data.
+  // launch.py writes Bolt_data.js on every startup — so after you run Bolt,
   // the page will show fresh numbers on the next refresh cycle.
   let countdown = 60;
   setInterval(() => {

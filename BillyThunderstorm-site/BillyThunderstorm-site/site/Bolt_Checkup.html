@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bolt — Your AI Producer</title>
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #16171c;
+      --surface2: #1e1f27;
+      --border: #2a2b35;
+      --accent: #e8621a;
+      --accent2: #f08c3a;
+      --green: #3ecf8e;
+      --red: #ff4f4f;
+      --yellow: #f5c842;
+      --text: #e8e8f0;
+      --muted: #7a7a9a;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* ─── Header ─── */
+    #header {
+      background: linear-gradient(135deg, #1a0a00 0%, #0d0d0f 60%);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+
+    .logo-text h1 {
+      font-size: 20px; font-weight: 700; letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #ff8c42, #ffb87a);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .logo-text p { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+
+    .header-right { display: flex; align-items: center; gap: 14px; }
+
+    #clock { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+    #voice-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex; align-items: center; gap: 6px;
+      transition: all 0.2s;
+    }
+    #voice-btn:hover { border-color: var(--accent); color: var(--accent); }
+    #voice-btn.speaking { border-color: var(--accent); background: rgba(232,98,26,0.12); }
+
+    /* ─── Nav ─── */
+    #nav {
+      display: flex;
+      gap: 4px;
+      padding: 16px 32px 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .nav-tab {
+      padding: 8px 18px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .nav-tab:hover { color: var(--text); }
+    .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ─── Main ─── */
+    #main { padding: 28px 32px; max-width: 1200px; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ─── Cards ─── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 18px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .card-title .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    /* ─── Grid ─── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+
+    @media (max-width: 800px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      #main { padding: 20px 16px; }
+      #nav { padding: 12px 16px 0; }
+      #header { padding: 16px; }
+    }
+
+    /* ─── Checklist ─── */
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .checklist-item:last-child { border-bottom: none; }
+    .checklist-item:hover { opacity: 0.85; }
+
+    .check-box {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .check-box.checked { background: var(--green); border-color: var(--green); }
+    .check-box.checked::after { content: '✓'; font-size: 12px; color: #000; font-weight: 700; }
+
+    .check-label { font-size: 14px; flex: 1; }
+    .check-label.checked { text-decoration: line-through; color: var(--muted); }
+
+    .check-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .check-badge.required { background: rgba(255,79,79,0.15); color: var(--red); }
+    .check-badge.optional { background: rgba(122,122,154,0.12); color: var(--muted); }
+
+    .checklist-progress {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .checklist-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    /* ─── Reset checklist btn ─── */
+    .reset-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-left: auto;
+      transition: all 0.2s;
+    }
+    .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── Stats ─── */
+    .stat-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      text-align: center;
+    }
+    .stat-num { font-size: 28px; font-weight: 700; color: var(--text); }
+    .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; }
+    .stat-badge { font-size: 11px; margin-top: 6px; color: var(--green); }
+    .stat-badge.down { color: var(--red); }
+    .stat-placeholder { font-size: 10px; color: var(--muted); margin-top: 4px; font-style: italic; }
+
+    /* ─── Goals ─── */
+    .goal-item {
+      margin-bottom: 16px;
+    }
+    .goal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .goal-title { font-size: 13px; font-weight: 500; }
+    .goal-numbers { display: flex; align-items: center; gap: 6px; }
+    .goal-current-input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      width: 70px;
+      text-align: right;
+      padding: 2px 6px;
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .goal-current-input:focus { border-color: var(--accent); }
+    .goal-sep { color: var(--muted); font-size: 12px; }
+    .goal-target { font-size: 13px; color: var(--muted); }
+    .goal-bar-wrap { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .goal-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s; }
+    .goal-pct { font-size: 11px; color: var(--muted); margin-top: 4px; text-align: right; }
+
+    .add-goal-btn {
+      background: transparent;
+      border: 1px dashed var(--border);
+      color: var(--muted);
+      padding: 8px;
+      border-radius: 8px;
+      width: 100%;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .add-goal-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── Content suggestions ─── */
+    .idea-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      gap: 12px;
+    }
+    .idea-platform {
+      font-size: 20px;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .idea-body { flex: 1; }
+    .idea-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .idea-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .idea-tags { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .idea-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(232,98,26,0.12);
+      color: var(--accent2);
+      font-weight: 500;
+    }
+
+    /* ─── Affiliates ─── */
+    .affiliate-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .affiliate-row:last-child { border-bottom: none; }
+    .affiliate-logo {
+      width: 36px; height: 36px;
+      background: var(--surface2);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .affiliate-info { flex: 1; }
+    .affiliate-name { font-size: 13px; font-weight: 600; }
+    .affiliate-detail { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .affiliate-status {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .affiliate-status.active { background: rgba(62,207,142,0.12); color: var(--green); }
+    .affiliate-status.pending { background: rgba(245,200,66,0.12); color: var(--yellow); }
+    .affiliate-status.prospect { background: rgba(122,122,154,0.12); color: var(--muted); }
+
+    .add-affiliate-btn {
+      background: transparent;
+      border: 1px dashed var(--border);
+      color: var(--muted);
+      padding: 10px;
+      border-radius: 8px;
+      width: 100%;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      margin-top: 10px;
+    }
+    .add-affiliate-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── Bolt Voice Banner ─── */
+    #bolt-banner {
+      background: linear-gradient(135deg, rgba(232,98,26,0.12), rgba(240,140,58,0.06));
+      border: 1px solid rgba(232,98,26,0.25);
+      border-radius: var(--radius);
+      padding: 18px 24px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    #bolt-banner .bolt-avatar { font-size: 28px; }
+    #bolt-banner .bolt-msg { flex: 1; }
+    #bolt-banner .bolt-msg p { font-size: 14px; line-height: 1.6; color: var(--text); }
+    #bolt-banner .bolt-name { font-size: 11px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+
+    /* ─── Modals ─── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      width: 400px;
+      max-width: 90vw;
+    }
+    .modal h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+    .modal-field { margin-bottom: 14px; }
+    .modal-field label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .modal-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .modal-input:focus { border-color: var(--accent); }
+    .modal-select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      appearance: none;
+    }
+    .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn-save {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .btn-save:hover { background: var(--accent2); }
+
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-text">
+      <h1>BOLT</h1>
+      <p>Your AI Producer</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <span id="clock"></span>
+    <button id="voice-btn" onclick="boltSpeak(null, true)">🔊 Bolt Brief</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<div id="nav">
+  <div class="nav-tab active" onclick="showSection('dashboard')">📋 Pre-Show</div>
+  <div class="nav-tab" onclick="showSection('stats')">📊 Performance</div>
+  <div class="nav-tab" onclick="showSection('content')">💡 Content</div>
+  <div class="nav-tab" onclick="showSection('goals')">🎯 Goals</div>
+  <div class="nav-tab" onclick="showSection('affiliates')">🤝 Affiliates</div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- ── DASHBOARD / PRE-SHOW ── -->
+  <div id="section-dashboard" class="section active">
+    <div id="bolt-banner">
+      <div class="bolt-avatar">⚡</div>
+      <div class="bolt-msg">
+        <div class="bolt-name">Bolt</div>
+        <p id="bolt-greeting">Loading your briefing...</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <div class="dot"></div>
+        Pre-Show Checklist
+        <button class="reset-btn" onclick="resetChecklist()">↺ Reset</button>
+      </div>
+      <div class="checklist-progress">
+        <div class="checklist-progress-bar" id="checklist-bar" style="width:0%"></div>
+      </div>
+      <div id="checklist-items"></div>
+    </div>
+  </div>
+
+  <!-- ── STATS ── -->
+  <div id="section-stats" class="section">
+    <div class="card">
+      <div class="card-title"><div class="dot"></div>Performance Overview</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:18px;">
+        ⚠️ Phase 2 placeholder — real data connects when TikTok &amp; Twitch APIs are approved.
+      </p>
+      <div class="grid-3">
+        <div class="stat-card">
+          <div class="stat-num">—</div>
+          <div class="stat-label">TikTok Views (7d)</div>
+          <div class="stat-placeholder">API pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">—</div>
+          <div class="stat-label">Twitch Avg Viewers</div>
+          <div class="stat-placeholder">API pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">—</div>
+          <div class="stat-label">Kick Followers</div>
+          <div class="stat-placeholder">API pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">—</div>
+          <div class="stat-label">New Followers (7d)</div>
+          <div class="stat-placeholder">API pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">—</div>
+          <div class="stat-label">Clips Posted</div>
+          <div class="stat-placeholder">API pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">—</div>
+          <div class="stat-label">Avg Virality Score</div>
+          <div class="stat-placeholder">API pending</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTENT ── -->
+  <div id="section-content" class="section">
+    <div class="card">
+      <div class="card-title"><div class="dot"></div>Content Ideas for Today</div>
+      <div id="content-ideas"></div>
+    </div>
+  </div>
+
+  <!-- ── GOALS ── -->
+  <div id="section-goals" class="section">
+    <div class="card">
+      <div class="card-title"><div class="dot"></div>Goal Tracker</div>
+      <div id="goals-list"></div>
+      <button class="add-goal-btn" onclick="openGoalModal()">+ Add Goal</button>
+    </div>
+  </div>
+
+  <!-- ── AFFILIATES ── -->
+  <div id="section-affiliates" class="section">
+    <div class="card">
+      <div class="card-title"><div class="dot"></div>Affiliate &amp; Partnership Manager</div>
+      <div id="affiliates-list"></div>
+      <button class="add-affiliate-btn" onclick="openAffiliateModal()">+ Add Partner / Prospect</button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- GOAL MODAL -->
+<div class="modal-overlay" id="goal-modal">
+  <div class="modal">
+    <h2>Add Goal</h2>
+    <div class="modal-field">
+      <label>Goal Title</label>
+      <input class="modal-input" id="goal-title-input" placeholder="e.g. Reach 1K TikTok followers" />
+    </div>
+    <div class="modal-field">
+      <label>Current</label>
+      <input class="modal-input" id="goal-current-input" type="number" placeholder="0" />
+    </div>
+    <div class="modal-field">
+      <label>Target</label>
+      <input class="modal-input" id="goal-target-input" type="number" placeholder="1000" />
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeGoalModal()">Cancel</button>
+      <button class="btn-save" onclick="saveGoal()">Save Goal</button>
+    </div>
+  </div>
+</div>
+
+<!-- AFFILIATE MODAL -->
+<div class="modal-overlay" id="affiliate-modal">
+  <div class="modal">
+    <h2>Add Partner / Prospect</h2>
+    <div class="modal-field">
+      <label>Name</label>
+      <input class="modal-input" id="aff-name-input" placeholder="e.g. Gamer Supps" />
+    </div>
+    <div class="modal-field">
+      <label>Details</label>
+      <input class="modal-input" id="aff-detail-input" placeholder="e.g. Energy drinks — 10% commission" />
+    </div>
+    <div class="modal-field">
+      <label>Status</label>
+      <select class="modal-select" id="aff-status-input">
+        <option value="active">Active</option>
+        <option value="pending">Pending</option>
+        <option value="prospect">Prospect</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeAffiliateModal()">Cancel</button>
+      <button class="btn-save" onclick="saveAffiliate()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+// CLOCK
+// ──────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {
+    hour: 'numeric', minute: '2-digit', weekday: 'short'
+  });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ──────────────────────────────────────────────
+// NAV
+// ──────────────────────────────────────────────
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ──────────────────────────────────────────────
+// VOICE (Nathan Enhanced)
+// ──────────────────────────────────────────────
+let speaking = false;
+
+function boltSpeak(text, isBrief) {
+  if (!('speechSynthesis' in window)) return;
+
+  if (speaking) {
+    window.speechSynthesis.cancel();
+    speaking = false;
+    document.getElementById('voice-btn').classList.remove('speaking');
+    return;
+  }
+
+  const msg = text || buildBriefing();
+  const utt = new SpeechSynthesisUtterance(msg);
+
+  // Try Nathan first, fall back gracefully
+  const voices = window.speechSynthesis.getVoices();
+  const nathan = voices.find(v => v.name.includes('Nathan')) ||
+                 voices.find(v => v.name.includes('Daniel')) ||
+                 voices.find(v => v.lang === 'en-US');
+  if (nathan) utt.voice = nathan;
+  utt.rate = 0.96;
+  utt.pitch = 1.0;
+
+  speaking = true;
+  document.getElementById('voice-btn').classList.add('speaking');
+
+  utt.onend = () => {
+    speaking = false;
+    document.getElementById('voice-btn').classList.remove('speaking');
+  };
+
+  window.speechSynthesis.speak(utt);
+}
+
+function buildBriefing() {
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "What's up" : "Good evening";
+  const checked = document.querySelectorAll('.check-box.checked').length;
+  const total = document.querySelectorAll('.check-box').length;
+  const goals = loadGoals();
+  const goalSummary = goals.length > 0
+    ? `You've got ${goals.length} active goal${goals.length > 1 ? 's' : ''} being tracked.`
+    : 'No goals set yet — head to the Goals tab to add some.';
+
+  return `${greeting}, Billy. Bolt here. ` +
+    `You've completed ${checked} out of ${total} pre-show checks. ` +
+    (checked === total ? `You're all set — let's go live. ` : `Make sure to finish the rest before you go live. `) +
+    goalSummary + ` Let's get it.`;
+}
+
+// Load voices async on some browsers
+window.speechSynthesis.onvoiceschanged = () => {};
+
+// ──────────────────────────────────────────────
+// CHECKLIST
+// ──────────────────────────────────────────────
+const DEFAULT_CHECKLIST = [
+  { label: 'OBS is open and scene is set', required: true },
+  { label: 'Streamlabs alerts tested', required: true },
+  { label: 'Twitch stream key set correctly', required: true },
+  { label: 'TikTok Live ready / RTMP key in', required: true },
+  { label: 'Kick stream key set', required: false },
+  { label: 'Microphone levels checked', required: true },
+  { label: 'Webcam framing / lighting good', required: true },
+  { label: 'Game / content launched and loaded', required: true },
+  { label: 'Stream title & category updated', required: true },
+  { label: 'Notifications posted to social', required: false },
+  { label: 'Water / snacks nearby', required: false },
+  { label: 'Phone on Do Not Disturb', required: false },
+];
+
+function loadCheckState() {
+  try { return JSON.parse(localStorage.getItem('bolt_checklist') || '{}'); } catch { return {}; }
+}
+
+function saveCheckState(state) {
+  localStorage.setItem('bolt_checklist', JSON.stringify(state));
+}
+
+function renderChecklist() {
+  const state = loadCheckState();
+  const container = document.getElementById('checklist-items');
+  container.innerHTML = '';
+
+  let checkedCount = 0;
+  DEFAULT_CHECKLIST.forEach((item, i) => {
+    const checked = !!state[i];
+    if (checked) checkedCount++;
+
+    const el = document.createElement('div');
+    el.className = 'checklist-item';
+    el.onclick = () => toggleCheck(i);
+    el.innerHTML = `
+      <div class="check-box ${checked ? 'checked' : ''}"></div>
+      <span class="check-label ${checked ? 'checked' : ''}">${item.label}</span>
+      <span class="check-badge ${item.required ? 'required' : 'optional'}">${item.required ? 'Required' : 'Optional'}</span>
+    `;
+    container.appendChild(el);
+  });
+
+  const pct = Math.round((checkedCount / DEFAULT_CHECKLIST.length) * 100);
+  document.getElementById('checklist-bar').style.width = pct + '%';
+}
+
+function toggleCheck(index) {
+  const state = loadCheckState();
+  state[index] = !state[index];
+  saveCheckState(state);
+  renderChecklist();
+}
+
+function resetChecklist() {
+  saveCheckState({});
+  renderChecklist();
+}
+
+// ──────────────────────────────────────────────
+// GOALS
+// ──────────────────────────────────────────────
+function loadGoals() {
+  try { return JSON.parse(localStorage.getItem('bolt_goals') || '[]'); } catch { return []; }
+}
+
+function saveGoals(goals) {
+  localStorage.setItem('bolt_goals', JSON.stringify(goals));
+}
+
+function renderGoals() {
+  const goals = loadGoals();
+  const container = document.getElementById('goals-list');
+  container.innerHTML = '';
+
+  if (goals.length === 0) {
+    container.innerHTML = '<p style="color:var(--muted);font-size:13px;">No goals yet. Add one below to start tracking.</p>';
+    return;
+  }
+
+  goals.forEach((goal, i) => {
+    const pct = Math.min(100, Math.round((goal.current / goal.target) * 100));
+    const div = document.createElement('div');
+    div.className = 'goal-item';
+    div.innerHTML = `
+      <div class="goal-header">
+        <span class="goal-title">${goal.title}</span>
+        <div class="goal-numbers">
+          <input
+            class="goal-current-input"
+            type="number"
+            value="${goal.current}"
+            onchange="updateGoalCurrent(${i}, this.value)"
+          />
+          <span class="goal-sep">/</span>
+          <span class="goal-target">${goal.target.toLocaleString()}</span>
+        </div>
+      </div>
+      <div class="goal-bar-wrap">
+        <div class="goal-bar" style="width:${pct}%"></div>
+      </div>
+      <div class="goal-pct">${pct}% complete</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function updateGoalCurrent(index, val) {
+  const goals = loadGoals();
+  goals[index].current = parseInt(val) || 0;
+  saveGoals(goals);
+  renderGoals();
+}
+
+function openGoalModal() {
+  document.getElementById('goal-modal').classList.add('open');
+  document.getElementById('goal-title-input').focus();
+}
+function closeGoalModal() {
+  document.getElementById('goal-modal').classList.remove('open');
+  document.getElementById('goal-title-input').value = '';
+  document.getElementById('goal-current-input').value = '';
+  document.getElementById('goal-target-input').value = '';
+}
+function saveGoal() {
+  const title = document.getElementById('goal-title-input').value.trim();
+  const current = parseInt(document.getElementById('goal-current-input').value) || 0;
+  const target = parseInt(document.getElementById('goal-target-input').value) || 100;
+  if (!title) return;
+  const goals = loadGoals();
+  goals.push({ title, current, target });
+  saveGoals(goals);
+  renderGoals();
+  closeGoalModal();
+}
+
+// ──────────────────────────────────────────────
+// AFFILIATES
+// ──────────────────────────────────────────────
+const DEFAULT_AFFILIATES = [
+  { name: 'Amazon Associates', detail: 'Streaming gear links — standard commission', status: 'active', emoji: '📦' },
+  { name: 'Gamer Supps', detail: 'Energy drinks — reach out via creator portal', status: 'prospect', emoji: '⚡' },
+];
+
+function loadAffiliates() {
+  try { return JSON.parse(localStorage.getItem('bolt_affiliates') || 'null') || DEFAULT_AFFILIATES; } catch { return DEFAULT_AFFILIATES; }
+}
+
+function saveAffiliates(affs) {
+  localStorage.setItem('bolt_affiliates', JSON.stringify(affs));
+}
+
+function renderAffiliates() {
+  const affs = loadAffiliates();
+  const container = document.getElementById('affiliates-list');
+  container.innerHTML = '';
+
+  affs.forEach(aff => {
+    const div = document.createElement('div');
+    div.className = 'affiliate-row';
+    div.innerHTML = `
+      <div class="affiliate-logo">${aff.emoji || '🤝'}</div>
+      <div class="affiliate-info">
+        <div class="affiliate-name">${aff.name}</div>
+        <div class="affiliate-detail">${aff.detail}</div>
+      </div>
+      <span class="affiliate-status ${aff.status}">${aff.status}</span>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function openAffiliateModal() {
+  document.getElementById('affiliate-modal').classList.add('open');
+  document.getElementById('aff-name-input').focus();
+}
+function closeAffiliateModal() {
+  document.getElementById('affiliate-modal').classList.remove('open');
+  document.getElementById('aff-name-input').value = '';
+  document.getElementById('aff-detail-input').value = '';
+}
+function saveAffiliate() {
+  const name = document.getElementById('aff-name-input').value.trim();
+  const detail = document.getElementById('aff-detail-input').value.trim();
+  const status = document.getElementById('aff-status-input').value;
+  if (!name) return;
+  const affs = loadAffiliates();
+  affs.push({ name, detail, status, emoji: '🤝' });
+  saveAffiliates(affs);
+  renderAffiliates();
+  closeAffiliateModal();
+}
+
+// ──────────────────────────────────────────────
+// CONTENT IDEAS
+// ──────────────────────────────────────────────
+const CONTENT_IDEAS = [
+  {
+    platform: '🎵',
+    title: '"First 10 minutes" challenge clip',
+    desc: 'Pull a wild or funny moment from your stream\'s opening segment. Hooks perform best under 8 seconds.',
+    tags: ['TikTok', 'Trending', 'Clip']
+  },
+  {
+    platform: '🎮',
+    title: 'Reaction highlight reel',
+    desc: 'Stack 3-5 genuine reaction clips into one short. Authentic emotions drive shares.',
+    tags: ['TikTok', 'Kick', 'Short-form']
+  },
+  {
+    platform: '📺',
+    title: 'What I\'m playing tonight + why',
+    desc: 'Quick 60-second "what we\'re doing today" video posted before going live. Drives live viewers.',
+    tags: ['TikTok', 'Pre-stream hype']
+  },
+  {
+    platform: '🔥',
+    title: 'Streamer vs. Chat challenge',
+    desc: 'Let chat set a challenge mid-stream. The outcome (success or fail) is the clip.',
+    tags: ['Interactive', 'Twitch', 'Kick']
+  },
+  {
+    platform: '⚡',
+    title: 'Setup tour short',
+    desc: 'People love gear content. 30-second walkthrough of your streaming setup performs well year-round.',
+    tags: ['Evergreen', 'YouTube Shorts', 'TikTok']
+  },
+];
+
+function renderContentIdeas() {
+  const container = document.getElementById('content-ideas');
+  container.innerHTML = CONTENT_IDEAS.map(idea => `
+    <div class="idea-card">
+      <div class="idea-platform">${idea.platform}</div>
+      <div class="idea-body">
+        <div class="idea-title">${idea.title}</div>
+        <div class="idea-desc">${idea.desc}</div>
+        <div class="idea-tags">${idea.tags.map(t => `<span class="idea-tag">${t}</span>`).join('')}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ──────────────────────────────────────────────
+// GREETING
+// ──────────────────────────────────────────────
+function setGreeting() {
+  const hour = new Date().getHours();
+  const timeGreet = hour < 12 ? "Morning" : hour < 17 ? "Afternoon" : "Evening";
+  const msgs = [
+    `${timeGreet}, Billy. Pre-show is ready. Knock out those checklist items and let's go live.`,
+    `${timeGreet}. Check your setup, update your goals, and let's make some clips worth posting.`,
+    `${timeGreet}. Bolt's online. Run the checklist, check your goals, and get that stream going.`,
+  ];
+  document.getElementById('bolt-greeting').textContent = msgs[Math.floor(Math.random() * msgs.length)];
+}
+
+// ──────────────────────────────────────────────
+// CLOSE MODALS ON OVERLAY CLICK
+// ──────────────────────────────────────────────
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) {
+      overlay.classList.remove('open');
+    }
+  });
+});
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+renderChecklist();
+renderGoals();
+renderAffiliates();
+renderContentIdeas();
+setGreeting();
+</script>
+</body>
+</html>
