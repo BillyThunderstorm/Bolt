@@ -32,7 +32,6 @@ load_dotenv()
 
 from modules.notifier import notify, notify_startup, notify_error
 from modules.Think_Learn_Decide import ThinkLearnDecideEngine
-from modules.Brain_Controller import BrainController
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 BRAIN_FILE  = "Bolt_brain.md"
@@ -93,11 +92,16 @@ def load_config() -> dict:
             "highlight_sensitivity": 0.7,
             "auto_rank": True,
             "auto_format_tiktok": True,
-            "auto_post_tiktok": False,
             "tiktok_style": "letterbox",
             "min_clip_duration": 15,
             "max_clip_duration": 60,
-            "min_post_score": 50,
+            "min_clip_score": 65,
+            "min_post_score": 65,
+            "quality_tiers": {
+                "discard_below": 60,
+                "queue_at": 80,
+                "use_ai_titles": False,
+            },
         }
 
 
@@ -146,8 +150,6 @@ def process_recording(
     style       = config.get("tiktok_style", "letterbox")
     min_score   = config.get("min_post_score", config.get("min_clip_score", 50))
 
-    brain = BrainController(config)
-
     # ── Step A: Detect highlights ─────────────────────────────────────────────
     notify(
         "Step 1/6 — Detecting highlights…",
@@ -174,7 +176,6 @@ def process_recording(
 
         for h in highlights:
             score = getattr(h, "score", 0)
-            brain.handle("highlight", score=score)
 
         # Voice alert is fine here — it's local and low-stakes
         try:

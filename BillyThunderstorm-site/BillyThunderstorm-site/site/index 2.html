@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- META SECTION: These tell browsers and search engines about your page -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Billy Thunderstorm - AI Content Creator & Bolt AI Program Developer">
+    <title>Billy Thunderstorm - AI Content Creation & Bolt AI</title>
+
+    <!-- STYLE SECTION: This is all the visual design (colors, fonts, spacing) -->
+    <style>
+        /* Reset default browser styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Global styles applied to the whole page */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+        }
+
+        /* Navigation bar at the top */
+        nav {
+            background-color: #1a1a1a;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: #00d4ff;
+        }
+
+        /* Main container - limits width for readability */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Hero section - the big intro at the top */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5rem 2rem;
+            text-align: center;
+            margin-top: 2rem;
+            border-radius: 10px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background-color: #00d4ff;
+            color: #1a1a1a;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn:hover {
+            background-color: #00b8d4;
+        }
+
+        /* Section headings */
+        h2 {
+            font-size: 2rem;
+            margin: 2rem 0 1rem 0;
+            color: #1a1a1a;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.5rem 0;
+            color: #667eea;
+        }
+
+        /* Cards for displaying projects/accomplishments */
+        .card {
+            background: white;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Grid for multiple cards side-by-side */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        footer a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Link to Bolt section */
+        .bolt-link {
+            background-color: #667eea;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            margin: 2rem 0;
+            border-radius: 5px;
+        }
+
+        .bolt-link a {
+            color: #00d4ff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVIGATION: Links to different sections of the page -->
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#bolt">Bolt AI</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- HERO SECTION: The first big impression -->
+    <section class="hero" id="home">
+        <h1>Billy Thunderstorm</h1>
+        <p>AI Content Creator | Bolt AI Program Developer | Learning & Building in Public</p>
+        <a href="#bolt" class="btn">Explore Bolt AI</a>
+    </section>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <div class="container">
+
+        <!-- ABOUT SECTION -->
+        <section id="about">
+            <h2>About Me</h2>
+            <div class="card">
+                <p>I'm a self-taught content creator and AI enthusiast building tools to help creators like me manage and produce better content. I believe in learning publicly, sharing the process, and building products that actually solve real problems.</p>
+                <p style="margin-top: 1rem;">My journey: Started with curiosity about AI and content creation. Now I'm combining both to create <strong>Bolt</strong>, a personal AI producer and manager for content creators.</p>
+            </div>
+        </section>
+
+        <!-- ACCOMPLISHMENTS/PROJECTS SECTION -->
+        <section id="projects">
+            <h2>What I'm Building</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Content Creation</h3>
+                    <p>Working on video content, scripts, and engaging stories. Learning the craft of storytelling and how to connect with audiences authentically.</p>
+                </div>
+                <div class="card">
+                    <h3>AI Integration</h3>
+                    <p>Experimenting with AI tools to enhance creative workflow. Building systems that don't replace creativity but amplify it.</p>
+                </div>
+                <div class="card">
+                    <h3>Learning in Public</h3>
+                    <p>Documenting my journey as I learn coding, scripting, and content creation. Mistakes and all.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- BOLT AI SECTION -->
+        <section id="bolt">
+            <h2>Bolt AI Program</h2>
+            <div class="card">
+                <p>Bolt is my personal AI producer and manager—a tool I'm building to help content creators like me:</p>
+                <ul style="margin: 1rem 0 0 2rem;">
+                    <li>Organize ideas and scripts</li>
+                    <li>Plan content calendars</li>
+                    <li>Generate insights from my audience</li>
+                    <li>Automate repetitive production tasks</li>
+                </ul>
+                <div class="bolt-link">
+                    <p>Access Bolt AI: <a href="/bolt">Visit Bolt Dashboard →</a></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CALL TO ACTION -->
+        <section id="contact" style="text-align: center; margin: 3rem 0;">
+            <h2>Let's Connect</h2>
+            <p>Interested in what I'm building? Want to sponsor or collaborate?</p>
+            <a href="mailto:billycarteriv@gmail.com" class="btn">Get in Touch</a>
+        </section>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2026 Billy Thunderstorm. Building Bolt AI in public.</p>
+        <p style="margin-top: 1rem; font-size: 0.9rem;">
+            <a href="https://billythunderstorm.us">billythunderstorm.us</a> |
+            <a href="https://billythunderstorm.us/bolt">Bolt AI</a>
+        </p>
+    </footer>
+</body>
+</html>

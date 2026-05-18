@@ -83,16 +83,47 @@ if [ ! -f "config.json" ]; then
     cat > config.json << 'CFGEOF'
 {
   "game": "Marvel Rivals",
+  "recordings_folder": "recordings",
+  "clips_folder": "clips",
+  "vertical_clips_folder": "vertical_clips",
   "auto_rank": true,
   "auto_format_tiktok": true,
   "highlight_sensitivity": 0.7,
   "use_obs_integration": true,
-  "peak_hour_windows": [
-    {"start": "07:00", "end": "09:00"},
-    {"start": "12:00", "end": "14:00"},
-    {"start": "19:00", "end": "22:00"}
-  ],
-  "hashtags": ["#gaming", "#clips", "#viral", "#trending"]
+  "obs_host": "localhost",
+  "obs_port": 4455,
+  "tiktok_style": "letterbox",
+  "min_clip_duration": 15,
+  "max_clip_duration": 60,
+  "min_clip_score": 65,
+  "min_post_score": 65,
+  "highlight": {
+    "energy_multiplier": 3.5,
+    "min_gap_seconds": 30,
+    "sensitivity": 0.55,
+    "min_confidence": 0.15,
+    "pad_before": 8,
+    "pad_after": 12
+  },
+  "quality_tiers": {
+    "discard_below": 60,
+    "queue_at": 80,
+    "use_ai_titles": false
+  },
+  "peak_notifications": {
+    "enabled": true,
+    "windows": [
+      {"label": "Morning", "start_hour": 7, "end_hour": 9},
+      {"label": "Lunch", "start_hour": 12, "end_hour": 14},
+      {"label": "Prime Time", "start_hour": 19, "end_hour": 22}
+    ],
+    "check_interval_minutes": 15,
+    "discord_enabled": true
+  },
+  "use_voice_checklist": false,
+  "whisper_model": "base",
+  "notes": "TikTok auto-posting is off. Bolt formats clips, saves captions, and pings you at peak hours so you can post manually from the queue.",
+  "hashtags": ["gaming", "clips", "viral", "trending"]
 }
 CFGEOF
     echo "  ✓ config.json created"
