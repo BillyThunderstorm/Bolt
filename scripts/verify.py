@@ -32,7 +32,7 @@ def check_files():
         "config.json",
         "requirements.txt",
         "README.md",
-        "bolt_brain.md",
+        "Bolt_brain.md",
         "docs/guides/SETUP_GUIDE.md",
         "docs/PROJECT_STATUS.md",
     ]

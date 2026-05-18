@@ -10,50 +10,35 @@ Use this page as the central map for Bolt.
 - `config.json` - runtime configuration
 - `requirements.txt` - Python dependency list
 
-## Core Intelligence
+## Canonical Runtime Docs
 
-- `modules/Think_Learn_Decide.py` - ingestion, reasoning, decisions, feedback loop, audit
-- `modules/Brain_Controller.py` - alternate decision controller scaffold
-- `docs/think_learn_decide.md` - canonical schema, safety, and learning store docs
-- `tests/test_think_learn_decide.py` - regression tests for intelligence workflows
+- `docs/PROJECT_STATUS.md` - current build status and next steps
+- `docs/think_learn_decide.md` - canonical decision and memory schema
+- `docs/Bolt_Checkup.html` - local dashboard source written from live stats
+- `data/Bolt_data.js` - generated dashboard payload written at startup
 
-## Setup and Status Docs
+## Setup and Integration
 
-- `docs/guides/SETUP_GUIDE.md` - setup and prerequisites
+- `docs/guides/SETUP_GUIDE.md` - setup, prerequisites, and troubleshooting
 - `docs/guides/STREAM_DECK_SETUP.md` - Stream Deck setup notes
 - `docs/guides/TWITCH_INTEGRATION_GUIDE.md` - Twitch integration pointer
 - `docs/guides/TWITCH_INTEGRATION_GUIDE_docs.md` - legacy Twitch integration writeup
-- `docs/PROJECT_STATUS.md` - current build status and next steps
-- `docs/Bolt_Checkup.html` - local runtime checkup dashboard
-- `docs/site/Bolt_Checkup.html` - site-hosted checkup page
-
-## Integrations and Briefings
-
-- `scripts/get_twitch_token.py` - canonical Twitch bot token setup
-- `scripts/log_clip_performance.py` - feed post metrics back into Bolt memory
-- `docs/briefings/daily-briefing-2026-04-16.md` - archived daily briefing note
-- `docs/briefings/bolt_briefing_2026-04-14.md` - archived Bolt briefing note
-
-## Operational Scripts
-
 - `scripts/setup.sh` - first-time setup and dependency install
-- `scripts/setup_icloud.sh` - legacy iCloud mover for the shared-folder flow
-- `scripts/Filter_Backlog.py` - filter low-scoring clips from backlog
-- `scripts/process_recordings.py` - batch recording processing helper
-- `scripts/build_env.py` - environment setup utility
 - `scripts/verify.py` - project verification checks
-- `scripts/autostart.py` - autostart utility
-- `scripts/legacy/README.md` - legacy script notes
+- `scripts/log_clip_performance.py` - feed post metrics back into Bolt memory
 
-## Key Runtime Modules
+## Runtime Modules
 
+- `modules/Think_Learn_Decide.py` - current intake, reasoning, decisions, feedback loop
+- `modules/Brain_Controller.py` - legacy compatibility controller that mirrors the live tiers
 - `modules/Watcher.py` - recording folder monitoring
 - `modules/Highlight_Detector.py` - highlight detection
 - `modules/Clip_Generator.py` - clip generation
+- `modules/Clip_Deduplicator.py` - duplicate protection
 - `modules/Subtitle_Generator.py` - subtitle generation
-- `modules/Title_Generator.py` - title generation
-- `modules/AI_Title_Generator.py` - AI title generation
-- `modules/Clip_Ranker.py` - ranking and scoring
+- `modules/Title_Generator.py` - local title generation
+- `modules/AI_Title_Generator.py` - older AI title path
+- `modules/Clip_Ranker.py` - ranking and tiering
 - `modules/Clip_Factory.py` - vertical format conversion
 - `modules/Post_Queue.py` - post queue integration
 - `modules/Peak_Hour_Notifier.py` - timing alerts
@@ -61,7 +46,14 @@ Use this page as the central map for Bolt.
 - `modules/Bolt_Voice.py` - spoken alerts and TTS
 - `modules/Bolt_Memory.py` - long-term memory
 - `modules/Bolt_Search.py` - memory search helper
-- `modules/Brain_Controller.py` - event decision controller scaffold
+
+## Status Surfaces
+
+- `docs/Bolt_Checkup.html` - canonical local dashboard
+- `docs/site/Bolt_Checkup.html` - published mirror of the dashboard
+- `docs/site/privacy-policy.html` - public privacy policy
+- `docs/site/terms.html` - public terms page
+- `docs/briefings/` - archived briefing notes
 
 ## Data and Logs
 
@@ -73,4 +65,9 @@ Use this page as the central map for Bolt.
 
 - `BillyThunderstorm-site/index.html` - public main site
 - `BillyThunderstorm-site/bolt/index.html` - Bolt-specific site page
-- `docs/site/` - generated static copies and checkup pages
+- `BillyThunderstorm-site/BillyThunderstorm-site/deploy/index.html` - legacy deploy mirror
+
+## Legacy or Archived
+
+- `scripts/legacy/README.md` - old script notes
+- `docs/guides/TWITCH_INTEGRATION_GUIDE_docs.md` - older writeup kept for reference

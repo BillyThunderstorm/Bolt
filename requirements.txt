@@ -1,7 +1,7 @@
 # Core pipeline
 librosa
 moviepy
-faster-whisper
+openai-whisper
 numpy
 opencv-python
 
@@ -9,13 +9,26 @@ opencv-python
 openai
 anthropic
 twitchio<3.0.0
+langchain
+langchain-huggingface
+langchain-community
+langchain-text-splitters
+chromadb
+sentence-transformers
 
 # Runtime integrations
 python-dotenv
 requests
+python-socketio[client]
 websocket-client
 obs-websocket-py
 flask
+SpeechRecognition
+
+# Google / calendar utilities
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
 
 # Voice and optional speech upgrades
 edge-tts

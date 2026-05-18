@@ -30,6 +30,7 @@ archive/
 
 # ── Python virtual environment ────────────────────────────────────────────────
 .venv/
+.venv*/
 .venv-1/
 venv/
 env/
