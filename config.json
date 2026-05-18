@@ -3,16 +3,22 @@
   "recordings_folder": "recordings",
   "clips_folder": "clips",
   "vertical_clips_folder": "vertical_clips",
+  "use_obs_integration": true,
+  "obs_host": "localhost",
+  "obs_port": 4455,
+  "obs_path": "",
   "tiktok_style": "letterbox",
   "auto_format_tiktok": true,
   "max_clips_per_session": 5,
+  "min_clip_duration": 15,
+  "max_clip_duration": 60,
   "min_clip_score": 65,
   "highlight_sensitivity": 0.35,
   "quality_tiers": {
     "discard_below": 60,
     "queue_at": 80,
     "use_ai_titles": false,
-    "_comment": "score < discard_below = discard; score >= queue_at = auto-queue; in between = mid (kept on disk, not auto-notified)"
+    "_comment": "score < discard_below = discard; discard_below <= score < min_post_score = mid; score >= min_post_score and < queue_at = queue without Discord ping; score >= queue_at = auto-queue + Discord alert"
   },
   "highlight": {
     "energy_multiplier": 3.5,
@@ -54,7 +60,7 @@
     "check_interval_minutes": 15,
     "discord_enabled": true
   },
-  "notes": "TikTok auto-posting removed. Bolt notifies you at peak hours \u2014 you post manually. API keys live in .env.",
+  "notes": "TikTok auto-posting is off. Bolt formats clips, saves captions, and pings you at peak hours so you can post manually from the queue.",
   "auto_rank": true,
   "min_post_score": 65
 }
