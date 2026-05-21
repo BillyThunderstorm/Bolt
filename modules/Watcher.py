@@ -23,9 +23,12 @@ import os
 import json
 import time
 from pathlib import Path
-from dotenv import load_dotenv
 
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 RECORDINGS_FOLDER = os.getenv("RECORDINGS_FOLDER", "recordings")
 WATCH_INTERVAL    = float(os.getenv("WATCH_INTERVAL", "5"))

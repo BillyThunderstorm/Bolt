@@ -25,9 +25,11 @@ import os
 import sys
 import json
 from pathlib import Path
-from dotenv import load_dotenv
-
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 # ── Find recordings folder ─────────────────────────────────────────────────────
 
@@ -162,8 +164,6 @@ def main():
 
     print()
 
-    brain_controller = BrainController(config, creator_brain)
-
     # ── Process each recording ────────────────────────────────────────────────
     from bot import process_recording
 
@@ -193,10 +193,10 @@ def main():
         if queue_file.exists():
             with open(queue_file) as f:
                 queue = json.load(f)
-            items = queue if isinstance(queue, list) else queue.get("queue", [])
-            unposted = [x for x in items if not x.get("posted", False)]
+            items = queue if isinstance(queue, list) else queue.get("clips", queue.get("queue", []))
+            unposted = [x for x in items if x.get("status", "ready") == "ready" and not x.get("posted", False)]
             if unposted:
-                print(f"  🦊  {len(unposted)} clip(s) ready to post in Discord queue")
+                print(f"  🦊  {len(unposted)} ready queue row(s)")
                 print("     Run:  python3 -m modules.Peak_Hour_Notifier --summary")
                 print()
     except Exception:
