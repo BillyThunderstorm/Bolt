@@ -162,7 +162,11 @@ if __name__ == "__main__":
 
     if "--summary" in sys.argv:
         s = get_summary()
-        print(f"\n  📋  Queue: {s['ready']} ready  |  {s['posted']} posted  |  {s['total']} total\n")
+        print(
+            f"\n  📋  Queue: {s['ready']} alertable  |  "
+            f"{s.get('ready_total', s['ready'])} ready rows  |  "
+            f"{s['posted']} posted  |  {s['total']} total\n"
+        )
         sys.exit(0)
 
     tz          = ZoneInfo(POSTING_TIMEZONE)
@@ -170,7 +174,7 @@ if __name__ == "__main__":
     print(f"\n  🕐  {datetime.now(tz).strftime('%I:%M %p')} {POSTING_TIMEZONE}")
     print(f"  {'🔥 Peak time' if is_peak else '💤 Off-peak'}  —  {info}")
     s = get_summary()
-    print(f"  📋  {s['ready']} clip(s) ready to post\n")
+    print(f"  📋  {s['ready']} alertable clip(s) / {s.get('ready_total', s['ready'])} ready row(s)\n")
 
     print("Starting peak-hour checker (Ctrl+C to stop)…\n")
     try:
