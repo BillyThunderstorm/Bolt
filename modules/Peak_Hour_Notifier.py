@@ -59,6 +59,7 @@ except ImportError:
 POSTING_TIMEZONE = os.getenv("POSTING_TIMEZONE", "America/New_York")
 DISCORD_WEBHOOK  = os.getenv("DISCORD_WEBHOOK_URL", "")
 READY_FILE       = Path("data/ready_to_post.json")
+CONFIG_FILE      = Path("config.json")
 
 # Peak posting windows as (start_hour, end_hour) in 24h format
 PEAK_WINDOWS = [
@@ -87,6 +88,53 @@ def _save_ready(data: dict):
     READY_FILE.parent.mkdir(exist_ok=True)
     with open(READY_FILE, "w") as f:
         json.dump(data, f, indent=2, default=str)
+
+
+def _load_config() -> dict:
+    """Load local config for queue eligibility checks."""
+    if not CONFIG_FILE.exists():
+        return {}
+    try:
+        with open(CONFIG_FILE) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _score_floor() -> float:
+    """Current minimum score required before a clip should wake Billy up."""
+    config = _load_config()
+    return float(config.get("min_post_score", config.get("min_clip_score", 0)))
+
+
+def _clip_file_exists(clip: dict) -> bool:
+    """Return True when the queued media file exists on this Mac."""
+    clip_path = clip.get("clip_path", "")
+    return bool(clip_path) and Path(clip_path).exists()
+
+
+def _score_clears_floor(clip: dict) -> bool:
+    """Return True when a queued clip clears the current posting score floor."""
+    try:
+        return float(clip.get("score", 0)) >= _score_floor()
+    except Exception:
+        return False
+
+
+def _is_alertable_clip(clip: dict) -> bool:
+    """
+    Return True when a queue row is safe to include in peak-hour alerts.
+
+    Old queue rows can survive config changes or iCloud sync without their media
+    files. Keep those rows for history, but do not alert Billy to post clips that
+    are missing locally or below the current score floor.
+    """
+    return (
+        clip.get("status") == "ready"
+        and clip.get("tier", "queue") == "queue"
+        and _clip_file_exists(clip)
+        and _score_clears_floor(clip)
+    )
 
 
 def _is_peak_now() -> tuple:
@@ -228,17 +276,30 @@ def alert_peak_window():
     # --summary for manual review, but never trigger a Discord ping.
     # Backward compat: clips queued before tier existed have no 'tier' key
     # — treat those as 'queue' so old data still works.
-    ready = [
-        c for c in data["clips"]
-        if c["status"] == "ready" and c.get("tier", "queue") == "queue"
-    ]
+    ready = [c for c in data["clips"] if _is_alertable_clip(c)]
     mid_count = sum(
         1 for c in data["clips"]
         if c["status"] == "ready" and c.get("tier") == "mid"
     )
+    missing_count = sum(
+        1 for c in data["clips"]
+        if c.get("status") == "ready" and not _clip_file_exists(c)
+    )
+    low_score_count = sum(
+        1 for c in data["clips"]
+        if c.get("status") == "ready" and _clip_file_exists(c) and not _score_clears_floor(c)
+    )
 
     if not ready:
-        if mid_count:
+        if missing_count or low_score_count:
+            notify(
+                "No alertable clips ready",
+                level="info",
+                reason=f"{missing_count} queued clip(s) are missing files on this Mac; "
+                       f"{low_score_count} existing clip(s) are below the current score floor. "
+                       "Queue history was left untouched."
+            )
+        elif mid_count:
             notify(
                 f"No QUEUE-tier clips ready — but {mid_count} MID-tier clip(s) sitting on disk",
                 level="info",
@@ -330,13 +391,40 @@ def mark_posted(clip_id: str = None):
     return count
 
 
+def reset_queue() -> Path:
+    """
+    Archive the current ready-to-post queue and start fresh.
+
+    This only touches data/ready_to_post.json. It does not delete clips,
+    vertical exports, captions, logs, or memory.
+    """
+    READY_FILE.parent.mkdir(exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    archive_path = READY_FILE.with_name(f"ready_to_post.archive-{timestamp}.json")
+
+    if READY_FILE.exists():
+        archive_path.write_text(READY_FILE.read_text(encoding="utf-8"), encoding="utf-8")
+
+    _save_ready({"clips": []})
+    notify(
+        "Post queue reset",
+        level="success",
+        reason=f"Archived old queue to {archive_path}. Clip files were not touched."
+    )
+    return archive_path
+
+
 def queue_summary() -> dict:
     """Return counts for each status in the ready-to-post list."""
     data = _load_ready()
     clips = data["clips"]
+    ready = [c for c in clips if c.get("status") == "ready"]
     return {
-        "ready":  sum(1 for c in clips if c["status"] == "ready"),
-        "posted": sum(1 for c in clips if c["status"] == "posted"),
+        "ready":  sum(1 for c in ready if _is_alertable_clip(c)),
+        "ready_total": len(ready),
+        "missing": sum(1 for c in ready if not _clip_file_exists(c)),
+        "below_floor": sum(1 for c in ready if _clip_file_exists(c) and not _score_clears_floor(c)),
+        "posted": sum(1 for c in clips if c.get("status") == "posted"),
         "total":  len(clips),
     }
 
@@ -349,14 +437,21 @@ if __name__ == "__main__":
 
     if "--mark-posted" in args:
         mark_posted()
+    elif "--reset-queue" in args:
+        reset_queue()
     elif "--summary" in args:
         s = queue_summary()
-        print(f"\n  📋  Post Queue: {s['ready']} ready  |  {s['posted']} posted  |  {s['total']} total\n")
+        print(
+            f"\n  📋  Post Queue: {s['ready']} alertable  |  "
+            f"{s['ready_total']} ready rows  |  {s['posted']} posted  |  {s['total']} total\n"
+        )
+        if s["missing"] or s["below_floor"]:
+            print(f"      ignored: {s['missing']} missing file(s), {s['below_floor']} below score floor\n")
     else:
         # Default: check peak hours and alert if applicable
         is_peak, info = _is_peak_now()
         print(f"\n  🕐  Current time zone: {POSTING_TIMEZONE}")
         print(f"  {'🔥 PEAK TIME' if is_peak else '💤 Off-peak'}  —  {info}")
         s = queue_summary()
-        print(f"  📋  Post Queue: {s['ready']} ready to post\n")
+        print(f"  📋  Post Queue: {s['ready']} alertable / {s['ready_total']} ready row(s)\n")
         alert_peak_window()

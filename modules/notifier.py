@@ -10,9 +10,12 @@ import json
 import urllib.request
 from datetime import datetime
 from typing import Any, Callable, Optional
-from dotenv import load_dotenv
 
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK_URL", "")
 
