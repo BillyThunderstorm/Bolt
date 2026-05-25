@@ -13,9 +13,11 @@ from typing import Any, Callable, Optional
 
 try:
     from dotenv import load_dotenv
-    load_dotenv()
 except ImportError:
-    pass
+    def load_dotenv(*args: Any, **kwargs: Any) -> bool:
+        return False
+
+load_dotenv()
 
 DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK_URL", "")
 

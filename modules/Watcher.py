@@ -26,9 +26,11 @@ from pathlib import Path
 
 try:
     from dotenv import load_dotenv
-    load_dotenv()
 except ImportError:
-    pass
+    def load_dotenv(*args, **kwargs):
+        return False
+
+load_dotenv()
 
 RECORDINGS_FOLDER = os.getenv("RECORDINGS_FOLDER", "recordings")
 WATCH_INTERVAL    = float(os.getenv("WATCH_INTERVAL", "5"))
