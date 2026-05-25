@@ -42,6 +42,27 @@ class ThinkLearnDecideTests(unittest.TestCase):
         self.assertGreaterEqual(count, 2)
         self.assertTrue(tld.UNIFIED_MEMORY_FILE.exists())
 
+    def test_think_retrieves_relevant_memory_when_available(self):
+        with patch("modules.Think_Learn_Decide.refresh_memory_index") as refresh, \
+             patch(
+                 "modules.Think_Learn_Decide.retrieve_memory",
+                 return_value=[
+                     {
+                         "title": "Decision audit: think",
+                         "source": "logs/decision_audit.log",
+                         "kind": "decision_audit",
+                         "score": 0.5,
+                         "summary": "Past Marvel Rivals clip was queued for manual review.",
+                     }
+                 ],
+             ):
+            thought = self.engine.think({"recording": "clip.mp4", "game": "Marvel Rivals"})
+
+        refresh.assert_called_once()
+        self.assertEqual(thought["retrieved_memory_count"], 1)
+        self.assertIn("Marvel Rivals", thought["memory_query"])
+        self.assertEqual(thought["retrieved_memory"][0]["kind"], "decision_audit")
+
     def test_proposal_ranking_and_policy(self):
         proposals = self.engine.propose_actions(
             [
@@ -52,6 +73,48 @@ class ThinkLearnDecideTests(unittest.TestCase):
         self.assertEqual(proposals[0].action, "delete_clip")
         self.assertFalse(self.engine.enforce_action_policy(proposals[0]))
         self.assertTrue(any(self.engine.enforce_action_policy(p) for p in proposals))
+
+    def test_memory_context_adjusts_proposal_confidence(self):
+        base = self.engine.propose_actions(
+            [{"action": "queue_clip", "score": 70, "clip_path": "plain.mp4"}]
+        )[0]
+        boosted = self.engine.propose_actions(
+            [
+                {
+                    "action": "queue_clip",
+                    "score": 70,
+                    "clip_path": "good.mp4",
+                    "memory_context": [
+                        {
+                            "title": "Decision audit: think",
+                            "score": 0.8,
+                            "summary": "Similar clip was queued and approved for manual review.",
+                        }
+                    ],
+                }
+            ]
+        )[0]
+        reduced = self.engine.propose_actions(
+            [
+                {
+                    "action": "queue_clip",
+                    "score": 70,
+                    "clip_path": "weak.mp4",
+                    "memory_context": [
+                        {
+                            "title": "Decision audit: blocked",
+                            "score": 0.8,
+                            "summary": "Similar clip was rejected, skipped, and below score floor.",
+                        }
+                    ],
+                }
+            ]
+        )[0]
+
+        self.assertGreater(boosted.confidence, base.confidence)
+        self.assertLess(reduced.confidence, base.confidence)
+        self.assertIn("memory boosted confidence", boosted.reason)
+        self.assertIn("memory reduced confidence", reduced.reason)
 
     def test_learning_updates_model(self):
         self.engine.learn_from_feedback("queue_clip", accepted=False, feedback_text="bad fit")

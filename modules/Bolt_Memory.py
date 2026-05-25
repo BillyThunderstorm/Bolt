@@ -60,6 +60,18 @@ GLOSSARY     = MEMORY_ROOT / "glossary.md"
 PEOPLE_DIR   = MEMORY_ROOT / "people"
 PROJECTS_DIR = MEMORY_ROOT / "projects"
 CONTEXT_DIR  = MEMORY_ROOT / "context"
+CONTENT_DIR  = MEMORY_ROOT / "content"
+
+try:
+    from modules.Memory_Index import (
+        format_retrieved_context,
+        refresh_memory_index,
+        retrieve_memory,
+    )
+except ImportError:
+    refresh_memory_index = None
+    retrieve_memory = None
+    format_retrieved_context = None
 
 
 # ── Load memory ────────────────────────────────────────────────────────────────
@@ -126,6 +138,11 @@ def load_all_memory() -> str:
     if context:
         sections.append(f"## Context\n{context}")
 
+    # Content creation memory — reviews, ideas, scripts, posting lessons
+    content = _read_folder(CONTENT_DIR)
+    if content:
+        sections.append(f"## Content Memory\n{content}")
+
     if not sections:
         return "(no memory files found — memory/ folder may be empty)"
 
@@ -134,7 +151,21 @@ def load_all_memory() -> str:
 
 # ── Recall — ask Claude something using memory as context ─────────────────────
 
-def recall(question: str, quiet: bool = False) -> str:
+def retrieve_context(question: str, limit: int = 5) -> str:
+    """
+    Retrieve the most relevant local memory snippets for a question.
+
+    This uses data/memory_index.json when it exists, and creates it on demand
+    when possible. It is deliberately local-only so Bolt can remember past
+    clips and decisions without needing a cloud vector database first.
+    """
+    if retrieve_memory is None or format_retrieved_context is None:
+        return "(memory retrieval index is not available)"
+    hits = retrieve_memory(question, limit=limit)
+    return format_retrieved_context(hits)
+
+
+def recall(question: str, quiet: bool = False, use_retrieval: bool = True) -> str:
     """
     Ask Bolt a question. It will answer using everything in memory/.
 
@@ -158,6 +189,7 @@ def recall(question: str, quiet: bool = False) -> str:
         return "ANTHROPIC_API_KEY not set in .env"
 
     memory_context = load_all_memory()
+    retrieved_context = retrieve_context(question) if use_retrieval else "(retrieval disabled)"
 
     client = anthropic.Anthropic(api_key=api_key)
 
@@ -169,7 +201,10 @@ Answer the question concisely and accurately based on what's in memory.
 If you don't know something, say so — don't make things up.
 
 MEMORY:
-{memory_context}"""
+{memory_context}
+
+RELEVANT RETRIEVED MEMORY:
+{retrieved_context}"""
 
     try:
         response = client.messages.create(
@@ -273,6 +308,23 @@ if __name__ == "__main__":
         print(load_all_memory())
         sys.exit(0)
 
+    if "--refresh-index" in sys.argv:
+        if refresh_memory_index is None:
+            print("  Memory index module is not available")
+            sys.exit(1)
+        payload = refresh_memory_index()
+        print(f"  Indexed {payload['entry_count']} memory entries")
+        sys.exit(0)
+
+    if "--search" in sys.argv:
+        idx = sys.argv.index("--search")
+        query = " ".join(sys.argv[idx + 1:]).strip()
+        if not query:
+            print("  Usage: python -m modules.Bolt_Memory --search 'your query'")
+            sys.exit(1)
+        print(retrieve_context(query))
+        sys.exit(0)
+
     if "--remember" in sys.argv:
         idx = sys.argv.index("--remember")
         if idx + 1 < len(sys.argv):
@@ -292,5 +344,7 @@ if __name__ == "__main__":
         print("  Usage:")
         print("    python -m modules.Bolt_Memory 'What game is Billy playing?'")
         print("    python -m modules.Bolt_Memory --load")
+        print("    python -m modules.Bolt_Memory --refresh-index")
+        print("    python -m modules.Bolt_Memory --search 'best Marvel Rivals clips'")
         print("    python -m modules.Bolt_Memory --remember 'Phase 3 is complete'")
     print()

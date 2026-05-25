@@ -25,11 +25,19 @@ import os
 import sys
 import json
 from pathlib import Path
+
+# Make project root importable when this script is run directly
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
     pass
+
+from modules.Think_Learn_Decide import BrainController
 
 # ── Find recordings folder ─────────────────────────────────────────────────────
 
@@ -164,6 +172,8 @@ def main():
 
     print()
 
+    brain_controller = BrainController(config, brain)
+
     # ── Process each recording ────────────────────────────────────────────────
     from bot import process_recording
 
@@ -172,7 +182,7 @@ def main():
         print()
 
         try:
-            process_recording(str(recording), config, brain)
+            process_recording(str(recording), config, brain, intelligence=brain_controller)
         except KeyboardInterrupt:
             print("\n  Stopped by user. Partial results may have been saved.")
             break
