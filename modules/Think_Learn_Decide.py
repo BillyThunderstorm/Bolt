@@ -27,6 +27,12 @@ from typing import Any, Dict, Iterable, List, Optional
 
 from modules.notifier import notify
 
+try:
+    from modules.Memory_Index import refresh_memory_index, retrieve_memory
+except ImportError:
+    refresh_memory_index = None
+    retrieve_memory = None
+
 PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 LOGS_DIR = PROJECT_ROOT / "logs"
@@ -118,6 +124,7 @@ class ThinkLearnDecideEngine:
             ("memory_people", MEMORY_DIR / "people", "markdown_dir"),
             ("memory_projects", MEMORY_DIR / "projects", "markdown_dir"),
             ("memory_context", MEMORY_DIR / "context", "markdown_dir"),
+            ("memory_content", MEMORY_DIR / "content", "markdown_dir"),
             ("memory_glossary", MEMORY_DIR / "glossary.md", "markdown"),
             ("ready_to_post", DATA_DIR / "ready_to_post.json", "json"),
             ("rankings", DATA_DIR / "rankings.json", "json"),
@@ -187,8 +194,23 @@ class ThinkLearnDecideEngine:
         )
 
     def think(self, current_context: Dict[str, Any]) -> Dict[str, Any]:
+        recording = current_context.get("recording", "session")
+        game = current_context.get("game", "Gaming")
+        memory_query = self._memory_query_for_context(current_context)
+        retrieved = self._retrieve_relevant_memory(memory_query)
+        memory_summaries = [
+            {
+                "title": item.get("title", "Memory"),
+                "source": item.get("source", ""),
+                "kind": item.get("kind", ""),
+                "score": item.get("score", 0),
+                "summary": item.get("summary", ""),
+            }
+            for item in retrieved
+        ]
+
         return {
-            "situation": f"Bolt processing {current_context.get('recording', 'session')} for {current_context.get('game', 'Gaming')}",
+            "situation": f"Bolt processing {recording} for {game}",
             "options": [
                 "Queue clips above score floor",
                 "Skip low-scoring clips",
@@ -200,7 +222,59 @@ class ThinkLearnDecideEngine:
             ],
             "recommended_next_step": "Format approved clips to vertical and save them to the post queue.",
             "memory_signals_used": len(self._load_recent_memory(50)),
+            "memory_query": memory_query,
+            "retrieved_memory_count": len(memory_summaries),
+            "retrieved_memory": memory_summaries,
         }
+
+    def _memory_query_for_context(self, current_context: Dict[str, Any]) -> str:
+        parts = [
+            str(current_context.get("game", "")),
+            str(current_context.get("recording", "")),
+            str(current_context.get("clip_path", "")),
+            str(current_context.get("title", "")),
+            str(current_context.get("intent", "")),
+            "clips decisions queue score creator voice",
+        ]
+        return " ".join(part for part in parts if part).strip()
+
+    def _retrieve_relevant_memory(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
+        if retrieve_memory is None or not query:
+            return []
+        try:
+            self._refresh_memory_index_if_enabled()
+            return retrieve_memory(query, limit=limit)
+        except Exception as exc:
+            self.record_event(
+                "memory_retrieval",
+                "decision_context",
+                "retrieve_memory",
+                "failed",
+                0.2,
+                f"Memory retrieval failed: {exc}",
+                None,
+                {"query": query},
+            )
+            return []
+
+    def _refresh_memory_index_if_enabled(self) -> None:
+        if refresh_memory_index is None:
+            return
+        if self.config.get("memory_auto_refresh", True) is False:
+            return
+        try:
+            refresh_memory_index()
+        except Exception as exc:
+            self.record_event(
+                "memory_retrieval",
+                "decision_context",
+                "refresh_memory_index",
+                "failed",
+                0.2,
+                f"Memory index refresh failed: {exc}",
+                None,
+                {},
+            )
 
     def _load_recent_memory(self, limit: int) -> List[Dict[str, Any]]:
         if not UNIFIED_MEMORY_FILE.exists():
@@ -218,20 +292,63 @@ class ThinkLearnDecideEngine:
         for idx, candidate in enumerate(candidates, start=1):
             action = candidate.get("action", "queue_clip")
             score = float(candidate.get("score", 0))
-            confidence = max(0.0, min(0.99, (score / 100.0) * 0.6 + 0.35))
+            memory_adjustment, memory_reason = self._memory_adjustment(candidate)
+            confidence = max(0.0, min(0.99, (score / 100.0) * 0.6 + 0.35 + memory_adjustment))
             risk = "high" if action in {"delete_clip", "publish_now"} else "low"
+            reason = f"Local action proposal from clip score={score:.1f}"
+            if memory_reason:
+                reason += f"; {memory_reason}"
             proposed.append(
                 ProposedAction(
                     action_id=f"act_{idx}_{int(score)}",
                     action=action,
                     confidence=confidence,
                     risk=risk,
-                    reason=f"Local action proposal from clip score={score:.1f}",
+                    reason=reason,
                     payload=candidate,
                 )
             )
         proposed.sort(key=lambda p: p.confidence, reverse=True)
         return proposed
+
+    def _memory_adjustment(self, candidate: Dict[str, Any]) -> tuple[float, str]:
+        memory_items = candidate.get("memory_context") or candidate.get("retrieved_memory") or []
+        if not isinstance(memory_items, list) or not memory_items:
+            return 0.0, ""
+
+        positive_terms = {
+            "queue", "queued", "approved", "success", "successful", "ready",
+            "manual review", "format approved", "peak hour",
+        }
+        negative_terms = {
+            "reject", "rejected", "blocked", "failed", "discard", "below",
+            "none approved", "skip", "skipped",
+        }
+
+        adjustment = 0.0
+        strongest_title = ""
+        strongest_score = 0.0
+        for item in memory_items[:5]:
+            if not isinstance(item, dict):
+                continue
+            summary = str(item.get("summary") or item.get("text") or "").lower()
+            title = str(item.get("title") or "memory")
+            match_score = float(item.get("score") or 0.0)
+            if match_score > strongest_score:
+                strongest_score = match_score
+                strongest_title = title
+            if any(term in summary for term in positive_terms):
+                adjustment += min(0.04, match_score * 0.04)
+            if any(term in summary for term in negative_terms):
+                adjustment -= min(0.05, match_score * 0.05)
+
+        adjustment = max(-0.10, min(0.08, adjustment))
+        if abs(adjustment) < 0.005:
+            return 0.0, f"memory checked, no confidence change from {len(memory_items)} match(es)"
+
+        direction = "boosted" if adjustment > 0 else "reduced"
+        title_part = f"; strongest match: {strongest_title}" if strongest_title else ""
+        return adjustment, f"memory {direction} confidence by {abs(adjustment):.2f} from {len(memory_items)} match(es){title_part}"
 
     def confirm_action(self, proposal: ProposedAction) -> bool:
         """
@@ -336,6 +453,21 @@ class ThinkLearnDecideEngine:
 
     def audit(self, phase: str, payload: Dict[str, Any]) -> None:
         _append_jsonl(AUDIT_LOG_FILE, {"timestamp": _now_iso(), "phase": phase, "payload": payload})
+
+
+
+class BrainController(ThinkLearnDecideEngine):
+    """
+    Backward-compatible name for Bolt's merged brain.
+
+    Old files may still call BrainController(config, creator_brain).
+    The new engine is ThinkLearnDecideEngine(config), so this wrapper keeps
+    older calls working while the project transitions.
+    """
+
+    def __init__(self, config: Dict[str, Any], creator_brain: str = ""):
+        super().__init__(config)
+        self.creator_brain = creator_brain or ""
 
 
 def sys_stdin_interactive() -> bool:

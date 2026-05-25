@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marvel Rivals Counter</title>
+<style>
+  :root {
+    --kills: #f04d3d;
+    --kills-soft: rgba(240, 77, 61, 0.28);
+    --wins: #f2b72d;
+    --wins-soft: rgba(242, 183, 45, 0.28);
+    --panel: rgba(8, 9, 13, 0.84);
+    --text: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html,
+  body {
+    width: fit-content;
+    min-width: 1px;
+    min-height: 1px;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  body {
+    font-family: "Arial Black", Impact, Arial, sans-serif;
+    display: flex;
+    gap: 16px;
+    padding: 14px;
+    color: var(--text);
+  }
+
+  .card {
+    position: relative;
+    min-width: 138px;
+    padding: 14px 22px 10px;
+    overflow: hidden;
+    text-align: center;
+    border-radius: 12px;
+    background: var(--panel);
+    backdrop-filter: blur(6px);
+    transform: translateZ(0);
+  }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background:
+      radial-gradient(circle at 50% 0%, var(--flash), transparent 62%),
+      linear-gradient(110deg, transparent 18%, rgba(255,255,255,0.22), transparent 42%);
+    transform: translateX(-110%);
+  }
+
+  .card.kills {
+    --flash: var(--kills-soft);
+    border: 2px solid var(--kills);
+    box-shadow: 0 0 18px rgba(240, 77, 61, 0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  .card.wins {
+    --flash: var(--wins-soft);
+    border: 2px solid var(--wins);
+    box-shadow: 0 0 18px rgba(242, 183, 45, 0.48), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  .label {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 2px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .kills .label { color: var(--kills); }
+  .wins .label { color: var(--wins); }
+
+  .number {
+    position: relative;
+    z-index: 1;
+    color: #fff;
+    font-size: 58px;
+    font-weight: 900;
+    line-height: 1.04;
+    min-height: 61px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.75), 0 0 20px var(--flash);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .controls {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .btn {
+    width: 34px;
+    height: 26px;
+    border: 0;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.08s, filter 0.12s, background 0.12s;
+  }
+
+  .btn:active { transform: scale(0.92); }
+  .btn:hover { filter: brightness(1.22); }
+  .kills .btn { background: rgba(240, 77, 61, 0.62); }
+  .wins .btn { background: rgba(242, 183, 45, 0.62); }
+
+  .reset {
+    position: relative;
+    z-index: 1;
+    display: block;
+    margin-top: 6px;
+    color: #fff;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    opacity: 0.52;
+  }
+
+  .reset:hover { opacity: 1; }
+
+  .burst {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    top: 13px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    opacity: 0;
+    pointer-events: none;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    transform: translate(-50%, 8px) scale(0.92);
+  }
+
+  .card.react .number { animation: number-pop 280ms cubic-bezier(.18,.9,.24,1.35); }
+  .card.react { animation: card-kick 320ms ease-out; }
+  .card.react::before { animation: shine 430ms ease-out; }
+  .card.react .burst { animation: burst-up 620ms ease-out; }
+  .card.down .number { animation-name: number-dip; }
+
+  body.obs .controls,
+  body.obs .reset {
+    display: none;
+  }
+
+  body.obs .card {
+    padding-bottom: 12px;
+  }
+
+  body.obs .number {
+    font-size: 64px;
+    min-height: 67px;
+  }
+
+  @keyframes number-pop {
+    0% { transform: scale(0.88); filter: brightness(1.6); }
+    58% { transform: scale(1.18); }
+    100% { transform: scale(1); filter: brightness(1); }
+  }
+
+  @keyframes number-dip {
+    0% { transform: scale(1.12); filter: saturate(0.65); }
+    100% { transform: scale(1); filter: saturate(1); }
+  }
+
+  @keyframes card-kick {
+    0% { transform: translateY(0) scale(1); }
+    45% { transform: translateY(-3px) scale(1.025); }
+    100% { transform: translateY(0) scale(1); }
+  }
+
+  @keyframes shine {
+    0% { opacity: 0; transform: translateX(-110%); }
+    22% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(110%); }
+  }
+
+  @keyframes burst-up {
+    0% { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }
+    18% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -22px) scale(1.08); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card.react,
+    .card.react::before,
+    .card.react .number,
+    .card.react .burst,
+    .card.down .number {
+      animation-duration: 1ms;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="card kills" data-counter="kills">
+    <div class="label">&#9876; Kills</div>
+    <div class="number" id="kills-num">0</div>
+    <div class="burst" id="kills-burst">+1</div>
+    <div class="controls">
+      <button class="btn" type="button" data-action="kills:-1" aria-label="Subtract one kill">&#8722;</button>
+      <button class="btn" type="button" data-action="kills:1" aria-label="Add one kill">&#43;</button>
+    </div>
+    <span class="reset" data-reset="kills">reset</span>
+  </div>
+
+  <div class="card wins" data-counter="wins">
+    <div class="label">&#9733; Wins</div>
+    <div class="number" id="wins-num">0</div>
+    <div class="burst" id="wins-burst">+1</div>
+    <div class="controls">
+      <button class="btn" type="button" data-action="wins:-1" aria-label="Subtract one win">&#8722;</button>
+      <button class="btn" type="button" data-action="wins:1" aria-label="Add one win">&#43;</button>
+    </div>
+    <span class="reset" data-reset="wins">reset</span>
+  </div>
+
+<script>
+  var STORAGE_KEY = 'marvel-rivals-counter-state';
+  var counts = { kills: 0, wins: 0 };
+  var serverMode = location.protocol.indexOf('http') === 0;
+  var params = new URLSearchParams(location.search);
+
+  if (params.get('overlay') !== '0') {
+    document.body.classList.add('obs');
+  }
+
+  function saveLocal() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(counts)); } catch (err) {}
+  }
+
+  function loadLocal() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      counts.kills = Number(saved.kills) || 0;
+      counts.wins = Number(saved.wins) || 0;
+    } catch (err) {}
+  }
+
+  function render(type, delta) {
+    var el = document.getElementById(type + '-num');
+    var card = document.querySelector('[data-counter="' + type + '"]');
+    var burst = document.getElementById(type + '-burst');
+
+    el.textContent = counts[type];
+    burst.textContent = delta < 0 ? String(delta) : '+' + (delta || 1);
+
+    card.classList.remove('react', 'down');
+    void card.offsetWidth;
+    if (delta < 0) card.classList.add('down');
+    card.classList.add('react');
+  }
+
+  function renderAll(deltaMap) {
+    render('kills', deltaMap && deltaMap.kills ? deltaMap.kills : 0);
+    render('wins', deltaMap && deltaMap.wins ? deltaMap.wins : 0);
+  }
+
+  function applyState(next, deltaMap) {
+    counts.kills = Math.max(0, Number(next.kills) || 0);
+    counts.wins = Math.max(0, Number(next.wins) || 0);
+    renderAll(deltaMap || {});
+    saveLocal();
+  }
+
+  function changeLocal(type, delta) {
+    var before = counts[type];
+    counts[type] = Math.max(0, counts[type] + delta);
+    render(type, counts[type] - before);
+    saveLocal();
+  }
+
+  function resetLocal(type) {
+    if (type === 'all') {
+      applyState({ kills: 0, wins: 0 }, { kills: -counts.kills, wins: -counts.wins });
+      return;
+    }
+    var before = counts[type];
+    counts[type] = 0;
+    render(type, -before);
+    saveLocal();
+  }
+
+  function callServer(path) {
+    return fetch(path, { cache: 'no-store' })
+      .then(function(res) { return res.json(); })
+      .then(function(payload) {
+        applyState(payload.counts, payload.delta || {});
+      })
+      .catch(function() {
+        serverMode = false;
+      });
+  }
+
+  function change(type, delta) {
+    if (serverMode) {
+      callServer('/api/change?type=' + encodeURIComponent(type) + '&delta=' + encodeURIComponent(delta));
+      return;
+    }
+    changeLocal(type, delta);
+  }
+
+  function resetOne(type) {
+    if (serverMode) {
+      callServer('/api/reset?type=' + encodeURIComponent(type));
+      return;
+    }
+    resetLocal(type);
+  }
+
+  document.addEventListener('click', function(e) {
+    var action = e.target.getAttribute('data-action');
+    var reset = e.target.getAttribute('data-reset');
+    if (action) {
+      var parts = action.split(':');
+      change(parts[0], Number(parts[1]));
+    }
+    if (reset) resetOne(reset);
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'F1' && !e.shiftKey) { e.preventDefault(); change('kills', 1); }
+    if (e.key === 'F1' && e.shiftKey) { e.preventDefault(); change('kills', -1); }
+    if (e.key === 'F2' && !e.shiftKey) { e.preventDefault(); change('wins', 1); }
+    if (e.key === 'F2' && e.shiftKey) { e.preventDefault(); change('wins', -1); }
+    if (e.key === 'F3') { e.preventDefault(); resetOne('all'); }
+  });
+
+  if (serverMode && window.EventSource) {
+    var stream = new EventSource('/events');
+    stream.onmessage = function(event) {
+      var payload = JSON.parse(event.data);
+      applyState(payload.counts, payload.delta || {});
+    };
+  }
+
+  if (serverMode) {
+    callServer('/api/state');
+  } else {
+    loadLocal();
+    renderAll();
+  }
+</script>
+</body>
+</html>

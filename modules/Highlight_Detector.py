@@ -84,6 +84,7 @@ def detect_highlights(video_path: str, sensitivity: float = SENSITIVITY) -> list
             [
                 "ffmpeg", "-y",                     # overwrite if exists
                 "-i", video_path,                   # input video
+                "-map", "0:a:0",
                 "-vn",                              # no video — audio only
                 "-ac", "1",                         # mono
                 "-ar", "22050",                     # match librosa default

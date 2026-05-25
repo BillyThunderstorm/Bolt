@@ -134,16 +134,20 @@ def process_recording(
         reason="Starting the full processing pipeline. "
                "This takes a minute depending on clip length."
     )
-    intelligence.record_event(
-        source="pipeline",
-        intent="recording_detected",
-        action="start_processing",
-        result="started",
-        confidence=1.0,
-        reason=f"Processing started for {filename}",
-        feedback=None,
-        metadata={"recording_path": recording_path},
-    )
+
+    if hasattr(intelligence, "record_event"):
+        intelligence.record_event(
+            source="pipeline",
+            intent="recording_detected",
+            action="start_processing",
+            result="started",
+            confidence=1.0,
+            reason=f"Processing started for {filename}",
+            feedback=None,
+            metadata={"recording_path": recording_path},
+        )
+    else:
+        print("⚠️ Brain engine has no record_event(); skipping recording_detected log.")
 
     game        = config.get("game", "Gaming")
     sensitivity = config.get("highlight_sensitivity", 0.7)
@@ -337,10 +341,21 @@ def process_recording(
             }
         )
         intelligence.audit("think", think_output)
+        retrieved_count = think_output.get("retrieved_memory_count", 0)
+        retrieved_memory = think_output.get("retrieved_memory", [])
+        top_memory = retrieved_memory[0] if retrieved_memory else {}
+        memory_reason = f"Based on {think_output['memory_signals_used']} recent memory signals"
+        if retrieved_count:
+            memory_reason += (
+                f" and {retrieved_count} retrieved match(es); "
+                f"top match: {top_memory.get('title', 'memory')} from {top_memory.get('source', 'unknown source')}."
+            )
+        else:
+            memory_reason += "."
         notify(
             f"Think step: {think_output['recommended_next_step']}",
             level="info",
-            reason=f"Based on {think_output['memory_signals_used']} memory signals.",
+            reason=memory_reason,
         )
 
         candidates = []
@@ -361,6 +376,7 @@ def process_recording(
                     "title":    title_data.get("titles", [""])[0] if title_data else "",
                     "hashtags": title_data.get("hashtags", []) if title_data else [],
                     "style":    style,
+                    "memory_context": retrieved_memory,
                 }
             )
 
@@ -424,16 +440,21 @@ def process_recording(
                 level="warning",
                 reason="Decision gate denied all actions (interactive approval required).",
             )
-            intelligence.record_event(
-                source="decision_engine",
-                intent="queue_decision",
-                action="queue_clip",
-                result="none_approved",
-                confidence=0.9,
-                reason="No clip actions passed assistive confirmation",
-                feedback=None,
-                metadata={"proposals": [p.as_dict() for p in proposals]},
-            )
+
+            if hasattr(intelligence, "record_event"):
+                intelligence.record_event(
+                    source="decision_engine",
+                    intent="queue_decision",
+                    action="queue_clip",
+                    result="none_approved",
+                    confidence=0.9,
+                    reason="No clip actions passed assistive confirmation",
+                    feedback=None,
+                    metadata={"proposals": [p.as_dict() for p in proposals]},
+                )
+            else:
+                print("⚠️ Brain engine has no record_event(); skipping queue_decision log.")
+
             return
 
         for clip in ranked_clips:
@@ -443,7 +464,16 @@ def process_recording(
 
             score      = getattr(clip, "score", 50)
             tier       = getattr(clip, "tier", "queue")
-            vertical   = format_for_tiktok(clip_path, style=style)
+
+            try:
+                vertical = format_for_tiktok(clip_path, style=style)
+                if not vertical:
+                    raise ValueError("format_for_tiktok returned empty path")
+            except Exception as e:
+                print(f"⚠️ TikTok formatting failed for {clip_path}: {e}")
+                print("⚠️ Queueing original clip instead.")
+                vertical = clip_path
+                
             title_data = clip_titles.get(clip_path, {})
             titles     = title_data.get("titles", [f"Clip from {game}"])
             best_title = titles[0]
@@ -572,7 +602,10 @@ def main():
     creator_brain = load_brain()
     config        = load_config()
     intelligence  = ThinkLearnDecideEngine(config)
-    intelligence.ingest_all_sources()
+    if hasattr(intelligence, "ingest_all_sources"):
+      intelligence.ingest_all_sources()
+    else:
+      print("⚠️ BrainController has no ingest_all_sources(); skipping source ingestion.")
 
     game        = config.get("game", "Gaming")
     sensitivity = config.get("highlight_sensitivity", 0.7)

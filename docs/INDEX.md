@@ -13,10 +13,12 @@ Use this page as the central map for Bolt.
 ## Canonical Runtime Docs
 
 - `docs/PROJECT_STATUS.md` - current build status and next steps
+- `modules/Think_Learn_Decide.py` - ingestion, reasoning, decisions, feedback loop, audit
 - `docs/think_learn_decide.md` - canonical decision and memory schema
 - `docs/planning/BOLT_PROCESS_ROADMAP.md` - visual map of Bolt's current process, workspace roles, and future architecture
 - `docs/Bolt_Checkup.html` - local dashboard source written from live stats
 - `data/Bolt_data.js` - generated dashboard payload written at startup
+- `tests/test_think_learn_decide.py` - regression tests for intelligence workflows
 
 ## Setup and Integration
 
