@@ -18,7 +18,7 @@ Where clips are saved:
   clips/           → raw highlight clips (horizontal, same as your recording)
   vertical_clips/  → TikTok-ready 9:16 format (this is what you post)
 
-Both folders are inside your Bolt folder on iCloud Drive.
+"Both folders are inside your Bolt project folder."
 """
 
 import os
@@ -30,6 +30,9 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
+
+from modules.Config_Loader import load_config
+config = load_config()
 
 try:
     from dotenv import load_dotenv
@@ -107,8 +110,11 @@ def print_recordings(recordings: list, folder: Path):
 
 
 def print_output_paths():
-    clips_dir    = Path("clips").resolve()
-    vertical_dir = Path("vertical_clips").resolve()
+    clips_dir = PROJECT_ROOT / config.get("clips_folder", "clips")
+    vertical_dir = PROJECT_ROOT / config.get("vertical_clips_folder", "vertical_clips")
+
+    clips_dir.mkdir(parents=True, exist_ok=True)
+    vertical_dir.mkdir(parents=True, exist_ok=True)
     print()
     print("  📁  Where to find your clips after processing:")
     print(f"     Horizontal clips:  {clips_dir}")
@@ -154,16 +160,10 @@ def main():
 
     print()
 
-    # ── Load config + brain ───────────────────────────────────────────────────
-    config = {}
-    try:
-        with open("config.json") as f:
-            config = json.load(f)
-    except Exception:
-        print("  ⚠  config.json not found — using defaults")
+   # config is already loaded at the top through Config_Loader
 
     brain = ""
-    brain_path = Path("Bolt_brain.md")
+    brain_path = PROJECT_ROOT / "Bolt_brain.md"
     if brain_path.exists():
         brain = brain_path.read_text()
         print("  ✓  Bolt_brain.md loaded — AI titles will match your style")

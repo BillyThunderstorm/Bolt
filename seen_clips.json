@@ -1706,5 +1706,250 @@
     "timestamp": 3.5,
     "phash": null,
     "added": 1779346528.668714
+  },
+  {
+    "path": "clips/2026-05-17_01-17-00_clip01_audio_spike_0.mp4",
+    "size": 19097797,
+    "timestamp": 1779762050.463924,
+    "phash": null,
+    "added": 1779762050.463938
+  },
+  {
+    "path": "clips/2026-05-17_01-17-00_clip01_audio_spike_0.mp4",
+    "size": 19097813,
+    "timestamp": 1779762087.91068,
+    "phash": null,
+    "added": 1779762087.9107032
+  },
+  {
+    "path": "clips/2026-05-16_01-15-57_clip01_audio_spike_0.mp4",
+    "size": 19824465,
+    "timestamp": 1779762141.206385,
+    "phash": null,
+    "added": 1779762141.206398
+  },
+  {
+    "path": "clips/2026-05-14_02-23-19_clip01_audio_spike_0.mp4",
+    "size": 16535667,
+    "timestamp": 1779762206.6213162,
+    "phash": null,
+    "added": 1779762206.621331
+  },
+  {
+    "path": "clips/2026-05-14_02-23-19_clip01_audio_spike_0.mp4",
+    "size": 16535683,
+    "timestamp": 1779762270.375572,
+    "phash": null,
+    "added": 1779762270.375587
+  },
+  {
+    "path": "clips/2026-05-12_20-50-28_clip01_audio_spike_0.mp4",
+    "size": 18966422,
+    "timestamp": 1779762417.0125902,
+    "phash": null,
+    "added": 1779762417.012606
+  },
+  {
+    "path": "clips/2026-05-12_20-50-28_clip01_audio_spike_0.mp4",
+    "size": 18966438,
+    "timestamp": 1779762603.737451,
+    "phash": null,
+    "added": 1779762603.737464
+  },
+  {
+    "path": "clips/2026-05-08_00-42-13_clip01_audio_spike_0.mp4",
+    "size": 14886732,
+    "timestamp": 1779762610.555069,
+    "phash": null,
+    "added": 1779762610.5550861
+  },
+  {
+    "path": "clips/2026-05-03_23-15-26_clip01_audio_spike_0.mp4",
+    "size": 15444506,
+    "timestamp": 1779762653.741756,
+    "phash": null,
+    "added": 1779762653.7417731
+  },
+  {
+    "path": "clips/2026-04-29_04-21-36_clip01_audio_spike_0.mp4",
+    "size": 15156375,
+    "timestamp": 1779762739.8370922,
+    "phash": null,
+    "added": 1779762739.837107
+  },
+  {
+    "path": "clips/2026-04-29_04-21-36_clip01_audio_spike_0.mp4",
+    "size": 15156391,
+    "timestamp": 1779762854.54905,
+    "phash": null,
+    "added": 1779762854.5490701
+  },
+  {
+    "path": "clips/2026-04-29_03-21-33_clip01_audio_spike_0.mp4",
+    "size": 15344440,
+    "timestamp": 1779762958.902184,
+    "phash": null,
+    "added": 1779762958.9022012
+  },
+  {
+    "path": "clips/2026-04-29_03-21-33_clip01_audio_spike_0.mp4",
+    "size": 15344456,
+    "timestamp": 1779763087.107222,
+    "phash": null,
+    "added": 1779763087.107239
+  },
+  {
+    "path": "clips/2026-04-18_20-45-35_clip53_audio_spike_1984.mp4",
+    "size": 18902249,
+    "timestamp": 1984.0,
+    "phash": null,
+    "added": 1779763337.2655559
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip67_audio_spike_3247.mp4",
+    "size": 26079502,
+    "timestamp": 3247.5,
+    "phash": null,
+    "added": 1779764630.312958
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip73_audio_spike_3580.mp4",
+    "size": 24718894,
+    "timestamp": 3580.5,
+    "phash": null,
+    "added": 1779764630.314337
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip75_audio_spike_3700.mp4",
+    "size": 25796701,
+    "timestamp": 3700.0,
+    "phash": null,
+    "added": 1779764630.315084
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip76_audio_spike_3739.mp4",
+    "size": 25777058,
+    "timestamp": 3739.5,
+    "phash": null,
+    "added": 1779764630.3157692
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip78_audio_spike_3799.mp4",
+    "size": 25615650,
+    "timestamp": 3799.5,
+    "phash": null,
+    "added": 1779764630.316511
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip80_audio_spike_3863.mp4",
+    "size": 25668828,
+    "timestamp": 3863.5,
+    "phash": null,
+    "added": 1779764630.317251
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip83_audio_spike_3959.mp4",
+    "size": 25719031,
+    "timestamp": 3959.5,
+    "phash": null,
+    "added": 1779764630.318034
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip85_audio_spike_4022.mp4",
+    "size": 25003319,
+    "timestamp": 4022.5,
+    "phash": null,
+    "added": 1779764630.318772
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip88_audio_spike_4130.mp4",
+    "size": 25986345,
+    "timestamp": 4130.0,
+    "phash": null,
+    "added": 1779764630.3195908
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip100_audio_spike_4501.mp4",
+    "size": 25845382,
+    "timestamp": 4501.5,
+    "phash": null,
+    "added": 1779764630.3207738
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip102_audio_spike_4563.mp4",
+    "size": 25530326,
+    "timestamp": 4563.0,
+    "phash": null,
+    "added": 1779764630.321532
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip104_audio_spike_4623.mp4",
+    "size": 25287682,
+    "timestamp": 4623.0,
+    "phash": null,
+    "added": 1779764630.32229
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip106_audio_spike_4683.mp4",
+    "size": 25260272,
+    "timestamp": 4683.0,
+    "phash": null,
+    "added": 1779764630.323047
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip107_audio_spike_4713.mp4",
+    "size": 25975922,
+    "timestamp": 4713.5,
+    "phash": null,
+    "added": 1779764630.3237572
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip109_audio_spike_4774.mp4",
+    "size": 26078258,
+    "timestamp": 4774.0,
+    "phash": null,
+    "added": 1779764630.324529
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip110_audio_spike_4807.mp4",
+    "size": 25612023,
+    "timestamp": 4807.5,
+    "phash": null,
+    "added": 1779764630.325237
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip111_audio_spike_5023.mp4",
+    "size": 25017506,
+    "timestamp": 5023.0,
+    "phash": null,
+    "added": 1779764630.32595
+  },
+  {
+    "path": "clips/2026-04-17_11-04-53_clip112_audio_spike_5064.mp4",
+    "size": 25747464,
+    "timestamp": 5064.0,
+    "phash": null,
+    "added": 1779764630.3266602
+  },
+  {
+    "path": "clips/2026-04-13_20-33-39_clip01_audio_spike_0.mp4",
+    "size": 12022433,
+    "timestamp": 1779764659.8220742,
+    "phash": null,
+    "added": 1779764659.822092
+  },
+  {
+    "path": "clips/2720288730-441598765-0d2ed793-1208-4a1c-ba04-959b1470589f_clip05_audio_spike_1863.mp4",
+    "size": 16278127,
+    "timestamp": 1863.5,
+    "phash": null,
+    "added": 1779764682.147703
+  },
+  {
+    "path": "clips/2026-02-17 21-08-26_clip01_audio_spike_0.mp4",
+    "size": 18544070,
+    "timestamp": 1779764688.30811,
+    "phash": null,
+    "added": 1779764688.308129
   }
 ]
