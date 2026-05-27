@@ -31,6 +31,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from modules.notifier import notify, notify_startup, notify_error
+from modules.Config_Loader import load_config
 from modules.Think_Learn_Decide import ThinkLearnDecideEngine
 
 # ── Constants ──────────────────────────────────────────────────────────────────
@@ -71,39 +72,6 @@ def load_brain() -> str:
 
 
 # ── 2. Load config ─────────────────────────────────────────────────────────────
-
-def load_config() -> dict:
-    """
-    Load config.json. If missing, return safe defaults.
-    Run launch.py to generate config.json via the setup wizard.
-    """
-    try:
-        with open(CONFIG_FILE) as f:
-            return json.load(f)
-    except FileNotFoundError:
-        notify(
-            "config.json not found — run launch.py to create it",
-            level="warning",
-            reason="Using safe defaults. Some features (OBS, TikTok posting) "
-                   "won't work without a proper config."
-        )
-        return {
-            "game": "Gaming",
-            "highlight_sensitivity": 0.7,
-            "auto_rank": True,
-            "auto_format_tiktok": True,
-            "tiktok_style": "letterbox",
-            "min_clip_duration": 15,
-            "max_clip_duration": 60,
-            "min_clip_score": 65,
-            "min_post_score": 65,
-            "quality_tiers": {
-                "discard_below": 60,
-                "queue_at": 80,
-                "use_ai_titles": False,
-            },
-        }
-
 
 # ── 3. Process a single recording through the full pipeline ───────────────────
 

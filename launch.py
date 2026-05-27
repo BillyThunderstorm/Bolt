@@ -27,6 +27,8 @@ load_dotenv()
 
 from modules.notifier import notify, notify_startup
 
+from modules.Config_Loader import load_config
+
 CONFIG_FILE = "config.json"
 ENV_FILE    = ".env"
 
@@ -60,7 +62,7 @@ def main():
     else:
         notify("Config found ✓", level="success")
 
-    config = _load_config()
+    config = load_config()
 
     # ── Step 2: Check .env file ───────────────────────────────────────────────
     _check_env_file()
@@ -481,19 +483,6 @@ def _run_setup_wizard():
         reason="You can edit config.json or .env at any time. "
                "Bolt will reload settings on next launch."
     )
-
-
-def _load_config() -> dict:
-    try:
-        with open(CONFIG_FILE) as f:
-            return json.load(f)
-    except Exception as exc:
-        notify(
-            f"Could not read config.json: {exc}",
-            level="error",
-            reason="Delete config.json and run launch.py again to regenerate it."
-        )
-        return {}
 
 
 def _check_env_file():

@@ -33,7 +33,7 @@ except ImportError:
     refresh_memory_index = None
     retrieve_memory = None
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 LOGS_DIR = PROJECT_ROOT / "logs"
 MEMORY_DIR = PROJECT_ROOT / "memory"

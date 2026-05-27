@@ -35,6 +35,47 @@ except ImportError:
         source: str = "audio"
 
 
+
+try:
+    from modules.Config_Loader import load_config
+except ImportError:
+    def load_config():
+        return {
+            "clips_folder": "clips",
+            "vertical_clips_folder": "vertical_clips",
+            "pad_before": 12.0,
+            "pad_after": 20.0,
+            "min_clip_duration": 10.0,
+            "max_clip_duration": 120.0,
+        }
+
+
+CONFIG = load_config()
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _resolve_output_dir(output_dir: str | None = None) -> Path:
+    """
+    Decide where generated clips should be saved.
+
+    Priority:
+    1. Explicit output_dir passed into generate_clips()
+    2. clips_folder from config.json
+    3. fallback folder named "clips" in the Bolt project root
+    """
+    chosen = output_dir or CONFIG.get("clips_folder", "clips")
+
+    path = Path(chosen)
+
+    # If config says "clips", keep it anchored to the Bolt project root.
+    # If config gives an absolute path, respect it.
+    if not path.is_absolute():
+        path = PROJECT_ROOT / path
+
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
 @dataclass
 class GeneratedClip:
     source_file: str
@@ -50,7 +91,7 @@ class GeneratedClip:
 def generate_clips(
     source_file: str,
     highlights: List["HighlightEvent"],
-    output_dir: str = "clips",
+    output_dir: str | None = None,
     pad_before: float = 12.0,
     pad_after: float = 20.0,
     min_duration: float = 10.0,
@@ -63,7 +104,7 @@ def generate_clips(
     ----------
     source_file  : path to the source recording
     highlights   : list of HighlightEvent objects
-    output_dir   : folder to write clips into
+    output_dir   : folder to write clips into; if None, uses config["clips_folder"]
     pad_before   : seconds of footage to include before the highlight peak
     pad_after    : seconds of footage to include after the highlight peak
     min_duration : clips shorter than this are skipped
@@ -80,7 +121,7 @@ def generate_clips(
                       "to the expected path before calling generate_clips().")
         return []
 
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    output_path = _resolve_output_dir(output_dir)
 
     # Detect total duration once
     total_duration = _get_duration(str(source))
@@ -89,7 +130,7 @@ def generate_clips(
         level="info",
         reason=f"Source duration: {total_duration:.1f}s | "
                f"pad_before={pad_before}s, pad_after={pad_after}s | "
-               f"output → {output_dir}/"
+               f"output → {output_path}/"
     )
 
     results: List[GeneratedClip] = []
@@ -138,7 +179,7 @@ def generate_clips(
                 duration = max_duration
 
             out_name = f"{stem}_clip{i:02d}_{event.trigger}_{int(event.timestamp)}.mp4"
-            out_path  = str(Path(output_dir) / out_name)
+            out_path  = str(output_path / out_name)
 
             success, error = _cut_clip_ffmpeg(str(source), out_path, start, duration)
 
@@ -191,7 +232,7 @@ def generate_clips(
     notify(
         f"Clip generation complete: {successful}/{len(highlights)} clips saved",
         level="success" if successful == len(highlights) else "warning",
-        reason=f"Clips written to {output_dir}/. "
+        reason=f"Clips written to {output_path}/. "
                "Failed clips are logged above — they will NOT enter the ranking pipeline."
     )
     return results

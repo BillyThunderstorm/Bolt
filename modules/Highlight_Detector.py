@@ -9,26 +9,17 @@ import os
 import tempfile
 import subprocess
 from dataclasses import dataclass
-import json
-from pathlib import Path
 
-# Load config once
-def _load_detector_config():
-    cfg_path = Path(__file__).parent.parent / "config.json"
-    try:
-        with open(cfg_path) as f:
-            cfg = json.load(f).get("highlight", {})
-        return cfg
-    except Exception:
-        return {}
+from modules.Config_Loader import load_config
 
-_CFG = _load_detector_config()
+config = load_config()
+_CFG = config.get("highlight", config)
 
 WINDOW_SEC    = 2.0
 HOP_SEC       = 0.5
 SPIKE_MULT    = float(_CFG.get("energy_multiplier", os.getenv("SPIKE_MULTIPLIER", "2.8")))
 MIN_GAP_SEC   = float(_CFG.get("min_gap_seconds", 15.0))
-SENSITIVITY   = float(_CFG.get("sensitivity", os.getenv("HIGHLIGHT_SENSITIVITY", "0.7")))
+SENSITIVITY   = float(_CFG.get("highlight_sensitivity",_CFG.get("sensitivity", os.getenv("HIGHLIGHT_SENSITIVITY", "0.7"))))
 
 # ── Hard confidence floor ─────────────────────────────────────────────────────
 # An audio spike that BARELY crosses the energy threshold has near-zero
