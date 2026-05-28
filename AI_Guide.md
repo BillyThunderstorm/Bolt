@@ -28,7 +28,7 @@ Bolt/
 │
 ├── Bolt_brain.md       ← Billy's creator profile. Read this before generating
 │                          ANY content, titles, suggestions, or advice.
-├── AGENTS.md           ← This file. AI session guide.
+├── AI_Guide.md           ← This file. AI session guide.
 ├── README.md           ← Human-readable project overview.
 │
 ├── modules/            ← All Python modules. Don't move these.
@@ -43,7 +43,7 @@ Bolt/
 │   ├── Clip_Generator.py     ← Cuts clips around highlights. NEW: per-clip
 │   │                          try/except so one bad event can't kill the batch
 │   ├── Title_Generator.py    ← AI-powered clip titles using Billy's profile
-│   ├── AI_Title_Generator.py ← Newer Anthropic-backed title generator
+│   ├── AI_Title_Generator.py ← Newer AI-Model title generator
 │   ├── Subtitle_Generator.py ← Whisper transcription + subtitle burn-in
 │   ├── Clip_Ranker.py        ← Virality scoring (0-100). NEW: Quality
 │   │                          Controller tiers (discard/mid/queue) attached
@@ -163,7 +163,7 @@ python3 launch.py            # go
 - ✅ Discord webhook connected (in .env) — used for peak-hour posting alerts
 - ✅ TikTok auto-posting REMOVED by design — replaced with Peak_Hour_Notifier
   - Bolt now alerts Billy at peak hours (7–9AM, 12–2PM, 7–10PM) via Discord
-  - Billy posts manually — no TikTok API token needed
+ -✅ Billy posts manually — no TikTok API token needed
 
 ---
 
@@ -270,7 +270,7 @@ compatibility shims at root. Phase 4 modules scaffolded but not yet wired.*
    langchain-community langchain-text-splitters chromadb` and then build
    the vectorstore — but swap `OpenAIEmbeddings` for `HuggingFaceEmbeddings`
    to avoid needing an OpenAI key on top of Anthropic.
-
+remove Anthropic key. 
 4. **Motion detection** to complete the "no audio peaks AND no motion"
    filter from Upgrade_thoughts. Audio gate is live; motion would require
    cv2 + optical flow on each candidate window. Defer until you find audio
