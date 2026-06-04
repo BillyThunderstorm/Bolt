@@ -51,6 +51,7 @@ def check_files():
         "modules/Post_Queue.py",
         "modules/Peak_Hour_Notifier.py",
         "modules/Think_Learn_Decide.py",
+        "modules/Multi_Publisher.py",
     ]
     missing = []
     for rel in required_files + required_modules:
@@ -147,6 +148,7 @@ def check_imports():
         "modules.TikTok_Publisher",
         "modules.OBS_Integration",
         "modules.Think_Learn_Decide",
+        "modules.Multi_Publisher",
     ]
     ok = True
     for name in modules:

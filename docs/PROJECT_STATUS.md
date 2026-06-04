@@ -2,35 +2,37 @@
 
 ## Current State
 
-Bolt is running as a working clip pipeline with a live personality layer.
-The core loop is stable: watch recordings, detect highlights, cut clips,
-rank them, format vertical exports, and notify Billy when a clip is worth
-posting.
+Bolt is a working local-first creator assistant with a stable clip pipeline and a growing memory/learning layer.
+
+The current mission is broader than Twitch clips. Bolt should support gaming, tech learning, AI development, product testing, Amazon Influencer storefront reviews, beauty/skincare testing, and the long-term goal of becoming Billy's virtual teammate.
+
+## Active Runtime
 
 What is active now:
 
 - recording watcher and batch processing
 - hard highlight confidence gate
-- deduplication before the expensive stages
+- deduplication before expensive stages
 - per-clip failure recovery
 - clip ranking tiers
 - title generation and subtitles
+- vertical clip formatting
 - OBS, Twitch, Streamlabs, and Discord integration
 - macOS voice alerts
 - Twitch chat personality layer
+- local queue and memory chat commands
 - runtime checkup dashboard generation
+- local memory retrieval through `modules/Memory_Index.py`
+- filed loose docs in canonical `docs/`, `memory/`, `teaching/rag/`, and `docs/upgrade/` locations
 
-## What Phase Means Here
+## Phase Meaning
 
 - Phase 1: dashboard and personality shell
 - Phase 2: live API connections
 - Phase 3: voice and chat personality
-- Phase 4: memory and decision-engine scaffolding
+- Phase 4: memory, retrieval, and decision-engine behavior
 
-Phase 3 is active in the current runtime. `Think_Learn_Decide` is the path
-`bot.py` actually uses today. Phase 4 exists in code, and `Brain_Controller`
-now mirrors the live thresholds as a compatibility wrapper instead of a
-separate competing tier system.
+`Think_Learn_Decide` is the canonical decision path. `Brain_Controller` remains as a compatibility wrapper instead of a competing tier system.
 
 ## Quality Gating
 
@@ -47,34 +49,60 @@ That means:
 - 65 to 79: format and queue, but no Discord alert
 - 80 and up: queue and alert Billy at peak hours
 
+## Memory And Creator Vision
+
+Bolt's memory now includes:
+
+- `memory/content/full-creator-vision.md`
+- `memory/content/product-reviews.md`
+- `memory/content/beauty-skincare.md`
+- `memory/content/ai-development.md`
+- `memory/content/brand-vision.md`
+- `memory/content/daily-briefing.md`
+- `docs/daily-briefing-template.md`
+- `docs/reports/DEBUG_REPORT.md`
+- `docs/architecture/SYSTEM_README.md`
+- `docs/upgrade/UPGRADE_INDEX.md`
+- `memory/context/bolt-personality.md`
+- `brand/BRAND_VISION_DESCRIPTION.md`
+
+Refresh the index after memory edits:
+
+```bash
+python3 scripts/refresh_memory_index.py
+```
+
 ## Current Commands
 
 ```bash
-pip3 install -r requirements.txt
+python3 -m pip install -r requirements.txt
 python3 launch.py
 python3 launch.py process
+python3 scripts/verify.py
+python3 -m unittest
 python3 -m modules.Bolt_Chat
 python3 -m modules.Bolt_Voice "say this out loud"
 python3 scripts/log_clip_performance.py --list
-python3 scripts/verify.py
+python3 llm/neural_model.py
 ```
 
 ## What Still Needs Finish Work
 
-1. Keep `Brain_Controller` as a compatibility wrapper and leave
-   `Think_Learn_Decide` as canonical.
-2. Populate the long-term memory/vector store so Bolt can retrieve past context.
-3. Decide whether motion gating belongs in the highlight detector after audio-only checks.
-4. Keep the setup templates and docs mirrored to the live `config.json` schema.
+1. Keep `Think_Learn_Decide` canonical and avoid reintroducing duplicate decision systems.
+2. Continue making retrieved memory change actual decisions, not only summaries.
+3. Add upgrade layers sequentially: one feature, one verification loop, one memory refresh.
+4. Decide how daily briefings should run locally before connecting calendar/email automation.
+5. Keep product/skincare/Amazon/AI learning lanes represented in future features.
+6. The old `BillyThunderstorm-site/` tree has been removed from the active repo layout.
 
 ## Troubleshooting Notes
 
 - If clips are too sparse, lower `highlight_sensitivity`.
 - If the queue is too noisy, raise `quality_tiers.discard_below`.
 - If clips are missing, lower `min_post_score` first, then `discard_below`.
-- If no chat responses appear, confirm `TWITCH_BOT_TOKEN`, `TWITCH_BOT_NAME`,
-  and `ANTHROPIC_API_KEY` are set in `.env`.
-- If voice does not speak, check `Bolt_VOICE_MUTE` and the macOS `say` command.
+- If no chat responses appear, confirm Twitch env vars are set in `.env`.
+- If voice does not speak, check `Bolt_VOICE_MUTE`, `use_voice_checklist`, and macOS `say`.
+- If memory search feels stale, run `python3 scripts/refresh_memory_index.py`.
 
 ## Last Updated
 

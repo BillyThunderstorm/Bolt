@@ -27,20 +27,20 @@ The jump from that toy example to a real LLM tokenizer is the same concept scale
 | Embedding | A list of numbers that captures the *meaning* of a token |
 | Vocabulary | The full list of tokens the model knows (~50,257 for GPT-2) |
 | BPE | Byte Pair Encoding — the algorithm that builds the vocabulary |
-| Context window | How many tokens the model can see at once (GPT-2: 1024, Claude: much larger) |
+| Context window | How many tokens the model can see at once (GPT-2: 1024, GPT-4: 128k) |
 
 ## Why this matters for Bolt
 
-Every time Bolt sends a prompt to Claude, Claude tokenizes it first. The length of prompts matters because tokens cost money and hit context limits. Long memory files = more tokens = higher API cost. This is why `Bolt_Memory.py` uses a "hot cache" (MEMORY.md) instead of dumping every file into every call — it keeps token count manageable.
+Every time Bolt sends a prompt to OpenAI, it tokenizes it first. The length of prompts matters because tokens cost money and hit context limits. Long memory files = more tokens = higher API cost. This is why `Bolt_Memory.py` uses a "hot cache" (MEMORY.md) instead of dumping every file into every call — it keeps token count manageable.
 
 ## What Billy can do with this
 
 - Estimate API costs by token count (roughly 1 token ≈ 0.75 words)
 - Know why Bolt's memory system is designed the way it is
-- Understand why Claude sometimes "forgets" early parts of long conversations (context window limit)
+- Understand why GPT-4 sometimes "forgets" early parts of long conversations (context window limit)
 - When something costs too many tokens, now you know why
 
 ## Connected files in Bolt
 - `modules/Bolt_Memory.py` — `load_all_memory()` manages token budget deliberately
-- `modules/AI_Title_Generator.py` — sends prompts to Claude (tokens going in)
+- `modules/AI_Title_Generator.py` — sends prompts to OpenAI (tokens going in)
 - `modules/Subtitle_Generator.py` — uses Whisper for transcription (similar input-as-tokens concept)

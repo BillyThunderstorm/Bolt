@@ -1,59 +1,65 @@
-# Billy Carter
+# Creator Profile: Billy Carter
 
-**Email:** billycarteriv@gmail.com
-**Role:** Self-taught content creator + aspiring coder
-**Stage:** Just starting out — little to no audience yet
+Billy is building Bolt while also building his creator workflow. Bolt should remember Billy as the creator, operator, and decision-maker for this system.
 
-## The Mission
+## Creator Direction
 
-Become a recognized voice in gaming highlights, tech reviews, and product testing. Building content creation skills and coding skills at the same time — everything self-taught, learning as he goes.
+Billy wants to grow around gaming highlights, tech reviews, general product testing, Amazon Influencer storefront reviews, beauty/skincare, and AI development. The through-line is learning in public: building tools, testing ideas, and showing what actually happened instead of pretending everything is polished from the start.
 
-## Personality & Communication Style
-
-- Gets frustrated when things feel overwhelming or confusing
-- Gets down on himself when progress is slow — needs encouragement, not pressure
-- Wants to understand *why* things work, not just be handed answers
-- Responds well to step-by-step explanations that show the thinking
-- Doesn't want to be fake or performative — authenticity is his differentiator
-- Doesn't like the hype-machine creator voice ("THIS IS INSANE!!!")
+The larger goal is to build a virtual teammate in Bolt: an assistant that helps Billy learn, grow, teach, test products, improve content, and advance alongside him.
 
 ## Content Voice
 
-Still developing, but:
-- Real talk, honest opinions
-- Learning-in-public angle — figuring it out and bringing the audience along
-- Gaming highlights, tech reviews, product testing
+Use a direct, honest, real-world voice.
 
-## Platforms (Priority Order)
+Prefer:
 
-1. TikTok — short clips, highlights, quick takes (HIGH)
-2. Twitch — live streams, gameplay, personality (HIGH)
-3. Instagram / X — social presence, repurposed clips (MEDIUM)
-4. YouTube — long-form reviews, future goal (NOT YET)
+- specific observations
+- useful lessons
+- clear opinions based on actual experience
+- plain language over hype
+- "what I noticed" instead of "this is insane"
 
-## Current Blockers
+Avoid:
 
-- Fear of posting the wrong thing (analysis paralysis)
-- Doesn't always know where to start
-- Technical side feels overwhelming
-- No views yet = hard to stay motivated
+- fake excitement
+- generic creator slogans
+- overexplaining the setup before the moment
+- claims that are not supported by the clip, product test, or data
 
-## What Works for Billy
+## Platform Priorities
 
-- Give ONE specific next step, not a list of five options
-- Explain the "why" behind every decision
-- Acknowledge frustration before jumping to solutions
-- Reference past conversations and wins when possible
-- Always consider: can this clip TikTok AND stream on Twitch?
+| Platform | Current role |
+|---|---|
+| TikTok | Highest-priority short-form clips, highlights, quick takes |
+| Twitch | Live source material, gameplay, audience interaction |
+| Instagram / X | Repurposed clips and social presence |
+| YouTube | Future long-form reviews, product tests, skincare tests, and deeper learning |
+| Amazon Influencer storefront | Product review destination and shopping context |
+
+## Decision Context For Bolt
+
+When Bolt evaluates a clip or idea, it should ask:
+
+- Does this show a real moment, reaction, lesson, or test?
+- Can the hook be understood quickly without fake hype?
+- Does it fit gaming, tech, AI development, product testing, skincare, or building Bolt in public?
+- Is this connected to an Amazon storefront review, product comparison, routine, or real-world test?
+- Is there a clear platform plan?
+- Has something similar worked, failed, or been skipped before?
 
 ## Active Projects
 
-- **Bolt** — AI content assistant bot (main project)
-- **ClipBot** — Automated clip processing from recordings
-- **Twitch Integration** — Bot + API setup for live stream automation
+- **Bolt**: AI content assistant and Twitch/local workflow bot.
+- **ClipBot**: Automated clip-processing pipeline.
+- **Twitch integration**: Live stream automation and bot account workflow.
+- **Amazon Influencer storefront**: Product review and recommendation lane.
+- **AI development learning**: Ongoing learning about AI systems while building Bolt.
+- **Beauty/skincare testing**: Product testing lane focused on routines, results, and honest observations.
 
-## Notes
+## Notes To Preserve
 
-- Everything is self-taught — code explanations should be beginner-friendly but never condescending
-- He's building Bolt alongside building himself as a creator — mutual growth is the theme
-- When he asks "what should I post?" → give ONE specific idea with a reason, not a list
+- Billy is self-taught in both content creation and coding, so Bolt's explanations should be plain and practical.
+- The creator brand should feel authentic, not performative.
+- The strongest content angle is often the real process: testing, learning, fixing, and showing the result.
+- Do not let one lane erase the others. Gaming, tech, product testing, skincare, AI learning, and Bolt-building all belong to the full picture.

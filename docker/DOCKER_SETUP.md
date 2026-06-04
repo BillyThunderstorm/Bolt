@@ -9,14 +9,14 @@ This Docker container provides an isolated development environment for experimen
 - **NumPy, Pandas, Matplotlib** — data science tools
 - **Jupyter Notebook** — interactive development at http://localhost:8888
 - **TensorBoard** — visualization of training metrics at http://localhost:6006
-- **Anthropic SDK** — access to Claude API inside the container
-- **Your ANTHROPIC_API_KEY** — automatically loaded from your .env file
+- **OpenAI SDK** — access to OpenAI API inside the container
+- **Your OPENAI_API_KEY** — automatically loaded from your .env file
 
 ## First-Time Setup
 
 ### Prerequisites
 1. **Docker Desktop installed** — download from https://www.docker.com/products/docker-desktop
-2. **.env file in Bolt folder** — your ANTHROPIC_API_KEY must be there
+2. **.env file in Bolt folder** — your OPENAI_API_KEY must be there
 3. **Terminal** — you'll run commands from the Bolt folder
 
 ### Start the Container

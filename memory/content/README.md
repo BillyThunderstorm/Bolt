@@ -5,6 +5,9 @@ This folder is for creator memory that is bigger than streaming clips.
 Use it for:
 
 - product and tech review ideas
+- Amazon Influencer storefront products and review plans
+- beauty/skincare routines, product tests, and results
+- AI development learning notes and Bolt-building lessons
 - gear Billy wants to test
 - honest opinions and takes
 - short-form content strategy

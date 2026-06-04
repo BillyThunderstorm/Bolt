@@ -113,6 +113,8 @@ class MemoryIndexTests(unittest.TestCase):
         self.assertTrue(results)
         self.assertIn("clip", {item["kind"] for item in results})
         self.assertNotIn("vector", results[0])
+        self.assertIn("signal", results[0])
+        self.assertIn("matched_terms", results[0])
 
     def test_vector_retrieval_finds_decision_language(self):
         with patch.object(mi, "MEMORY_DIR", self.root / "memory"), \
@@ -159,6 +161,29 @@ class MemoryIndexTests(unittest.TestCase):
 
         self.assertTrue(results)
         self.assertTrue(any(item["source"] == "memory/content/product-reviews.md" for item in results))
+
+    def test_retrieve_classifies_supportive_and_cautionary_memory(self):
+        (self.root / "memory" / "content" / "lessons.md").write_text(
+            "# Lessons\n\n## Strong Clip\nSimilar clip was queued and successful.\n\n"
+            "## Weak Clip\nSimilar clip was rejected and skipped below score floor.",
+            encoding="utf-8",
+        )
+
+        with patch.object(mi, "MEMORY_DIR", self.root / "memory"), \
+             patch.object(mi, "DATA_DIR", self.root / "data"), \
+             patch.object(mi, "LOGS_DIR", self.root / "logs"), \
+             patch.object(mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"), \
+             patch.object(mi, "PROCESSED_RECORDINGS_FILE", self.root / "data" / "processed_recordings.json"), \
+             patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"), \
+             patch.object(mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"), \
+             patch.object(mi, "PERFORMANCE_OUTCOMES_FILE", self.root / "data" / "performance_outcomes.jsonl"):
+            mi.refresh_memory_index(project_root=self.root, out_file=self.index_file)
+            supportive = mi.retrieve_memory("queued successful clip", index_file=self.index_file, limit=3)
+            cautionary = mi.retrieve_memory("rejected skipped below clip", index_file=self.index_file, limit=3)
+
+        self.assertEqual(supportive[0]["signal"], "supportive")
+        self.assertEqual(cautionary[0]["signal"], "cautionary")
+        self.assertIn("clip", supportive[0]["matched_terms"])
 
 
 if __name__ == "__main__":

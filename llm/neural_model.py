@@ -12,6 +12,7 @@ What this does:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from pathlib import Path
 from torch.optim import SGD
 from torch.utils.data import Dataset, DataLoader
 
@@ -223,13 +224,14 @@ if __name__ == "__main__":
     # --- SAVE AND RELOAD THE MODEL ---
     # This shows that the trained weights persist and work later
     print("\n" + "-" * 70)
+    model_path = Path(__file__).with_name("neural_model.pth")
     print("Saving model to disk...")
-    torch.save(model.state_dict(), "neural_model.pth")
-    print("Saved as 'neural_model.pth'")
+    torch.save(model.state_dict(), model_path)
+    print(f"Saved as '{model_path}'")
 
     print("Creating a fresh model and loading the saved weights...")
     fresh_model = NeuralNetwork(num_inputs=2, num_outputs=2)
-    fresh_model.load_state_dict(torch.load("neural_model.pth", weights_only=True))
+    fresh_model.load_state_dict(torch.load(model_path, weights_only=True))
     print("Weights loaded successfully!\n")
 
     # Verify the fresh model has the same accuracy
@@ -238,6 +240,6 @@ if __name__ == "__main__":
     print(f"Reloaded model test accuracy: {reloaded_accuracy:.4f}")
 
     if reloaded_accuracy == test_accuracy:
-        print("✓ Reloaded model performs identically to the original!")
+        print("Reloaded model performs identically to the original!")
 
     print("-" * 70)

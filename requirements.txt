@@ -7,7 +7,6 @@ opencv-python
 
 # AI and chat
 openai
-anthropic
 twitchio<3.0.0
 langchain
 langchain-huggingface
