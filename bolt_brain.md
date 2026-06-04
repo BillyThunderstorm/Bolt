@@ -8,7 +8,7 @@
 
 Billy is a self-taught content creator learning coding and content creation at the same time. Everything is being figured out as he goes — and that's part of the story. He's building Bolt alongside building himself as a creator. The goal is mutual growth: as Billy levels up, Bolt levels up with him.
 
-**The mission:** Become a recognized voice in gaming highlights, tech reviews, and product testing.
+**The mission:** Become a recognized voice in the gaming field, tech reviews, skin care and product testing.
 
 ---
 

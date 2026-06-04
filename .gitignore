@@ -46,3 +46,6 @@ llm-env/
 yolov5
 yolov5
 credentials.json
+.env.backup
+scripts/launcher_stdout.log
+scripts/launcher_stderr.log

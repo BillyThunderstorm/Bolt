@@ -1,54 +1,26 @@
 # Bolt Commands To Remember
 
-This file keeps the important Bolt commands in one place.
+This file keeps the current Bolt commands in one place.
 
 ## Local Paths
 
-Go to the real Bolt project:
+Real Bolt repo:
 
 ```bash
 cd "/Users/carter/developer/Bolt"
 ```
 
-Go to the helper scripts folder:
+Helper workspace for side scaffolds and sibling tooling:
 
 ```bash
 cd "/Users/carter/Documents/Codex/2026-05-13/im-trying-to-create-my-own"
 ```
 
-## Run The Repair/Patch Scripts
+Keep those workspaces separate unless you are intentionally copying a specific artifact.
 
-Run these from the helper scripts folder. They patch the Bolt project.
+## Setup
 
-```bash
-python3 bolt_repair.py
-```
-
-```bash
-python3 bolt_patch_ai_title.py
-```
-
-```bash
-python3 bolt_patch_lazy_clip_factory.py
-```
-
-```bash
-python3 bolt_patch_lazy_highlight.py
-```
-
-```bash
-python3 bolt_patch_lazy_tiktok.py
-```
-
-Note: the helper scripts currently point at an older iCloud Bolt path. Update their `ROOT` value to this before running them:
-
-```python
-ROOT = Path("/Users/carter/developer/Bolt")
-```
-
-## Bolt Setup Commands
-
-Run these from the Bolt project folder:
+Run from `/Users/carter/developer/Bolt`:
 
 ```bash
 python3 -m venv .venv
@@ -66,13 +38,17 @@ python3 -m pip install --upgrade pip
 python3 -m pip install -r requirements.txt
 ```
 
+Create a local `.env` from the safe template:
+
+```bash
+cp .env.example .env
+```
+
 Back up `.env` before changing keys:
 
 ```bash
 cp .env .env.backup
 ```
-
-Note: this repo currently has `.env`, but does not have `.env.example`.
 
 ## Verify Bolt
 
@@ -82,18 +58,26 @@ Run the project verifier:
 python3 scripts/verify.py
 ```
 
-Note: `scripts/verify.py` may warn about older file names that are no longer in this repo.
+Run the unit tests:
+
+```bash
+python3 -m unittest
+```
+
+Run focused tests:
+
+```bash
+python3 -m unittest tests.test_memory_index
+```
+
+```bash
+python3 -m unittest tests.test_think_learn_decide
+```
 
 Run Python compile checks:
 
 ```bash
-python3 -m compileall .
-```
-
-Run tests:
-
-```bash
-python3 -m pytest
+python3 -m compileall launch.py bot.py modules scripts tests
 ```
 
 ## Launch Bolt
@@ -104,10 +88,10 @@ Run the full launch flow:
 python3 launch.py
 ```
 
-Skip the checklist:
+Process the latest recording:
 
 ```bash
-python3 launch.py --no-checklist
+python3 launch.py process
 ```
 
 Run the bot directly:
@@ -124,7 +108,86 @@ Drop recordings into `recordings/`, then run:
 python3 scripts/process_recordings.py
 ```
 
-## Twitch Token
+## Chat, Voice, And Local Controls
+
+Run Bolt chat locally:
+
+```bash
+python3 -m modules.Bolt_Chat
+```
+
+Test voice:
+
+```bash
+python3 -m modules.Bolt_Voice "say this out loud"
+```
+
+Useful chat commands when Bolt chat is running:
+
+```text
+!queue
+!recall honest product reviews
+!recall beauty skincare routine product test
+!recall AI development virtual teammate
+```
+
+## Memory
+
+Refresh the local searchable memory index after editing memory files:
+
+```bash
+python3 scripts/refresh_memory_index.py
+```
+
+Search memory through the index module:
+
+```bash
+python3 -m modules.Memory_Index --refresh "Amazon Influencer storefront product testing"
+```
+
+Search memory through Bolt memory:
+
+```bash
+python3 -m modules.Bolt_Memory --search "beauty skincare routine product test results"
+```
+
+## Content Results And Learning
+
+List logged performance outcomes:
+
+```bash
+python3 scripts/log_clip_performance.py --list
+```
+
+Log a posted clip result:
+
+```bash
+python3 scripts/log_clip_performance.py --clip clips/example.mp4 --platform TikTok --note "Strong opening hook"
+```
+
+## Multi-Platform Posting Plans
+
+Build a no-cost posting packet:
+
+```bash
+python3 -m modules.Multi_Publisher clips/example.mp4 "Working title" --hashtags gaming ai
+```
+
+## Title Generation
+
+Monitor title generation results:
+
+```bash
+python3 scripts/monitor_title_results.py
+```
+
+Run the local title upgrade test helper:
+
+```bash
+python3 scripts/test_title_upgrade_10_clips.py
+```
+
+## Tokens And Auth
 
 Generate or refresh the Twitch bot token:
 
@@ -132,42 +195,42 @@ Generate or refresh the Twitch bot token:
 python3 scripts/get_twitch_token.py
 ```
 
-## Clip Performance Logging
-
-Log TikTok performance after posting so Bolt can learn:
+Generate or refresh TikTok auth:
 
 ```bash
-python3 scripts/log_clip_performance.py
+python3 scripts/get_tiktok_token.py
 ```
 
-## Cleanup
+## AI Learning
 
-Run Bolt cleanup:
+Run the cleaned neural-network learning example:
 
 ```bash
-bash scripts/cleanup_bolt.sh
+python3 llm/neural_model.py
 ```
 
-## Git LFS Commands
-
-Use these if Bolt needs Git LFS for large video/model files:
+## Docs To Check Before Upgrades
 
 ```bash
-git lfs install
+open README.md
 ```
 
 ```bash
-cp "/Users/carter/Documents/Codex/2026-05-13/im-trying-to-create-my-own/bolt_gitattributes_fixed" .gitattributes
+open docs/INDEX.md
 ```
 
 ```bash
-git add .gitattributes
+open docs/PROJECT_STATUS.md
 ```
 
-## Helpful Checks
+```bash
+open memory/content/full-creator-vision.md
+```
+
+## Git Checks
 
 ```bash
-git status
+git status --short
 ```
 
 ```bash
@@ -175,5 +238,5 @@ git diff --stat
 ```
 
 ```bash
-find . -maxdepth 3 -name "*.py"
+git diff -- README.md BOLT_COMMANDS.md docs memory brand llm
 ```

@@ -2,7 +2,7 @@
 
 ## Direction
 
-Billy wants to become a recognized voice in gaming highlights, tech reviews, and product testing.
+Billy wants to become a recognized voice in gaming highlights, tech reviews, general product testing, and practical recommendations. Product reviews connect directly to his Amazon Influencer storefront, so Bolt should remember products, tests, verdicts, and audience usefulness.
 
 The review style should be:
 
@@ -29,6 +29,20 @@ Lean into:
 | Item | Category | Status | Notes |
 |---|---|---|---|
 | TBD | gear/game/app | idea | Add products here as Billy chooses them |
+
+## Amazon Influencer Storefront Context
+
+Reviews should help someone decide whether a product is actually worth trying or buying. Bolt should track:
+
+- product name and category
+- where it fits in the storefront
+- why Billy tested it
+- real-world use case
+- what worked
+- what did not work
+- who it is for
+- honest verdict
+- content links or posting results when available
 
 ## Reusable Review Shape
 

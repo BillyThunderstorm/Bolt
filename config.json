@@ -17,7 +17,7 @@
   "quality_tiers": {
     "discard_below": 60,
     "queue_at": 80,
-    "use_ai_titles": false,
+    "use_ai_titles": true,
     "_comment": "score < discard_below = discard; discard_below <= score < min_post_score = mid; score >= min_post_score and < queue_at = queue without Discord ping; score >= queue_at = auto-queue + Discord alert"
   },
   "highlight": {
@@ -60,7 +60,14 @@
     "check_interval_minutes": 15,
     "discord_enabled": true
   },
-  "notes": "TikTok auto-posting is off. Bolt formats clips, saves captions, and pings you at peak hours so you can post manually from the queue.",
+  "auto_posting": {
+    "enabled": true,
+    "review_window_minutes": 30,
+    "auto_post_if_deadline_missed": true,
+    "require_rejection_reason": true,
+    "privacy": "PUBLIC_TO_EVERYONE"
+  },
+  "notes": "Auto-posting has safeguards: Bolt asks for review 30 minutes before peak time, posts if approved or if the deadline is missed, and holds rejected clips with a required reason.",
   "auto_rank": true,
   "min_post_score": 65
 }

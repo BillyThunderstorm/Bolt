@@ -22,7 +22,7 @@ During training, the model can't "cheat" by looking at future tokens. A mask is 
 
 ## Why this matters for Bolt
 
-This is the actual mechanism that makes Claude useful. When you send Bolt's memory as context, attention is what lets Claude connect a fact from MEMORY.md to a question asked three paragraphs later. The model isn't searching a database — it's computing attention weights across every token in context simultaneously.
+This is the actual mechanism that makes OpenAI useful. When you send Bolt's memory as context, attention is what lets GPT connect a fact from MEMORY.md to a question asked three paragraphs later. The model isn't searching a database — it's computing attention weights across every token in context simultaneously.
 
 Understanding this explains:
 - Why longer, clearer prompts work better (more relevant tokens for attention to find)
@@ -41,6 +41,6 @@ Understanding this explains:
 | Attention weight | How much one token "pays attention" to another (0 to 1) |
 
 ## Connected files in Bolt
-- `modules/Bolt_Memory.py` — the memory context is what Claude runs attention over
-- `modules/Think_Learn_Decide.py` — uses Claude (attention-powered) to make decisions about clips
+- `modules/Bolt_Memory.py` — the memory context is what GPT runs attention over
+- `modules/Think_Learn_Decide.py` — uses OpenAI (attention-powered) to make decisions about clips
 - `neural_model.py` — the linear layers in your neural net are the precursor concept; attention adds the "look at everything at once" superpower

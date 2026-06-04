@@ -52,6 +52,9 @@ class ThinkLearnDecideTests(unittest.TestCase):
                          "source": "logs/decision_audit.log",
                          "kind": "decision_audit",
                          "score": 0.5,
+                         "signal": "supportive",
+                         "signal_reason": "supportive terms: queued",
+                         "matched_terms": ["marvel", "rivals"],
                          "summary": "Past Marvel Rivals clip was queued for manual review.",
                      }
                  ],
@@ -62,6 +65,8 @@ class ThinkLearnDecideTests(unittest.TestCase):
         self.assertEqual(thought["retrieved_memory_count"], 1)
         self.assertIn("Marvel Rivals", thought["memory_query"])
         self.assertEqual(thought["retrieved_memory"][0]["kind"], "decision_audit")
+        self.assertEqual(thought["memory_influence"]["net_direction"], "supportive")
+        self.assertEqual(thought["memory_influence"]["supportive"], 1)
 
     def test_proposal_ranking_and_policy(self):
         proposals = self.engine.propose_actions(
@@ -115,6 +120,33 @@ class ThinkLearnDecideTests(unittest.TestCase):
         self.assertLess(reduced.confidence, base.confidence)
         self.assertIn("memory boosted confidence", boosted.reason)
         self.assertIn("memory reduced confidence", reduced.reason)
+
+    def test_memory_influence_adjusts_proposal_confidence(self):
+        base = self.engine.propose_actions(
+            [{"action": "queue_clip", "score": 70, "clip_path": "plain.mp4"}]
+        )[0]
+        boosted = self.engine.propose_actions(
+            [
+                {
+                    "action": "queue_clip",
+                    "score": 70,
+                    "clip_path": "good.mp4",
+                    "memory_influence": {
+                        "supportive": 2,
+                        "cautionary": 0,
+                        "mixed": 0,
+                        "context": 1,
+                        "net_direction": "supportive",
+                        "confidence_delta": 0.04,
+                        "strongest_match": {"title": "Strong product test"},
+                    },
+                }
+            ]
+        )[0]
+
+        self.assertGreater(boosted.confidence, base.confidence)
+        self.assertIn("memory boosted confidence", boosted.reason)
+        self.assertIn("Strong product test", boosted.reason)
 
     def test_learning_updates_model(self):
         self.engine.learn_from_feedback("queue_clip", accepted=False, feedback_text="bad fit")

@@ -55,14 +55,14 @@ The model has 163M parameters total (124M when you tie the input/output weights 
 
 ## Why this matters for Bolt
 
-This is the architecture behind Claude. When Bolt sends context to Claude — memory files, chat history, clip metadata — those tokens go through exactly this structure. Knowing this changes how you think about prompts:
+This is the architecture behind GPT-4. When Bolt sends context to OpenAI — memory files, chat history, clip metadata — those tokens go through exactly this structure. Knowing this changes how you think about prompts:
 
 - **Residual connections** mean early information doesn't just disappear — it stays in the mix through all 12+ layers. Important context early in a prompt still matters at the end.
 - **The FeedForward 4x expansion** is where "reasoning" happens at the token level. Richer prompts with more context give this layer more to work with.
-- **LayerNorm** explains why Claude handles both short and long inputs without breaking — the normalization keeps everything in range regardless of input size.
-- **Weight tying** is a hint at why Claude's input vocabulary and output vocabulary are the same thing — it's predicting tokens from the same space it reads them.
+- **LayerNorm** explains why GPT-4 handles both short and long inputs without breaking — the normalization keeps everything in range regardless of input size.
+- **Weight tying** is a hint at why GPT's input vocabulary and output vocabulary are the same thing — it's predicting tokens from the same space it reads them.
 
-Practically: `modules/Think_Learn_Decide.py` and `modules/AI_Title_Generator.py` are calling Claude — which means they're firing this full architecture on every call. Every token in Bolt's memory context is going through 96 transformer blocks (Claude's architecture, much deeper than GPT-2's 12).
+Practically: `modules/Think_Learn_Decide.py` and `modules/AI_Title_Generator.py` are calling OpenAI — which means they're firing this full architecture on every call. Every token in Bolt's memory context is going through GPT-4's transformer blocks on every call.
 
 ## What I can do with this now
 
@@ -80,7 +80,7 @@ Practically: `modules/Think_Learn_Decide.py` and `modules/AI_Title_Generator.py`
 ## Connected files in Bolt
 - `llm/neural_model.py` — the FeedForward block is essentially this, just embedded inside GPT
 - `llm/neural_model.pth` — saved weights, analogous to what a trained GPT checkpoint looks like
-- `modules/Think_Learn_Decide.py` — calls Claude (which runs this architecture) to make clip decisions
-- `modules/AI_Title_Generator.py` — calls Claude to generate titles, fires the full transformer on each call
-- `modules/Bolt_Memory.py` — loads context for Claude; understanding transformer attention explains why memory structure matters
+- `modules/Think_Learn_Decide.py` — calls OpenAI (which runs this architecture) to make clip decisions
+- `modules/AI_Title_Generator.py` — calls OpenAI to generate titles, fires the full transformer on each call
+- `modules/Bolt_Memory.py` — loads context for OpenAI; understanding transformer attention explains why memory structure matters
 - `llm/LLMs-from-scratch/ch04/` — the actual notebook for this chapter
