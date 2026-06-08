@@ -52,7 +52,7 @@ except ImportError:
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
-VOICE           = os.getenv("Bolt_VOICE", "Nathan (Enhanced)")
+VOICE           = os.getenv("Bolt_VOICE", "Good News")  # Cheerful-dark, perfect for Bolt
 RATE            = int(os.getenv("Bolt_VOICE_RATE", "175"))   # words per minute
 MUTED           = os.getenv("Bolt_VOICE_MUTE", "false").lower() == "true"
 
@@ -62,9 +62,9 @@ MUTED           = os.getenv("Bolt_VOICE_MUTE", "false").lower() == "true"
 EDGE_TTS_VOICE  = os.getenv("Bolt_EDGE_VOICE", "en-US-ChristopherNeural")
 EDGE_TTS_RATE   = os.getenv("Bolt_EDGE_RATE", "+0%")   # e.g. +10% faster, -10% slower
 
-# ElevenLabs (kept for future use, not active)
-ELEVENLABS_KEY      = os.getenv("ELEVENLABS_API_KEY", "")
-ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "")
+# ElevenLabs — PRIMARY TTS 
+ELEVENLABS_KEY      = os.getenv("ELEVENLABS_API_KEY", "sk_ab867a447da9976e33d40f8d2c1da14b9ee2b12bad1df904")
+ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "o3VpiaQ9JcGIFpOrkHHf")  # Cowboy
 
 
 # ── What Bolt says for each event type ────────────────────────────────────────
@@ -122,14 +122,17 @@ def _start_worker():
 def _speak_now(text: str):
     """
     The actual TTS call. Priority order:
-      1. edge-tts (free, neural quality, internet required)
-      2. macOS say command (free, offline, always available)
-      3. ElevenLabs (optional future upgrade, requires API key)
+      1. ElevenLabs (primary — most natural voice)
+      2. edge-tts (free, neural quality — second best)
+      3. macOS say command (free, offline, always available)
     """
     if MUTED:
         return
 
-    # edge-tts first — better voice quality, completely free
+    # ElevenLabs first — most natural
+    if _try_elevenlabs(text):
+        return
+
     if _try_edge_tts(text):
         return
 
