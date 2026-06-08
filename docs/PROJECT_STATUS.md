@@ -180,3 +180,50 @@ June 6, 2026
 | `*/30 * * * *` | Video Compression | Active |
 | `0 */3 * * *` | Storage Monitoring + Alerts | Active |
 | `0 */6 * * *` | Media Rotation | Active |
+
+## Websites (NEW - June 8, 2026)
+
+Bolt now runs three live websites and a Cloudflare Worker API:
+
+| Site | URL | Description |
+|------|-----|-------------|
+| **Bolt Command Center** | bolt.billythunderstorm.us | Terminal, clip queue, daily briefing, peak hours, brain activity |
+| **Billy Thunderstorm** | billythunderstorm.us | Creator portfolio, hero image, milestones, storefront, social links |
+| **Live Status** | billythunderstorm.live | Stream status, peak hours, social links |
+| **API Worker** | api.billythunderstorm.us | JSON endpoints serving live data from GitHub |
+
+### Architecture
+
+```
+Bolt (local) → scripts/site_data_writer.py → GitHub (site-data.json)
+                                                    ↓
+Cloudflare Worker (api.billythunderstorm.us) → reads GitHub raw
+                                                    ↓
+Three Cloudflare Pages sites → fetch from API every 60 seconds
+```
+
+### Key Details
+- All sites deployed to Cloudflare Pages (direct upload)
+- API Worker reads `site-data.json` from GitHub (30-second cache)
+- Sites automatically fall back to localhost:8103 for local development
+- Twitch username: ThunderstormBilly
+- Domains: billythunderstorm.us and bolt.billythunderstorm.us on Cloudflare, billythunderstorm.live via Streamlabs/Namecheap with Cloudflare DNS
+
+### Keeping Data Fresh
+Run after each pipeline cycle:
+```bash
+python3 scripts/site_data_writer.py --push
+```
+
+Or add to cron for auto-updates every 15 minutes:
+```bash
+*/15 * * * * cd /Users/carter/developer/Bolt && python3 scripts/site_data_writer.py --push
+```
+
+### Redeploying Sites
+```bash
+wrangler pages deploy /tmp/sites/bolt  --project-name=bolt-fortress
+wrangler pages deploy /tmp/sites/main   --project-name=billythunderstorm
+wrangler pages deploy /tmp/sites/live   --project-name=billythunderstorm-live
+cd /tmp/sites/bolt-api-worker && wrangler deploy
+```

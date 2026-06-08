@@ -154,6 +154,19 @@ Bolt provides multiple ways to interact:
 | Compression Log | `logs/video_compression.log` | Compression results |
 | Cron Schedule | `crontab -l` | Active jobs |
 
+
+## Websites
+
+| File / URL | Description |
+|-------------|-------------|
+| `scripts/site_data_writer.py` | Pushes live data to GitHub for websites |
+| `site-data.json` | Current site data snapshot (auto-updated) |
+| [bolt.billythunderstorm.us](https://bolt.billythunderstorm.us) | Command center |
+| [billythunderstorm.us](https://billythunderstorm.us) | Creator portfolio |
+| [billythunderstorm.live](https://billythunderstorm.live) | Live status page |
+| [api.billythunderstorm.us](https://api.billythunderstorm.us) | Live data API |
+| `/tmp/sites/` | Site source files and deploy configs |
+
 ## Legacy or Archived
 
 | File | Description |
@@ -163,4 +176,4 @@ Bolt provides multiple ways to interact:
 
 ---
 
-*Last updated: June 6, 2026 - Added storage management docs and user interfaces index*
+*Last updated: June 8, 2026 - Added storage management docs and user interfaces index*
