@@ -296,4 +296,19 @@ Before adding new paid services, keep upgrades local-first:
 - RAG study materials added to `teaching/rag/`
 - Storage alerting infrastructure prepared
 
-*Last updated: June 6, 2026 - Comprehensive documentation update with all user interfaces, storage management features, and completed upgrades*
+
+## Websites
+
+Bolt runs three live websites on Cloudflare:
+
+| Site | URL | Description |
+|------|-----|-------------|
+| **Bolt Command Center** | [bolt.billythunderstorm.us](https://bolt.billythunderstorm.us) | Terminal, clip queue, daily briefing, peak hours |
+| **Billy Thunderstorm** | [billythunderstorm.us](https://billythunderstorm.us) | Creator portfolio, milestones, storefront |
+| **Live Status** | [billythunderstorm.live](https://billythunderstorm.live) | Stream status, peak hours, socials |
+| **API Worker** | [api.billythunderstorm.us](https://api.billythunderstorm.us) | JSON endpoints for live data |
+
+Keep site data fresh: `python3 scripts/site_data_writer.py --push`
+Redeploy: `wrangler pages deploy /tmp/sites/bolt --project-name=bolt-fortress`
+
+*Last updated: June 8, 2026 - Comprehensive documentation update with all user interfaces, storage management features, and completed upgrades*

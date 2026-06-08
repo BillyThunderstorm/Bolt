@@ -212,6 +212,77 @@ Run the cleaned neural-network learning example:
 python3 llm/neural_model.py
 ```
 
+## Websites (NEW)
+
+Bolt runs three websites and an API on Cloudflare:
+
+| Site | URL | Description |
+|------|-----|-------------|
+| **Bolt Command Center** | bolt.billythunderstorm.us | Terminal, clip queue, briefing, peak hours |
+| **Billy Thunderstorm** | billythunderstorm.us | Creator portfolio, milestones, storefront, socials |
+| **Live Status** | billythunderstorm.live | Stream status, peak hours, social links |
+| **API Worker** | api.billythunderstorm.us | JSON endpoints for live data |
+
+### Update Site Data
+
+After each Bolt pipeline run, push fresh data to the websites:
+
+```bash
+python3 scripts/site_data_writer.py --push
+```
+
+Or add to bot.py as an import:
+
+```python
+from scripts.site_data_writer import write_site_data
+write_site_data(push=True)
+```
+
+### Set Up Cron for Auto-Updates
+
+```bash
+crontab -e
+# Add this line for every 15 minutes:
+*/15 * * * * cd /Users/carter/developer/Bolt && python3 scripts/site_data_writer.py --push
+```
+
+### Redeploy Sites (After Content Changes)
+
+Site files are in `/tmp/sites/`. If you modify the HTML/CSS/JS, redeploy:
+
+```bash
+wrangler pages deploy /tmp/sites/bolt  --project-name=bolt-fortress
+wrangler pages deploy /tmp/sites/main   --project-name=billythunderstorm
+wrangler pages deploy /tmp/sites/live   --project-name=billythunderstorm-live
+```
+
+API Worker (only if worker.js changed):
+
+```bash
+cd /tmp/sites/bolt-api-worker && wrangler deploy
+```
+
+### Local Development
+
+For testing sites locally, run the API server:
+
+```bash
+python3 /tmp/sites/api_server.py
+# Serves at http://localhost:8103
+```
+
+Then open site files in a browser — they'll fall back to localhost:8103 automatically.
+
+### API Endpoints
+
+| Endpoint | Returns |
+|----------|---------|
+| `api.billythunderstorm.us/api/status` | Clip counts, API key status |
+| `api.billythunderstorm.us/api/queue` | Clip queue with titles |
+| `api.billythunderstorm.us/api/briefing` | Daily briefing |
+| `api.billythunderstorm.us/api/peaks` | Peak hour schedule |
+| `api.billythunderstorm.us/api/all` | Everything in one request |
+
 ## Storage Management & Monitoring
 
 ### Run Storage Optimization
@@ -282,6 +353,7 @@ Configuration options:
 
 ```bash
 open README.md
+open BOLT_COMMANDS.md
 open docs/INDEX.md
 open docs/PROJECT_STATUS.md
 open memory/content/full-creator-vision.md
@@ -319,6 +391,10 @@ git diff -- README.md BOLT_COMMANDS.md docs memory brand llm
 | **Storage Monitor** | `scripts/monitoring/storage_monitor.sh` | Disk usage + alerts |
 | **Video Compressor** | `scripts/media_processing/compress_videos.sh` | HandBrake compression |
 | **Media Rotator** | `scripts/maintenance/media_rotation.sh` | Auto-archival |
+| **Site Data Writer** | `python3 scripts/site_data_writer.py --push` | Push live data to websites |
+| **Bolt Website** | bolt.billythunderstorm.us | Command center |
+| **Billy Website** | billythunderstorm.us | Creator portfolio |
+| **Live Status** | billythunderstorm.live | Stream status page |
 
 ## Cron Jobs (Automated)
 
@@ -331,6 +407,7 @@ Current schedule:
 - `*/30 * * * *` - Video compression
 - `0 */3 * * *` - Storage monitoring with alerts
 - `0 */6 * * *` - Media rotation/archival
+- `*/15 * * * *` - Site data push to websites (recommended)
 
 ## Storage Alert Notifications
 
@@ -367,4 +444,4 @@ python3 scripts/daily_briefing.py --output /path/to/briefing.md
 - Dynamic action items
 - Quick command references
 
-*Last updated: June 7, 2026 - Added daily briefing generator with 7am cron schedule*
+*Last updated: June 8, 2026 - Added websites section, site data writer, and deployment commands*

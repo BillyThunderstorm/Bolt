@@ -270,3 +270,39 @@ tail -f logs/video_compression.log
 *Last updated: June 6, 2026 - All planned upgrades completed*
 *Current storage: Run `du -sh .` for current size*
 *Cron jobs active: Run `crontab -l` for schedule*
+
+## 🌐 Websites Deployment (June 8, 2026) ✅ COMPLETE
+
+### Deployed Sites
+- **bolt.billythunderstorm.us** — Command center with terminal, clip queue, briefing, peak hours
+- **billythunderstorm.us** — Creator portfolio with hero, milestones, storefront, socials
+- **billythunderstorm.live** — Live status page with stream status, peak hours
+- **api.billythunderstorm.us** — Cloudflare Worker API serving live data from GitHub
+
+### Data Flow
+```
+Bolt local pipeline → site_data_writer.py → GitHub site-data.json
+                                                      ↓
+Cloudflare Worker reads from GitHub raw → serves /api/* endpoints
+                                                      ↓
+Sites fetch from API every 60 seconds
+```
+
+### Key Commands
+```bash
+# Push fresh data to websites
+python3 scripts/site_data_writer.py --push
+
+# Redeploy after HTML/CSS/JS changes
+wrangler pages deploy /tmp/sites/bolt  --project-name=bolt-fortress
+wrangler pages deploy /tmp/sites/main   --project-name=billythunderstorm
+wrangler pages deploy /tmp/sites/live   --project-name=billythunderstorm-live
+
+# Redeploy API Worker (only if worker.js changed)
+cd /tmp/sites/bolt-api-worker && wrangler deploy
+
+# Local development
+python3 /tmp/sites/api_server.py  # serves at localhost:8103
+```
+
+*Last updated: June 8, 2026 - Websites deployed and live*
