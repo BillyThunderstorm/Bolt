@@ -110,35 +110,38 @@ python3 scripts/process_recordings.py
 
 ## Chat, Voice, And Local Controls
 
+### Bolt Chat Module
 Run Bolt chat locally:
 
 ```bash
 python3 -m modules.Bolt_Chat
 ```
 
+### Voice Commands
 Test voice:
 
 ```bash
 python3 -m modules.Bolt_Voice "say this out loud"
 ```
 
-Useful chat commands when Bolt chat is running:
-
+### Chat Commands (when Bolt is running)
 ```text
-!queue
+!queue                    - Show current clip queue status
 !recall honest product reviews
 !recall beauty skincare routine product test
 !recall AI development virtual teammate
 ```
 
-## Memory
+## Memory Operations
 
+### Refresh Memory Index
 Refresh the local searchable memory index after editing memory files:
 
 ```bash
 python3 scripts/refresh_memory_index.py
 ```
 
+### Search Memory
 Search memory through the index module:
 
 ```bash
@@ -153,6 +156,7 @@ python3 -m modules.Bolt_Memory --search "beauty skincare routine product test re
 
 ## Content Results And Learning
 
+### Log Performance
 List logged performance outcomes:
 
 ```bash
@@ -165,8 +169,7 @@ Log a posted clip result:
 python3 scripts/log_clip_performance.py --clip clips/example.mp4 --platform TikTok --note "Strong opening hook"
 ```
 
-## Multi-Platform Posting Plans
-
+### Multi-Platform Posting
 Build a no-cost posting packet:
 
 ```bash
@@ -209,22 +212,81 @@ Run the cleaned neural-network learning example:
 python3 llm/neural_model.py
 ```
 
+## Storage Management & Monitoring
+
+### Run Storage Optimization
+```bash
+# Dry run to see what would be done
+python3 scripts/maintenance/storage_optimization.sh --dry-run
+
+# Run actual optimization (use with caution)
+python3 scripts/maintenance/storage_optimization.sh
+
+# Skip deduplication (faster, but less thorough)
+python3 scripts/maintenance/storage_optimization.sh --skip-dedup
+
+# Customize limits
+python3 scripts/maintenance/storage_optimization.sh --recordings-gb 40 --clips-gb 0.5
+```
+
+### Individual Maintenance Scripts
+```bash
+# Media rotation (size-based, runs every 6 hours via cron)
+scripts/maintenance/media_rotation.sh
+
+# Storage monitoring with alerts (runs every 3 hours via cron)
+scripts/monitoring/storage_monitor.sh
+
+# Video compression (runs every 30 minutes via cron)
+scripts/media_processing/compress_videos.sh
+```
+
+### Duplicate Detection
+```bash
+# Scan for duplicates in clips and recordings
+python3 scripts/clip_deduplicator.py
+
+# Dry run mode (no database changes)
+python3 scripts/clip_deduplicator.py --dry-run
+
+# Check a single file
+python3 scripts/clip_deduplicator.py --check clips/example.mp4
+
+# Clear the hash database
+python3 scripts/clip_deduplicator.py --clear-db
+```
+
+### Performance Baseline
+```bash
+# Measure current performance metrics
+python3 scripts/performance_baseline.py
+```
+
+## Storage Alert Configuration
+
+Configure email and SMS alerts:
+
+```bash
+# Edit the configuration file
+nano configs/storage_alerts.env
+```
+
+Configuration options:
+- `ALERT_EMAIL` - Email address for alerts
+- `ALERT_PHONE` - Phone number for SMS (digits only)
+- `CARRIER` - Mobile carrier (att, verizon, tmobile, sprint, virgin, boost)
+- `WEBHOOK_URL` - Generic webhook URL
+- `DISCORD_WEBHOOK` - Discord webhook URL
+
 ## Docs To Check Before Upgrades
 
 ```bash
 open README.md
-```
-
-```bash
 open docs/INDEX.md
-```
-
-```bash
 open docs/PROJECT_STATUS.md
-```
-
-```bash
 open memory/content/full-creator-vision.md
+open NEXT_UPGRADE_STEPS.md
+open OPTIMIZATION_ROADMAP.md
 ```
 
 ## Git Checks
@@ -240,3 +302,69 @@ git diff --stat
 ```bash
 git diff -- README.md BOLT_COMMANDS.md docs memory brand llm
 ```
+
+## User Interfaces Summary
+
+| Interface | Command/Path | Description |
+|-----------|--------------|-------------|
+| **CLI Launcher** | `python3 launch.py` | Main entry point for Bolt |
+| **Bot Runtime** | `python3 bot.py` | Direct bot execution |
+| **Chat Module** | `python3 -m modules.Bolt_Chat` | Local chat testing |
+| **Voice Module** | `python3 -m modules.Bolt_Voice "text"` | TTS voice output |
+| **Memory Search** | `python3 -m modules.Memory_Index` | Searchable memory index |
+| **Memory Browser** | `python3 -m modules.Bolt_Memory` | Full memory operations |
+| **Checkup Dashboard** | `docs/Bolt_Checkup.html` | Live status dashboard |
+| **Duplicate Scanner** | `python3 scripts/clip_deduplicator.py` | Hash-based dedup |
+| **Performance Baseline** | `python3 scripts/performance_baseline.py` | Benchmark metrics |
+| **Storage Monitor** | `scripts/monitoring/storage_monitor.sh` | Disk usage + alerts |
+| **Video Compressor** | `scripts/media_processing/compress_videos.sh` | HandBrake compression |
+| **Media Rotator** | `scripts/maintenance/media_rotation.sh` | Auto-archival |
+
+## Cron Jobs (Automated)
+
+```bash
+# View active cron jobs
+crontab -l
+```
+
+Current schedule:
+- `*/30 * * * *` - Video compression
+- `0 */3 * * *` - Storage monitoring with alerts
+- `0 */6 * * *` - Media rotation/archival
+
+## Storage Alert Notifications
+
+When disk usage exceeds thresholds, alerts are sent to:
+- **Email**: billycarteriv@gmail.com
+- **SMS**: 707-567-8495 (AT&T)
+
+Thresholds:
+- Warning: 80% disk usage
+- Critical: 95% disk usage
+
+## Daily Briefing
+
+Generate a morning briefing with queue status, storage, and action items:
+
+```bash
+# Generate and save briefing (saves to briefings/daily/)
+python3 scripts/daily_briefing.py
+
+# Print to stdout only
+python3 scripts/daily_briefing.py --print
+
+# Save to custom path
+python3 scripts/daily_briefing.py --output /path/to/briefing.md
+```
+
+**Cron Schedule**: Runs automatically at 7:00 AM daily
+
+**Briefing Includes**:
+- Queue status (clips ready to post)
+- Storage usage (recordings, clips, logs, disk %)
+- Recent clips table
+- Processing stats
+- Dynamic action items
+- Quick command references
+
+*Last updated: June 7, 2026 - Added daily briefing generator with 7am cron schedule*

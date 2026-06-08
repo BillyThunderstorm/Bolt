@@ -1,41 +1,60 @@
-# Core pipeline
-librosa
-moviepy
-openai-whisper
-numpy
-opencv-python
+# Bolt - Creator Assistant
+# Requirements organized by category
+# Last updated: June 6, 2026
 
-# AI and chat
-openai
-twitchio<3.0.0
-langchain
-langchain-huggingface
-langchain-community
-langchain-text-splitters
-chromadb
-sentence-transformers
+# =============================================================================
+# CORE VIDEO/AUDIO PROCESSING
+# =============================================================================
+moviepy          # Video editing and clip generation
+librosa          # Audio analysis for highlight detection
+numpy            # Numerical operations (required by librosa, moviepy, etc.)
+opencv-python    # Computer vision for frame analysis
 
-# Runtime integrations
-python-dotenv
-requests
-python-socketio[client]
-websocket-client
-obs-websocket-py
-flask
-SpeechRecognition
+# =============================================================================
+# AI/LLM INTEGRATION
+# =============================================================================
+openai           # Chat completions and embeddings
+langchain        # RAG and memory retrieval
+langchain-huggingface  # HuggingFace model integration
+langchain-community    # Community langchain integrations
+langchain-text-splitters  # Text chunking for RAG
+chromadb         # Vector database for memory storage
+sentence-transformers  # Embedding models
 
-# Google / calendar utilities
-google-api-python-client
-google-auth-httplib2
-google-auth-oauthlib
+# =============================================================================
+# PLATFORM INTEGRATIONS
+# =============================================================================
+twitchio<3.0.0   # Twitch chat and API (pinned for stability)
+obs-websocket-py # OBS Studio control
+python-socketio[client]  # Streamlabs real-time events
+websocket-client # Low-level WebSocket support
+requests         # HTTP requests for APIs
 
-# Voice and optional speech upgrades
-edge-tts
+# =============================================================================
+# GOOGLE SERVICES
+# =============================================================================
+google-api-python-client   # Gmail, Calendar APIs
+google-auth-httplib2       # Google auth support
+google-auth-oauthlib       # OAuth2 flow for Google
 
-# Scheduling and system utilities
-schedule
-psutil
-pytz
+# =============================================================================
+# VOICE/SPEECH
+# =============================================================================
+edge-tts     # Microsoft TTS for voice output
+SpeechRecognition  # Speech-to-text (optional)
 
-# Timezone support (Python < 3.9)
-backports.zoneinfo; python_version < "3.9"
+# =============================================================================
+# WEB/QUEUE
+# =============================================================================
+flask        # Local web server for callbacks
+
+# =============================================================================
+# UTILITIES
+# =============================================================================
+python-dotenv    # Environment variable management
+schedule         # Job scheduling
+psutil           # System monitoring
+pytz             # Timezone support
+
+# Note: backports.zoneinfo removed - Python 3.9+ has zoneinfo built-in
+# Note: openai-whisper removed - using openai API for transcription instead

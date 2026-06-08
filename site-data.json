@@ -1,0 +1,135 @@
+{
+  "generated_at": "2026-06-08 02:11:01",
+  "status": {
+    "clips_made": 52,
+    "vertical_clips": 0,
+    "ready_to_post": 12,
+    "recordings_processed": 98,
+    "api_keys": {
+      "twitch": true,
+      "obs": false,
+      "discord": true,
+      "tiktok": false
+    }
+  },
+  "queue": [
+    {
+      "id": "be211e22",
+      "created": "2026-05-29T06:06:38.227773",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "4a45e3a7",
+      "created": "2026-05-29T06:06:38.229236",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "0fc3aed6",
+      "created": "2026-05-29T06:06:38.230327",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "5448e1fe",
+      "created": "2026-05-29T06:06:38.232474",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "f13097df",
+      "created": "2026-06-02T12:44:49.325457",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "29896cfb",
+      "created": "2026-06-02T12:44:49.328068",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "ffcd58ec",
+      "created": "2026-06-02T12:44:49.329379",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "1bcd8b7e",
+      "created": "2026-06-02T12:44:49.332776",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "ba0c55ec",
+      "created": "2026-06-07T04:17:03.193757",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "372ca716",
+      "created": "2026-06-07T04:17:03.195440",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "cc337b0d",
+      "created": "2026-06-07T04:17:03.196522",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "db341bdf",
+      "created": "2026-06-07T04:17:03.198599",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    }
+  ],
+  "briefing": {
+    "date": "Sunday, June 07, 2026",
+    "action_items": [
+      "Upload 8 clip(s) from queue to TikTok/Shorts/Reels",
+      "Check for new recordings to process",
+      "Review clip performance and log results"
+    ]
+  },
+  "peaks": [
+    {
+      "label": "Morning",
+      "start_hour": 7,
+      "end_hour": 9,
+      "start_display": "7 AM",
+      "end_display": "9 AM",
+      "active": false
+    },
+    {
+      "label": "Lunch",
+      "start_hour": 12,
+      "end_hour": 14,
+      "start_display": "12 PM",
+      "end_display": "2 PM",
+      "active": false
+    },
+    {
+      "label": "Prime Time",
+      "start_hour": 19,
+      "end_hour": 22,
+      "start_display": "7 PM",
+      "end_display": "10 PM",
+      "active": false
+    }
+  ]
+}

@@ -2,15 +2,18 @@
 
 Bolt is Billy's local-first AI teammate for creator work, learning, and content operations.
 
+**AI Provider:** OpenAI (chat/responses) + ElevenLabs (voice TTS)
+
 It started as a Twitch and clip assistant, but the current vision is broader: Bolt helps Billy learn, test, teach, create, and improve across gaming, tech, AI development, product testing, Amazon Influencer storefront reviews, beauty/skincare, and building Bolt itself.
 
 ## Current Shape
 
-- Clip pipeline: watches recordings, detects highlights, cuts clips, ranks them, formats vertical exports, queues posts, and alerts Billy when clips are worth posting.
-- Decision layer: `Think_Learn_Decide` is the canonical intake/reasoning path, with `Brain_Controller` kept as a compatibility wrapper.
-- Memory layer: `modules/Memory_Index.py` builds a local searchable index from Markdown memory, queue/history data, decision logs, and posted-performance outcomes.
-- Content memory: `memory/content/` now tracks the full creator vision, product reviews, Amazon storefront context, beauty/skincare, AI learning, hooks, and posted-content lessons.
-- No-cost defaults: AI-assisted features stay optional and should fall back to local/template behavior when credentials are missing.
+- **Clip Pipeline**: Watches recordings, detects highlights, cuts clips, ranks them, formats vertical exports, queues posts, and alerts Billy when clips are worth posting
+- **Decision Layer**: `Think_Learn_Decide` is the canonical intake/reasoning path, with `Brain_Controller` kept as a compatibility wrapper
+- **Memory Layer**: `modules/Memory_Index.py` builds a local searchable index from Markdown memory, queue/history data, decision logs, and posted-performance outcomes
+- **Content Memory**: `memory/content/` tracks the full creator vision, product reviews, Amazon storefront context, beauty/skincare, AI learning, hooks, and posted-content lessons
+- **Storage Management**: Automated compression, rotation, and duplicate detection with email/SMS alerts
+- **No-Cost Defaults**: AI-assisted features stay optional and fall back to local/template behavior when credentials are missing
 
 ## Project Layout
 
@@ -37,6 +40,7 @@ Bolt/
 ├── brand/                    # Brand vision and identity docs
 ├── teaching/                 # Teaching/learning helper material
 │   └── rag/                  # RAG study notes and helper experiments
+├── configs/                  # Configuration files (alerts, rotation policies)
 ├── docs/reports/             # Debug reports and cleanup notes
 ├── docs/architecture/        # System-level architecture/readme material
 └── docs/upgrade/             # Upgrade strategy, status, and implementation notes
@@ -46,18 +50,19 @@ Bolt/
 
 Bolt should preserve the whole picture:
 
-- gaming highlights and stream moments
-- tech learning and reviews
-- general product testing
+- Gaming highlights and stream moments
+- Tech learning and reviews
+- General product testing
 - Amazon Influencer storefront reviews
-- beauty and skincare testing
+- Beauty and skincare testing
 - AI development learning
-- building Bolt in public as a virtual teammate
+- Building Bolt in public as a virtual teammate
 
 Gaming is one strong lane, not the whole mission.
 
 ## What Works Now
 
+### Clip Pipeline
 - Recording watcher and batch processing
 - Hard highlight confidence gate
 - Per-clip failure recovery
@@ -66,10 +71,29 @@ Gaming is one strong lane, not the whole mission.
 - Title generation, subtitles, and vertical formatting
 - Local/manual multi-platform posting packets
 - Peak-hour Discord alerts for queue-worthy clips
+
+### Communication
 - Twitch chat bot and local chat commands
+- Voice alerts via macOS TTS and ElevenLabs
+- Email and SMS storage alerts
+
+### Memory & Learning
 - Memory recall through `modules.Memory_Index`
 - Posted-performance logging for future learning
+- RAG study materials in `teaching/rag/`
+
+### Storage Management
+- Automated video compression (HandBrake H.264/H.265)
+- Media rotation and archival (size-based)
+- Hash-based duplicate detection
+- Storage monitoring with threshold alerts
+- Performance baseline tracking
+
+### Monitoring
 - Live checkup dashboard generation
+- Storage monitoring (every 3 hours)
+- Media rotation (every 6 hours)
+- Video compression (every 30 minutes)
 
 ## Quick Start
 
@@ -92,6 +116,29 @@ python3 scripts/verify.py
 python3 -m unittest
 python3 -m modules.Bolt_Chat
 python3 -m modules.Bolt_Voice "say this out loud"
+```
+
+## User Interfaces
+
+Bolt provides multiple ways to interact:
+
+| Interface | Command | Description |
+|-----------|---------|-------------|
+| **CLI Launcher** | `python3 launch.py` | Main entry point for Bolt |
+| **Bot Runtime** | `python3 bot.py` | Direct bot execution |
+| **Chat Module** | `python3 -m modules.Bolt_Chat` | Local chat testing |
+| **Voice Module** | `python3 -m modules.Bolt_Voice "text"` | TTS voice output |
+| **Memory Search** | `python3 -m modules.Memory_Index` | Searchable memory index |
+| **Memory Browser** | `python3 -m modules.Bolt_Memory` | Full memory operations |
+| **Checkup Dashboard** | `docs/Bolt_Checkup.html` | Live status dashboard |
+| **Duplicate Scanner** | `python3 scripts/clip_deduplicator.py` | Hash-based dedup |
+| **Performance Baseline** | `python3 scripts/performance_baseline.py` | Benchmark metrics |
+| **Storage Monitor** | `scripts/monitoring/storage_monitor.sh` | Disk usage + alerts |
+
+### Chat Commands (when running)
+```text
+!queue                    - Show current clip queue status
+!recall <topic>           - Search memory for topic
 ```
 
 ## Memory And Learning
@@ -134,9 +181,24 @@ Important config values:
 - `use_obs_integration`, `obs_host`, and `obs_port` for OBS launch/connect
 - `use_ai_titles` / `title_generation.enabled` for optional AI title generation
 
+### Storage Alerts Configuration
+Edit `configs/storage_alerts.env` to configure:
+- Email alerts
+- SMS alerts (via email-to-SMS)
+- Webhook notifications (Discord, generic)
+
+### Daily Briefing
+A morning briefing runs at 7 AM automatically, or generate on-demand:
+
+```bash
+python3 scripts/daily_briefing.py
+```
+
+Includes queue status, storage usage, recent clips, and action items.
+
 Suggested quality baseline:
 
-- below `60`: discard
+- Below `60`: discard
 - `60-64`: keep on disk, no queue
 - `65-79`: format and queue silently
 - `80+`: queue and alert Billy at peak hours
@@ -144,10 +206,10 @@ Suggested quality baseline:
 ## Documentation
 
 | Doc | What it covers |
-|---|---|
-| `BOLT_COMMANDS.md` | Practical command sheet |
+|-----|----------------|
+| `BOLT_COMMANDS.md` | Practical command sheet with all interfaces |
 | `docs/INDEX.md` | Canonical navigation map |
-| `docs/PROJECT_STATUS.md` | Current build status |
+| `docs/PROJECT_STATUS.md` | Current build status and next steps |
 | `docs/guides/SETUP_GUIDE.md` | Setup and troubleshooting |
 | `docs/guides/STREAM_DECK_SETUP.md` | Stream Deck layout |
 | `docs/think_learn_decide.md` | Decision and memory schema |
@@ -160,11 +222,13 @@ Suggested quality baseline:
 | `memory/content/product-reviews.md` | Product/Amazon review memory |
 | `memory/content/beauty-skincare.md` | Beauty/skincare memory |
 | `memory/content/ai-development.md` | AI learning and Bolt teammate memory |
+| `NEXT_UPGRADE_STEPS.md` | Immediate next steps and timeline |
+| `OPTIMIZATION_ROADMAP.md` | Long-term optimization plan |
 
 ## Troubleshooting
 
 | Problem | First thing to check |
-|---|---|
+|---------|---------------------|
 | No highlights found | Lower `highlight_sensitivity` a little |
 | OBS will not connect | Confirm obs-websocket is enabled and the password is right |
 | Clips are too noisy | Raise `quality_tiers.discard_below` |
@@ -172,14 +236,64 @@ Suggested quality baseline:
 | Chat bot is silent | Confirm Twitch env vars exist in `.env` |
 | Voice does not speak | Check `Bolt_VOICE_MUTE`, `use_voice_checklist`, and macOS `say` |
 | Memory search feels stale | Run `python3 scripts/refresh_memory_index.py` |
+| Storage alerts not sending | Verify `configs/storage_alerts.env` is configured |
+
+## Storage Management
+
+### Automated Maintenance (Cron Jobs)
+```bash
+# View active cron jobs
+crontab -l
+```
+
+| Schedule | Task | Description |
+|----------|------|-------------|
+| `*/30 * * * *` | Video Compression | Compress new clips with HandBrake |
+| `0 */3 * * *` | Storage Monitor | Check disk usage, send alerts |
+| `0 */6 * * *` | Media Rotation | Archive old recordings/clips |
+
+### Manual Storage Commands
+```bash
+# Detect duplicates
+python3 scripts/clip_deduplicator.py
+
+# Run performance baseline
+python3 scripts/performance_baseline.py
+
+# Manual storage optimization
+python3 scripts/maintenance/storage_optimization.sh
+```
+
+### Current Alert Recipients
+- **Email**: billycarteriv@gmail.com
+- **SMS**: 707-567-8495 (AT&T)
+
+### Alert Thresholds
+- **Warning**: 80% disk usage
+- **Critical**: 95% disk usage
 
 ## Upgrade Direction
 
 Before adding new paid services, keep upgrades local-first:
 
-1. Strengthen memory retrieval and decision wiring.
-2. Keep optional AI features behind config flags and local fallbacks.
-3. Add learning layers one at a time so Bolt stays understandable.
-4. Let the full creator vision guide features, not only the clip pipeline.
+1. Strengthen memory retrieval and decision wiring
+2. Keep optional AI features behind config flags and local fallbacks
+3. Add learning layers one at a time so Bolt stays understandable
+4. Let the full creator vision guide features, not only the clip pipeline
 
-*Last updated: May 2026*
+## Recent Updates (June 2026)
+
+### June 6, 2026 - Upgrades Completed
+- Fixed HandBrakeCLI path for cron execution
+- Audited and organized `requirements.txt`
+- Created hash-based duplicate detection (`scripts/clip_deduplicator.py`)
+- Enhanced storage monitor with email/SMS alerts
+- Created performance baseline script
+- Updated all documentation with comprehensive interface list
+
+### Earlier June 2026
+- Dependency pinning for stability
+- RAG study materials added to `teaching/rag/`
+- Storage alerting infrastructure prepared
+
+*Last updated: June 6, 2026 - Comprehensive documentation update with all user interfaces, storage management features, and completed upgrades*
