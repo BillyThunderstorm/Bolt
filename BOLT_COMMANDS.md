@@ -117,6 +117,25 @@ Run Bolt chat locally:
 python3 -m modules.Bolt_Chat
 ```
 
+Run with voice responses enabled (speaks replies aloud via ElevenLabs):
+
+```bash
+python3 -m modules.Bolt_Chat --voice
+```
+
+### Voice Conversation (NEW)
+Start a back-and-forth voice conversation with Bolt. Listens via mic, transcribes with Whisper, generates personality-driven responses, speaks them aloud, and remembers the thread:
+
+```bash
+python3 -m modules.Bolt_Conversation              # voice chat loop
+python3 -m modules.Bolt_Conversation --text         # type instead of speak
+python3 -m modules.Bolt_Conversation --once "What should I post today?"
+python3 -m modules.Bolt_Conversation --status      # check setup status
+python3 -m modules.Bolt_Conversation --clear       # clear conversation history
+```
+
+Conversation history is saved to `data/conversations/voice_history.json`.
+
 ### Voice Commands
 Test voice:
 
@@ -124,12 +143,25 @@ Test voice:
 python3 -m modules.Bolt_Voice "say this out loud"
 ```
 
+List available voice event lines:
+
+```bash
+python3 -m modules.Bolt_Voice --list-events
+```
+
 ### Chat Commands (when Bolt is running)
 ```text
 !queue                    - Show current clip queue status
-!recall honest product reviews
-!recall beauty skincare routine product test
-!recall AI development virtual teammate
+!recall <topic>           - Search memory for topic
+!clip                     - Confirm last highlight count
+!highlights               - How many highlights this session
+!uptime                   - How long the stream has been live
+!postnow [clip_id]        - Approve and publish the next ready clip
+!dontpost [clip_id] <reason>  - Hold a clip and save why
+!stopclip                 - Reject the next auto-post
+!skip [clip_id]           - Skip the next post
+!rank                     - Show current clip ranking settings
+!config                   - Show current config summary
 ```
 
 ## Memory Operations
@@ -382,6 +414,8 @@ git diff -- README.md BOLT_COMMANDS.md docs memory brand llm
 | **CLI Launcher** | `python3 launch.py` | Main entry point for Bolt |
 | **Bot Runtime** | `python3 bot.py` | Direct bot execution |
 | **Chat Module** | `python3 -m modules.Bolt_Chat` | Local chat testing |
+| **Chat + Voice** | `python3 -m modules.Bolt_Chat --voice` | Chat with spoken replies |
+| **Voice Conversation** | `python3 -m modules.Bolt_Conversation` | Hands-free back-and-forth voice chat |
 | **Voice Module** | `python3 -m modules.Bolt_Voice "text"` | TTS voice output |
 | **Memory Search** | `python3 -m modules.Memory_Index` | Searchable memory index |
 | **Memory Browser** | `python3 -m modules.Bolt_Memory` | Full memory operations |
@@ -395,6 +429,18 @@ git diff -- README.md BOLT_COMMANDS.md docs memory brand llm
 | **Bolt Website** | bolt.billythunderstorm.us | Command center |
 | **Billy Website** | billythunderstorm.us | Creator portfolio |
 | **Live Status** | billythunderstorm.live | Stream status page |
+
+## Creator Domain Docs (NEW)
+
+```bash
+open docs/requirements/creator-domains-requirements.md   # system requirements
+open .github/instructions/creator-domains.instructions.md  # behavior instructions
+open memory/content/content-creation.md                  # content domain
+open memory/content/assistant-productivity.md            # productivity domain
+open memory/content/game-testing.md                      # game/tech review domain
+open memory/content/live-streaming.md                    # streaming domain
+open memory/content/social-media-management.md           # social domain
+```
 
 ## Cron Jobs (Automated)
 
@@ -444,4 +490,4 @@ python3 scripts/daily_briefing.py --output /path/to/briefing.md
 - Dynamic action items
 - Quick command references
 
-*Last updated: June 8, 2026 - Added websites section, site data writer, and deployment commands*
+*Last updated: June 8, 2026 - Added voice conversation module, expanded chat commands, creator domain docs*

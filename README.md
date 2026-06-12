@@ -126,7 +126,9 @@ Bolt provides multiple ways to interact:
 |-----------|---------|-------------|
 | **CLI Launcher** | `python3 launch.py` | Main entry point for Bolt |
 | **Bot Runtime** | `python3 bot.py` | Direct bot execution |
+| **Conversation Module** | `python3 -m modules.Bolt_Conversation` | Voice chat loop with memory (NEW) |
 | **Chat Module** | `python3 -m modules.Bolt_Chat` | Local chat testing |
+| **Chat with Voice** | `python3 -m modules.Bolt_Chat --voice` | Twitch chat with voice replies (NEW) |
 | **Voice Module** | `python3 -m modules.Bolt_Voice "text"` | TTS voice output |
 | **Memory Search** | `python3 -m modules.Memory_Index` | Searchable memory index |
 | **Memory Browser** | `python3 -m modules.Bolt_Memory` | Full memory operations |
@@ -219,6 +221,11 @@ Suggested quality baseline:
 | `docs/upgrade/UPGRADE_INDEX.md` | Upgrade documentation map |
 | `brand/BRAND_VISION_DESCRIPTION.md` | Brand and logo direction |
 | `memory/content/full-creator-vision.md` | Creator north star |
+| `memory/content/content-creation.md` | Content creation domain (NEW) |
+| `memory/content/assistant-productivity.md` | Assistant productivity domain (NEW) |
+| `memory/content/game-testing.md` | Game and tech testing domain (NEW) |
+| `memory/content/live-streaming.md` | Live streaming domain (NEW) |
+| `memory/content/social-media-management.md` | Social media management domain (NEW) |
 | `memory/content/product-reviews.md` | Product/Amazon review memory |
 | `memory/content/beauty-skincare.md` | Beauty/skincare memory |
 | `memory/content/ai-development.md` | AI learning and Bolt teammate memory |
