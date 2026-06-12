@@ -24,6 +24,8 @@ Use this page as the central map for Bolt.
 | `modules/Think_Learn_Decide.py` | Ingestion, reasoning, decisions, feedback loop, audit |
 | `docs/think_learn_decide.md` | Canonical decision and memory schema |
 | `memory/content/full-creator-vision.md` | North star across all creator lanes |
+| `docs/requirements/creator-domains-requirements.md` | System requirements for 7 creator domains (NEW) |
+| `.github/instructions/creator-domains.instructions.md` | Behavioral instructions with full personality (NEW) |
 | `docs/Bolt_Checkup.html` | Local dashboard source from live stats |
 | `data/Bolt_data.js` | Generated dashboard payload |
 | `tests/test_think_learn_decide.py` | Regression tests for intelligence workflows |
@@ -61,6 +63,7 @@ Use this page as the central map for Bolt.
 |--------|-------------|
 | `modules/Think_Learn_Decide.py` | Current intake, reasoning, decisions, feedback loop |
 | `modules/Brain_Controller.py` | Legacy compatibility controller |
+| `modules/Bolt_Conversation.py` | Voice conversation engine — mic, Whisper, OpenAI, TTS (NEW) |
 | `modules/Watcher.py` | Recording folder monitoring |
 | `modules/Highlight_Detector.py` | Highlight detection |
 | `modules/Clip_Generator.py` | Clip generation |
@@ -72,7 +75,7 @@ Use this page as the central map for Bolt.
 | `modules/Clip_Factory.py` | Vertical format conversion |
 | `modules/Post_Queue.py` | Post queue integration |
 | `modules/Peak_Hour_Notifier.py` | Timing alerts |
-| `modules/Bolt_Chat.py` | Twitch personality layer |
+| `modules/Bolt_Chat.py` | Twitch personality layer with optional voice replies |
 | `modules/Bolt_Voice.py` | Spoken alerts and TTS |
 | `modules/Bolt_Memory.py` | Long-term memory |
 | `modules/Bolt_Search.py` | Memory search helper |
@@ -89,6 +92,11 @@ Use this page as the central map for Bolt.
 | `memory/content/product-reviews.md` | Product testing and Amazon storefront |
 | `memory/content/beauty-skincare.md` | Beauty and skincare testing |
 | `memory/content/ai-development.md` | AI learning and Bolt teammate vision |
+| `memory/content/content-creation.md` | Content creation domain (NEW) |
+| `memory/content/assistant-productivity.md` | Assistant productivity domain (NEW) |
+| `memory/content/game-testing.md` | Game and tech testing/review domain (NEW) |
+| `memory/content/live-streaming.md` | Live streaming domain (NEW) |
+| `memory/content/social-media-management.md` | Social media management domain (NEW) |
 | `memory/content/brand-vision.md` | Searchable brand identity |
 | `memory/content/daily-briefing.md` | Daily briefing memory |
 | `memory/context/bolt-personality.md` | Bolt personality and voice |
@@ -153,6 +161,8 @@ Bolt provides multiple ways to interact:
 | Storage Log | `logs/storage_monitor.log` | Alert history |
 | Compression Log | `logs/video_compression.log` | Compression results |
 | Cron Schedule | `crontab -l` | Active jobs |
+| Voice Conversation | `python -m modules.Bolt_Conversation` | Voice chat loop with memory (NEW) |
+| Chat (with Voice) | `python -m modules.Bolt_Chat --voice` | Twitch chat with voice replies (NEW) |
 
 
 ## Websites

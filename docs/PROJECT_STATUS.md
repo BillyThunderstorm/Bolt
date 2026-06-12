@@ -19,7 +19,8 @@ What is active now:
 - Vertical clip formatting
 - OBS, Twitch, Streamlabs, and Discord integration
 - macOS voice alerts
-- Twitch chat personality layer
+- Twitch chat personality layer with persistent conversation memory
+- **Voice conversation engine** — hands-free back-and-forth via mic, Whisper, OpenAI, and ElevenLabs
 - Local queue and memory chat commands
 - Runtime checkup dashboard generation
 - Local memory retrieval through `modules/Memory_Index.py`
@@ -70,10 +71,17 @@ Bolt's memory now includes:
 - `memory/content/ai-development.md`
 - `memory/content/brand-vision.md`
 - `memory/content/daily-briefing.md`
+- `memory/content/content-creation.md` (NEW)
+- `memory/content/assistant-productivity.md` (NEW)
+- `memory/content/game-testing.md` (NEW)
+- `memory/content/live-streaming.md` (NEW)
+- `memory/content/social-media-management.md` (NEW)
 - `docs/daily-briefing-template.md`
 - `docs/reports/DEBUG_REPORT.md`
 - `docs/architecture/SYSTEM_README.md`
 - `docs/upgrade/UPGRADE_INDEX.md`
+- `docs/requirements/creator-domains-requirements.md` (NEW)
+- `.github/instructions/creator-domains.instructions.md` (NEW)
 - `memory/context/bolt-personality.md`
 - `brand/BRAND_VISION_DESCRIPTION.md`
 
@@ -92,6 +100,8 @@ python3 launch.py process
 python3 scripts/verify.py
 python3 -m unittest
 python3 -m modules.Bolt_Chat
+python3 -m modules.Bolt_Chat --voice
+python3 -m modules.Bolt_Conversation
 python3 -m modules.Bolt_Voice "say this out loud"
 python3 scripts/log_clip_performance.py --list
 python3 llm/neural_model.py
@@ -133,9 +143,34 @@ crontab -l
 - If storage alerts aren't sending, verify `configs/storage_alerts.env` is configured
 
 ## Last Updated
-June 6, 2026
+June 8, 2026
 
 ## Recent Updates (June 2026)
+
+### June 8, 2026 - Creator Domains & Voice Conversation ✅
+- **Voice Conversation Engine**: `modules/Bolt_Conversation.py` — hands-free back-and-forth voice chat
+  - Listens via microphone using `speech_recognition` + OpenAI Whisper
+  - Persistent conversation memory stored in `data/conversations/voice_history.json`
+  - Personality-driven responses using `memory/context/bolt-personality.md`
+  - Speaks replies through `Bolt_Voice` (ElevenLabs primary, edge-tts fallback, macOS say fallback)
+  - CLI modes: voice loop (`--text` for typed), `--once` for single prompts, `--status`, `--clear`
+- **Twitch Chat Voice Mode**: `--voice` flag added to `Bolt_Chat` — speaks replies aloud via ElevenLabs
+- **Chat commands expanded**: `!postnow`, `!dontpost`, `!stopclip`, `!skip`, `!rank`, `!config`, `!uptime`, `!highlights`
+- **Creator Domains System Requirements**: `docs/requirements/creator-domains-requirements.md`
+  - Functional requirements for 7 domains: content creation, assistant productivity, game/tech testing, product review, live streaming, AI learning, social media management
+- **Master Instruction Template**: `.github/instructions/creator-domains.instructions.md`
+  - Full Bolt personality integration (cheerful energy, accidental sarcasm, decision hierarchy, burnout detection)
+  - Domain-specific behavioral prompts with voice conversation rules
+  - Cross-domain priority stack and memory layer management
+- **New Domain Memory Files**:
+  - `memory/content/content-creation.md`
+  - `memory/content/assistant-productivity.md`
+  - `memory/content/game-testing.md`
+  - `memory/content/live-streaming.md`
+  - `memory/content/social-media-management.md`
+- **Personality integration**: `Bolt_Chat.py` now loads `memory/context/bolt-personality.md` correctly (fixed path bug)
+- **Memory index refreshed**: 1380 entries indexed
+- **34 unit tests pass** with no regressions
 
 ### June 6, 2026 - Upgrades Completed ✅
 - **Fixed HandBrakeCLI Path**: Added PATH export for cron execution in video compression script
@@ -155,13 +190,17 @@ June 6, 2026
 
 | Upgrade | Status | Details |
 |---------|--------|---------|
+| Voice Conversation Engine | ✅ Complete | `modules/Bolt_Conversation.py` — mic, Whisper, OpenAI, ElevenLabs, persistent memory |
+| Twitch Chat Voice Mode | ✅ Complete | `--voice` flag speaks chat replies aloud |
+| Creator Domains Requirements | ✅ Complete | System requirements for 7 creator/business domains |
+| Master Instruction Template | ✅ Complete | `.github/instructions/creator-domains.instructions.md` with full personality |
+| Domain Memory Files | ✅ Complete | 5 new memory files covering all creator lanes |
 | HandBrakeCLI Path Fix | ✅ Complete | Fixed cron execution with full PATH |
 | Requirements Audit | ✅ Complete | Organized, removed unused packages |
 | Duplicate Detection | ✅ Complete | SHA256 hash-based system |
 | Storage Alerts | ✅ Complete | Email + SMS configured |
 | Performance Baseline | ✅ Complete | Benchmark script created |
-| Database Optimization | ✅ N/A | Project uses JSON/JSONL, not SQLite |
-| Documentation | ✅ Complete | All interfaces documented |
+| Documentation | ✅ Complete | All interfaces and commands documented |
 
 ## Storage Status
 

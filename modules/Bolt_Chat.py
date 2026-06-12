@@ -79,6 +79,19 @@ except ImportError:
     def needs_search(q): return False
     def search_and_answer(q, **kw): return None
 
+try:
+    from modules.Bolt_Voice import speak as _voice_speak
+    VOICE_OK = True
+except ImportError:
+    VOICE_OK = False
+    def _voice_speak(text): pass
+
+try:
+    from modules.Bolt_Conversation import ConversationMemory
+    CONV_OK = True
+except ImportError:
+    CONV_OK = False
+
 
 # ── Config from .env ──────────────────────────────────────────────────────────
 
@@ -371,8 +384,9 @@ def _ask_openai(prompt: str, brain: str, memory: SessionMemory) -> Optional[str]
         return None
 
     # Load personality guide into context
+    personality_path = Path("memory/context/bolt-personality.md")
     try:
-        with open("{PERSONALITY}", "r") as pf:
+        with open(personality_path, "r", encoding="utf-8") as pf:
             _personality_text = pf.read()
     except FileNotFoundError:
         _personality_text = "Use cheerful, innocent energy."
@@ -435,10 +449,12 @@ if TWITCHIO_OK:
         Bolt does when things happen.
         """
 
-        def __init__(self, brain: str):
+        def __init__(self, brain: str, use_voice: bool = False):
             self.brain   = brain
             self.memory  = SessionMemory()
             self._last_message_at = 0.0   # rate limiting
+            self.use_voice = use_voice and VOICE_OK
+            self.conv_memory = ConversationMemory() if CONV_OK else None
 
             super().__init__(
                 token=BOT_TOKEN,
@@ -528,6 +544,11 @@ if TWITCHIO_OK:
             # Last resort fallback
             if not response:
                 response = f"@{ctx.author.name} good question — billy's the expert, I just run the tech 🦊"
+
+            # Persist to conversation memory for continuity with voice chat
+            if self.conv_memory:
+                self.conv_memory.add("user", f"Twitch chat @{ctx.author.name}: {question}")
+                self.conv_memory.add("assistant", response)
 
             await self._say(response)
 
@@ -653,13 +674,16 @@ if TWITCHIO_OK:
 
         # ── Internal helpers ──────────────────────────────────────────────────
 
-        async def _say(self, message: str):
+        async def _say(self, message: str, speak_aloud: bool = False):
             """
             Send a message to chat, with rate limiting.
 
             Twitch allows ~20 messages / 30 seconds. Bolt enforces a
             3-second cooldown between messages so she never hits the limit
             or feels spammy.
+
+            If speak_aloud or self.use_voice is enabled, also queues the
+            message via Bolt_Voice so Billy hears it.
             """
             now = time.time()
             gap = now - self._last_message_at
@@ -673,6 +697,9 @@ if TWITCHIO_OK:
                     self._last_message_at = time.time()
             except Exception as exc:
                 notify(f"Bolt chat send failed: {exc}", level="warning")
+
+            if speak_aloud or self.use_voice:
+                _voice_speak(message)
 
         # ── Thread-safe event triggers ────────────────────────────────────────
         # These let synchronous code (bot.py) trigger async Bolt events.
@@ -693,7 +720,7 @@ if TWITCHIO_OK:
 else:
     # Stub class so bot.py can import BoltBot even when twitchio isn't installed
     class BoltBot:
-        def __init__(self, brain: str):
+        def __init__(self, brain: str, use_voice: bool = False):
             notify(
                 "twitchio not installed — chat bot disabled",
                 level="warning",
@@ -712,7 +739,7 @@ else:
 _bot_instance: Optional[BoltBot] = None
 
 
-def start_chat_bot(brain: str = "") -> Optional[BoltBot]:
+def start_chat_bot(brain: str = "", use_voice: bool = False) -> Optional[BoltBot]:
     """
     Start BoltBot in a background daemon thread.
 
@@ -778,7 +805,7 @@ def start_chat_bot(brain: str = "") -> Optional[BoltBot]:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
-            bot = BoltBot(brain=brain)
+            bot = BoltBot(brain=brain, use_voice=use_voice)
             _holder[0] = bot
             _bot_instance = bot
             _ready.set()          # unblock main thread — bot object is ready
@@ -803,7 +830,7 @@ def start_chat_bot(brain: str = "") -> Optional[BoltBot]:
         notify(
             f"Bolt chat bot starting in #{CHANNEL}…",
             level="info",
-            reason=f"Bot name: {BOT_NAME}. "
+            reason=f"Bot name: {BOT_NAME}. Voice: {'on' if use_voice else 'off'}. "
                    "Bolt will greet viewers, react to highlights, and answer !Bolt questions. "
                    "Give her ~10 seconds to connect."
         )
@@ -833,6 +860,7 @@ if __name__ == "__main__":
     print(f"  Bot name: {BOT_NAME}")
     print(f"  Token set: {'yes ✓' if BOT_TOKEN else 'NO — add TWITCH_BOT_TOKEN to .env'}")
     print(f"  OpenAI:   {'available ✓' if OPENAI_OK and OPENAI_KEY else 'not configured'}")
+    print(f"  Voice:    {'enabled ✓' if VOICE_OK else 'not configured'}")
     print()
 
     if "--check" in sys.argv:
@@ -843,7 +871,8 @@ if __name__ == "__main__":
         brain_path = Path("bolt_brain.md")
     brain = brain_path.read_text() if brain_path.exists() else ""
 
-    bot = start_chat_bot(brain=brain)
+    use_voice = "--voice" in sys.argv
+    bot = start_chat_bot(brain=brain, use_voice=use_voice)
     if not bot:
         sys.exit(1)
 

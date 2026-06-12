@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-06-08 02:20:19",
+  "generated_at": "2026-06-12 00:21:27",
   "status": {
-    "clips_made": 52,
-    "vertical_clips": 0,
-    "ready_to_post": 12,
-    "recordings_processed": 98,
+    "clips_made": 137,
+    "vertical_clips": 52,
+    "ready_to_post": 36,
+    "recordings_processed": 116,
     "api_keys": {
-      "twitch": true,
+      "twitch": false,
       "obs": false,
-      "discord": true,
+      "discord": false,
       "tiktok": false
     }
   },
