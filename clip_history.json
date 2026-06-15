@@ -5,6 +5,12 @@
       "total_views": 4,
       "total_likes": 0,
       "avg_views": 4
+    },
+    "manual": {
+      "total_clips": 1,
+      "total_views": 1,
+      "total_likes": 0,
+      "avg_views": 1
     }
   }
 }

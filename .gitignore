@@ -1,49 +1,42 @@
-# ── Secrets — NEVER commit these ─────────────────────────────────────────────
-docs.env
-archive/docs.env
-
-# ── Video files — too large for GitHub ───────────────────────────────────────
-recordings/
-clips/
-vertical_clips/
-*.mp4
-*.mkv
-*.mov
-*.avi
-
-# ── Runtime output — generated automatically, no need to track ───────────────
-data/
-logs/
-__pycache__/
-*.pyc
-*.pyo
-
-# ── Mac system files ──────────────────────────────────────────────────────────
-.DS_Store
-.AppleDouble
 
 # ── Archive / backups ─────────────────────────────────────────────────────────
-_Archive/
-archive/
-
+# ── Editor / IDE ──────────────────────────────────────────────────────────────
+# ── Mac system files ──────────────────────────────────────────────────────────
 # ── Python virtual environment ────────────────────────────────────────────────
-.venv/
+# ── Runtime output — generated automatically, no need to track ───────────────
+# ── Secrets — NEVER commit these ─────────────────────────────────────────────
+# ── Video files — too large for GitHub ───────────────────────────────────────
+*.avi
+*.mkv
+*.mov
+*.mp4
+*.pyc
+*.pyo
+*.swp
+.AppleDouble
+.DS_Store
+.env
+.env.backup
+.idea/
 .venv*/
 .venv-1/
-venv/
+.venv/
+.vscode/
+_Archive/
+__pycache__/
+archive/
+archive/docs.env
+clips/
+credentials.json
+data/
+docs.env
 env/
 llm-env/
-
-# ── Editor / IDE ──────────────────────────────────────────────────────────────
-.vscode/
-.idea/
-*.swp
+logs/
 node_modules/
-llm-env/
-llm-env/
-yolov5
-yolov5
-credentials.json
-.env.backup
-scripts/launcher_stdout.log
+recordings/
 scripts/launcher_stderr.log
+scripts/launcher_stdout.log
+venv/
+vertical_clips/
+yolov5
