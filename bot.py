@@ -28,7 +28,7 @@ import json
 from pathlib import Path
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(".env.local")
 
 from modules.notifier import notify, notify_startup, notify_error
 from modules.Config_Loader import load_config
