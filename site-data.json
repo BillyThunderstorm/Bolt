@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-06-16 05:11:07",
+  "generated_at": "2026-06-16 06:15:01",
   "status": {
-    "clips_made": 25,
+    "clips_made": 27,
     "vertical_clips": 52,
     "ready_to_post": 36,
-    "recordings_processed": 126,
+    "recordings_processed": 127,
     "api_keys": {
       "twitch": true,
       "obs": false,
