@@ -14,12 +14,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DISCORD_WEBHOOK       = os.getenv("DISCORD_WEBHOOK_URL", "")
+DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK_URL", "")
 MAX_ERRORS_BEFORE_ALERT = int(os.getenv("MAX_ERRORS_BEFORE_ALERT", "3"))
 
 
-def with_retry(fn, *args, retries: int = 3, label: str = "",
-               reraise: bool = False, **kwargs):
+def with_retry(
+    fn, *args, retries: int = 3, label: str = "", reraise: bool = False, **kwargs
+):
     delay = 5
     last_exc = None
     for attempt in range(1, retries + 1):
@@ -27,7 +28,9 @@ def with_retry(fn, *args, retries: int = 3, label: str = "",
             return fn(*args, **kwargs)
         except Exception as exc:
             last_exc = exc
-            print(f"[ErrorRecovery] {label or fn.__name__} attempt {attempt}/{retries} failed: {exc}")
+            print(
+                f"[ErrorRecovery] {label or fn.__name__} attempt {attempt}/{retries} failed: {exc}"
+            )
             if attempt < retries:
                 time.sleep(delay)
                 delay *= 3
@@ -38,22 +41,24 @@ def with_retry(fn, *args, retries: int = 3, label: str = "",
 
 class ErrorTracker:
     def __init__(self):
-        self._errors   = []
-        self._counts   = {}
-        self._alerted  = set()
+        self._errors = []
+        self._counts = {}
+        self._alerted = set()
 
     def record(self, stage: str, context: str, error: Exception):
         entry = {
-            "stage":   stage,
+            "stage": stage,
             "context": context,
-            "error":   str(error),
-            "time":    datetime.now().isoformat(),
+            "error": str(error),
+            "time": datetime.now().isoformat(),
         }
         self._errors.append(entry)
         self._counts[stage] = self._counts.get(stage, 0) + 1
         print(f"[ErrorTracker] {stage}: {error}")
-        if (self._counts[stage] >= MAX_ERRORS_BEFORE_ALERT
-                and stage not in self._alerted):
+        if (
+            self._counts[stage] >= MAX_ERRORS_BEFORE_ALERT
+            and stage not in self._alerted
+        ):
             self._alerted.add(stage)
             self._alert_discord(stage, error)
 
@@ -77,13 +82,15 @@ class ErrorTracker:
     def _alert_discord(self, stage: str, error: Exception):
         if not DISCORD_WEBHOOK:
             return
-        body = {"content": f"⚠️ **Bolt error alert** | {stage} failed {self._counts[stage]}x\nLatest: {error}"}
+        body = {
+            "content": f"⚠️ **Bolt error alert** | {stage} failed {self._counts[stage]}x\nLatest: {error}"
+        }
         try:
             req = urllib.request.Request(
                 DISCORD_WEBHOOK,
-                data    = json.dumps(body).encode(),
-                headers = {"Content-Type": "application/json"},
-                method  = "POST",
+                data=json.dumps(body).encode(),
+                headers={"Content-Type": "application/json"},
+                method="POST",
             )
             urllib.request.urlopen(req, timeout=5)
         except Exception:

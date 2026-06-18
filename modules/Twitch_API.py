@@ -8,12 +8,14 @@ env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(env_path)
 
 # Get credentials from .env
-TWITCH_OAUTH_TOKEN = os.getenv("TWITCH_OAUTH_TOKEN")
+TWITCH_BOT_TOKEN = os.getenv("TWITCH_BOT_TOKEN")
+TWITCH_OAUTH_TOKEN = os.getenv("TWITCH_OAUTH_TOKEN") or TWITCH_BOT_TOKEN
 TWITCH_CLIENT_ID = os.getenv("TWITCH_CLIENT_ID")
 TWITCH_CHANNEL = os.getenv("TWITCH_CHANNEL")
 
 # Base URL for Twitch API
 TWITCH_API_URL = "https://api.twitch.tv/helix"
+
 
 # Headers required for all Twitch API requests
 def get_headers():
@@ -25,7 +27,7 @@ def get_headers():
     return {
         "Authorization": f"Bearer {TWITCH_OAUTH_TOKEN}",
         "Client-ID": TWITCH_CLIENT_ID,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
 
@@ -43,7 +45,7 @@ def get_follower_count():
         user_response = requests.get(
             f"{TWITCH_API_URL}/users",
             headers=get_headers(),
-            params={"login": TWITCH_CHANNEL}
+            params={"login": TWITCH_CHANNEL},
         )
         user_response.raise_for_status()
         user_id = user_response.json()["data"][0]["id"]
@@ -52,7 +54,7 @@ def get_follower_count():
         follower_response = requests.get(
             f"{TWITCH_API_URL}/channels/followers",
             headers=get_headers(),
-            params={"broadcaster_id": user_id}
+            params={"broadcaster_id": user_id},
         )
         follower_response.raise_for_status()
         follower_count = follower_response.json()["data"][0]["total"]
@@ -78,7 +80,7 @@ def get_last_stream_info():
         user_response = requests.get(
             f"{TWITCH_API_URL}/users",
             headers=get_headers(),
-            params={"login": TWITCH_CHANNEL}
+            params={"login": TWITCH_CHANNEL},
         )
         user_response.raise_for_status()
         user_id = user_response.json()["data"][0]["id"]
@@ -90,8 +92,8 @@ def get_last_stream_info():
             params={
                 "user_id": user_id,
                 "type": "archive",  # Only get VODs (broadcast archives)
-                "first": 1  # Only get the most recent one
-            }
+                "first": 1,  # Only get the most recent one
+            },
         )
         stream_response.raise_for_status()
 
@@ -107,7 +109,7 @@ def get_last_stream_info():
         return {
             "viewers": stream.get("view_count", 0),
             "title": stream.get("title", "Unknown"),
-            "created_at": stream.get("created_at", "Unknown")
+            "created_at": stream.get("created_at", "Unknown"),
         }
 
     except Exception as e:
@@ -128,7 +130,7 @@ def get_current_game():
         user_response = requests.get(
             f"{TWITCH_API_URL}/users",
             headers=get_headers(),
-            params={"login": TWITCH_CHANNEL}
+            params={"login": TWITCH_CHANNEL},
         )
         user_response.raise_for_status()
         user_id = user_response.json()["data"][0]["id"]
@@ -137,7 +139,7 @@ def get_current_game():
         channel_response = requests.get(
             f"{TWITCH_API_URL}/channels",
             headers=get_headers(),
-            params={"broadcaster_id": user_id}
+            params={"broadcaster_id": user_id},
         )
         channel_response.raise_for_status()
 
@@ -164,7 +166,7 @@ def get_all_twitch_data():
         "followers": get_follower_count(),
         "last_stream_viewers": get_last_stream_info()["viewers"],
         "last_stream_title": get_last_stream_info()["title"],
-        "current_game": get_current_game()
+        "current_game": get_current_game(),
     }
 
 

@@ -33,7 +33,7 @@ def calc_loss_batch(input_batch, target_batch, model, device):
 
 
 def calc_loss_loader(data_loader, model, device, num_batches=None):
-    total_loss = 0.
+    total_loss = 0.0
     if len(data_loader) == 0:
         return float("nan")
     elif num_batches is None:
@@ -63,17 +63,13 @@ def generate_and_print_sample(model, tokenizer, device, start_context):
     context_size = model.pos_emb.weight.shape[0]
     encoded = text_to_token_ids(start_context, tokenizer).to(device)
     with torch.no_grad():
-        token_ids = generate_text_simple(
-            model=model, idx=encoded,
-            max_new_tokens=50, context_size=context_size
-        )
+        token_ids = generate_text_simple(model=model, idx=encoded, max_new_tokens=50, context_size=context_size)
         decoded_text = token_ids_to_text(token_ids, tokenizer)
         print(decoded_text.replace("\n", " "))  # Compact print format
     model.train()
 
 
-def train_model_simple(model, train_loader, val_loader, optimizer, device, num_epochs,
-                       eval_freq, eval_iter, start_context, tokenizer):
+def train_model_simple(model, train_loader, val_loader, optimizer, device, num_epochs, eval_freq, eval_iter, start_context, tokenizer):
     # Initialize lists to track losses and tokens seen
     train_losses, val_losses, track_tokens_seen = [], [], []
     tokens_seen = 0
@@ -93,18 +89,14 @@ def train_model_simple(model, train_loader, val_loader, optimizer, device, num_e
 
             # Optional evaluation step
             if global_step % eval_freq == 0:
-                train_loss, val_loss = evaluate_model(
-                    model, train_loader, val_loader, device, eval_iter)
+                train_loss, val_loss = evaluate_model(model, train_loader, val_loader, device, eval_iter)
                 train_losses.append(train_loss)
                 val_losses.append(val_loss)
                 track_tokens_seen.append(tokens_seen)
-                print(f"Ep {epoch+1} (Step {global_step:06d}): "
-                      f"Train loss {train_loss:.3f}, Val loss {val_loss:.3f}")
+                print(f"Ep {epoch + 1} (Step {global_step:06d}): Train loss {train_loss:.3f}, Val loss {val_loss:.3f}")
 
         # Print a sample text after each epoch
-        generate_and_print_sample(
-            model, tokenizer, device, start_context
-        )
+        generate_and_print_sample(model, tokenizer, device, start_context)
 
     return train_losses, val_losses, track_tokens_seen
 
@@ -155,9 +147,7 @@ def main(gpt_config, settings):
 
     model = GPTModel(gpt_config)
     model.to(device)  # no assignment model = model.to(device) necessary for nn.Module classes
-    optimizer = torch.optim.AdamW(
-        model.parameters(), lr=settings["learning_rate"], weight_decay=settings["weight_decay"]
-    )
+    optimizer = torch.optim.AdamW(model.parameters(), lr=settings["learning_rate"], weight_decay=settings["weight_decay"])
 
     ##############################
     # Set up dataloaders
@@ -174,7 +164,7 @@ def main(gpt_config, settings):
         stride=gpt_config["context_length"],
         drop_last=True,
         shuffle=True,
-        num_workers=0
+        num_workers=0,
     )
 
     val_loader = create_dataloader_v1(
@@ -184,7 +174,7 @@ def main(gpt_config, settings):
         stride=gpt_config["context_length"],
         drop_last=False,
         shuffle=False,
-        num_workers=0
+        num_workers=0,
     )
 
     ##############################
@@ -194,32 +184,33 @@ def main(gpt_config, settings):
     tokenizer = tiktoken.get_encoding("gpt2")
 
     train_losses, val_losses, tokens_seen = train_model_simple(
-        model, train_loader, val_loader, optimizer, device,
-        num_epochs=settings["num_epochs"], eval_freq=5, eval_iter=1,
-        start_context="Every effort moves you", tokenizer=tokenizer
+        model,
+        train_loader,
+        val_loader,
+        optimizer,
+        device,
+        num_epochs=settings["num_epochs"],
+        eval_freq=5,
+        eval_iter=1,
+        start_context="Every effort moves you",
+        tokenizer=tokenizer,
     )
 
     return train_losses, val_losses, tokens_seen, model
 
 
 if __name__ == "__main__":
-
     GPT_CONFIG_124M = {
-        "vocab_size": 50257,    # Vocabulary size
+        "vocab_size": 50257,  # Vocabulary size
         "context_length": 256,  # Shortened context length (orig: 1024)
-        "emb_dim": 768,         # Embedding dimension
-        "n_heads": 12,          # Number of attention heads
-        "n_layers": 12,         # Number of layers
-        "drop_rate": 0.1,       # Dropout rate
-        "qkv_bias": False       # Query-key-value bias
+        "emb_dim": 768,  # Embedding dimension
+        "n_heads": 12,  # Number of attention heads
+        "n_layers": 12,  # Number of layers
+        "drop_rate": 0.1,  # Dropout rate
+        "qkv_bias": False,  # Query-key-value bias
     }
 
-    OTHER_SETTINGS = {
-        "learning_rate": 5e-4,
-        "num_epochs": 10,
-        "batch_size": 2,
-        "weight_decay": 0.1
-    }
+    OTHER_SETTINGS = {"learning_rate": 5e-4, "num_epochs": 10, "batch_size": 2, "weight_decay": 0.1}
 
     ###########################
     # Initiate training

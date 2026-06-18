@@ -84,9 +84,7 @@ def gemma4_transformers_module():
 
     saved_path = list(sys.path)
     saved_modules = {
-        name: module
-        for name, module in list(sys.modules.items())
-        if name == "transformers" or name.startswith("transformers.")
+        name: module for name, module in list(sys.modules.items()) if name == "transformers" or name.startswith("transformers.")
     }
 
     for name in list(saved_modules):

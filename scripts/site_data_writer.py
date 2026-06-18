@@ -72,7 +72,11 @@ def _latest_briefing():
             continue
         if in_actions:
             stripped = line.strip()
-            if stripped.startswith("#") or stripped.startswith("```") or stripped.startswith("---"):
+            if (
+                stripped.startswith("#")
+                or stripped.startswith("```")
+                or stripped.startswith("---")
+            ):
                 in_actions = False
                 continue
             if stripped and stripped[0].isdigit():
@@ -95,26 +99,31 @@ def _clip_queue():
         if tiktok:
             caption = tiktok.get("caption", "")
             title = caption.split("\n")[0] if caption else "Untitled clip"
-        clips.append({
-            "id": item.get("queue_id", ""),
-            "created": item.get("created_at", ""),
-            "title": title,
-            "platforms": len(platforms),
-            "status": tiktok.get("status", "queued") if tiktok else "queued",
-        })
+        clips.append(
+            {
+                "id": item.get("queue_id", ""),
+                "created": item.get("created_at", ""),
+                "title": title,
+                "platforms": len(platforms),
+                "status": tiktok.get("status", "queued") if tiktok else "queued",
+            }
+        )
     return clips
 
 
 def _system_status():
     try:
         from dotenv import load_dotenv
+
         load_dotenv(BOLT_ROOT / ".env")
     except ImportError:
         pass
 
     clips_count = 0
     if CLIPS_DIR.exists():
-        clips_count = len(list(CLIPS_DIR.glob("*.mp4"))) + len(list(CLIPS_DIR.glob("*.mkv")))
+        clips_count = len(list(CLIPS_DIR.glob("*.mp4"))) + len(
+            list(CLIPS_DIR.glob("*.mkv"))
+        )
 
     vertical_count = 0
     if VERTICAL_DIR.exists():
@@ -129,7 +138,9 @@ def _system_status():
         "clips_made": clips_count,
         "vertical_clips": vertical_count,
         "ready_to_post": queue_count,
-        "recordings_processed": len(_load_json(DATA_DIR / "processed_recordings.json", [])),
+        "recordings_processed": len(
+            _load_json(DATA_DIR / "processed_recordings.json", [])
+        ),
         "api_keys": {
             "twitch": bool(os.getenv("TWITCH_CLIENT_ID")),
             "obs": bool(os.getenv("OBS_PASSWORD")),
@@ -151,14 +162,16 @@ def _peak_hours():
         end = w.get("end_hour", 0)
         label = w.get("label", "")
         active = start <= current_hour < end
-        result.append({
-            "label": label,
-            "start_hour": start,
-            "end_hour": end,
-            "start_display": f"{start % 12 or 12} {'AM' if start < 12 else 'PM'}",
-            "end_display": f"{end % 12 or 12} {'AM' if end < 12 else 'PM'}",
-            "active": active,
-        })
+        result.append(
+            {
+                "label": label,
+                "start_hour": start,
+                "end_hour": end,
+                "start_display": f"{start % 12 or 12} {'AM' if start < 12 else 'PM'}",
+                "end_display": f"{end % 12 or 12} {'AM' if end < 12 else 'PM'}",
+                "active": active,
+            }
+        )
     return result
 
 
@@ -186,14 +199,28 @@ def write_site_data(push=False, output_path=None):
 
     if push:
         try:
-            subprocess.run(["git", "add", str(path)], cwd=str(BOLT_ROOT), check=True, capture_output=True)
+            subprocess.run(
+                ["git", "add", str(path)],
+                cwd=str(BOLT_ROOT),
+                check=True,
+                capture_output=True,
+            )
             msg = f"Update site data — {datetime.now(CT).strftime('%b %d, %H:%M')}"
-            subprocess.run(["git", "commit", "-m", msg], cwd=str(BOLT_ROOT), check=True, capture_output=True)
-            subprocess.run(["git", "push"], cwd=str(BOLT_ROOT), check=True, capture_output=True)
+            subprocess.run(
+                ["git", "commit", "-m", msg],
+                cwd=str(BOLT_ROOT),
+                check=True,
+                capture_output=True,
+            )
+            subprocess.run(
+                ["git", "push"], cwd=str(BOLT_ROOT), check=True, capture_output=True
+            )
             print(f"  ⚡  Pushed to GitHub")
         except subprocess.CalledProcessError as e:
             print(f"  ⚠  Git push failed: {e.stderr.decode() if e.stderr else e}")
-            print(f"     You may need to commit manually: git add site-data.json && git commit -m 'Update site data' && git push")
+            print(
+                f"     You may need to commit manually: git add site-data.json && git commit -m 'Update site data' && git push"
+            )
 
     return path
 

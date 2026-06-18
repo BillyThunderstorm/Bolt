@@ -18,21 +18,16 @@ from torch.utils.data import Subset, DataLoader
 def test_train(tmp_path):
 
     GPT_CONFIG_124M = {
-        "vocab_size": 50257,    # Vocabulary size
+        "vocab_size": 50257,  # Vocabulary size
         "context_length": 256,  # Shortened context length (orig: 1024)
-        "emb_dim": 768,         # Embedding dimension
-        "n_heads": 12,          # Number of attention heads
-        "n_layers": 12,         # Number of layers
-        "drop_rate": 0.1,       # Dropout rate
-        "qkv_bias": False       # Query-key-value bias
+        "emb_dim": 768,  # Embedding dimension
+        "n_heads": 12,  # Number of attention heads
+        "n_layers": 12,  # Number of layers
+        "drop_rate": 0.1,  # Dropout rate
+        "qkv_bias": False,  # Query-key-value bias
     }
 
-    OTHER_SETTINGS = {
-        "learning_rate": 5e-4,
-        "num_epochs": 2,
-        "batch_size": 1,
-        "weight_decay": 0.1
-    }
+    OTHER_SETTINGS = {"learning_rate": 5e-4, "num_epochs": 2, "batch_size": 1, "weight_decay": 0.1}
 
     torch.manual_seed(123)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -75,7 +70,7 @@ def test_train(tmp_path):
         stride=GPT_CONFIG_124M["context_length"],
         drop_last=True,
         shuffle=True,
-        num_workers=0
+        num_workers=0,
     )
 
     val_loader = create_dataloader_v1(
@@ -85,7 +80,7 @@ def test_train(tmp_path):
         stride=GPT_CONFIG_124M["context_length"],
         drop_last=False,
         shuffle=False,
-        num_workers=0
+        num_workers=0,
     )
 
     ##############################
@@ -107,10 +102,19 @@ def test_train(tmp_path):
     warmup_steps = 1
 
     train_losses, val_losses, tokens_seen, lrs = train_model(
-        model, one_batch_train_loader, one_batch_val_loader, optimizer, device, n_epochs=n_epochs,
-        eval_freq=5, eval_iter=1, start_context="Every effort moves you",
-        tokenizer=tokenizer, warmup_steps=warmup_steps,
-        initial_lr=1e-5, min_lr=1e-5
+        model,
+        one_batch_train_loader,
+        one_batch_val_loader,
+        optimizer,
+        device,
+        n_epochs=n_epochs,
+        eval_freq=5,
+        eval_iter=1,
+        start_context="Every effort moves you",
+        tokenizer=tokenizer,
+        warmup_steps=warmup_steps,
+        initial_lr=1e-5,
+        min_lr=1e-5,
     )
 
     assert round(train_losses[0], 1) == 10.9

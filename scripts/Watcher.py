@@ -28,9 +28,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 RECORDINGS_FOLDER = os.getenv("RECORDINGS_FOLDER", "recordings")
-WATCH_INTERVAL    = float(os.getenv("WATCH_INTERVAL", "5"))
-WATCH_EXTENSIONS  = {".mp4", ".mkv", ".mov", ".avi"}
-STABLE_WAIT_SEC   = 3.0   # seconds to wait before declaring the file stable
+WATCH_INTERVAL = float(os.getenv("WATCH_INTERVAL", "5"))
+WATCH_EXTENSIONS = {".mp4", ".mkv", ".mov", ".avi"}
+STABLE_WAIT_SEC = 3.0  # seconds to wait before declaring the file stable
 
 # Where we persist the list of already-processed filenames across restarts.
 # Without this file, every launch re-runs the full pipeline on every recording.
@@ -100,10 +100,10 @@ def watch_folder(folder: str = RECORDINGS_FOLDER):
 
             full_path = os.path.join(folder, filename)
             if not _is_stable(full_path):
-                continue   # still being written — check again next cycle
+                continue  # still being written — check again next cycle
 
             processed.add(filename)
-            _save_processed(processed)   # persist immediately so restarts stay clean
+            _save_processed(processed)  # persist immediately so restarts stay clean
             print(f"[Watcher] New recording detected: {filename}")
             yield full_path
 

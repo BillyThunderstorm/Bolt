@@ -19,8 +19,11 @@ from typing import Optional
 try:
     from modules.notifier import notify
 except ImportError:
+
     def notify(msg, level="info", reason=None):
-        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(level, "•")
+        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(
+            level, "•"
+        )
         print(f"  {prefix}  {msg}")
         if reason:
             print(f"     → {reason}")
@@ -42,7 +45,7 @@ def search_and_answer(
     notify(
         "Live web search is disabled",
         level="info",
-        reason="Web search was removed. Bolt will use its local fallback response."
+        reason="Web search was removed. Bolt will use its local fallback response.",
     )
     return None
 
@@ -55,11 +58,33 @@ def needs_search(question: str) -> bool:
     decide whether to fall back, defer, or answer locally.
     """
     search_signals = [
-        "right now", "currently", "today", "this week", "latest",
-        "best", "meta", "patch", "update", "nerf", "buff", "broken",
-        "trending", "popular", "new", "season", "ranked",
-        "what is", "how do", "how to", "tips", "guide", "loadout",
-        "settings", "pro settings", "what happened", "news",
+        "right now",
+        "currently",
+        "today",
+        "this week",
+        "latest",
+        "best",
+        "meta",
+        "patch",
+        "update",
+        "nerf",
+        "buff",
+        "broken",
+        "trending",
+        "popular",
+        "new",
+        "season",
+        "ranked",
+        "what is",
+        "how do",
+        "how to",
+        "tips",
+        "guide",
+        "loadout",
+        "settings",
+        "pro settings",
+        "what happened",
+        "news",
     ]
     q_lower = question.lower()
     return any(signal in q_lower for signal in search_signals)
@@ -68,7 +93,9 @@ def needs_search(question: str) -> bool:
 if __name__ == "__main__":
     import sys
 
-    test_q = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else "what is the current meta?"
+    test_q = (
+        " ".join(sys.argv[1:]) if len(sys.argv) > 1 else "what is the current meta?"
+    )
     print("\n  ⚡️  Bolt Search — Local fallback mode")
     print(f"  Question: {test_q}")
     print(f"  Needs search: {needs_search(test_q)}")

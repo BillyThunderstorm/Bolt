@@ -258,6 +258,10 @@ crontab -l
 | `*/30 * * * *` | Video Compression | Compress new clips with HandBrake |
 | `0 */3 * * *` | Storage Monitor | Check disk usage, send alerts |
 | `0 */6 * * *` | Media Rotation | Archive old recordings/clips |
+| `0 3 * * *` | Storage Optimization | Nightly cleanup (3-day retention) |
+| `0 7 * * *` | **Daily Briefing** | Morning briefing → SMS/email |
+| `0 */2 * * *` | **Auto-Process** | Process recordings automatically |
+| `0 9 * * 0` | **Weekly Analysis** | Sunday insights → email (NEW) |
 
 ### Manual Storage Commands
 ```bash

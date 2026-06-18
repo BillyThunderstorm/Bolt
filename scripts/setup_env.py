@@ -11,6 +11,7 @@ from pathlib import Path
 
 ENV_FILE = Path(".env")
 
+
 def load_current_env():
     """Load existing .env values."""
     env = {}
@@ -22,6 +23,7 @@ def load_current_env():
                     key, _, value = line.partition("=")
                     env[key.strip()] = value.strip()
     return env
+
 
 def save_env(env):
     """Save env dict back to file, preserving comments."""
@@ -54,9 +56,14 @@ def save_env(env):
             if key not in existing_keys:
                 f.write(f"{key}={value}\n")
 
+
 def prompt(key, description, current_value="", secret=False):
     """Prompt user for a value."""
-    if current_value and current_value != "TODO_get_from_platform_openai" and not current_value.startswith("TODO"):
+    if (
+        current_value
+        and current_value != "TODO_get_from_platform_openai"
+        and not current_value.startswith("TODO")
+    ):
         display = "****" + current_value[-4:] if secret else current_value
         print(f"  Current: {display}")
 
@@ -64,6 +71,7 @@ def prompt(key, description, current_value="", secret=False):
     if value:
         return value
     return current_value
+
 
 def main():
     print("=" * 60)
@@ -79,7 +87,9 @@ def main():
     print()
     env["OBS_HOST"] = prompt("OBS_HOST", "OBS Host", env.get("OBS_HOST", "localhost"))
     env["OBS_PORT"] = prompt("OBS_PORT", "OBS Port", env.get("OBS_PORT", "4455"))
-    env["OBS_PASSWORD"] = prompt("OBS_PASSWORD", "OBS Password", env.get("OBS_PASSWORD", ""), secret=True)
+    env["OBS_PASSWORD"] = prompt(
+        "OBS_PASSWORD", "OBS Password", env.get("OBS_PASSWORD", ""), secret=True
+    )
     print()
 
     # ── Twitch ────────────────────────────────────────────────────────────────
@@ -87,8 +97,14 @@ def main():
     print("  Bot token: https://twitchapps.com/tmi/")
     print("  Login as your bot account (e.g., BoltBot)")
     print()
-    env["TWITCH_CHANNEL"] = prompt("TWITCH_CHANNEL", "Your Twitch channel", env.get("TWITCH_CHANNEL", "ThunderstormBilly"))
-    env["TWITCH_BOT_NAME"] = prompt("TWITCH_BOT_NAME", "Bot account name", env.get("TWITCH_BOT_NAME", "BoltBot"))
+    env["TWITCH_CHANNEL"] = prompt(
+        "TWITCH_CHANNEL",
+        "Your Twitch channel",
+        env.get("TWITCH_CHANNEL", "ThunderstormBilly"),
+    )
+    env["TWITCH_BOT_NAME"] = prompt(
+        "TWITCH_BOT_NAME", "Bot account name", env.get("TWITCH_BOT_NAME", "BoltBot")
+    )
 
     bot_token = env.get("TWITCH_BOT_TOKEN", "")
     if not bot_token or bot_token.startswith("TODO"):
@@ -98,7 +114,11 @@ def main():
         if token:
             env["TWITCH_BOT_TOKEN"] = token
     else:
-        print("  TWITCH_BOT_TOKEN: ****" + bot_token[-4:] if len(bot_token) > 4 else "  TWITCH_BOT_TOKEN: set")
+        print(
+            "  TWITCH_BOT_TOKEN: ****" + bot_token[-4:]
+            if len(bot_token) > 4
+            else "  TWITCH_BOT_TOKEN: set"
+        )
     print()
 
     # ── OpenAI ────────────────────────────────────────────────────────────────
@@ -107,10 +127,16 @@ def main():
     print()
 
     openai_key = env.get("OPENAI_API_KEY", "")
-    if not openai_key or openai_key.startswith("TODO") or openai_key == "sk_your_key_here":
+    if (
+        not openai_key
+        or openai_key.startswith("TODO")
+        or openai_key == "sk_your_key_here"
+    ):
         print("  → OPENAI_API_KEY is missing or incomplete")
         print("  → You can skip this for now (Bolt will use template titles)")
-        token = input("  Paste OpenAI API key (sk-...) or press Enter to skip: ").strip()
+        token = input(
+            "  Paste OpenAI API key (sk-...) or press Enter to skip: "
+        ).strip()
         if token:
             env["OPENAI_API_KEY"] = token
         else:
@@ -133,7 +159,11 @@ def main():
         else:
             print("  (Discord alerts skipped)")
     else:
-        print("  DISCORD_WEBHOOK_URL: ****" + discord_url[-20:] if len(discord_url) > 20 else "  DISCORD_WEBHOOK_URL: set")
+        print(
+            "  DISCORD_WEBHOOK_URL: ****" + discord_url[-20:]
+            if len(discord_url) > 20
+            else "  DISCORD_WEBHOOK_URL: set"
+        )
     print()
 
     # ── ElevenLabs ────────────────────────────────────────────────────────────
@@ -142,7 +172,9 @@ def main():
     if eleven_key and not eleven_key.startswith("sk_"):
         print(f"  → ELEVENLABS_API_KEY may be invalid (current: {eleven_key[:8]}...)")
     else:
-        print(f"  ELEVENLABS_API_KEY: ****{eleven_key[-8:] if len(eleven_key) > 8 else 'not set'}")
+        print(
+            f"  ELEVENLABS_API_KEY: ****{eleven_key[-8:] if len(eleven_key) > 8 else 'not set'}"
+        )
     print()
 
     # Save
@@ -155,16 +187,28 @@ def main():
     print()
     print("Setup Summary:")
     print(f"  OBS Password:       {'✓' if env.get('OBS_PASSWORD') else '○'}")
-    print(f"  Twitch Bot Token:   {'✓' if env.get('TWITCH_BOT_TOKEN') and not env.get('TWITCH_BOT_TOKEN', '').startswith('TODO') else '○'}")
-    print(f"  OpenAI API Key:     {'✓' if env.get('OPENAI_API_KEY') and not env.get('OPENAI_API_KEY', '').startswith('TODO') else '○ (using templates)'}")
-    print(f"  Discord Webhook:    {'✓' if env.get('DISCORD_WEBHOOK_URL') and not env.get('DISCORD_WEBHOOK_URL', '').startswith('TODO') else '○'}")
-    print(f"  ElevenLabs Key:     {'✓' if env.get('ELEVENLABS_API_KEY') and env.get('ELEVENLABS_API_KEY', '').startswith('sk_') else '○'}")
+    print(
+        f"  Twitch Bot Token:   {'✓' if env.get('TWITCH_BOT_TOKEN') and not env.get('TWITCH_BOT_TOKEN', '').startswith('TODO') else '○'}"
+    )
+    print(
+        f"  OpenAI API Key:     {'✓' if env.get('OPENAI_API_KEY') and not env.get('OPENAI_API_KEY', '').startswith('TODO') else '○ (using templates)'}"
+    )
+    print(
+        f"  Discord Webhook:    {'✓' if env.get('DISCORD_WEBHOOK_URL') and not env.get('DISCORD_WEBHOOK_URL', '').startswith('TODO') else '○'}"
+    )
+    print(
+        f"  ElevenLabs Key:     {'✓' if env.get('ELEVENLABS_API_KEY') and env.get('ELEVENLABS_API_KEY', '').startswith('sk_') else '○'}"
+    )
     print()
 
     missing = []
-    if not env.get("TWITCH_BOT_TOKEN") or env.get("TWITCH_BOT_TOKEN", "").startswith("TODO"):
+    if not env.get("TWITCH_BOT_TOKEN") or env.get("TWITCH_BOT_TOKEN", "").startswith(
+        "TODO"
+    ):
         missing.append("Twitch bot token (needed for chat)")
-    if not env.get("OPENAI_API_KEY") or env.get("OPENAI_API_KEY", "").startswith("TODO"):
+    if not env.get("OPENAI_API_KEY") or env.get("OPENAI_API_KEY", "").startswith(
+        "TODO"
+    ):
         missing.append("OpenAI API key (needed for AI features)")
 
     if missing:
@@ -178,6 +222,7 @@ def main():
 
     print()
     print("Run: python3 launch.py")
+
 
 if __name__ == "__main__":
     main()

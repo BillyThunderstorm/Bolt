@@ -28,6 +28,7 @@ def mark_highlight(label: str = "") -> dict:
     """
     monitor = get_obs_monitor()
     import time
+
     ts = time.time()
     monitor._save_replay()
     return {"timestamp": ts, "label": label or "manual"}

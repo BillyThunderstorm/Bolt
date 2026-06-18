@@ -36,7 +36,9 @@ def convert_to_gb(x):
 
 
 def main():
-    p = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Memory vs. Context Length: MHA vs. DeltaNet (3:1 mix)")
+    p = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Memory vs. Context Length: MHA vs. DeltaNet (3:1 mix)"
+    )
     p.add_argument("--batch", type=int, default=1)
     p.add_argument("--emb_dim", type=int, default=2048)
     p.add_argument("--n_heads", type=int, default=16)
@@ -51,29 +53,25 @@ def main():
     bytes_per_elem = DTYPE_BYTES[args.dtype]
 
     # 1) Full attention only
-    mha_bytes = np.array([
-        calc_kv_bytes_total_mha(args.batch, int(t), args.emb_dim, args.n_layers,
-                                     bytes_per_elem, args.n_heads)
-        for t in ctx
-    ], dtype=float)
+    mha_bytes = np.array(
+        [calc_kv_bytes_total_mha(args.batch, int(t), args.emb_dim, args.n_layers, bytes_per_elem, args.n_heads) for t in ctx], dtype=float
+    )
 
     # 2) DeltaNet only
-    dnet_bytes_const = calc_kv_bytes_total_deltanet_no_conv(
-        args.batch, args.emb_dim, args.n_layers,
-        bytes_per_elem, args.n_heads
-    )
+    dnet_bytes_const = calc_kv_bytes_total_deltanet_no_conv(args.batch, args.emb_dim, args.n_layers, bytes_per_elem, args.n_heads)
     dnet_bytes = np.full_like(mha_bytes, fill_value=dnet_bytes_const, dtype=float)
 
     # 3) 3:1 layer ratio (3 DeltaNet : 1 Full Attention)
     n_mha_layers = args.n_layers / 4
     n_dnet_layers = args.n_layers - n_mha_layers
-    mix_bytes = np.array([
-        calc_kv_bytes_total_mha(args.batch, int(t), args.emb_dim, n_mha_layers,
-                                     bytes_per_elem, args.n_heads)
-        + calc_kv_bytes_total_deltanet_no_conv(args.batch, args.emb_dim, n_dnet_layers,
-                                                    bytes_per_elem, args.n_heads)
-        for t in ctx
-    ], dtype=float)
+    mix_bytes = np.array(
+        [
+            calc_kv_bytes_total_mha(args.batch, int(t), args.emb_dim, n_mha_layers, bytes_per_elem, args.n_heads)
+            + calc_kv_bytes_total_deltanet_no_conv(args.batch, args.emb_dim, n_dnet_layers, bytes_per_elem, args.n_heads)
+            for t in ctx
+        ],
+        dtype=float,
+    )
 
     # Convert to GB
     mha_gb = convert_to_gb(mha_bytes)

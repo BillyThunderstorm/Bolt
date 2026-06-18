@@ -70,17 +70,13 @@ def plot_active_params_vs_experts(
     plt.figure(figsize=(7, 5))
     plt.plot(experts, moe_active, marker="o", label="MoE active per token")
     plt.plot(experts, moe_total, marker="s", linestyle="--", label="MoE total parameters")
-    plt.axhline(dense_active, linestyle=":", color="gray",
-                label="FFN dense (active = total)")
+    plt.axhline(dense_active, linestyle=":", color="gray", label="FFN dense (active = total)")
 
     plt.xlabel(f"Number of experts (top_k = {top_k})")
     plt.ylabel("Parameters")
     if y_log:
         plt.yscale("log")
-    plt.title(
-        f"Active vs Total Parameters per Token\n"
-        f"(emb_dim={emb_dim}, hidden_dim={hidden_dim}, ffn={ffn_type}, top_k={top_k})"
-    )
+    plt.title(f"Active vs Total Parameters per Token\n(emb_dim={emb_dim}, hidden_dim={hidden_dim}, ffn={ffn_type}, top_k={top_k})")
     plt.legend()
     plt.tight_layout()
     if save_path:
@@ -102,8 +98,7 @@ def main():
     p.add_argument(
         "--no_match_dense",
         action="store_true",
-        help=("Disable matching MoE parameters to dense FFN total; "
-              "uses provided hidden_dim instead."),
+        help=("Disable matching MoE parameters to dense FFN total; uses provided hidden_dim instead."),
     )
     args = p.parse_args()
 

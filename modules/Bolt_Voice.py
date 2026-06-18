@@ -39,6 +39,7 @@ from typing import Optional
 
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     pass
@@ -46,24 +47,27 @@ except ImportError:
 try:
     from modules.notifier import notify
 except ImportError:
+
     def notify(msg, level="info", reason=None):
         print(f"  {msg}")
 
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
-VOICE           = os.getenv("Bolt_VOICE", "Good News")  # Cheerful-dark, perfect for Bolt
-RATE            = int(os.getenv("Bolt_VOICE_RATE", "175"))   # words per minute
-MUTED           = os.getenv("Bolt_VOICE_MUTE", "false").lower() == "true"
+VOICE = os.getenv("Bolt_VOICE", "Good News")  # Cheerful-dark, perfect for Bolt
+RATE = int(os.getenv("Bolt_VOICE_RATE", "175"))  # words per minute
+MUTED = os.getenv("Bolt_VOICE_MUTE", "false").lower() == "true"
 
 # edge-tts (free, neural quality — installed via pip3 install edge-tts)
 # Pick a voice from: en-US-GuyNeural, en-US-ChristopherNeural, en-US-EricNeural, en-US-AndrewNeural
 # Full list: run `edge-tts --list-voices` in Terminal
-EDGE_TTS_VOICE  = os.getenv("Bolt_EDGE_VOICE", "en-US-ChristopherNeural")
-EDGE_TTS_RATE   = os.getenv("Bolt_EDGE_RATE", "+0%")   # e.g. +10% faster, -10% slower
+EDGE_TTS_VOICE = os.getenv("Bolt_EDGE_VOICE", "en-US-ChristopherNeural")
+EDGE_TTS_RATE = os.getenv("Bolt_EDGE_RATE", "+0%")  # e.g. +10% faster, -10% slower
 
-# ElevenLabs — PRIMARY TTS 
-ELEVENLABS_KEY      = os.getenv("ELEVENLABS_API_KEY", "sk_ab867a447da9976e33d40f8d2c1da14b9ee2b12bad1df904")
+# ElevenLabs — PRIMARY TTS
+ELEVENLABS_KEY = os.getenv(
+    "ELEVENLABS_API_KEY", "sk_ab867a447da9976e33d40f8d2c1da14b9ee2b12bad1df904"
+)
 ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "o3VpiaQ9JcGIFpOrkHHf")  # Cowboy
 
 
@@ -74,18 +78,18 @@ ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "o3VpiaQ9JcGIFpOrkHHf")  
 # (If you want Bolt heard by viewers, route your mic — ask Billy.)
 
 VOICE_LINES = {
-    "startup":     "All systems online, Billy. Bolt is ready when you are.",
-    "highlight":   "Highlight sequence detected. Archiving the moment.",
+    "startup": "All systems online, Billy. Bolt is ready when you are.",
+    "highlight": "Highlight sequence detected. Archiving the moment.",
     "highlight_3": "That is the third highlight of the session. Confidence in your performance is increasing.",
-    "sub":         "New subscriber confirmed. {name} has joined the channel.",
-    "resub":       "{name} has returned for month {months}. Loyalty noted.",
-    "raid":        "{raider} has initiated a raid. {count} incoming viewers. Standby.",
-    "raid_small":  "{raider} has arrived with reinforcements. Welcome to the channel.",
-    "bits":        "Contribution received from {name}. {amount} bits. Acknowledged.",
-    "going_live":  "Stream is active. O B S is connected. I am monitoring.",
-    "peak_alert":  "Billy — optimal posting window is now open. Your clips are standing by in Discord.",
-    "error":       "Alert. A system error has occurred. Terminal review recommended.",
-    "shutdown":    "Signing off. It was a good session, Billy.",
+    "sub": "New subscriber confirmed. {name} has joined the channel.",
+    "resub": "{name} has returned for month {months}. Loyalty noted.",
+    "raid": "{raider} has initiated a raid. {count} incoming viewers. Standby.",
+    "raid_small": "{raider} has arrived with reinforcements. Welcome to the channel.",
+    "bits": "Contribution received from {name}. {amount} bits. Acknowledged.",
+    "going_live": "Stream is active. O B S is connected. I am monitoring.",
+    "peak_alert": "Billy — optimal posting window is now open. Your clips are standing by in Discord.",
+    "error": "Alert. A system error has occurred. Terminal review recommended.",
+    "shutdown": "Signing off. It was a good session, Billy.",
 }
 
 
@@ -115,7 +119,9 @@ def _start_worker():
     global _worker_thread
     if _worker_thread and _worker_thread.is_alive():
         return
-    _worker_thread = threading.Thread(target=_speech_worker, name="BoltVoice", daemon=True)
+    _worker_thread = threading.Thread(
+        target=_speech_worker, name="BoltVoice", daemon=True
+    )
     _worker_thread.start()
 
 
@@ -159,6 +165,7 @@ def _try_edge_tts(text: str) -> bool:
         return False  # not installed, skip silently
 
     try:
+
         async def _generate_audio(tmp_path: str):
             communicate = edge_tts.Communicate(text, EDGE_TTS_VOICE, rate=EDGE_TTS_RATE)
             await communicate.save(tmp_path)
@@ -194,9 +201,7 @@ def _try_macos_say(text: str) -> bool:
     """
     try:
         subprocess.run(
-            ["say", "-v", VOICE, "-r", str(RATE), text],
-            check=True,
-            capture_output=True
+            ["say", "-v", VOICE, "-r", str(RATE), text], check=True, capture_output=True
         )
         return True
     except FileNotFoundError:
@@ -205,7 +210,7 @@ def _try_macos_say(text: str) -> bool:
             "TTS unavailable — `say` command not found",
             level="warning",
             reason="Bolt's voice requires macOS. On Windows/Linux, set ELEVENLABS_API_KEY "
-                   "in .env as an alternative."
+            "in .env as an alternative.",
         )
         return False
     except subprocess.CalledProcessError:
@@ -229,15 +234,14 @@ def _try_elevenlabs(text: str) -> bool:
         return False
 
     try:
-        url = f"https://api.elevenlabs.io/v1/text-to-speech/{ELEVENLABS_VOICE_ID}/stream"
-        headers = {
-            "xi-api-key": ELEVENLABS_KEY,
-            "Content-Type": "application/json"
-        }
+        url = (
+            f"https://api.elevenlabs.io/v1/text-to-speech/{ELEVENLABS_VOICE_ID}/stream"
+        )
+        headers = {"xi-api-key": ELEVENLABS_KEY, "Content-Type": "application/json"}
         body = {
             "text": text,
             "model_id": "eleven_turbo_v2",
-            "voice_settings": {"stability": 0.5, "similarity_boost": 0.75}
+            "voice_settings": {"stability": 0.5, "similarity_boost": 0.75},
         }
         resp = requests.post(url, json=body, headers=headers, stream=True, timeout=10)
         if resp.status_code != 200:
@@ -245,6 +249,7 @@ def _try_elevenlabs(text: str) -> bool:
 
         # Write to temp file and play via afplay (macOS)
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
             for chunk in resp.iter_content(chunk_size=1024):
                 f.write(chunk)
@@ -259,6 +264,7 @@ def _try_elevenlabs(text: str) -> bool:
 
 
 # ── Public API ─────────────────────────────────────────────────────────────────
+
 
 def speak(text: str):
     """
@@ -319,12 +325,15 @@ if __name__ == "__main__":
 
     try:
         import edge_tts as _et
+
         edge_available = True
     except ImportError:
         edge_available = False
 
     print(f"\n  🤖  Bolt Voice — TTS Test")
-    print(f"  edge-tts:  {'✓ installed — ' + EDGE_TTS_VOICE if edge_available else '✗ not installed (run: pip3 install edge-tts --break-system-packages)'}")
+    print(
+        f"  edge-tts:  {'✓ installed — ' + EDGE_TTS_VOICE if edge_available else '✗ not installed (run: pip3 install edge-tts --break-system-packages)'}"
+    )
     print(f"  Fallback:  macOS say ({VOICE}, {RATE} wpm)")
     print(f"  Muted:     {MUTED}")
     print(f"  Available: {is_available()}")
@@ -354,4 +363,3 @@ if __name__ == "__main__":
         print("    • Mute Bolt:     add Bolt_VOICE_MUTE=true to .env")
         print("    • Speak custom:  python -m modules.Bolt_Voice 'your text here'")
         print("    • List events:   python -m modules.Bolt_Voice --list-events")
-    

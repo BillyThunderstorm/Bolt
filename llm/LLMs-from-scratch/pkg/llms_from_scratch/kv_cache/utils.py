@@ -3,6 +3,7 @@
 #   - https://www.manning.com/books/build-a-large-language-model-from-scratch
 # Code: https://github.com/rasbt/LLMs-from-scratch
 
+
 class KVCache:
     def __init__(self, n_layers):
         self.cache = [None] * n_layers

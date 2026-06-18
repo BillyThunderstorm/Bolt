@@ -98,7 +98,7 @@ class MultiHeadAttention(nn.Module):
         # Use the mask to fill attention scores
         attn_scores.masked_fill_(mask_bool, -torch.inf)
 
-        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
         attn_weights = self.dropout(attn_weights)
 
         # Shape: (b, num_tokens, num_heads, head_dim)
@@ -137,10 +137,7 @@ class GELU(nn.Module):
         super().__init__()
 
     def forward(self, x):
-        return 0.5 * x * (1 + torch.tanh(
-            torch.sqrt(torch.tensor(2.0 / torch.pi)) *
-            (x + 0.044715 * torch.pow(x, 3))
-        ))
+        return 0.5 * x * (1 + torch.tanh(torch.sqrt(torch.tensor(2.0 / torch.pi)) * (x + 0.044715 * torch.pow(x, 3))))
 
 
 class FeedForward(nn.Module):
@@ -164,24 +161,9 @@ class MoEFeedForward(nn.Module):
         self.emb_dim = cfg["emb_dim"]
 
         self.gate = nn.Linear(cfg["emb_dim"], cfg["num_experts"], bias=False)
-        self.fc1 = nn.ModuleList(
-            [
-                nn.Linear(cfg["emb_dim"], cfg["hidden_dim"], bias=False)
-                for _ in range(self.num_experts)
-            ]
-        )
-        self.fc2 = nn.ModuleList(
-            [
-                nn.Linear(cfg["emb_dim"], cfg["hidden_dim"], bias=False)
-                for _ in range(self.num_experts)
-            ]
-        )
-        self.fc3 = nn.ModuleList(
-            [
-                nn.Linear(cfg["hidden_dim"], cfg["emb_dim"], bias=False)
-                for _ in range(self.num_experts)
-            ]
-        )
+        self.fc1 = nn.ModuleList([nn.Linear(cfg["emb_dim"], cfg["hidden_dim"], bias=False) for _ in range(self.num_experts)])
+        self.fc2 = nn.ModuleList([nn.Linear(cfg["emb_dim"], cfg["hidden_dim"], bias=False) for _ in range(self.num_experts)])
+        self.fc3 = nn.ModuleList([nn.Linear(cfg["hidden_dim"], cfg["emb_dim"], bias=False) for _ in range(self.num_experts)])
 
     def forward(self, x):
         # x: (batch, seq_len, emb_dim)
@@ -211,16 +193,12 @@ class MoEFeedForward(nn.Module):
                 continue
 
             expert_input = x_flat.index_select(0, selected_idx)
-            hidden = torch.nn.functional.silu(self.fc1[expert_id](expert_input)) * self.fc2[
-                expert_id
-            ](expert_input)
+            hidden = torch.nn.functional.silu(self.fc1[expert_id](expert_input)) * self.fc2[expert_id](expert_input)
             expert_out = self.fc3[expert_id](hidden)
 
             mask_selected = mask[selected_idx]
             slot_indices = mask_selected.int().argmax(dim=-1, keepdim=True)
-            selected_probs = torch.gather(
-                topk_probs_flat.index_select(0, selected_idx), dim=-1, index=slot_indices
-            ).squeeze(-1)
+            selected_probs = torch.gather(topk_probs_flat.index_select(0, selected_idx), dim=-1, index=slot_indices).squeeze(-1)
 
             out_flat.index_add_(0, selected_idx, expert_out * selected_probs.unsqueeze(-1))
 
@@ -288,8 +266,7 @@ class GPTModel(nn.Module):
         #    *[TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
         ####################################################
         #  KV cache-related
-        self.trf_blocks = nn.ModuleList(
-            [TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
+        self.trf_blocks = nn.ModuleList([TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
 
         self.current_pos = 0
         ####################################################
@@ -333,18 +310,16 @@ class GPTModel(nn.Module):
         for blk in self.trf_blocks:
             blk.att.reset_cache()
         self.current_pos = 0
+
     ####################################################
 
 
-def generate_text_simple_cached(model, idx, max_new_tokens,
-                                context_size=None, use_cache=True):
+def generate_text_simple_cached(model, idx, max_new_tokens, context_size=None, use_cache=True):
     model.eval()
     ctx_len = context_size or model.pos_emb.num_embeddings
     batch_size, base_len = idx.shape
     total_len = base_len + max_new_tokens
-    generated = torch.empty(
-        batch_size, total_len, dtype=idx.dtype, device=idx.device
-    )
+    generated = torch.empty(batch_size, total_len, dtype=idx.dtype, device=idx.device)
     generated[:, :base_len] = idx
     cur_len = base_len
     use_cuda = torch.cuda.is_available()
@@ -394,7 +369,8 @@ def generate_text_simple_cached(model, idx, max_new_tokens,
         max_ffn_mem = max(MOE_FF_MEM_BYTES)
 
         def to_mb(bytes_val):
-            return bytes_val / (1024 ** 2)
+            return bytes_val / (1024**2)
+
         print(f"Avg MoE FF mem delta/call: {to_mb(avg_ffn_mem):.2f} MB (max {to_mb(max_ffn_mem):.2f} MB)")
 
     return generated[:, :cur_len]
@@ -403,7 +379,7 @@ def generate_text_simple_cached(model, idx, max_new_tokens,
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--emb_dim", type=int, default=768, help="Model embedding dimension.")
-    parser.add_argument("--hidden_dim", type=int, default=768*4, help="Intermediate FFN or MoE size.")
+    parser.add_argument("--hidden_dim", type=int, default=768 * 4, help="Intermediate FFN or MoE size.")
     parser.add_argument("--n_heads", type=int, default=12, help="Number of attention heads.")
     parser.add_argument("--n_layers", type=int, default=12, help="Number of transformer blocks.")
     parser.add_argument("--max_new_tokens", type=int, default=200, help="Number of tokens to generate.")
@@ -433,14 +409,14 @@ def main():
     encoded = tokenizer.encode(start_context)
 
     GPT_CONFIG_124M = {
-        "vocab_size": 50257,            # Vocabulary size
+        "vocab_size": 50257,  # Vocabulary size
         "context_length": args.max_new_tokens + len(encoded),
-        "emb_dim": args.emb_dim,        # Embedding dimension
+        "emb_dim": args.emb_dim,  # Embedding dimension
         "hidden_dim": args.hidden_dim,  # Intermediate size
-        "n_heads": args.n_heads,        # Number of attention heads
-        "n_layers": args.n_layers,      # Number of layers
-        "drop_rate": 0.0,               # Dropout rate
-        "qkv_bias": False,              # Query-Key-Value bias
+        "n_heads": args.n_heads,  # Number of attention heads
+        "n_layers": args.n_layers,  # Number of layers
+        "drop_rate": 0.0,  # Dropout rate
+        "qkv_bias": False,  # Query-Key-Value bias
         "num_experts": args.num_experts,
         "num_experts_per_tok": args.num_experts_per_tok if args.num_experts > 0 else 0,
     }
@@ -451,7 +427,7 @@ def main():
     model.eval()  # disable dropout
 
     encoded_tensor = torch.tensor(encoded, device=device).unsqueeze(0)
-    print(f"\n{50*'='}\n{22*' '}IN\n{50*'='}")
+    print(f"\n{50 * '='}\n{22 * ' '}IN\n{50 * '='}")
     print("\nInput text:", start_context)
     print("Encoded input text:", encoded)
     print("encoded_tensor.shape:", encoded_tensor.shape)
@@ -473,16 +449,16 @@ def main():
 
     decoded_text = tokenizer.decode(token_ids.squeeze(0).tolist())
 
-    print(f"\n\n{50*'='}\n{22*' '}OUT\n{50*'='}")
+    print(f"\n\n{50 * '='}\n{22 * ' '}OUT\n{50 * '='}")
     print("\nOutput:", token_ids)
     print("Output length:", len(token_ids[0]))
     print("Output text:", decoded_text)
 
     print(f"\nTime: {total_time:.2f} sec")
-    print(f"{int(len(token_ids[0])/total_time)} tokens/sec")
+    print(f"{int(len(token_ids[0]) / total_time)} tokens/sec")
     if torch.cuda.is_available():
         max_mem_bytes = torch.cuda.max_memory_allocated()
-        max_mem_gb = max_mem_bytes / (1024 ** 3)
+        max_mem_gb = max_mem_bytes / (1024**3)
         print(f"Max memory allocated: {max_mem_gb:.2f} GB")
 
 

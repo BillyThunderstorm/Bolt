@@ -23,6 +23,7 @@ import platform
 from pathlib import Path
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from modules.notifier import notify, notify_startup
@@ -30,15 +31,15 @@ from modules.notifier import notify, notify_startup
 from modules.Config_Loader import load_config
 
 CONFIG_FILE = "config.json"
-ENV_FILE    = ".env"
+ENV_FILE = ".env"
 
 REQUIRED_KEYS = []
 OPTIONAL_KEYS = [
-    ("OBS_PASSWORD",             "OBS WebSocket password"),
-    ("TWITCH_BOT_TOKEN",         "Bolt chat bot (Twitch OAuth token)"),
-    ("STREAMLABS_SOCKET_TOKEN",  "Streamlabs token (donations/raids/subs)"),
-    ("TWITCH_CLIENT_ID",         "Twitch app credentials (native clip creation)"),
-    ("DISCORD_WEBHOOK_URL",      "Discord webhook for peak-hour alerts"),
+    ("OBS_PASSWORD", "OBS WebSocket password"),
+    ("TWITCH_BOT_TOKEN", "Bolt chat bot (Twitch OAuth token)"),
+    ("STREAMLABS_SOCKET_TOKEN", "Streamlabs token (donations/raids/subs)"),
+    ("TWITCH_CLIENT_ID", "Twitch app credentials (native clip creation)"),
+    ("DISCORD_WEBHOOK_URL", "Discord webhook for peak-hour alerts"),
 ]
 
 
@@ -47,7 +48,7 @@ def main():
         "Bolt — Streaming AI Assistant",
         level="startup",
         reason="Starting up. Bolt will check your config, launch OBS if needed, "
-               "and then begin monitoring your stream."
+        "and then begin monitoring your stream.",
     )
 
     # ── Step 1: First-run config wizard ──────────────────────────────────────
@@ -56,7 +57,7 @@ def main():
             "No config.json found — running first-time setup wizard",
             level="info",
             reason="This only runs once. Bolt will ask a few questions and create "
-                   "config.json and .env automatically. You can edit either file at any time."
+            "config.json and .env automatically. You can edit either file at any time.",
         )
         _run_setup_wizard()
     else:
@@ -77,13 +78,17 @@ def main():
     obs_connected = False
     if config.get("use_obs_integration", True):
         obs_connected = _launch_and_wait_for_obs(config)
+
+        # Start OBS game tracker if connected
+        if obs_connected:
+            _start_obs_game_tracker()
     else:
         notify(
             "OBS integration disabled — folder-watch mode only",
             level="info",
             reason="Set 'use_obs_integration': true in config.json to enable OBS auto-launch "
-                   "and real-time audio monitoring. In folder-watch mode, Bolt still processes "
-                   "any recordings you drop into the recordings/ folder."
+            "and real-time audio monitoring. In folder-watch mode, Bolt still processes "
+            "any recordings you drop into the recordings/ folder.",
         )
 
     # ── Step 6: Print missing-items checklist ────────────────────────────────
@@ -92,6 +97,7 @@ def main():
     # ── Step 7: Refresh checkup dashboard data ───────────────────────────────
     try:
         from modules.Checkup_Writer import update_checkup
+
         update_checkup()
     except Exception as exc:
         notify(f"Checkup data skipped: {exc}", level="info")
@@ -107,7 +113,7 @@ def main():
     notify(
         f"Handing off to bot.py (mode={mode})…",
         level="info",
-        reason="launch.py's job is done. bot.py takes over and runs the full pipeline."
+        reason="launch.py's job is done. bot.py takes over and runs the full pipeline.",
     )
 
     try:
@@ -120,6 +126,7 @@ def main():
 
 # ── Clip cleanup ──────────────────────────────────────────────────────────────
 
+
 def _cleanup_old_clips(max_age_days: int = 14):
     """
     Delete clips and vertical clips older than max_age_days.
@@ -129,6 +136,7 @@ def _cleanup_old_clips(max_age_days: int = 14):
     Runs silently on every launch so you never have to think about it.
     """
     import time
+
     cutoff = time.time() - (max_age_days * 86400)  # 86400 seconds in a day
     folders = [Path("clips"), Path("vertical_clips")]
     extensions = {".mp4", ".mkv", ".mov"}
@@ -149,17 +157,18 @@ def _cleanup_old_clips(max_age_days: int = 14):
         notify(
             f"🗑️  Cleaned up {len(deleted)} clip{'s' if len(deleted) != 1 else ''} older than {max_age_days} days.",
             level="info",
-            reason="Old clips auto-deleted on launch. Anything older than 14 days is assumed posted or skipped."
+            reason="Old clips auto-deleted on launch. Anything older than 14 days is assumed posted or skipped.",
         )
     else:
         notify(
             f"✅ No clips older than {max_age_days} days — nothing to clean up.",
             level="info",
-            reason="Clip folder check passed. All clips are recent."
+            reason="Clip folder check passed. All clips are recent.",
         )
 
 
 # ── Phase 3: Personality layer ─────────────────────────────────────────────────
+
 
 def _start_personality_layer():
     """
@@ -182,14 +191,21 @@ def _start_personality_layer():
     # Voice check
     try:
         from modules.Bolt_Voice import say_event, is_available
+
         if is_available():
             say_event("startup")
-            notify("Bolt voice (TTS) active ✓", level="success",
-                   reason="Bolt will speak out loud for highlights, raids, and subs. "
-                          "Mute with Bolt_VOICE_MUTE=true in .env if needed.")
+            notify(
+                "Bolt voice (TTS) active ✓",
+                level="success",
+                reason="Bolt will speak out loud for highlights, raids, and subs. "
+                "Mute with Bolt_VOICE_MUTE=true in .env if needed.",
+            )
         else:
-            notify("Bolt voice (TTS) not available on this system", level="info",
-                   reason="TTS requires macOS. Bolt will still work — just no spoken alerts.")
+            notify(
+                "Bolt voice (TTS) not available on this system",
+                level="info",
+                reason="TTS requires macOS. Bolt will still work — just no spoken alerts.",
+            )
     except Exception as exc:
         notify(f"Voice module skipped: {exc}", level="info")
 
@@ -199,18 +215,19 @@ def _start_personality_layer():
         notify(
             "Bolt chat bot will connect when bot.py starts…",
             level="info",
-            reason="TWITCH_BOT_TOKEN found. Bolt will join Twitch chat automatically."
+            reason="TWITCH_BOT_TOKEN found. Bolt will join Twitch chat automatically.",
         )
     else:
         notify(
             "Chat bot not configured — skipping",
             level="info",
             reason="To enable: add TWITCH_BOT_TOKEN and TWITCH_BOT_NAME to .env.\n"
-                   "     Get a token at: https://twitchapps.com/tmi/"
+            "     Get a token at: https://twitchapps.com/tmi/",
         )
 
 
 # ── OBS launcher ──────────────────────────────────────────────────────────────
+
 
 def _launch_and_wait_for_obs(config: dict) -> bool:
     """
@@ -222,7 +239,7 @@ def _launch_and_wait_for_obs(config: dict) -> bool:
             "OBS not running — launching it now",
             level="info",
             reason="Bolt found OBS integration enabled and will open OBS automatically "
-                   "so you don't have to do it manually before every stream."
+            "so you don't have to do it manually before every stream.",
         )
         _open_obs(config)
         notify("Waiting for OBS to initialise (up to 30 seconds)…", level="info")
@@ -236,10 +253,11 @@ def _launch_and_wait_for_obs(config: dict) -> bool:
             f"Connecting to OBS WebSocket (attempt {attempt}/6)…",
             level="info",
             reason="The OBS WebSocket connection is how Bolt asks OBS to save replay clips. "
-                   "It's a persistent two-way channel — like a remote control for OBS."
+            "It's a persistent two-way channel — like a remote control for OBS.",
         )
         try:
             import websocket as _ws
+
             host = config.get("obs_host", os.getenv("OBS_HOST", "localhost"))
             port = config.get("obs_port", int(os.getenv("OBS_PORT", "4455")))
             sock = _ws.create_connection(f"ws://{host}:{port}", timeout=3)
@@ -248,7 +266,7 @@ def _launch_and_wait_for_obs(config: dict) -> bool:
                 f"OBS WebSocket reachable at {host}:{port} ✓",
                 level="success",
                 reason="OBS is open and accepting connections. Bolt will complete the "
-                       "full auth handshake when bot.py starts."
+                "full auth handshake when bot.py starts.",
             )
             return True
         except Exception:
@@ -258,9 +276,9 @@ def _launch_and_wait_for_obs(config: dict) -> bool:
         "OBS WebSocket timed out — continuing in folder-watch mode",
         level="warning",
         reason="Could not reach OBS after 30 seconds. Common causes: "
-               "WebSocket Server not enabled in OBS (Tools → WebSocket Server Settings), "
-               "wrong port (default: 4455), or OBS still loading. "
-               "Bolt will still process recordings dropped into the recordings/ folder."
+        "WebSocket Server not enabled in OBS (Tools → WebSocket Server Settings), "
+        "wrong port (default: 4455), or OBS still loading. "
+        "Bolt will still process recordings dropped into the recordings/ folder.",
     )
     return False
 
@@ -271,18 +289,21 @@ def _is_obs_running() -> bool:
         if system == "Windows":
             result = subprocess.run(
                 ["tasklist", "/FI", "IMAGENAME eq obs64.exe"],
-                capture_output=True, text=True
+                capture_output=True,
+                text=True,
             )
             return "obs64.exe" in result.stdout
-        else:   # macOS / Linux
-            result = subprocess.run(["pgrep", "-x", "OBS"], capture_output=True, text=True)
+        else:  # macOS / Linux
+            result = subprocess.run(
+                ["pgrep", "-x", "OBS"], capture_output=True, text=True
+            )
             return bool(result.stdout.strip())
     except Exception:
         return False
 
 
 def _open_obs(config: dict):
-    system   = platform.system()
+    system = platform.system()
     obs_path = config.get("obs_path", "")
 
     if obs_path and Path(obs_path).exists():
@@ -295,7 +316,7 @@ def _open_obs(config: dict):
             r"C:\Program Files (x86)\obs-studio\bin\32bit\obs32.exe",
         ],
         "Darwin": ["/Applications/OBS.app/Contents/MacOS/OBS"],
-        "Linux":  ["obs"],
+        "Linux": ["obs"],
     }
     for path in defaults.get(system, []):
         try:
@@ -308,11 +329,12 @@ def _open_obs(config: dict):
         "Could not find OBS — add 'obs_path' to config.json",
         level="warning",
         reason="Add 'obs_path': '/full/path/to/OBS' to config.json. "
-               "Example for macOS: /Applications/OBS.app/Contents/MacOS/OBS"
+        "Example for macOS: /Applications/OBS.app/Contents/MacOS/OBS",
     )
 
 
 # ── Config / setup ────────────────────────────────────────────────────────────
+
 
 def _run_setup_wizard():
     """
@@ -336,12 +358,15 @@ def _run_setup_wizard():
     print("  You can fine-tune this per-game later in game_configs.json.\n")
     sensitivity = ""
     while sensitivity not in ["1", "2", "3"]:
-        sensitivity = input(
-            "    1 = very sensitive  (more clips, catches everything)\n"
-            "    2 = balanced        (recommended)\n"
-            "    3 = strict          (only the biggest moments)\n"
-            "  Choose 1/2/3 [2]: "
-        ).strip() or "2"
+        sensitivity = (
+            input(
+                "    1 = very sensitive  (more clips, catches everything)\n"
+                "    2 = balanced        (recommended)\n"
+                "    3 = strict          (only the biggest moments)\n"
+                "  Choose 1/2/3 [2]: "
+            ).strip()
+            or "2"
+        )
     sens_value = {"1": 0.5, "2": 0.7, "3": 0.85}[sensitivity]
 
     # ── Step 3: Twitch ────────────────────────────────────────────────────────
@@ -349,34 +374,41 @@ def _run_setup_wizard():
     print("  Bolt monitors your Twitch chat for hype moments (no login needed).")
     print("  Optional: add TWITCH_CLIENT_ID + TWITCH_OAUTH_TOKEN later for")
     print("  native Twitch clip creation.\n")
-    twitch_channel    = input("  Twitch channel name [BillyandRandyGaming]: ").strip() \
-                        or "BillyandRandyGaming"
-    hype_threshold    = input("  Chat hype threshold — msgs/sec to trigger a clip [3]: ").strip() \
-                        or "3"
+    twitch_channel = (
+        input("  Twitch channel name [BillyandRandyGaming]: ").strip()
+        or "BillyandRandyGaming"
+    )
+    hype_threshold = (
+        input("  Chat hype threshold — msgs/sec to trigger a clip [3]: ").strip() or "3"
+    )
 
     # ── Step 4: OBS ───────────────────────────────────────────────────────────
     print("\nSTEP 4 — OBS integration")
     print("  Lets Bolt save replay buffer clips in real time via OBS WebSocket.")
     print("  Enable OBS WebSocket: Tools → WebSocket Server Settings → Enable\n")
-    use_obs      = (input("  Use OBS integration? (y/n) [y]: ").strip().lower() or "y") == "y"
-    obs_path     = ""
+    use_obs = (
+        input("  Use OBS integration? (y/n) [y]: ").strip().lower() or "y"
+    ) == "y"
+    obs_path = ""
     obs_password = ""
     if use_obs:
-        obs_path     = input("  Full path to OBS (Enter to auto-detect): ").strip()
-        obs_password = input("  OBS WebSocket password (OBS → Tools → WebSocket Settings): ").strip()
+        obs_path = input("  Full path to OBS (Enter to auto-detect): ").strip()
+        obs_password = input(
+            "  OBS WebSocket password (OBS → Tools → WebSocket Settings): "
+        ).strip()
 
     # ── Step 5: Streamlabs ────────────────────────────────────────────────────
     print("\nSTEP 5 — Streamlabs events (optional)")
     print("  Clips auto-save on donations ($1+), raids (5+ viewers),")
     print("  subscriptions, bits (100+), and hosts.")
     print("  Token: streamlabs.com/dashboard → Settings → API Settings → Socket API\n")
-    sl_token     = input("  Streamlabs Socket API token (Enter to skip): ").strip()
+    sl_token = input("  Streamlabs Socket API token (Enter to skip): ").strip()
 
     # ── Step 6: Discord ───────────────────────────────────────────────────────
     print("\nSTEP 6 — Discord notifications (optional)")
     print("  Get a phone ping when a clip posts or an error repeats 3× in a session.")
     print("  Create webhook: Discord server → Edit Channel → Integrations → Webhooks\n")
-    discord      = input("  Discord webhook URL (Enter to skip): ").strip()
+    discord = input("  Discord webhook URL (Enter to skip): ").strip()
 
     # ── Step 7: Peak-hour queueing ────────────────────────────────────────────
     print("\nSTEP 7 — Peak-hour queueing")
@@ -386,26 +418,26 @@ def _run_setup_wizard():
 
     # ── Write config.json ─────────────────────────────────────────────────────
     config = {
-        "game":                  game,
-        "recordings_folder":     "recordings",
-        "clips_folder":          "clips",
+        "game": game,
+        "recordings_folder": "recordings",
+        "clips_folder": "clips",
         "vertical_clips_folder": "vertical_clips",
         "highlight_sensitivity": sens_value,
-        "use_obs_integration":   use_obs,
-        "obs_path":              obs_path,
-        "obs_host":              "localhost",
-        "obs_port":              4455,
-        "auto_rank":             True,
-        "auto_format_tiktok":    True,
-        "tiktok_style":          "letterbox",
-        "min_clip_duration":     15,
-        "max_clip_duration":     60,
-        "min_clip_score":        65,
-        "min_post_score":        65,
-        "use_voice_checklist":    False,
-        "whisper_model":         "base",
-        "hashtags":              ["gaming", "clips", "viral", "trending", "MarvelRivals", "fyp"],
-        "notes":                 "Bolt formats clips, saves captions, and pings at peak hours for manual posting.",
+        "use_obs_integration": use_obs,
+        "obs_path": obs_path,
+        "obs_host": "localhost",
+        "obs_port": 4455,
+        "auto_rank": True,
+        "auto_format_tiktok": True,
+        "tiktok_style": "letterbox",
+        "min_clip_duration": 15,
+        "max_clip_duration": 60,
+        "min_clip_score": 65,
+        "min_post_score": 65,
+        "use_voice_checklist": False,
+        "whisper_model": "base",
+        "hashtags": ["gaming", "clips", "viral", "trending", "MarvelRivals", "fyp"],
+        "notes": "Bolt formats clips, saves captions, and pings at peak hours for manual posting.",
         "highlight": {
             "energy_multiplier": 3.5,
             "min_gap_seconds": 30,
@@ -445,8 +477,8 @@ def _run_setup_wizard():
                     existing_env[k.strip()] = v.strip()
 
     updates = {
-        "GAME_NAME":             game,
-        "TWITCH_CHANNEL":        twitch_channel,
+        "GAME_NAME": game,
+        "TWITCH_CHANNEL": twitch_channel,
         "TWITCH_HYPE_THRESHOLD": hype_threshold,
     }
     if obs_password:
@@ -459,10 +491,18 @@ def _run_setup_wizard():
     existing_env.update(updates)
 
     # Ensure placeholder keys exist
-    for key in ("OBS_PASSWORD", "STREAMLABS_SOCKET_TOKEN", "ANTHROPIC_API_KEY",
-                "TIKTOK_ACCESS_TOKEN", "TWITCH_CLIENT_ID", "TWITCH_OAUTH_TOKEN",
-                "TWITCH_CLIENT_SECRET", "DISCORD_WEBHOOK_URL", "POSTING_TIMEZONE",
-                "MIN_POST_GAP_HOURS"):
+    for key in (
+        "OBS_PASSWORD",
+        "STREAMLABS_SOCKET_TOKEN",
+        "ANTHROPIC_API_KEY",
+        "TIKTOK_ACCESS_TOKEN",
+        "TWITCH_CLIENT_ID",
+        "TWITCH_OAUTH_TOKEN",
+        "TWITCH_CLIENT_SECRET",
+        "DISCORD_WEBHOOK_URL",
+        "POSTING_TIMEZONE",
+        "MIN_POST_GAP_HOURS",
+    ):
         existing_env.setdefault(key, "")
 
     if not existing_env.get("POSTING_TIMEZONE"):
@@ -481,7 +521,7 @@ def _run_setup_wizard():
         "Setup complete ✓  (config.json and .env created)",
         level="success",
         reason="You can edit config.json or .env at any time. "
-               "Bolt will reload settings on next launch."
+        "Bolt will reload settings on next launch.",
     )
 
 
@@ -492,7 +532,7 @@ def _check_env_file():
             ".env not found — creating blank one",
             level="warning",
             reason="The .env file stores API keys and passwords. "
-                   "Run the setup wizard (delete config.json) to fill it in."
+            "Run the setup wizard (delete config.json) to fill it in.",
         )
         with open(ENV_FILE, "w") as f:
             f.write("# Bolt environment config\n")
@@ -507,6 +547,35 @@ def _check_env_file():
             if line and not line.startswith("#") and "=" in line:
                 k, _, v = line.partition("=")
                 os.environ.setdefault(k.strip(), v.strip())
+
+
+def _start_obs_game_tracker():
+    """
+    Start the OBS game tracker in a background thread.
+    This watches for scene changes and auto-updates config.json.
+
+    Why a thread? So it runs alongside bot.py without blocking.
+    The tracker persists even after launch.py hands off to bot.py.
+    """
+    import threading
+
+    def run_tracker():
+        try:
+            from scripts.update_game_from_obs import main as tracker_main
+
+            tracker_main()
+        except Exception as e:
+            notify(f"OBS game tracker error: {e}", level="warning")
+
+    thread = threading.Thread(target=run_tracker, daemon=True)
+    thread.start()
+
+    notify(
+        "OBS game tracker started ✓",
+        level="info",
+        reason="Bolt will auto-update config.json when you switch OBS scenes. "
+        "Make sure your scenes are mapped in configs/scene_game_mapping.json.",
+    )
 
 
 def _print_checklist(config: dict):
@@ -527,15 +596,17 @@ def _print_checklist(config: dict):
     for key, label in OPTIONAL_KEYS:
         val = os.getenv(key, "")
         status = "✓" if val else "○"
-        level  = "info" if val else "info"
-        notify(f"  {status} {label} {'(configured)' if val else '(optional)'}", level=level)
+        level = "info" if val else "info"
+        notify(
+            f"  {status} {label} {'(configured)' if val else '(optional)'}", level=level
+        )
 
     if missing:
         notify(
             f"{len(missing)} item(s) still to set up:",
             level="info",
             reason="These are needed for enabled features. Optional services can be added later. "
-                   "Edit .env to add them whenever you're ready."
+            "Edit .env to add them whenever you're ready.",
         )
         for item in missing:
             notify(f"    • {item}", level="info")
@@ -544,6 +615,7 @@ def _print_checklist(config: dict):
 
 
 # ── Twitch stats display ───────────────────────────────────────────────────────
+
 
 def _show_twitch_stats():
     """
@@ -555,7 +627,7 @@ def _show_twitch_stats():
 
     Skips gracefully if TWITCH_CLIENT_ID or TWITCH_CLIENT_SECRET aren't set.
     """
-    client_id     = os.getenv("TWITCH_CLIENT_ID", "").strip()
+    client_id = os.getenv("TWITCH_CLIENT_ID", "").strip()
     client_secret = os.getenv("TWITCH_CLIENT_SECRET", "").strip()
 
     if not client_id or not client_secret:
@@ -563,15 +635,19 @@ def _show_twitch_stats():
             "Twitch stats skipped — add TWITCH_CLIENT_ID + TWITCH_CLIENT_SECRET to .env",
             level="info",
             reason="Once added, Bolt will show your follower count, live status, and "
-                   "top clips every time you launch."
+            "top clips every time you launch.",
         )
         return
 
-    notify("Fetching Twitch stats…", level="info",
-           reason="Pulling your channel data from the Twitch API so you can see "
-                  "follower count, stream status, and top clips before going live.")
+    notify(
+        "Fetching Twitch stats…",
+        level="info",
+        reason="Pulling your channel data from the Twitch API so you can see "
+        "follower count, stream status, and top clips before going live.",
+    )
     try:
         from modules.Twitch_Stats import TwitchStats
+
         stats = TwitchStats()
         stats.print_summary()
     except Exception as e:
@@ -579,24 +655,31 @@ def _show_twitch_stats():
             f"Twitch stats unavailable: {e}",
             level="warning",
             reason="This won't stop Bolt from running. Check your TWITCH_CLIENT_ID "
-                   "and TWITCH_CLIENT_SECRET in .env if you want stats at startup."
+            "and TWITCH_CLIENT_SECRET in .env if you want stats at startup.",
         )
 
 
 # ── Voice pre-stream checklist ─────────────────────────────────────────────────
 
+
 def _run_voice_checklist(config: dict):
     """
-    Show the pre-stream task checklist and let Billy check items off by voice.
+    Show the pre-stream task checklist and let Billy check items off by voice or keyboard.
 
     Why voice? So you can walk around setting things up and just say
     "OBS done" or "title set" without stopping to click anything.
+
+    Keyboard mode: Type part of a task name (e.g., "obs", "title", "streamlabs")
+    and press Enter to check it off.
 
     Skips if 'skip_checklist': true in config.json, or if --no-checklist
     is passed as a command-line argument.
     """
     if config.get("skip_checklist", False):
-        notify("Pre-stream checklist skipped (skip_checklist=true in config.json)", level="info")
+        notify(
+            "Pre-stream checklist skipped (skip_checklist=true in config.json)",
+            level="info",
+        )
         return
 
     if "--no-checklist" in sys.argv:
@@ -606,44 +689,44 @@ def _run_voice_checklist(config: dict):
     notify(
         "Starting pre-stream checklist…",
         level="info",
-        reason="Say any task out loud to check it off. For example: "
-               "'OBS is good', 'title set', 'Streamlabs on'. "
-               "Press Ctrl+C at any time to skip the rest and continue."
+        reason="Say a task out loud to check it off (e.g., 'OBS is good', 'title set'), "
+        "OR type part of a task name and press Enter. "
+        "Press Ctrl+C at any time to skip the rest and continue.",
     )
 
     try:
         from modules.Voice_Checklist import VoiceChecklist
 
         # Use keyboard mode if voice is disabled in config
-        use_voice = config.get("use_voice_checklist", True)
-        timeout   = config.get("checklist_timeout_minutes", 15)
+        use_voice = config.get("use_voice_checklist", False)  # Default to keyboard mode
+        timeout = config.get("checklist_timeout_minutes", 15)
 
         checklist = VoiceChecklist(use_voice=use_voice)
-        tasks     = checklist.run(timeout_minutes=timeout)
+        tasks = checklist.run(timeout_minutes=timeout)
 
-        done  = sum(1 for t in tasks if t["done"])
+        done = sum(1 for t in tasks if t["done"])
         total = len(tasks)
         notify(
             f"Checklist complete — {done}/{total} tasks done",
             level="success" if done == total else "info",
-            reason="Checklist progress saved to logs/checklist_progress.json."
+            reason="Checklist progress saved to logs/checklist_progress.json.",
         )
 
     except KeyboardInterrupt:
         notify("Checklist skipped by user — continuing launch", level="info")
     except Exception as e:
         notify(
-            f"Voice checklist unavailable: {e}",
+            f"Checklist error: {e}",
             level="warning",
-            reason="Install speech_recognition to enable voice: "
-                   "pip3 install SpeechRecognition pyaudio --break-system-packages. "
-                   "Bolt will continue without the checklist."
+            reason="The checklist should still work in keyboard mode. "
+            "Run 'python3 -m modules.Voice_Checklist --keyboard' to test.",
         )
 
 
 if __name__ == "__main__":
     if "--briefing" in sys.argv:
         from Daily_Briefing import generate_briefing
+
         generate_briefing()
         sys.exit(0)
 

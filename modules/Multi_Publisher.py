@@ -73,14 +73,16 @@ def build_platform_plan(
     for platform in enabled:
         scheduled_for = _next_platform_time(platform, now) + STAGGER_DELAYS[platform]
         metadata = _format_for_platform(platform, clip_path, title, tags)
-        plan.append({
-            "platform": platform.value,
-            "label": PLATFORM_LABELS[platform],
-            "status": "manual_upload_ready",
-            "scheduled_for": scheduled_for.isoformat(),
-            "clip_path": str(clip_path),
-            **metadata,
-        })
+        plan.append(
+            {
+                "platform": platform.value,
+                "label": PLATFORM_LABELS[platform],
+                "status": "manual_upload_ready",
+                "scheduled_for": scheduled_for.isoformat(),
+                "clip_path": str(clip_path),
+                **metadata,
+            }
+        )
     return plan
 
 
@@ -88,11 +90,13 @@ def append_platform_plan(queue_id: str, platform_plan: List[dict]) -> dict:
     """Persist the platform plan to a dedicated no-cost queue file."""
     data = _load_platform_queue()
     data["items"] = [item for item in data["items"] if item.get("queue_id") != queue_id]
-    data["items"].append({
-        "queue_id": queue_id,
-        "created_at": datetime.now().isoformat(),
-        "platforms": platform_plan,
-    })
+    data["items"].append(
+        {
+            "queue_id": queue_id,
+            "created_at": datetime.now().isoformat(),
+            "platforms": platform_plan,
+        }
+    )
     _save_platform_queue(data)
     return data["items"][-1]
 
@@ -111,7 +115,9 @@ def normalize_hashtags(hashtags: List[str]) -> List[str]:
     return cleaned[:30]
 
 
-def _format_for_platform(platform: Platform, clip_path: str, title: str, hashtags: List[str]) -> dict:
+def _format_for_platform(
+    platform: Platform, clip_path: str, title: str, hashtags: List[str]
+) -> dict:
     if platform == Platform.TIKTOK:
         return {
             "caption": _caption(title, hashtags[:5], limit=2200),
@@ -209,13 +215,17 @@ def _save_platform_queue(data: dict) -> None:
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Build a no-cost multi-platform posting plan.")
+    parser = argparse.ArgumentParser(
+        description="Build a no-cost multi-platform posting plan."
+    )
     parser.add_argument("clip_path")
     parser.add_argument("title")
     parser.add_argument("--hashtags", nargs="*", default=[])
     args = parser.parse_args()
 
-    print(json.dumps(
-        build_platform_plan(args.clip_path, args.title, args.hashtags),
-        indent=2,
-    ))
+    print(
+        json.dumps(
+            build_platform_plan(args.clip_path, args.title, args.hashtags),
+            indent=2,
+        )
+    )

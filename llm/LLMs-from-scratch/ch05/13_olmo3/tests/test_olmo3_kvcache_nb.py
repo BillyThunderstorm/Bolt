@@ -43,7 +43,6 @@ def dummy_cfg_base():
         "attention_dropout": 0.0,
         "sliding_window": 4,
         "layer_types": ["full_attention"] * 2,
-
         # RoPE config
         "rope_base": 10_000.0,
         "rope_attention_factor": 1.0,
@@ -54,13 +53,13 @@ def dummy_cfg_base():
         "dtype": torch.float32,
     }
 
+
 @torch.inference_mode()
 def test_dummy_olmo3_forward(dummy_cfg_base, dummy_input, import_notebook_defs):
     torch.manual_seed(123)
     model = import_notebook_defs.Olmo3Model(dummy_cfg_base)
     out = model(dummy_input)
-    assert out.shape == (1, dummy_input.size(1), dummy_cfg_base["vocab_size"]), \
-        f"Expected shape (1, seq_len, vocab_size), got {out.shape}"
+    assert out.shape == (1, dummy_input.size(1), dummy_cfg_base["vocab_size"]), f"Expected shape (1, seq_len, vocab_size), got {out.shape}"
 
 
 @torch.inference_mode()
@@ -83,10 +82,8 @@ def test_olmo3_base_equivalence_with_transformers(import_notebook_defs):
         "layer_types": ["full_attention", "full_attention"],
         "dtype": torch.float32,
         "query_pre_attn_scalar": 256,
-
         # required by TransformerBlock
         "attention_bias": False,
-
         # required by RMSNorm and RoPE setup in Olmo3Model
         "rms_norm_eps": 1e-6,
         "rope_base": 1_000_000.0,
@@ -94,7 +91,6 @@ def test_olmo3_base_equivalence_with_transformers(import_notebook_defs):
         "rope_type": "default",
         "rope_factor": 1.0,
         "rope_orig_max": 8,
-
         # extra HF-only stuff
         "rope_local_base": 10_000.0,
     }

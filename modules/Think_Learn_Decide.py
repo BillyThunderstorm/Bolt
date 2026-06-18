@@ -78,7 +78,9 @@ def _format_for_tiktok(clip_path: str, style: str) -> str:
 def _add_to_queue(clip_path: str, title: str, hashtags: List[str], score: float) -> Any:
     from modules.Post_Queue import add_to_queue
 
-    return add_to_queue(clip_path=clip_path, title=title, hashtags=hashtags, score=score)
+    return add_to_queue(
+        clip_path=clip_path, title=title, hashtags=hashtags, score=score
+    )
 
 
 @dataclass
@@ -133,7 +135,13 @@ class ThinkLearnDecideEngine:
         return {
             "generated_at": _now_iso(),
             "sources": [
-                {"id": sid, "path": str(path), "type": typ, "exists": path.exists(), "last_seen": _now_iso()}
+                {
+                    "id": sid,
+                    "path": str(path),
+                    "type": typ,
+                    "exists": path.exists(),
+                    "last_seen": _now_iso(),
+                }
                 for sid, path, typ in candidates
             ],
         }
@@ -148,18 +156,45 @@ class ThinkLearnDecideEngine:
             try:
                 if source["type"] == "markdown":
                     preview = path.read_text(encoding="utf-8")[:300]
-                    self.record_event(source["id"], "memory_context", "ingest_markdown", "loaded", 0.8, f"Loaded {path.name}", None, {"preview": preview})
+                    self.record_event(
+                        source["id"],
+                        "memory_context",
+                        "ingest_markdown",
+                        "loaded",
+                        0.8,
+                        f"Loaded {path.name}",
+                        None,
+                        {"preview": preview},
+                    )
                     ingested += 1
                 elif source["type"] == "markdown_dir":
                     for md_file in sorted(path.glob("*.md")):
                         preview = md_file.read_text(encoding="utf-8")[:300]
-                        self.record_event(source["id"], "memory_context", "ingest_markdown", "loaded", 0.8, f"Loaded {md_file.name}", None, {"preview": preview})
+                        self.record_event(
+                            source["id"],
+                            "memory_context",
+                            "ingest_markdown",
+                            "loaded",
+                            0.8,
+                            f"Loaded {md_file.name}",
+                            None,
+                            {"preview": preview},
+                        )
                         ingested += 1
                 elif source["type"] == "json":
                     payload = _safe_load_json(path, None)
                     if payload is not None:
                         keys = list(payload.keys()) if isinstance(payload, dict) else []
-                        self.record_event(source["id"], "structured_state", "ingest_json", "loaded", 0.85, f"Loaded {path.name}", None, {"keys": keys})
+                        self.record_event(
+                            source["id"],
+                            "structured_state",
+                            "ingest_json",
+                            "loaded",
+                            0.85,
+                            f"Loaded {path.name}",
+                            None,
+                            {"keys": keys},
+                        )
                         ingested += 1
             except Exception:
                 continue
@@ -243,7 +278,9 @@ class ThinkLearnDecideEngine:
         ]
         return " ".join(part for part in parts if part).strip()
 
-    def _retrieve_relevant_memory(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
+    def _retrieve_relevant_memory(
+        self, query: str, limit: int = 5
+    ) -> List[Dict[str, Any]]:
         if retrieve_memory is None or not query:
             return []
         try:
@@ -326,7 +363,9 @@ class ThinkLearnDecideEngine:
         if not UNIFIED_MEMORY_FILE.exists():
             return []
         out: List[Dict[str, Any]] = []
-        for line in UNIFIED_MEMORY_FILE.read_text(encoding="utf-8").splitlines()[-limit:]:
+        for line in UNIFIED_MEMORY_FILE.read_text(encoding="utf-8").splitlines()[
+            -limit:
+        ]:
             try:
                 out.append(json.loads(line))
             except Exception:
@@ -339,7 +378,9 @@ class ThinkLearnDecideEngine:
             action = candidate.get("action", "queue_clip")
             score = float(candidate.get("score", 0))
             memory_adjustment, memory_reason = self._memory_adjustment(candidate)
-            confidence = max(0.0, min(0.99, (score / 100.0) * 0.6 + 0.35 + memory_adjustment))
+            confidence = max(
+                0.0, min(0.99, (score / 100.0) * 0.6 + 0.35 + memory_adjustment)
+            )
             risk = "high" if action in {"delete_clip", "publish_now"} else "low"
             reason = f"Local action proposal from clip score={score:.1f}"
             if memory_reason:
@@ -358,11 +399,21 @@ class ThinkLearnDecideEngine:
         return proposed
 
     def _memory_adjustment(self, candidate: Dict[str, Any]) -> tuple[float, str]:
-        memory_items = candidate.get("memory_context") or candidate.get("retrieved_memory") or []
-        influence = candidate.get("memory_influence") if isinstance(candidate.get("memory_influence"), dict) else {}
+        memory_items = (
+            candidate.get("memory_context") or candidate.get("retrieved_memory") or []
+        )
+        influence = (
+            candidate.get("memory_influence")
+            if isinstance(candidate.get("memory_influence"), dict)
+            else {}
+        )
         if influence:
             adjustment = float(influence.get("confidence_delta") or 0.0)
-            strongest = influence.get("strongest_match") if isinstance(influence.get("strongest_match"), dict) else {}
+            strongest = (
+                influence.get("strongest_match")
+                if isinstance(influence.get("strongest_match"), dict)
+                else {}
+            )
             direction = str(influence.get("net_direction") or "neutral")
             total = sum(
                 int(influence.get(key) or 0)
@@ -373,7 +424,10 @@ class ThinkLearnDecideEngine:
                 return 0.0, f"memory influence neutral from {total} match(es)"
             verb = "boosted" if adjustment > 0 else "reduced"
             title_part = f"; strongest match: {title}" if title else ""
-            return adjustment, f"memory {verb} confidence by {abs(adjustment):.2f} ({direction}, {total} match(es)){title_part}"
+            return (
+                adjustment,
+                f"memory {verb} confidence by {abs(adjustment):.2f} ({direction}, {total} match(es)){title_part}",
+            )
 
         if not isinstance(memory_items, list) or not memory_items:
             return 0.0, ""
@@ -391,18 +445,50 @@ class ThinkLearnDecideEngine:
             if match_score > strongest_score:
                 strongest_score = match_score
                 strongest_title = title
-            if signal == "supportive" or any(term in summary for term in ("queue", "queued", "approved", "success", "successful", "ready", "manual review", "format approved", "peak hour")):
+            if signal == "supportive" or any(
+                term in summary
+                for term in (
+                    "queue",
+                    "queued",
+                    "approved",
+                    "success",
+                    "successful",
+                    "ready",
+                    "manual review",
+                    "format approved",
+                    "peak hour",
+                )
+            ):
                 adjustment += min(0.04, match_score * 0.04)
-            if signal == "cautionary" or any(term in summary for term in ("reject", "rejected", "blocked", "failed", "discard", "below", "none approved", "skip", "skipped")):
+            if signal == "cautionary" or any(
+                term in summary
+                for term in (
+                    "reject",
+                    "rejected",
+                    "blocked",
+                    "failed",
+                    "discard",
+                    "below",
+                    "none approved",
+                    "skip",
+                    "skipped",
+                )
+            ):
                 adjustment -= min(0.05, match_score * 0.05)
 
         adjustment = max(-0.10, min(0.08, adjustment))
         if abs(adjustment) < 0.005:
-            return 0.0, f"memory checked, no confidence change from {len(memory_items)} match(es)"
+            return (
+                0.0,
+                f"memory checked, no confidence change from {len(memory_items)} match(es)",
+            )
 
         direction = "boosted" if adjustment > 0 else "reduced"
         title_part = f"; strongest match: {strongest_title}" if strongest_title else ""
-        return adjustment, f"memory {direction} confidence by {abs(adjustment):.2f} from {len(memory_items)} match(es){title_part}"
+        return (
+            adjustment,
+            f"memory {direction} confidence by {abs(adjustment):.2f} from {len(memory_items)} match(es){title_part}",
+        )
 
     def confirm_action(self, proposal: ProposedAction) -> bool:
         """
@@ -432,7 +518,13 @@ class ThinkLearnDecideEngine:
 
     def enqueue_pending_proposal(self, proposal: ProposedAction) -> None:
         pending = _safe_load_json(PENDING_PROPOSALS_FILE, [])
-        pending.append({"queued_at": _now_iso(), "status": "pending", "proposal": proposal.as_dict()})
+        pending.append(
+            {
+                "queued_at": _now_iso(),
+                "status": "pending",
+                "proposal": proposal.as_dict(),
+            }
+        )
         _safe_write_json(PENDING_PROPOSALS_FILE, pending)
 
     def pending_proposals(self) -> List[Dict[str, Any]]:
@@ -443,11 +535,16 @@ class ThinkLearnDecideEngine:
         changed = False
         for item in pending:
             proposal = item.get("proposal", {})
-            if proposal.get("action_id") == action_id and item.get("status") == "pending":
+            if (
+                proposal.get("action_id") == action_id
+                and item.get("status") == "pending"
+            ):
                 item["status"] = "approved" if approved else "rejected"
                 item["resolved_at"] = _now_iso()
                 item["note"] = note
-                self.learn_from_feedback(proposal.get("action", "queue_clip"), approved, note)
+                self.learn_from_feedback(
+                    proposal.get("action", "queue_clip"), approved, note
+                )
                 changed = True
                 break
         if changed:
@@ -478,36 +575,66 @@ class ThinkLearnDecideEngine:
             title = payload.get("title") or Path(clip_path).stem.replace("_", " ")
             hashtags = payload.get("hashtags") or []
             score = float(payload.get("score", 50))
-            _add_to_queue(clip_path=vertical, title=title, hashtags=hashtags, score=score)
+            _add_to_queue(
+                clip_path=vertical, title=title, hashtags=hashtags, score=score
+            )
             return True
         except Exception:
             return False
 
-    def learn_from_feedback(self, action: str, accepted: bool, feedback_text: str = "") -> None:
+    def learn_from_feedback(
+        self, action: str, accepted: bool, feedback_text: str = ""
+    ) -> None:
         feedback_map = self.model.setdefault("feedback_by_action", {})
-        feedback_map[action] = float(feedback_map.get(action, 0.0)) + (1.0 if accepted else -1.0)
+        feedback_map[action] = float(feedback_map.get(action, 0.0)) + (
+            1.0 if accepted else -1.0
+        )
         _safe_write_json(DECISION_MODEL_FILE, self.model)
-        self.record_event("decision_feedback", "user_preference", action, "accepted" if accepted else "rejected", 0.9, "Feedback recorded", feedback_text, {})
+        self.record_event(
+            "decision_feedback",
+            "user_preference",
+            action,
+            "accepted" if accepted else "rejected",
+            0.9,
+            "Feedback recorded",
+            feedback_text,
+            {},
+        )
 
-    def learn_from_outcome(self, action: str, success: bool, details: Dict[str, Any]) -> None:
+    def learn_from_outcome(
+        self, action: str, success: bool, details: Dict[str, Any]
+    ) -> None:
         outcomes = self.model.setdefault("outcomes_by_action", {})
         stats = outcomes.setdefault(action, {"ok": 0, "total": 0})
         stats["total"] = int(stats.get("total", 0)) + 1
         if success:
             stats["ok"] = int(stats.get("ok", 0)) + 1
         _safe_write_json(DECISION_MODEL_FILE, self.model)
-        self.record_event("decision_outcome", "execution_result", action, "success" if success else "failed", 0.95, "Outcome captured", None, details)
+        self.record_event(
+            "decision_outcome",
+            "execution_result",
+            action,
+            "success" if success else "failed",
+            0.95,
+            "Outcome captured",
+            None,
+            details,
+        )
 
     def enforce_action_policy(self, proposal: ProposedAction) -> bool:
         allowlist = set(self.config.get("decision_allowlist", ["queue_clip"]))
-        denylist = set(self.config.get("decision_denylist", ["delete_clip", "publish_now"]))
+        denylist = set(
+            self.config.get("decision_denylist", ["delete_clip", "publish_now"])
+        )
         if proposal.action in denylist:
             return False
         return proposal.action in allowlist
 
     def audit(self, phase: str, payload: Dict[str, Any]) -> None:
-        _append_jsonl(AUDIT_LOG_FILE, {"timestamp": _now_iso(), "phase": phase, "payload": payload})
-
+        _append_jsonl(
+            AUDIT_LOG_FILE,
+            {"timestamp": _now_iso(), "phase": phase, "payload": payload},
+        )
 
 
 class BrainController(ThinkLearnDecideEngine):
@@ -540,11 +667,16 @@ def review_pending_cli() -> int:
     print(f"Pending proposals: {len(pending)}")
     for idx, item in enumerate(pending, start=1):
         proposal = item.get("proposal", {})
-        print(f"{idx}. {proposal.get('action_id')} | {proposal.get('action')} | clip={proposal.get('payload', {}).get('clip_path', '-')}")
+        print(
+            f"{idx}. {proposal.get('action_id')} | {proposal.get('action')} | clip={proposal.get('payload', {}).get('clip_path', '-')}"
+        )
     if not sys_stdin_interactive():
         print("Non-interactive mode: run this command in a terminal to approve/reject.")
         return 1
-    approve_all = input("Approve all pending proposals? [y/N]: ").strip().lower() in {"y", "yes"}
+    approve_all = input("Approve all pending proposals? [y/N]: ").strip().lower() in {
+        "y",
+        "yes",
+    }
     for item in pending:
         proposal = item.get("proposal", {})
         action_id = proposal.get("action_id", "")
@@ -554,7 +686,9 @@ def review_pending_cli() -> int:
             engine.resolve_pending(action_id, approved=True, note="approved_all_batch")
         else:
             answer = input(f"Approve {action_id}? [y/N]: ").strip().lower()
-            engine.resolve_pending(action_id, approved=answer in {"y", "yes"}, note="manual_batch_review")
+            engine.resolve_pending(
+                action_id, approved=answer in {"y", "yes"}, note="manual_batch_review"
+            )
     print("Pending review complete.")
     return 0
 
@@ -573,4 +707,6 @@ if __name__ == "__main__":
         raise SystemExit(review_pending_cli())
     if "--apply-approved" in sys.argv:
         raise SystemExit(apply_approved_cli())
-    print("Usage: python -m modules.Think_Learn_Decide --review-pending|--apply-approved")
+    print(
+        "Usage: python -m modules.Think_Learn_Decide --review-pending|--apply-approved"
+    )

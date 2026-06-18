@@ -2406,5 +2406,33 @@
     "timestamp": 3053.5,
     "phash": null,
     "added": 1781212959.188056
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/clips/2026-06-16_05-11-15_clip24_audio_spike_1916.mp4",
+    "size": 22433858,
+    "timestamp": 1916.5,
+    "phash": null,
+    "added": 1781608611.405689
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/clips/2026-06-16_05-11-15_clip43_audio_spike_2810.mp4",
+    "size": 14580937,
+    "timestamp": 2810.0,
+    "phash": null,
+    "added": 1781608611.4077618
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/clips/2026-06-16_05-11-15_clip49_audio_spike_3218.mp4",
+    "size": 13465878,
+    "timestamp": 3218.0,
+    "phash": null,
+    "added": 1781608611.408895
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/clips/2026-06-16_05-11-15_clip50_audio_spike_3248.mp4",
+    "size": 15482630,
+    "timestamp": 3248.0,
+    "phash": null,
+    "added": 1781608611.409995
   }
 ]

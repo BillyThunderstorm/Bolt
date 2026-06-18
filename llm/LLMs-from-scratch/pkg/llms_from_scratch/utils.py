@@ -47,11 +47,7 @@ def _extract_defs_and_classes_from_code(src):
         # def fn(
         #     arg,
         # ):
-        balance = (
-            header.count("(") - header.count(")")
-            + header.count("[") - header.count("]")
-            + header.count("{") - header.count("}")
-        )
+        balance = header.count("(") - header.count(")") + header.count("[") - header.count("]") + header.count("{") - header.count("}")
         return balance <= 0
 
     lines = src.splitlines()
@@ -99,11 +95,7 @@ def _extract_defs_and_classes_from_code(src):
     # General rule:
     # replace functions defined like `def load_weights_into_xxx(ClassName, ...`
     # with `def load_weights_into_xxx(model, ...`
-    code = re.sub(
-        r"(def\s+load_weights_into_\w+\s*\()\s*\w+\s*,",
-        r"\1model,",
-        code
-    )
+    code = re.sub(r"(def\s+load_weights_into_\w+\s*\()\s*\w+\s*,", r"\1model,", code)
     return code
 
 

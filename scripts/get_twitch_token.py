@@ -31,6 +31,7 @@ TOKEN_URL = "https://twitchtokengenerator.com"
 
 # ── Load / write .env ─────────────────────────────────────────────────────────
 
+
 def load_env() -> dict:
     env = {}
     if ENV_FILE.exists():
@@ -62,6 +63,7 @@ def write_env_key(key: str, value: str):
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
+
 def main():
     print()
     print("=" * 58)
@@ -89,7 +91,9 @@ def main():
        (it's a long string of letters and numbers)
 """)
 
-    token = input("  Step 3 — Paste your ACCESS TOKEN here and press Enter:\n  > ").strip()
+    token = input(
+        "  Step 3 — Paste your ACCESS TOKEN here and press Enter:\n  > "
+    ).strip()
 
     if not token:
         print("\n  ✗  Nothing was pasted. Run the script again.")

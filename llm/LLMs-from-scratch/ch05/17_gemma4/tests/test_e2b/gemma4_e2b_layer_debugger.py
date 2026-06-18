@@ -175,11 +175,7 @@ def _attach_debug_hooks(model, is_hf):
         handles.append(core.norm.register_forward_hook(hook("final_norm")))
         handles.append(model.lm_head.register_forward_hook(hook("logits")))
     else:
-        handles.append(
-            model.tok_emb.register_forward_hook(
-                scaled_embedding_hook("embedding", model.cfg["emb_dim"] ** 0.5)
-            )
-        )
+        handles.append(model.tok_emb.register_forward_hook(scaled_embedding_hook("embedding", model.cfg["emb_dim"] ** 0.5)))
         blocks = getattr(model, "blocks", None)
         if blocks is None:
             blocks = getattr(model, "trf_blocks", None)

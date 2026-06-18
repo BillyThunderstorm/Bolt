@@ -31,10 +31,10 @@ def get_model_and_tokenizer():
     CHOOSE_MODEL = "gpt2-small (124M)"  # Optionally replace with another model from the model_configs dir below
 
     BASE_CONFIG = {
-        "vocab_size": 50257,     # Vocabulary size
+        "vocab_size": 50257,  # Vocabulary size
         "context_length": 1024,  # Context length
-        "drop_rate": 0.0,        # Dropout rate
-        "qkv_bias": True         # Query-key-value bias
+        "drop_rate": 0.0,  # Dropout rate
+        "qkv_bias": True,  # Query-key-value bias
     }
 
     model_configs = {
@@ -75,7 +75,7 @@ async def main(message: chainlit.Message):
         max_new_tokens=50,
         context_size=model_config["context_length"],
         top_k=1,
-        temperature=0.0
+        temperature=0.0,
     )
 
     text = token_ids_to_text(token_ids, tokenizer)

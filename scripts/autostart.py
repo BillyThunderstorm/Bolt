@@ -25,7 +25,7 @@ def main():
     system = platform.system()
 
     print(f"\nAutostart manager — {system}")
-    print("="*40)
+    print("=" * 40)
 
     if action == "install":
         if system == "Darwin":
@@ -116,8 +116,7 @@ def _install_macos():
 
     # Load it immediately
     result = subprocess.run(
-        ["launchctl", "load", str(PLIST_PATH)],
-        capture_output=True, text=True
+        ["launchctl", "load", str(PLIST_PATH)], capture_output=True, text=True
     )
 
     if result.returncode == 0:
@@ -158,12 +157,17 @@ def _install_windows():
     - It restarts automatically if it fails
     """
     cmd = [
-        "schtasks", "/create",
-        "/tn", TASK_NAME,
-        "/tr", f'"{PYTHON}" "{LAUNCH_SCRIPT}"',
-        "/sc", "ONLOGON",
-        "/ru", os.environ.get("USERNAME", ""),
-        "/f",   # force overwrite if exists
+        "schtasks",
+        "/create",
+        "/tn",
+        TASK_NAME,
+        "/tr",
+        f'"{PYTHON}" "{LAUNCH_SCRIPT}"',
+        "/sc",
+        "ONLOGON",
+        "/ru",
+        os.environ.get("USERNAME", ""),
+        "/f",  # force overwrite if exists
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, shell=True)
     if result.returncode == 0:
@@ -178,7 +182,9 @@ def _install_windows():
 def _uninstall_windows():
     result = subprocess.run(
         ["schtasks", "/delete", "/tn", TASK_NAME, "/f"],
-        capture_output=True, text=True, shell=True
+        capture_output=True,
+        text=True,
+        shell=True,
     )
     if result.returncode == 0:
         print("Autostart task removed.")
@@ -211,11 +217,13 @@ WantedBy=default.target
 
 def _install_linux():
     SERVICE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    SERVICE_PATH.write_text(SERVICE_TEMPLATE.format(
-        python=PYTHON,
-        script=str(LAUNCH_SCRIPT),
-        workdir=str(SCRIPT_DIR),
-    ))
+    SERVICE_PATH.write_text(
+        SERVICE_TEMPLATE.format(
+            python=PYTHON,
+            script=str(LAUNCH_SCRIPT),
+            workdir=str(SCRIPT_DIR),
+        )
+    )
     subprocess.run(["systemctl", "--user", "daemon-reload"])
     subprocess.run(["systemctl", "--user", "enable", SERVICE_NAME])
     subprocess.run(["systemctl", "--user", "start", SERVICE_NAME])
@@ -234,11 +242,11 @@ def _uninstall_linux():
 
 # ── Status check ──────────────────────────────────────────────────────────────
 
+
 def _check_status(system: str):
     if system == "Darwin":
         result = subprocess.run(
-            ["launchctl", "list", PLIST_LABEL],
-            capture_output=True, text=True
+            ["launchctl", "list", PLIST_LABEL], capture_output=True, text=True
         )
         if result.returncode == 0:
             print("Status: RUNNING")
@@ -248,7 +256,9 @@ def _check_status(system: str):
     elif system == "Windows":
         result = subprocess.run(
             ["schtasks", "/query", "/tn", TASK_NAME],
-            capture_output=True, text=True, shell=True
+            capture_output=True,
+            text=True,
+            shell=True,
         )
         print(result.stdout if result.returncode == 0 else "Task not found.")
     elif system == "Linux":

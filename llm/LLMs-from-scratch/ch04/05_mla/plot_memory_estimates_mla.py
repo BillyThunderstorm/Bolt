@@ -16,11 +16,10 @@ DTYPE_BYTES = {
 
 
 def convert_bytes_to_gb(n_bytes):
-    return n_bytes / (1000. ** 3)
+    return n_bytes / (1000.0**3)
 
 
-def calc_kv_bytes_total_mha(batch, context_length, emb_dim, n_heads,
-                                 n_layers, bytes_per_elem):
+def calc_kv_bytes_total_mha(batch, context_length, emb_dim, n_heads, n_layers, bytes_per_elem):
     head_dim = emb_dim / n_heads
     per_layer = batch * context_length * head_dim * n_heads * 2 * bytes_per_elem
     return per_layer * n_layers
@@ -38,16 +37,11 @@ def plot_abs_kv_vs_context_multiple():
     dtype = "bf16"
     bytes_per_elem = DTYPE_BYTES[dtype]
 
-    context_lengths = [
-        256, 512, 1024, 2048, 4096, 8192,
-        16384, 32768, 65536, 131072
-    ]
+    context_lengths = [256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072]
 
     mha_gb = []
     for L in context_lengths:
-        total_mha = calc_kv_bytes_total_mha(
-            batch_size, L, emb_dim, n_heads, n_layers, bytes_per_elem
-        )
+        total_mha = calc_kv_bytes_total_mha(batch_size, L, emb_dim, n_heads, n_layers, bytes_per_elem)
         mha_gb.append(convert_bytes_to_gb(total_mha))
 
     latent_dims = [1024, 512, 256, 64]
@@ -60,16 +54,13 @@ def plot_abs_kv_vs_context_multiple():
     for latent_dim in latent_dims:
         mla_gb = []
         for L in context_lengths:
-            total_mla = calc_kv_bytes_total_mla(
-                batch_size, L, n_layers, latent_dim, bytes_per_elem
-            )
+            total_mla = calc_kv_bytes_total_mla(batch_size, L, n_layers, latent_dim, bytes_per_elem)
             mla_gb.append(convert_bytes_to_gb(total_mla))
 
         total_mla_ref = calc_kv_bytes_total_mla(batch_size, L_ref, n_layers, latent_dim, bytes_per_elem)
         comp = total_mha_ref / total_mla_ref if total_mla_ref != 0 else float("inf")
 
-        plt.plot(context_lengths, mla_gb, marker="o",
-                 label=f"MLA (latent_dim={latent_dim}, {comp:,.1f}× compression)")
+        plt.plot(context_lengths, mla_gb, marker="o", label=f"MLA (latent_dim={latent_dim}, {comp:,.1f}× compression)")
 
     plt.xscale("log")
     plt.xlabel("context_length (log scale)")
@@ -78,7 +69,7 @@ def plot_abs_kv_vs_context_multiple():
         "KV-cache vs Context Length — MHA vs MLA\n"
         f"(n_heads={n_heads}, emb_dim={emb_dim}, n_layers={n_layers}, "
         f"batch={batch_size}, dtype={dtype})",
-        fontsize=8
+        fontsize=8,
     )
     plt.grid(True, which="both")
     plt.legend()

@@ -16,11 +16,7 @@ import torch
 def test_dataloader(tmp_path, file_name):
 
     if not os.path.exists("the-verdict.txt"):
-        url = (
-            "https://raw.githubusercontent.com/rasbt/"
-            "LLMs-from-scratch/main/ch02/01_main-chapter-code/"
-            "the-verdict.txt"
-        )
+        url = "https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/main/ch02/01_main-chapter-code/the-verdict.txt"
         file_path = "the-verdict.txt"
 
         response = requests.get(url, timeout=30)
@@ -40,12 +36,7 @@ def test_dataloader(tmp_path, file_name):
 
     batch_size = 8
     max_length = 4
-    dataloader = create_dataloader_v1(
-        raw_text,
-        batch_size=batch_size,
-        max_length=max_length,
-        stride=max_length
-    )
+    dataloader = create_dataloader_v1(raw_text, batch_size=batch_size, max_length=max_length, stride=max_length)
 
     for batch in dataloader:
         x, y = batch

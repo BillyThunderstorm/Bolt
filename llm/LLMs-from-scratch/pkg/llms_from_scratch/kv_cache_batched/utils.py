@@ -3,11 +3,10 @@
 #   - https://www.manning.com/books/build-a-large-language-model-from-scratch
 # Code: https://github.com/rasbt/LLMs-from-scratch
 
+
 class KVCache:
     def __init__(self, n_layers, batch_size):
-        self.cache = [
-            [None for _ in range(batch_size)] for _ in range(n_layers)
-        ]
+        self.cache = [[None for _ in range(batch_size)] for _ in range(n_layers)]
 
     def get(self, layer_idx, batch_idx):
         return self.cache[layer_idx][batch_idx]

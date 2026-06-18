@@ -18,6 +18,7 @@ RECORDINGS_DIR = Path("/Users/carter/developer/Bolt/recordings")
 HASH_DB_PATH = Path("/Users/carter/developer/Bolt/data/media_hash_db.json")
 DRY_RUN = False
 
+
 def calculate_hash(file_path: Path, chunk_size: int = 8192) -> str:
     """Calculate SHA256 hash of a file."""
     sha256_hash = hashlib.sha256()
@@ -30,6 +31,7 @@ def calculate_hash(file_path: Path, chunk_size: int = 8192) -> str:
         print(f"Error reading {file_path}: {e}")
         return None
 
+
 def load_hash_db() -> dict:
     """Load existing hash database."""
     if HASH_DB_PATH.exists():
@@ -40,20 +42,19 @@ def load_hash_db() -> dict:
             print(f"Warning: Could not load hash database: {e}")
     return {"files": {}, "duplicates": []}
 
+
 def save_hash_db(db: dict):
     """Save hash database to disk."""
     HASH_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(HASH_DB_PATH, "w") as f:
         json.dump(db, f, indent=2)
 
-def scan_directory(directory: Path, hash_db: dict, file_extensions: tuple = None) -> dict:
+
+def scan_directory(
+    directory: Path, hash_db: dict, file_extensions: tuple = None
+) -> dict:
     """Scan a directory for media files and calculate hashes."""
-    results = {
-        "scanned": 0,
-        "new": 0,
-        "duplicates": [],
-        "errors": []
-    }
+    results = {"scanned": 0, "new": 0, "duplicates": [], "errors": []}
 
     if not directory.exists():
         print(f"Directory does not exist: {directory}")
@@ -79,11 +80,13 @@ def scan_directory(directory: Path, hash_db: dict, file_extensions: tuple = None
             if file_hash in hash_db["files"]:
                 existing_path = hash_db["files"][file_hash]
                 if existing_path != rel_path:
-                    results["duplicates"].append({
-                        "file": rel_path,
-                        "duplicate_of": existing_path,
-                        "hash": file_hash[:16] + "..."
-                    })
+                    results["duplicates"].append(
+                        {
+                            "file": rel_path,
+                            "duplicate_of": existing_path,
+                            "hash": file_hash[:16] + "...",
+                        }
+                    )
                     print(f"  DUPLICATE: {file_path.name}")
                     print(f"    -> Original: {existing_path}")
             else:
@@ -91,6 +94,7 @@ def scan_directory(directory: Path, hash_db: dict, file_extensions: tuple = None
                 results["new"] += 1
 
     return results
+
 
 def find_duplicates(directories: list) -> dict:
     """Find all duplicates across multiple directories."""
@@ -100,7 +104,7 @@ def find_duplicates(directories: list) -> dict:
         "total_new": 0,
         "total_duplicates": 0,
         "duplicate_files": [],
-        "by_directory": {}
+        "by_directory": {},
     }
 
     for dir_path in directories:
@@ -122,6 +126,7 @@ def find_duplicates(directories: list) -> dict:
 
     return all_results
 
+
 def check_file_for_duplicates(file_path: Path, hash_db: dict = None) -> bool:
     """Check if a single file is a duplicate. Returns True if duplicate."""
     if hash_db is None:
@@ -136,6 +141,7 @@ def check_file_for_duplicates(file_path: Path, hash_db: dict = None) -> bool:
             print(f"  Original: {existing}")
             return True
     return False
+
 
 def main():
     """Main entry point."""
@@ -201,6 +207,7 @@ def main():
         print("Hash database updated with new file hashes")
 
     return 0 if results["total_duplicates"] == 0 else 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

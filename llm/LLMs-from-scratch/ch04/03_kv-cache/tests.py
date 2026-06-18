@@ -21,7 +21,7 @@ GPT_CONFIG_124M = {
     "n_layers": 12,
     "drop_rate": 0.1,
     "qkv_bias": False,
-    "kv_window_size": 1024  # NEW: KV cache window size
+    "kv_window_size": 1024,  # NEW: KV cache window size
 }
 
 
@@ -42,12 +42,7 @@ def test_gpt_model_equivalence_not_cached(ModelClass):
 
     model_name = ModelClass.__module__ + "." + ModelClass.__name__
 
-    token_ids = generate_text_simple(
-        model=model,
-        idx=encoded_tensor,
-        max_new_tokens=30,
-        context_size=GPT_CONFIG_124M["context_length"]
-    )
+    token_ids = generate_text_simple(model=model, idx=encoded_tensor, max_new_tokens=30, context_size=GPT_CONFIG_124M["context_length"])
 
     if not hasattr(test_gpt_model_equivalence_not_cached, "results"):
         test_gpt_model_equivalence_not_cached.results = []
@@ -57,9 +52,7 @@ def test_gpt_model_equivalence_not_cached(ModelClass):
     if len(test_gpt_model_equivalence_not_cached.results) == 3:
         base_name, base_output = test_gpt_model_equivalence_not_cached.results[0]
         for other_name, other_output in test_gpt_model_equivalence_not_cached.results[1:]:
-            assert torch.equal(base_output, other_output), (
-                f"Mismatch between {base_name} and {other_name}"
-            )
+            assert torch.equal(base_output, other_output), f"Mismatch between {base_name} and {other_name}"
 
 
 @pytest.mark.parametrize("ModelClass", [GPTModelBase, GPTModelKV1, GPTModelKV2])
@@ -76,25 +69,14 @@ def test_gpt_model_equivalence_cached(ModelClass):
     model_name = ModelClass.__module__ + "." + ModelClass.__name__
 
     if ModelClass is GPTModelBase:
-        token_ids = generate_text_simple(
-            model=model,
-            idx=encoded_tensor,
-            max_new_tokens=30,
-            context_size=GPT_CONFIG_124M["context_length"]
-        )
+        token_ids = generate_text_simple(model=model, idx=encoded_tensor, max_new_tokens=30, context_size=GPT_CONFIG_124M["context_length"])
     elif ModelClass is GPTModelKV1:
         token_ids = generate_text_simple_cachedKV1(
-            model=model,
-            idx=encoded_tensor,
-            max_new_tokens=30,
-            context_size=GPT_CONFIG_124M["context_length"]
+            model=model, idx=encoded_tensor, max_new_tokens=30, context_size=GPT_CONFIG_124M["context_length"]
         )
     else:
         token_ids = generate_text_simple_cachedKV2(
-            model=model,
-            idx=encoded_tensor,
-            max_new_tokens=30,
-            context_size=GPT_CONFIG_124M["context_length"]
+            model=model, idx=encoded_tensor, max_new_tokens=30, context_size=GPT_CONFIG_124M["context_length"]
         )
 
     if not hasattr(test_gpt_model_equivalence_cached, "results"):
@@ -105,9 +87,7 @@ def test_gpt_model_equivalence_cached(ModelClass):
     if len(test_gpt_model_equivalence_cached.results) == 3:
         base_name, base_output = test_gpt_model_equivalence_cached.results[0]
         for other_name, other_output in test_gpt_model_equivalence_cached.results[1:]:
-            assert torch.equal(base_output, other_output), (
-                f"Mismatch between {base_name} and {other_name}"
-            )
+            assert torch.equal(base_output, other_output), f"Mismatch between {base_name} and {other_name}"
 
 
 def test_context_overflow_bug():
@@ -127,7 +107,7 @@ def test_context_overflow_bug():
         "n_layers": 12,
         "drop_rate": 0.1,
         "qkv_bias": False,
-        "kv_window_size": 20  # Larger than context_length
+        "kv_window_size": 20,  # Larger than context_length
     }
 
     torch.manual_seed(123)
@@ -143,7 +123,7 @@ def test_context_overflow_bug():
         idx=input_tokens,
         max_new_tokens=10,  # 5 + 10 = 15 > 10 context_length
         context_size=GPT_CONFIG_SMALL["context_length"],
-        use_cache=True
+        use_cache=True,
     )
 
 
@@ -164,7 +144,7 @@ def test_prefill_chunking_basic():
         "n_layers": 12,
         "drop_rate": 0.1,
         "qkv_bias": False,
-        "kv_window_size": 4  # Small window to force chunking
+        "kv_window_size": 4,  # Small window to force chunking
     }
 
     torch.manual_seed(123)
@@ -175,12 +155,7 @@ def test_prefill_chunking_basic():
     input_tokens = torch.randint(0, 50257, (1, 10), device=device)
 
     # Should successfully process all input in chunks
-    token_ids = generate_text_simple_cachedKV2(
-        model=model,
-        idx=input_tokens,
-        max_new_tokens=2,
-        use_cache=True
-    )
+    token_ids = generate_text_simple_cachedKV2(model=model, idx=input_tokens, max_new_tokens=2, use_cache=True)
 
     # Should have 10 input + 2 generated = 12 total
     assert token_ids.shape[1] == 12, f"Expected 12 tokens, got {token_ids.shape[1]}"

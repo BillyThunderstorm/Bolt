@@ -20,12 +20,15 @@ class MultiPublisherTests(unittest.TestCase):
             timezone="America/Chicago",
         )
 
-        self.assertEqual([item["platform"] for item in plan], [
-            "tiktok",
-            "youtube_shorts",
-            "instagram_reels",
-            "kick",
-        ])
+        self.assertEqual(
+            [item["platform"] for item in plan],
+            [
+                "tiktok",
+                "youtube_shorts",
+                "instagram_reels",
+                "kick",
+            ],
+        )
         self.assertTrue(all(item["status"] == "manual_upload_ready" for item in plan))
         self.assertIn("#MarvelRivals", plan[0]["caption"])
         self.assertIn("#Shorts", plan[1]["description"])
@@ -38,9 +41,11 @@ class MultiPublisherTests(unittest.TestCase):
             ready_file = tmp_path / "ready_to_post.json"
             platform_file = tmp_path / "multi_platform_queue.json"
 
-            with patch.object(notifier, "READY_FILE", ready_file), \
-                 patch.object(notifier, "CONFIG_FILE", tmp_path / "config.json"), \
-                 patch.object(mp, "PLATFORM_QUEUE_FILE", platform_file):
+            with (
+                patch.object(notifier, "READY_FILE", ready_file),
+                patch.object(notifier, "CONFIG_FILE", tmp_path / "config.json"),
+                patch.object(mp, "PLATFORM_QUEUE_FILE", platform_file),
+            ):
                 item = notifier.queue_clip(
                     clip_path=str(clip),
                     title="A free reach test.",

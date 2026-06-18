@@ -20,24 +20,29 @@ from typing import List, Optional
 try:
     from modules.notifier import notify
 except ImportError:
+
     def notify(msg, level="info", reason=None):
-        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(level, "•")
+        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(
+            level, "•"
+        )
         print(f"  {prefix}  {msg}")
         if reason:
             print(f"     → {reason}")
+
 
 try:
     import imagehash
     from PIL import Image
     import subprocess as _sp
+
     HAS_PHASH = True
 except ImportError:
     HAS_PHASH = False
 
 SEEN_FILE = "seen_clips.json"
-TIMESTAMP_WINDOW_S = 30.0   # clips within this many seconds are suspect
+TIMESTAMP_WINDOW_S = 30.0  # clips within this many seconds are suspect
 SIZE_RATIO_THRESHOLD = 0.10  # within 10% file size = suspect
-PHASH_THRESHOLD = 8          # Hamming distance (lower = more similar)
+PHASH_THRESHOLD = 8  # Hamming distance (lower = more similar)
 
 
 class ClipDeduplicator:
@@ -53,8 +58,12 @@ class ClipDeduplicator:
             f"ClipDeduplicator initialised ({method})",
             level="info",
             reason="Duplicate detection prevents the same moment from being posted "
-                   "multiple times if replay buffer overlap or reprocessing occurs. "
-                   + ("Install imagehash + Pillow for stronger pHash detection." if not HAS_PHASH else "")
+            "multiple times if replay buffer overlap or reprocessing occurs. "
+            + (
+                "Install imagehash + Pillow for stronger pHash detection."
+                if not HAS_PHASH
+                else ""
+            ),
         )
 
     def is_duplicate(self, clip_path: str, timestamp: Optional[float] = None) -> bool:
@@ -80,22 +89,26 @@ class ClipDeduplicator:
                     f"Duplicate detected: {path.name}",
                     level="warning",
                     reason=f"Matches previously seen clip at timestamp {seen.get('timestamp', '?'):.1f}s. "
-                           "Skipping to avoid duplicate posts."
+                    "Skipping to avoid duplicate posts.",
                 )
                 return True
 
         # Not a duplicate — record it
-        self._seen.append({
-            "path": str(path),
-            "size": size,
-            "timestamp": ts,
-            "phash": str(phash) if phash else None,
-            "added": time.time(),
-        })
+        self._seen.append(
+            {
+                "path": str(path),
+                "size": size,
+                "timestamp": ts,
+                "phash": str(phash) if phash else None,
+                "added": time.time(),
+            }
+        )
         self._save()
         return False
 
-    def filter_clips(self, clips: list, timestamps: Optional[List[float]] = None) -> list:
+    def filter_clips(
+        self, clips: list, timestamps: Optional[List[float]] = None
+    ) -> list:
         """
         Filter a list of clip objects, removing duplicates.
         clips must have a .output_file attribute.
@@ -149,24 +162,27 @@ def filter_with_report(clips: list, timestamps: Optional[List[float]] = None) ->
         f"Deduplication: {len(unique)} unique, {len(dupes)} duplicate(s) removed",
         level="success" if not dupes else "info",
         reason="Duplicates are skipped in the ranking pipeline. "
-               "They are NOT deleted from disk so you can review them manually."
+        "They are NOT deleted from disk so you can review them manually.",
     )
     return unique, dupes
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
+
 def _compute_phash(clip_path: str) -> Optional[object]:
     """Extract first frame and compute perceptual hash."""
     if not HAS_PHASH:
         return None
     import subprocess, tempfile, os
+
     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
         tmp_path = tmp.name
     try:
         subprocess.run(
             ["ffmpeg", "-y", "-i", clip_path, "-vframes", "1", "-q:v", "2", tmp_path],
-            capture_output=True, timeout=15
+            capture_output=True,
+            timeout=15,
         )
         if os.path.exists(tmp_path) and os.path.getsize(tmp_path) > 0:
             img = Image.open(tmp_path)

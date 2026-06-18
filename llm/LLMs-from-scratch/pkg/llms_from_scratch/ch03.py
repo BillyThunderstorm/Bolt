@@ -8,7 +8,6 @@ import torch.nn as nn
 
 
 class SelfAttention_v1(nn.Module):
-
     def __init__(self, d_in, d_out):
         super().__init__()
         self.W_query = nn.Parameter(torch.rand(d_in, d_out))
@@ -20,17 +19,14 @@ class SelfAttention_v1(nn.Module):
         queries = x @ self.W_query
         values = x @ self.W_value
 
-        attn_scores = queries @ keys.T # omega
-        attn_weights = torch.softmax(
-            attn_scores / keys.shape[-1]**0.5, dim=-1
-        )
+        attn_scores = queries @ keys.T  # omega
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
 
         context_vec = attn_weights @ values
         return context_vec
 
 
 class SelfAttention_v2(nn.Module):
-
     def __init__(self, d_in, d_out, qkv_bias=False):
         super().__init__()
         self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)
@@ -43,23 +39,21 @@ class SelfAttention_v2(nn.Module):
         values = self.W_value(x)
 
         attn_scores = queries @ keys.T
-        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
 
         context_vec = attn_weights @ values
         return context_vec
 
 
 class CausalAttention(nn.Module):
-
-    def __init__(self, d_in, d_out, context_length,
-                 dropout, qkv_bias=False):
+    def __init__(self, d_in, d_out, context_length, dropout, qkv_bias=False):
         super().__init__()
         self.d_out = d_out
         self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)
         self.W_key = nn.Linear(d_in, d_out, bias=qkv_bias)
         self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)
         self.dropout = nn.Dropout(dropout)  # New
-        self.register_buffer("mask", torch.triu(torch.ones(context_length, context_length), diagonal=1)) # New
+        self.register_buffer("mask", torch.triu(torch.ones(context_length, context_length), diagonal=1))  # New
 
     def forward(self, x):
         b, num_tokens, d_in = x.shape  # New batch dimension b
@@ -73,10 +67,9 @@ class CausalAttention(nn.Module):
 
         attn_scores = queries @ keys.transpose(1, 2)  # Changed transpose
         attn_scores.masked_fill_(  # New, _ ops are in-place
-            self.mask.bool()[:num_tokens, :num_tokens], -torch.inf)  # `:num_tokens` to account for cases where the number of tokens in the batch is smaller than the supported context_size
-        attn_weights = torch.softmax(
-            attn_scores / keys.shape[-1]**0.5, dim=-1
-        )
+            self.mask.bool()[:num_tokens, :num_tokens], -torch.inf
+        )  # `:num_tokens` to account for cases where the number of tokens in the batch is smaller than the supported context_size
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
         attn_weights = self.dropout(attn_weights)  # New
 
         context_vec = attn_weights @ values
@@ -86,10 +79,7 @@ class CausalAttention(nn.Module):
 class MultiHeadAttentionWrapper(nn.Module):
     def __init__(self, d_in, d_out, context_length, dropout, num_heads, qkv_bias=False):
         super().__init__()
-        self.heads = nn.ModuleList(
-            [CausalAttention(d_in, d_out, context_length, dropout, qkv_bias)
-             for _ in range(num_heads)]
-        )
+        self.heads = nn.ModuleList([CausalAttention(d_in, d_out, context_length, dropout, qkv_bias) for _ in range(num_heads)])
 
     def forward(self, x):
         return torch.cat([head(x) for head in self.heads], dim=-1)
@@ -138,7 +128,7 @@ class MultiHeadAttention(nn.Module):
         # Use the mask to fill attention scores
         attn_scores.masked_fill_(mask_bool, -torch.inf)
 
-        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
         attn_weights = self.dropout(attn_weights)
 
         # Shape: (b, num_tokens, num_heads, head_dim)
@@ -185,10 +175,11 @@ class PyTorchMultiHeadAttention(nn.Module):
         # (3, b, num_heads, num_tokens, head_dim) -> 3 times (b, num_heads, num_tokens, head_dim)
         queries, keys, values = qkv
 
-        use_dropout = 0. if not self.training else self.dropout
+        use_dropout = 0.0 if not self.training else self.dropout
 
         context_vec = nn.functional.scaled_dot_product_attention(
-            queries, keys, values, attn_mask=None, dropout_p=use_dropout, is_causal=True)
+            queries, keys, values, attn_mask=None, dropout_p=use_dropout, is_causal=True
+        )
 
         # Combine heads, where self.d_out = self.num_heads * self.head_dim
         context_vec = context_vec.transpose(1, 2).contiguous().view(batch_size, num_tokens, self.d_out)

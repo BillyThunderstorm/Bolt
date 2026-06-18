@@ -29,7 +29,7 @@ HPARAM_GRID = {
 
 
 def calc_loss_loader(data_loader, model, device, num_batches=None):
-    total_loss = 0.
+    total_loss = 0.0
     if len(data_loader) == 0:
         return float("nan")
     elif num_batches is None:
@@ -63,9 +63,7 @@ def evaluate_model(model, train_loader, val_loader, device, eval_iter):
     return train_loss, val_loss
 
 
-def train_model(model, train_loader, val_loader, optimizer, device,
-                n_epochs, eval_iter, warmup_iters=10,
-                initial_lr=3e-05, min_lr=1e-6):
+def train_model(model, train_loader, val_loader, optimizer, device, n_epochs, eval_iter, warmup_iters=10, initial_lr=3e-05, min_lr=1e-6):
     global_step = 0
 
     max_lr = optimizer.param_groups[0]["lr"]
@@ -111,7 +109,6 @@ def train_model(model, train_loader, val_loader, optimizer, device,
 
 
 if __name__ == "__main__":
-
     # Generate all combinations of hyperparameters
     hyperparameter_combinations = list(itertools.product(*HPARAM_GRID.values()))
     total_combinations = len(hyperparameter_combinations)
@@ -137,7 +134,6 @@ if __name__ == "__main__":
     interrupted = False
     current_config = 0
     for combination in hyperparameter_combinations:
-
         try:
             current_config += 1
             print(f"Evaluating configuration {current_config} of {total_combinations}")
@@ -146,13 +142,13 @@ if __name__ == "__main__":
             HPARAM_CONFIG = dict(zip(HPARAM_GRID.keys(), combination))
 
             GPT_CONFIG_124M = {
-                "vocab_size": 50257,    # Vocabulary size
+                "vocab_size": 50257,  # Vocabulary size
                 "context_length": 256,  # Context length -- shortened from original 1024 tokens
-                "emb_dim": 768,         # Embedding dimension
-                "n_heads": 12,          # Number of attention heads
-                "n_layers": 12,         # Number of layers
+                "emb_dim": 768,  # Embedding dimension
+                "n_heads": 12,  # Number of attention heads
+                "n_layers": 12,  # Number of layers
                 "drop_rate": HPARAM_CONFIG["drop_rate"],
-                "qkv_bias": False,     # Query-Key-Value bias
+                "qkv_bias": False,  # Query-Key-Value bias
             }
 
             torch.manual_seed(123)
@@ -163,7 +159,7 @@ if __name__ == "__main__":
                 stride=GPT_CONFIG_124M["context_length"],
                 drop_last=True,
                 shuffle=True,
-                num_workers=0
+                num_workers=0,
             )
 
             val_loader = create_dataloader_v1(
@@ -173,28 +169,28 @@ if __name__ == "__main__":
                 stride=GPT_CONFIG_124M["context_length"],
                 drop_last=False,
                 shuffle=False,
-                num_workers=0
+                num_workers=0,
             )
 
             model = GPTModel(GPT_CONFIG_124M)
             model.to(device)
 
-            optimizer = torch.optim.AdamW(
-                model.parameters(),
-                lr=HPARAM_CONFIG["peak_lr"],
-                weight_decay=HPARAM_CONFIG["weight_decay"]
-            )
+            optimizer = torch.optim.AdamW(model.parameters(), lr=HPARAM_CONFIG["peak_lr"], weight_decay=HPARAM_CONFIG["weight_decay"])
 
             encoded_start_context = tokenizer.encode("Nevertheless")
             encoded_tensor = torch.tensor(encoded_start_context).unsqueeze(0)
 
             train_loss, val_loss = train_model(
-                model, train_loader, val_loader, optimizer, device,
+                model,
+                train_loader,
+                val_loader,
+                optimizer,
+                device,
                 n_epochs=HPARAM_CONFIG["n_epochs"],
                 eval_iter=1,
                 warmup_iters=HPARAM_CONFIG["warmup_iters"],
                 initial_lr=HPARAM_CONFIG["initial_lr"],
-                min_lr=HPARAM_CONFIG["min_lr"]
+                min_lr=HPARAM_CONFIG["min_lr"],
             )
 
             # Log the best hyperparameters based on validation loss

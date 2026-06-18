@@ -68,11 +68,9 @@ class NeuralNetwork(torch.nn.Module):
             # 1st hidden layer
             torch.nn.Linear(num_inputs, 30),
             torch.nn.ReLU(),
-
             # 2nd hidden layer
             torch.nn.Linear(30, 20),
             torch.nn.ReLU(),
-
             # output layer
             torch.nn.Linear(20, num_outputs),
         )
@@ -83,19 +81,15 @@ class NeuralNetwork(torch.nn.Module):
 
 
 def prepare_dataset():
-    X_train = torch.tensor([
-        [-1.2, 3.1],
-        [-0.9, 2.9],
-        [-0.5, 2.6],
-        [2.3, -1.1],
-        [2.7, -1.5]
-    ])
+    X_train = torch.tensor([[-1.2, 3.1], [-0.9, 2.9], [-0.5, 2.6], [2.3, -1.1], [2.7, -1.5]])
     y_train = torch.tensor([0, 0, 0, 1, 1])
 
-    X_test = torch.tensor([
-        [-0.8, 2.8],
-        [2.6, -1.6],
-    ])
+    X_test = torch.tensor(
+        [
+            [-0.8, 2.8],
+            [2.6, -1.6],
+        ]
+    )
     y_test = torch.tensor([0, 1])
 
     # Uncomment these lines to increase the dataset size to run this script on up to 8 GPUs:
@@ -115,7 +109,7 @@ def prepare_dataset():
         pin_memory=True,
         drop_last=True,
         # NEW: chunk batches across GPUs without overlapping samples:
-        sampler=DistributedSampler(train_ds)  # NEW
+        sampler=DistributedSampler(train_ds),  # NEW
     )
     test_loader = DataLoader(
         dataset=test_ds,
@@ -144,7 +138,6 @@ def main(rank, world_size, num_epochs):
 
         model.train()
         for features, labels in train_loader:
-
             features, labels = features.to(rank), labels.to(rank)  # New: use rank
             logits = model(features)
             loss = F.cross_entropy(logits, labels)  # Loss function
@@ -154,9 +147,7 @@ def main(rank, world_size, num_epochs):
             optimizer.step()
 
             # LOGGING
-            print(f"[GPU{rank}] Epoch: {epoch+1:03d}/{num_epochs:03d}"
-                  f" | Batchsize {labels.shape[0]:03d}"
-                  f" | Train/Val Loss: {loss:.2f}")
+            print(f"[GPU{rank}] Epoch: {epoch + 1:03d}/{num_epochs:03d} | Batchsize {labels.shape[0]:03d} | Train/Val Loss: {loss:.2f}")
 
     model.eval()
 

@@ -98,7 +98,7 @@ class MultiHeadAttention(nn.Module):
         # Use the mask to fill attention scores
         attn_scores.masked_fill_(mask_bool, -torch.inf)
 
-        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
         attn_weights = self.dropout(attn_weights)
 
         # Shape: (b, num_tokens, num_heads, head_dim)
@@ -137,10 +137,7 @@ class GELU(nn.Module):
         super().__init__()
 
     def forward(self, x):
-        return 0.5 * x * (1 + torch.tanh(
-            torch.sqrt(torch.tensor(2.0 / torch.pi)) *
-            (x + 0.044715 * torch.pow(x, 3))
-        ))
+        return 0.5 * x * (1 + torch.tanh(torch.sqrt(torch.tensor(2.0 / torch.pi)) * (x + 0.044715 * torch.pow(x, 3))))
 
 
 # class FeedForward(nn.Module):
@@ -154,6 +151,7 @@ class GELU(nn.Module):
 
 #     def forward(self, x):
 #         return self.layers(x)
+
 
 # Uses SwiGLU instead of GeLU to make it more comparable to MoE
 class FeedForward(nn.Module):
@@ -228,8 +226,7 @@ class GPTModel(nn.Module):
         #    *[TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
         ####################################################
         #  KV cache-related
-        self.trf_blocks = nn.ModuleList(
-            [TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
+        self.trf_blocks = nn.ModuleList([TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
 
         self.current_pos = 0
         ####################################################
@@ -273,18 +270,16 @@ class GPTModel(nn.Module):
         for blk in self.trf_blocks:
             blk.att.reset_cache()
         self.current_pos = 0
+
     ####################################################
 
 
-def generate_text_simple_cached(model, idx, max_new_tokens,
-                                context_size=None, use_cache=True):
+def generate_text_simple_cached(model, idx, max_new_tokens, context_size=None, use_cache=True):
     model.eval()
     ctx_len = context_size or model.pos_emb.num_embeddings
     batch_size, base_len = idx.shape
     total_len = base_len + max_new_tokens
-    generated = torch.empty(
-        batch_size, total_len, dtype=idx.dtype, device=idx.device
-    )
+    generated = torch.empty(batch_size, total_len, dtype=idx.dtype, device=idx.device)
     generated[:, :base_len] = idx
     cur_len = base_len
     use_cuda = torch.cuda.is_available()
@@ -334,7 +329,8 @@ def generate_text_simple_cached(model, idx, max_new_tokens,
         max_ffn_mem = max(FFN_MEM_BYTES)
 
         def to_mb(bytes_val):
-            return bytes_val / (1024 ** 2)
+            return bytes_val / (1024**2)
+
         print(f"Avg FFN mem delta/call: {to_mb(avg_ffn_mem):.2f} MB (max {to_mb(max_ffn_mem):.2f} MB)")
 
     return generated[:, :cur_len]
@@ -343,7 +339,7 @@ def generate_text_simple_cached(model, idx, max_new_tokens,
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--emb_dim", type=int, default=768, help="Model embedding dimension.")
-    parser.add_argument("--hidden_dim", type=int, default=768*4, help="Intermediate FFN size.")
+    parser.add_argument("--hidden_dim", type=int, default=768 * 4, help="Intermediate FFN size.")
     parser.add_argument("--n_heads", type=int, default=12, help="Number of attention heads.")
     parser.add_argument("--n_layers", type=int, default=12, help="Number of transformer blocks.")
     parser.add_argument("--max_new_tokens", type=int, default=200, help="Number of tokens to generate.")
@@ -360,14 +356,14 @@ def main():
     encoded = tokenizer.encode(start_context)
 
     GPT_CONFIG_124M = {
-        "vocab_size": 50257,            # Vocabulary size
+        "vocab_size": 50257,  # Vocabulary size
         "context_length": args.max_new_tokens + len(encoded),
-        "emb_dim": args.emb_dim,        # Embedding dimension
+        "emb_dim": args.emb_dim,  # Embedding dimension
         "hidden_dim": args.hidden_dim,  # Intermediate size
-        "n_heads": args.n_heads,        # Number of attention heads
-        "n_layers": args.n_layers,      # Number of layers
-        "drop_rate": 0.0,               # Dropout rate
-        "qkv_bias": False,              # Query-Key-Value bias
+        "n_heads": args.n_heads,  # Number of attention heads
+        "n_layers": args.n_layers,  # Number of layers
+        "drop_rate": 0.0,  # Dropout rate
+        "qkv_bias": False,  # Query-Key-Value bias
     }
     torch.manual_seed(123)
     model = GPTModel(GPT_CONFIG_124M)
@@ -376,7 +372,7 @@ def main():
     model.eval()  # disable dropout
 
     encoded_tensor = torch.tensor(encoded, device=device).unsqueeze(0)
-    print(f"\n{50*'='}\n{22*' '}IN\n{50*'='}")
+    print(f"\n{50 * '='}\n{22 * ' '}IN\n{50 * '='}")
     print("\nInput text:", start_context)
     print("Encoded input text:", encoded)
     print("encoded_tensor.shape:", encoded_tensor.shape)
@@ -398,16 +394,16 @@ def main():
 
     decoded_text = tokenizer.decode(token_ids.squeeze(0).tolist())
 
-    print(f"\n\n{50*'='}\n{22*' '}OUT\n{50*'='}")
+    print(f"\n\n{50 * '='}\n{22 * ' '}OUT\n{50 * '='}")
     print("\nOutput:", token_ids)
     print("Output length:", len(token_ids[0]))
     print("Output text:", decoded_text)
 
     print(f"\nTime: {total_time:.2f} sec")
-    print(f"{int(len(token_ids[0])/total_time)} tokens/sec")
+    print(f"{int(len(token_ids[0]) / total_time)} tokens/sec")
     if torch.cuda.is_available():
         max_mem_bytes = torch.cuda.max_memory_allocated()
-        max_mem_gb = max_mem_bytes / (1024 ** 3)
+        max_mem_gb = max_mem_bytes / (1024**3)
         print(f"Max memory allocated: {max_mem_gb:.2f} GB")
 
 

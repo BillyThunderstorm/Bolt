@@ -76,9 +76,7 @@ class InstructionDataset(Dataset):
             instruction_plus_input = format_input(entry)
             response_text = f"\n\n### Response:\n{entry['output']}"
             full_text = instruction_plus_input + response_text
-            self.encoded_texts.append(
-                tokenizer.encode(full_text)
-            )
+            self.encoded_texts.append(tokenizer.encode(full_text))
 
     def __getitem__(self, index):
         return self.encoded_texts[index]
@@ -87,15 +85,11 @@ class InstructionDataset(Dataset):
         return len(self.data)
 
 
-def custom_collate_draft_1(
-    batch,
-    pad_token_id=50256,
-    device="cpu"
-):
+def custom_collate_draft_1(batch, pad_token_id=50256, device="cpu"):
     # Find the longest sequence in the batch
     # and increase the max length by +1, which will add one extra
     # padding token below
-    batch_max_length = max(len(item)+1 for item in batch)
+    batch_max_length = max(len(item) + 1 for item in batch)
 
     # Pad and prepare inputs
     inputs_lst = []
@@ -105,10 +99,7 @@ def custom_collate_draft_1(
         # Add an <|endoftext|> token
         new_item += [pad_token_id]
         # Pad sequences to batch_max_length
-        padded = (
-            new_item + [pad_token_id] *
-            (batch_max_length - len(new_item))
-        )
+        padded = new_item + [pad_token_id] * (batch_max_length - len(new_item))
         # Via padded[:-1], we remove the extra padded token
         # that has been added via the +1 setting in batch_max_length
         # (the extra padding token will be relevant in later codes)
@@ -120,13 +111,9 @@ def custom_collate_draft_1(
     return inputs_tensor
 
 
-def custom_collate_draft_2(
-    batch,
-    pad_token_id=50256,
-    device="cpu"
-):
+def custom_collate_draft_2(batch, pad_token_id=50256, device="cpu"):
     # Find the longest sequence in the batch
-    batch_max_length = max(len(item)+1 for item in batch)
+    batch_max_length = max(len(item) + 1 for item in batch)
 
     # Pad and prepare inputs
     inputs_lst, targets_lst = [], []
@@ -136,10 +123,7 @@ def custom_collate_draft_2(
         # Add an <|endoftext|> token
         new_item += [pad_token_id]
         # Pad sequences to max_length
-        padded = (
-            new_item + [pad_token_id] *
-            (batch_max_length - len(new_item))
-        )
+        padded = new_item + [pad_token_id] * (batch_max_length - len(new_item))
         inputs = torch.tensor(padded[:-1])  # Truncate the last token for inputs
         targets = torch.tensor(padded[1:])  # Shift +1 to the right for targets
         inputs_lst.append(inputs)
@@ -151,15 +135,9 @@ def custom_collate_draft_2(
     return inputs_tensor, targets_tensor
 
 
-def custom_collate_fn(
-    batch,
-    pad_token_id=50256,
-    ignore_index=-100,
-    allowed_max_length=None,
-    device="cpu"
-):
+def custom_collate_fn(batch, pad_token_id=50256, ignore_index=-100, allowed_max_length=None, device="cpu"):
     # Find the longest sequence in the batch
-    batch_max_length = max(len(item)+1 for item in batch)
+    batch_max_length = max(len(item) + 1 for item in batch)
 
     # Pad and prepare inputs and targets
     inputs_lst, targets_lst = [], []
@@ -169,10 +147,7 @@ def custom_collate_fn(
         # Add an <|endoftext|> token
         new_item += [pad_token_id]
         # Pad sequences to max_length
-        padded = (
-            new_item + [pad_token_id] *
-            (batch_max_length - len(new_item))
-        )
+        padded = new_item + [pad_token_id] * (batch_max_length - len(new_item))
         inputs = torch.tensor(padded[:-1])  # Truncate the last token for inputs
         targets = torch.tensor(padded[1:])  # Shift +1 to the right for targets
 
@@ -206,22 +181,16 @@ def check_if_running(process_name):
     return running
 
 
-def query_model(
-    prompt,
-    model="llama3",
-    url="http://localhost:11434/api/chat"
-):
+def query_model(prompt, model="llama3", url="http://localhost:11434/api/chat"):
     # Create the data payload as a dictionary
     data = {
         "model": model,
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "options": {     # Settings below are required for deterministic responses
+        "messages": [{"role": "user", "content": prompt}],
+        "options": {  # Settings below are required for deterministic responses
             "seed": 123,
             "temperature": 0,
-            "num_ctx": 2048
-        }
+            "num_ctx": 2048,
+        },
     }
 
     # Send the POST request

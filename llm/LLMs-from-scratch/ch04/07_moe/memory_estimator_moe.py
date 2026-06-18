@@ -15,7 +15,7 @@ DTYPE_BYTES = {
 
 
 def convert_bytes(n):
-    gb = n / (1000 ** 3)
+    gb = n / (1000**3)
     return f"{gb:,.2f} GB"
 
 
@@ -36,9 +36,7 @@ def calc_router_params(emb_dim, num_experts):
     return emb_dim * num_experts
 
 
-def estimate_params_and_hidden(
-    emb_dim, hidden_dim, ffn_type, num_experts, match_dense=False
-):
+def estimate_params_and_hidden(emb_dim, hidden_dim, ffn_type, num_experts, match_dense=False):
     P_dense = calc_ffn_params(emb_dim, hidden_dim, ffn_type)
     R = calc_router_params(emb_dim, num_experts)
 
@@ -65,13 +63,9 @@ def estimate_params_and_hidden(
 
 
 def main():
-    p = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description="Estimate FFN vs MoE parameter memory"
-    )
-    p.add_argument("--emb_dim", type=int, required=True,
-                   help="Model embedding dimension.")
-    p.add_argument("--hidden_dim", type=int, required=True,
-                   help="Dense FFN intermediate size (hidden dimension).")
+    p = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Estimate FFN vs MoE parameter memory")
+    p.add_argument("--emb_dim", type=int, required=True, help="Model embedding dimension.")
+    p.add_argument("--hidden_dim", type=int, required=True, help="Dense FFN intermediate size (hidden dimension).")
     p.add_argument("--ffn_type", choices=["gelu", "swiglu"], default="swiglu")
     p.add_argument("--num_experts", type=int, default=8)
     p.add_argument("--top_k", type=int, default=2)
@@ -79,8 +73,7 @@ def main():
     p.add_argument(
         "--match_dense",
         action="store_true",
-        help=("Auto-set per-expert hidden so MoE total params ~= dense FFN params "
-              "(router included)."),
+        help=("Auto-set per-expert hidden so MoE total params ~= dense FFN params (router included)."),
     )
     args = p.parse_args()
 
@@ -94,9 +87,7 @@ def main():
         match_dense=args.match_dense,
     )
 
-    moe_active_params_per_token = (
-        res["router"] + args.top_k * res["per_expert_params"]
-    )
+    moe_active_params_per_token = res["router"] + args.top_k * res["per_expert_params"]
 
     print("==== Config ====")
     print(f"{'emb_dim':23}: {args.emb_dim}")
@@ -109,16 +100,11 @@ def main():
     print()
 
     print("==== Model weights (parameters) ====")
-    print(f"{'Dense FFN params':23}: {res['dense_params']:,} "
-          f"({convert_bytes(res['dense_params'] * bytes_per_elem)})")
-    print(f"{'Per-expert params':23}: {res['per_expert_params']:,} "
-          f"({convert_bytes(res['per_expert_params'] * bytes_per_elem)})")
-    print(f"{'Router params':23}: {res['router']:,} "
-          f"({convert_bytes(res['router'] * bytes_per_elem)})")
-    print(f"{'MoE TOTAL params':23}: {res['moe_total']:,} "
-          f"({convert_bytes(res['moe_total'] * bytes_per_elem)})")
-    print(f"{'MoE ACTIVE/Token':23}: {moe_active_params_per_token:,} "
-          f"({convert_bytes(moe_active_params_per_token * bytes_per_elem)})")
+    print(f"{'Dense FFN params':23}: {res['dense_params']:,} ({convert_bytes(res['dense_params'] * bytes_per_elem)})")
+    print(f"{'Per-expert params':23}: {res['per_expert_params']:,} ({convert_bytes(res['per_expert_params'] * bytes_per_elem)})")
+    print(f"{'Router params':23}: {res['router']:,} ({convert_bytes(res['router'] * bytes_per_elem)})")
+    print(f"{'MoE TOTAL params':23}: {res['moe_total']:,} ({convert_bytes(res['moe_total'] * bytes_per_elem)})")
+    print(f"{'MoE ACTIVE/Token':23}: {moe_active_params_per_token:,} ({convert_bytes(moe_active_params_per_token * bytes_per_elem)})")
     print(f"{'moe_hidden_dim':23}: {res['moe_hidden_dim']}")
     print()
 

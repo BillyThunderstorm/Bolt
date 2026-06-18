@@ -19,9 +19,11 @@ class LogClipPerformanceTests(unittest.TestCase):
     def test_record_learning_outcome_writes_jsonl_and_learns(self):
         outcome_file = self.root / "data" / "performance_outcomes.jsonl"
 
-        with patch.object(lcp, "PERFORMANCE_OUTCOMES_FILE", outcome_file), \
-             patch("modules.Think_Learn_Decide.ThinkLearnDecideEngine") as engine_cls, \
-             patch("modules.Memory_Index.refresh_memory_index") as refresh:
+        with (
+            patch.object(lcp, "PERFORMANCE_OUTCOMES_FILE", outcome_file),
+            patch("modules.Think_Learn_Decide.ThinkLearnDecideEngine") as engine_cls,
+            patch("modules.Memory_Index.refresh_memory_index") as refresh,
+        ):
             engine = engine_cls.return_value
             outcome = lcp._record_learning_outcome(
                 game="Marvel Rivals",

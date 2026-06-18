@@ -20,9 +20,22 @@ def find_highest_gradient(model):
     return max_grad
 
 
-def train_model(model, train_loader, val_loader, optimizer, device,
-                n_epochs, eval_freq, eval_iter, start_context, tokenizer,
-                warmup_steps, initial_lr=3e-05, min_lr=1e-6, orig_book_version=False):
+def train_model(
+    model,
+    train_loader,
+    val_loader,
+    optimizer,
+    device,
+    n_epochs,
+    eval_freq,
+    eval_iter,
+    start_context,
+    tokenizer,
+    warmup_steps,
+    initial_lr=3e-05,
+    min_lr=1e-6,
+    orig_book_version=False,
+):
 
     train_losses, val_losses, track_tokens_seen, track_lrs = [], [], [], []
     tokens_seen, global_step = 0, -1
@@ -48,8 +61,7 @@ def train_model(model, train_loader, val_loader, optimizer, device,
                 lr = initial_lr + global_step * lr_increment
             else:
                 # Cosine annealing after warmup
-                progress = ((global_step - warmup_steps) /
-                            (total_training_steps - warmup_steps))
+                progress = (global_step - warmup_steps) / (total_training_steps - warmup_steps)
                 lr = min_lr + (peak_lr - min_lr) * 0.5 * (1 + math.cos(math.pi * progress))
 
             # Apply the calculated learning rate to the optimizer
@@ -66,7 +78,9 @@ def train_model(model, train_loader, val_loader, optimizer, device,
                 if global_step > warmup_steps:
                     torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             else:
-                if global_step >= warmup_steps:  # the book originally used global_step > warmup_steps, which led to a skipped clipping step after warmup
+                if (
+                    global_step >= warmup_steps
+                ):  # the book originally used global_step > warmup_steps, which led to a skipped clipping step after warmup
                     torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
 
             optimizer.step()
@@ -74,21 +88,14 @@ def train_model(model, train_loader, val_loader, optimizer, device,
 
             # Periodically evaluate the model on the training and validation sets
             if global_step % eval_freq == 0:
-                train_loss, val_loss = evaluate_model(
-                    model, train_loader, val_loader,
-                    device, eval_iter
-                )
+                train_loss, val_loss = evaluate_model(model, train_loader, val_loader, device, eval_iter)
                 train_losses.append(train_loss)
                 val_losses.append(val_loss)
                 track_tokens_seen.append(tokens_seen)
                 # Print the current losses
-                print(f"Ep {epoch+1} (Iter {global_step:06d}): "
-                      f"Train loss {train_loss:.3f}, "
-                      f"Val loss {val_loss:.3f}")
+                print(f"Ep {epoch + 1} (Iter {global_step:06d}): Train loss {train_loss:.3f}, Val loss {val_loss:.3f}")
 
         # Generate and print a sample from the model to monitor progress
-        generate_and_print_sample(
-            model, tokenizer, device, start_context
-        )
+        generate_and_print_sample(model, tokenizer, device, start_context)
 
     return train_losses, val_losses, track_tokens_seen, track_lrs

@@ -41,21 +41,77 @@ PERFORMANCE_OUTCOMES_FILE = DATA_DIR / "performance_outcomes.jsonl"
 VECTOR_DIMENSIONS = 256
 
 STOPWORDS = {
-    "a", "an", "and", "are", "as", "at", "be", "but", "by", "for",
-    "from", "has", "have", "he", "his", "i", "in", "is", "it", "its",
-    "me", "my", "of", "on", "or", "our", "so", "that", "the", "this",
-    "to", "was", "we", "what", "when", "where", "who", "why", "with",
-    "you", "your",
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "but",
+    "by",
+    "for",
+    "from",
+    "has",
+    "have",
+    "he",
+    "his",
+    "i",
+    "in",
+    "is",
+    "it",
+    "its",
+    "me",
+    "my",
+    "of",
+    "on",
+    "or",
+    "our",
+    "so",
+    "that",
+    "the",
+    "this",
+    "to",
+    "was",
+    "we",
+    "what",
+    "when",
+    "where",
+    "who",
+    "why",
+    "with",
+    "you",
+    "your",
 }
 
 SUPPORTIVE_TERMS = {
-    "approved", "queue", "queued", "success", "successful", "worked",
-    "strong", "ready", "posted", "performed", "useful", "keep",
+    "approved",
+    "queue",
+    "queued",
+    "success",
+    "successful",
+    "worked",
+    "strong",
+    "ready",
+    "posted",
+    "performed",
+    "useful",
+    "keep",
 }
 
 CAUTIONARY_TERMS = {
-    "reject", "rejected", "blocked", "failed", "discard", "below",
-    "skip", "skipped", "underperformed", "caution", "avoid", "stale",
+    "reject",
+    "rejected",
+    "blocked",
+    "failed",
+    "discard",
+    "below",
+    "skip",
+    "skipped",
+    "underperformed",
+    "caution",
+    "avoid",
+    "stale",
 }
 
 
@@ -166,12 +222,18 @@ def _matched_terms(query_tokens: Counter, entry: Dict[str, Any]) -> List[str]:
     return sorted(token for token in query_tokens if token in entry_tokens)
 
 
-def _classify_memory_signal(entry: Dict[str, Any], matched: List[str]) -> Dict[str, Any]:
+def _classify_memory_signal(
+    entry: Dict[str, Any], matched: List[str]
+) -> Dict[str, Any]:
     searchable = _searchable_text(entry).lower()
     tags = {str(tag).lower() for tag in entry.get("tags", [])}
 
-    positive_hits = sorted(term for term in SUPPORTIVE_TERMS if term in searchable or term in tags)
-    caution_hits = sorted(term for term in CAUTIONARY_TERMS if term in searchable or term in tags)
+    positive_hits = sorted(
+        term for term in SUPPORTIVE_TERMS if term in searchable or term in tags
+    )
+    caution_hits = sorted(
+        term for term in CAUTIONARY_TERMS if term in searchable or term in tags
+    )
 
     if caution_hits and not positive_hits:
         signal = "cautionary"
@@ -206,7 +268,9 @@ def _dedupe_key(entry: Dict[str, Any]) -> str:
 
 def _file_mtime(path: Path) -> str:
     try:
-        return datetime.fromtimestamp(path.stat().st_mtime).isoformat(timespec="seconds")
+        return datetime.fromtimestamp(path.stat().st_mtime).isoformat(
+            timespec="seconds"
+        )
     except Exception:
         return _now_iso()
 
@@ -284,11 +348,17 @@ def _entries_from_unified_memory(root: Path) -> List[MemoryEntry]:
 
     for idx, item in enumerate(_iter_jsonl(UNIFIED_MEMORY_FILE), start=1):
         reason = str(item.get("reason") or "")
-        metadata = item.get("metadata") if isinstance(item.get("metadata"), dict) else {}
+        metadata = (
+            item.get("metadata") if isinstance(item.get("metadata"), dict) else {}
+        )
         preview = str(metadata.get("preview") or "")
-        clip_path = str(metadata.get("clip_path") or metadata.get("recording_path") or "")
+        clip_path = str(
+            metadata.get("clip_path") or metadata.get("recording_path") or ""
+        )
         feedback = str(item.get("feedback") or "")
-        text = "\n".join(part for part in [reason, preview, clip_path, feedback] if part).strip()
+        text = "\n".join(
+            part for part in [reason, preview, clip_path, feedback] if part
+        ).strip()
         if not text:
             continue
 
@@ -303,7 +373,9 @@ def _entries_from_unified_memory(root: Path) -> List[MemoryEntry]:
                 kind="decision_event",
                 title=f"{action}: {reason or source}",
                 text=text,
-                tags=[tag for tag in ["decision", "event", source, intent, action] if tag],
+                tags=[
+                    tag for tag in ["decision", "event", source, intent, action] if tag
+                ],
                 updated_at=timestamp,
                 metadata=item,
             )
@@ -331,7 +403,9 @@ def _entries_from_clip_history(root: Path) -> List[MemoryEntry]:
             )
         )
 
-    for idx, recording in enumerate(processed if isinstance(processed, list) else [], start=1):
+    for idx, recording in enumerate(
+        processed if isinstance(processed, list) else [], start=1
+    ):
         recording_name = str(recording)
         entries.append(
             MemoryEntry(
@@ -356,7 +430,11 @@ def _entries_from_decision_audit(root: Path) -> List[MemoryEntry]:
     for idx, item in enumerate(_iter_jsonl(DECISION_AUDIT_FILE), start=1):
         phase = str(item.get("phase") or "audit")
         payload = item.get("payload", {})
-        text = json.dumps(payload, sort_keys=True) if isinstance(payload, dict) else str(payload)
+        text = (
+            json.dumps(payload, sort_keys=True)
+            if isinstance(payload, dict)
+            else str(payload)
+        )
         if not text:
             continue
         entries.append(
@@ -399,7 +477,14 @@ def _entries_from_performance_outcomes(root: Path) -> List[MemoryEntry]:
                 kind="performance_outcome",
                 title=title,
                 text=text,
-                tags=["performance", "outcome", "clip", game, trigger, "success" if success else "underperformed"],
+                tags=[
+                    "performance",
+                    "outcome",
+                    "clip",
+                    game,
+                    trigger,
+                    "success" if success else "underperformed",
+                ],
                 updated_at=str(item.get("timestamp") or _now_iso()),
                 metadata=item,
             )
@@ -422,7 +507,9 @@ def build_memory_entries(project_root: Path = PROJECT_ROOT) -> List[MemoryEntry]
     return entries
 
 
-def refresh_memory_index(project_root: Path = PROJECT_ROOT, out_file: Path = MEMORY_INDEX_FILE) -> Dict[str, Any]:
+def refresh_memory_index(
+    project_root: Path = PROJECT_ROOT, out_file: Path = MEMORY_INDEX_FILE
+) -> Dict[str, Any]:
     entries = build_memory_entries(project_root)
     entry_payloads = []
     for entry in entries:
@@ -445,7 +532,9 @@ def refresh_memory_index(project_root: Path = PROJECT_ROOT, out_file: Path = MEM
     return payload
 
 
-def load_memory_index(index_file: Path = MEMORY_INDEX_FILE, auto_refresh: bool = True) -> Dict[str, Any]:
+def load_memory_index(
+    index_file: Path = MEMORY_INDEX_FILE, auto_refresh: bool = True
+) -> Dict[str, Any]:
     if not index_file.exists() and auto_refresh:
         return refresh_memory_index(out_file=index_file)
     return _safe_load_json(index_file, {"entries": []})
@@ -457,25 +546,41 @@ def _score_entry(query_tokens: Counter, entry: Dict[str, Any]) -> float:
     if not query_tokens or not entry_tokens:
         return 0.0
 
-    overlap = sum(min(weight, entry_tokens[token]) for token, weight in query_tokens.items())
+    overlap = sum(
+        min(weight, entry_tokens[token]) for token, weight in query_tokens.items()
+    )
     if overlap == 0:
         return 0.0
 
     length_penalty = math.sqrt(sum(entry_tokens.values())) or 1.0
-    tag_bonus = 0.15 * sum(1 for token in query_tokens if token in set(entry.get("tags", [])))
-    title_bonus = 0.25 * sum(1 for token in query_tokens if token in _tokenize(str(entry.get("title") or "")))
+    tag_bonus = 0.15 * sum(
+        1 for token in query_tokens if token in set(entry.get("tags", []))
+    )
+    title_bonus = 0.25 * sum(
+        1 for token in query_tokens if token in _tokenize(str(entry.get("title") or ""))
+    )
     return (overlap / length_penalty) + tag_bonus + title_bonus
 
 
-def _hybrid_score(query: str, query_tokens: Counter, query_vector: List[float], entry: Dict[str, Any]) -> float:
+def _hybrid_score(
+    query: str, query_tokens: Counter, query_vector: List[float], entry: Dict[str, Any]
+) -> float:
     vector = entry.get("vector")
-    vector_score = _cosine_similarity(query_vector, vector) if isinstance(vector, list) else 0.0
+    vector_score = (
+        _cosine_similarity(query_vector, vector) if isinstance(vector, list) else 0.0
+    )
     keyword_score = _score_entry(query_tokens, entry)
 
     # Normalize the older token score into a smaller boost. Exact words still
     # matter, but vector similarity carries the main ranking.
     keyword_boost = min(keyword_score, 1.0) * 0.35
-    recency_boost = 0.03 if str(entry.get("updated_at") or "").startswith(datetime.now().strftime("%Y-%m")) else 0.0
+    recency_boost = (
+        0.03
+        if str(entry.get("updated_at") or "").startswith(
+            datetime.now().strftime("%Y-%m")
+        )
+        else 0.0
+    )
     return vector_score + keyword_boost + recency_boost
 
 
@@ -540,10 +645,18 @@ def format_retrieved_context(results: List[Dict[str, Any]]) -> str:
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Build and query Bolt's local memory index.")
-    parser.add_argument("query", nargs="*", help="Optional query to search after refreshing.")
-    parser.add_argument("--refresh", action="store_true", help="Refresh data/memory_index.json.")
-    parser.add_argument("--limit", type=int, default=5, help="Number of retrieval results.")
+    parser = argparse.ArgumentParser(
+        description="Build and query Bolt's local memory index."
+    )
+    parser.add_argument(
+        "query", nargs="*", help="Optional query to search after refreshing."
+    )
+    parser.add_argument(
+        "--refresh", action="store_true", help="Refresh data/memory_index.json."
+    )
+    parser.add_argument(
+        "--limit", type=int, default=5, help="Number of retrieval results."
+    )
     args = parser.parse_args()
 
     if args.refresh or not MEMORY_INDEX_FILE.exists():

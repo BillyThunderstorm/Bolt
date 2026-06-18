@@ -317,20 +317,33 @@ Then open site files in a browser — they'll fall back to localhost:8103 automa
 
 ## Storage Management & Monitoring
 
+**Current Status (June 15, 2026 - POST-MAINTENANCE)**:
+- Disk: 87% used (776GB/926GB) - ✅ 10% freed
+- Recordings: 0GB (deleted files >3 days old)
+- Clips: 0GB (deleted files >3 days old)
+- Archive: 49GB (old files preserved here)
+
+**Maintenance Done June 15**:
+- Deleted recordings older than 3 days (freed 91GB)
+- Deleted clips older than 3 days (freed 6.7GB)
+- Archived old clips and recordings to archive/ (49GB preserved)
+- Fixed storage_optimization.sh archival bug
+- Added nightly storage optimization cron job (3am)
+- Updated langchain/openai packages
+
 ### Run Storage Optimization
 ```bash
 # Dry run to see what would be done
-python3 scripts/maintenance/storage_optimization.sh --dry-run
+./scripts/maintenance/storage_optimization.sh --dry-run
 
 # Run actual optimization (use with caution)
-python3 scripts/maintenance/storage_optimization.sh
-
-# Skip deduplication (faster, but less thorough)
-python3 scripts/maintenance/storage_optimization.sh --skip-dedup
+./scripts/maintenance/storage_optimization.sh --skip-dedup
 
 # Customize limits
-python3 scripts/maintenance/storage_optimization.sh --recordings-gb 40 --clips-gb 0.5
+./scripts/maintenance/storage_optimization.sh --recordings-gb 40 --clips-gb 0.5
 ```
+
+**Bug Fix (June 15)**: Fixed archival path issue in `storage_optimization.sh` line 264 - changed `mv "$file" "$ARCHIVE_DIR/$file/"` to `mv "$file" "$ARCHIVE_DIR/$file"` (removed trailing slash).
 
 ### Individual Maintenance Scripts
 ```bash
@@ -450,10 +463,12 @@ crontab -l
 ```
 
 Current schedule:
-- `*/30 * * * *` - Video compression
+- `*/30 * * * *` - Video compression (HandBrakeCLI)
 - `0 */3 * * *` - Storage monitoring with alerts
 - `0 */6 * * *` - Media rotation/archival
+- `0 3 * * *` - **Storage optimization** (nightly, skips dedup for speed)
 - `*/15 * * * *` - Site data push to websites (recommended)
+- `0 7 * * *` - Daily briefing
 
 ## Storage Alert Notifications
 
@@ -490,4 +505,4 @@ python3 scripts/daily_briefing.py --output /path/to/briefing.md
 - Dynamic action items
 - Quick command references
 
-*Last updated: June 8, 2026 - Added voice conversation module, expanded chat commands, creator domain docs*
+*Last updated: June 15, 2026 - CRITICAL MAINTENANCE: Deleted recordings/clips >3 days old (freed 98GB total), disk now 86% (was 97%). **AUTOMATION ADDED**: Auto-process recordings every 2hrs, daily briefing → SMS/email, **weekly analysis Sundays at 9am**.*

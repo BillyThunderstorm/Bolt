@@ -21,6 +21,7 @@ from torch.utils.data import Dataset, DataLoader
 # 1. DEFINE THE NEURAL NETWORK CLASS
 # ============================================================================
 
+
 class NeuralNetwork(nn.Module):
     """
     A simple feedforward neural network.
@@ -39,11 +40,11 @@ class NeuralNetwork(nn.Module):
         super().__init__()
         # Sequential stacks layers: input → layer1 → ReLU → layer2 → ReLU → output
         self.layers = nn.Sequential(
-            nn.Linear(num_inputs, 30),      # 2 inputs → 30 neurons
-            nn.ReLU(),                       # Add non-linearity
-            nn.Linear(30, 20),               # 30 neurons → 20 neurons
-            nn.ReLU(),                       # Add non-linearity again
-            nn.Linear(20, num_outputs),      # 20 neurons → 2 outputs
+            nn.Linear(num_inputs, 30),  # 2 inputs → 30 neurons
+            nn.ReLU(),  # Add non-linearity
+            nn.Linear(30, 20),  # 30 neurons → 20 neurons
+            nn.ReLU(),  # Add non-linearity again
+            nn.Linear(20, num_outputs),  # 20 neurons → 2 outputs
         )
 
     def forward(self, x):
@@ -66,6 +67,7 @@ class NeuralNetwork(nn.Module):
 # ============================================================================
 # 2. DEFINE THE CUSTOM DATASET CLASS
 # ============================================================================
+
 
 class ToyDataset(Dataset):
     """
@@ -102,6 +104,7 @@ class ToyDataset(Dataset):
 # 3. DEFINE THE ACCURACY COMPUTATION FUNCTION
 # ============================================================================
 
+
 def compute_accuracy(model, dataloader):
     """
     Evaluate the model on a dataset and return accuracy.
@@ -116,18 +119,18 @@ def compute_accuracy(model, dataloader):
     Why model.eval()? Disables dropout/batch normalization so evaluation is consistent.
     Why torch.no_grad()? Disables gradient tracking (we don't backprop during evaluation).
     """
-    model.eval()                              # Put model in evaluation mode
+    model.eval()  # Put model in evaluation mode
     correct = 0.0
     total_examples = 0
 
     for idx, (features, labels) in enumerate(dataloader):
-        with torch.no_grad():                 # Don't track gradients
-            logits = model(features)          # Forward pass
+        with torch.no_grad():  # Don't track gradients
+            logits = model(features)  # Forward pass
 
         predictions = torch.argmax(logits, dim=1)  # Pick the class with highest logit
-        compare = labels == predictions             # Compare to ground truth
-        correct += torch.sum(compare)               # Count correct predictions
-        total_examples += len(compare)              # Count total predictions
+        compare = labels == predictions  # Compare to ground truth
+        correct += torch.sum(compare)  # Count correct predictions
+        total_examples += len(compare)  # Count total predictions
 
     return (correct / total_examples).item()
 
@@ -137,25 +140,27 @@ def compute_accuracy(model, dataloader):
 # ============================================================================
 
 if __name__ == "__main__":
-
     # --- CREATE TRAINING DATA ---
     # Two classes, 2D points. Class 0 clusters around (-1, 3), class 1 around (2, -1)
-    X_train = torch.tensor([
-        [-1.2, 3.1],   # class 0
-        [-0.9, 2.9],   # class 0
-        [-0.5, 2.6],   # class 0
-        [2.3, -1.1],   # class 1
-        [2.7, -1.5],   # class 1
-    ])
+    X_train = torch.tensor(
+        [
+            [-1.2, 3.1],  # class 0
+            [-0.9, 2.9],  # class 0
+            [-0.5, 2.6],  # class 0
+            [2.3, -1.1],  # class 1
+            [2.7, -1.5],  # class 1
+        ]
+    )
     y_train = torch.tensor([0, 0, 0, 1, 1])
 
     # --- CREATE TEST DATA ---
-    X_test = torch.tensor([
-        [-0.8, 2.8],   # looks like class 0
-        [2.6, -1.6],   # looks like class 1
-    ])
+    X_test = torch.tensor(
+        [
+            [-0.8, 2.8],  # looks like class 0
+            [2.6, -1.6],  # looks like class 1
+        ]
+    )
     y_test = torch.tensor([0, 1])
-
 
     # --- CREATE DATALOADERS ---
     # DataLoader handles batching. batch_size=2 means:
@@ -167,7 +172,6 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_dataset, batch_size=2, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=2, shuffle=False)
 
-
     # --- INITIALIZE MODEL AND OPTIMIZER ---
     torch.manual_seed(123)  # For reproducibility
     model = NeuralNetwork(num_inputs=2, num_outputs=2)
@@ -177,7 +181,6 @@ if __name__ == "__main__":
     # - SGD = Stochastic Gradient Descent: on each batch, move weights opposite to gradients
     # - lr=0.5 = how big are the steps? Bigger steps = faster learning but might overshoot
     # - For this tiny dataset, 0.5 works well. For real data, you'd tune this.
-
 
     # --- TRAINING LOOP ---
     num_epochs = 3
@@ -198,28 +201,28 @@ if __name__ == "__main__":
 
             # Backward pass: compute gradients
             optimizer.zero_grad()  # Clear old gradients (important!)
-            loss.backward()        # Compute new gradients via backprop
+            loss.backward()  # Compute new gradients via backprop
 
             # Update weights: move in the direction that reduces loss
             optimizer.step()
 
-        print(f"Epoch {epoch+1}/{num_epochs} completed | Final batch loss: {loss:.4f}")
+        print(
+            f"Epoch {epoch + 1}/{num_epochs} completed | Final batch loss: {loss:.4f}"
+        )
 
     print("-" * 70)
     print("Training finished!\n")
 
-
     # --- EVALUATION ---
     print("Evaluating on training data...")
     train_accuracy = compute_accuracy(model, train_loader)
-    print(f"Train accuracy: {train_accuracy:.4f} ({train_accuracy*100:.1f}%)")
+    print(f"Train accuracy: {train_accuracy:.4f} ({train_accuracy * 100:.1f}%)")
 
     print("Evaluating on test data...")
     test_accuracy = compute_accuracy(model, test_loader)
-    print(f"Test accuracy: {test_accuracy:.4f} ({test_accuracy*100:.1f}%)")
+    print(f"Test accuracy: {test_accuracy:.4f} ({test_accuracy * 100:.1f}%)")
 
     # Interpretation: 1.0 = 100% = perfect! All 5 training samples correct, both test samples correct.
-
 
     # --- SAVE AND RELOAD THE MODEL ---
     # This shows that the trained weights persist and work later

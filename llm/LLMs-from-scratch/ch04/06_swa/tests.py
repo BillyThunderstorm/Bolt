@@ -53,11 +53,7 @@ def test_swa_matches_base_model_when_window_equals_context():
     torch.manual_seed(123)
     base_model = GPTModelBase(cfg)
     swa_model = GPTModelSWA(swa_cfg)
-    base_state = {
-        key: value
-        for key, value in base_model.state_dict().items()
-        if not key.endswith(".att.mask")
-    }
+    base_state = {key: value for key, value in base_model.state_dict().items() if not key.endswith(".att.mask")}
     load_result = swa_model.load_state_dict(base_state, strict=True)
     assert not load_result.missing_keys
     assert not load_result.unexpected_keys

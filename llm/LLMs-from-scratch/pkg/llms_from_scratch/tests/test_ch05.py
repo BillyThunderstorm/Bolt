@@ -23,15 +23,10 @@ GPT_CONFIG_124M = {
     "n_heads": 12,
     "n_layers": 12,
     "drop_rate": 0.1,
-    "qkv_bias": False
+    "qkv_bias": False,
 }
 
-OTHER_SETTINGS = {
-    "learning_rate": 5e-4,
-    "num_epochs": 2,
-    "batch_size": 1,
-    "weight_decay": 0.1
-}
+OTHER_SETTINGS = {"learning_rate": 5e-4, "num_epochs": 2, "batch_size": 1, "weight_decay": 0.1}
 
 
 @pytest.mark.parametrize("ModelClass", [GPTModel, GPTModelFast])
@@ -68,7 +63,7 @@ def test_train_simple(tmp_path, ModelClass):
         stride=GPT_CONFIG_124M["context_length"],
         drop_last=True,
         shuffle=True,
-        num_workers=0
+        num_workers=0,
     )
 
     val_loader = create_dataloader_v1(
@@ -78,7 +73,7 @@ def test_train_simple(tmp_path, ModelClass):
         stride=GPT_CONFIG_124M["context_length"],
         drop_last=False,
         shuffle=False,
-        num_workers=0
+        num_workers=0,
     )
 
     # Limit to 1 batch for speed
@@ -93,18 +88,21 @@ def test_train_simple(tmp_path, ModelClass):
     model = ModelClass(GPT_CONFIG_124M)
     model.to(device)
 
-    optimizer = torch.optim.AdamW(
-        model.parameters(),
-        lr=OTHER_SETTINGS["learning_rate"],
-        weight_decay=OTHER_SETTINGS["weight_decay"]
-    )
+    optimizer = torch.optim.AdamW(model.parameters(), lr=OTHER_SETTINGS["learning_rate"], weight_decay=OTHER_SETTINGS["weight_decay"])
 
     tokenizer = tiktoken.get_encoding("gpt2")
 
     train_losses, val_losses, tokens_seen = train_model_simple(
-        model, one_batch_train_loader, one_batch_val_loader, optimizer, device,
-        num_epochs=OTHER_SETTINGS["num_epochs"], eval_freq=1, eval_iter=1,
-        start_context="Every effort moves you", tokenizer=tokenizer
+        model,
+        one_batch_train_loader,
+        one_batch_val_loader,
+        optimizer,
+        device,
+        num_epochs=OTHER_SETTINGS["num_epochs"],
+        eval_freq=1,
+        eval_iter=1,
+        start_context="Every effort moves you",
+        tokenizer=tokenizer,
     )
 
     assert round(train_losses[0], 1) == 7.6

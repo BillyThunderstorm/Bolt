@@ -18,7 +18,7 @@ DTYPE_BYTES = {
 
 
 def convert_bytes(n):
-    gb = n / (1000 ** 3)
+    gb = n / (1000**3)
     return f"{gb:,.2f} GB"
 
 
@@ -47,8 +47,7 @@ def distribute_layers(n_layers, a, b):
     return swa, full
 
 
-def estimate_totals(context_length, sliding_window_size, emb_dim, n_heads, n_layers,
-                    n_kv_groups, batch_size, dtype, swa_ratio):
+def estimate_totals(context_length, sliding_window_size, emb_dim, n_heads, n_layers, n_kv_groups, batch_size, dtype, swa_ratio):
     if n_heads % n_kv_groups != 0:
         raise ValueError("n_kv_groups must divide n_heads exactly.")
 
@@ -90,20 +89,22 @@ def estimate_totals(context_length, sliding_window_size, emb_dim, n_heads, n_lay
 
 
 def main():
-    p = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Estimate KV-cache memory for MHA/GQA with SWA layer ratio")
+    p = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Estimate KV-cache memory for MHA/GQA with SWA layer ratio"
+    )
     p.add_argument("--context_length", default=1024, type=int)
-    p.add_argument("--sliding_window_size", required=True, type=int,
-                   help="SWA window size W per SWA layer.")
+    p.add_argument("--sliding_window_size", required=True, type=int, help="SWA window size W per SWA layer.")
     p.add_argument("--emb_dim", required=True, type=int)
     p.add_argument("--n_heads", required=True, type=int)
     p.add_argument("--n_layers", required=True, type=int)
-    p.add_argument("--n_kv_groups", required=True, type=int,
-                   help="GQA groups; 1 means MHA-equivalent KV heads.")
+    p.add_argument("--n_kv_groups", required=True, type=int, help="GQA groups; 1 means MHA-equivalent KV heads.")
     p.add_argument("--batch_size", default=1, type=int)
     p.add_argument("--dtype", choices=DTYPE_BYTES.keys(), default="fp16")
-    p.add_argument("--swa_ratio", default="1:0",
-                   help="SWA:Full layer ratio. Example '5:1' -> 5 SWA for each 1 full. "
-                        "'1:5' -> 1 SWA for 5 full. Default '1:0' = all SWA.")
+    p.add_argument(
+        "--swa_ratio",
+        default="1:0",
+        help="SWA:Full layer ratio. Example '5:1' -> 5 SWA for each 1 full. '1:5' -> 1 SWA for 5 full. Default '1:0' = all SWA.",
+    )
     args = p.parse_args()
 
     cfg = {
@@ -135,8 +136,7 @@ def main():
     print(f"head_dim               : {res['head_dim']}")
     print(f"GQA n_kv_heads         : {res['n_kv_heads_gqa']}")
     print(f"Effective SWA window W : {res['eff_W']}")
-    print(f"Layer ratio (SWA:Full) : {args.swa_ratio} -> "
-          f"{res['n_swa_layers']} SWA, {res['n_full_layers']} Full")
+    print(f"Layer ratio (SWA:Full) : {args.swa_ratio} -> {res['n_swa_layers']} SWA, {res['n_full_layers']} Full")
     print()
 
     print("==== KV-cache totals across all layers ====")

@@ -3,7 +3,7 @@
 #   - https://www.manning.com/books/build-a-large-language-model-from-scratch
 # Code: https://github.com/rasbt/LLMs-from-scratch
 
-from .utils import KVCache   # noqa: F401
+from .utils import KVCache  # noqa: F401
 
 import os
 from pathlib import Path
@@ -15,39 +15,39 @@ from tiktoken.load import load_tiktoken_bpe
 
 
 LLAMA32_CONFIG_1B = {
-    "vocab_size": 128_256,           # Vocabulary size
-    "context_length": 131_072,       # Context length that was used to train the model
-    "emb_dim": 2048,                 # Embedding dimension
-    "n_heads": 32,                   # Number of attention heads
-    "n_layers": 16,                  # Number of layers
-    "hidden_dim": 8192,              # Size of the intermediate dimension in FeedForward
-    "n_kv_groups": 8,                # Key-Value groups for grouped-query attention
-    "rope_base": 500_000.0,          # The base in RoPE's "theta"
-    "dtype": torch.bfloat16,         # Lower-precision dtype to reduce memory usage
-    "rope_freq": {                   # RoPE frequency scaling
+    "vocab_size": 128_256,  # Vocabulary size
+    "context_length": 131_072,  # Context length that was used to train the model
+    "emb_dim": 2048,  # Embedding dimension
+    "n_heads": 32,  # Number of attention heads
+    "n_layers": 16,  # Number of layers
+    "hidden_dim": 8192,  # Size of the intermediate dimension in FeedForward
+    "n_kv_groups": 8,  # Key-Value groups for grouped-query attention
+    "rope_base": 500_000.0,  # The base in RoPE's "theta"
+    "dtype": torch.bfloat16,  # Lower-precision dtype to reduce memory usage
+    "rope_freq": {  # RoPE frequency scaling
         "factor": 32.0,
         "low_freq_factor": 1.0,
         "high_freq_factor": 4.0,
         "original_context_length": 8192,
-    }
+    },
 }
 
 LLAMA32_CONFIG_3B = {
-    "vocab_size": 128_256,           # Vocabulary size
-    "context_length": 131_072,       # Context length that was used to train the model
-    "emb_dim": 3072,                 # Embedding dimension
-    "n_heads": 24,                   # Number of attention heads
-    "n_layers": 28,                  # Number of layers
-    "hidden_dim": 8192,              # Size of the intermediate dimension in FeedForward
-    "n_kv_groups": 8,                # Key-Value groups for grouped-query attention
-    "rope_base": 500_000.0,          # The base in RoPE's "theta"
-    "dtype": torch.bfloat16,         # Lower-precision dtype to reduce memory usage
-    "rope_freq": {                   # RoPE frequency scaling
+    "vocab_size": 128_256,  # Vocabulary size
+    "context_length": 131_072,  # Context length that was used to train the model
+    "emb_dim": 3072,  # Embedding dimension
+    "n_heads": 24,  # Number of attention heads
+    "n_layers": 28,  # Number of layers
+    "hidden_dim": 8192,  # Size of the intermediate dimension in FeedForward
+    "n_kv_groups": 8,  # Key-Value groups for grouped-query attention
+    "rope_base": 500_000.0,  # The base in RoPE's "theta"
+    "dtype": torch.bfloat16,  # Lower-precision dtype to reduce memory usage
+    "rope_freq": {  # RoPE frequency scaling
         "factor": 32.0,
         "low_freq_factor": 1.0,
         "high_freq_factor": 4.0,
         "original_context_length": 8192,
-    }
+    },
 }
 
 
@@ -70,7 +70,7 @@ class Llama3Model(nn.Module):
             head_dim=cfg["emb_dim"] // cfg["n_heads"],
             theta_base=cfg["rope_base"],
             context_length=cfg["context_length"],
-            freq_config=cfg["rope_freq"]
+            freq_config=cfg["rope_freq"],
         )
         self.register_buffer("cos", cos, persistent=False)
         self.register_buffer("sin", sin, persistent=False)
@@ -86,22 +86,16 @@ class Llama3Model(nn.Module):
             pos_start = self.current_pos
             pos_end = pos_start + num_tokens
             self.current_pos = pos_end
-            mask = torch.triu(
-                torch.ones(pos_end, pos_end, device=x.device, dtype=torch.bool), diagonal=1
-            )[pos_start:pos_end, :pos_end]
+            mask = torch.triu(torch.ones(pos_end, pos_end, device=x.device, dtype=torch.bool), diagonal=1)[pos_start:pos_end, :pos_end]
         else:
             pos_start = 0  # Not strictly necessary but helps torch.compile
-            mask = torch.triu(
-                torch.ones(num_tokens, num_tokens, device=x.device, dtype=torch.bool), diagonal=1
-            )
+            mask = torch.triu(torch.ones(num_tokens, num_tokens, device=x.device, dtype=torch.bool), diagonal=1)
         # Shape (1, 1, num_tokens, num_tokens) to broadcast across batch and heads
         mask = mask[None, None, :, :]
 
         for i, block in enumerate(self.trf_blocks):
             blk_cache = cache.get(i) if cache else None
-            x, new_blk_cache = block(x, mask, self.cos, self.sin,
-                                     start_pos=pos_start,
-                                     cache=blk_cache)
+            x, new_blk_cache = block(x, mask, self.cos, self.sin, start_pos=pos_start, cache=blk_cache)
             if cache is not None:
                 cache.update(i, new_blk_cache)
 
@@ -117,11 +111,7 @@ class TransformerBlock(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.att = GroupedQueryAttention(
-            d_in=cfg["emb_dim"],
-            d_out=cfg["emb_dim"],
-            num_heads=cfg["n_heads"],
-            num_kv_groups=cfg["n_kv_groups"],
-            dtype=cfg["dtype"]
+            d_in=cfg["emb_dim"], d_out=cfg["emb_dim"], num_heads=cfg["n_heads"], num_kv_groups=cfg["n_kv_groups"], dtype=cfg["dtype"]
         )
         self.ff = FeedForward(cfg)
         self.norm1 = nn.RMSNorm(cfg["emb_dim"], eps=1e-5, dtype=cfg["dtype"])
@@ -158,9 +148,7 @@ class FeedForward(nn.Module):
 
 
 class GroupedQueryAttention(nn.Module):
-    def __init__(
-            self, d_in, d_out, num_heads, num_kv_groups, dtype=None
-    ):
+    def __init__(self, d_in, d_out, num_heads, num_kv_groups, dtype=None):
         super().__init__()
         assert d_out % num_heads == 0, "d_out must be divisible by num_heads"
         assert num_heads % num_kv_groups == 0, "num_heads must be divisible by num_kv_groups"
@@ -182,8 +170,8 @@ class GroupedQueryAttention(nn.Module):
 
         # Apply projections
         queries = self.W_query(x)  # (b, num_tokens, num_heads * head_dim)
-        keys = self.W_key(x)       # (b, num_tokens, num_kv_groups * head_dim)
-        values = self.W_value(x)   # (b, num_tokens, num_kv_groups * head_dim)
+        keys = self.W_key(x)  # (b, num_tokens, num_kv_groups * head_dim)
+        values = self.W_value(x)  # (b, num_tokens, num_kv_groups * head_dim)
 
         # Reshape
         queries = queries.view(b, num_tokens, self.num_heads, self.head_dim).transpose(1, 2)
@@ -222,7 +210,7 @@ class GroupedQueryAttention(nn.Module):
         # Use the mask to fill attention scores
         attn_scores = attn_scores.masked_fill(mask, -torch.inf)
 
-        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
         assert keys.shape[-1] == self.head_dim
 
         # Shape: (b, num_tokens, num_heads, head_dim)
@@ -248,17 +236,13 @@ def compute_rope_params(head_dim, theta_base=10_000, context_length=4096, freq_c
 
         wavelen = 2 * torch.pi / inv_freq
 
-        inv_freq_llama = torch.where(
-            wavelen > low_freq_wavelen, inv_freq / freq_config["factor"], inv_freq
-        )
+        inv_freq_llama = torch.where(wavelen > low_freq_wavelen, inv_freq / freq_config["factor"], inv_freq)
 
         smooth_factor = (freq_config["original_context_length"] / wavelen - freq_config["low_freq_factor"]) / (
             freq_config["high_freq_factor"] - freq_config["low_freq_factor"]
         )
 
-        smoothed_inv_freq = (
-            (1 - smooth_factor) * (inv_freq / freq_config["factor"]) + smooth_factor * inv_freq
-        )
+        smoothed_inv_freq = (1 - smooth_factor) * (inv_freq / freq_config["factor"]) + smooth_factor * inv_freq
 
         is_medium_freq = (wavelen <= low_freq_wavelen) & (wavelen >= high_freq_wavelen)
         inv_freq_llama = torch.where(is_medium_freq, smoothed_inv_freq, inv_freq_llama)
@@ -287,11 +271,11 @@ def apply_rope(x, cos, sin, offset=0):
 
     # Split x into first half and second half
     x1 = x[..., : head_dim // 2]  # First half
-    x2 = x[..., head_dim // 2:]  # Second half
+    x2 = x[..., head_dim // 2 :]  # Second half
 
     # Adjust sin and cos shapes
-    cos = cos[offset:offset + seq_len, :].unsqueeze(0).unsqueeze(0)  # Shape: (1, 1, seq_len, head_dim)
-    sin = sin[offset:offset + seq_len, :].unsqueeze(0).unsqueeze(0)
+    cos = cos[offset : offset + seq_len, :].unsqueeze(0).unsqueeze(0)  # Shape: (1, 1, seq_len, head_dim)
+    sin = sin[offset : offset + seq_len, :].unsqueeze(0).unsqueeze(0)
 
     # Apply the rotary transformation
     rotated = torch.cat((-x2, x1), dim=-1)
@@ -308,6 +292,7 @@ def apply_rope(x, cos, sin, offset=0):
 
 class Llama3Tokenizer:
     """Thin wrapper around tiktoken that keeps track of Llama-3 special IDs."""
+
     def __init__(self, model_path):
         if not os.path.isfile(model_path):
             raise FileNotFoundError(model_path)
@@ -322,26 +307,23 @@ class Llama3Tokenizer:
             "<|end_header_id|>": 128007,
             "<|eot_id|>": 128009,
         }
-        self.special.update({f"<|reserved_{i}|>": 128002 + i
-                             for i in range(256)
-                             if 128002 + i not in self.special.values()})
+        self.special.update({f"<|reserved_{i}|>": 128002 + i for i in range(256) if 128002 + i not in self.special.values()})
 
         self.model = tiktoken.Encoding(
             name=Path(model_path).name,
             pat_str=r"(?i:'s|'t|'re|'ve|'m|'ll|'d)"
-                    r"|[^\r\n\p{L}\p{N}]?\p{L}+"
-                    r"|\p{N}{1,3}"
-                    r"| ?[^\s\p{L}\p{N}]+[\r\n]*"
-                    r"|\s*[\r\n]+"
-                    r"|\s+(?!\S)"
-                    r"|\s+",
+            r"|[^\r\n\p{L}\p{N}]?\p{L}+"
+            r"|\p{N}{1,3}"
+            r"| ?[^\s\p{L}\p{N}]+[\r\n]*"
+            r"|\s*[\r\n]+"
+            r"|\s+(?!\S)"
+            r"|\s+",
             mergeable_ranks=mergeable,
             special_tokens=self.special,
         )
 
     def encode(self, text, bos=False, eos=False, **kwargs):
-        ids = ([self.special["<|begin_of_text|>"]] if bos else []) \
-              + self.model.encode(text)
+        ids = ([self.special["<|begin_of_text|>"]] if bos else []) + self.model.encode(text)
         if eos:
             ids.append(self.special["<|end_of_text|>"])
         return ids
@@ -351,9 +333,7 @@ class Llama3Tokenizer:
 
 
 class ChatFormat:
-
-    def __init__(self, tokenizer: Llama3Tokenizer, *,
-                 default_system="You are a helpful assistant."):
+    def __init__(self, tokenizer: Llama3Tokenizer, *, default_system="You are a helpful assistant."):
         self.tok = tokenizer
         self.default_system = default_system
 
@@ -396,7 +376,7 @@ def clean_text(text, header_end="assistant<|end_header_id|>\n\n"):
 
     if index != -1:
         # Return the substring starting after "<|end_header_id|>"
-        return text[index + len(header_end):].strip()  # Strip removes leading/trailing whitespace
+        return text[index + len(header_end) :].strip()  # Strip removes leading/trailing whitespace
     else:
         # If the token is not found, return the original text
         return text
@@ -406,12 +386,14 @@ def clean_text(text, header_end="assistant<|end_header_id|>\n\n"):
 # Llama 3 fast (alternative code geared towards efficiency)
 ######################################################################
 
+
 class GroupedQueryAttentionFast(nn.Module):
     """
     Drop-in replacement for GroupedQueryAttention but using PyTorch's
     scaled_dot_product_attention, which uses FlashAttention if run
     on an Ampere GPU (like A100) or newer and uses float16/bfloat16 or lower.
     """
+
     def __init__(self, d_in, d_out, num_heads, num_kv_groups, dtype=None):
         super().__init__()
         assert d_out % num_heads == 0, "d_out must be divisible by num_heads"
@@ -446,8 +428,10 @@ class GroupedQueryAttentionFast(nn.Module):
 
         # Efficient scaled dot-product attention
         attn_output = torch.nn.functional.scaled_dot_product_attention(
-            q, k, v,
-            is_causal=True  # Enables Flash/FlexAttention kernels
+            q,
+            k,
+            v,
+            is_causal=True,  # Enables Flash/FlexAttention kernels
         )
 
         # Combine heads and project
@@ -460,14 +444,11 @@ class TransformerBlockFast(nn.Module):
     Same as original TransformerBlock but uses
     GroupedQueryAttentionFast instead of GroupedQueryAttention.
     """
+
     def __init__(self, cfg):
         super().__init__()
         self.att = GroupedQueryAttentionFast(
-            d_in=cfg["emb_dim"],
-            d_out=cfg["emb_dim"],
-            num_heads=cfg["n_heads"],
-            num_kv_groups=cfg["n_kv_groups"],
-            dtype=cfg["dtype"]
+            d_in=cfg["emb_dim"], d_out=cfg["emb_dim"], num_heads=cfg["n_heads"], num_kv_groups=cfg["n_kv_groups"], dtype=cfg["dtype"]
         )
         self.ff = FeedForward(cfg)
         self.norm1 = nn.RMSNorm(cfg["emb_dim"], eps=1e-5, dtype=cfg["dtype"])
@@ -495,6 +476,7 @@ class Llama3ModelFast(nn.Module):
     instead of TransformerBlock, which in turn uses
     GroupedQueryAttentionFast instead of GroupedQueryAttention.
     """
+
     def __init__(self, cfg):
         super().__init__()
 
@@ -512,7 +494,7 @@ class Llama3ModelFast(nn.Module):
             head_dim=cfg["emb_dim"] // cfg["n_heads"],
             theta_base=cfg["rope_base"],
             context_length=cfg["context_length"],
-            freq_config=cfg["rope_freq"]
+            freq_config=cfg["rope_freq"],
         )
         self.register_buffer("cos", cos, persistent=False)
         self.register_buffer("sin", sin, persistent=False)

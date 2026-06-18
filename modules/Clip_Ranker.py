@@ -14,13 +14,18 @@ from typing import List, Optional, Dict
 try:
     from modules.notifier import notify, notify_score
 except ImportError:
+
     def notify(msg, level="info", reason=None):
-        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(level, "•")
+        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(
+            level, "•"
+        )
         print(f"  {prefix}  {msg}")
         if reason:
             print(f"     → {reason}")
+
     def notify_score(clip, score, breakdown):
         print(f"  📊  {clip}: {score:.0f} | {breakdown}")
+
 
 try:
     from modules.Clip_Generator import GeneratedClip
@@ -36,8 +41,9 @@ HISTORY_FILE = "clip_history.json"
 #   queue   → auto-flows through Title/Subtitle/Factory and into Peak_Hour_Notifier
 # Tune in config.json → quality_tiers.{discard_below, queue_at}.
 TIER_DISCARD = "discard"
-TIER_MID     = "mid"
-TIER_QUEUE   = "queue"
+TIER_MID = "mid"
+TIER_QUEUE = "queue"
+
 
 def _load_tier_thresholds():
     cfg_path = Path(__file__).parent.parent / "config.json"
@@ -46,10 +52,11 @@ def _load_tier_thresholds():
             tiers = json.load(f).get("quality_tiers", {})
         return (
             float(tiers.get("discard_below", 60.0)),
-            float(tiers.get("queue_at",      80.0)),
+            float(tiers.get("queue_at", 80.0)),
         )
     except Exception:
         return 60.0, 80.0
+
 
 DISCARD_BELOW, QUEUE_AT = _load_tier_thresholds()
 
@@ -65,17 +72,17 @@ def _classify_tier(score: float) -> str:
 
 # Bonus points per trigger type (stacks with audio score)
 TRIGGER_BONUS: Dict[str, float] = {
-    "kill":         18,
-    "multi_kill":   28,
-    "ace":          35,
-    "donation":     22,
-    "raid":         30,
-    "sub":          20,
-    "resub":        15,
-    "bits":         12,
-    "chat_hype":    10,
-    "highlight":     5,
-    "manual":       20,   # Stream Deck button press
+    "kill": 18,
+    "multi_kill": 28,
+    "ace": 35,
+    "donation": 22,
+    "raid": 30,
+    "sub": 20,
+    "resub": 15,
+    "bits": 12,
+    "chat_hype": 10,
+    "highlight": 5,
+    "manual": 20,  # Stream Deck button press
 }
 
 
@@ -105,18 +112,16 @@ def rank_clips(
         f"Ranking {len(scoreable)} clip(s) for {game}",
         level="info",
         reason=f"Scoring formula: audio_energy (0-50) + trigger_bonus (0-35) + "
-               f"history_boost (0-15). min_score threshold = {min_score}."
+        f"history_boost (0-15). min_score threshold = {min_score}.",
     )
 
     for clip in scoreable:
         score, breakdown = _score_clip(clip, history)
         clip.score = score  # attach dynamically
-        clip.tier  = _classify_tier(score)  # 'discard' / 'mid' / 'queue'
+        clip.tier = _classify_tier(score)  # 'discard' / 'mid' / 'queue'
 
         notify_score(
-            Path(clip.output_file).name,
-            score,
-            f"{breakdown} → tier={clip.tier}"
+            Path(clip.output_file).name, score, f"{breakdown} → tier={clip.tier}"
         )
 
         if clip.tier == TIER_DISCARD:
@@ -124,24 +129,24 @@ def rank_clips(
                 f"  DISCARD ({score:.0f} < {DISCARD_BELOW:.0f}) — won't auto-process",
                 level="warning",
                 reason="Below the discard threshold. The clip file stays on disk "
-                       "but skips Title/Subtitle/Factory and won't trigger peak-hour "
-                       "alerts. Lower quality_tiers.discard_below in config.json to "
-                       "be more lenient."
+                "but skips Title/Subtitle/Factory and won't trigger peak-hour "
+                "alerts. Lower quality_tiers.discard_below in config.json to "
+                "be more lenient.",
             )
         elif clip.tier == TIER_MID:
             notify(
                 f"  MID ({score:.0f}) — kept, but won't auto-notify",
                 level="info",
                 reason="Decent clip, just not great. It's available if you scroll "
-                       "the clips folder manually. Only QUEUE-tier clips trigger "
-                       "Peak_Hour_Notifier pings."
+                "the clips folder manually. Only QUEUE-tier clips trigger "
+                "Peak_Hour_Notifier pings.",
             )
         else:  # queue
             notify(
                 f"  QUEUE ({score:.0f}) — auto-processing",
                 level="success",
                 reason="Strong clip — flowing through Title_Generator, "
-                       "Subtitle_Generator, Clip_Factory, and into Peak_Hour_Notifier."
+                "Subtitle_Generator, Clip_Factory, and into Peak_Hour_Notifier.",
             )
 
     # Sort descending
@@ -153,7 +158,7 @@ def rank_clips(
             f"Best clip: {Path(best.output_file).name} (score {best.score:.0f})",
             level="success",
             reason="This clip will be processed first through Title_Generator "
-                   "and Clip_Factory before entering the post queue."
+            "and Clip_Factory before entering the post queue.",
         )
 
     return scoreable
@@ -234,8 +239,9 @@ def update_historical_performance(
             history = {}
 
     game_data = history.setdefault(game, {})
-    entry = game_data.setdefault(trigger, {"total_clips": 0, "total_views": 0,
-                                            "total_likes": 0, "avg_views": 0})
+    entry = game_data.setdefault(
+        trigger, {"total_clips": 0, "total_views": 0, "total_likes": 0, "avg_views": 0}
+    )
     entry["total_clips"] += 1
     entry["total_views"] += views
     entry["total_likes"] += likes
@@ -248,6 +254,6 @@ def update_historical_performance(
         f"Performance logged: {trigger} ({views:,} views) for {game}",
         level="info",
         reason="Historical data updated in clip_history.json. "
-               "Future clips with the same trigger type will receive a ranking boost "
-               "proportional to this clip's performance."
+        "Future clips with the same trigger type will receive a ranking boost "
+        "proportional to this clip's performance.",
     )

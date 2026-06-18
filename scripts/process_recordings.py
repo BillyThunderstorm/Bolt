@@ -32,10 +32,12 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from modules.Config_Loader import load_config
+
 config = load_config()
 
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     pass
@@ -43,6 +45,7 @@ except ImportError:
 from modules.Think_Learn_Decide import BrainController
 
 # ── Find recordings folder ─────────────────────────────────────────────────────
+
 
 def find_recordings_folder() -> Path:
     """
@@ -83,6 +86,7 @@ def find_recordings(folder: Path) -> list:
 
 # ── Display helpers ────────────────────────────────────────────────────────────
 
+
 def print_header():
     print()
     print("  ⚡️  Bolt — Process Recordings")
@@ -96,7 +100,9 @@ def print_recordings(recordings: list, folder: Path):
         print()
         print("  To add recordings:")
         print(f"     1. Copy your .mp4 or .mkv files into:  {folder.resolve()}")
-        print("     2. OR in OBS: Settings → Output → Recording → set path to that folder")
+        print(
+            "     2. OR in OBS: Settings → Output → Recording → set path to that folder"
+        )
         print()
         return False
 
@@ -124,12 +130,13 @@ def print_output_paths():
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 
+
 def main():
     print_header()
 
-    folder     = find_recordings_folder()
+    folder = find_recordings_folder()
     recordings = find_recordings(folder)
-    mode       = sys.argv[1] if len(sys.argv) > 1 else "all"
+    mode = sys.argv[1] if len(sys.argv) > 1 else "all"
 
     # ── List mode ─────────────────────────────────────────────────────────────
     if mode == "list":
@@ -152,15 +159,17 @@ def main():
         try:
             idx = int(mode) - 1
             to_process = [recordings[idx]]
-            print(f"  Processing #{idx+1}:  {recordings[idx].name}")
+            print(f"  Processing #{idx + 1}:  {recordings[idx].name}")
         except (ValueError, IndexError):
             print(f"  ✗  Unknown mode: {mode}")
-            print("     Usage: python3 process_recordings.py [all | latest | list | 1..N]")
+            print(
+                "     Usage: python3 process_recordings.py [all | latest | list | 1..N]"
+            )
             return
 
     print()
 
-   # config is already loaded at the top through Config_Loader
+    # config is already loaded at the top through Config_Loader
 
     brain = ""
     brain_path = PROJECT_ROOT / "Bolt_brain.md"
@@ -182,13 +191,16 @@ def main():
         print()
 
         try:
-            process_recording(str(recording), config, brain, intelligence=brain_controller)
+            process_recording(
+                str(recording), config, brain, intelligence=brain_controller
+            )
         except KeyboardInterrupt:
             print("\n  Stopped by user. Partial results may have been saved.")
             break
         except Exception as e:
             print(f"  ✗  Failed to process {recording.name}: {e}")
             import traceback
+
             traceback.print_exc()
             continue
 
@@ -203,8 +215,16 @@ def main():
         if queue_file.exists():
             with open(queue_file) as f:
                 queue = json.load(f)
-            items = queue if isinstance(queue, list) else queue.get("clips", queue.get("queue", []))
-            unposted = [x for x in items if x.get("status", "ready") == "ready" and not x.get("posted", False)]
+            items = (
+                queue
+                if isinstance(queue, list)
+                else queue.get("clips", queue.get("queue", []))
+            )
+            unposted = [
+                x
+                for x in items
+                if x.get("status", "ready") == "ready" and not x.get("posted", False)
+            ]
             if unposted:
                 print(f"  🦊  {len(unposted)} ready queue row(s)")
                 print("     Run:  python3 -m modules.Peak_Hour_Notifier --summary")

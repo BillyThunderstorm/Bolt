@@ -17,6 +17,7 @@ def _get_client():
     if _client is None:
         try:
             from openai import OpenAI
+
             api_key = os.getenv("OPENAI_API_KEY")
             if not api_key:
                 raise ValueError("OPENAI_API_KEY not set in environment")
@@ -30,11 +31,11 @@ def _get_client():
 def ask_llm(prompt: str, model: str = "gpt-4o-mini") -> str:
     """
     Ask OpenAI a question.
-    
+
     Args:
         prompt: The question/prompt to send
         model: Model name (default: gpt-4o-mini)
-    
+
     Returns:
         The response text, or error message if unavailable
     """
@@ -42,10 +43,9 @@ def ask_llm(prompt: str, model: str = "gpt-4o-mini") -> str:
         client = _get_client()
         if not client:
             return "LLM unavailable: client initialization failed."
-        
+
         response = client.chat.completions.create(
-            model=model,
-            messages=[{"role": "user", "content": prompt}]
+            model=model, messages=[{"role": "user", "content": prompt}]
         )
         return response.choices[0].message.content
     except Exception as e:

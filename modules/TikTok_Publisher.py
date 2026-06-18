@@ -22,19 +22,24 @@ from typing import Optional, List
 try:
     from modules.notifier import notify, notify_post
 except ImportError:
+
     def notify(msg, level="info", reason=None):
-        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(level, "•")
+        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(
+            level, "•"
+        )
         print(f"  {prefix}  {msg}")
         if reason:
             print(f"     → {reason}")
+
     def notify_post(title, platform, status, url=None, reason=None):
         print(f"  📤  [{platform}] {status}: {title}")
         if url:
             print(f"      {url}")
 
-TIKTOK_INIT_URL   = "https://open.tiktokapis.com/v2/post/publish/video/init/"
+
+TIKTOK_INIT_URL = "https://open.tiktokapis.com/v2/post/publish/video/init/"
 TIKTOK_STATUS_URL = "https://open.tiktokapis.com/v2/post/publish/status/fetch/"
-CHUNK_SIZE        = 64 * 1024 * 1024  # 64 MB
+CHUNK_SIZE = 64 * 1024 * 1024  # 64 MB
 
 
 class TikTokPublisher:
@@ -47,7 +52,7 @@ class TikTokPublisher:
                 "TikTok access token not configured",
                 level="warning",
                 reason="Run python3 scripts/get_tiktok_token.py after your TikTok app "
-                       "has Content Posting API scopes approved."
+                "has Content Posting API scopes approved.",
             )
 
     def _load_access_token(self) -> str:
@@ -59,7 +64,7 @@ class TikTokPublisher:
             notify(
                 f"TikTok token refresh skipped: {exc}",
                 level="warning",
-                reason="Bolt will try the current TIKTOK_ACCESS_TOKEN from the environment."
+                reason="Bolt will try the current TIKTOK_ACCESS_TOKEN from the environment.",
             )
             return os.getenv("TIKTOK_ACCESS_TOKEN", "")
 
@@ -91,7 +96,10 @@ class TikTokPublisher:
             requests = None  # type: ignore
 
         if not requests:
-            return {"success": False, "error": "requests library not installed — pip install requests"}
+            return {
+                "success": False,
+                "error": "requests library not installed — pip install requests",
+            }
         if not self.token:
             return {"success": False, "error": "TIKTOK_ACCESS_TOKEN not set"}
 
@@ -110,14 +118,17 @@ class TikTokPublisher:
             f"Publishing to TikTok: {path.name}",
             level="info",
             reason=f"File size: {file_size / 1_048_576:.1f} MB | "
-                   f"Chunks: {chunk_count} | Caption: {caption[:60]}…"
+            f"Chunks: {chunk_count} | Caption: {caption[:60]}…",
         )
 
         # ── Step 1: Init upload ──────────────────────────────────────────────
-        notify("Step 1/3 — Initialising upload with TikTok API…", level="info",
-               reason="The init call reserves a slot on TikTok's servers and returns "
-                      "an upload_url + publish_id. The publish_id is used to poll "
-                      "upload status later.")
+        notify(
+            "Step 1/3 — Initialising upload with TikTok API…",
+            level="info",
+            reason="The init call reserves a slot on TikTok's servers and returns "
+            "an upload_url + publish_id. The publish_id is used to poll "
+            "upload status later.",
+        )
         init_payload = {
             "post_info": {
                 "title": caption,
@@ -135,8 +146,9 @@ class TikTokPublisher:
         }
 
         try:
-            resp = requests.post(TIKTOK_INIT_URL, headers=self._headers,
-                                 json=init_payload, timeout=30)
+            resp = requests.post(
+                TIKTOK_INIT_URL, headers=self._headers, json=init_payload, timeout=30
+            )
             data = resp.json()
         except Exception as exc:
             notify(f"Init request failed: {exc}", level="error")
@@ -144,9 +156,12 @@ class TikTokPublisher:
 
         if resp.status_code != 200 or data.get("error", {}).get("code") != "ok":
             err = data.get("error", {})
-            notify(f"TikTok init error: {err.get('message', 'unknown')}", level="error",
-                   reason="Common causes: expired access token, missing Content Posting "
-                          "API scope, or video duration outside 3s–60min limit.")
+            notify(
+                f"TikTok init error: {err.get('message', 'unknown')}",
+                level="error",
+                reason="Common causes: expired access token, missing Content Posting "
+                "API scope, or video duration outside 3s–60min limit.",
+            )
             return {"success": False, "error": err.get("message", "init failed")}
 
         upload_url = data["data"]["upload_url"]
@@ -154,9 +169,12 @@ class TikTokPublisher:
         notify(f"Upload initialised — publish_id: {publish_id}", level="success")
 
         # ── Step 2: Chunk upload ─────────────────────────────────────────────
-        notify(f"Step 2/3 — Uploading {chunk_count} chunk(s)…", level="info",
-               reason="Chunks are sent with Content-Range headers. TikTok reassembles "
-                      "them server-side. Using 64 MB chunks for reliability on slow connections.")
+        notify(
+            f"Step 2/3 — Uploading {chunk_count} chunk(s)…",
+            level="info",
+            reason="Chunks are sent with Content-Range headers. TikTok reassembles "
+            "them server-side. Using 64 MB chunks for reliability on slow connections.",
+        )
         ok, err = self._upload_chunks(path, upload_url, file_size, chunk_count)
         if not ok:
             notify(f"Chunk upload failed: {err}", level="error")
@@ -165,14 +183,18 @@ class TikTokPublisher:
         notify("Chunks uploaded successfully ✓", level="success")
 
         # ── Step 3: Poll status ──────────────────────────────────────────────
-        notify("Step 3/3 — Polling publish status…", level="info",
-               reason="TikTok processes the video server-side (transcoding, moderation). "
-                      "This usually takes 15-60 seconds. Bolt polls every 10s up to 5 minutes.")
+        notify(
+            "Step 3/3 — Polling publish status…",
+            level="info",
+            reason="TikTok processes the video server-side (transcoding, moderation). "
+            "This usually takes 15-60 seconds. Bolt polls every 10s up to 5 minutes.",
+        )
         result = self._poll_status(publish_id, title)
         return result
 
-    def _upload_chunks(self, path: Path, upload_url: str,
-                       file_size: int, chunk_count: int) -> tuple:
+    def _upload_chunks(
+        self, path: Path, upload_url: str, file_size: int, chunk_count: int
+    ) -> tuple:
         try:
             with open(path, "rb") as f:
                 for i in range(chunk_count):
@@ -185,17 +207,20 @@ class TikTokPublisher:
                         "Content-Range": f"bytes {start}-{end}/{file_size}",
                         "Content-Length": str(len(chunk_data)),
                     }
-                    resp = requests.put(upload_url, headers=headers,
-                                        data=chunk_data, timeout=300)
+                    resp = requests.put(
+                        upload_url, headers=headers, data=chunk_data, timeout=300
+                    )
                     if resp.status_code not in (200, 201, 206):
-                        return False, f"Chunk {i+1} HTTP {resp.status_code}: {resp.text[:200]}"
-                    notify(f"  Chunk {i+1}/{chunk_count} uploaded ✓", level="info")
+                        return (
+                            False,
+                            f"Chunk {i + 1} HTTP {resp.status_code}: {resp.text[:200]}",
+                        )
+                    notify(f"  Chunk {i + 1}/{chunk_count} uploaded ✓", level="info")
             return True, None
         except Exception as exc:
             return False, str(exc)
 
-    def _poll_status(self, publish_id: str, title: str,
-                     max_wait: int = 300) -> dict:
+    def _poll_status(self, publish_id: str, title: str, max_wait: int = 300) -> dict:
         deadline = time.time() + max_wait
         while time.time() < deadline:
             try:
@@ -216,26 +241,45 @@ class TikTokPublisher:
 
             if status == "PUBLISH_COMPLETE":
                 share_url = data.get("data", {}).get("publicaly_available_post_id", [])
-                url = f"https://www.tiktok.com/video/{share_url[0]}" if share_url else None
-                notify_post(title, "TikTok", "published", url=url,
-                            reason="Video is live and publicly visible. "
-                                   "Engagement metrics will be available in ~1 hour.")
+                url = (
+                    f"https://www.tiktok.com/video/{share_url[0]}"
+                    if share_url
+                    else None
+                )
+                notify_post(
+                    title,
+                    "TikTok",
+                    "published",
+                    url=url,
+                    reason="Video is live and publicly visible. "
+                    "Engagement metrics will be available in ~1 hour.",
+                )
                 return {"success": True, "publish_id": publish_id, "url": url}
 
             if status in ("FAILED", "REJECTED"):
                 reason = data.get("data", {}).get("fail_reason", "unknown")
-                notify_post(title, "TikTok", f"failed ({reason})",
-                            reason="TikTok rejected the video. Common reasons: "
-                                   "community guideline violation, duplicate content, "
-                                   "or audio copyright match.")
-                return {"success": False, "publish_id": publish_id,
-                        "error": f"TikTok {status}: {reason}"}
+                notify_post(
+                    title,
+                    "TikTok",
+                    f"failed ({reason})",
+                    reason="TikTok rejected the video. Common reasons: "
+                    "community guideline violation, duplicate content, "
+                    "or audio copyright match.",
+                )
+                return {
+                    "success": False,
+                    "publish_id": publish_id,
+                    "error": f"TikTok {status}: {reason}",
+                }
 
             time.sleep(10)
 
-        notify(f"TikTok publish timed out after {max_wait}s", level="error",
-               reason="The video may still publish — check your TikTok app. "
-                      "The publish_id is saved so you can query status manually.")
+        notify(
+            f"TikTok publish timed out after {max_wait}s",
+            level="error",
+            reason="The video may still publish — check your TikTok app. "
+            "The publish_id is saved so you can query status manually.",
+        )
         return {"success": False, "publish_id": publish_id, "error": "timeout"}
 
 

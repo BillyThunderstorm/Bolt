@@ -23,16 +23,48 @@ from modules import Title_Generator as titles  # noqa: E402
 
 
 SCENARIOS = [
-    {"trigger": "kill", "score": 72, "context": {"transcript": "Wait, how did that land?"}},
-    {"trigger": "multi_kill", "score": 88, "context": {"kill_count": 3, "window_seconds": 9}},
-    {"trigger": "ace", "score": 95, "context": {"transcript": "No way. That was all five."}},
-    {"trigger": "chat_hype", "score": 82, "context": {"transcript": "Chat called it before I did."}},
-    {"trigger": "reaction", "score": 78, "context": {"transcript": "I actually cannot believe that worked."}},
-    {"trigger": "highlight", "score": 70, "context": {"transcript": "That was cleaner than it had any right to be."}},
-    {"trigger": "manual", "score": 76, "context": {"transcript": "Saving that one. Easy."}},
+    {
+        "trigger": "kill",
+        "score": 72,
+        "context": {"transcript": "Wait, how did that land?"},
+    },
+    {
+        "trigger": "multi_kill",
+        "score": 88,
+        "context": {"kill_count": 3, "window_seconds": 9},
+    },
+    {
+        "trigger": "ace",
+        "score": 95,
+        "context": {"transcript": "No way. That was all five."},
+    },
+    {
+        "trigger": "chat_hype",
+        "score": 82,
+        "context": {"transcript": "Chat called it before I did."},
+    },
+    {
+        "trigger": "reaction",
+        "score": 78,
+        "context": {"transcript": "I actually cannot believe that worked."},
+    },
+    {
+        "trigger": "highlight",
+        "score": 70,
+        "context": {"transcript": "That was cleaner than it had any right to be."},
+    },
+    {
+        "trigger": "manual",
+        "score": 76,
+        "context": {"transcript": "Saving that one. Easy."},
+    },
     {"trigger": "donation", "score": 84, "context": {"donor_name": "chat"}},
     {"trigger": "raid", "score": 86, "context": {"raid_size": "12"}},
-    {"trigger": "sub", "score": 80, "context": {"transcript": "Perfect timing on that sub."}},
+    {
+        "trigger": "sub",
+        "score": 80,
+        "context": {"transcript": "Perfect timing on that sub."},
+    },
 ]
 
 
@@ -46,14 +78,16 @@ def fake_ask_llm(prompt: str, model: str = "") -> str:
 
     trigger = details.get("trigger", "highlight").replace("_", " ")
     game = details.get("game", "Marvel Rivals")
-    return json.dumps({
-        "titles": [
-            f"Billy turned this {trigger} into a moment.",
-            f"This {game} clip got weird fast.",
-            "The replay makes it even better.",
-        ],
-        "hashtags": ["#MarvelRivals", "#Gaming", "#Clips", "#BillyThunderstorm"],
-    })
+    return json.dumps(
+        {
+            "titles": [
+                f"Billy turned this {trigger} into a moment.",
+                f"This {game} clip got weird fast.",
+                "The replay makes it even better.",
+            ],
+            "hashtags": ["#MarvelRivals", "#Gaming", "#Clips", "#BillyThunderstorm"],
+        }
+    )
 
 
 def main() -> int:
@@ -67,9 +101,13 @@ def main() -> int:
 
     with tempfile.TemporaryDirectory() as tmp:
         cache_path = Path(tmp) / "title_cache.json"
-        with patch.object(titles, "TITLE_CACHE", cache_path), \
-             patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test-title-upgrade"}, clear=False), \
-             patch("modules.LLM_Handler.ask_llm", side_effect=fake_ask_llm):
+        with (
+            patch.object(titles, "TITLE_CACHE", cache_path),
+            patch.dict(
+                os.environ, {"OPENAI_API_KEY": "sk-test-title-upgrade"}, clear=False
+            ),
+            patch("modules.LLM_Handler.ask_llm", side_effect=fake_ask_llm),
+        ):
             for index, scenario in enumerate(SCENARIOS, start=1):
                 context = {
                     "config": {"quality_tiers": {"use_ai_titles": True}},
@@ -89,16 +127,20 @@ def main() -> int:
                         context=context,
                     )
                     if len(generated) < 3:
-                        raise AssertionError("Expected at least 3 generated title options")
+                        raise AssertionError(
+                            "Expected at least 3 generated title options"
+                        )
                     if not all(title.strip() for title in generated):
                         raise AssertionError("Generated titles must not be blank")
                     if not any(tag == "#MarvelRivals" for tag in hashtags):
                         raise AssertionError("Expected #MarvelRivals in hashtags")
-                    clip_result.update({
-                        "status": "passed",
-                        "title": generated[0],
-                        "hashtags": hashtags,
-                    })
+                    clip_result.update(
+                        {
+                            "status": "passed",
+                            "title": generated[0],
+                            "hashtags": hashtags,
+                        }
+                    )
                     report["passed"] += 1
                 except Exception as exc:
                     clip_result.update({"status": "failed", "error": str(exc)})
@@ -109,7 +151,9 @@ def main() -> int:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
-    print(f"Title upgrade smoke test: {report['passed']}/{report['scenario_count']} clips passed")
+    print(
+        f"Title upgrade smoke test: {report['passed']}/{report['scenario_count']} clips passed"
+    )
     print(f"Report: {output_path}")
     return 0 if report["failed"] == 0 else 1
 

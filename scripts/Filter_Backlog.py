@@ -3,6 +3,7 @@
 Filter the existing clip backlog by score.
 Moves low-scoring clips into clips/_low_score/ so you only review the good ones.
 """
+
 import os, shutil
 from pathlib import Path
 from modules.Clip_Ranker import _score_clip, _load_history
@@ -14,17 +15,20 @@ LOW_DIR.mkdir(exist_ok=True)
 THRESHOLD = 65
 history = _load_history("Marvel Rivals")
 
+
 # Build minimal clip-like objects from existing files
 class FakeHighlight:
     def __init__(self):
         self.trigger = "highlight"
         self.score = 50.0
 
+
 class FakeClip:
     def __init__(self, path):
         self.output_file = str(path)
         self.success = True
         self.highlight = FakeHighlight()
+
 
 moved = 0
 kept = 0

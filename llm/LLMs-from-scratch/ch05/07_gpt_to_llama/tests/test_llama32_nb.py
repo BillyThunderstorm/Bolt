@@ -32,8 +32,8 @@ def dummy_input():
 def dummy_cfg_base():
     return {
         "vocab_size": 100,
-        "emb_dim": 32,            # hidden_size
-        "hidden_dim": 64,         # intermediate_size (FFN)
+        "emb_dim": 32,  # hidden_size
+        "hidden_dim": 64,  # intermediate_size (FFN)
         "n_layers": 2,
         "n_heads": 4,
         "head_dim": 8,
@@ -62,6 +62,7 @@ def test_dummy_llama3_forward(dummy_cfg_base, dummy_input, import_notebook_defs)
 @pytest.mark.skipif(not transformers_installed, reason="transformers not installed")
 def test_llama3_base_equivalence_with_transformers(import_notebook_defs):
     from transformers.models.llama import LlamaConfig, LlamaForCausalLM
+
     cfg = {
         "vocab_size": 257,
         "context_length": 8192,

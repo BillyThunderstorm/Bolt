@@ -261,9 +261,7 @@ def format_report(differences):
 
 if __name__ == "__main__":
     if Qwen3_5ForCausalLM is None:
-        raise SystemExit(
-            "Qwen3.5 classes are unavailable. Install a recent transformers version or use local transformers-main."
-        )
+        raise SystemExit("Qwen3.5 classes are unavailable. Install a recent transformers version or use local transformers-main.")
 
     import_notebook_defs = load_notebook_defs()
     cfg = tiny_debug_config()

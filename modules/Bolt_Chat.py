@@ -45,6 +45,7 @@ from typing import Optional
 
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     pass
@@ -52,12 +53,14 @@ except ImportError:
 try:
     import twitchio
     from twitchio.ext import commands as twitch_commands
+
     TWITCHIO_OK = True
 except ImportError:
     TWITCHIO_OK = False
 
 try:
     from openai import OpenAI
+
     OPENAI_OK = True
 except ImportError:
     OPENAI_OK = False
@@ -65,29 +68,44 @@ except ImportError:
 try:
     from modules.notifier import notify
 except ImportError:
+
     def notify(msg, level="info", reason=None):
-        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(level, "•")
+        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(
+            level, "•"
+        )
         print(f"  {prefix}  {msg}")
         if reason:
             print(f"     → {reason}")
 
+
 try:
     from modules.Bolt_Search import search_and_answer, needs_search
+
     SEARCH_OK = True
 except ImportError:
     SEARCH_OK = False
-    def needs_search(q): return False
-    def search_and_answer(q, **kw): return None
+
+    def needs_search(q):
+        return False
+
+    def search_and_answer(q, **kw):
+        return None
+
 
 try:
     from modules.Bolt_Voice import speak as _voice_speak
+
     VOICE_OK = True
 except ImportError:
     VOICE_OK = False
-    def _voice_speak(text): pass
+
+    def _voice_speak(text):
+        pass
+
 
 try:
     from modules.Bolt_Conversation import ConversationMemory
+
     CONV_OK = True
 except ImportError:
     CONV_OK = False
@@ -95,9 +113,9 @@ except ImportError:
 
 # ── Config from .env ──────────────────────────────────────────────────────────
 
-BOT_TOKEN   = os.getenv("TWITCH_BOT_TOKEN", "")
-BOT_NAME    = os.getenv("TWITCH_BOT_NAME", "BoltBot")
-CHANNEL     = os.getenv("TWITCH_CHANNEL", "BillyandRandy").lstrip("#").lower()
+BOT_TOKEN = os.getenv("TWITCH_BOT_TOKEN", "")
+BOT_NAME = os.getenv("TWITCH_BOT_NAME", "BoltBot")
+CHANNEL = os.getenv("TWITCH_CHANNEL", "BillyandRandy").lstrip("#").lower()
 OPENAI_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # How long to wait between Bolt messages (seconds) — avoids chat spam
@@ -108,6 +126,7 @@ CHAT_MEMORY_SIZE = 20
 
 
 # ── Session Memory — what Bolt knows about THIS stream ────────────────────────
+
 
 class SessionMemory:
     """
@@ -120,15 +139,16 @@ class SessionMemory:
     Resets every time Bolt starts (per-session, not persistent yet —
     that's Phase 4 territory).
     """
+
     def __init__(self):
-        self.start_time      = datetime.now()
-        self.greeted_users   = set()          # usernames already welcomed
-        self.highlight_count = 0              # clips flagged this session
-        self.sub_count       = 0              # subs this session
-        self.raid_sources    = []             # list of (username, viewer_count)
-        self.recent_chat     = deque(maxlen=CHAT_MEMORY_SIZE)  # last N messages
-        self.last_game       = os.getenv("GAME_NAME", "the game")
-        self.energy_level    = "normal"       # "hype", "normal", "quiet"
+        self.start_time = datetime.now()
+        self.greeted_users = set()  # usernames already welcomed
+        self.highlight_count = 0  # clips flagged this session
+        self.sub_count = 0  # subs this session
+        self.raid_sources = []  # list of (username, viewer_count)
+        self.recent_chat = deque(maxlen=CHAT_MEMORY_SIZE)  # last N messages
+        self.last_game = os.getenv("GAME_NAME", "the game")
+        self.energy_level = "normal"  # "hype", "normal", "quiet"
 
     def add_message(self, username: str, text: str):
         self.recent_chat.append({"user": username, "text": text})
@@ -225,6 +245,7 @@ def format_queue_status() -> str:
     """Return a Twitch-sized status line for the local posting queue."""
     try:
         from modules.Post_Queue import get_summary
+
         summary = get_summary()
     except Exception as exc:
         return f"queue status unavailable: {exc}"
@@ -247,6 +268,7 @@ def format_queue_status() -> str:
 def approve_next_post(clip_id: str = "") -> str:
     try:
         from modules.Peak_Hour_Notifier import approve_next_clip
+
         clip = approve_next_clip(clip_id or None)
     except Exception as exc:
         return f"approval failed: {exc}"
@@ -264,6 +286,7 @@ def reject_next_post(text: str = "") -> str:
         reason = parts[1] if len(parts) > 1 else ""
     try:
         from modules.Peak_Hour_Notifier import reject_next_clip
+
         clip = reject_next_clip(reason, clip_id or None)
     except Exception as exc:
         return f"hold failed: {exc}"
@@ -277,6 +300,7 @@ def reject_next_post(text: str = "") -> str:
 def post_next_now(clip_id: str = "") -> str:
     try:
         from modules.Peak_Hour_Notifier import post_now
+
         result = post_now(clip_id or None)
     except Exception as exc:
         return f"post failed: {exc}"
@@ -304,6 +328,7 @@ def rank_next_clip(text: str = "") -> str:
         return "rank needs a number from 0 to 100"
     try:
         from modules.Peak_Hour_Notifier import override_clip_score
+
         clip = override_clip_score(score, clip_id or None)
     except Exception as exc:
         return f"rank failed: {exc}"
@@ -323,12 +348,16 @@ def update_live_config(text: str = "") -> str:
         "min_post_score": ("root", int),
         "queue_at": ("quality_tiers", int),
         "discard_below": ("quality_tiers", int),
-        "use_ai_titles": ("quality_tiers", lambda value: value.lower() in {"1", "true", "yes", "on"}),
+        "use_ai_titles": (
+            "quality_tiers",
+            lambda value: value.lower() in {"1", "true", "yes", "on"},
+        ),
     }
     if key not in allowed:
         return "config key not allowed live"
     try:
         import json
+
         path = Path("config.json")
         config = json.loads(path.read_text(encoding="utf-8"))
         section, caster = allowed[key]
@@ -350,6 +379,7 @@ def local_memory_recall(query: str, limit: int = 2, max_chars: int = 360) -> str
         return "try !recall <thing to search>"
     try:
         from modules.Memory_Index import retrieve_memory
+
         hits = retrieve_memory(query, limit=limit)
     except Exception as exc:
         return f"memory search unavailable: {exc}"
@@ -368,6 +398,7 @@ def local_memory_recall(query: str, limit: int = 2, max_chars: int = 360) -> str
 
 
 # ── OpenAI-powered responses ──────────────────────────────────────────────────
+
 
 def _ask_openai(prompt: str, brain: str, memory: SessionMemory) -> Optional[str]:
     """
@@ -427,19 +458,23 @@ When answering questions: be direct, be accurate, stay in character as Bolt."""
             max_tokens=100,
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt}
-            ]
+                {"role": "user", "content": prompt},
+            ],
         )
         return response.choices[0].message.content.strip()
     except Exception as exc:
-        notify(f"Bolt OpenAI call failed: {exc}", level="warning",
-               reason="Falling back to template response. Check OPENAI_API_KEY in .env.")
+        notify(
+            f"Bolt OpenAI call failed: {exc}",
+            level="warning",
+            reason="Falling back to template response. Check OPENAI_API_KEY in .env.",
+        )
         return None
 
 
 # ── The Bot ───────────────────────────────────────────────────────────────────
 
 if TWITCHIO_OK:
+
     class BoltBot(twitch_commands.Bot):
         """
         Bolt's Twitch chat presence.
@@ -450,9 +485,9 @@ if TWITCHIO_OK:
         """
 
         def __init__(self, brain: str, use_voice: bool = False):
-            self.brain   = brain
-            self.memory  = SessionMemory()
-            self._last_message_at = 0.0   # rate limiting
+            self.brain = brain
+            self.memory = SessionMemory()
+            self._last_message_at = 0.0  # rate limiting
             self.use_voice = use_voice and VOICE_OK
             self.conv_memory = ConversationMemory() if CONV_OK else None
 
@@ -467,7 +502,7 @@ if TWITCHIO_OK:
                 f"Bolt is live in #{CHANNEL} as {self.nick} ✓",
                 level="success",
                 reason="Chat bot connected. Bolt will greet viewers, react to highlights, "
-                       "and answer !Bolt questions."
+                "and answer !Bolt questions.",
             )
             await self._say(f"Bolt online 🦊 let's run it")
 
@@ -477,7 +512,7 @@ if TWITCHIO_OK:
                 return  # skip Bolt's own messages
 
             username = message.author.name if message.author else "someone"
-            text     = message.content.strip()
+            text = message.content.strip()
 
             # Track in session memory
             self.memory.add_message(username, text)
@@ -520,17 +555,18 @@ if TWITCHIO_OK:
 
             # If the question needs current info, search first
             if SEARCH_OK and needs_search(question):
-                game_context = f"Streaming game: {self.memory.last_game}. Channel: {CHANNEL}."
+                game_context = (
+                    f"Streaming game: {self.memory.last_game}. Channel: {CHANNEL}."
+                )
                 # Run search in a thread so it doesn't block the async event loop
                 import asyncio
+
                 loop = asyncio.get_event_loop()
                 response = await loop.run_in_executor(
                     None,
                     lambda: search_and_answer(
-                        question,
-                        context=game_context,
-                        short=True
-                    )
+                        question, context=game_context, short=True
+                    ),
                 )
                 # Prepend the username so the reply feels personal in chat
                 if response:
@@ -538,7 +574,7 @@ if TWITCHIO_OK:
 
             # Fall back to OpenAI without search if search wasn't needed or failed
             if not response:
-                prompt   = f"Chat user @{ctx.author.name} asked: {question}"
+                prompt = f"Chat user @{ctx.author.name} asked: {question}"
                 response = _ask_openai(prompt, self.brain, self.memory)
 
             # Last resort fallback
@@ -547,7 +583,9 @@ if TWITCHIO_OK:
 
             # Persist to conversation memory for continuity with voice chat
             if self.conv_memory:
-                self.conv_memory.add("user", f"Twitch chat @{ctx.author.name}: {question}")
+                self.conv_memory.add(
+                    "user", f"Twitch chat @{ctx.author.name}: {question}"
+                )
                 self.conv_memory.add("assistant", response)
 
             await self._say(response)
@@ -560,14 +598,16 @@ if TWITCHIO_OK:
                     f"already on it 👀 that's highlight #{self.memory.highlight_count} tonight"
                 )
             else:
-                await self._say("no highlights flagged yet — keep playing, it's coming 🦊")
+                await self._say(
+                    "no highlights flagged yet — keep playing, it's coming 🦊"
+                )
 
         @twitch_commands.command(name="uptime")
         async def cmd_uptime(self, ctx):
             """!uptime — how long has Bolt been running this session."""
             mins = int((datetime.now() - self.memory.start_time).total_seconds() / 60)
-            hrs  = mins // 60
-            m    = mins % 60
+            hrs = mins // 60
+            m = mins % 60
             if hrs > 0:
                 await self._say(f"we've been live {hrs}h {m}m 🦊")
             else:
@@ -605,7 +645,9 @@ if TWITCHIO_OK:
         async def cmd_stopclip(self, ctx):
             """!stopclip [clip_id] <reason> — emergency hold for a queued clip."""
             text = ctx.message.content.replace("!stopclip", "", 1).strip()
-            await self._say(reject_next_post(text or "Stopped from Twitch chat override"))
+            await self._say(
+                reject_next_post(text or "Stopped from Twitch chat override")
+            )
 
         @twitch_commands.command(name="skip")
         async def cmd_skip(self, ctx):
@@ -646,20 +688,20 @@ if TWITCHIO_OK:
                     reaction = reaction % n
             else:
                 # After a few highlights, be a bit more chill about it
-                reaction = random.choice([
-                    f"highlight #{n} in the bag 📦",
-                    "another one 🦊",
-                    f"that's {n} tonight, billy's having a session",
-                ])
+                reaction = random.choice(
+                    [
+                        f"highlight #{n} in the bag 📦",
+                        "another one 🦊",
+                        f"that's {n} tonight, billy's having a session",
+                    ]
+                )
             await self._say(reaction)
 
         async def on_sub(self, username: str, months: int = 1):
             """Called when someone subscribes or resubscribes."""
             self.memory.add_sub(username)
             if months > 1:
-                await self._say(
-                    f"{username} back for month {months}!! real one 🦊"
-                )
+                await self._say(f"{username} back for month {months}!! real one 🦊")
             else:
                 await self._say(_pick(SUB_REACTIONS, name=username))
 
@@ -712,7 +754,9 @@ if TWITCHIO_OK:
             asyncio.run_coroutine_threadsafe(self.on_sub(username, months), self.loop)
 
         def trigger_raid(self, raider: str, viewer_count: int):
-            asyncio.run_coroutine_threadsafe(self.on_raid(raider, viewer_count), self.loop)
+            asyncio.run_coroutine_threadsafe(
+                self.on_raid(raider, viewer_count), self.loop
+            )
 
         def trigger_bits(self, username: str, amount: int):
             asyncio.run_coroutine_threadsafe(self.on_bits(username, amount), self.loop)
@@ -725,13 +769,23 @@ else:
                 "twitchio not installed — chat bot disabled",
                 level="warning",
                 reason="Run: pip3 install twitchio --break-system-packages\n"
-                       "     Then add TWITCH_BOT_TOKEN and TWITCH_BOT_NAME to .env"
+                "     Then add TWITCH_BOT_TOKEN and TWITCH_BOT_NAME to .env",
             )
-        def run(self): pass
-        def trigger_highlight(self): pass
-        def trigger_sub(self, *a, **kw): pass
-        def trigger_raid(self, *a, **kw): pass
-        def trigger_bits(self, *a, **kw): pass
+
+        def run(self):
+            pass
+
+        def trigger_highlight(self):
+            pass
+
+        def trigger_sub(self, *a, **kw):
+            pass
+
+        def trigger_raid(self, *a, **kw):
+            pass
+
+        def trigger_bits(self, *a, **kw):
+            pass
 
 
 # ── Public launcher (runs bot in background thread) ──────────────────────────
@@ -760,7 +814,7 @@ def start_chat_bot(brain: str = "", use_voice: bool = False) -> Optional[BoltBot
             "Chat bot skipped — twitchio not installed",
             level="warning",
             reason="Install it with: pip3 install twitchio --break-system-packages\n"
-                   "     Then add TWITCH_BOT_TOKEN=oauth:xxx and TWITCH_BOT_NAME=YourBot to .env"
+            "     Then add TWITCH_BOT_TOKEN=oauth:xxx and TWITCH_BOT_NAME=YourBot to .env",
         )
         return None
 
@@ -769,11 +823,11 @@ def start_chat_bot(brain: str = "", use_voice: bool = False) -> Optional[BoltBot
             "Chat bot skipped — TWITCH_BOT_TOKEN not set",
             level="warning",
             reason="To get a token:\n"
-                   "     1. Go to https://twitchapps.com/tmi/\n"
-                   "     2. Log in as your bot account (or your main account)\n"
-                   "     3. Copy the token (starts with oauth:)\n"
-                   "     4. Add to .env: TWITCH_BOT_TOKEN=oauth:xxxxxxxxxx\n"
-                   "     5. Add to .env: TWITCH_BOT_NAME=YourBotUsername"
+            "     1. Go to https://twitchapps.com/tmi/\n"
+            "     2. Log in as your bot account (or your main account)\n"
+            "     3. Copy the token (starts with oauth:)\n"
+            "     4. Add to .env: TWITCH_BOT_TOKEN=oauth:xxxxxxxxxx\n"
+            "     5. Add to .env: TWITCH_BOT_NAME=YourBotUsername",
         )
         return None
 
@@ -783,7 +837,7 @@ def start_chat_bot(brain: str = "", use_voice: bool = False) -> Optional[BoltBot
 
     # Use an Event + list so the thread can hand the bot back to the main thread
     # without a race condition.
-    _ready  = threading.Event()
+    _ready = threading.Event()
     _holder = [None]
 
     def _run():
@@ -808,14 +862,17 @@ def start_chat_bot(brain: str = "", use_voice: bool = False) -> Optional[BoltBot
             bot = BoltBot(brain=brain, use_voice=use_voice)
             _holder[0] = bot
             _bot_instance = bot
-            _ready.set()          # unblock main thread — bot object is ready
-            bot.run()             # blocks until bot disconnects or crashes
+            _ready.set()  # unblock main thread — bot object is ready
+            bot.run()  # blocks until bot disconnects or crashes
         except Exception as exc:
             if not _ready.is_set():
-                _ready.set()      # unblock main thread even on init failure
-            notify(f"Bolt chat bot crashed: {exc}", level="error",
-                   reason="Check TWITCH_BOT_TOKEN and TWITCH_BOT_NAME in .env. "
-                          "Token may have expired — get a new one at twitchapps.com/tmi")
+                _ready.set()  # unblock main thread even on init failure
+            notify(
+                f"Bolt chat bot crashed: {exc}",
+                level="error",
+                reason="Check TWITCH_BOT_TOKEN and TWITCH_BOT_NAME in .env. "
+                "Token may have expired — get a new one at twitchapps.com/tmi",
+            )
         finally:
             loop.close()
 
@@ -831,8 +888,8 @@ def start_chat_bot(brain: str = "", use_voice: bool = False) -> Optional[BoltBot
             f"Bolt chat bot starting in #{CHANNEL}…",
             level="info",
             reason=f"Bot name: {BOT_NAME}. Voice: {'on' if use_voice else 'off'}. "
-                   "Bolt will greet viewers, react to highlights, and answer !Bolt questions. "
-                   "Give her ~10 seconds to connect."
+            "Bolt will greet viewers, react to highlights, and answer !Bolt questions. "
+            "Give her ~10 seconds to connect.",
         )
 
     return _holder[0]
@@ -858,8 +915,12 @@ if __name__ == "__main__":
     print("\n  🦊  Bolt Chat Bot — Direct Test")
     print(f"  Channel:  #{CHANNEL}")
     print(f"  Bot name: {BOT_NAME}")
-    print(f"  Token set: {'yes ✓' if BOT_TOKEN else 'NO — add TWITCH_BOT_TOKEN to .env'}")
-    print(f"  OpenAI:   {'available ✓' if OPENAI_OK and OPENAI_KEY else 'not configured'}")
+    print(
+        f"  Token set: {'yes ✓' if BOT_TOKEN else 'NO — add TWITCH_BOT_TOKEN to .env'}"
+    )
+    print(
+        f"  OpenAI:   {'available ✓' if OPENAI_OK and OPENAI_KEY else 'not configured'}"
+    )
     print(f"  Voice:    {'enabled ✓' if VOICE_OK else 'not configured'}")
     print()
 
