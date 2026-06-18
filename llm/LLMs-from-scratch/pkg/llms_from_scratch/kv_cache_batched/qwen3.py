@@ -3,13 +3,18 @@
 #   - https://www.manning.com/books/build-a-large-language-model-from-scratch
 # Code: https://github.com/rasbt/LLMs-from-scratch
 
-from .utils import KVCache   # noqa: F401
-from ..qwen3 import (   # noqa: F401
-    QWEN_CONFIG_06_B, QWEN3_CONFIG_1_7B, QWEN3_CONFIG_4B,
-    QWEN3_CONFIG_8B, QWEN3_CONFIG_14B, QWEN3_CONFIG_32B,
-    Qwen3Tokenizer, load_weights_into_qwen,
+from .utils import KVCache  # noqa: F401
+from ..qwen3 import (  # noqa: F401
+    QWEN_CONFIG_06_B,
+    QWEN3_CONFIG_1_7B,
+    QWEN3_CONFIG_4B,
+    QWEN3_CONFIG_8B,
+    QWEN3_CONFIG_14B,
+    QWEN3_CONFIG_32B,
+    Qwen3Tokenizer,
+    load_weights_into_qwen,
     download_from_huggingface,
-    download_from_huggingface_from_snapshots
+    download_from_huggingface_from_snapshots,
 )
 
 import torch
@@ -34,11 +39,7 @@ class Qwen3Model(nn.Module):
             head_dim = cfg["emb_dim"] // cfg["n_heads"]
         else:
             head_dim = cfg["head_dim"]
-        cos, sin = compute_rope_params(
-            head_dim=head_dim,
-            theta_base=cfg["rope_base"],
-            context_length=cfg["context_length"]
-        )
+        cos, sin = compute_rope_params(head_dim=head_dim, theta_base=cfg["rope_base"], context_length=cfg["context_length"])
         self.register_buffer("cos", cos, persistent=False)
         self.register_buffer("sin", sin, persistent=False)
         self.cfg = cfg
@@ -54,18 +55,14 @@ class Qwen3Model(nn.Module):
             pos_start = start_pos
             pos_end = pos_start + num_tokens
             max_len = pos_end.max().item()
-            full_mask = torch.triu(
-                torch.ones(max_len, max_len, device=device, dtype=torch.bool), diagonal=1
-            )
+            full_mask = torch.triu(torch.ones(max_len, max_len, device=device, dtype=torch.bool), diagonal=1)
             mask = torch.zeros(B, 1, num_tokens, max_len, device=device, dtype=torch.bool)
             for i in range(B):
                 ps, pe = pos_start[i].item(), pos_end[i].item()
                 mask[i, 0] = full_mask[ps:pe, :pe]
         else:
             pos_start = torch.zeros(B, dtype=torch.long, device=device)
-            mask = torch.triu(
-                torch.ones(num_tokens, num_tokens, device=device, dtype=torch.bool), diagonal=1
-            )[None, None, :, :]
+            mask = torch.triu(torch.ones(num_tokens, num_tokens, device=device, dtype=torch.bool), diagonal=1)[None, None, :, :]
 
         for i, block in enumerate(self.trf_blocks):
             blk_cache = [cache.get(i, b_idx) for b_idx in range(B)] if cache is not None else None
@@ -91,7 +88,7 @@ class TransformerBlock(nn.Module):
             head_dim=cfg["head_dim"],
             num_kv_groups=cfg["n_kv_groups"],
             qk_norm=cfg["qk_norm"],
-            dtype=cfg["dtype"]
+            dtype=cfg["dtype"],
         )
         self.ff = FeedForward(cfg)
         self.norm1 = RMSNorm(cfg["emb_dim"], eps=1e-6)
@@ -160,8 +157,8 @@ class GroupedQueryAttention(nn.Module):
 
         # Apply projections
         queries = self.W_query(x)  # (b, num_tokens, num_heads * head_dim)
-        keys = self.W_key(x)       # (b, num_tokens, num_kv_groups * head_dim)
-        values = self.W_value(x)   # (b, num_tokens, num_kv_groups * head_dim)
+        keys = self.W_key(x)  # (b, num_tokens, num_kv_groups * head_dim)
+        values = self.W_value(x)  # (b, num_tokens, num_kv_groups * head_dim)
 
         # Reshape
         queries = queries.view(b, num_tokens, self.num_heads, self.head_dim).transpose(1, 2)
@@ -183,12 +180,12 @@ class GroupedQueryAttention(nn.Module):
         for i in range(b):
             prev = cache[i] if cache else None
             if prev is None:
-                k_cat = keys[i:i+1]
-                v_cat = values[i:i+1]
+                k_cat = keys[i : i + 1]
+                v_cat = values[i : i + 1]
             else:
                 prev_k, prev_v = prev
-                k_cat = torch.cat([prev_k, keys[i:i+1]], dim=2)
-                v_cat = torch.cat([prev_v, values[i:i+1]], dim=2)
+                k_cat = torch.cat([prev_k, keys[i : i + 1]], dim=2)
+                v_cat = torch.cat([prev_v, values[i : i + 1]], dim=2)
             next_cache.append((k_cat, v_cat))
 
         keys = torch.cat([k for k, _ in next_cache], dim=0)
@@ -240,8 +237,8 @@ def apply_rope(x, cos, sin, offset):
     assert offset.shape[0] == bsz, "Offset must have one value per batch item"
 
     # Prepare cos/sin: (seq_len, head_dim)
-    cos = cos[:cos.shape[0], :].unsqueeze(0).unsqueeze(0)  # (1, 1, total_seq_len, head_dim)
-    sin = sin[:sin.shape[0], :].unsqueeze(0).unsqueeze(0)
+    cos = cos[: cos.shape[0], :].unsqueeze(0).unsqueeze(0)  # (1, 1, total_seq_len, head_dim)
+    sin = sin[: sin.shape[0], :].unsqueeze(0).unsqueeze(0)
 
     # Build position indices per batch item
     position_ids = torch.arange(seq_len, device=offset.device).unsqueeze(0) + offset.unsqueeze(1)  # (bsz, seq_len)
@@ -255,8 +252,8 @@ def apply_rope(x, cos, sin, offset):
     cos = cos.unsqueeze(1)  # (bsz, 1, seq_len, head_dim)
     sin = sin.unsqueeze(1)
 
-    x1 = x[..., :head_dim // 2]
-    x2 = x[..., head_dim // 2:]
+    x1 = x[..., : head_dim // 2]
+    x2 = x[..., head_dim // 2 :]
 
     rotated = torch.cat((-x2, x1), dim=-1)
     x_rotated = (x * cos) + (rotated * sin)

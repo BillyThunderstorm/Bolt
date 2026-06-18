@@ -6,6 +6,7 @@
 # Additional utility and helper functions for text generation not covered
 # in the main chapters
 
+
 def trim_input_tensor(input_ids_tensor, context_len, max_new_tokens):
     assert max_new_tokens < context_len
     keep_len = max(1, context_len - max_new_tokens)

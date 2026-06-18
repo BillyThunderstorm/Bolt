@@ -17,11 +17,15 @@ from typing import List, Optional, Tuple
 try:
     from modules.notifier import notify
 except ImportError:
+
     def notify(msg, level="info", reason=None):
-        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(level, "•")
+        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(
+            level, "•"
+        )
         print(f"  {prefix}  {msg}")
         if reason:
             print(f"     → {reason}")
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 TITLE_CACHE = PROJECT_ROOT / "data" / "title_cache.json"
@@ -84,16 +88,24 @@ TEMPLATES: dict = {
 }
 
 HASHTAG_POOLS: dict = {
-    "Marvel Rivals":  ["#MarvelRivals", "#MarvelRivalsClips", "#superhero", "#gaming"],
-    "Valorant":       ["#Valorant", "#ValorantClips", "#VCT", "#FPS"],
-    "Apex Legends":   ["#ApexLegends", "#Apex", "#ApexClips", "#BattleRoyale"],
-    "Fortnite":       ["#Fortnite", "#FortniteClips", "#BuildingIsBack", "#FN"],
-    "Warzone":        ["#Warzone", "#COD", "#WarzoneClips", "#CallOfDuty"],
-    "Overwatch 2":    ["#Overwatch2", "#OW2", "#OverwatchClips", "#FPS"],
-    "CS2":            ["#CS2", "#CounterStrike", "#CS2Clips", "#FPS"],
+    "Marvel Rivals": ["#MarvelRivals", "#MarvelRivalsClips", "#superhero", "#gaming"],
+    "Valorant": ["#Valorant", "#ValorantClips", "#VCT", "#FPS"],
+    "Apex Legends": ["#ApexLegends", "#Apex", "#ApexClips", "#BattleRoyale"],
+    "Fortnite": ["#Fortnite", "#FortniteClips", "#BuildingIsBack", "#FN"],
+    "Warzone": ["#Warzone", "#COD", "#WarzoneClips", "#CallOfDuty"],
+    "Overwatch 2": ["#Overwatch2", "#OW2", "#OverwatchClips", "#FPS"],
+    "CS2": ["#CS2", "#CounterStrike", "#CS2Clips", "#FPS"],
     "League of Legends": ["#LeagueOfLegends", "#LoL", "#LoLClips", "#MOBA"],
 }
-GENERIC_TAGS = ["#gaming", "#clips", "#viral", "#trending", "#streamer", "#twitch", "#tiktokgaming"]
+GENERIC_TAGS = [
+    "#gaming",
+    "#clips",
+    "#viral",
+    "#trending",
+    "#streamer",
+    "#twitch",
+    "#tiktokgaming",
+]
 
 
 def generate_titles(
@@ -118,7 +130,7 @@ def generate_titles(
     notify(
         f"Generating local template titles for {trigger} clip (score {score:.0f})",
         level="info",
-        reason="AI titles are disabled or unavailable. Using free local templates."
+        reason="AI titles are disabled or unavailable. Using free local templates.",
     )
 
     titles = _template_titles(trigger, game, context, count)
@@ -135,11 +147,14 @@ def _ai_titles_enabled(context: dict) -> bool:
     if config is None:
         try:
             from modules.Config_Loader import load_config
+
             config = load_config()
         except Exception:
             config = {}
 
-    title_config = config.get("title_generation", {}) if isinstance(config, dict) else {}
+    title_config = (
+        config.get("title_generation", {}) if isinstance(config, dict) else {}
+    )
     if title_config.get("enabled") is not None:
         return bool(title_config.get("enabled"))
 
@@ -164,7 +179,7 @@ def _llm_titles(
         notify(
             f"Using cached AI titles for {trigger} clip",
             level="info",
-            reason="Title cache avoids paying for the same prompt twice."
+            reason="Title cache avoids paying for the same prompt twice.",
         )
         return cached.get("titles", []), cached.get("hashtags", [])
 
@@ -172,7 +187,7 @@ def _llm_titles(
         notify(
             "AI titles enabled, but OPENAI_API_KEY is not configured",
             level="warning",
-            reason="Bolt will keep working with local template titles."
+            reason="Bolt will keep working with local template titles.",
         )
         return None
 
@@ -180,10 +195,11 @@ def _llm_titles(
     notify(
         f"Generating AI titles for {trigger} clip (score {score:.0f})",
         level="info",
-        reason="Using Billy's creator profile plus clip context, with template fallback."
+        reason="Using Billy's creator profile plus clip context, with template fallback.",
     )
     try:
         from modules.LLM_Handler import ask_llm
+
         raw = ask_llm(prompt, model=AI_MODEL)
         result = _parse_title_response(raw)
         titles = _clean_titles(result.get("titles", []), count)
@@ -196,19 +212,21 @@ def _llm_titles(
         notify(
             f"AI title ready: {titles[0]}",
             level="success",
-            reason="Saved to data/title_cache.json for reuse."
+            reason="Saved to data/title_cache.json for reuse.",
         )
         return titles, hashtags
     except Exception as exc:
         notify(
             f"AI title generation failed: {exc}",
             level="warning",
-            reason="Falling back to local templates so the clip pipeline can continue."
+            reason="Falling back to local templates so the clip pipeline can continue.",
         )
         return None
 
 
-def _build_title_prompt(trigger: str, game: str, score: float, context: dict, count: int) -> str:
+def _build_title_prompt(
+    trigger: str, game: str, score: float, context: dict, count: int
+) -> str:
     brain = str(context.get("creator_brain") or _load_creator_brain())
     transcript = str(context.get("transcript") or "").strip()
     memory = str(context.get("memory") or context.get("retrieved_memory") or "").strip()
@@ -261,7 +279,9 @@ def _load_title_cache() -> dict:
 
 def _save_title_cache(cache: dict) -> None:
     TITLE_CACHE.parent.mkdir(parents=True, exist_ok=True)
-    TITLE_CACHE.write_text(json.dumps(cache, indent=2, sort_keys=True), encoding="utf-8")
+    TITLE_CACHE.write_text(
+        json.dumps(cache, indent=2, sort_keys=True), encoding="utf-8"
+    )
 
 
 def _cache_key(trigger: str, game: str, score: float, context: dict, count: int) -> str:
@@ -334,14 +354,16 @@ def _template_titles(trigger: str, game: str, context: dict, count: int) -> List
     filled = []
     for t in selected:
         try:
-            filled.append(t.format(
-                game=game,
-                trigger=trigger,
-                count=context.get("kill_count", "Multiple"),
-                seconds=context.get("window_seconds", "10"),
-                donor=context.get("donor_name", "the donator"),
-                raiders=context.get("raid_size", "A ton of"),
-            ))
+            filled.append(
+                t.format(
+                    game=game,
+                    trigger=trigger,
+                    count=context.get("kill_count", "Multiple"),
+                    seconds=context.get("window_seconds", "10"),
+                    donor=context.get("donor_name", "the donator"),
+                    raiders=context.get("raid_size", "A ton of"),
+                )
+            )
         except KeyError:
             filled.append(t.replace("{game}", game).replace("{trigger}", trigger))
 

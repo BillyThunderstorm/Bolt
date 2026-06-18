@@ -54,17 +54,18 @@ TITLE_TEMPLATES = {
 # Keywords in the transcription steer the category choice.
 # Recognizing these patterns is a core NLP concept called "intent detection".
 CATEGORY_KEYWORDS = {
-    "reaction":    ["insane", "crazy", "no way", "what", "omg", "bro", "wait"],
+    "reaction": ["insane", "crazy", "no way", "what", "omg", "bro", "wait"],
     "achievement": ["finally", "clutch", "first time", "win", "victory", "ranked"],
-    "funny":       ["lol", "lmao", "bug", "glitch", "wtf", "accident", "oops"],
-    "hype":        ["go off", "cracked", "nasty", "goated", "diff", "aim"],
-    "challenge":   ["try", "test", "see if", "attempt", "challenge", "strategy"],
+    "funny": ["lol", "lmao", "bug", "glitch", "wtf", "accident", "oops"],
+    "hype": ["go off", "cracked", "nasty", "goated", "diff", "aim"],
+    "challenge": ["try", "test", "see if", "attempt", "challenge", "strategy"],
     "informative": ["how", "tip", "trick", "tutorial", "learn", "guide"],
 }
 
 
-def generate_title(clip_path: str, game: str, transcription: str = "",
-                   visual_intensity: float = 0.5) -> str:
+def generate_title(
+    clip_path: str, game: str, transcription: str = "", visual_intensity: float = 0.5
+) -> str:
     """
     Generate the best title for a clip.
 
@@ -75,8 +76,11 @@ def generate_title(clip_path: str, game: str, transcription: str = "",
     4. Substitute the game name and any detected achievements
     5. Notify you of the choice and the reasoning
     """
-    notify(f"Generating title for: {Path(clip_path).name}", level="info",
-           reason="Title generation analyzes your transcript + video energy to pick the most viral framing.")
+    notify(
+        f"Generating title for: {Path(clip_path).name}",
+        level="info",
+        reason="Title generation analyzes your transcript + video energy to pick the most viral framing.",
+    )
 
     # Step 1: Score each category based on keyword matches in the transcript
     category_scores = {cat: 0 for cat in TITLE_TEMPLATES}
@@ -93,7 +97,7 @@ def generate_title(clip_path: str, game: str, transcription: str = "",
         reason=(
             "Each point means a keyword from that category appeared in your speech. "
             "More keyword matches = stronger signal that this framing fits the clip."
-        )
+        ),
     )
 
     # Step 2: Adjust scores based on visual intensity
@@ -112,28 +116,31 @@ def generate_title(clip_path: str, game: str, transcription: str = "",
         reason=(
             f"Visual intensity {visual_intensity:.0%} means the frame had "
             f"{'a lot of fast movement — boosted hype/reaction categories' if visual_intensity >= 0.7 else 'calm/steady footage — boosted informative/achievement categories'}."
-        )
+        ),
     )
 
     # Step 3: Pick the winning category
     # Load historical performance to break ties
-    best_category = max(category_scores, key=lambda c: (
-        category_scores[c],
-        _get_category_performance(c)
-    ))
+    best_category = max(
+        category_scores,
+        key=lambda c: (category_scores[c], _get_category_performance(c)),
+    )
 
     # Step 4: Pick the best template from the category
     templates = TITLE_TEMPLATES[best_category]
     best_template = _pick_best_template(templates, best_category)
-    runner_up_template = templates[1] if len(templates) > 1 and templates[1] != best_template else None
+    runner_up_template = (
+        templates[1] if len(templates) > 1 and templates[1] != best_template else None
+    )
 
     # Step 5: Fill in placeholders
     achievement = _detect_achievement(transcription)
-    title = best_template.format(
-        game=game,
-        achievement=achievement or "this moment"
+    title = best_template.format(game=game, achievement=achievement or "this moment")
+    runner_up = (
+        runner_up_template.format(game=game, achievement=achievement or "this moment")
+        if runner_up_template
+        else None
     )
-    runner_up = runner_up_template.format(game=game, achievement=achievement or "this moment") if runner_up_template else None
 
     # Notify with full explanation
     notify_title(Path(clip_path).name, title, best_category, runner_up)
@@ -150,8 +157,11 @@ def train_on_titles(titles_file: str):
     This is supervised learning in its simplest form —
     you're providing labeled examples to improve future output.
     """
-    notify(f"Training on titles from: {titles_file}", level="info",
-           reason="Training means we're learning which title patterns perform best so future clips get better titles automatically.")
+    notify(
+        f"Training on titles from: {titles_file}",
+        level="info",
+        reason="Training means we're learning which title patterns perform best so future clips get better titles automatically.",
+    )
 
     try:
         with open(titles_file) as f:
@@ -165,19 +175,33 @@ def train_on_titles(titles_file: str):
         title = example.get("title", "")
         views = example.get("views", 0)
         category = _classify_title(title)
-        model["category_performance"][category] = model["category_performance"].get(category, [])
+        model["category_performance"][category] = model["category_performance"].get(
+            category, []
+        )
         model["category_performance"][category].append(views)
 
     _save_model(model)
-    notify(f"Trained on {len(examples)} title examples", level="success",
-           reason="The model now has real performance data — it will prefer categories that historically got more views.")
+    notify(
+        f"Trained on {len(examples)} title examples",
+        level="success",
+        reason="The model now has real performance data — it will prefer categories that historically got more views.",
+    )
 
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
+
 def _detect_achievement(transcription: str) -> str:
     """Look for achievement-like phrases in the transcript."""
-    achievement_phrases = ["kill streak", "ace", "clutch", "MVP", "win", "ranked up", "headshot"]
+    achievement_phrases = [
+        "kill streak",
+        "ace",
+        "clutch",
+        "MVP",
+        "win",
+        "ranked up",
+        "headshot",
+    ]
     tl = transcription.lower()
     for phrase in achievement_phrases:
         if phrase.lower() in tl:
@@ -212,12 +236,14 @@ def _classify_title(title: str) -> str:
 
 def _record_title(title: str, category: str, clip_path: str):
     model = _load_model()
-    model.setdefault("history", []).append({
-        "title": title,
-        "category": category,
-        "clip": str(clip_path),
-        "views": None  # updated later when metrics come in
-    })
+    model.setdefault("history", []).append(
+        {
+            "title": title,
+            "category": category,
+            "clip": str(clip_path),
+            "views": None,  # updated later when metrics come in
+        }
+    )
     _save_model(model)
 
 
@@ -234,5 +260,3 @@ def _load_model() -> dict:
 def _save_model(model: dict):
     with open(VIRAL_MODEL_FILE, "w") as f:
         json.dump(model, f, indent=2)
-
-

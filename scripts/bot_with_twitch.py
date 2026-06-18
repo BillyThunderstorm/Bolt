@@ -16,16 +16,19 @@ from modules.Twitch_API import get_all_twitch_data  # ← NEW: Import Twitch dat
 # block the bot. If Nathan isn't installed, it falls back to the system default.
 Bolt_VOICE = "Nathan (Enhanced)"
 
+
 def Bolt_speak(message: str) -> None:
     """Speak a message out loud using Bolt's voice."""
     try:
         subprocess.run(
             ["say", "-v", Bolt_VOICE, message],
-            check=False,        # don't crash the bot if say fails
-            timeout=30,         # safety cap so it never hangs
+            check=False,  # don't crash the bot if say fails
+            timeout=30,  # safety cap so it never hangs
         )
     except Exception as e:
         logging.warning(f"Bolt voice error: {e}")
+
+
 # ────────────────────────────────────────────────────────────────────────────
 
 APP_ROOT = Path(__file__).resolve().parent
@@ -84,7 +87,9 @@ def main():
             timestamps = detect_highlights(recording)
             clips = generate_clips(recording, timestamps)
 
-            Bolt_speak(f"Found {len(clips)} clip{'s' if len(clips) != 1 else ''}. Generating titles and subtitles.")
+            Bolt_speak(
+                f"Found {len(clips)} clip{'s' if len(clips) != 1 else ''}. Generating titles and subtitles."
+            )
 
             for clip in clips:
                 subtitles = generate_subtitles(clip)

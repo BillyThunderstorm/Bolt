@@ -147,6 +147,7 @@ def _attach_debug_hooks(model, is_hf):
     def hook(name):
         def _record(_, __, output):
             traces[name] = output.detach().to(torch.float32).cpu()
+
         return _record
 
     if is_hf:
@@ -254,13 +255,9 @@ def format_report(differences):
         if diff["status"] == "ok":
             lines.append(f"[OK] {diff['name']}: max={diff['max_diff']:.2e}, mean={diff['mean_abs_diff']:.2e}")
         elif diff["status"] == "mismatch":
-            lines.append(
-                f"[DIFF] {diff['name']}: max={diff['max_diff']:.2e}, mean={diff['mean_abs_diff']:.2e}"
-            )
+            lines.append(f"[DIFF] {diff['name']}: max={diff['max_diff']:.2e}, mean={diff['mean_abs_diff']:.2e}")
         elif diff["status"] == "shape_mismatch":
-            lines.append(
-                f"[SHAPE] {diff['name']}: ours={diff['ours_shape']}, hf={diff['hf_shape']}"
-            )
+            lines.append(f"[SHAPE] {diff['name']}: ours={diff['ours_shape']}, hf={diff['hf_shape']}")
         else:
             lines.append(f"[MISSING] {diff['name']}: ours={diff['ours_shape']}, hf={diff['hf_shape']}")
     return "\n".join(lines)

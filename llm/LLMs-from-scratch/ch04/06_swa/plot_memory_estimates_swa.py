@@ -25,7 +25,7 @@ DTYPE_BYTES = {
 
 
 def convert_bytes_to_gb(n_bytes):
-    return n_bytes / (1000.0 ** 3)
+    return n_bytes / (1000.0**3)
 
 
 def parse_ratio(ratio_str):
@@ -45,30 +45,22 @@ def calc_kv_bytes_total_mha(batch, context_length, emb_dim, n_layers, bytes_per_
     return batch * context_length * emb_dim * 2 * bytes_per_elem * n_layers
 
 
-def calc_kv_bytes_total_gqa(
-    batch, context_length, emb_dim, n_layers, bytes_per_elem, n_kv_groups
-):
+def calc_kv_bytes_total_gqa(batch, context_length, emb_dim, n_layers, bytes_per_elem, n_kv_groups):
     # For GQA, n_kv_heads = n_heads / n_kv_groups
     # => scale the MHA total by 1 / n_kv_groups
     base = calc_kv_bytes_total_mha(batch, context_length, emb_dim, n_layers, bytes_per_elem)
     return base / n_kv_groups
 
 
-def calc_kv_bytes_total_mha_swa(
-    batch, context_length, emb_dim, n_layers, bytes_per_elem, window, swa_ratio
-):
+def calc_kv_bytes_total_mha_swa(batch, context_length, emb_dim, n_layers, bytes_per_elem, window, swa_ratio):
     # Split layers into SWA vs Full
     a, b = parse_ratio(swa_ratio)
     total_blocks = a + b
     n_swa_layers = int(round(n_layers * (a / total_blocks)))
     n_full_layers = n_layers - n_swa_layers
 
-    total_full = calc_kv_bytes_total_mha(
-        batch, context_length, emb_dim, n_full_layers, bytes_per_elem
-    )
-    total_swa = calc_kv_bytes_total_mha(
-        batch, window, emb_dim, n_swa_layers, bytes_per_elem
-    )
+    total_full = calc_kv_bytes_total_mha(batch, context_length, emb_dim, n_full_layers, bytes_per_elem)
+    total_swa = calc_kv_bytes_total_mha(batch, window, emb_dim, n_swa_layers, bytes_per_elem)
     return total_full + total_swa
 
 
@@ -95,28 +87,22 @@ def calc_kv_bytes_total_gqa_swa(
         bytes_per_elem,
         n_kv_groups,
     )
-    total_swa = calc_kv_bytes_total_gqa(
-        batch, window, emb_dim, n_swa_layers, bytes_per_elem, n_kv_groups
-    )
+    total_swa = calc_kv_bytes_total_gqa(batch, window, emb_dim, n_swa_layers, bytes_per_elem, n_kv_groups)
     return total_full + total_swa
 
 
 def main():
-    p = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description="KV-cache vs Context Length — MHA vs GQA with SWA overlays"
+    p = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="KV-cache vs Context Length — MHA vs GQA with SWA overlays"
     )
     p.add_argument("--emb_dim", type=int, required=True)
     p.add_argument("--n_heads", type=int, required=True)
     p.add_argument("--n_layers", type=int, required=True)
     p.add_argument("--batch_size", type=int, default=1)
     p.add_argument("--dtype", choices=DTYPE_BYTES.keys(), default="bf16")
-    p.add_argument(
-        "--sliding_window_size", type=int, required=True, help="SWA window size W"
-    )
+    p.add_argument("--sliding_window_size", type=int, required=True, help="SWA window size W")
     p.add_argument("--swa_ratio", type=str, default="5:1", help="SWA:Full ratio, e.g., 5:1")
-    p.add_argument(
-        "--output", type=Path, default=Path("kv_bytes_vs_context_length.pdf")
-    )
+    p.add_argument("--output", type=Path, default=Path("kv_bytes_vs_context_length.pdf"))
     args = p.parse_args()
 
     batch_size = args.batch_size
@@ -126,12 +112,9 @@ def main():
     bytes_per_elem = DTYPE_BYTES[args.dtype]
 
     kv_groups = 4
-    valid_g4 = (n_heads % kv_groups == 0)
+    valid_g4 = n_heads % kv_groups == 0
 
-    context_lengths = [
-        256, 512, 1024, 2048, 4096, 8192,
-        16384, 32768, 65536, 131072
-    ]
+    context_lengths = [256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072]
 
     series = {
         "MHA (KV total)": [],
@@ -139,14 +122,10 @@ def main():
     }
     if valid_g4:
         series["GQA kv_groups=4 (full)"] = []
-        series[
-            f"SWA on GQA kv_groups=4 (ratio {args.swa_ratio}, W={args.sliding_window_size})"
-        ] = []
+        series[f"SWA on GQA kv_groups=4 (ratio {args.swa_ratio}, W={args.sliding_window_size})"] = []
 
     for L in context_lengths:
-        total_mha = calc_kv_bytes_total_mha(
-            batch_size, L, emb_dim, n_layers, bytes_per_elem
-        )
+        total_mha = calc_kv_bytes_total_mha(batch_size, L, emb_dim, n_layers, bytes_per_elem)
         total_mha_swa = calc_kv_bytes_total_mha_swa(
             batch_size,
             L,
@@ -157,14 +136,10 @@ def main():
             swa_ratio=args.swa_ratio,
         )
         series["MHA (KV total)"].append(convert_bytes_to_gb(total_mha))
-        series[
-            f"SWA on MHA (ratio {args.swa_ratio}, W={args.sliding_window_size})"
-        ].append(convert_bytes_to_gb(total_mha_swa))
+        series[f"SWA on MHA (ratio {args.swa_ratio}, W={args.sliding_window_size})"].append(convert_bytes_to_gb(total_mha_swa))
 
         if valid_g4:
-            total_gqa = calc_kv_bytes_total_gqa(
-                batch_size, L, emb_dim, n_layers, bytes_per_elem, n_kv_groups=kv_groups
-            )
+            total_gqa = calc_kv_bytes_total_gqa(batch_size, L, emb_dim, n_layers, bytes_per_elem, n_kv_groups=kv_groups)
             total_gqa_swa = calc_kv_bytes_total_gqa_swa(
                 batch_size,
                 L,
@@ -176,9 +151,9 @@ def main():
                 swa_ratio=args.swa_ratio,
             )
             series["GQA kv_groups=4 (full)"].append(convert_bytes_to_gb(total_gqa))
-            series[
-                f"SWA on GQA kv_groups=4 (ratio {args.swa_ratio}, W={args.sliding_window_size})"
-            ].append(convert_bytes_to_gb(total_gqa_swa))
+            series[f"SWA on GQA kv_groups=4 (ratio {args.swa_ratio}, W={args.sliding_window_size})"].append(
+                convert_bytes_to_gb(total_gqa_swa)
+            )
 
     plt.figure(figsize=(10, 5))
     x = np.array(context_lengths, dtype=float)
@@ -220,10 +195,7 @@ def main():
     plt.close()
 
     if not valid_g4:
-        print(
-            f"Skipped GQA kv_groups=4 because n_heads={args.n_heads} "
-            "is not divisible by 4."
-        )
+        print(f"Skipped GQA kv_groups=4 because n_heads={args.n_heads} is not divisible by 4.")
     print(f"Saved plot to: {args.output}")
 
 

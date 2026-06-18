@@ -35,6 +35,7 @@ except ImportError:
 
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     pass
@@ -42,8 +43,11 @@ except ImportError:
 try:
     from modules.notifier import notify
 except ImportError:
+
     def notify(msg, level="info", reason=None):
-        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(level, "•")
+        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(
+            level, "•"
+        )
         print(f"  {prefix}  {msg}")
         if reason:
             print(f"     → {reason}")
@@ -52,20 +56,21 @@ except ImportError:
 # ── Config ─────────────────────────────────────────────────────────────────────
 
 POSTING_TIMEZONE = os.getenv("POSTING_TIMEZONE", "America/New_York")
-DISCORD_WEBHOOK  = os.getenv("DISCORD_WEBHOOK_URL", "")
-READY_FILE       = Path("data/ready_to_post.json")
-CONFIG_FILE      = Path("config.json")
-REJECTION_LOG    = Path("data/post_rejections.jsonl")
+DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK_URL", "")
+READY_FILE = Path("data/ready_to_post.json")
+CONFIG_FILE = Path("config.json")
+REJECTION_LOG = Path("data/post_rejections.jsonl")
 
 # Peak posting windows as (start_hour, end_hour) in 24h format
 PEAK_WINDOWS = [
-    (7,  9),   # 7:00 AM – 9:00 AM   morning scroll
+    (7, 9),  # 7:00 AM – 9:00 AM   morning scroll
     (12, 14),  # 12:00 PM – 2:00 PM  lunch break
     (19, 22),  # 7:00 PM – 10:00 PM  prime time
 ]
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
+
 
 def _load_ready() -> dict:
     """Load the ready-to-post list from disk. Returns empty structure if missing."""
@@ -103,7 +108,9 @@ def _auto_posting_config() -> dict:
     return {
         "enabled": bool(auto.get("enabled", False)),
         "review_window_minutes": int(auto.get("review_window_minutes", 30)),
-        "auto_post_if_deadline_missed": bool(auto.get("auto_post_if_deadline_missed", True)),
+        "auto_post_if_deadline_missed": bool(
+            auto.get("auto_post_if_deadline_missed", True)
+        ),
         "require_rejection_reason": bool(auto.get("require_rejection_reason", True)),
         "privacy": str(auto.get("privacy", "PUBLIC_TO_EVERYONE")),
     }
@@ -167,7 +174,7 @@ def _is_peak_now() -> tuple:
       (True,  "7:00 AM – 9:00 AM")
       (False, "Next peak: 12:00 PM")
     """
-    now  = _now()
+    now = _now()
     hour = now.hour
 
     for start_h, end_h in PEAK_WINDOWS:
@@ -182,9 +189,9 @@ def _is_peak_now() -> tuple:
 
 def _next_peak_window() -> str:
     """Return a human-readable string for the next upcoming peak window."""
-    tz        = ZoneInfo(POSTING_TIMEZONE)
-    now       = datetime.now(tz)
-    hour      = now.hour
+    tz = ZoneInfo(POSTING_TIMEZONE)
+    now = datetime.now(tz)
+    hour = now.hour
 
     # Check today's remaining windows
     for start_h, end_h in PEAK_WINDOWS:
@@ -200,7 +207,7 @@ def _next_peak_window() -> str:
 def _fmt_hour(h: int) -> str:
     """Convert 24h integer to readable 12h string. E.g. 19 → '7:00 PM'"""
     period = "AM" if h < 12 else "PM"
-    h12    = h % 12 or 12
+    h12 = h % 12 or 12
     return f"{h12}:00 {period}"
 
 
@@ -231,14 +238,16 @@ def _ensure_auto_post_plan(clip: dict, now: datetime = None) -> dict:
         scheduled = _next_peak_datetime(now)
 
     review_starts = scheduled - timedelta(minutes=auto_cfg["review_window_minutes"])
-    plan.update({
-        "enabled": auto_cfg["enabled"],
-        "status": status,
-        "scheduled_for": scheduled.isoformat(),
-        "review_starts_at": review_starts.isoformat(),
-        "approval_deadline": scheduled.isoformat(),
-        "auto_post_if_deadline_missed": auto_cfg["auto_post_if_deadline_missed"],
-    })
+    plan.update(
+        {
+            "enabled": auto_cfg["enabled"],
+            "status": status,
+            "scheduled_for": scheduled.isoformat(),
+            "review_starts_at": review_starts.isoformat(),
+            "approval_deadline": scheduled.isoformat(),
+            "auto_post_if_deadline_missed": auto_cfg["auto_post_if_deadline_missed"],
+        }
+    )
     clip["auto_post"] = plan
     return plan
 
@@ -258,8 +267,11 @@ def _send_discord(message: str):
         try:
             requests.post(webhook, json={"content": message}, timeout=10)
         except Exception as exc:
-            notify(f"Discord notify failed: {exc}", level="warning",
-                   reason="Check Discord webhook values in .env. Clip still saved locally.")
+            notify(
+                f"Discord notify failed: {exc}",
+                level="warning",
+                reason="Check Discord webhook values in .env. Clip still saved locally.",
+            )
 
 
 def _discord_webhooks() -> list[str]:
@@ -306,6 +318,7 @@ def _record_rejection(clip: dict, reason: str) -> None:
 
 # ── Public API ─────────────────────────────────────────────────────────────────
 
+
 def queue_clip(
     clip_path: str,
     title: str,
@@ -329,26 +342,27 @@ def queue_clip(
     Returns the item dict that was saved.
     """
     data = _load_ready()
-    now  = _now()
+    now = _now()
 
     is_peak, window_info = _is_peak_now()
 
     item = {
-        "id":          str(uuid.uuid4())[:8],
-        "clip_path":   str(clip_path),
-        "title":       title,
-        "hashtags":    hashtags or [],
-        "score":       round(score, 1),
-        "tier":        tier,
-        "status":      "ready",
-        "queued_at":   now.isoformat(),
-        "posted_at":   None,
+        "id": str(uuid.uuid4())[:8],
+        "clip_path": str(clip_path),
+        "title": title,
+        "hashtags": hashtags or [],
+        "score": round(score, 1),
+        "tier": tier,
+        "status": "ready",
+        "queued_at": now.isoformat(),
+        "posted_at": None,
     }
     if tier == "queue":
         _ensure_auto_post_plan(item, now)
 
     try:
         from modules.Multi_Publisher import append_platform_plan, build_platform_plan
+
         platform_plan = build_platform_plan(
             clip_path=clip_path,
             title=title,
@@ -363,7 +377,7 @@ def queue_clip(
         notify(
             f"Multi-platform plan skipped: {exc}",
             level="warning",
-            reason="The main ready-to-post queue was still saved."
+            reason="The main ready-to-post queue was still saved.",
         )
 
     data["clips"].append(item)
@@ -373,10 +387,10 @@ def queue_clip(
         f"Clip saved to post queue  [score {score:.0f}, tier {tier}]",
         level="success",
         reason=f"Title: '{title}'\n"
-               f"     → File: {Path(clip_path).name}\n"
-               f"     → {window_info}\n"
-               f"     → Platform packets: {len(item.get('platform_plan', []))}\n"
-               f"     → Will trigger peak alert: {'YES' if tier == 'queue' else 'no (mid-tier)'}"
+        f"     → File: {Path(clip_path).name}\n"
+        f"     → {window_info}\n"
+        f"     → Platform packets: {len(item.get('platform_plan', []))}\n"
+        f"     → Will trigger peak alert: {'YES' if tier == 'queue' else 'no (mid-tier)'}",
     )
 
     # Only QUEUE tier triggers an immediate peak-window alert.
@@ -397,23 +411,26 @@ def alert_peak_window():
       - By Post_Queue's background checker (if running)
       - Any time you want to manually check: python -m modules.Peak_Hour_Notifier
     """
-    data  = _load_ready()
+    data = _load_ready()
     # Only QUEUE-tier clips wake Billy up. Mid-tier clips are visible in
     # --summary for manual review, but never trigger a Discord ping.
     # Backward compat: clips queued before tier existed have no 'tier' key
     # — treat those as 'queue' so old data still works.
     ready = [c for c in data["clips"] if _is_alertable_clip(c)]
     mid_count = sum(
-        1 for c in data["clips"]
-        if c["status"] == "ready" and c.get("tier") == "mid"
+        1 for c in data["clips"] if c["status"] == "ready" and c.get("tier") == "mid"
     )
     missing_count = sum(
-        1 for c in data["clips"]
+        1
+        for c in data["clips"]
         if c.get("status") == "ready" and not _clip_file_exists(c)
     )
     low_score_count = sum(
-        1 for c in data["clips"]
-        if c.get("status") == "ready" and _clip_file_exists(c) and not _score_clears_floor(c)
+        1
+        for c in data["clips"]
+        if c.get("status") == "ready"
+        and _clip_file_exists(c)
+        and not _score_clears_floor(c)
     )
 
     if not ready:
@@ -422,21 +439,24 @@ def alert_peak_window():
                 "No alertable clips ready",
                 level="info",
                 reason=f"{missing_count} queued clip(s) are missing files on this Mac; "
-                       f"{low_score_count} existing clip(s) are below the current score floor. "
-                       "Queue history was left untouched."
+                f"{low_score_count} existing clip(s) are below the current score floor. "
+                "Queue history was left untouched.",
             )
         elif mid_count:
             notify(
                 f"No QUEUE-tier clips ready — but {mid_count} MID-tier clip(s) sitting on disk",
                 level="info",
                 reason="Mid-tier clips are decent but not great. They live in "
-                       "data/ready_to_post.json with tier='mid'. Browse them manually "
-                       "if you want, or lower quality_tiers.queue_at in config.json "
-                       "to promote more clips into the auto-alert lane."
+                "data/ready_to_post.json with tier='mid'. Browse them manually "
+                "if you want, or lower quality_tiers.queue_at in config.json "
+                "to promote more clips into the auto-alert lane.",
             )
         else:
-            notify("No clips in post queue", level="info",
-                   reason="Process a recording first, or drop an .mp4 into recordings/")
+            notify(
+                "No clips in post queue",
+                level="info",
+                reason="Process a recording first, or drop an .mp4 into recordings/",
+            )
         return
 
     is_peak, window_info = _is_peak_now()
@@ -446,7 +466,7 @@ def alert_peak_window():
             f"Not peak hours yet  ({window_info})",
             level="info",
             reason=f"{len(ready)} clip(s) are ready and waiting. "
-                   "Bolt will alert you when the window opens."
+            "Bolt will alert you when the window opens.",
         )
         return
 
@@ -482,7 +502,7 @@ def alert_peak_window():
     notify(
         f"Peak hour alert sent! {len(ready)} clip(s) are ready.",
         level="success",
-        reason="Check Discord for the full list with titles and file names."
+        reason="Check Discord for the full list with titles and file names.",
     )
 
 
@@ -510,12 +530,18 @@ def alert_review_window(now: datetime = None) -> int:
             changed = True
 
     if count:
-        message = _review_message([c for c in ready if c.get("auto_post", {}).get("status") == "awaiting_approval"])
+        message = _review_message(
+            [
+                c
+                for c in ready
+                if c.get("auto_post", {}).get("status") == "awaiting_approval"
+            ]
+        )
         _send_discord(message)
         notify(
             "Post ready and awaiting your approval.",
             level="success",
-            reason=f"{count} clip(s) are in the pre-peak review window. Approve with !postnow or hold with !dontpost <reason>."
+            reason=f"{count} clip(s) are in the pre-peak review window. Approve with !postnow or hold with !dontpost <reason>.",
         )
 
     if changed:
@@ -555,7 +581,7 @@ def approve_next_clip(clip_id: str = None) -> dict:
             notify(
                 f"Approved clip {clip.get('id')} for auto-post",
                 level="success",
-                reason="Bolt will post at the scheduled peak time, or you can use !postnow to publish immediately."
+                reason="Bolt will post at the scheduled peak time, or you can use !postnow to publish immediately.",
             )
             return clip
     return {}
@@ -575,7 +601,12 @@ def reject_next_clip(reason: str = "", clip_id: str = None) -> dict:
         if clip_id and clip.get("id") != clip_id:
             continue
         plan = _ensure_auto_post_plan(clip, now)
-        if plan.get("status") in {"scheduled", "awaiting_approval", "approved", "publish_failed"}:
+        if plan.get("status") in {
+            "scheduled",
+            "awaiting_approval",
+            "approved",
+            "publish_failed",
+        }:
             clip["status"] = "held"
             clip["held_at"] = now.isoformat()
             clip["hold_reason"] = reason
@@ -587,7 +618,7 @@ def reject_next_clip(reason: str = "", clip_id: str = None) -> dict:
             notify(
                 f"Held clip {clip.get('id')}",
                 level="warning",
-                reason=f"Reason recorded: {reason}"
+                reason=f"Reason recorded: {reason}",
             )
             if reason == "No rejection reason provided yet":
                 _send_discord(
@@ -629,7 +660,7 @@ def override_clip_score(score: float, clip_id: str = None) -> dict:
         notify(
             f"Clip {clip.get('id')} score set to {score:.0f}",
             level="success",
-            reason=f"Tier is now {clip.get('tier')}."
+            reason=f"Tier is now {clip.get('tier')}.",
         )
         return clip
     return {}
@@ -677,22 +708,32 @@ def process_auto_post_queue(now: datetime = None) -> dict:
             stats["review_alerted"] += 1
 
         status = plan.get("status")
-        deadline_missed = status == "awaiting_approval" and now >= deadline and plan.get("auto_post_if_deadline_missed")
+        deadline_missed = (
+            status == "awaiting_approval"
+            and now >= deadline
+            and plan.get("auto_post_if_deadline_missed")
+        )
         approved_due = status == "approved" and now >= deadline
         if deadline_missed or approved_due:
-            result = _publish_clip(clip, now, reason="deadline missed" if deadline_missed else "approved")
+            result = _publish_clip(
+                clip, now, reason="deadline missed" if deadline_missed else "approved"
+            )
             if result.get("success"):
                 stats["posted"] += 1
             else:
                 stats["failed"] += 1
 
     if stats["review_alerted"]:
-        waiting = [c for c in data["clips"] if c.get("auto_post", {}).get("status") == "awaiting_approval"]
+        waiting = [
+            c
+            for c in data["clips"]
+            if c.get("auto_post", {}).get("status") == "awaiting_approval"
+        ]
         _send_discord(_review_message(waiting))
         notify(
             "Post ready and awaiting your approval.",
             level="success",
-            reason=f"{stats['review_alerted']} clip(s) entered the review window."
+            reason=f"{stats['review_alerted']} clip(s) entered the review window.",
         )
 
     _save_ready(data)
@@ -725,7 +766,7 @@ def _publish_clip(clip: dict, now: datetime, reason: str) -> dict:
         notify(
             f"Auto-posted clip {clip.get('id')}",
             level="success",
-            reason=f"Published after {reason}."
+            reason=f"Published after {reason}.",
         )
     else:
         plan["status"] = "publish_failed"
@@ -733,7 +774,7 @@ def _publish_clip(clip: dict, now: datetime, reason: str) -> dict:
         notify(
             f"Auto-post failed for clip {clip.get('id')}",
             level="warning",
-            reason=f"{plan['publish_error']}. Clip remains ready for manual posting or retry."
+            reason=f"{plan['publish_error']}. Clip remains ready for manual posting or retry.",
         )
     return result
 
@@ -748,15 +789,15 @@ def mark_posted(clip_id: str = None):
     This keeps the queue clean so you don't get duplicate alerts.
     """
     data = _load_ready()
-    tz   = ZoneInfo(POSTING_TIMEZONE)
-    now  = datetime.now(tz)
+    tz = ZoneInfo(POSTING_TIMEZONE)
+    now = datetime.now(tz)
     count = 0
 
     for clip in data["clips"]:
         if clip["status"] != "ready":
             continue
         if clip_id is None or clip["id"] == clip_id:
-            clip["status"]    = "posted"
+            clip["status"] = "posted"
             clip["posted_at"] = now.isoformat()
             count += 1
 
@@ -764,7 +805,7 @@ def mark_posted(clip_id: str = None):
     notify(
         f"Marked {count} clip(s) as posted ✓",
         level="success",
-        reason="Queue updated. Run again after your next session to clear new clips."
+        reason="Queue updated. Run again after your next session to clear new clips.",
     )
     return count
 
@@ -781,13 +822,15 @@ def reset_queue() -> Path:
     archive_path = READY_FILE.with_name(f"ready_to_post.archive-{timestamp}.json")
 
     if READY_FILE.exists():
-        archive_path.write_text(READY_FILE.read_text(encoding="utf-8"), encoding="utf-8")
+        archive_path.write_text(
+            READY_FILE.read_text(encoding="utf-8"), encoding="utf-8"
+        )
 
     _save_ready({"clips": []})
     notify(
         "Post queue reset",
         level="success",
-        reason=f"Archived old queue to {archive_path}. Clip files were not touched."
+        reason=f"Archived old queue to {archive_path}. Clip files were not touched.",
     )
     return archive_path
 
@@ -798,16 +841,26 @@ def queue_summary() -> dict:
     clips = data["clips"]
     ready = [c for c in clips if c.get("status") == "ready"]
     return {
-        "ready":  sum(1 for c in ready if _is_alertable_clip(c)),
+        "ready": sum(1 for c in ready if _is_alertable_clip(c)),
         "ready_total": len(ready),
-        "awaiting_approval": sum(1 for c in ready if c.get("auto_post", {}).get("status") == "awaiting_approval"),
-        "approved": sum(1 for c in ready if c.get("auto_post", {}).get("status") == "approved"),
+        "awaiting_approval": sum(
+            1
+            for c in ready
+            if c.get("auto_post", {}).get("status") == "awaiting_approval"
+        ),
+        "approved": sum(
+            1 for c in ready if c.get("auto_post", {}).get("status") == "approved"
+        ),
         "held": sum(1 for c in clips if c.get("status") == "held"),
-        "publish_failed": sum(1 for c in ready if c.get("auto_post", {}).get("status") == "publish_failed"),
+        "publish_failed": sum(
+            1 for c in ready if c.get("auto_post", {}).get("status") == "publish_failed"
+        ),
         "missing": sum(1 for c in ready if not _clip_file_exists(c)),
-        "below_floor": sum(1 for c in ready if _clip_file_exists(c) and not _score_clears_floor(c)),
+        "below_floor": sum(
+            1 for c in ready if _clip_file_exists(c) and not _score_clears_floor(c)
+        ),
         "posted": sum(1 for c in clips if c.get("status") == "posted"),
-        "total":  len(clips),
+        "total": len(clips),
     }
 
 
@@ -815,6 +868,7 @@ def queue_summary() -> dict:
 
 if __name__ == "__main__":
     import sys
+
     args = sys.argv[1:]
 
     if "--mark-posted" in args:
@@ -825,15 +879,27 @@ if __name__ == "__main__":
         result = process_auto_post_queue()
         print(json.dumps(result, indent=2))
     elif "--post-now" in args:
-        clip_id = args[args.index("--post-now") + 1] if args.index("--post-now") + 1 < len(args) else None
+        clip_id = (
+            args[args.index("--post-now") + 1]
+            if args.index("--post-now") + 1 < len(args)
+            else None
+        )
         print(json.dumps(post_now(clip_id), indent=2, default=str))
     elif "--approve" in args:
-        clip_id = args[args.index("--approve") + 1] if args.index("--approve") + 1 < len(args) else None
+        clip_id = (
+            args[args.index("--approve") + 1]
+            if args.index("--approve") + 1 < len(args)
+            else None
+        )
         print(json.dumps(approve_next_clip(clip_id), indent=2, default=str))
     elif "--reject" in args:
         idx = args.index("--reject")
-        clip_id = args[idx + 1] if idx + 1 < len(args) and not args[idx + 1].startswith("--") else None
-        reason = " ".join(args[idx + 2:] if clip_id else args[idx + 1:])
+        clip_id = (
+            args[idx + 1]
+            if idx + 1 < len(args) and not args[idx + 1].startswith("--")
+            else None
+        )
+        reason = " ".join(args[idx + 2 :] if clip_id else args[idx + 1 :])
         print(json.dumps(reject_next_clip(reason, clip_id), indent=2, default=str))
     elif "--reset-queue" in args:
         reset_queue()
@@ -848,12 +914,16 @@ if __name__ == "__main__":
             f"{s['approved']} approved, {s['held']} held, {s['publish_failed']} failed\n"
         )
         if s["missing"] or s["below_floor"]:
-            print(f"      ignored: {s['missing']} missing file(s), {s['below_floor']} below score floor\n")
+            print(
+                f"      ignored: {s['missing']} missing file(s), {s['below_floor']} below score floor\n"
+            )
     else:
         # Default: check peak hours and alert if applicable
         is_peak, info = _is_peak_now()
         print(f"\n  🕐  Current time zone: {POSTING_TIMEZONE}")
         print(f"  {'🔥 PEAK TIME' if is_peak else '💤 Off-peak'}  —  {info}")
         s = queue_summary()
-        print(f"  📋  Post Queue: {s['ready']} alertable / {s['ready_total']} ready row(s)\n")
+        print(
+            f"  📋  Post Queue: {s['ready']} alertable / {s['ready_total']} ready row(s)\n"
+        )
         alert_peak_window()

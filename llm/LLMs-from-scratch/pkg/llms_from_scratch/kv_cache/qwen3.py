@@ -3,13 +3,18 @@
 #   - https://www.manning.com/books/build-a-large-language-model-from-scratch
 # Code: https://github.com/rasbt/LLMs-from-scratch
 
-from .utils import KVCache   # noqa: F401
-from ..qwen3 import (   # noqa: F401
-    QWEN_CONFIG_06_B, QWEN3_CONFIG_1_7B, QWEN3_CONFIG_4B,
-    QWEN3_CONFIG_8B, QWEN3_CONFIG_14B, QWEN3_CONFIG_32B,
-    Qwen3Tokenizer, load_weights_into_qwen,
+from .utils import KVCache  # noqa: F401
+from ..qwen3 import (  # noqa: F401
+    QWEN_CONFIG_06_B,
+    QWEN3_CONFIG_1_7B,
+    QWEN3_CONFIG_4B,
+    QWEN3_CONFIG_8B,
+    QWEN3_CONFIG_14B,
+    QWEN3_CONFIG_32B,
+    Qwen3Tokenizer,
+    load_weights_into_qwen,
     download_from_huggingface,
-    download_from_huggingface_from_snapshots
+    download_from_huggingface_from_snapshots,
 )
 
 import torch
@@ -34,11 +39,7 @@ class Qwen3Model(nn.Module):
             head_dim = cfg["emb_dim"] // cfg["n_heads"]
         else:
             head_dim = cfg["head_dim"]
-        cos, sin = compute_rope_params(
-            head_dim=head_dim,
-            theta_base=cfg["rope_base"],
-            context_length=cfg["context_length"]
-        )
+        cos, sin = compute_rope_params(head_dim=head_dim, theta_base=cfg["rope_base"], context_length=cfg["context_length"])
         self.register_buffer("cos", cos, persistent=False)
         self.register_buffer("sin", sin, persistent=False)
         self.cfg = cfg
@@ -54,22 +55,16 @@ class Qwen3Model(nn.Module):
             pos_start = self.current_pos
             pos_end = pos_start + num_tokens
             self.current_pos = pos_end
-            mask = torch.triu(
-                torch.ones(pos_end, pos_end, device=x.device, dtype=torch.bool), diagonal=1
-            )[pos_start:pos_end, :pos_end]
+            mask = torch.triu(torch.ones(pos_end, pos_end, device=x.device, dtype=torch.bool), diagonal=1)[pos_start:pos_end, :pos_end]
         else:
             pos_start = 0  # Not strictly necessary but helps torch.compile
-            mask = torch.triu(
-                torch.ones(num_tokens, num_tokens, device=x.device, dtype=torch.bool), diagonal=1
-            )
+            mask = torch.triu(torch.ones(num_tokens, num_tokens, device=x.device, dtype=torch.bool), diagonal=1)
         # Shape (1, 1, num_tokens, num_tokens) to broadcast across batch and heads
         mask = mask[None, None, :, :]
 
         for i, block in enumerate(self.trf_blocks):
             blk_cache = cache.get(i) if cache else None
-            x, new_blk_cache = block(x, mask, self.cos, self.sin,
-                                     start_pos=pos_start,
-                                     cache=blk_cache)
+            x, new_blk_cache = block(x, mask, self.cos, self.sin, start_pos=pos_start, cache=blk_cache)
             if cache is not None:
                 cache.update(i, new_blk_cache)
 
@@ -90,7 +85,7 @@ class TransformerBlock(nn.Module):
             head_dim=cfg["head_dim"],
             num_kv_groups=cfg["n_kv_groups"],
             qk_norm=cfg["qk_norm"],
-            dtype=cfg["dtype"]
+            dtype=cfg["dtype"],
         )
         if "num_experts" in cfg and cfg["num_experts"] > 0:
             self.ff = MoEFeedForward(cfg)
@@ -137,12 +132,15 @@ class MoEFeedForward(nn.Module):
         self.emb_dim = cfg["emb_dim"]
         self.gate = nn.Linear(cfg["emb_dim"], cfg["num_experts"], bias=False, dtype=cfg["dtype"])
 
-        self.fc1 = nn.ModuleList([nn.Linear(cfg["emb_dim"], cfg["moe_intermediate_size"], bias=False, dtype=cfg["dtype"])
-                                  for _ in range(cfg["num_experts"])])
-        self.fc2 = nn.ModuleList([nn.Linear(cfg["emb_dim"], cfg["moe_intermediate_size"], bias=False, dtype=cfg["dtype"])
-                                  for _ in range(cfg["num_experts"])])
-        self.fc3 = nn.ModuleList([nn.Linear(cfg["moe_intermediate_size"], cfg["emb_dim"], bias=False, dtype=cfg["dtype"])
-                                  for _ in range(cfg["num_experts"])])
+        self.fc1 = nn.ModuleList(
+            [nn.Linear(cfg["emb_dim"], cfg["moe_intermediate_size"], bias=False, dtype=cfg["dtype"]) for _ in range(cfg["num_experts"])]
+        )
+        self.fc2 = nn.ModuleList(
+            [nn.Linear(cfg["emb_dim"], cfg["moe_intermediate_size"], bias=False, dtype=cfg["dtype"]) for _ in range(cfg["num_experts"])]
+        )
+        self.fc3 = nn.ModuleList(
+            [nn.Linear(cfg["moe_intermediate_size"], cfg["emb_dim"], bias=False, dtype=cfg["dtype"]) for _ in range(cfg["num_experts"])]
+        )
 
     def forward(self, x):
         scores = self.gate(x)  # (b, seq_len, num_experts)
@@ -183,9 +181,7 @@ class MoEFeedForward(nn.Module):
 
 
 class GroupedQueryAttention(nn.Module):
-    def __init__(
-        self, d_in, num_heads, num_kv_groups, head_dim=None, qk_norm=False, dtype=None
-    ):
+    def __init__(self, d_in, num_heads, num_kv_groups, head_dim=None, qk_norm=False, dtype=None):
         super().__init__()
         assert num_heads % num_kv_groups == 0, "num_heads must be divisible by num_kv_groups"
 
@@ -217,8 +213,8 @@ class GroupedQueryAttention(nn.Module):
 
         # Apply projections
         queries = self.W_query(x)  # (b, num_tokens, num_heads * head_dim)
-        keys = self.W_key(x)       # (b, num_tokens, num_kv_groups * head_dim)
-        values = self.W_value(x)   # (b, num_tokens, num_kv_groups * head_dim)
+        keys = self.W_key(x)  # (b, num_tokens, num_kv_groups * head_dim)
+        values = self.W_value(x)  # (b, num_tokens, num_kv_groups * head_dim)
 
         # Reshape
         queries = queries.view(b, num_tokens, self.num_heads, self.head_dim).transpose(1, 2)
@@ -287,11 +283,11 @@ def apply_rope(x, cos, sin, offset=0):
 
     # Split x into first half and second half
     x1 = x[..., : head_dim // 2]  # First half
-    x2 = x[..., head_dim // 2:]  # Second half
+    x2 = x[..., head_dim // 2 :]  # Second half
 
     # Adjust sin and cos shapes
-    cos = cos[offset:offset + seq_len, :].unsqueeze(0).unsqueeze(0)  # Shape: (1, 1, seq_len, head_dim)
-    sin = sin[offset:offset + seq_len, :].unsqueeze(0).unsqueeze(0)
+    cos = cos[offset : offset + seq_len, :].unsqueeze(0).unsqueeze(0)  # Shape: (1, 1, seq_len, head_dim)
+    sin = sin[offset : offset + seq_len, :].unsqueeze(0).unsqueeze(0)
 
     # Apply the rotary transformation
     rotated = torch.cat((-x2, x1), dim=-1)

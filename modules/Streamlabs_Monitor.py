@@ -31,20 +31,22 @@ from typing import Callable, Optional
 
 try:
     import socketio as sio_lib
+
     _SIO_OK = True
 except ImportError:
     _SIO_OK = False
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # ── Config ─────────────────────────────────────────────────────────────────────
-SOCKET_TOKEN    = os.getenv("STREAMLABS_SOCKET_TOKEN", "")
-STREAMLABS_URL  = "https://sockets.streamlabs.com"
+SOCKET_TOKEN = os.getenv("STREAMLABS_SOCKET_TOKEN", "")
+STREAMLABS_URL = "https://sockets.streamlabs.com"
 
-MIN_RAID_SIZE   = int(os.getenv("MIN_RAID_SIZE",    "5"))
-MIN_BITS        = int(os.getenv("MIN_BITS",         "100"))
-MIN_DONATION    = float(os.getenv("MIN_DONATION_USD", "1.00"))
+MIN_RAID_SIZE = int(os.getenv("MIN_RAID_SIZE", "5"))
+MIN_BITS = int(os.getenv("MIN_BITS", "100"))
+MIN_DONATION = float(os.getenv("MIN_DONATION_USD", "1.00"))
 
 log = logging.getLogger(__name__)
 
@@ -66,14 +68,14 @@ class StreamlabsMonitor:
     def __init__(
         self,
         on_highlight: Optional[Callable] = None,
-        on_event:     Optional[Callable] = None,
+        on_event: Optional[Callable] = None,
     ):
         self.on_highlight = on_highlight or (lambda *a, **kw: None)
-        self.on_event     = on_event     or (lambda *a, **kw: None)
-        self._sio         = None
-        self._thread      = None
-        self._running     = False
-        self._connected   = False
+        self.on_event = on_event or (lambda *a, **kw: None)
+        self._sio = None
+        self._thread = None
+        self._running = False
+        self._connected = False
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -97,7 +99,7 @@ class StreamlabsMonitor:
             return False
 
         self._running = True
-        self._thread  = threading.Thread(
+        self._thread = threading.Thread(
             target=self._run, name="streamlabs-monitor", daemon=True
         )
         self._thread.start()
@@ -141,12 +143,12 @@ class StreamlabsMonitor:
             self._register_handlers()
             url = f"{STREAMLABS_URL}?token={SOCKET_TOKEN}"
             self._sio.connect(url, transports=["websocket"])
-            self._sio.wait()          # blocks until disconnect
+            self._sio.wait()  # blocks until disconnect
         except Exception as exc:
             log.error(f"[Streamlabs] Connection error: {exc}")
         finally:
             self._connected = False
-            self._running   = False
+            self._running = False
 
     def _register_handlers(self):
         sio = self._sio
@@ -173,8 +175,8 @@ class StreamlabsMonitor:
         """Route incoming Streamlabs event to the right handler."""
         try:
             event_type = raw.get("type", "")
-            message    = raw.get("message", [{}])
-            payload    = message[0] if isinstance(message, list) and message else {}
+            message = raw.get("message", [{}])
+            payload = message[0] if isinstance(message, list) and message else {}
 
             # Always fire the generic callback
             self.on_event(event_type, payload)
@@ -200,62 +202,58 @@ class StreamlabsMonitor:
     # ── Event handlers ─────────────────────────────────────────────────────────
 
     def _handle_donation(self, p: dict):
-        name   = p.get("name", "Anonymous")
+        name = p.get("name", "Anonymous")
         amount = float(p.get("amount", 0))
-        msg    = p.get("message", "")
-        label  = f"💸 Donation ${amount:.2f} from {name}"
+        msg = p.get("message", "")
+        label = f"💸 Donation ${amount:.2f} from {name}"
         if msg:
             label += f': "{msg}"'
 
         print(f"  [Streamlabs] {label}")
 
         if amount >= MIN_DONATION:
-            self.on_highlight("donation", label, {
-                "donor": name, "amount": amount, "message": msg
-            })
+            self.on_highlight(
+                "donation", label, {"donor": name, "amount": amount, "message": msg}
+            )
 
     def _handle_raid(self, p: dict):
         raider = p.get("name", "Unknown")
-        count  = int(p.get("raiders", p.get("viewerCount", 0)))
-        label  = f"⚔️ Raid! {raider} brought {count} viewers"
+        count = int(p.get("raiders", p.get("viewerCount", 0)))
+        label = f"⚔️ Raid! {raider} brought {count} viewers"
 
         print(f"  [Streamlabs] {label}")
 
         if count >= MIN_RAID_SIZE:
-            self.on_highlight("raid", label, {
-                "raider": raider, "count": count
-            })
+            self.on_highlight("raid", label, {"raider": raider, "count": count})
 
     def _handle_subscription(self, p: dict):
-        name    = p.get("name", "Unknown")
-        plan    = p.get("sub_plan_name", p.get("sub_plan", ""))
-        gifted  = p.get("gifter_display_name", "")
+        name = p.get("name", "Unknown")
+        plan = p.get("sub_plan_name", p.get("sub_plan", ""))
+        gifted = p.get("gifter_display_name", "")
         if gifted:
             label = f"🎁 Gift sub from {gifted} → {name} ({plan})"
         else:
             label = f"⭐ New sub: {name} ({plan})"
 
         print(f"  [Streamlabs] {label}")
-        self.on_highlight("subscription", label, {
-            "subscriber": name, "plan": plan, "gifter": gifted
-        })
+        self.on_highlight(
+            "subscription", label, {"subscriber": name, "plan": plan, "gifter": gifted}
+        )
 
     def _handle_resub(self, p: dict):
-        name   = p.get("name", "Unknown")
+        name = p.get("name", "Unknown")
         months = p.get("months", 1)
-        label  = f"🔄 Resub: {name} — {months} months"
+        label = f"🔄 Resub: {name} — {months} months"
 
         print(f"  [Streamlabs] {label}")
         # Only fire on milestone resubs (every 3 months, 6, 12, etc.)
         if int(months) % 3 == 0:
-            self.on_highlight("resub", label, {
-                "subscriber": name, "months": months
-            })
+            self.on_highlight("resub", label, {"subscriber": name, "months": months})
 
     def _handle_bits(self, p: dict):
-        name  = p.get("name", "Anonymous")
-        bits  = int(p.get("amount", p.get("bits_used", 0)))
-        msg   = p.get("message", p.get("chat_message", ""))
+        name = p.get("name", "Anonymous")
+        bits = int(p.get("amount", p.get("bits_used", 0)))
+        msg = p.get("message", p.get("chat_message", ""))
         label = f"💎 {bits} bits from {name}"
         if msg:
             label += f': "{msg}"'
@@ -263,21 +261,19 @@ class StreamlabsMonitor:
         print(f"  [Streamlabs] {label}")
 
         if bits >= MIN_BITS:
-            self.on_highlight("bits", label, {
-                "viewer": name, "bits": bits, "message": msg
-            })
+            self.on_highlight(
+                "bits", label, {"viewer": name, "bits": bits, "message": msg}
+            )
 
     def _handle_host(self, p: dict):
-        hoster  = p.get("name", "Unknown")
+        hoster = p.get("name", "Unknown")
         viewers = int(p.get("viewers", 0))
-        label   = f"📡 Host: {hoster} ({viewers} viewers)"
+        label = f"📡 Host: {hoster} ({viewers} viewers)"
 
         print(f"  [Streamlabs] {label}")
 
         if viewers >= MIN_RAID_SIZE:
-            self.on_highlight("host", label, {
-                "hoster": hoster, "viewers": viewers
-            })
+            self.on_highlight("host", label, {"hoster": hoster, "viewers": viewers})
 
 
 # ══════════════════════════════════════════════════════════════════════════════

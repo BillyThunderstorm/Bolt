@@ -30,6 +30,7 @@ from datetime import datetime, timezone, timedelta
 try:
     from .notifier import notify
 except ImportError:
+
     def notify(msg, level="info", reason=None):
         print(f"  [{level.upper()}] {msg}")
         if reason:
@@ -38,13 +39,14 @@ except ImportError:
 
 # -- Paths ---------------------------------------------------------------------
 
-_ROOT       = Path(__file__).parent.parent
+_ROOT = Path(__file__).parent.parent
 CREDENTIALS = _ROOT / "credentials.json"
-TOKEN_PATH  = _ROOT / "data" / "google_token.json"
-SCOPES      = ["https://www.googleapis.com/auth/calendar.readonly"]
+TOKEN_PATH = _ROOT / "data" / "google_token.json"
+SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
 
 # -- Auth ----------------------------------------------------------------------
+
 
 def _get_service():
     try:
@@ -56,7 +58,7 @@ def _get_service():
         notify(
             "Google Calendar libraries not installed",
             level="warning",
-            reason="Run: pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib"
+            reason="Run: pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib",
         )
         return None
 
@@ -64,7 +66,7 @@ def _get_service():
         notify(
             "credentials.json not found",
             level="error",
-            reason=f"Expected at: {CREDENTIALS}"
+            reason=f"Expected at: {CREDENTIALS}",
         )
         return None
 
@@ -82,30 +84,39 @@ def _get_service():
         if creds and creds.expired and creds.refresh_token:
             try:
                 creds.refresh(Request())
-                notify("Google Calendar token refreshed", level="success",
-                       reason="Auto-renewed silently. No action needed.")
+                notify(
+                    "Google Calendar token refreshed",
+                    level="success",
+                    reason="Auto-renewed silently. No action needed.",
+                )
             except Exception as e:
-                notify(f"Token refresh failed: {e} -- re-authenticating", level="warning")
+                notify(
+                    f"Token refresh failed: {e} -- re-authenticating", level="warning"
+                )
                 creds = None
 
         if not creds or not creds.valid:
             notify(
                 "Opening browser for Google Calendar auth...",
                 level="info",
-                reason="This only happens once. Sign in and click Allow."
+                reason="This only happens once. Sign in and click Allow.",
             )
-            flow  = InstalledAppFlow.from_client_secrets_file(str(CREDENTIALS), SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(str(CREDENTIALS), SCOPES)
             creds = flow.run_local_server(port=0)
 
         with open(TOKEN_PATH, "w") as f:
             f.write(creds.to_json())
-        notify("Google Calendar token saved", level="success",
-               reason=f"Saved to {TOKEN_PATH} -- future runs won't need browser auth.")
+        notify(
+            "Google Calendar token saved",
+            level="success",
+            reason=f"Saved to {TOKEN_PATH} -- future runs won't need browser auth.",
+        )
 
     return build("calendar", "v3", credentials=creds)
 
 
 # -- Core functions ------------------------------------------------------------
+
 
 def get_todays_events() -> list:
     service = _get_service()
@@ -113,19 +124,25 @@ def get_todays_events() -> list:
         return []
 
     local_tz = datetime.now().astimezone().tzinfo
-    today    = datetime.now(local_tz).date()
+    today = datetime.now(local_tz).date()
     start_dt = datetime(today.year, today.month, today.day, tzinfo=local_tz).isoformat()
-    end_dt   = (datetime(today.year, today.month, today.day, tzinfo=local_tz)
-                + timedelta(days=1)).isoformat()
+    end_dt = (
+        datetime(today.year, today.month, today.day, tzinfo=local_tz)
+        + timedelta(days=1)
+    ).isoformat()
 
     try:
-        result = service.events().list(
-            calendarId="primary",
-            timeMin=start_dt,
-            timeMax=end_dt,
-            singleEvents=True,
-            orderBy="startTime",
-        ).execute()
+        result = (
+            service.events()
+            .list(
+                calendarId="primary",
+                timeMin=start_dt,
+                timeMax=end_dt,
+                singleEvents=True,
+                orderBy="startTime",
+            )
+            .execute()
+        )
         return [_parse_event(e) for e in result.get("items", [])]
     except Exception as e:
         notify(f"Calendar fetch failed: {e}", level="warning")
@@ -140,13 +157,17 @@ def get_upcoming_events(count: int = 5) -> list:
     now = datetime.now(timezone.utc).isoformat()
 
     try:
-        result = service.events().list(
-            calendarId="primary",
-            timeMin=now,
-            maxResults=count,
-            singleEvents=True,
-            orderBy="startTime",
-        ).execute()
+        result = (
+            service.events()
+            .list(
+                calendarId="primary",
+                timeMin=now,
+                maxResults=count,
+                singleEvents=True,
+                orderBy="startTime",
+            )
+            .execute()
+        )
         return [_parse_event(e) for e in result.get("items", [])]
     except Exception as e:
         notify(f"Upcoming events fetch failed: {e}", level="warning")
@@ -157,7 +178,7 @@ def format_for_briefing() -> str:
     if not CREDENTIALS.exists():
         return f"Calendar unavailable: credentials.json not found at {CREDENTIALS}."
 
-    events    = get_todays_events()
+    events = get_todays_events()
     today_str = datetime.now().strftime("%A %B %d").replace(" 0", " ")
 
     if not events:
@@ -181,27 +202,38 @@ def format_for_briefing() -> str:
 
 # -- Helpers -------------------------------------------------------------------
 
+
 def _parse_event(raw: dict) -> dict:
-    title    = raw.get("summary", "(no title)")
+    title = raw.get("summary", "(no title)")
     location = raw.get("location", "")
     start_raw = raw.get("start", {})
-    end_raw   = raw.get("end", {})
+    end_raw = raw.get("end", {})
 
     if "date" in start_raw and "dateTime" not in start_raw:
-        return {"title": title, "start": "All day", "end": "",
-                "location": location, "all_day": True}
+        return {
+            "title": title,
+            "start": "All day",
+            "end": "",
+            "location": location,
+            "all_day": True,
+        }
 
     start_str = _fmt_time(start_raw.get("dateTime", ""))
-    end_str   = _fmt_time(end_raw.get("dateTime", ""))
-    return {"title": title, "start": start_str, "end": end_str,
-            "location": location, "all_day": False}
+    end_str = _fmt_time(end_raw.get("dateTime", ""))
+    return {
+        "title": title,
+        "start": start_str,
+        "end": end_str,
+        "location": location,
+        "all_day": False,
+    }
 
 
 def _fmt_time(iso_str: str) -> str:
     if not iso_str:
         return ""
     try:
-        dt     = datetime.fromisoformat(iso_str)
+        dt = datetime.fromisoformat(iso_str)
         hour12 = dt.hour % 12 or 12
         minute = dt.strftime("%M")
         period = "AM" if dt.hour < 12 else "PM"

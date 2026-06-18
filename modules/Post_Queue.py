@@ -29,6 +29,7 @@ except ImportError:
 
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     pass
@@ -46,12 +47,16 @@ except ImportError:
     # Fallback so the file is importable even if Peak_Hour_Notifier isn't present
     def alert_peak_window():
         print("[PostQueue] Peak_Hour_Notifier not found — no alerts sent")
+
     def process_auto_post_queue():
         return {"review_alerted": 0, "posted": 0, "failed": 0, "held": 0}
+
     def queue_summary():
         return {"ready": 0, "posted": 0, "total": 0}
-    PEAK_WINDOWS      = [(7, 9), (12, 14), (19, 22)]
-    POSTING_TIMEZONE  = os.getenv("POSTING_TIMEZONE", "America/New_York")
+
+    PEAK_WINDOWS = [(7, 9), (12, 14), (19, 22)]
+    POSTING_TIMEZONE = os.getenv("POSTING_TIMEZONE", "America/New_York")
+
     def _is_peak_now():
         return False, "unknown"
 
@@ -62,6 +67,7 @@ CHECK_INTERVAL_MINUTES = int(os.getenv("PEAK_CHECK_INTERVAL_MINUTES", "15"))
 
 
 # ── Public convenience functions (used by bot.py) ─────────────────────────────
+
 
 def add_to_queue(
     clip_path: str,
@@ -85,6 +91,7 @@ def add_to_queue(
         in bot.py and never reach this function.
     """
     from modules.Peak_Hour_Notifier import queue_clip
+
     return queue_clip(clip_path, title, hashtags=hashtags, score=score, tier=tier)
 
 
@@ -94,6 +101,7 @@ def get_summary() -> dict:
 
 
 # ── Background loop ────────────────────────────────────────────────────────────
+
 
 def run_peak_checker():
     """
@@ -109,16 +117,18 @@ def run_peak_checker():
         t = threading.Thread(target=run_peak_checker, daemon=True)
         t.start()
     """
-    tz             = ZoneInfo(POSTING_TIMEZONE)
-    alerted_today  = set()   # set of (date, start_hour) tuples already notified
+    tz = ZoneInfo(POSTING_TIMEZONE)
+    alerted_today = set()  # set of (date, start_hour) tuples already notified
     last_check_day = None
 
-    print(f"[PostQueue] Peak-hour checker started. "
-          f"Checking every {CHECK_INTERVAL_MINUTES} min ({POSTING_TIMEZONE})")
+    print(
+        f"[PostQueue] Peak-hour checker started. "
+        f"Checking every {CHECK_INTERVAL_MINUTES} min ({POSTING_TIMEZONE})"
+    )
 
     while True:
         try:
-            now  = datetime.now(tz)
+            now = datetime.now(tz)
             today = now.date()
 
             # Reset alerts each new day
@@ -173,12 +183,14 @@ if __name__ == "__main__":
         )
         sys.exit(0)
 
-    tz          = ZoneInfo(POSTING_TIMEZONE)
+    tz = ZoneInfo(POSTING_TIMEZONE)
     is_peak, info = _is_peak_now()
     print(f"\n  🕐  {datetime.now(tz).strftime('%I:%M %p')} {POSTING_TIMEZONE}")
     print(f"  {'🔥 Peak time' if is_peak else '💤 Off-peak'}  —  {info}")
     s = get_summary()
-    print(f"  📋  {s['ready']} alertable clip(s) / {s.get('ready_total', s['ready'])} ready row(s)\n")
+    print(
+        f"  📋  {s['ready']} alertable clip(s) / {s.get('ready_total', s['ready'])} ready row(s)\n"
+    )
 
     print("Starting peak-hour checker (Ctrl+C to stop)…\n")
     try:

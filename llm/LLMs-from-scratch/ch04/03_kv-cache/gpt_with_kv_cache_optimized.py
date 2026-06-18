@@ -39,9 +39,7 @@ class MultiHeadAttention(nn.Module):
 
         if use_cache:
             # to prevent self.ptr_cur became negative
-            assert num_tokens <= self.window_size, (
-                f"Input chunk size ({num_tokens}) exceeds KV cache window size ({self.window_size}). "
-            )
+            assert num_tokens <= self.window_size, f"Input chunk size ({num_tokens}) exceeds KV cache window size ({self.window_size}). "
 
         keys_new = self.W_key(x)  # Shape: (b, num_tokens, d_out)
         values_new = self.W_value(x)
@@ -62,9 +60,7 @@ class MultiHeadAttention(nn.Module):
         # NEW
         if use_cache:
             if self.cache_k is None or self.cache_k.size(0) != b:
-                self.cache_k = torch.zeros(b, self.num_heads,
-                                           self.window_size, self.head_dim,
-                                           device=x.device)
+                self.cache_k = torch.zeros(b, self.num_heads, self.window_size, self.head_dim, device=x.device)
                 self.cache_v = torch.zeros_like(self.cache_k)
                 self.ptr_cur = 0  # pointer to next free slot
 
@@ -76,12 +72,12 @@ class MultiHeadAttention(nn.Module):
                 self.cache_v[:, :, :-overflow, :] = self.cache_v[:, :, overflow:, :].clone()
                 self.ptr_cur -= overflow  # pointer after shift
 
-            self.cache_k[:, :, self.ptr_cur:self.ptr_cur + num_tokens, :] = keys_new
-            self.cache_v[:, :, self.ptr_cur:self.ptr_cur + num_tokens, :] = values_new
+            self.cache_k[:, :, self.ptr_cur : self.ptr_cur + num_tokens, :] = keys_new
+            self.cache_v[:, :, self.ptr_cur : self.ptr_cur + num_tokens, :] = values_new
             self.ptr_cur += num_tokens
 
-            keys = self.cache_k[:, :, :self.ptr_cur, :]
-            values = self.cache_v[:, :, :self.ptr_cur, :]
+            keys = self.cache_k[:, :, : self.ptr_cur, :]
+            values = self.cache_v[:, :, : self.ptr_cur, :]
         else:
             keys, values = keys_new, values_new
             self.ptr_cur = 0  # keep pointer sane if you interleave modes
@@ -100,14 +96,14 @@ class MultiHeadAttention(nn.Module):
             # Cached: need to offset the diagonal by (K − num_tokens)
             offset = K - num_tokens  # number of tokens already in cache before this chunk
             row_idx = torch.arange(num_tokens, device=x.device).unsqueeze(1)  # (num_tokens, 1)
-            col_idx = torch.arange(K, device=x.device).unsqueeze(0)           # (1, K)
-            causal_mask = row_idx + offset < col_idx                          # True where j > i+offset
+            col_idx = torch.arange(K, device=x.device).unsqueeze(0)  # (1, K)
+            causal_mask = row_idx + offset < col_idx  # True where j > i+offset
         ####################################################
 
         # Use the mask to fill attention scores
         attn_scores.masked_fill_(causal_mask.unsqueeze(0).unsqueeze(0), -torch.inf)
 
-        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
         attn_weights = self.dropout(attn_weights)
 
         # Shape: (b, num_tokens, num_heads, head_dim)
@@ -123,6 +119,7 @@ class MultiHeadAttention(nn.Module):
     # NEW
     def reset_cache(self):
         self.cache_k, self.cache_v = None, None
+
     ####################################################
 
 
@@ -148,10 +145,7 @@ class GELU(nn.Module):
         super().__init__()
 
     def forward(self, x):
-        return 0.5 * x * (1 + torch.tanh(
-            torch.sqrt(torch.tensor(2.0 / torch.pi)) *
-            (x + 0.044715 * torch.pow(x, 3))
-        ))
+        return 0.5 * x * (1 + torch.tanh(torch.sqrt(torch.tensor(2.0 / torch.pi)) * (x + 0.044715 * torch.pow(x, 3))))
 
 
 class FeedForward(nn.Module):
@@ -177,7 +171,7 @@ class TransformerBlock(nn.Module):
             num_heads=cfg["n_heads"],
             dropout=cfg["drop_rate"],
             qkv_bias=cfg["qkv_bias"],
-            window_size=cfg["kv_window_size"] if "kv_window_size" in cfg else cfg["context_length"]   # NEW
+            window_size=cfg["kv_window_size"] if "kv_window_size" in cfg else cfg["context_length"],  # NEW
         )
         self.ff = FeedForward(cfg)
         self.norm1 = LayerNorm(cfg["emb_dim"])
@@ -219,15 +213,14 @@ class GPTModel(nn.Module):
         #    *[TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
         ####################################################
         # NEW
-        self.trf_blocks = nn.ModuleList(
-            [TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
+        self.trf_blocks = nn.ModuleList([TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
 
         self.ptr_current_pos = 0
         ####################################################
 
         self.final_norm = LayerNorm(cfg["emb_dim"])
         self.out_head = nn.Linear(cfg["emb_dim"], cfg["vocab_size"], bias=False)
-        self.kv_window_size = cfg["kv_window_size"]  if "kv_window_size" in cfg else cfg["context_length"]
+        self.kv_window_size = cfg["kv_window_size"] if "kv_window_size" in cfg else cfg["context_length"]
 
     def forward(self, in_idx, use_cache=False):
         batch_size, seq_len = in_idx.shape
@@ -272,13 +265,13 @@ class GPTModel(nn.Module):
         for blk in self.trf_blocks:
             blk.att.reset_cache()
         self.ptr_current_pos = 0
+
     ####################################################
 
 
 def generate_text_simple(model, idx, max_new_tokens, context_size):
     # idx is (B, T) array of indices in the current context
     for _ in range(max_new_tokens):
-
         # Crop current context if it exceeds the supported context size
         # E.g., if LLM supports only 5 tokens, and the context size is 10
         # then only the last 5 tokens are used as context
@@ -318,7 +311,7 @@ def generate_text_simple_cached(model, idx, max_new_tokens, context_size=None, u
 
             # prefill to handle input_tokens_length > kv_window_size
             for i in range(0, input_tokens_length, kv_window_size):
-                chunk = input_tokens[:, i:i+kv_window_size]
+                chunk = input_tokens[:, i : i + kv_window_size]
                 logits = model(chunk, use_cache=True)
 
             # can't generate more than ctx_len of result
@@ -337,19 +330,21 @@ def generate_text_simple_cached(model, idx, max_new_tokens, context_size=None, u
                 idx = torch.cat([idx, next_idx], dim=1)
 
     return idx
+
+
 ####################################################
 
 
 def main():
     GPT_CONFIG_124M = {
-        "vocab_size": 50257,     # Vocabulary size
+        "vocab_size": 50257,  # Vocabulary size
         "context_length": 1024,  # Context length
-        "emb_dim": 768,          # Embedding dimension
-        "n_heads": 12,           # Number of attention heads
-        "n_layers": 12,          # Number of layers
-        "drop_rate": 0.1,        # Dropout rate
-        "qkv_bias": False,       # Query-Key-Value bias
-        "kv_window_size": 1024   # NEW: KV cache window size
+        "emb_dim": 768,  # Embedding dimension
+        "n_heads": 12,  # Number of attention heads
+        "n_layers": 12,  # Number of layers
+        "drop_rate": 0.1,  # Dropout rate
+        "qkv_bias": False,  # Query-Key-Value bias
+        "kv_window_size": 1024,  # NEW: KV cache window size
     }
 
     torch.manual_seed(123)
@@ -364,7 +359,7 @@ def main():
     encoded = tokenizer.encode(start_context)
     encoded_tensor = torch.tensor(encoded, device=device).unsqueeze(0)
 
-    print(f"\n{50*'='}\n{22*' '}IN\n{50*'='}")
+    print(f"\n{50 * '='}\n{22 * ' '}IN\n{50 * '='}")
     print("\nInput text:", start_context)
     print("Encoded input text:", encoded)
     print("encoded_tensor.shape:", encoded_tensor.shape)
@@ -395,16 +390,16 @@ def main():
 
     decoded_text = tokenizer.decode(token_ids.squeeze(0).tolist())
 
-    print(f"\n\n{50*'='}\n{22*' '}OUT\n{50*'='}")
+    print(f"\n\n{50 * '='}\n{22 * ' '}OUT\n{50 * '='}")
     print("\nOutput:", token_ids)
     print("Output length:", len(token_ids[0]))
     print("Output text:", decoded_text)
 
     print(f"\nTime: {total_time:.2f} sec")
-    print(f"{int(len(token_ids[0])/total_time)} tokens/sec")
+    print(f"{int(len(token_ids[0]) / total_time)} tokens/sec")
     if torch.cuda.is_available():
         max_mem_bytes = torch.cuda.max_memory_allocated()
-        max_mem_gb = max_mem_bytes / (1024 ** 3)
+        max_mem_gb = max_mem_bytes / (1024**3)
         print(f"Max memory allocated: {max_mem_gb:.2f} GB")
 
 

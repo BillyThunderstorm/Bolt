@@ -21,12 +21,9 @@ def test_pretraining():
 
     os.makedirs(folder_path, exist_ok=True)
 
-    with open(folder_path/file_name, "w") as file:
+    with open(folder_path / file_name, "w") as file:
         file.write(content)
 
-    result = subprocess.run(
-        ["python", "pretraining_simple.py", "--debug", "true"],
-        capture_output=True, text=True
-    )
+    result = subprocess.run(["python", "pretraining_simple.py", "--debug", "true"], capture_output=True, text=True)
     print(result.stdout)
     assert "Maximum GPU memory allocated" in result.stdout

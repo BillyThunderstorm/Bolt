@@ -15,11 +15,16 @@ from modules.Config_Loader import load_config
 config = load_config()
 _CFG = config.get("highlight", config)
 
-WINDOW_SEC    = 2.0
-HOP_SEC       = 0.5
-SPIKE_MULT    = float(_CFG.get("energy_multiplier", os.getenv("SPIKE_MULTIPLIER", "2.8")))
-MIN_GAP_SEC   = float(_CFG.get("min_gap_seconds", 15.0))
-SENSITIVITY   = float(_CFG.get("highlight_sensitivity",_CFG.get("sensitivity", os.getenv("HIGHLIGHT_SENSITIVITY", "0.7"))))
+WINDOW_SEC = 2.0
+HOP_SEC = 0.5
+SPIKE_MULT = float(_CFG.get("energy_multiplier", os.getenv("SPIKE_MULTIPLIER", "2.8")))
+MIN_GAP_SEC = float(_CFG.get("min_gap_seconds", 15.0))
+SENSITIVITY = float(
+    _CFG.get(
+        "highlight_sensitivity",
+        _CFG.get("sensitivity", os.getenv("HIGHLIGHT_SENSITIVITY", "0.7")),
+    )
+)
 
 # ── Hard confidence floor ─────────────────────────────────────────────────────
 # An audio spike that BARELY crosses the energy threshold has near-zero
@@ -34,8 +39,8 @@ MIN_CONFIDENCE = float(_CFG.get("min_confidence", 0.15))
 
 @dataclass
 class HighlightEvent:
-    timestamp:  float
-    type:       str   = "audio_spike"
+    timestamp: float
+    type: str = "audio_spike"
     confidence: float = 0.0
 
     # ── Clip_Generator uses these names ──────────────────────────────────────
@@ -43,9 +48,9 @@ class HighlightEvent:
     # was causing a crash because Clip_Generator couldn't find the attribute.
     # "score" maps confidence (0–1) to a 0–100 scale for ranking.
     # "duration" is the size of the detected audio spike window in seconds.
-    trigger:    str   = ""
-    score:      float = 0.0
-    duration:   float = 2.0   # seconds — the spike window Clip_Generator pads around
+    trigger: str = ""
+    score: float = 0.0
+    duration: float = 2.0  # seconds — the spike window Clip_Generator pads around
 
     def __post_init__(self):
         # Keep trigger/score in sync with type/confidence automatically.
@@ -73,21 +78,29 @@ def detect_highlights(video_path: str, sensitivity: float = SENSITIVITY) -> list
 
         result = subprocess.run(
             [
-                "ffmpeg", "-y",                     # overwrite if exists
-                "-i", video_path,                   # input video
-                "-map", "0:a:0",
-                "-vn",                              # no video — audio only
-                "-ac", "1",                         # mono
-                "-ar", "22050",                     # match librosa default
-                "-f", "wav",                        # output format
+                "ffmpeg",
+                "-y",  # overwrite if exists
+                "-i",
+                video_path,  # input video
+                "-map",
+                "0:a:0",
+                "-vn",  # no video — audio only
+                "-ac",
+                "1",  # mono
+                "-ar",
+                "22050",  # match librosa default
+                "-f",
+                "wav",  # output format
                 tmp_path,
             ],
             stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,              # suppress opus timestamp spam
+            stderr=subprocess.DEVNULL,  # suppress opus timestamp spam
         )
 
         if result.returncode != 0:
-            print(f"[HighlightDetector] ffmpeg failed to extract audio from: {video_path}")
+            print(
+                f"[HighlightDetector] ffmpeg failed to extract audio from: {video_path}"
+            )
             return []
 
         y, sr = librosa.load(tmp_path, sr=22050, mono=True)
@@ -100,16 +113,16 @@ def detect_highlights(video_path: str, sensitivity: float = SENSITIVITY) -> list
         except Exception:
             pass
 
-    hop    = int(HOP_SEC * sr)
-    win    = int(WINDOW_SEC * sr)
-    rms    = librosa.feature.rms(y=y, frame_length=win, hop_length=hop)[0]
-    times  = librosa.frames_to_time(range(len(rms)), sr=sr, hop_length=hop)
+    hop = int(HOP_SEC * sr)
+    win = int(WINDOW_SEC * sr)
+    rms = librosa.feature.rms(y=y, frame_length=win, hop_length=hop)[0]
+    times = librosa.frames_to_time(range(len(rms)), sr=sr, hop_length=hop)
 
-    baseline   = float(np.median(rms))
-    threshold  = baseline * (SPIKE_MULT * (1.0 - sensitivity + 0.5))
-    last_ts    = -MIN_GAP_SEC
-    events     = []
-    rejected   = 0   # count how many barely-crossing spikes we dropped
+    baseline = float(np.median(rms))
+    threshold = baseline * (SPIKE_MULT * (1.0 - sensitivity + 0.5))
+    last_ts = -MIN_GAP_SEC
+    events = []
+    rejected = 0  # count how many barely-crossing spikes we dropped
 
     for i, (t, level) in enumerate(zip(times, rms)):
         if level >= threshold and (t - last_ts) >= MIN_GAP_SEC:
@@ -121,15 +134,19 @@ def detect_highlights(video_path: str, sensitivity: float = SENSITIVITY) -> list
                 rejected += 1
                 continue
 
-            events.append(HighlightEvent(
-                timestamp  = float(t),
-                type       = "audio_spike",
-                confidence = round(confidence, 3),
-            ))
+            events.append(
+                HighlightEvent(
+                    timestamp=float(t),
+                    type="audio_spike",
+                    confidence=round(confidence, 3),
+                )
+            )
             last_ts = t
 
     if rejected:
-        print(f"[HighlightDetector] {len(events)} highlights kept, "
-              f"{rejected} weak spikes dropped (confidence < {MIN_CONFIDENCE}).")
+        print(
+            f"[HighlightDetector] {len(events)} highlights kept, "
+            f"{rejected} weak spikes dropped (confidence < {MIN_CONFIDENCE})."
+        )
 
     return events

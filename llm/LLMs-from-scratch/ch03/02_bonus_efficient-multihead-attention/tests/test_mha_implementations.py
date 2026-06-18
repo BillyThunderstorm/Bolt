@@ -28,7 +28,7 @@ def copy_weights(from_mha, to_mha):
     [
         (768, 768, 2, 4, 12, 123),  # d_in == d_out
         (768, 1536, 2, 4, 12, 456),  # d_in != d_out
-        (1024, 512, 2, 4, 8, 789),   # d_in > d_out
+        (1024, 512, 2, 4, 8, 789),  # d_in > d_out
     ],
 )
 def test_mha_einsum_matches_ch03(d_in, d_out, batch, seq_len, num_heads, seed, import_notebook_defs):

@@ -7,6 +7,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
+
 # from sklearn.metrics import balanced_accuracy_score
 from sklearn.dummy import DummyClassifier
 
@@ -36,9 +37,9 @@ def eval_model(model, X_train, y_train, X_val, y_val, X_test, y_test):
     # balanced_accuracy_test = balanced_accuracy_score(y_test, y_pred_test)
 
     # Printing the results
-    print(f"Training Accuracy: {accuracy_train*100:.2f}%")
-    print(f"Validation Accuracy: {accuracy_val*100:.2f}%")
-    print(f"Test Accuracy: {accuracy_test*100:.2f}%")
+    print(f"Training Accuracy: {accuracy_train * 100:.2f}%")
+    print(f"Validation Accuracy: {accuracy_val * 100:.2f}%")
+    print(f"Test Accuracy: {accuracy_test * 100:.2f}%")
 
     # print(f"\nTraining Balanced Accuracy: {balanced_accuracy_train*100:.2f}%")
     # print(f"Validation Balanced Accuracy: {balanced_accuracy_val*100:.2f}%")

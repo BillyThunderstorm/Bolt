@@ -261,7 +261,7 @@ archive_files_by_size() {
                 echo -e "${YELLOW}[DRY RUN] Would archive: $file (${file_size_gb}GB)${NC}"
             else
                 mkdir -p "$(dirname "$ARCHIVE_DIR/$file")"
-                mv "$file" "$ARCHIVE_DIR/$file/"
+                mv "$file" "$ARCHIVE_DIR/$file"
                 echo -e "${GREEN}Archived: $file (${file_size_gb}GB)${NC}"
             fi
             

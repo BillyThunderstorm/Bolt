@@ -28,7 +28,7 @@ from previous_chapters import (
     load_weights_into_gpt,
     text_to_token_ids,
     train_model_simple,
-    token_ids_to_text
+    token_ids_to_text,
 )
 
 
@@ -42,9 +42,7 @@ class InstructionDataset(Dataset):
             instruction_plus_input = format_input(entry)
             response_text = f"\n\n### Response:\n{entry['output']}"
             full_text = instruction_plus_input + response_text
-            self.encoded_texts.append(
-                tokenizer.encode(full_text)
-            )
+            self.encoded_texts.append(tokenizer.encode(full_text))
 
     def __getitem__(self, index):
         return self.encoded_texts[index]
@@ -53,15 +51,9 @@ class InstructionDataset(Dataset):
         return len(self.data)
 
 
-def custom_collate_fn(
-    batch,
-    pad_token_id=50256,
-    ignore_index=-100,
-    allowed_max_length=None,
-    device="cpu"
-):
+def custom_collate_fn(batch, pad_token_id=50256, ignore_index=-100, allowed_max_length=None, device="cpu"):
     # Find the longest sequence in the batch
-    batch_max_length = max(len(item)+1 for item in batch)
+    batch_max_length = max(len(item) + 1 for item in batch)
 
     # Pad and prepare inputs and targets
     inputs_lst, targets_lst = [], []
@@ -151,14 +143,14 @@ def main(test_mode=False):
     print()
     pkgs = [
         "matplotlib",  # Plotting library
-        "tiktoken",    # Tokenizer
-        "torch",       # Deep learning library
-        "tqdm",        # Progress bar
+        "tiktoken",  # Tokenizer
+        "torch",  # Deep learning library
+        "tqdm",  # Progress bar
         "tensorflow",  # For OpenAI's pretrained weights
     ]
     for p in pkgs:
         print(f"{p} version: {version(p)}")
-    print(50*"-")
+    print(50 * "-")
 
     #######################################
     # Download and prepare dataset
@@ -168,11 +160,11 @@ def main(test_mode=False):
     data = download_and_load_file(file_path, url)
 
     train_portion = int(len(data) * 0.85)  # 85% for training
-    test_portion = int(len(data) * 0.1)    # 10% for testing
+    test_portion = int(len(data) * 0.1)  # 10% for testing
 
     train_data = data[:train_portion]
-    test_data = data[train_portion:train_portion + test_portion]
-    val_data = data[train_portion + test_portion:]
+    test_data = data[train_portion : train_portion + test_portion]
+    val_data = data[train_portion + test_portion :]
 
     # Use very small subset for testing purposes
     if test_mode:
@@ -183,12 +175,12 @@ def main(test_mode=False):
     print("Training set length:", len(train_data))
     print("Validation set length:", len(val_data))
     print("Test set length:", len(test_data))
-    print(50*"-")
+    print(50 * "-")
 
     tokenizer = tiktoken.get_encoding("gpt2")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Device:", device)
-    print(50*"-")
+    print(50 * "-")
 
     customized_collate_fn = partial(custom_collate_fn, device=device, allowed_max_length=1024)
 
@@ -199,22 +191,12 @@ def main(test_mode=False):
 
     train_dataset = InstructionDataset(train_data, tokenizer)
     train_loader = DataLoader(
-        train_dataset,
-        batch_size=batch_size,
-        collate_fn=customized_collate_fn,
-        shuffle=True,
-        drop_last=True,
-        num_workers=num_workers
+        train_dataset, batch_size=batch_size, collate_fn=customized_collate_fn, shuffle=True, drop_last=True, num_workers=num_workers
     )
 
     val_dataset = InstructionDataset(val_data, tokenizer)
     val_loader = DataLoader(
-        val_dataset,
-        batch_size=batch_size,
-        collate_fn=customized_collate_fn,
-        shuffle=False,
-        drop_last=False,
-        num_workers=num_workers
+        val_dataset, batch_size=batch_size, collate_fn=customized_collate_fn, shuffle=False, drop_last=False, num_workers=num_workers
     )
 
     #######################################
@@ -230,7 +212,7 @@ def main(test_mode=False):
             "qkv_bias": False,
             "emb_dim": 12,
             "n_layers": 1,
-            "n_heads": 2
+            "n_heads": 2,
         }
         model = GPTModel(BASE_CONFIG)
         model.eval()
@@ -240,10 +222,10 @@ def main(test_mode=False):
     # Code as it is used in the main chapter
     else:
         BASE_CONFIG = {
-            "vocab_size": 50257,     # Vocabulary size
+            "vocab_size": 50257,  # Vocabulary size
             "context_length": 1024,  # Context length
-            "drop_rate": 0.0,        # Dropout rate
-            "qkv_bias": True         # Query-key-value bias
+            "drop_rate": 0.0,  # Dropout rate
+            "qkv_bias": True,  # Query-key-value bias
         }
 
         model_configs = {
@@ -266,7 +248,7 @@ def main(test_mode=False):
         model.to(device)
 
     print("Loaded model:", CHOOSE_MODEL)
-    print(50*"-")
+    print(50 * "-")
 
     #######################################
     # Finetuning the model
@@ -286,9 +268,16 @@ def main(test_mode=False):
 
     torch.manual_seed(123)
     train_losses, val_losses, tokens_seen = train_model_simple(
-        model, train_loader, val_loader, optimizer, device,
-        num_epochs=num_epochs, eval_freq=5, eval_iter=5,
-        start_context=format_input(val_data[0]), tokenizer=tokenizer
+        model,
+        train_loader,
+        val_loader,
+        optimizer,
+        device,
+        num_epochs=num_epochs,
+        eval_freq=5,
+        eval_iter=5,
+        start_context=format_input(val_data[0]),
+        tokenizer=tokenizer,
     )
 
     end_time = time.time()
@@ -297,14 +286,13 @@ def main(test_mode=False):
 
     epochs_tensor = torch.linspace(0, num_epochs, len(train_losses))
     plot_losses(epochs_tensor, tokens_seen, train_losses, val_losses)
-    print(50*"-")
+    print(50 * "-")
 
     #######################################
     # Saving results
     #######################################
     print("Generating responses")
     for i, entry in tqdm(enumerate(test_data), total=len(test_data)):
-
         input_text = format_input(entry)
 
         token_ids = generate(
@@ -312,10 +300,10 @@ def main(test_mode=False):
             idx=text_to_token_ids(input_text, tokenizer).to(device),
             max_new_tokens=256,
             context_size=BASE_CONFIG["context_length"],
-            eos_id=50256
+            eos_id=50256,
         )
         generated_text = token_ids_to_text(token_ids, tokenizer)
-        response_text = generated_text[len(input_text):].replace("### Response:", "").strip()
+        response_text = generated_text[len(input_text) :].replace("### Response:", "").strip()
 
         test_data[i]["model_response"] = response_text
 
@@ -324,24 +312,25 @@ def main(test_mode=False):
         json.dump(test_data, file, indent=4)  # "indent" for pretty-printing
     print(f"Responses saved as {test_data_path}")
 
-    file_name = f"{re.sub(r'[ ()]', '', CHOOSE_MODEL) }-sft-standalone.pth"
+    file_name = f"{re.sub(r'[ ()]', '', CHOOSE_MODEL)}-sft-standalone.pth"
     torch.save(model.state_dict(), file_name)
     print(f"Model saved as {file_name}")
 
 
 if __name__ == "__main__":
-
     import argparse
 
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description="Finetune a GPT model for classification"
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Finetune a GPT model for classification"
     )
     parser.add_argument(
         "--test_mode",
         default=False,
         action="store_true",
-        help=("This flag runs the model in test mode for internal testing purposes. "
-              "Otherwise, it runs the model as it is used in the chapter (recommended).")
+        help=(
+            "This flag runs the model in test mode for internal testing purposes. "
+            "Otherwise, it runs the model as it is used in the chapter (recommended)."
+        ),
     )
     args = parser.parse_args()
 

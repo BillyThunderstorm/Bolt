@@ -53,9 +53,13 @@ def _action_items(calendar: str, gmail: str, memory: str) -> list[str]:
     if "Nothing scheduled today" in calendar:
         actions[0] = "Pick one focused Bolt/content block and put it on the calendar."
     if "No important unread" in gmail or "Gmail unavailable" in gmail:
-        actions[1] = "Do a quick manual Gmail scan for real people, account alerts, products, or creator work."
+        actions[1] = (
+            "Do a quick manual Gmail scan for real people, account alerts, products, or creator work."
+        )
     if "(no relevant memory found)" in memory or "unavailable" in memory.lower():
-        actions[2] = "Add one useful note to Bolt memory so tomorrow's briefing has stronger context."
+        actions[2] = (
+            "Add one useful note to Bolt memory so tomorrow's briefing has stronger context."
+        )
 
     return actions
 
@@ -78,7 +82,7 @@ def generate_briefing() -> Path:
             "## Reminder Checklist\n" + "\n".join(f"- [ ] {item}" for item in actions),
             "## Shortcut Payload\n"
             "Use the checklist above for Reminders, then notify: "
-            f"\"Bolt briefing ready: {len(actions)} actions for today.\"",
+            f'"Bolt briefing ready: {len(actions)} actions for today."',
             "",
         ]
     )

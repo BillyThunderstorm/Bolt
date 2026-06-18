@@ -13,6 +13,7 @@ from pathlib import Path
 try:
     from .notifier import notify
 except ImportError:
+
     def notify(msg, level="info", reason=None):
         print(f"  [{level.upper()}] {msg}")
         if reason:
@@ -47,7 +48,11 @@ def _get_service():
         return None
 
     if not CREDENTIALS.exists():
-        notify("credentials.json not found", level="warning", reason=f"Expected at: {CREDENTIALS}")
+        notify(
+            "credentials.json not found",
+            level="warning",
+            reason=f"Expected at: {CREDENTIALS}",
+        )
         return None
 
     creds = None
@@ -89,11 +94,16 @@ def get_important_unread(limit: int = 5) -> list[dict]:
         return []
 
     try:
-        result = service.users().messages().list(
-            userId="me",
-            q=IMPORTANT_QUERY,
-            maxResults=limit,
-        ).execute()
+        result = (
+            service.users()
+            .messages()
+            .list(
+                userId="me",
+                q=IMPORTANT_QUERY,
+                maxResults=limit,
+            )
+            .execute()
+        )
         messages = result.get("messages", [])
     except Exception as exc:
         notify(f"Gmail search failed: {exc}", level="warning")
@@ -102,15 +112,23 @@ def get_important_unread(limit: int = 5) -> list[dict]:
     items = []
     for message in messages:
         try:
-            raw = service.users().messages().get(
-                userId="me",
-                id=message["id"],
-                format="metadata",
-                metadataHeaders=["From", "Subject", "Date"],
-            ).execute()
+            raw = (
+                service.users()
+                .messages()
+                .get(
+                    userId="me",
+                    id=message["id"],
+                    format="metadata",
+                    metadataHeaders=["From", "Subject", "Date"],
+                )
+                .execute()
+            )
         except Exception:
             continue
-        headers = {h.get("name", ""): h.get("value", "") for h in raw.get("payload", {}).get("headers", [])}
+        headers = {
+            h.get("name", ""): h.get("value", "")
+            for h in raw.get("payload", {}).get("headers", [])
+        }
         items.append(
             {
                 "from": headers.get("From", "(unknown sender)"),

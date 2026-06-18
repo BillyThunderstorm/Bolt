@@ -8,24 +8,17 @@ import chainlit
 
 # For llms_from_scratch installation instructions, see:
 # https://github.com/rasbt/LLMs-from-scratch/tree/main/pkg
-from llms_from_scratch.kv_cache.qwen3 import (
-    Qwen3Model,
-    Qwen3Tokenizer,
-    download_from_huggingface_from_snapshots,
-    load_weights_into_qwen
-)
-from llms_from_scratch.kv_cache.generate import (
-    generate_text_simple_stream
-)
+from llms_from_scratch.kv_cache.qwen3 import Qwen3Model, Qwen3Tokenizer, download_from_huggingface_from_snapshots, load_weights_into_qwen
+from llms_from_scratch.kv_cache.generate import generate_text_simple_stream
 
 # ============================================================
 # EDIT ME: Simple configuration
 # ============================================================
-MODEL = "0.6B"            # options: "0.6B","1.7B","4B","8B","14B","32B","30B-A3B"
-REASONING = True          # True = "thinking" chat model, False = Base
-DEVICE = "auto"           # "auto" | "cuda" | "mps" | "cpu"
+MODEL = "0.6B"  # options: "0.6B","1.7B","4B","8B","14B","32B","30B-A3B"
+REASONING = True  # True = "thinking" chat model, False = Base
+DEVICE = "auto"  # "auto" | "cuda" | "mps" | "cpu"
 MAX_NEW_TOKENS = 38912
-LOCAL_DIR = None          # e.g., "Qwen3-0.6B-Base"; None auto-selects
+LOCAL_DIR = None  # e.g., "Qwen3-0.6B-Base"; None auto-selects
 # ============================================================
 
 
@@ -74,10 +67,7 @@ def get_device(name):
 
 def get_model_and_tokenizer(qwen3_config, repo_id, local_dir, device, use_reasoning):
     model = Qwen3Model(qwen3_config)
-    weights_dict = download_from_huggingface_from_snapshots(
-        repo_id=repo_id,
-        local_dir=local_dir
-    )
+    weights_dict = download_from_huggingface_from_snapshots(repo_id=repo_id, local_dir=local_dir)
     load_weights_into_qwen(model, qwen3_config, weights_dict)
     del weights_dict
 
@@ -90,7 +80,7 @@ def get_model_and_tokenizer(qwen3_config, repo_id, local_dir, device, use_reason
         repo_id=repo_id,
         apply_chat_template=use_reasoning,
         add_generation_prompt=use_reasoning,
-        add_thinking=use_reasoning
+        add_thinking=use_reasoning,
     )
     return model, tokenizer
 
@@ -104,9 +94,7 @@ MODEL, TOKENIZER = get_model_and_tokenizer(QWEN3_CONFIG, REPO_ID, LOCAL_DIR, DEV
 @chainlit.on_chat_start
 async def on_start():
     chainlit.user_session.set("history", [])
-    chainlit.user_session.get("history").append(
-        {"role": "system", "content": "You are a helpful assistant."}
-    )
+    chainlit.user_session.get("history").append({"role": "system", "content": "You are a helpful assistant."})
 
 
 @chainlit.on_message
@@ -124,10 +112,7 @@ async def main(message: chainlit.Message):
 
     # 3) Stream generation
     for tok in generate_text_simple_stream(
-        model=MODEL,
-        token_ids=input_ids_tensor,
-        max_new_tokens=MAX_NEW_TOKENS,
-        eos_token_id=TOKENIZER.eos_token_id
+        model=MODEL, token_ids=input_ids_tensor, max_new_tokens=MAX_NEW_TOKENS, eos_token_id=TOKENIZER.eos_token_id
     ):
         token_id = tok.squeeze(0)
         piece = TOKENIZER.decode(token_id.tolist())

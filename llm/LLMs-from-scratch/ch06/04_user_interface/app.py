@@ -26,13 +26,13 @@ def get_model_and_tokenizer():
     """
 
     GPT_CONFIG_124M = {
-        "vocab_size": 50257,     # Vocabulary size
+        "vocab_size": 50257,  # Vocabulary size
         "context_length": 1024,  # Context length
-        "emb_dim": 768,          # Embedding dimension
-        "n_heads": 12,           # Number of attention heads
-        "n_layers": 12,          # Number of layers
-        "drop_rate": 0.1,        # Dropout rate
-        "qkv_bias": True         # Query-key-value bias
+        "emb_dim": 768,  # Embedding dimension
+        "n_heads": 12,  # Number of attention heads
+        "n_layers": 12,  # Number of layers
+        "drop_rate": 0.1,  # Dropout rate
+        "qkv_bias": True,  # Query-key-value bias
     }
 
     tokenizer = tiktoken.get_encoding("gpt2")
@@ -40,8 +40,7 @@ def get_model_and_tokenizer():
     model_path = Path("..") / "01_main-chapter-code" / "review_classifier.pth"
     if not model_path.exists():
         print(
-            f"Could not find the {model_path} file. Please run the chapter 6 code"
-            " (ch06.ipynb) to generate the review_classifier.pth file."
+            f"Could not find the {model_path} file. Please run the chapter 6 code (ch06.ipynb) to generate the review_classifier.pth file."
         )
         sys.exit()
 

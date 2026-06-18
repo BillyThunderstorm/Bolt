@@ -24,7 +24,9 @@ class ThinkLearnDecideTests(unittest.TestCase):
         tld.DATA_DIR.mkdir(parents=True, exist_ok=True)
         tld.LOGS_DIR.mkdir(parents=True, exist_ok=True)
         tld.MEMORY_DIR.mkdir(parents=True, exist_ok=True)
-        (tld.MEMORY_DIR / "MEMORY.md").write_text("# Notes\n- test fact", encoding="utf-8")
+        (tld.MEMORY_DIR / "MEMORY.md").write_text(
+            "# Notes\n- test fact", encoding="utf-8"
+        )
         (tld.LOGS_DIR / "Bolt_2026-04-28.log").write_text(
             json.dumps({"level": "info", "msg": "started", "reason": "test"}) + "\n",
             encoding="utf-8",
@@ -43,23 +45,27 @@ class ThinkLearnDecideTests(unittest.TestCase):
         self.assertTrue(tld.UNIFIED_MEMORY_FILE.exists())
 
     def test_think_retrieves_relevant_memory_when_available(self):
-        with patch("modules.Think_Learn_Decide.refresh_memory_index") as refresh, \
-             patch(
-                 "modules.Think_Learn_Decide.retrieve_memory",
-                 return_value=[
-                     {
-                         "title": "Decision audit: think",
-                         "source": "logs/decision_audit.log",
-                         "kind": "decision_audit",
-                         "score": 0.5,
-                         "signal": "supportive",
-                         "signal_reason": "supportive terms: queued",
-                         "matched_terms": ["marvel", "rivals"],
-                         "summary": "Past Marvel Rivals clip was queued for manual review.",
-                     }
-                 ],
-             ):
-            thought = self.engine.think({"recording": "clip.mp4", "game": "Marvel Rivals"})
+        with (
+            patch("modules.Think_Learn_Decide.refresh_memory_index") as refresh,
+            patch(
+                "modules.Think_Learn_Decide.retrieve_memory",
+                return_value=[
+                    {
+                        "title": "Decision audit: think",
+                        "source": "logs/decision_audit.log",
+                        "kind": "decision_audit",
+                        "score": 0.5,
+                        "signal": "supportive",
+                        "signal_reason": "supportive terms: queued",
+                        "matched_terms": ["marvel", "rivals"],
+                        "summary": "Past Marvel Rivals clip was queued for manual review.",
+                    }
+                ],
+            ),
+        ):
+            thought = self.engine.think(
+                {"recording": "clip.mp4", "game": "Marvel Rivals"}
+            )
 
         refresh.assert_called_once()
         self.assertEqual(thought["retrieved_memory_count"], 1)
@@ -149,8 +155,12 @@ class ThinkLearnDecideTests(unittest.TestCase):
         self.assertIn("Strong product test", boosted.reason)
 
     def test_learning_updates_model(self):
-        self.engine.learn_from_feedback("queue_clip", accepted=False, feedback_text="bad fit")
-        self.engine.learn_from_outcome("queue_clip", success=True, details={"clip_path": "x.mp4"})
+        self.engine.learn_from_feedback(
+            "queue_clip", accepted=False, feedback_text="bad fit"
+        )
+        self.engine.learn_from_outcome(
+            "queue_clip", success=True, details={"clip_path": "x.mp4"}
+        )
         model = json.loads(tld.DECISION_MODEL_FILE.read_text(encoding="utf-8"))
         self.assertIn("feedback_by_action", model)
         self.assertIn("outcomes_by_action", model)
@@ -186,8 +196,13 @@ class ThinkLearnDecideTests(unittest.TestCase):
         action_id = self.engine.pending_proposals()[0]["proposal"]["action_id"]
         self.engine.resolve_pending(action_id, approved=True, note="ship it")
 
-        with patch("modules.Think_Learn_Decide._format_for_tiktok", return_value="clipA_tiktok.mp4"), \
-             patch("modules.Think_Learn_Decide._add_to_queue") as add_to_queue:
+        with (
+            patch(
+                "modules.Think_Learn_Decide._format_for_tiktok",
+                return_value="clipA_tiktok.mp4",
+            ),
+            patch("modules.Think_Learn_Decide._add_to_queue") as add_to_queue,
+        ):
             applied = self.engine.apply_approved()
 
         self.assertEqual(applied, 1)

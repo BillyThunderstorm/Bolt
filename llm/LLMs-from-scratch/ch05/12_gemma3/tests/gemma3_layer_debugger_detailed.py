@@ -288,10 +288,7 @@ def format_report(differences, show_block_details=True, details_for_all_blocks=F
             continue
 
         detail_prefix = f"{diff['name']}."
-        detail_diffs = [
-            other for other in differences
-            if other["name"].startswith(detail_prefix)
-        ]
+        detail_diffs = [other for other in differences if other["name"].startswith(detail_prefix)]
         if not detail_diffs:
             continue
 

@@ -40,3 +40,4 @@ scripts/launcher_stdout.log
 venv/
 vertical_clips/
 yolov5
+.env.local

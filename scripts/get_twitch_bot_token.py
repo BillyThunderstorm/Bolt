@@ -11,6 +11,7 @@ from pathlib import Path
 
 ENV_FILE = Path(__file__).parent.parent / ".env"
 
+
 def load_env():
     env = {}
     if ENV_FILE.exists():
@@ -21,6 +22,7 @@ def load_env():
                     k, _, v = line.partition("=")
                     env[k.strip()] = v.strip()
     return env
+
 
 def write_env_key(key: str, value: str):
     lines = []
@@ -38,13 +40,14 @@ def write_env_key(key: str, value: str):
     with open(ENV_FILE, "w") as f:
         f.writelines(lines)
 
+
 def get_app_access_token(client_id: str, client_secret: str) -> str:
     """Get an app access token using client credentials."""
     url = "https://id.twitch.tv/oauth2/token"
     params = {
         "client_id": client_id,
         "client_secret": client_secret,
-        "grant_type": "client_credentials"
+        "grant_type": "client_credentials",
     }
 
     response = requests.post(url, params=params)
@@ -56,6 +59,7 @@ def get_app_access_token(client_id: str, client_secret: str) -> str:
         print(f"  Error: {response.status_code}")
         print(f"  Response: {response.text}")
         return ""
+
 
 def main():
     print()
@@ -85,7 +89,9 @@ def main():
     print(f"  ✓  App access token obtained")
     print()
     print("  IMPORTANT: This is an APP token, not a BOT chat token.")
-    print("  For Bolt to chat, you need a USER token with chat:read and chat:edit scopes.")
+    print(
+        "  For Bolt to chat, you need a USER token with chat:read and chat:edit scopes."
+    )
     print()
     print("  The easiest way is to use twitchtokengenerator.com:")
     print("    1. Go to: https://twitchtokengenerator.com")
@@ -98,7 +104,9 @@ def main():
     print("  Or use the Twitch CLI: twitch token --scopes chat:read,chat:edit")
     print()
 
-    token = input("  Paste your BOT chat token (starts with oauth: or just the token):\n  > ").strip()
+    token = input(
+        "  Paste your BOT chat token (starts with oauth: or just the token):\n  > "
+    ).strip()
 
     if not token:
         print("\n  ✗  Nothing was pasted. Run the script again.")
@@ -129,6 +137,7 @@ def main():
 """)
     print("=" * 58)
     print()
+
 
 if __name__ == "__main__":
     main()

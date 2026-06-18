@@ -29,8 +29,10 @@ from typing import Any, Dict, List, Optional
 try:
     from .notifier import notify
 except ImportError:
+
     def notify(msg, level="info", reason=None):
         print(f"  [{level.upper()}] {msg}")
+
 
 try:
     from .Think_Learn_Decide import ThinkLearnDecideEngine, sys_stdin_interactive
@@ -56,7 +58,9 @@ def _load_thresholds() -> tuple:
 
     tiers = config.get("quality_tiers", {})
     discard_below = float(tiers.get("discard_below", 60.0))
-    min_post_score = float(config.get("min_post_score", config.get("min_clip_score", 65.0)))
+    min_post_score = float(
+        config.get("min_post_score", config.get("min_clip_score", 65.0))
+    )
     queue_at = float(tiers.get("queue_at", 80.0))
 
     min_post_score = max(min_post_score, discard_below)
@@ -100,6 +104,7 @@ class BrainController:
         if self._voice is None:
             try:
                 from . import Bolt_Voice
+
                 self._voice = Bolt_Voice
             except ImportError:
                 pass
@@ -202,7 +207,11 @@ class BrainController:
             elif tier == TIER_MID:
                 actions.extend(
                     [
-                        {"type": "notify", "msg": f"Mid-tier highlight (score {score}) — keeping it local", "level": "info"},
+                        {
+                            "type": "notify",
+                            "msg": f"Mid-tier highlight (score {score}) — keeping it local",
+                            "level": "info",
+                        },
                         {"type": "pipeline", "mode": "clip_only"},
                     ]
                 )
@@ -212,7 +221,11 @@ class BrainController:
                 actions.extend(
                     [
                         {"type": "speak", "event": "highlight"},
-                        {"type": "notify", "msg": f"Queue-tier highlight (score {score}) — clipping and queuing", "level": "success"},
+                        {
+                            "type": "notify",
+                            "msg": f"Queue-tier highlight (score {score}) — clipping and queuing",
+                            "level": "success",
+                        },
                         {"type": "pipeline", "mode": "clip_only"},
                     ]
                 )
@@ -223,7 +236,9 @@ class BrainController:
             score = float(data.get("score", 0))
             path = data.get("path", "")
             tier = self._score_to_tier(score)
-            self.state["clips_queued_today"] = self.state.get("clips_queued_today", 0) + 1
+            self.state["clips_queued_today"] = (
+                self.state.get("clips_queued_today", 0) + 1
+            )
 
             self._record_event(
                 source="brain_controller",
@@ -239,18 +254,36 @@ class BrainController:
             if score >= MIN_POST_SCORE:
                 actions += [
                     {"type": "queue", "path": path, "score": score},
-                    {"type": "notify", "msg": f"Clip queued: {Path(path).name} [score {score:.0f}]", "level": "success"},
+                    {
+                        "type": "notify",
+                        "msg": f"Clip queued: {Path(path).name} [score {score:.0f}]",
+                        "level": "success",
+                    },
                 ]
             else:
-                actions.append({"type": "archive", "path": path, "reason": "Below posting floor"})
+                actions.append(
+                    {"type": "archive", "path": path, "reason": "Below posting floor"}
+                )
 
         elif event == "raid":
             raider = data.get("raider", "someone")
             count = data.get("count", 0)
             actions += [
-                {"type": "speak", "event": "raid" if count >= 10 else "raid_small", "kwargs": {"raider": raider, "count": count}},
-                {"type": "chat", "msg": "raid", "kwargs": {"raider": raider, "count": count}},
-                {"type": "notify", "msg": f"Raid from {raider} — {count} viewers", "level": "success"},
+                {
+                    "type": "speak",
+                    "event": "raid" if count >= 10 else "raid_small",
+                    "kwargs": {"raider": raider, "count": count},
+                },
+                {
+                    "type": "chat",
+                    "msg": "raid",
+                    "kwargs": {"raider": raider, "count": count},
+                },
+                {
+                    "type": "notify",
+                    "msg": f"Raid from {raider} — {count} viewers",
+                    "level": "success",
+                },
             ]
 
         elif event == "sub":
@@ -265,22 +298,42 @@ class BrainController:
             name = data.get("name", "someone")
             months = data.get("months", 1)
             actions += [
-                {"type": "speak", "event": "resub", "kwargs": {"name": name, "months": months}},
-                {"type": "notify", "msg": f"Resub: {name} (month {months})", "level": "success"},
+                {
+                    "type": "speak",
+                    "event": "resub",
+                    "kwargs": {"name": name, "months": months},
+                },
+                {
+                    "type": "notify",
+                    "msg": f"Resub: {name} (month {months})",
+                    "level": "success",
+                },
             ]
 
         elif event == "bits":
             name = data.get("name", "someone")
             amount = data.get("amount", 0)
             actions += [
-                {"type": "speak", "event": "bits", "kwargs": {"name": name, "amount": amount}},
-                {"type": "notify", "msg": f"Bits: {amount} from {name}", "level": "success"},
+                {
+                    "type": "speak",
+                    "event": "bits",
+                    "kwargs": {"name": name, "amount": amount},
+                },
+                {
+                    "type": "notify",
+                    "msg": f"Bits: {amount} from {name}",
+                    "level": "success",
+                },
             ]
 
         elif event == "stream_start":
             actions += [
                 {"type": "speak", "event": "going_live"},
-                {"type": "notify", "msg": "Stream started — Bolt is monitoring", "level": "startup"},
+                {
+                    "type": "notify",
+                    "msg": "Stream started — Bolt is monitoring",
+                    "level": "startup",
+                },
                 {"type": "memory", "fact": f"Stream started at {now}"},
             ]
 
@@ -289,8 +342,15 @@ class BrainController:
             clips = self.state.get("clips_queued_today", 0)
             actions += [
                 {"type": "speak", "event": "shutdown"},
-                {"type": "notify", "msg": f"Stream ended — {highlights} highlights, {clips} clips queued", "level": "success"},
-                {"type": "memory", "fact": f"Session ended: {highlights} highlights, {clips} clips queued"},
+                {
+                    "type": "notify",
+                    "msg": f"Stream ended — {highlights} highlights, {clips} clips queued",
+                    "level": "success",
+                },
+                {
+                    "type": "memory",
+                    "fact": f"Session ended: {highlights} highlights, {clips} clips queued",
+                },
                 {"type": "reset_state"},
             ]
 
@@ -300,13 +360,21 @@ class BrainController:
             if clips > 0:
                 actions += [
                     {"type": "speak", "event": "peak_alert"},
-                    {"type": "notify", "msg": f"Peak hour ({label}) — {clips} clip(s) ready in Discord", "level": "success"},
+                    {
+                        "type": "notify",
+                        "msg": f"Peak hour ({label}) — {clips} clip(s) ready in Discord",
+                        "level": "success",
+                    },
                 ]
 
         elif event == "error":
             actions += [
                 {"type": "speak", "event": "error"},
-                {"type": "notify", "msg": data.get("msg", "An error occurred"), "level": "error"},
+                {
+                    "type": "notify",
+                    "msg": data.get("msg", "An error occurred"),
+                    "level": "error",
+                },
             ]
 
         self._save_state()
@@ -336,18 +404,25 @@ class BrainController:
                     if msg_type == "highlight":
                         self._chat_bot.trigger_highlight()
                     elif msg_type == "raid":
-                        self._chat_bot.trigger_raid(kwargs.get("raider", ""), kwargs.get("count", 0))
+                        self._chat_bot.trigger_raid(
+                            kwargs.get("raider", ""), kwargs.get("count", 0)
+                        )
                     elif msg_type == "sub":
                         self._chat_bot.trigger_sub(kwargs.get("name", ""))
                 except Exception as exc:
                     notify(f"Chat action failed: {exc}", level="warning")
 
         elif atype == "notify":
-            notify(action.get("msg", ""), level=action.get("level", "info"), reason=action.get("reason"))
+            notify(
+                action.get("msg", ""),
+                level=action.get("level", "info"),
+                reason=action.get("reason"),
+            )
 
         elif atype == "memory":
             try:
                 from .Bolt_Memory import remember
+
                 remember(action.get("fact", ""))
             except Exception:
                 pass
@@ -382,7 +457,9 @@ if __name__ == "__main__":
     import sys
 
     try:
-        with open(Path(__file__).parent.parent / "config.json", "r", encoding="utf-8") as fh:
+        with open(
+            Path(__file__).parent.parent / "config.json", "r", encoding="utf-8"
+        ) as fh:
             config = json.load(fh)
     except Exception:
         config = {}
@@ -408,7 +485,9 @@ if __name__ == "__main__":
         print(f"  Event: {event} {data}")
         actions = brain.decide(event, **data)
         for a in actions:
-            print(f"    → {a['type']}: {a.get('msg') or a.get('event') or a.get('fact') or ''}")
+            print(
+                f"    → {a['type']}: {a.get('msg') or a.get('event') or a.get('fact') or ''}"
+            )
         print()
 
     print(f"  {brain.session_summary()}")

@@ -98,7 +98,7 @@ def test_rope():
         "low_freq_factor": 1.0,
         "high_freq_factor": 4.0,
         "original_max_position_embeddings": 8192,
-        "rope_type": "llama3"
+        "rope_type": "llama3",
     }
 
     class RoPEConfig:
@@ -122,10 +122,7 @@ def test_rope():
             if "rope_theta" not in params:
                 params["rope_theta"] = getattr(self, "rope_theta")
             # Handle older key name used in this repo.
-            if (
-                "original_max_position_embeddings" not in params
-                and "original_context_length" in params
-            ):
+            if "original_max_position_embeddings" not in params and "original_context_length" in params:
                 params["original_max_position_embeddings"] = params["original_context_length"]
             self.rope_parameters = params
             return params
@@ -144,13 +141,13 @@ def test_rope():
 
 
 GPT_CONFIG_124M = {
-    "vocab_size": 50257,     # Vocabulary size
+    "vocab_size": 50257,  # Vocabulary size
     "context_length": 1024,  # Context length
-    "emb_dim": 768,          # Embedding dimension
-    "n_heads": 12,           # Number of attention heads
-    "n_layers": 12,          # Number of layers
-    "drop_rate": 0.1,        # Dropout rate
-    "qkv_bias": False        # Query-Key-Value bias
+    "emb_dim": 768,  # Embedding dimension
+    "n_heads": 12,  # Number of attention heads
+    "n_layers": 12,  # Number of layers
+    "drop_rate": 0.1,  # Dropout rate
+    "qkv_bias": False,  # Query-Key-Value bias
 }
 
 
@@ -168,7 +165,7 @@ def test_grouped_query_attention_equivalence():
             "low_freq_factor": 1.0,
             "high_freq_factor": 4.0,
             "original_context_length": t,
-        }
+        },
     )
 
     # Causal mask for the slow version
@@ -203,10 +200,7 @@ def llama3_weights_path(tmp_path_factory):
     return path
 
 
-@pytest.mark.skipif(
-    os.getenv("GITHUB_ACTIONS") == "true",
-    reason="Skipping in GitHub Actions due to compute or memory constraints"
-)
+@pytest.mark.skipif(os.getenv("GITHUB_ACTIONS") == "true", reason="Skipping in GitHub Actions due to compute or memory constraints")
 @pytest.mark.parametrize("ModelClass", [Llama3Model, Llama3ModelKV])
 @pytest.mark.parametrize("generate_fn", [generate_text_simple, generate_text_simple_cached])
 def test_model_variants(ModelClass, generate_fn, llama3_weights_path):
@@ -228,21 +222,14 @@ def test_model_variants(ModelClass, generate_fn, llama3_weights_path):
     encoded = tokenizer.encode(start_context)
     encoded_tensor = torch.tensor(encoded).unsqueeze(0)
 
-    print(f"\n{50*'='}\n{22*' '}IN\n{50*'='}")
+    print(f"\n{50 * '='}\n{22 * ' '}IN\n{50 * '='}")
     print("\nInput text:", start_context)
     print("Encoded input text:", encoded)
     print("encoded_tensor.shape:", encoded_tensor.shape)
 
-    out = generate_fn(
-        model=model,
-        idx=encoded_tensor,
-        max_new_tokens=5,
-        context_size=LLAMA32_CONFIG_1B["context_length"]
-    )
+    out = generate_fn(model=model, idx=encoded_tensor, max_new_tokens=5, context_size=LLAMA32_CONFIG_1B["context_length"])
     print("Encoded output text:", out)
-    expect = torch.tensor([
-        [43, 2543, 292, 4483, 100383, 8113, 76873, 42175, 72641]
-    ])
+    expect = torch.tensor([[43, 2543, 292, 4483, 100383, 8113, 76873, 42175, 72641]])
     assert torch.equal(expect, out)
 
 
@@ -272,6 +259,7 @@ def test_rmsnorm_equivalence():
 @pytest.mark.skipif(not transformers_installed, reason="transformers not installed")
 def test_llama3_base_equivalence_with_transformers():
     from transformers.models.llama import LlamaConfig, LlamaForCausalLM
+
     cfg = {
         "vocab_size": 257,
         "context_length": 8192,

@@ -117,11 +117,13 @@ def dummy_cfg_base():
 @pytest.fixture
 def dummy_cfg_moe(dummy_cfg_base):
     cfg = dummy_cfg_base.copy()
-    cfg.update({
-        "num_experts": 4,
-        "num_experts_per_tok": 2,
-        "moe_intermediate_size": 64,
-    })
+    cfg.update(
+        {
+            "num_experts": 4,
+            "num_experts_per_tok": 2,
+            "moe_intermediate_size": 64,
+        }
+    )
     return cfg
 
 
@@ -130,8 +132,7 @@ def test_dummy_qwen3_forward(dummy_cfg_base, dummy_input):
     torch.manual_seed(123)
     model = Qwen3Model(dummy_cfg_base)
     out = model(dummy_input)
-    assert out.shape == (1, dummy_input.size(1), dummy_cfg_base["vocab_size"]), \
-        f"Expected shape (1, seq_len, vocab_size), got {out.shape}"
+    assert out.shape == (1, dummy_input.size(1), dummy_cfg_base["vocab_size"]), f"Expected shape (1, seq_len, vocab_size), got {out.shape}"
 
 
 @torch.inference_mode()
@@ -139,10 +140,8 @@ def test_dummy_qwen3_moe_forward(dummy_cfg_moe, dummy_input):
     torch.manual_seed(123)
     model = Qwen3Model(dummy_cfg_moe)
     out = model(dummy_input)
-    assert out.shape == (1, dummy_input.size(1), dummy_cfg_moe["vocab_size"]), \
-        f"Expected shape (1, seq_len, vocab_size), got {out.shape}"
-    assert any(hasattr(block.ff, "gate") for block in model.trf_blocks), \
-        "Expected MoEFeedForward in at least one transformer block"
+    assert out.shape == (1, dummy_input.size(1), dummy_cfg_moe["vocab_size"]), f"Expected shape (1, seq_len, vocab_size), got {out.shape}"
+    assert any(hasattr(block.ff, "gate") for block in model.trf_blocks), "Expected MoEFeedForward in at least one transformer block"
 
 
 @torch.inference_mode()
@@ -164,8 +163,8 @@ def test_moe_forward_matches_reference(dummy_cfg_moe):
 
     gating_probs = torch.zeros_like(scores)
     for i in range(moe.num_experts_per_tok):
-        indices = topk_indices[..., i:i+1]
-        prob = topk_probs[..., i:i+1]
+        indices = topk_indices[..., i : i + 1]
+        prob = topk_probs[..., i : i + 1]
         gating_probs.scatter_(dim=-1, index=indices, src=prob)
     gating_probs = gating_probs.unsqueeze(-1)
 
@@ -200,7 +199,7 @@ def test_qwen3_kvcache_equivalence(cfg_name, request):
 
     logits_stepwise = []
     for t in range(input_ids.size(1)):
-        input_token = input_ids[:, t:t + 1]
+        input_token = input_ids[:, t : t + 1]
         logits = model_kv(input_token, cache=cache)
         logits_stepwise.append(logits)
     out_kv = torch.cat(logits_stepwise, dim=1)
@@ -307,33 +306,23 @@ def test_model_variants(ModelClass, qwen3_weights_path, generate_fn):
     model.eval()
 
     tokenizer = Qwen3Tokenizer(
-        tokenizer_file_path="tokenizer-base.json",
-        repo_id="rasbt/qwen3-from-scratch",
-        add_generation_prompt=False,
-        add_thinking=False
+        tokenizer_file_path="tokenizer-base.json", repo_id="rasbt/qwen3-from-scratch", add_generation_prompt=False, add_thinking=False
     )
 
     prompt = "Give me a short introduction to large language models."
     input_token_ids = tokenizer.encode(prompt)
     input_token_ids = torch.tensor([input_token_ids])
 
-    print(f"\n{50*'='}\n{22*' '}IN\n{50*'='}")
+    print(f"\n{50 * '='}\n{22 * ' '}IN\n{50 * '='}")
     print("\nInput text:", prompt)
     print("Encoded input text:", input_token_ids)
     print("encoded_tensor.shape:", input_token_ids.shape)
 
-    out = generate_fn(
-        model=model,
-        idx=input_token_ids,
-        max_new_tokens=5,
-        context_size=QWEN_CONFIG_06_B["context_length"]
-    )
+    out = generate_fn(model=model, idx=input_token_ids, max_new_tokens=5, context_size=QWEN_CONFIG_06_B["context_length"])
     print("Encoded output text:", out)
-    expect = torch.tensor([
-        [151644, 872, 198, 35127, 752, 264, 2805, 16800, 311,
-         3460, 4128,  4119, 13, 151645, 198, 112120, 83942, 60483,
-         102652, 7414]
-    ])
+    expect = torch.tensor(
+        [[151644, 872, 198, 35127, 752, 264, 2805, 16800, 311, 3460, 4128, 4119, 13, 151645, 198, 112120, 83942, 60483, 102652, 7414]]
+    )
     assert torch.equal(expect, out)
 
 
@@ -345,10 +334,7 @@ def test_model_KV_noKV(qwen3_weights_path):
     model_KV.eval()
 
     tokenizer = Qwen3Tokenizer(
-        tokenizer_file_path="tokenizer-base.json",
-        repo_id="rasbt/qwen3-from-scratch",
-        add_generation_prompt=False,
-        add_thinking=False
+        tokenizer_file_path="tokenizer-base.json", repo_id="rasbt/qwen3-from-scratch", add_generation_prompt=False, add_thinking=False
     )
 
     prompt = "Give me a short introduction to large language models."
@@ -356,10 +342,7 @@ def test_model_KV_noKV(qwen3_weights_path):
     input_token_ids = torch.tensor([input_token_ids])
 
     out_KV = generate_text_simple_cached(
-        model=model_KV,
-        idx=input_token_ids,
-        max_new_tokens=5,
-        context_size=QWEN_CONFIG_06_B["context_length"]
+        model=model_KV, idx=input_token_ids, max_new_tokens=5, context_size=QWEN_CONFIG_06_B["context_length"]
     )
     del model_KV
 
@@ -369,10 +352,7 @@ def test_model_KV_noKV(qwen3_weights_path):
     model_noKV.eval()
 
     out_noKV = generate_text_simple(
-        model=model_noKV,
-        idx=input_token_ids,
-        max_new_tokens=5,
-        context_size=QWEN_CONFIG_06_B["context_length"]
+        model=model_noKV, idx=input_token_ids, max_new_tokens=5, context_size=QWEN_CONFIG_06_B["context_length"]
     )
 
     assert torch.equal(out_noKV, out_KV)
@@ -386,10 +366,7 @@ def test_model_batched_KV(qwen3_weights_path):
     model_KV.eval()
 
     tokenizer = Qwen3Tokenizer(
-        tokenizer_file_path="tokenizer-base.json",
-        repo_id="rasbt/qwen3-from-scratch",
-        add_generation_prompt=False,
-        add_thinking=False
+        tokenizer_file_path="tokenizer-base.json", repo_id="rasbt/qwen3-from-scratch", add_generation_prompt=False, add_thinking=False
     )
 
     # Batch size 1
@@ -399,10 +376,7 @@ def test_model_batched_KV(qwen3_weights_path):
     input_token_ids = torch.tensor([input_token_ids])
 
     out_KV = generate_text_simple_cached(
-        model=model_KV,
-        idx=input_token_ids,
-        max_new_tokens=5,
-        context_size=QWEN_CONFIG_06_B["context_length"]
+        model=model_KV, idx=input_token_ids, max_new_tokens=5, context_size=QWEN_CONFIG_06_B["context_length"]
     )
     del model_KV
 
@@ -412,25 +386,17 @@ def test_model_batched_KV(qwen3_weights_path):
     model_KV_batched.eval()
 
     out_KV_bs_1 = generate_text_simple_batched(
-        model=model_KV_batched,
-        idx=input_token_ids,
-        max_new_tokens=5,
-        context_size=QWEN_CONFIG_06_B["context_length"]
+        model=model_KV_batched, idx=input_token_ids, max_new_tokens=5, context_size=QWEN_CONFIG_06_B["context_length"]
     )
 
     assert torch.equal(out_KV, out_KV_bs_1)
 
     # Batch size 2
 
-    prompts = [
-        "Give me a short introduction to large language models.",
-        "Give me a short introduction to large language models."
-    ]
+    prompts = ["Give me a short introduction to large language models.", "Give me a short introduction to large language models."]
     tokenized_prompts = [tokenizer.encode(p) for p in prompts]
     max_len = max(len(t) for t in tokenized_prompts)
-    padded_token_ids = [
-        t + [tokenizer.pad_token_id] * (max_len - len(t)) for t in tokenized_prompts
-    ]
+    padded_token_ids = [t + [tokenizer.pad_token_id] * (max_len - len(t)) for t in tokenized_prompts]
     input_tensor = torch.tensor(padded_token_ids)
     out_KV_bs_2 = generate_text_simple_batched(
         model=model_KV_batched,
@@ -464,12 +430,16 @@ def test_rmsnorm_equivalence():
 
 
 @pytest.mark.skipif(not transformers_installed, reason="transformers not installed")
-@pytest.mark.parametrize("repo_id, tok_file", [
-    ("Qwen/Qwen3-0.6B", "Qwen3-0.6B/tokenizer.json"),  # Chat / Reasoning
-    ("Qwen/Qwen3-0.6B-Base", "Qwen3-0.6B-Base/tokenizer.json"),  # Base
-])
+@pytest.mark.parametrize(
+    "repo_id, tok_file",
+    [
+        ("Qwen/Qwen3-0.6B", "Qwen3-0.6B/tokenizer.json"),  # Chat / Reasoning
+        ("Qwen/Qwen3-0.6B-Base", "Qwen3-0.6B-Base/tokenizer.json"),  # Base
+    ],
+)
 def test_all_special_tokens_roundtrip(repo_id, tok_file):
     from transformers import AutoTokenizer as HFTokenizer
+
     hf_tok = HFTokenizer.from_pretrained(repo_id)
 
     qt = Qwen3Tokenizer(
@@ -497,7 +467,7 @@ def test_all_special_tokens_roundtrip(repo_id, tok_file):
         assert qt.decode(ids) == s, f"Inline decode mismatch for {sp}"
 
     # EOS / PAD expectations
-    is_base = ("Base" in repo_id)
+    is_base = "Base" in repo_id
     expected_eos = "<|endoftext|>" if is_base else "<|im_end|>"
     expected_pad = "<|endoftext|>"
 
@@ -540,12 +510,14 @@ def test_chat_wrap_and_equivalence(add_gen, add_think):
 
         # Our encode vs HF template
         ours = qt.encode(prompt)
-        ref = _hf_ids(hf_tok.apply_chat_template(
-            messages,
-            tokenize=True,
-            add_generation_prompt=add_gen,
-            enable_thinking=add_think,
-        ))
+        ref = _hf_ids(
+            hf_tok.apply_chat_template(
+                messages,
+                tokenize=True,
+                add_generation_prompt=add_gen,
+                enable_thinking=add_think,
+            )
+        )
 
         if add_gen and not add_think:
             pass  # skip edge case as this is not something we use in practice
@@ -562,14 +534,20 @@ def test_chat_wrap_and_equivalence(add_gen, add_think):
 
 
 @pytest.mark.skipif(not transformers_installed, reason="transformers not installed")
-@pytest.mark.parametrize("repo_id, tok_file", [
-    ("Qwen/Qwen3-0.6B", "Qwen3-0.6B/tokenizer.json"),
-    ("Qwen/Qwen3-0.6B-Base", "Qwen3-0.6B-Base/tokenizer.json"),
-])
-@pytest.mark.parametrize("add_gen, add_think", [
-    (True, True),
-    (False, False),
-])
+@pytest.mark.parametrize(
+    "repo_id, tok_file",
+    [
+        ("Qwen/Qwen3-0.6B", "Qwen3-0.6B/tokenizer.json"),
+        ("Qwen/Qwen3-0.6B-Base", "Qwen3-0.6B-Base/tokenizer.json"),
+    ],
+)
+@pytest.mark.parametrize(
+    "add_gen, add_think",
+    [
+        (True, True),
+        (False, False),
+    ],
+)
 def test_multiturn_equivalence(repo_id, tok_file, add_gen, add_think):
     from transformers import AutoTokenizer
 
@@ -589,15 +567,9 @@ def test_multiturn_equivalence(repo_id, tok_file, add_gen, add_think):
     ]
 
     # HF reference (ids and raw template text)
-    ref_ids = hf_tok.apply_chat_template(
-        messages, tokenize=True,
-        add_generation_prompt=add_gen, enable_thinking=add_think
-    )
+    ref_ids = hf_tok.apply_chat_template(messages, tokenize=True, add_generation_prompt=add_gen, enable_thinking=add_think)
     ref_ids = _hf_ids(ref_ids)
-    ref_text = hf_tok.apply_chat_template(
-        messages, tokenize=False,
-        add_generation_prompt=add_gen, enable_thinking=add_think
-    )
+    ref_text = hf_tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=add_gen, enable_thinking=add_think)
 
     # Our encode over HF's raw template text
     ours_ids = qt.encode(ref_text, chat_wrapped=False)
@@ -647,7 +619,7 @@ def test_tokenizer_equivalence():
                     repo_id=repo_id,
                     apply_chat_template=apply_chat_template,
                     add_generation_prompt=states[0],
-                    add_thinking=states[1]
+                    add_thinking=states[1],
                 )
                 input_token_ids = tokenizer.encode(prompt)
 
@@ -678,13 +650,19 @@ def test_tokenizer_equivalence():
 
 
 @pytest.mark.skipif(not transformers_installed, reason="transformers not installed")
-@pytest.mark.parametrize("repo_id, tok_file", [
-    ("Qwen/Qwen3-0.6B", "Qwen3-0.6B/tokenizer.json"),
-])
-@pytest.mark.parametrize("add_gen, add_think", [
-    (True, True),
-    (False, False),
-])
+@pytest.mark.parametrize(
+    "repo_id, tok_file",
+    [
+        ("Qwen/Qwen3-0.6B", "Qwen3-0.6B/tokenizer.json"),
+    ],
+)
+@pytest.mark.parametrize(
+    "add_gen, add_think",
+    [
+        (True, True),
+        (False, False),
+    ],
+)
 def test_multiturn_prefix_stability(repo_id, tok_file, add_gen, add_think):
     from transformers import AutoTokenizer
 
@@ -709,15 +687,9 @@ def test_multiturn_prefix_stability(repo_id, tok_file, add_gen, add_think):
     for delta in turns:
         running += delta
 
-        ref_ids = hf_tok.apply_chat_template(
-            running, tokenize=True,
-            add_generation_prompt=add_gen, enable_thinking=add_think
-        )
+        ref_ids = hf_tok.apply_chat_template(running, tokenize=True, add_generation_prompt=add_gen, enable_thinking=add_think)
         ref_ids = _hf_ids(ref_ids)
-        ref_text = hf_tok.apply_chat_template(
-            running, tokenize=False,
-            add_generation_prompt=add_gen, enable_thinking=add_think
-        )
+        ref_text = hf_tok.apply_chat_template(running, tokenize=False, add_generation_prompt=add_gen, enable_thinking=add_think)
 
         # Normalize line endings to match our encoder's assumptions
         ref_text_norm = ref_text.replace("\r\n", "\n").replace("\r", "\n")
@@ -729,9 +701,10 @@ def test_multiturn_prefix_stability(repo_id, tok_file, add_gen, add_think):
         if ours_ids != ref_ids:
             # Lightweight inline diff to aid debugging
             from itertools import zip_longest
+
             for i, (a, b) in enumerate(zip_longest(ours_ids, ref_ids, fillvalue=None)):
                 if a != b:
-                    slice_lo, slice_hi = max(0, i-6), i+6
+                    slice_lo, slice_hi = max(0, i - 6), i + 6
                     ours_slice = ours_ids[slice_lo:slice_hi]
                     ref_slice = ref_ids[slice_lo:slice_hi]
                     ours_toks = [qt._tok.id_to_token(x) if x is not None else None for x in ours_slice]
@@ -748,8 +721,8 @@ def test_multiturn_prefix_stability(repo_id, tok_file, add_gen, add_think):
         # 2) Prefix stability only when HF's own *text* remained a prefix
         if prev_ids_hf is not None and prev_ref_text is not None:
             if ref_text.startswith(prev_ref_text):
-                assert ours_ids[:len(prev_ids_qt)] == prev_ids_qt
-                assert ref_ids[:len(prev_ids_hf)] == prev_ids_hf
+                assert ours_ids[: len(prev_ids_qt)] == prev_ids_qt
+                assert ref_ids[: len(prev_ids_hf)] == prev_ids_hf
             # else: HF modified earlier boundaries (e.g., inserted <think>), so skip prefix checks
 
         # 3) Decode parity at each step

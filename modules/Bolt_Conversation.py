@@ -33,6 +33,7 @@ from typing import List, Dict, Optional
 
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     pass
@@ -41,29 +42,40 @@ except ImportError:
 
 try:
     import speech_recognition as sr
+
     SPEECH_OK = True
 except ImportError:
     SPEECH_OK = False
 
 try:
     from openai import OpenAI
+
     OPENAI_OK = True
 except ImportError:
     OPENAI_OK = False
 
 try:
     from modules.Bolt_Voice import speak, say_event
+
     VOICE_OK = True
 except ImportError:
     VOICE_OK = False
-    def speak(text): print(f"  [VOICE] {text}")
-    def say_event(event, **kw): pass
+
+    def speak(text):
+        print(f"  [VOICE] {text}")
+
+    def say_event(event, **kw):
+        pass
+
 
 try:
     from modules.notifier import notify
 except ImportError:
+
     def notify(msg, level="info", reason=None):
-        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(level, "•")
+        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(
+            level, "•"
+        )
         print(f"  {prefix}  {msg}")
         if reason:
             print(f"     → {reason}")
@@ -88,6 +100,7 @@ PHRASE_TIMEOUT = int(os.getenv("BOLT_PHRASE_TIMEOUT", "5"))
 
 # ── Conversation Memory ───────────────────────────────────────────────────────
 
+
 class ConversationMemory:
     """
     Persistent conversation storage.
@@ -96,7 +109,9 @@ class ConversationMemory:
     across restarts. Stored as JSON in data/conversations/.
     """
 
-    def __init__(self, filepath: Path = HISTORY_FILE, max_turns: int = MAX_HISTORY_TURNS):
+    def __init__(
+        self, filepath: Path = HISTORY_FILE, max_turns: int = MAX_HISTORY_TURNS
+    ):
         self.filepath = filepath
         self.max_turns = max_turns
         self.history: List[Dict[str, str]] = []
@@ -108,7 +123,9 @@ class ConversationMemory:
                 with open(self.filepath, "r", encoding="utf-8") as f:
                     self.history = json.load(f)
             except Exception as exc:
-                notify("Conversation history load failed", level="warning", reason=str(exc))
+                notify(
+                    "Conversation history load failed", level="warning", reason=str(exc)
+                )
                 self.history = []
         else:
             self.history = []
@@ -122,13 +139,11 @@ class ConversationMemory:
 
     def add(self, role: str, content: str):
         """Add a turn and trim to max length."""
-        self.history.append({
-            "role": role,
-            "content": content,
-            "timestamp": datetime.now().isoformat()
-        })
+        self.history.append(
+            {"role": role, "content": content, "timestamp": datetime.now().isoformat()}
+        )
         if len(self.history) > self.max_turns:
-            self.history = self.history[-self.max_turns:]
+            self.history = self.history[-self.max_turns :]
         self._save()
 
     def as_openai_messages(self) -> List[Dict[str, str]]:
@@ -149,6 +164,7 @@ class ConversationMemory:
 
 
 # ── Personality & Brain Loaders ────────────────────────────────────────────────
+
 
 def _load_file(path: Path, fallback: str = "") -> str:
     if path.exists():
@@ -191,6 +207,7 @@ VOICE CONVERSATION RULES:
 
 # ── Speech Input ──────────────────────────────────────────────────────────────
 
+
 def listen_for_speech() -> Optional[str]:
     """
     Listen to the microphone and return transcribed text.
@@ -202,8 +219,11 @@ def listen_for_speech() -> Optional[str]:
     Returns None if no speech was detected or transcription failed.
     """
     if not SPEECH_OK:
-        notify("Speech recognition not available", level="warning",
-               reason="Install SpeechRecognition: pip3 install SpeechRecognition")
+        notify(
+            "Speech recognition not available",
+            level="warning",
+            reason="Install SpeechRecognition: pip3 install SpeechRecognition",
+        )
         return None
 
     recognizer = sr.Recognizer()
@@ -213,7 +233,9 @@ def listen_for_speech() -> Optional[str]:
     with sr.Microphone() as source:
         notify("Listening...", level="info")
         try:
-            audio = recognizer.listen(source, timeout=LISTEN_TIMEOUT, phrase_time_limit=15)
+            audio = recognizer.listen(
+                source, timeout=LISTEN_TIMEOUT, phrase_time_limit=15
+            )
         except sr.WaitTimeoutError:
             notify("No speech detected", level="info")
             return None
@@ -255,9 +277,7 @@ def _transcribe_with_whisper(audio_path: str) -> Optional[str]:
         client = OpenAI(api_key=OPENAI_KEY)
         with open(audio_path, "rb") as f:
             result = client.audio.transcriptions.create(
-                model=WHISPER_MODEL,
-                file=f,
-                response_format="text"
+                model=WHISPER_MODEL, file=f, response_format="text"
             )
         # result is a string when response_format="text"
         if isinstance(result, str):
@@ -269,6 +289,7 @@ def _transcribe_with_whisper(audio_path: str) -> Optional[str]:
 
 
 # ── Response Generation ───────────────────────────────────────────────────────
+
 
 def generate_response(user_text: str, memory: ConversationMemory) -> str:
     """
@@ -288,10 +309,7 @@ def generate_response(user_text: str, memory: ConversationMemory) -> str:
     try:
         client = OpenAI(api_key=OPENAI_KEY)
         response = client.chat.completions.create(
-            model=OPENAI_MODEL,
-            max_tokens=250,
-            temperature=0.85,
-            messages=messages
+            model=OPENAI_MODEL, max_tokens=250, temperature=0.85, messages=messages
         )
         return response.choices[0].message.content.strip()
     except Exception as exc:
@@ -301,12 +319,14 @@ def generate_response(user_text: str, memory: ConversationMemory) -> str:
 
 # ── Voice Output ────────────────────────────────────────────────────────────────
 
+
 def speak_response(text: str):
     """Queue a spoken response via Bolt_Voice."""
     speak(text)
 
 
 # ── Main Conversation Loop ──────────────────────────────────────────────────────
+
 
 def conversation_loop(text_mode: bool = False):
     """
@@ -317,7 +337,9 @@ def conversation_loop(text_mode: bool = False):
     """
     memory = ConversationMemory()
 
-    greeting = "Hey Billy! Bolt is here and ready to chat! What are we working on today?"
+    greeting = (
+        "Hey Billy! Bolt is here and ready to chat! What are we working on today?"
+    )
     print(f"\n  🤖  {greeting}\n")
     speak_response(greeting)
 
@@ -352,7 +374,11 @@ def conversation_loop(text_mode: bool = False):
     goodbye = "Signing off! It was a good session, Billy!"
     print(f"\n  🤖  {goodbye}\n")
     speak_response(goodbye)
-    notify("Conversation saved", level="success", reason=f"{len(memory.history)} turns in history")
+    notify(
+        "Conversation saved",
+        level="success",
+        reason=f"{len(memory.history)} turns in history",
+    )
 
 
 def single_exchange(prompt: str):

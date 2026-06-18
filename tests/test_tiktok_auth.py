@@ -14,7 +14,10 @@ class TikTokAuthTests(unittest.TestCase):
             path = Path(tmp) / ".env"
             path.write_text("A=1\nTIKTOK_ACCESS_TOKEN=old\n", encoding="utf-8")
 
-            auth.write_env_values({"TIKTOK_ACCESS_TOKEN": "new", "TIKTOK_REFRESH_TOKEN": "refresh"}, path=path)
+            auth.write_env_values(
+                {"TIKTOK_ACCESS_TOKEN": "new", "TIKTOK_REFRESH_TOKEN": "refresh"},
+                path=path,
+            )
 
             text = path.read_text(encoding="utf-8")
             self.assertIn("A=1", text)
@@ -59,7 +62,9 @@ class TikTokAuthTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / ".env"
             with self.assertRaises(RuntimeError):
-                auth.save_token_bundle({"error": "invalid_grant", "log_id": "abc"}, path=path)
+                auth.save_token_bundle(
+                    {"error": "invalid_grant", "log_id": "abc"}, path=path
+                )
 
 
 if __name__ == "__main__":

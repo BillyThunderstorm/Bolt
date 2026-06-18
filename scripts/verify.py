@@ -65,7 +65,16 @@ def check_files():
 def check_directories():
     print("\nChecking directories...")
     all_ok = True
-    for rel in ["recordings", "clips", "vertical_clips", "modules", "assets", "data", "logs", "memory"]:
+    for rel in [
+        "recordings",
+        "clips",
+        "vertical_clips",
+        "modules",
+        "assets",
+        "data",
+        "logs",
+        "memory",
+    ]:
         path = Path(rel)
         if not path.exists():
             path.mkdir(parents=True, exist_ok=True)
@@ -83,7 +92,12 @@ def check_config():
         mark(False, "config.json", str(exc))
         return False
 
-    required = ["game", "auto_format_tiktok", "highlight_sensitivity", "max_clips_per_session"]
+    required = [
+        "game",
+        "auto_format_tiktok",
+        "highlight_sensitivity",
+        "max_clips_per_session",
+    ]
     ok = True
     for key in required:
         present = key in config
@@ -91,7 +105,11 @@ def check_config():
         ok = ok and present
 
     score = config.get("min_post_score", config.get("min_clip_score"))
-    mark(score is not None, "clip score floor", str(score) if score is not None else "missing min_post_score/min_clip_score")
+    mark(
+        score is not None,
+        "clip score floor",
+        str(score) if score is not None else "missing min_post_score/min_clip_score",
+    )
     return ok and score is not None
 
 
@@ -116,7 +134,14 @@ def check_env():
         mark(False, ".env", "missing or empty")
         return False
 
-    placeholders = {"", "your_key_here", "your_client_id_here", "your_client_secret_here", "your_obs_password_here", "your_discord_webhook_here"}
+    placeholders = {
+        "",
+        "your_key_here",
+        "your_client_id_here",
+        "your_client_secret_here",
+        "your_obs_password_here",
+        "your_discord_webhook_here",
+    }
     optional = [
         ("OBS_PASSWORD", "needed when OBS integration is enabled"),
         ("TWITCH_BOT_TOKEN", "enables Twitch chat bot"),

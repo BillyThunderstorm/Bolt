@@ -16,32 +16,39 @@ import time
 import base64
 import hashlib
 import threading
+from pathlib import Path
 from typing import Optional, Callable
 
 try:
     from modules.notifier import notify
 except ImportError:
+
     def notify(msg, level="info", reason=None):
-        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(level, "•")
+        prefix = {"info": "ℹ", "success": "✓", "warning": "⚠", "error": "✗"}.get(
+            level, "•"
+        )
         print(f"  {prefix}  {msg}")
         if reason:
             print(f"     → {reason}")
 
+
 try:
     import websocket
+
     HAS_WEBSOCKET = True
 except ImportError:
     HAS_WEBSOCKET = False
 
 # OBS WebSocket 5.x eventSubscriptions bitmask
-# Bit 0  = General, Bit 1 = Config, Bit 4 = Outputs, Bit 5 = SceneItems,
+# Bit 0  = General, Bit 1 = Config, Bit 2 = Scenes, Bit 4 = Outputs, Bit 5 = SceneItems,
 # Bit 16 = InputVolumeMeters
 EVENT_SUBSCRIPTIONS = (
-    (1 << 0)   # General
+    (1 << 0)  # General
+    | (1 << 2)  # Scenes (for CurrentProgramSceneChanged)
     | (1 << 4)  # Outputs (replay buffer, stream, record)
     | (1 << 5)  # SceneItems
-    | (1 << 16) # InputVolumeMeters
-)  # = 67617
+    | (1 << 16)  # InputVolumeMeters
+)  # = 67621
 
 
 class StreamMonitor:
@@ -56,6 +63,7 @@ class StreamMonitor:
     on_stream_stop()
     on_record_start()
     on_record_stop(path: str)
+    on_game_changed(game: str)   — called when scene changes to a mapped game
     """
 
     def __init__(
@@ -71,6 +79,7 @@ class StreamMonitor:
         on_stream_stop: Optional[Callable] = None,
         on_record_start: Optional[Callable] = None,
         on_record_stop: Optional[Callable] = None,
+        on_game_changed: Optional[Callable] = None,
     ):
         self.host = host
         self.port = port
@@ -78,18 +87,20 @@ class StreamMonitor:
         self.spike_threshold_db = spike_threshold_db
         self.spike_multiplier = spike_multiplier
 
-        self.on_replay_saved  = on_replay_saved  or (lambda path: None)
-        self.on_spike         = on_spike         or (lambda db: None)
-        self.on_stream_start  = on_stream_start  or (lambda: None)
-        self.on_stream_stop   = on_stream_stop   or (lambda: None)
-        self.on_record_start  = on_record_start  or (lambda: None)
-        self.on_record_stop   = on_record_stop   or (lambda path: None)
+        self.on_replay_saved = on_replay_saved or (lambda path: None)
+        self.on_spike = on_spike or (lambda db: None)
+        self.on_stream_start = on_stream_start or (lambda: None)
+        self.on_stream_stop = on_stream_stop or (lambda: None)
+        self.on_record_start = on_record_start or (lambda: None)
+        self.on_record_stop = on_record_stop or (lambda path: None)
+        self.on_game_changed = on_game_changed or (lambda game: None)
 
         self._ws: Optional[object] = None
         self._thread: Optional[threading.Thread] = None
         self._running = False
-        self._rms_history: list = []   # rolling window for spike detection
+        self._rms_history: list = []  # rolling window for spike detection
         self._request_id = 0
+        self._last_scene: Optional[str] = None
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -99,7 +110,7 @@ class StreamMonitor:
             notify(
                 "websocket-client not installed — OBS monitoring disabled",
                 level="warning",
-                reason="Install with: pip3 install websocket-client"
+                reason="Install with: pip3 install websocket-client",
             )
             return
 
@@ -110,8 +121,8 @@ class StreamMonitor:
             f"OBS WebSocket monitor starting on {self.host}:{self.port}",
             level="info",
             reason="Running in a background thread so Bolt can watch the recordings "
-                   "folder at the same time. The WebSocket stays connected for the "
-                   "entire stream session."
+            "folder at the same time. The WebSocket stays connected for the "
+            "entire stream session.",
         )
 
     def stop(self):
@@ -131,7 +142,7 @@ class StreamMonitor:
             "Replay buffer save requested",
             level="info",
             reason="OBS will write the last N seconds of footage to disk. "
-                   "ReplayBufferSaved event will fire when the file is ready."
+            "ReplayBufferSaved event will fire when the file is ready.",
         )
 
     # ── WebSocket thread ───────────────────────────────────────────────────────
@@ -151,17 +162,23 @@ class StreamMonitor:
                 )
                 self._ws.run_forever(ping_interval=20, ping_timeout=10)
             except Exception as exc:
-                notify(f"OBS WebSocket error: {exc}", level="warning",
-                       reason=f"Will retry in {retry_delay}s. "
-                              "Check OBS is open and WebSocket Server is enabled.")
+                notify(
+                    f"OBS WebSocket error: {exc}",
+                    level="warning",
+                    reason=f"Will retry in {retry_delay}s. "
+                    "Check OBS is open and WebSocket Server is enabled.",
+                )
             if self._running:
                 time.sleep(retry_delay)
                 retry_delay = min(retry_delay * 2, 60)
 
     def _on_open(self, ws):
-        notify("OBS WebSocket connected — waiting for Hello", level="info",
-               reason="OBS sends a Hello message first with auth challenge. "
-                      "Bolt will respond with Identify to complete the handshake.")
+        notify(
+            "OBS WebSocket connected — waiting for Hello",
+            level="info",
+            reason="OBS sends a Hello message first with auth challenge. "
+            "Bolt will respond with Identify to complete the handshake.",
+        )
 
     def _on_message(self, ws, raw):
         try:
@@ -181,8 +198,8 @@ class StreamMonitor:
                 "OBS WebSocket authenticated ✓",
                 level="success",
                 reason="Bolt is now subscribed to OBS events including "
-                       "ReplayBufferSaved, StreamStateChanged, RecordStateChanged, "
-                       "and InputVolumeMeters for audio spike detection."
+                "ReplayBufferSaved, StreamStateChanged, RecordStateChanged, "
+                "and InputVolumeMeters for audio spike detection.",
             )
 
         # Event (op=5)
@@ -198,9 +215,12 @@ class StreamMonitor:
 
     def _on_close(self, ws, code, reason):
         if self._running:
-            notify(f"OBS WebSocket closed ({code}) — reconnecting…", level="warning",
-                   reason="Connection lost. This can happen if OBS crashes or is restarted. "
-                          "Bolt will reconnect automatically.")
+            notify(
+                f"OBS WebSocket closed ({code}) — reconnecting…",
+                level="warning",
+                reason="Connection lost. This can happen if OBS crashes or is restarted. "
+                "Bolt will reconnect automatically.",
+            )
 
     # ── OBS protocol ──────────────────────────────────────────────────────────
 
@@ -209,14 +229,10 @@ class StreamMonitor:
         auth_str = ""
         if auth and self.password:
             secret = base64.b64encode(
-                hashlib.sha256(
-                    (self.password + auth["salt"]).encode()
-                ).digest()
+                hashlib.sha256((self.password + auth["salt"]).encode()).digest()
             ).decode()
             auth_str = base64.b64encode(
-                hashlib.sha256(
-                    (secret + auth["challenge"]).encode()
-                ).digest()
+                hashlib.sha256((secret + auth["challenge"]).encode()).digest()
             ).decode()
 
         identify = {
@@ -225,7 +241,7 @@ class StreamMonitor:
                 "rpcVersion": 1,
                 "authentication": auth_str,
                 "eventSubscriptions": EVENT_SUBSCRIPTIONS,
-            }
+            },
         }
         self._ws.send(json.dumps(identify))
 
@@ -239,15 +255,18 @@ class StreamMonitor:
                 f"Replay buffer saved: {path}",
                 level="success",
                 reason="OBS has written the clip to disk. Bolt's Watcher will pick "
-                       "it up from the recordings folder and begin processing."
+                "it up from the recordings folder and begin processing.",
             )
             self.on_replay_saved(path)
 
         elif event_type == "StreamStateChanged":
             state = event_data.get("outputState", "")
             if state == "OBS_WEBSOCKET_OUTPUT_STARTED":
-                notify("Stream started ✓", level="success",
-                       reason="Bolt is now monitoring audio levels and chat activity.")
+                notify(
+                    "Stream started ✓",
+                    level="success",
+                    reason="Bolt is now monitoring audio levels and chat activity.",
+                )
                 self.on_stream_start()
             elif state == "OBS_WEBSOCKET_OUTPUT_STOPPED":
                 notify("Stream stopped.", level="info")
@@ -260,10 +279,17 @@ class StreamMonitor:
                 self.on_record_start()
             elif state == "OBS_WEBSOCKET_OUTPUT_STOPPED":
                 path = event_data.get("outputPath", "")
-                notify(f"Recording saved: {path}", level="success",
-                       reason="Full recording is ready. If auto-processing is enabled, "
-                              "Bolt will scan it for highlights now.")
+                notify(
+                    f"Recording saved: {path}",
+                    level="success",
+                    reason="Full recording is ready. If auto-processing is enabled, "
+                    "Bolt will scan it for highlights now.",
+                )
                 self.on_record_stop(path)
+
+        elif event_type == "CurrentProgramSceneChanged":
+            scene_name = event_data.get("currentProgramSceneName", "")
+            self._handle_scene_change(scene_name)
 
         elif event_type == "InputVolumeMeters":
             self._check_volume_spike(event_data)
@@ -280,9 +306,7 @@ class StreamMonitor:
                 continue
             # levels is [[left_mul, right_mul], ...] per channel
             try:
-                max_mul = max(
-                    max(ch) for ch in levels if ch
-                )
+                max_mul = max(max(ch) for ch in levels if ch)
             except (ValueError, TypeError):
                 continue
 
@@ -300,14 +324,15 @@ class StreamMonitor:
             ratio = max_mul / avg
             if ratio >= self.spike_multiplier:
                 import math
+
                 db = 20 * math.log10(max_mul) if max_mul > 0 else -100
                 if db >= self.spike_threshold_db:
                     notify(
                         f"Audio spike detected: {db:.1f} dB (ratio {ratio:.1f}×)",
                         level="info",
                         reason=f"Volume jumped {ratio:.1f}× above the rolling average. "
-                               f"spike_multiplier threshold = {self.spike_multiplier}. "
-                               "Requesting replay buffer save."
+                        f"spike_multiplier threshold = {self.spike_multiplier}. "
+                        "Requesting replay buffer save.",
                     )
                     self.on_spike(db)
                     self._rms_history.clear()  # debounce
@@ -323,10 +348,55 @@ class StreamMonitor:
                 "requestType": request_type,
                 "requestId": str(self._request_id),
                 "requestData": fields or {},
-            }
+            },
         }
         if self._ws:
             try:
                 self._ws.send(json.dumps(msg))
             except Exception as exc:
                 notify(f"Failed to send {request_type}: {exc}", level="warning")
+
+    # ── Scene/Game tracking ─────────────────────────────────────────────────────
+
+    def _handle_scene_change(self, scene_name: str):
+        """
+        When OBS scene changes, check if it maps to a game and update config.json.
+        """
+        if scene_name == self._last_scene:
+            return  # Ignore duplicate events
+
+        self._last_scene = scene_name
+        game = self._get_game_for_scene(scene_name)
+
+        if game:
+            notify(
+                f"Scene changed to '{scene_name}' → Game: {game}",
+                level="info",
+                reason="Bolt will use this game title for performance tracking and clip metadata.",
+            )
+            self.on_game_changed(game)
+        else:
+            notify(
+                f"Scene changed to '{scene_name}' (no game mapping)",
+                level="info",
+                reason=f"Add '{scene_name}' to configs/scene_game_mapping.json to enable auto-tracking.",
+            )
+
+    def _get_game_for_scene(self, scene_name: str) -> Optional[str]:
+        """
+        Load scene-to-game mapping and return the game title for this scene.
+        Returns None if no mapping exists.
+        """
+        mapping_file = (
+            Path(__file__).parent.parent / "configs" / "scene_game_mapping.json"
+        )
+        if not mapping_file.exists():
+            return None
+
+        try:
+            with open(mapping_file) as f:
+                mapping = json.load(f)
+                scenes = mapping.get("scenes", {})
+                return scenes.get(scene_name)
+        except Exception:
+            return None

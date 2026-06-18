@@ -36,12 +36,13 @@ load_dotenv()
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 
-TWITCH_AUTH_URL   = "https://id.twitch.tv/oauth2/token"
-TWITCH_API_BASE   = "https://api.twitch.tv/helix"
-TOKEN_CACHE_FILE  = Path(__file__).parent.parent / "logs" / "twitch_token_cache.json"
+TWITCH_AUTH_URL = "https://id.twitch.tv/oauth2/token"
+TWITCH_API_BASE = "https://api.twitch.tv/helix"
+TOKEN_CACHE_FILE = Path(__file__).parent.parent / "logs" / "twitch_token_cache.json"
 
 
 # ── Main class ─────────────────────────────────────────────────────────────────
+
 
 class TwitchStats:
     """
@@ -51,10 +52,14 @@ class TwitchStats:
     """
 
     def __init__(self, channel: str = None):
-        self.client_id     = os.getenv("TWITCH_CLIENT_ID", "").strip()
+        self.client_id = os.getenv("TWITCH_CLIENT_ID", "").strip()
         self.client_secret = os.getenv("TWITCH_CLIENT_SECRET", "").strip()
-        self.channel       = (channel or os.getenv("TWITCH_CHANNEL", "BillyandRandyGaming")).strip().lower()
-        self._token        = None
+        self.channel = (
+            (channel or os.getenv("TWITCH_CHANNEL", "BillyandRandyGaming"))
+            .strip()
+            .lower()
+        )
+        self._token = None
         self._token_expiry = 0
 
         if not self.client_id:
@@ -85,43 +90,53 @@ class TwitchStats:
         if TOKEN_CACHE_FILE.exists():
             try:
                 cache = json.loads(TOKEN_CACHE_FILE.read_text())
-                if cache.get("expires_at", 0) > now + 300:   # 5-min buffer
+                if cache.get("expires_at", 0) > now + 300:  # 5-min buffer
                     return cache["access_token"]
             except Exception:
-                pass   # Cache corrupted — just fetch a new token
+                pass  # Cache corrupted — just fetch a new token
 
         # Fetch fresh token from Twitch
-        resp = requests.post(TWITCH_AUTH_URL, params={
-            "client_id":     self.client_id,
-            "client_secret": self.client_secret,
-            "grant_type":    "client_credentials",
-        }, timeout=10)
+        resp = requests.post(
+            TWITCH_AUTH_URL,
+            params={
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "grant_type": "client_credentials",
+            },
+            timeout=10,
+        )
         resp.raise_for_status()
         data = resp.json()
 
-        token      = data["access_token"]
+        token = data["access_token"]
         expires_at = now + data.get("expires_in", 3600)
 
         # Save to cache
         TOKEN_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
-        TOKEN_CACHE_FILE.write_text(json.dumps({
-            "access_token": token,
-            "expires_at":   expires_at,
-        }))
+        TOKEN_CACHE_FILE.write_text(
+            json.dumps(
+                {
+                    "access_token": token,
+                    "expires_at": expires_at,
+                }
+            )
+        )
 
         return token
 
     def _headers(self) -> dict:
         """Auth headers required for every Twitch API call."""
         return {
-            "Client-ID":     self.client_id,
+            "Client-ID": self.client_id,
             "Authorization": f"Bearer {self._get_token()}",
         }
 
     def _get(self, endpoint: str, params: dict = None) -> dict:
         """Make a GET request to the Twitch Helix API."""
-        url  = f"{TWITCH_API_BASE}/{endpoint}"
-        resp = requests.get(url, headers=self._headers(), params=params or {}, timeout=10)
+        url = f"{TWITCH_API_BASE}/{endpoint}"
+        resp = requests.get(
+            url, headers=self._headers(), params=params or {}, timeout=10
+        )
         resp.raise_for_status()
         return resp.json()
 
@@ -147,7 +162,7 @@ class TwitchStats:
             data = self._get("channels/followers", {"broadcaster_id": broadcaster_id})
             return data.get("total", 0)
         except Exception:
-            return -1   # API may require user OAuth for exact count on some channels
+            return -1  # API may require user OAuth for exact count on some channels
 
     def get_stream_status(self, user_id: str) -> dict:
         """
@@ -167,6 +182,7 @@ class TwitchStats:
         uptime_str = ""
         if started_at:
             from datetime import datetime, timezone
+
             start = datetime.fromisoformat(started_at.replace("Z", "+00:00"))
             delta = datetime.now(timezone.utc) - start
             hours, rem = divmod(int(delta.total_seconds()), 3600)
@@ -174,13 +190,15 @@ class TwitchStats:
             uptime_str = f"{hours}h {mins}m" if hours else f"{mins}m"
 
         return {
-            "live":          True,
-            "title":         stream.get("title", ""),
-            "game_name":     stream.get("game_name", ""),
-            "viewer_count":  stream.get("viewer_count", 0),
-            "started_at":    started_at,
-            "uptime":        uptime_str,
-            "thumbnail_url": stream.get("thumbnail_url", "").replace("{width}", "320").replace("{height}", "180"),
+            "live": True,
+            "title": stream.get("title", ""),
+            "game_name": stream.get("game_name", ""),
+            "viewer_count": stream.get("viewer_count", 0),
+            "started_at": started_at,
+            "uptime": uptime_str,
+            "thumbnail_url": stream.get("thumbnail_url", "")
+            .replace("{width}", "320")
+            .replace("{height}", "180"),
         }
 
     def get_channel_info(self, broadcaster_id: str) -> dict:
@@ -194,10 +212,10 @@ class TwitchStats:
             return {}
         ch = channels[0]
         return {
-            "title":    ch.get("title", ""),
-            "game":     ch.get("game_name", ""),
+            "title": ch.get("title", ""),
+            "game": ch.get("game_name", ""),
             "language": ch.get("broadcaster_language", ""),
-            "tags":     ch.get("tags", []),
+            "tags": ch.get("tags", []),
         }
 
     def get_recent_clips(self, broadcaster_id: str, limit: int = 5) -> list:
@@ -205,18 +223,21 @@ class TwitchStats:
         Fetch the top clips by view count.
         Useful for seeing what content is performing best.
         """
-        data = self._get("clips", {
-            "broadcaster_id": broadcaster_id,
-            "first":          limit,
-        })
+        data = self._get(
+            "clips",
+            {
+                "broadcaster_id": broadcaster_id,
+                "first": limit,
+            },
+        )
         clips = data.get("data", [])
         return [
             {
-                "title":       c.get("title", ""),
-                "view_count":  c.get("view_count", 0),
-                "created_at":  c.get("created_at", "")[:10],  # date only
-                "duration":    round(c.get("duration", 0), 1),
-                "url":         c.get("url", ""),
+                "title": c.get("title", ""),
+                "view_count": c.get("view_count", 0),
+                "created_at": c.get("created_at", "")[:10],  # date only
+                "duration": round(c.get("duration", 0), 1),
+                "url": c.get("url", ""),
             }
             for c in clips
         ]
@@ -235,24 +256,26 @@ class TwitchStats:
 
             broadcaster_id = user["id"]
 
-            followers    = self.get_follower_count(broadcaster_id)
-            stream       = self.get_stream_status(broadcaster_id)
+            followers = self.get_follower_count(broadcaster_id)
+            stream = self.get_stream_status(broadcaster_id)
             channel_info = self.get_channel_info(broadcaster_id)
-            clips        = self.get_recent_clips(broadcaster_id)
+            clips = self.get_recent_clips(broadcaster_id)
 
             return {
-                "channel":      self.channel,
+                "channel": self.channel,
                 "display_name": user.get("display_name", self.channel),
-                "followers":    followers,
-                "total_views":  user.get("view_count", 0),
-                "stream":       stream,
+                "followers": followers,
+                "total_views": user.get("view_count", 0),
+                "stream": stream,
                 "channel_info": channel_info,
-                "top_clips":    clips,
-                "fetched_at":   time.strftime("%Y-%m-%d %H:%M:%S"),
+                "top_clips": clips,
+                "fetched_at": time.strftime("%Y-%m-%d %H:%M:%S"),
             }
 
         except requests.HTTPError as e:
-            return {"error": f"Twitch API error: {e.response.status_code} — {e.response.text}"}
+            return {
+                "error": f"Twitch API error: {e.response.status_code} — {e.response.text}"
+            }
         except Exception as e:
             return {"error": str(e)}
 
@@ -265,7 +288,7 @@ class TwitchStats:
             return
 
         stream = data["stream"]
-        ch     = data["channel_info"]
+        ch = data["channel_info"]
 
         print("\n" + "═" * 50)
         print(f"  📺  {data['display_name']}  (@{data['channel']})")
@@ -275,7 +298,9 @@ class TwitchStats:
         print()
 
         if stream["live"]:
-            print(f"  🔴 LIVE NOW  — {stream['viewer_count']:,} viewers  |  Up {stream['uptime']}")
+            print(
+                f"  🔴 LIVE NOW  — {stream['viewer_count']:,} viewers  |  Up {stream['uptime']}"
+            )
             print(f"  🎮 {stream['game_name']}")
             print(f"  📝 {stream['title']}")
         else:
@@ -287,7 +312,9 @@ class TwitchStats:
         if data["top_clips"]:
             print("  🏆 Top Clips:")
             for i, clip in enumerate(data["top_clips"], 1):
-                print(f"    {i}. {clip['title']} — {clip['view_count']:,} views ({clip['created_at']})")
+                print(
+                    f"    {i}. {clip['title']} — {clip['view_count']:,} views ({clip['created_at']})"
+                )
 
         print(f"\n  Updated: {data['fetched_at']}")
         print("═" * 50 + "\n")

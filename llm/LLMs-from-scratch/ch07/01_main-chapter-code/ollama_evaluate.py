@@ -15,14 +15,12 @@ def query_model(prompt, model="llama3", url="http://localhost:11434/api/chat"):
     # Create the data payload as a dictionary
     data = {
         "model": model,
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "options": {     # Settings below are required for deterministic responses
+        "messages": [{"role": "user", "content": prompt}],
+        "options": {  # Settings below are required for deterministic responses
             "seed": 123,
             "temperature": 0,
-            "num_ctx": 2048
-        }
+            "num_ctx": 2048,
+        },
     }
 
     # Send the POST request
@@ -73,7 +71,7 @@ def main(file_path):
     model = "llama3"
     scores = generate_model_scores(test_data, "model_response", model)
     print(f"Number of scores: {len(scores)} of {len(test_data)}")
-    print(f"Average score: {sum(scores)/len(scores):.2f}\n")
+    print(f"Average score: {sum(scores) / len(scores):.2f}\n")
 
 
 def generate_model_scores(json_data, json_key, model="llama3"):
@@ -100,19 +98,13 @@ def generate_model_scores(json_data, json_key, model="llama3"):
 
 
 if __name__ == "__main__":
-
     import argparse
 
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description="Evaluate model responses with ollama"
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Evaluate model responses with ollama"
     )
     parser.add_argument(
-        "--file_path",
-        required=True,
-        help=(
-            "The path to the test dataset `.json` file with the"
-            " `'output'` and `'model_response'` keys"
-        )
+        "--file_path", required=True, help=("The path to the test dataset `.json` file with the `'output'` and `'model_response'` keys")
     )
     args = parser.parse_args()
 

@@ -49,7 +49,8 @@ def main() -> int:
     ten_clip_report = load_json(TEN_CLIP_REPORT, {})
     outcomes = load_jsonl(PERFORMANCE_OUTCOMES_FILE)
     title_outcomes = [
-        row for row in outcomes
+        row
+        for row in outcomes
         if "title" in str(row).lower() or row.get("clip_path") or row.get("trigger")
     ]
 

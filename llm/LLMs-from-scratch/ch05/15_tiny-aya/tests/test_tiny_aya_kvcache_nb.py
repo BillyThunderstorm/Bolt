@@ -56,8 +56,7 @@ def test_dummy_tiny_aya_forward(dummy_cfg_base, dummy_input, import_notebook_def
     torch.manual_seed(123)
     model = import_notebook_defs.TinyAyaModel(dummy_cfg_base)
     out = model(dummy_input)
-    assert out.shape == (1, dummy_input.size(1), dummy_cfg_base["vocab_size"]), \
-        f"Expected shape (1, seq_len, vocab_size), got {out.shape}"
+    assert out.shape == (1, dummy_input.size(1), dummy_cfg_base["vocab_size"]), f"Expected shape (1, seq_len, vocab_size), got {out.shape}"
 
 
 @torch.inference_mode()

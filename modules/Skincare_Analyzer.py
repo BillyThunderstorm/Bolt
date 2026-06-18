@@ -28,6 +28,7 @@ the textual analysis to a scientific database model.
 import json
 from typing import List, Dict, Any
 
+
 # Placeholder for external API calls/databases
 def fetch_ingredient_data(ingredient_name: str) -> Dict[str, Any]:
     """
@@ -36,14 +37,39 @@ def fetch_ingredient_data(ingredient_name: str) -> Dict[str, Any]:
     """
     print(f"Simulating database lookup for: {ingredient_name}...")
     data = {
-        "retinol": {"category": "Retinoid", "effect": "Cell turnover/Acne", "strength": "Medium", "precautions": ["Use at night", "Start slow"]},
-        "niacinamide": {"category": "Vitamin", "effect": "Barrier repair", "strength": "Low", "precautions": ["Great for sensitive skin"]},
-        "salicylic_acid": {"category": "BHA", "effect": "Exfoliation", "strength": "Medium", "precautions": ["Use on clean skin"]},
+        "retinol": {
+            "category": "Retinoid",
+            "effect": "Cell turnover/Acne",
+            "strength": "Medium",
+            "precautions": ["Use at night", "Start slow"],
+        },
+        "niacinamide": {
+            "category": "Vitamin",
+            "effect": "Barrier repair",
+            "strength": "Low",
+            "precautions": ["Great for sensitive skin"],
+        },
+        "salicylic_acid": {
+            "category": "BHA",
+            "effect": "Exfoliation",
+            "strength": "Medium",
+            "precautions": ["Use on clean skin"],
+        },
     }
-    return data.get(ingredient_name.lower(), {"category": "Unknown", "effect": "Unknown", "strength": "N/A", "precautions": ["Consult a dermatologist."]})
+    return data.get(
+        ingredient_name.lower(),
+        {
+            "category": "Unknown",
+            "effect": "Unknown",
+            "strength": "N/A",
+            "precautions": ["Consult a dermatologist."],
+        },
+    )
 
 
-def analyze_skincare_routine(product_list: List[Dict[str, Any]], user_goal: str) -> Dict[str, Any]:
+def analyze_skincare_routine(
+    product_list: List[Dict[str, Any]], user_goal: str
+) -> Dict[str, Any]:
     """
     Analyzes a list of products against a user goal to create a structured routine plan.
 
@@ -55,7 +81,7 @@ def analyze_skincare_routine(product_list: List[Dict[str, Any]], user_goal: str)
         A dictionary containing the structured analysis report.
     """
     print(f"\n[🧪 Skincare Analyzer] Analyzing routine for: {user_goal}")
-    
+
     if not product_list:
         return {"status": "Failure", "reason": "No products provided for analysis."}
 
@@ -68,40 +94,46 @@ def analyze_skincare_routine(product_list: List[Dict[str, Any]], user_goal: str)
     ingredient_report = []
     for ingredient in all_ingredients:
         data = fetch_ingredient_data(ingredient)
-        ingredient_report.append({
-            "ingredient": ingredient,
-            "details": data
-        })
+        ingredient_report.append({"ingredient": ingredient, "details": data})
 
     # 3. Synthesize the final routine (This is where the LLM prompt magic happens)
     # Placeholder logic: The LLM will interpret ingredient_report + user_goal
-    
+
     structured_report = {
         "status": "Success",
         "user_goal_addressed": user_goal,
         "summary_hook": f"A custom routine based on {user_goal} using {len(product_list)} products.",
         "key_findings": [
             "🚨 **Warning:** Watch out for common irritants in the product list.",
-            "✨ **Recommendation:** The combination of Retinol and Niacinamide is highly effective for barrier repair."
+            "✨ **Recommendation:** The combination of Retinol and Niacinamide is highly effective for barrier repair.",
         ],
         "product_comparison": product_list,
         "ingredient_action_plan": ingredient_report,
         "suggested_routine": {
             "AM": ["Cleanser (Gentle)", "Serum (Niacinamide)", "SPF (Non-comedogenic)"],
-            "PM": ["Cleanser (Gentle)", "Treatment (Retinol)", "Moisturizer"]
-        }
+            "PM": ["Cleanser (Gentle)", "Treatment (Retinol)", "Moisturizer"],
+        },
     }
-    
+
     return structured_report
+
 
 if __name__ == "__main__":
     # Example Usage:
     test_products = [
-        {"name": "Product X", "ingredients": ["Retinol", "Hyaluronic Acid"], "type": "Serum"},
-        {"name": "Product Y", "ingredients": ["Niacinamide", "Ceramide"], "type": "Moisturizer"}
+        {
+            "name": "Product X",
+            "ingredients": ["Retinol", "Hyaluronic Acid"],
+            "type": "Serum",
+        },
+        {
+            "name": "Product Y",
+            "ingredients": ["Niacinamide", "Ceramide"],
+            "type": "Moisturizer",
+        },
     ]
     test_goal = "A routine for barrier repair in cold weather."
-    
+
     report = analyze_skincare_routine(test_products, test_goal)
     print("\n==========================================")
     print("✅ SKINGCARE ANALYSIS REPORT READY:")

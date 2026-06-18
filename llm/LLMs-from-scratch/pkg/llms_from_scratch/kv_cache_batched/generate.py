@@ -23,21 +23,13 @@ def generate_text_simple(model, idx, max_new_tokens, context_size=None, use_cach
             input_ids = idx[:, -ctx_len:]
             seq_len = input_ids.size(1)
             start_pos = model.current_pos.clone()
-            logits = model(
-                input_ids,
-                cache=cache,
-                start_pos=start_pos
-            )
+            logits = model(input_ids, cache=cache, start_pos=start_pos)
             model.current_pos += seq_len
 
             # iterative generation
             for _ in range(max_new_tokens):
                 next_token = logits[:, -1].argmax(dim=-1, keepdim=True)  # (B, 1)
-                logits = model(
-                    next_token,
-                    cache=cache,
-                    start_pos=model.current_pos.clone()
-                )
+                logits = model(next_token, cache=cache, start_pos=model.current_pos.clone())
                 model.current_pos += 1
                 idx = torch.cat([idx, next_token], dim=1)
         else:

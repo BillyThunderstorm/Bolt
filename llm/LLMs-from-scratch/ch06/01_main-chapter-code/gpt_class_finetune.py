@@ -78,33 +78,22 @@ class SpamDataset(Dataset):
         self.data = pd.read_csv(csv_file)
 
         # Pre-tokenize texts
-        self.encoded_texts = [
-            tokenizer.encode(text) for text in self.data["Text"]
-        ]
+        self.encoded_texts = [tokenizer.encode(text) for text in self.data["Text"]]
 
         if max_length is None:
             self.max_length = self._longest_encoded_length()
         else:
             self.max_length = max_length
             # Truncate sequences if they are longer than max_length
-            self.encoded_texts = [
-                encoded_text[:self.max_length]
-                for encoded_text in self.encoded_texts
-            ]
+            self.encoded_texts = [encoded_text[: self.max_length] for encoded_text in self.encoded_texts]
 
         # Pad sequences to the longest sequence
-        self.encoded_texts = [
-            encoded_text + [pad_token_id] * (self.max_length - len(encoded_text))
-            for encoded_text in self.encoded_texts
-        ]
+        self.encoded_texts = [encoded_text + [pad_token_id] * (self.max_length - len(encoded_text)) for encoded_text in self.encoded_texts]
 
     def __getitem__(self, index):
         encoded = self.encoded_texts[index]
         label = self.data.iloc[index]["Label"]
-        return (
-            torch.tensor(encoded, dtype=torch.long),
-            torch.tensor(label, dtype=torch.long)
-        )
+        return (torch.tensor(encoded, dtype=torch.long), torch.tensor(label, dtype=torch.long))
 
     def __len__(self):
         return len(self.data)
@@ -152,7 +141,7 @@ def calc_loss_batch(input_batch, target_batch, model, device):
 
 
 def calc_loss_loader(data_loader, model, device, num_batches=None):
-    total_loss = 0.
+    total_loss = 0.0
     if len(data_loader) == 0:
         return float("nan")
     elif num_batches is None:
@@ -177,8 +166,7 @@ def evaluate_model(model, train_loader, val_loader, device, eval_iter):
     return train_loss, val_loss
 
 
-def train_classifier_simple(model, train_loader, val_loader, optimizer, device, num_epochs,
-                            eval_freq, eval_iter):
+def train_classifier_simple(model, train_loader, val_loader, optimizer, device, num_epochs, eval_freq, eval_iter):
     # Initialize lists to track losses and tokens seen
     train_losses, val_losses, train_accs, val_accs = [], [], [], []
     examples_seen, global_step = 0, -1
@@ -197,18 +185,16 @@ def train_classifier_simple(model, train_loader, val_loader, optimizer, device, 
 
             # Optional evaluation step
             if global_step % eval_freq == 0:
-                train_loss, val_loss = evaluate_model(
-                    model, train_loader, val_loader, device, eval_iter)
+                train_loss, val_loss = evaluate_model(model, train_loader, val_loader, device, eval_iter)
                 train_losses.append(train_loss)
                 val_losses.append(val_loss)
-                print(f"Ep {epoch+1} (Step {global_step:06d}): "
-                      f"Train loss {train_loss:.3f}, Val loss {val_loss:.3f}")
+                print(f"Ep {epoch + 1} (Step {global_step:06d}): Train loss {train_loss:.3f}, Val loss {val_loss:.3f}")
 
         # Calculate accuracy after each epoch
         train_accuracy = calc_accuracy_loader(train_loader, model, device, num_batches=eval_iter)
         val_accuracy = calc_accuracy_loader(val_loader, model, device, num_batches=eval_iter)
-        print(f"Training accuracy: {train_accuracy*100:.2f}% | ", end="")
-        print(f"Validation accuracy: {val_accuracy*100:.2f}%")
+        print(f"Training accuracy: {train_accuracy * 100:.2f}% | ", end="")
+        print(f"Validation accuracy: {val_accuracy * 100:.2f}%")
         train_accs.append(train_accuracy)
         val_accs.append(val_accuracy)
 
@@ -236,18 +222,19 @@ def plot_values(epochs_seen, examples_seen, train_values, val_values, label="los
 
 
 if __name__ == "__main__":
-
     import argparse
 
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description="Finetune a GPT model for classification"
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Finetune a GPT model for classification"
     )
     parser.add_argument(
         "--test_mode",
         default=False,
         action="store_true",
-        help=("This flag runs the model in test mode for internal testing purposes. "
-              "Otherwise, it runs the model as it is used in the chapter (recommended).")
+        help=(
+            "This flag runs the model in test mode for internal testing purposes. "
+            "Otherwise, it runs the model as it is used in the chapter (recommended)."
+        ),
     )
     args = parser.parse_args()
 
@@ -281,23 +268,11 @@ if __name__ == "__main__":
     ########################################
     tokenizer = tiktoken.get_encoding("gpt2")
 
-    train_dataset = SpamDataset(
-        csv_file="train.csv",
-        max_length=None,
-        tokenizer=tokenizer
-    )
+    train_dataset = SpamDataset(csv_file="train.csv", max_length=None, tokenizer=tokenizer)
 
-    val_dataset = SpamDataset(
-        csv_file="validation.csv",
-        max_length=train_dataset.max_length,
-        tokenizer=tokenizer
-    )
+    val_dataset = SpamDataset(csv_file="validation.csv", max_length=train_dataset.max_length, tokenizer=tokenizer)
 
-    test_dataset = SpamDataset(
-        csv_file="test.csv",
-        max_length=train_dataset.max_length,
-        tokenizer=tokenizer
-    )
+    test_dataset = SpamDataset(csv_file="test.csv", max_length=train_dataset.max_length, tokenizer=tokenizer)
 
     num_workers = 0
     batch_size = 8
@@ -339,7 +314,7 @@ if __name__ == "__main__":
             "qkv_bias": False,
             "emb_dim": 12,
             "n_layers": 1,
-            "n_heads": 2
+            "n_heads": 2,
         }
         model = GPTModel(BASE_CONFIG)
         model.eval()
@@ -351,10 +326,10 @@ if __name__ == "__main__":
         INPUT_PROMPT = "Every effort moves"
 
         BASE_CONFIG = {
-            "vocab_size": 50257,     # Vocabulary size
+            "vocab_size": 50257,  # Vocabulary size
             "context_length": 1024,  # Context length
-            "drop_rate": 0.0,        # Dropout rate
-            "qkv_bias": True         # Query-key-value bias
+            "drop_rate": 0.0,  # Dropout rate
+            "qkv_bias": True,  # Query-key-value bias
         }
 
         model_configs = {
@@ -409,8 +384,14 @@ if __name__ == "__main__":
 
     num_epochs = 5
     train_losses, val_losses, train_accs, val_accs, examples_seen = train_classifier_simple(
-        model, train_loader, val_loader, optimizer, device,
-        num_epochs=num_epochs, eval_freq=50, eval_iter=5,
+        model,
+        train_loader,
+        val_loader,
+        optimizer,
+        device,
+        num_epochs=num_epochs,
+        eval_freq=50,
+        eval_iter=5,
     )
 
     end_time = time.time()

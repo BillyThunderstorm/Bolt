@@ -5,10 +5,7 @@
 
 
 from llms_from_scratch.ch04 import GPTModel
-from llms_from_scratch.ch06 import (
-    download_and_unzip_spam_data, create_balanced_dataset,
-    random_split, SpamDataset, train_classifier_simple
-)
+from llms_from_scratch.ch06 import download_and_unzip_spam_data, create_balanced_dataset, random_split, SpamDataset, train_classifier_simple
 from llms_from_scratch.appendix_e import replace_linear_with_lora
 
 from pathlib import Path
@@ -32,15 +29,11 @@ def test_train_classifier_lora(tmp_path):
     data_file_path = Path(extracted_path) / "SMSSpamCollection.tsv"
 
     try:
-        download_and_unzip_spam_data(
-            url, zip_path, extracted_path, data_file_path
-        )
+        download_and_unzip_spam_data(url, zip_path, extracted_path, data_file_path)
     except (requests.exceptions.RequestException, TimeoutError) as e:
         print(f"Primary URL failed: {e}. Trying backup URL...")
         backup_url = "https://f001.backblazeb2.com/file/LLMs-from-scratch/sms%2Bspam%2Bcollection.zip"
-        download_and_unzip_spam_data(
-            backup_url, zip_path, extracted_path, data_file_path
-        )
+        download_and_unzip_spam_data(backup_url, zip_path, extracted_path, data_file_path)
 
     df = pd.read_csv(data_file_path, sep="\t", header=None, names=["Label", "Text"])
     balanced_df = create_balanced_dataset(df)
@@ -56,17 +49,9 @@ def test_train_classifier_lora(tmp_path):
     ########################################
     tokenizer = tiktoken.get_encoding("gpt2")
 
-    train_dataset = SpamDataset(
-        csv_file=tmp_path / "train.csv",
-        max_length=None,
-        tokenizer=tokenizer
-    )
+    train_dataset = SpamDataset(csv_file=tmp_path / "train.csv", max_length=None, tokenizer=tokenizer)
 
-    val_dataset = SpamDataset(
-        csv_file=tmp_path / "validation.csv",
-        max_length=train_dataset.max_length,
-        tokenizer=tokenizer
-    )
+    val_dataset = SpamDataset(csv_file=tmp_path / "validation.csv", max_length=train_dataset.max_length, tokenizer=tokenizer)
 
     num_workers = 0
     batch_size = 8
@@ -100,7 +85,7 @@ def test_train_classifier_lora(tmp_path):
         "qkv_bias": False,
         "emb_dim": 12,
         "n_layers": 1,
-        "n_heads": 2
+        "n_heads": 2,
     }
     model = GPTModel(BASE_CONFIG)
     model.eval()
@@ -141,8 +126,14 @@ def test_train_classifier_lora(tmp_path):
 
     num_epochs = 6
     train_losses, val_losses, train_accs, val_accs, examples_seen = train_classifier_simple(
-        model, batch_train_loader, batch_val_loader, optimizer, device,
-        num_epochs=num_epochs, eval_freq=1, eval_iter=1,
+        model,
+        batch_train_loader,
+        batch_val_loader,
+        optimizer,
+        device,
+        num_epochs=num_epochs,
+        eval_freq=1,
+        eval_iter=1,
     )
 
     assert round(train_losses[0], 1) == 0.8

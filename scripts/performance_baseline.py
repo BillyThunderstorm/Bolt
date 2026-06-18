@@ -17,14 +17,17 @@ from pathlib import Path
 RESULTS_DIR = Path("logs/performance")
 RESULTS_FILE = RESULTS_DIR / f"baseline_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
+
 def ensure_results_dir():
     """Create results directory if it doesn't exist."""
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+
 
 def get_memory_usage_mb() -> float:
     """Get current process memory usage in MB."""
     try:
         import psutil
+
         process = psutil.Process(os.getpid())
         return process.memory_info().rss / 1024 / 1024
     except ImportError:
@@ -32,7 +35,8 @@ def get_memory_usage_mb() -> float:
         try:
             result = subprocess.run(
                 ["ps", "-o", "rss=", "-p", str(os.getpid())],
-                capture_output=True, text=True
+                capture_output=True,
+                text=True,
             )
             if result.returncode == 0:
                 return int(result.stdout.strip()) / 1024  # Convert KB to MB
@@ -40,13 +44,14 @@ def get_memory_usage_mb() -> float:
             pass
     return 0.0
 
+
 def measure_startup_time(script: str) -> dict:
     """Measure how long a script takes to start (syntax check + import test)."""
     result = {
         "script": script,
         "syntax_check_sec": None,
         "import_test_sec": None,
-        "error": None
+        "error": None,
     }
 
     try:
@@ -63,13 +68,10 @@ def measure_startup_time(script: str) -> dict:
 
     return result
 
+
 def measure_import_time(module: str) -> dict:
     """Measure how long a module takes to import."""
-    result = {
-        "module": module,
-        "import_time_sec": None,
-        "error": None
-    }
+    result = {"module": module, "import_time_sec": None, "error": None}
 
     try:
         start = time.time()
@@ -80,6 +82,7 @@ def measure_import_time(module: str) -> dict:
         result["error"] = str(e)
 
     return result
+
 
 def check_system_resources() -> dict:
     """Check current system resource usage."""
@@ -92,19 +95,27 @@ def check_system_resources() -> dict:
 
     try:
         import psutil
-        resources["memory_total_gb"] = round(psutil.virtual_memory().total / 1024 / 1024 / 1024, 2)
-        resources["memory_available_gb"] = round(psutil.virtual_memory().available / 1024 / 1024 / 1024, 2)
+
+        resources["memory_total_gb"] = round(
+            psutil.virtual_memory().total / 1024 / 1024 / 1024, 2
+        )
+        resources["memory_available_gb"] = round(
+            psutil.virtual_memory().available / 1024 / 1024 / 1024, 2
+        )
     except ImportError:
         pass
 
     # Disk free space
     try:
         stat = os.statvfs("/")
-        resources["disk_free_gb"] = round((stat.f_bavail * stat.f_frsize) / 1024 / 1024 / 1024, 2)
+        resources["disk_free_gb"] = round(
+            (stat.f_bavail * stat.f_frsize) / 1024 / 1024 / 1024, 2
+        )
     except Exception:
         pass
 
     return resources
+
 
 def run_baseline() -> dict:
     """Run full performance baseline."""
@@ -123,7 +134,7 @@ def run_baseline() -> dict:
         "system": check_system_resources(),
         "module_imports": [],
         "script_startup": [],
-        "notes": []
+        "notes": [],
     }
 
     # Core modules to test
@@ -175,21 +186,25 @@ def run_baseline() -> dict:
     print("=" * 60)
 
     total_import_time = sum(
-        r.get("import_time_sec", 0) or 0
-        for r in results["module_imports"]
+        r.get("import_time_sec", 0) or 0 for r in results["module_imports"]
     )
     print(f"Total module import time: {total_import_time:.3f}s")
 
     if results["script_startup"]:
         valid_syntax = [
-            r for r in results["script_startup"]
+            r
+            for r in results["script_startup"]
             if r.get("syntax_check_sec") is not None
         ]
         if valid_syntax:
-            avg_syntax = sum(r["syntax_check_sec"] for r in valid_syntax) / len(valid_syntax)
+            avg_syntax = sum(r["syntax_check_sec"] for r in valid_syntax) / len(
+                valid_syntax
+            )
             print(f"Average script syntax check: {avg_syntax:.4f}s")
 
-    print(f"System memory: {results['system']['memory_total_gb']}GB total, {results['system']['memory_available_gb']}GB available")
+    print(
+        f"System memory: {results['system']['memory_total_gb']}GB total, {results['system']['memory_available_gb']}GB available"
+    )
     print(f"Disk free: {results['system']['disk_free_gb']}GB")
 
     # Save results
@@ -200,6 +215,7 @@ def run_baseline() -> dict:
     print(f"Results saved to: {RESULTS_FILE}")
 
     return results
+
 
 if __name__ == "__main__":
     if "--help" in sys.argv:

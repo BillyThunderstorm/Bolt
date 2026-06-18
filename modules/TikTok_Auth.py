@@ -48,7 +48,9 @@ def write_env_values(values: dict, path: Path = ENV_FILE) -> None:
     path.write_text("".join(lines), encoding="utf-8")
 
 
-def access_token_is_fresh(env: Optional[dict] = None, leeway_seconds: int = 300) -> bool:
+def access_token_is_fresh(
+    env: Optional[dict] = None, leeway_seconds: int = 300
+) -> bool:
     env = env or load_env()
     token = env.get("TIKTOK_ACCESS_TOKEN", "").strip()
     expires_at = float(env.get("TIKTOK_ACCESS_TOKEN_EXPIRES_AT", "0") or 0)
@@ -92,8 +94,12 @@ def save_token_bundle(data: dict, path: Path = ENV_FILE) -> dict:
         "TIKTOK_OPEN_ID": data.get("open_id", ""),
         "TIKTOK_SCOPE": data.get("scope", ""),
         "TIKTOK_TOKEN_TYPE": data.get("token_type", "Bearer"),
-        "TIKTOK_ACCESS_TOKEN_EXPIRES_AT": str(now + int(data.get("expires_in", 0) or 0)),
-        "TIKTOK_REFRESH_TOKEN_EXPIRES_AT": str(now + int(data.get("refresh_expires_in", 0) or 0)),
+        "TIKTOK_ACCESS_TOKEN_EXPIRES_AT": str(
+            now + int(data.get("expires_in", 0) or 0)
+        ),
+        "TIKTOK_REFRESH_TOKEN_EXPIRES_AT": str(
+            now + int(data.get("refresh_expires_in", 0) or 0)
+        ),
     }
     write_env_values(values, path=path)
     return values
@@ -129,12 +135,14 @@ def refresh_access_token(path: Path = ENV_FILE) -> Optional[str]:
     if not client_key or not client_secret or not refresh_token:
         return env.get("TIKTOK_ACCESS_TOKEN", "") or None
 
-    data = post_token_request({
-        "client_key": client_key,
-        "client_secret": client_secret,
-        "grant_type": "refresh_token",
-        "refresh_token": refresh_token,
-    })
+    data = post_token_request(
+        {
+            "client_key": client_key,
+            "client_secret": client_secret,
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+        }
+    )
     saved = save_token_bundle(data, path=path)
     return saved.get("TIKTOK_ACCESS_TOKEN") or None
 

@@ -20,7 +20,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from modules.TikTok_Auth import ENV_FILE, exchange_code_for_tokens, load_env, write_env_values
+from modules.TikTok_Auth import (
+    ENV_FILE,
+    exchange_code_for_tokens,
+    load_env,
+    write_env_values,
+)
 
 AUTH_URL = "https://www.tiktok.com/v2/auth/authorize/"
 DEFAULT_SCOPES = "user.info.basic,video.publish,video.upload"
@@ -48,7 +53,9 @@ def extract_code(value: str) -> tuple[str, str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Authorize Bolt with TikTok and save tokens to .env.")
+    parser = argparse.ArgumentParser(
+        description="Authorize Bolt with TikTok and save tokens to .env."
+    )
     parser.add_argument("--client-key", default="")
     parser.add_argument("--client-secret", default="")
     parser.add_argument("--redirect-uri", default="")
@@ -62,8 +69,12 @@ def main() -> int:
 
     print("\nBolt TikTok Token Setup")
     print("=" * 58)
-    print("You need the Client Key, Client Secret, and Redirect URI from your TikTok Developer app.")
-    print("The Redirect URI must exactly match one registered in TikTok's developer portal.\n")
+    print(
+        "You need the Client Key, Client Secret, and Redirect URI from your TikTok Developer app."
+    )
+    print(
+        "The Redirect URI must exactly match one registered in TikTok's developer portal.\n"
+    )
 
     if not client_key:
         client_key = input("TikTok Client Key: ").strip()
@@ -89,15 +100,19 @@ def main() -> int:
     }
     auth_url = f"{AUTH_URL}?{urllib.parse.urlencode(params)}"
 
-    write_env_values({
-        "TIKTOK_CLIENT_KEY": client_key,
-        "TIKTOK_CLIENT_SECRET": client_secret,
-        "TIKTOK_REDIRECT_URI": redirect_uri,
-    })
+    write_env_values(
+        {
+            "TIKTOK_CLIENT_KEY": client_key,
+            "TIKTOK_CLIENT_SECRET": client_secret,
+            "TIKTOK_REDIRECT_URI": redirect_uri,
+        }
+    )
 
     print("\nOpen this URL in your browser and approve Bolt:")
     print(auth_url)
-    print("\nAfter approval, paste the full redirect URL here. If TikTok only shows a code, paste the code.")
+    print(
+        "\nAfter approval, paste the full redirect URL here. If TikTok only shows a code, paste the code."
+    )
 
     pasted = input("\nRedirect URL or code:\n> ").strip()
     code, returned_state = extract_code(pasted)
@@ -123,7 +138,9 @@ def main() -> int:
     print("\nSaved TikTok tokens to .env.")
     print(f"Authorized scopes: {scopes or '(none returned)'}")
     if "video.publish" not in scopes:
-        print("Note: direct auto-posting needs the video.publish scope approved by TikTok.")
+        print(
+            "Note: direct auto-posting needs the video.publish scope approved by TikTok."
+        )
     print("\nVerify with: python3 scripts/verify.py")
     return 0
 

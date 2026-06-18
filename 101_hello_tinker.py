@@ -110,7 +110,9 @@ async def _(service_client):
     MODEL_NAME = "Qwen/Qwen3-4B-Instruct-2507"
 
     # Create a sampling client -- this connects to a remote GPU worker
-    sampling_client = await service_client.create_sampling_client_async(base_model=MODEL_NAME)
+    sampling_client = await service_client.create_sampling_client_async(
+        base_model=MODEL_NAME
+    )
 
     # Get the tokenizer for encoding/decoding text
     tokenizer = sampling_client.get_tokenizer()
@@ -172,7 +174,9 @@ def _(mo):
 async def _(prompt, sampling_client, tokenizer, types):
     result_1 = await sampling_client.sample_async(
         prompt=prompt,
-        sampling_params=types.SamplingParams(max_tokens=50, temperature=0.9, stop=["\n"]),
+        sampling_params=types.SamplingParams(
+            max_tokens=50, temperature=0.9, stop=["\n"]
+        ),
         num_samples=3,
     )
     for i, _seq in enumerate(result_1.sequences):

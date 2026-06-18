@@ -27,10 +27,7 @@ class GELU(nn.Module):
         super().__init__()
 
     def forward(self, x):
-        return 0.5 * x * (1 + torch.tanh(
-            torch.sqrt(torch.tensor(2.0 / torch.pi)) *
-            (x + 0.044715 * torch.pow(x, 3))
-        ))
+        return 0.5 * x * (1 + torch.tanh(torch.sqrt(torch.tensor(2.0 / torch.pi)) * (x + 0.044715 * torch.pow(x, 3))))
 
 
 class FeedForward(nn.Module):
@@ -55,7 +52,8 @@ class TransformerBlock(nn.Module):
             context_length=cfg["context_length"],
             num_heads=cfg["n_heads"],
             dropout=cfg["drop_rate"],
-            qkv_bias=cfg["qkv_bias"])
+            qkv_bias=cfg["qkv_bias"],
+        )
         self.ff = FeedForward(cfg)
         self.norm1 = LayerNorm(cfg["emb_dim"])
         self.norm2 = LayerNorm(cfg["emb_dim"])
@@ -65,7 +63,7 @@ class TransformerBlock(nn.Module):
         # Shortcut connection for attention block
         shortcut = x
         x = self.norm1(x)
-        x = self.att(x)   # Shape [batch_size, num_tokens, emb_size]
+        x = self.att(x)  # Shape [batch_size, num_tokens, emb_size]
         x = self.drop_resid(x)
         x = x + shortcut  # Add the original input back
 
@@ -86,8 +84,7 @@ class GPTModel(nn.Module):
         self.pos_emb = nn.Embedding(cfg["context_length"], cfg["emb_dim"])
         self.drop_emb = nn.Dropout(cfg["drop_rate"])
 
-        self.trf_blocks = nn.Sequential(
-            *[TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
+        self.trf_blocks = nn.Sequential(*[TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
 
         self.final_norm = LayerNorm(cfg["emb_dim"])
         self.out_head = nn.Linear(cfg["emb_dim"], cfg["vocab_size"], bias=False)
@@ -107,7 +104,6 @@ class GPTModel(nn.Module):
 def generate_text_simple(model, idx, max_new_tokens, context_size):
     # idx is (B, T) array of indices in the current context
     for _ in range(max_new_tokens):
-
         # Crop current context if it exceeds the supported context size
         # E.g., if LLM supports only 5 tokens, and the context size is 10
         # then only the last 5 tokens are used as context
@@ -128,6 +124,7 @@ def generate_text_simple(model, idx, max_new_tokens, context_size):
         idx = torch.cat((idx, idx_next), dim=1)  # (batch, n_tokens+1)
 
     return idx
+
 
 ######################
 # Bonus
@@ -151,11 +148,8 @@ class TransformerBlockFast(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.att = PyTorchMultiHeadAttention(
-            d_in=cfg["emb_dim"],
-            d_out=cfg["emb_dim"],
-            num_heads=cfg["n_heads"],
-            dropout=cfg["drop_rate"],
-            qkv_bias=cfg["qkv_bias"])
+            d_in=cfg["emb_dim"], d_out=cfg["emb_dim"], num_heads=cfg["n_heads"], dropout=cfg["drop_rate"], qkv_bias=cfg["qkv_bias"]
+        )
         self.ff = FeedForwardFast(cfg)
         self.norm1 = nn.LayerNorm(cfg["emb_dim"])
         self.norm2 = nn.LayerNorm(cfg["emb_dim"])
@@ -165,7 +159,7 @@ class TransformerBlockFast(nn.Module):
         # Shortcut connection for attention block
         shortcut = x
         x = self.norm1(x)
-        x = self.att(x)   # Shape [batch_size, num_tokens, emb_size]
+        x = self.att(x)  # Shape [batch_size, num_tokens, emb_size]
         x = self.drop_shortcut(x)
         x = x + shortcut  # Add the original input back
 
@@ -193,14 +187,14 @@ class GPTModelFast(nn.Module):
     3. Uses PyTorch's scaled_dot_product_attention instead of a custom MultiHeadAttention.
     4. Automatically enables FlashAttention on compatible GPUs.
     """
+
     def __init__(self, cfg):
         super().__init__()
         self.tok_emb = nn.Embedding(cfg["vocab_size"], cfg["emb_dim"])
         self.pos_emb = nn.Embedding(cfg["context_length"], cfg["emb_dim"])
         self.drop_emb = nn.Dropout(cfg["drop_rate"])
 
-        self.trf_blocks = nn.Sequential(
-            *[TransformerBlockFast(cfg) for _ in range(cfg["n_layers"])])
+        self.trf_blocks = nn.Sequential(*[TransformerBlockFast(cfg) for _ in range(cfg["n_layers"])])
 
         self.final_norm = nn.LayerNorm(cfg["emb_dim"])
         self.out_head = nn.Linear(cfg["emb_dim"], cfg["vocab_size"], bias=False)

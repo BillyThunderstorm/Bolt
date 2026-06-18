@@ -15,27 +15,27 @@ import torch.nn as nn
 
 # 0.6 billion parameters
 QWEN_CONFIG_06_B = {
-    "vocab_size": 151_936,           # Vocabulary size
-    "context_length": 40_960,        # Context length that was used to train the model
-    "emb_dim": 1024,                 # Embedding dimension
-    "n_heads": 16,                   # Number of attention heads
-    "n_layers": 28,                  # Number of layers
-    "hidden_dim": 3072,              # Size of the intermediate dimension in FeedForward
-    "head_dim": 128,                 # Size of the heads in GQA
-    "qk_norm": True,                 # Whether to normalize queries and keys in GQA
-    "n_kv_groups": 8,                # Key-Value groups for grouped-query attention
-    "rope_base": 1_000_000.0,        # The base in RoPE's "theta"
-    "dtype": torch.bfloat16,         # Lower-precision dtype to reduce memory usage
+    "vocab_size": 151_936,  # Vocabulary size
+    "context_length": 40_960,  # Context length that was used to train the model
+    "emb_dim": 1024,  # Embedding dimension
+    "n_heads": 16,  # Number of attention heads
+    "n_layers": 28,  # Number of layers
+    "hidden_dim": 3072,  # Size of the intermediate dimension in FeedForward
+    "head_dim": 128,  # Size of the heads in GQA
+    "qk_norm": True,  # Whether to normalize queries and keys in GQA
+    "n_kv_groups": 8,  # Key-Value groups for grouped-query attention
+    "rope_base": 1_000_000.0,  # The base in RoPE's "theta"
+    "dtype": torch.bfloat16,  # Lower-precision dtype to reduce memory usage
 }
 
 # 1.7 billion parameters
 QWEN3_CONFIG_1_7B = {
     "vocab_size": 151_936,
     "context_length": 40_960,
-    "emb_dim": 2048,                 # 2x larger than above
+    "emb_dim": 2048,  # 2x larger than above
     "n_heads": 16,
     "n_layers": 28,
-    "hidden_dim": 6144,              # 2x larger than above
+    "hidden_dim": 6144,  # 2x larger than above
     "head_dim": 128,
     "qk_norm": True,
     "n_kv_groups": 8,
@@ -47,10 +47,10 @@ QWEN3_CONFIG_1_7B = {
 QWEN3_CONFIG_4B = {
     "vocab_size": 151_936,
     "context_length": 40_960,
-    "emb_dim": 2560,                 # 25% larger than above
-    "n_heads": 32,                   # 2x larger than above
-    "n_layers": 36,                  # 29% larger than above
-    "hidden_dim": 9728,              # ~3x larger than above
+    "emb_dim": 2560,  # 25% larger than above
+    "n_heads": 32,  # 2x larger than above
+    "n_layers": 36,  # 29% larger than above
+    "hidden_dim": 9728,  # ~3x larger than above
     "head_dim": 128,
     "qk_norm": True,
     "n_kv_groups": 8,
@@ -62,10 +62,10 @@ QWEN3_CONFIG_4B = {
 QWEN3_CONFIG_8B = {
     "vocab_size": 151_936,
     "context_length": 40_960,
-    "emb_dim": 4096,                 # 60% larger than above
+    "emb_dim": 4096,  # 60% larger than above
     "n_heads": 32,
     "n_layers": 36,
-    "hidden_dim": 12288,             # 26% larger than above
+    "hidden_dim": 12288,  # 26% larger than above
     "head_dim": 128,
     "qk_norm": True,
     "n_kv_groups": 8,
@@ -75,31 +75,31 @@ QWEN3_CONFIG_8B = {
 
 # 14 billion parameters
 QWEN3_CONFIG_14B = {
-        "vocab_size": 151_936,
-        "context_length": 40_960,
-        "emb_dim": 5120,                 # 25% larger than above
-        "n_heads": 40,                   # 25% larger than above
-        "n_layers": 40,                  # 11% larger than above
-        "hidden_dim": 17408,             # 42% larger than above
-        "head_dim": 128,
-        "qk_norm": True,
-        "n_kv_groups": 8,
-        "rope_base": 1_000_000.0,
-        "dtype": torch.bfloat16,
+    "vocab_size": 151_936,
+    "context_length": 40_960,
+    "emb_dim": 5120,  # 25% larger than above
+    "n_heads": 40,  # 25% larger than above
+    "n_layers": 40,  # 11% larger than above
+    "hidden_dim": 17408,  # 42% larger than above
+    "head_dim": 128,
+    "qk_norm": True,
+    "n_kv_groups": 8,
+    "rope_base": 1_000_000.0,
+    "dtype": torch.bfloat16,
 }
 
 QWEN3_CONFIG_32B = {
-        "vocab_size": 151_936,
-        "context_length": 40_960,
-        "emb_dim": 5120,
-        "n_heads": 64,                   # 60% larger than above
-        "n_layers": 64,                  # 60% larger than above
-        "hidden_dim": 25600,             # 47% larger than above
-        "head_dim": 128,
-        "qk_norm": True,
-        "n_kv_groups": 8,
-        "rope_base": 1_000_000.0,
-        "dtype": torch.bfloat16,
+    "vocab_size": 151_936,
+    "context_length": 40_960,
+    "emb_dim": 5120,
+    "n_heads": 64,  # 60% larger than above
+    "n_layers": 64,  # 60% larger than above
+    "hidden_dim": 25600,  # 47% larger than above
+    "head_dim": 128,
+    "qk_norm": True,
+    "n_kv_groups": 8,
+    "rope_base": 1_000_000.0,
+    "dtype": torch.bfloat16,
 }
 
 # Mixture of Experts Model
@@ -138,11 +138,7 @@ class Qwen3Model(nn.Module):
             head_dim = cfg["emb_dim"] // cfg["n_heads"]
         else:
             head_dim = cfg["head_dim"]
-        cos, sin = compute_rope_params(
-            head_dim=head_dim,
-            theta_base=cfg["rope_base"],
-            context_length=cfg["context_length"]
-        )
+        cos, sin = compute_rope_params(head_dim=head_dim, theta_base=cfg["rope_base"], context_length=cfg["context_length"])
         self.register_buffer("cos", cos, persistent=False)
         self.register_buffer("sin", sin, persistent=False)
         self.cfg = cfg
@@ -171,7 +167,7 @@ class TransformerBlock(nn.Module):
             head_dim=cfg["head_dim"],
             num_kv_groups=cfg["n_kv_groups"],
             qk_norm=cfg["qk_norm"],
-            dtype=cfg["dtype"]
+            dtype=cfg["dtype"],
         )
         if "num_experts" in cfg and cfg["num_experts"] > 0:
             self.ff = MoEFeedForward(cfg)
@@ -184,7 +180,12 @@ class TransformerBlock(nn.Module):
         # Shortcut connection for attention block
         shortcut = x
         x = self.norm1(x)
-        x = self.att(x, mask, cos, sin,)  # Shape [batch_size, num_tokens, emb_size]
+        x = self.att(
+            x,
+            mask,
+            cos,
+            sin,
+        )  # Shape [batch_size, num_tokens, emb_size]
         x = x + shortcut  # Add the original input back
 
         # Shortcut connection for feed-forward block
@@ -218,12 +219,15 @@ class MoEFeedForward(nn.Module):
         self.emb_dim = cfg["emb_dim"]
         self.gate = nn.Linear(cfg["emb_dim"], cfg["num_experts"], bias=False, dtype=cfg["dtype"])
 
-        self.fc1 = nn.ModuleList([nn.Linear(cfg["emb_dim"], cfg["moe_intermediate_size"], bias=False, dtype=cfg["dtype"])
-                                  for _ in range(cfg["num_experts"])])
-        self.fc2 = nn.ModuleList([nn.Linear(cfg["emb_dim"], cfg["moe_intermediate_size"], bias=False, dtype=cfg["dtype"])
-                                  for _ in range(cfg["num_experts"])])
-        self.fc3 = nn.ModuleList([nn.Linear(cfg["moe_intermediate_size"], cfg["emb_dim"], bias=False, dtype=cfg["dtype"])
-                                  for _ in range(cfg["num_experts"])])
+        self.fc1 = nn.ModuleList(
+            [nn.Linear(cfg["emb_dim"], cfg["moe_intermediate_size"], bias=False, dtype=cfg["dtype"]) for _ in range(cfg["num_experts"])]
+        )
+        self.fc2 = nn.ModuleList(
+            [nn.Linear(cfg["emb_dim"], cfg["moe_intermediate_size"], bias=False, dtype=cfg["dtype"]) for _ in range(cfg["num_experts"])]
+        )
+        self.fc3 = nn.ModuleList(
+            [nn.Linear(cfg["moe_intermediate_size"], cfg["emb_dim"], bias=False, dtype=cfg["dtype"]) for _ in range(cfg["num_experts"])]
+        )
 
     def forward(self, x):
         scores = self.gate(x)  # (b, seq_len, num_experts)
@@ -264,9 +268,7 @@ class MoEFeedForward(nn.Module):
 
 
 class GroupedQueryAttention(nn.Module):
-    def __init__(
-        self, d_in, num_heads, num_kv_groups, head_dim=None, qk_norm=False, dtype=None
-    ):
+    def __init__(self, d_in, num_heads, num_kv_groups, head_dim=None, qk_norm=False, dtype=None):
         super().__init__()
         assert num_heads % num_kv_groups == 0, "num_heads must be divisible by num_kv_groups"
 
@@ -298,8 +300,8 @@ class GroupedQueryAttention(nn.Module):
 
         # Apply projections
         queries = self.W_query(x)  # (b, num_tokens, num_heads * head_dim)
-        keys = self.W_key(x)       # (b, num_tokens, num_kv_groups * head_dim)
-        values = self.W_value(x)   # (b, num_tokens, num_kv_groups * head_dim)
+        keys = self.W_key(x)  # (b, num_tokens, num_kv_groups * head_dim)
+        values = self.W_value(x)  # (b, num_tokens, num_kv_groups * head_dim)
 
         # Reshape
         queries = queries.view(b, num_tokens, self.num_heads, self.head_dim).transpose(1, 2)
@@ -391,7 +393,7 @@ def compute_rope_params(head_dim, theta_base=10_000, context_length=4096, dtype=
     positions = torch.arange(context_length, dtype=dtype)
 
     # Compute the angles
-    angles = positions.unsqueeze(1) * inv_freq.unsqueeze(0) # Shape: (context_length, head_dim // 2)
+    angles = positions.unsqueeze(1) * inv_freq.unsqueeze(0)  # Shape: (context_length, head_dim // 2)
 
     # Expand angles to match the head_dim
     angles = torch.cat([angles, angles], dim=1)  # Shape: (context_length, head_dim)
@@ -410,7 +412,7 @@ def apply_rope(x, cos, sin):
 
     # Split x into first half and second half
     x1 = x[..., : head_dim // 2]  # First half
-    x2 = x[..., head_dim // 2:]  # Second half
+    x2 = x[..., head_dim // 2 :]  # Second half
 
     # Adjust sin and cos shapes
     cos = cos[:seq_len, :].unsqueeze(0).unsqueeze(0)  # Shape: (1, 1, seq_len, head_dim)
@@ -469,97 +471,63 @@ def load_weights_into_qwen(model, param_config, params):
 
         # Q, K, V projections
         att.W_query.weight = assign(
-            att.W_query.weight,
-            params[f"model.layers.{l}.self_attn.q_proj.weight"],
-            f"model.layers.{l}.self_attn.q_proj.weight"
+            att.W_query.weight, params[f"model.layers.{l}.self_attn.q_proj.weight"], f"model.layers.{l}.self_attn.q_proj.weight"
         )
         att.W_key.weight = assign(
-            att.W_key.weight,
-            params[f"model.layers.{l}.self_attn.k_proj.weight"],
-            f"model.layers.{l}.self_attn.k_proj.weight"
+            att.W_key.weight, params[f"model.layers.{l}.self_attn.k_proj.weight"], f"model.layers.{l}.self_attn.k_proj.weight"
         )
         att.W_value.weight = assign(
-            att.W_value.weight,
-            params[f"model.layers.{l}.self_attn.v_proj.weight"],
-            f"model.layers.{l}.self_attn.v_proj.weight"
+            att.W_value.weight, params[f"model.layers.{l}.self_attn.v_proj.weight"], f"model.layers.{l}.self_attn.v_proj.weight"
         )
 
         # Output projection
         att.out_proj.weight = assign(
-            att.out_proj.weight,
-            params[f"model.layers.{l}.self_attn.o_proj.weight"],
-            f"model.layers.{l}.self_attn.o_proj.weight"
+            att.out_proj.weight, params[f"model.layers.{l}.self_attn.o_proj.weight"], f"model.layers.{l}.self_attn.o_proj.weight"
         )
 
         # QK norms
         if hasattr(att, "q_norm") and att.q_norm is not None:
             att.q_norm.scale = assign(
-                att.q_norm.scale,
-                params[f"model.layers.{l}.self_attn.q_norm.weight"],
-                f"model.layers.{l}.self_attn.q_norm.weight"
+                att.q_norm.scale, params[f"model.layers.{l}.self_attn.q_norm.weight"], f"model.layers.{l}.self_attn.q_norm.weight"
             )
         if hasattr(att, "k_norm") and att.k_norm is not None:
             att.k_norm.scale = assign(
-                att.k_norm.scale,
-                params[f"model.layers.{l}.self_attn.k_norm.weight"],
-                f"model.layers.{l}.self_attn.k_norm.weight"
+                att.k_norm.scale, params[f"model.layers.{l}.self_attn.k_norm.weight"], f"model.layers.{l}.self_attn.k_norm.weight"
             )
 
         # Attention layernorm
         block.norm1.scale = assign(
-            block.norm1.scale,
-            params[f"model.layers.{l}.input_layernorm.weight"],
-            f"model.layers.{l}.input_layernorm.weight"
+            block.norm1.scale, params[f"model.layers.{l}.input_layernorm.weight"], f"model.layers.{l}.input_layernorm.weight"
         )
 
         # Feedforward weights
         if param_config.get("num_experts", 0) > 0:
             # Load router (gating) weights
             block.ff.gate.weight = assign(
-                block.ff.gate.weight,
-                params[f"model.layers.{l}.mlp.gate.weight"],
-                f"model.layers.{l}.mlp.gate.weight"
+                block.ff.gate.weight, params[f"model.layers.{l}.mlp.gate.weight"], f"model.layers.{l}.mlp.gate.weight"
             )
             # Load expert weights
             for e in range(param_config["num_experts"]):
                 prefix = f"model.layers.{l}.mlp.experts.{e}"
-                block.ff.fc1[e].weight = assign(
-                    block.ff.fc1[e].weight,
-                    params[f"{prefix}.gate_proj.weight"],
-                    f"{prefix}.gate_proj.weight"
-                )
-                block.ff.fc2[e].weight = assign(
-                    block.ff.fc2[e].weight,
-                    params[f"{prefix}.up_proj.weight"],
-                    f"{prefix}.up_proj.weight"
-                )
-                block.ff.fc3[e].weight = assign(
-                    block.ff.fc3[e].weight,
-                    params[f"{prefix}.down_proj.weight"],
-                    f"{prefix}.down_proj.weight"
-                )
+                block.ff.fc1[e].weight = assign(block.ff.fc1[e].weight, params[f"{prefix}.gate_proj.weight"], f"{prefix}.gate_proj.weight")
+                block.ff.fc2[e].weight = assign(block.ff.fc2[e].weight, params[f"{prefix}.up_proj.weight"], f"{prefix}.up_proj.weight")
+                block.ff.fc3[e].weight = assign(block.ff.fc3[e].weight, params[f"{prefix}.down_proj.weight"], f"{prefix}.down_proj.weight")
 
         else:
             block.ff.fc1.weight = assign(
-                block.ff.fc1.weight,
-                params[f"model.layers.{l}.mlp.gate_proj.weight"],
-                f"model.layers.{l}.mlp.gate_proj.weight"
+                block.ff.fc1.weight, params[f"model.layers.{l}.mlp.gate_proj.weight"], f"model.layers.{l}.mlp.gate_proj.weight"
             )
             block.ff.fc2.weight = assign(
-                block.ff.fc2.weight,
-                params[f"model.layers.{l}.mlp.up_proj.weight"],
-                f"model.layers.{l}.mlp.up_proj.weight"
+                block.ff.fc2.weight, params[f"model.layers.{l}.mlp.up_proj.weight"], f"model.layers.{l}.mlp.up_proj.weight"
             )
             block.ff.fc3.weight = assign(
-                block.ff.fc3.weight,
-                params[f"model.layers.{l}.mlp.down_proj.weight"],
-                f"model.layers.{l}.mlp.down_proj.weight"
+                block.ff.fc3.weight, params[f"model.layers.{l}.mlp.down_proj.weight"], f"model.layers.{l}.mlp.down_proj.weight"
             )
 
         block.norm2.scale = assign(
             block.norm2.scale,
             params[f"model.layers.{l}.post_attention_layernorm.weight"],
-            f"model.layers.{l}.post_attention_layernorm.weight"
+            f"model.layers.{l}.post_attention_layernorm.weight",
         )
 
     # Final normalization and output head
@@ -575,18 +543,27 @@ def load_weights_into_qwen(model, param_config, params):
 class Qwen3Tokenizer:
     _SPECIALS = [
         "<|endoftext|>",
-        "<|im_start|>", "<|im_end|>",
-        "<|object_ref_start|>", "<|object_ref_end|>",
-        "<|box_start|>", "<|box_end|>",
-        "<|quad_start|>", "<|quad_end|>",
-        "<|vision_start|>", "<|vision_end|>",
-        "<|vision_pad|>", "<|image_pad|>", "<|video_pad|>",
-        "<think>", "</think>"
+        "<|im_start|>",
+        "<|im_end|>",
+        "<|object_ref_start|>",
+        "<|object_ref_end|>",
+        "<|box_start|>",
+        "<|box_end|>",
+        "<|quad_start|>",
+        "<|quad_end|>",
+        "<|vision_start|>",
+        "<|vision_end|>",
+        "<|vision_pad|>",
+        "<|image_pad|>",
+        "<|video_pad|>",
+        "<think>",
+        "</think>",
     ]
     _SPLIT_RE = re.compile(r"(<\|[^>]+?\|>|<think>|</think>)")
 
-    def __init__(self, tokenizer_file_path="tokenizer.json", repo_id=None,
-                 apply_chat_template=True, add_generation_prompt=False, add_thinking=False):
+    def __init__(
+        self, tokenizer_file_path="tokenizer.json", repo_id=None, apply_chat_template=True, add_generation_prompt=False, add_thinking=False
+    ):
         from tokenizers import Tokenizer
 
         self.apply_chat_template = apply_chat_template

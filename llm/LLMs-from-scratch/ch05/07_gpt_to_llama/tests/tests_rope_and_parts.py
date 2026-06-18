@@ -79,7 +79,7 @@ def litgpt_build_rope_cache(
 def litgpt_apply_rope(x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor) -> torch.Tensor:
     head_size = x.size(-1)
     x1 = x[..., : head_size // 2]  # (B, nh, T, hs/2)
-    x2 = x[..., head_size // 2:]  # (B, nh, T, hs/2)
+    x2 = x[..., head_size // 2 :]  # (B, nh, T, hs/2)
     rotated = torch.cat((-x2, x1), dim=-1)  # (B, nh, T, hs)
     if cos.dim() > 1:
         # batch dimensions must align
@@ -129,7 +129,7 @@ def notebook():
 
     notebooks = {
         "converting-gpt-to-llama2": ["SiLU", "RMSNorm", "precompute_rope_params", "compute_rope"],
-        "converting-llama2-to-llama3": ["precompute_rope_params"]
+        "converting-llama2-to-llama3": ["precompute_rope_params"],
     }
 
     return import_definitions_from_notebook(notebooks)
@@ -165,12 +165,9 @@ def test_rope_llama2(notebook):
     # Generate reference RoPE via HF
 
     if version.parse(transformers_version) < version.parse("4.48"):
-        rot_emb = LlamaRotaryEmbedding(
-            dim=head_dim,
-            max_position_embeddings=context_len,
-            base=theta_base
-        )
+        rot_emb = LlamaRotaryEmbedding(dim=head_dim, max_position_embeddings=context_len, base=theta_base)
     else:
+
         class RoPEConfig:
             dim: int = head_dim
             rope_theta = theta_base
@@ -217,11 +214,7 @@ def test_rope_llama3(notebook):
     theta_base = 500_000
 
     # Instantiate RoPE parameters
-    cos, sin = nb2.precompute_rope_params(
-        head_dim=head_dim,
-        context_length=context_len,
-        theta_base=theta_base
-    )
+    cos, sin = nb2.precompute_rope_params(head_dim=head_dim, context_length=context_len, theta_base=theta_base)
 
     # Dummy query and key tensors
     torch.manual_seed(123)
@@ -234,12 +227,9 @@ def test_rope_llama3(notebook):
 
     # Generate reference RoPE via HF
     if version.parse(transformers_version) < version.parse("4.48"):
-        rot_emb = LlamaRotaryEmbedding(
-            dim=head_dim,
-            max_position_embeddings=context_len,
-            base=theta_base
-        )
+        rot_emb = LlamaRotaryEmbedding(dim=head_dim, max_position_embeddings=context_len, base=theta_base)
     else:
+
         class RoPEConfig:
             dim: int = head_dim
             rope_theta = theta_base
@@ -316,7 +306,7 @@ def test_rope_llama3_12(notebook):
         "low_freq_factor": 1.0,
         "high_freq_factor": 4.0,
         "original_max_position_embeddings": 8192,
-        "rope_type": "llama3"
+        "rope_type": "llama3",
     }
 
     class RoPEConfig:
@@ -346,19 +336,9 @@ def test_rope_llama3_12(notebook):
     torch.testing.assert_close(queries_rot, ref_queries_rot)
 
     # Generate reference RoPE via LitGPT
-    litgpt_rope_config = {
-        "factor": 8.0,
-        "low_freq_factor": 1.0,
-        "high_freq_factor": 4.0,
-        "original_max_seq_len": 8192
-    }
+    litgpt_rope_config = {"factor": 8.0, "low_freq_factor": 1.0, "high_freq_factor": 4.0, "original_max_seq_len": 8192}
 
-    litgpt_cos, litgpt_sin = litgpt_build_rope_cache(
-        context_len,
-        n_elem=head_dim,
-        base=rope_theta,
-        extra_config=litgpt_rope_config
-    )
+    litgpt_cos, litgpt_sin = litgpt_build_rope_cache(context_len, n_elem=head_dim, base=rope_theta, extra_config=litgpt_rope_config)
     litgpt_queries_rot = litgpt_apply_rope(queries, litgpt_cos, litgpt_sin)
     litgpt_keys_rot = litgpt_apply_rope(keys, litgpt_cos, litgpt_sin)
 

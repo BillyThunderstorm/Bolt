@@ -3,7 +3,7 @@
 #   - https://www.manning.com/books/build-a-large-language-model-from-scratch
 # Code: https://github.com/rasbt/LLMs-from-scratch
 
-from .utils import KVCache   # noqa: F401
+from .utils import KVCache  # noqa: F401
 
 import torch
 import torch.nn as nn
@@ -63,7 +63,7 @@ class MultiHeadAttention(nn.Module):
         # Use the mask to fill attention scores
         attn_scores.masked_fill_(causal_mask, -torch.inf)
 
-        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
         attn_weights = self.dropout(attn_weights)
 
         # Shape: (b, num_tokens, num_heads, head_dim)
@@ -98,10 +98,7 @@ class GELU(nn.Module):
         super().__init__()
 
     def forward(self, x):
-        return 0.5 * x * (1 + torch.tanh(
-            torch.sqrt(torch.tensor(2.0 / torch.pi)) *
-            (x + 0.044715 * torch.pow(x, 3))
-        ))
+        return 0.5 * x * (1 + torch.tanh(torch.sqrt(torch.tensor(2.0 / torch.pi)) * (x + 0.044715 * torch.pow(x, 3))))
 
 
 class FeedForward(nn.Module):
@@ -126,7 +123,8 @@ class TransformerBlock(nn.Module):
             context_length=cfg["context_length"],
             num_heads=cfg["n_heads"],
             dropout=cfg["drop_rate"],
-            qkv_bias=cfg["qkv_bias"])
+            qkv_bias=cfg["qkv_bias"],
+        )
         self.ff = FeedForward(cfg)
         self.norm1 = LayerNorm(cfg["emb_dim"])
         self.norm2 = LayerNorm(cfg["emb_dim"])
@@ -136,7 +134,7 @@ class TransformerBlock(nn.Module):
         # Shortcut connection for attention block
         shortcut = x
         x = self.norm1(x)
-        x, next_cache = self.att(x, use_cache=use_cache, start_pos=start_pos, cache=cache) # Shape [batch_size, num_tokens, emb_size]
+        x, next_cache = self.att(x, use_cache=use_cache, start_pos=start_pos, cache=cache)  # Shape [batch_size, num_tokens, emb_size]
         x = self.drop_shortcut(x)
         x = x + shortcut  # Add the original input back
 
@@ -157,8 +155,7 @@ class GPTModel(nn.Module):
         self.pos_emb = nn.Embedding(cfg["context_length"], cfg["emb_dim"])
         self.drop_emb = nn.Dropout(cfg["drop_rate"])
 
-        self.trf_blocks = nn.Sequential(
-            *[TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
+        self.trf_blocks = nn.Sequential(*[TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
 
         self.final_norm = LayerNorm(cfg["emb_dim"])
         self.out_head = nn.Linear(cfg["emb_dim"], cfg["vocab_size"], bias=False)

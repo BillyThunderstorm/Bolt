@@ -77,15 +77,31 @@ class MemoryIndexTests(unittest.TestCase):
         self.tempdir.cleanup()
 
     def test_refresh_indexes_markdown_decisions_and_clips(self):
-        with patch.object(mi, "MEMORY_DIR", self.root / "memory"), \
-             patch.object(mi, "DATA_DIR", self.root / "data"), \
-             patch.object(mi, "LOGS_DIR", self.root / "logs"), \
-             patch.object(mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"), \
-             patch.object(mi, "PROCESSED_RECORDINGS_FILE", self.root / "data" / "processed_recordings.json"), \
-             patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"), \
-             patch.object(mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"), \
-             patch.object(mi, "PERFORMANCE_OUTCOMES_FILE", self.root / "data" / "performance_outcomes.jsonl"):
-            payload = mi.refresh_memory_index(project_root=self.root, out_file=self.index_file)
+        with (
+            patch.object(mi, "MEMORY_DIR", self.root / "memory"),
+            patch.object(mi, "DATA_DIR", self.root / "data"),
+            patch.object(mi, "LOGS_DIR", self.root / "logs"),
+            patch.object(
+                mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"
+            ),
+            patch.object(
+                mi,
+                "PROCESSED_RECORDINGS_FILE",
+                self.root / "data" / "processed_recordings.json",
+            ),
+            patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"),
+            patch.object(
+                mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"
+            ),
+            patch.object(
+                mi,
+                "PERFORMANCE_OUTCOMES_FILE",
+                self.root / "data" / "performance_outcomes.jsonl",
+            ),
+        ):
+            payload = mi.refresh_memory_index(
+                project_root=self.root, out_file=self.index_file
+            )
 
         kinds = {entry["kind"] for entry in payload["entries"]}
         self.assertIn("markdown", kinds)
@@ -96,19 +112,40 @@ class MemoryIndexTests(unittest.TestCase):
         self.assertEqual(payload["version"], 2)
         self.assertEqual(payload["vector"]["type"], "hashed_term_frequency")
         self.assertTrue(all("vector" in entry for entry in payload["entries"]))
-        self.assertTrue(all(len(entry["vector"]) == mi.VECTOR_DIMENSIONS for entry in payload["entries"]))
+        self.assertTrue(
+            all(
+                len(entry["vector"]) == mi.VECTOR_DIMENSIONS
+                for entry in payload["entries"]
+            )
+        )
 
     def test_retrieve_finds_relevant_memory(self):
-        with patch.object(mi, "MEMORY_DIR", self.root / "memory"), \
-             patch.object(mi, "DATA_DIR", self.root / "data"), \
-             patch.object(mi, "LOGS_DIR", self.root / "logs"), \
-             patch.object(mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"), \
-             patch.object(mi, "PROCESSED_RECORDINGS_FILE", self.root / "data" / "processed_recordings.json"), \
-             patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"), \
-             patch.object(mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"), \
-             patch.object(mi, "PERFORMANCE_OUTCOMES_FILE", self.root / "data" / "performance_outcomes.jsonl"):
+        with (
+            patch.object(mi, "MEMORY_DIR", self.root / "memory"),
+            patch.object(mi, "DATA_DIR", self.root / "data"),
+            patch.object(mi, "LOGS_DIR", self.root / "logs"),
+            patch.object(
+                mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"
+            ),
+            patch.object(
+                mi,
+                "PROCESSED_RECORDINGS_FILE",
+                self.root / "data" / "processed_recordings.json",
+            ),
+            patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"),
+            patch.object(
+                mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"
+            ),
+            patch.object(
+                mi,
+                "PERFORMANCE_OUTCOMES_FILE",
+                self.root / "data" / "performance_outcomes.jsonl",
+            ),
+        ):
             mi.refresh_memory_index(project_root=self.root, out_file=self.index_file)
-            results = mi.retrieve_memory("Marvel Rivals clip", index_file=self.index_file)
+            results = mi.retrieve_memory(
+                "Marvel Rivals clip", index_file=self.index_file
+            )
 
         self.assertTrue(results)
         self.assertIn("clip", {item["kind"] for item in results})
@@ -117,50 +154,103 @@ class MemoryIndexTests(unittest.TestCase):
         self.assertIn("matched_terms", results[0])
 
     def test_vector_retrieval_finds_decision_language(self):
-        with patch.object(mi, "MEMORY_DIR", self.root / "memory"), \
-             patch.object(mi, "DATA_DIR", self.root / "data"), \
-             patch.object(mi, "LOGS_DIR", self.root / "logs"), \
-             patch.object(mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"), \
-             patch.object(mi, "PROCESSED_RECORDINGS_FILE", self.root / "data" / "processed_recordings.json"), \
-             patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"), \
-             patch.object(mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"), \
-             patch.object(mi, "PERFORMANCE_OUTCOMES_FILE", self.root / "data" / "performance_outcomes.jsonl"):
+        with (
+            patch.object(mi, "MEMORY_DIR", self.root / "memory"),
+            patch.object(mi, "DATA_DIR", self.root / "data"),
+            patch.object(mi, "LOGS_DIR", self.root / "logs"),
+            patch.object(
+                mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"
+            ),
+            patch.object(
+                mi,
+                "PROCESSED_RECORDINGS_FILE",
+                self.root / "data" / "processed_recordings.json",
+            ),
+            patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"),
+            patch.object(
+                mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"
+            ),
+            patch.object(
+                mi,
+                "PERFORMANCE_OUTCOMES_FILE",
+                self.root / "data" / "performance_outcomes.jsonl",
+            ),
+        ):
             mi.refresh_memory_index(project_root=self.root, out_file=self.index_file)
-            results = mi.retrieve_memory("training agent memory retrieval", index_file=self.index_file)
+            results = mi.retrieve_memory(
+                "training agent memory retrieval", index_file=self.index_file
+            )
 
         self.assertTrue(results)
         top_text = " ".join(item["summary"] for item in results[:3])
         self.assertIn("memory retrieval", top_text)
 
     def test_retrieve_finds_performance_outcomes(self):
-        with patch.object(mi, "MEMORY_DIR", self.root / "memory"), \
-             patch.object(mi, "DATA_DIR", self.root / "data"), \
-             patch.object(mi, "LOGS_DIR", self.root / "logs"), \
-             patch.object(mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"), \
-             patch.object(mi, "PROCESSED_RECORDINGS_FILE", self.root / "data" / "processed_recordings.json"), \
-             patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"), \
-             patch.object(mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"), \
-             patch.object(mi, "PERFORMANCE_OUTCOMES_FILE", self.root / "data" / "performance_outcomes.jsonl"):
+        with (
+            patch.object(mi, "MEMORY_DIR", self.root / "memory"),
+            patch.object(mi, "DATA_DIR", self.root / "data"),
+            patch.object(mi, "LOGS_DIR", self.root / "logs"),
+            patch.object(
+                mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"
+            ),
+            patch.object(
+                mi,
+                "PROCESSED_RECORDINGS_FILE",
+                self.root / "data" / "processed_recordings.json",
+            ),
+            patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"),
+            patch.object(
+                mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"
+            ),
+            patch.object(
+                mi,
+                "PERFORMANCE_OUTCOMES_FILE",
+                self.root / "data" / "performance_outcomes.jsonl",
+            ),
+        ):
             mi.refresh_memory_index(project_root=self.root, out_file=self.index_file)
-            results = mi.retrieve_memory("multi kill TikTok performance", index_file=self.index_file)
+            results = mi.retrieve_memory(
+                "multi kill TikTok performance", index_file=self.index_file
+            )
 
         self.assertTrue(results)
         self.assertIn("performance_outcome", {item["kind"] for item in results})
 
     def test_retrieve_finds_content_memory(self):
-        with patch.object(mi, "MEMORY_DIR", self.root / "memory"), \
-             patch.object(mi, "DATA_DIR", self.root / "data"), \
-             patch.object(mi, "LOGS_DIR", self.root / "logs"), \
-             patch.object(mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"), \
-             patch.object(mi, "PROCESSED_RECORDINGS_FILE", self.root / "data" / "processed_recordings.json"), \
-             patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"), \
-             patch.object(mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"), \
-             patch.object(mi, "PERFORMANCE_OUTCOMES_FILE", self.root / "data" / "performance_outcomes.jsonl"):
+        with (
+            patch.object(mi, "MEMORY_DIR", self.root / "memory"),
+            patch.object(mi, "DATA_DIR", self.root / "data"),
+            patch.object(mi, "LOGS_DIR", self.root / "logs"),
+            patch.object(
+                mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"
+            ),
+            patch.object(
+                mi,
+                "PROCESSED_RECORDINGS_FILE",
+                self.root / "data" / "processed_recordings.json",
+            ),
+            patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"),
+            patch.object(
+                mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"
+            ),
+            patch.object(
+                mi,
+                "PERFORMANCE_OUTCOMES_FILE",
+                self.root / "data" / "performance_outcomes.jsonl",
+            ),
+        ):
             mi.refresh_memory_index(project_root=self.root, out_file=self.index_file)
-            results = mi.retrieve_memory("honest product review testing", index_file=self.index_file)
+            results = mi.retrieve_memory(
+                "honest product review testing", index_file=self.index_file
+            )
 
         self.assertTrue(results)
-        self.assertTrue(any(item["source"] == "memory/content/product-reviews.md" for item in results))
+        self.assertTrue(
+            any(
+                item["source"] == "memory/content/product-reviews.md"
+                for item in results
+            )
+        )
 
     def test_retrieve_classifies_supportive_and_cautionary_memory(self):
         (self.root / "memory" / "content" / "lessons.md").write_text(
@@ -169,17 +259,35 @@ class MemoryIndexTests(unittest.TestCase):
             encoding="utf-8",
         )
 
-        with patch.object(mi, "MEMORY_DIR", self.root / "memory"), \
-             patch.object(mi, "DATA_DIR", self.root / "data"), \
-             patch.object(mi, "LOGS_DIR", self.root / "logs"), \
-             patch.object(mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"), \
-             patch.object(mi, "PROCESSED_RECORDINGS_FILE", self.root / "data" / "processed_recordings.json"), \
-             patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"), \
-             patch.object(mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"), \
-             patch.object(mi, "PERFORMANCE_OUTCOMES_FILE", self.root / "data" / "performance_outcomes.jsonl"):
+        with (
+            patch.object(mi, "MEMORY_DIR", self.root / "memory"),
+            patch.object(mi, "DATA_DIR", self.root / "data"),
+            patch.object(mi, "LOGS_DIR", self.root / "logs"),
+            patch.object(
+                mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"
+            ),
+            patch.object(
+                mi,
+                "PROCESSED_RECORDINGS_FILE",
+                self.root / "data" / "processed_recordings.json",
+            ),
+            patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"),
+            patch.object(
+                mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"
+            ),
+            patch.object(
+                mi,
+                "PERFORMANCE_OUTCOMES_FILE",
+                self.root / "data" / "performance_outcomes.jsonl",
+            ),
+        ):
             mi.refresh_memory_index(project_root=self.root, out_file=self.index_file)
-            supportive = mi.retrieve_memory("queued successful clip", index_file=self.index_file, limit=3)
-            cautionary = mi.retrieve_memory("rejected skipped below clip", index_file=self.index_file, limit=3)
+            supportive = mi.retrieve_memory(
+                "queued successful clip", index_file=self.index_file, limit=3
+            )
+            cautionary = mi.retrieve_memory(
+                "rejected skipped below clip", index_file=self.index_file, limit=3
+            )
 
         self.assertEqual(supportive[0]["signal"], "supportive")
         self.assertEqual(cautionary[0]["signal"], "cautionary")

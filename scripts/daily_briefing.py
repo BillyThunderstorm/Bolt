@@ -17,6 +17,7 @@ CLIPS_DIR = PROJECT_ROOT / "clips"
 LOGS_DIR = PROJECT_ROOT / "logs"
 OUTPUT_DIR = PROJECT_ROOT / "briefings" / "daily"
 
+
 def get_queue_status() -> dict:
     """Load multi-platform queue status."""
     queue_file = DATA_DIR / "multi_platform_queue.json"
@@ -29,19 +30,20 @@ def get_queue_status() -> dict:
     items = data.get("items", [])
     return {
         "total": len(items),
-        "items": items[:5]  # Show first 5
+        "items": items[:5],  # Show first 5
     }
+
 
 def get_storage_status() -> dict:
     """Get storage metrics."""
+
     def get_dir_size(path: Path) -> tuple:
         if not path.exists():
             return 0, "0GB"
         try:
             # Use du -sk for kilobytes (more compatible)
             result = subprocess.run(
-                ["du", "-sk", str(path)],
-                capture_output=True, text=True
+                ["du", "-sk", str(path)], capture_output=True, text=True
             )
             kb_val = int(result.stdout.split()[0])
             gb_val = kb_val / 1024 / 1024
@@ -55,10 +57,7 @@ def get_storage_status() -> dict:
 
     # Disk usage
     try:
-        result = subprocess.run(
-            ["df", "/"],
-            capture_output=True, text=True
-        )
+        result = subprocess.run(["df", "/"], capture_output=True, text=True)
         lines = result.stdout.strip().split("\n")
         if len(lines) > 1:
             parts = lines[1].split()
@@ -72,8 +71,9 @@ def get_storage_status() -> dict:
         "recordings": recordings_str,
         "clips": clips_str,
         "logs": logs_str,
-        "disk_percent": disk_percent
+        "disk_percent": disk_percent,
     }
+
 
 def get_recent_clips() -> list:
     """Get recently created clips."""
@@ -84,17 +84,20 @@ def get_recent_clips() -> list:
     for f in CLIPS_DIR.glob("*.mp4"):
         try:
             mtime = datetime.fromtimestamp(f.stat().st_mtime)
-            clips.append({
-                "name": f.name,
-                "date": mtime.strftime("%Y-%m-%d"),
-                "size_mb": f.stat().st_size / 1024 / 1024
-            })
+            clips.append(
+                {
+                    "name": f.name,
+                    "date": mtime.strftime("%Y-%m-%d"),
+                    "size_mb": f.stat().st_size / 1024 / 1024,
+                }
+            )
         except Exception:
             pass
 
     # Sort by date, newest first
     clips.sort(key=lambda x: x["date"], reverse=True)
     return clips[:5]  # Show 5 most recent
+
 
 def get_processed_recordings_count() -> int:
     """Count processed recordings."""
@@ -107,8 +110,9 @@ def get_processed_recordings_count() -> int:
 
     return len(data) if isinstance(data, list) else 0
 
-def generate_briefing() -> str:
-    """Generate the full briefing markdown."""
+
+def generate_briefing() -> tuple[str, str]:
+    """Generate the full briefing markdown and a clean SMS summary."""
     today = datetime.now()
     date_str = today.strftime("%A, %B %d, %Y")
 
@@ -117,23 +121,31 @@ def generate_briefing() -> str:
     recent_clips = get_recent_clips()
     processed_count = get_processed_recordings_count()
 
+    # One-line SMS facts (no markdown table junk)
+    sms_facts = [
+        f"{queue['total']} clips ready",
+        f"disk {storage['disk_percent']}%",
+        f"{processed_count} recordings processed",
+    ]
+    briefing_sms_summary = " | ".join(sms_facts)
+
     briefing = f"""# Bolt Daily Briefing
 
 **{date_str}**
 
----
+|---
 
 ## Queue Status
 
-**Clips ready to post:** {queue['total']}
+**Clips ready to post:** {queue["total"]}
 
 """
 
-    if queue['total'] > 0:
+    if queue["total"] > 0:
         briefing += "### Ready for Upload\n\n"
-        for i, item in enumerate(queue['items'], 1):
-            created = item.get('created_at', 'unknown')[:10]
-            platforms = len(item.get('platforms', []))
+        for i, item in enumerate(queue["items"], 1):
+            created = item.get("created_at", "unknown")[:10]
+            platforms = len(item.get("platforms", []))
             briefing += f"{i}. Created: {created} | Platforms: {platforms}\n"
         briefing += "\n"
     else:
@@ -145,16 +157,18 @@ def generate_briefing() -> str:
 
 | Directory | Size |
 |-----------|------|
-| Recordings | {storage['recordings']} |
-| Clips | {storage['clips']} |
-| Logs | {storage['logs']} |
-| **Disk Usage** | **{storage['disk_percent']}%** |
+| Recordings | {storage["recordings"]} |
+| Clips | {storage["clips"]} |
+| Logs | {storage["logs"]} |
+| **Disk Usage** | **{storage["disk_percent"]}%** |
 
 """
 
-    if int(storage['disk_percent']) > 80:
-        briefing += "⚠️ **Storage warning:** Disk usage above 80%. Consider running cleanup.\n\n"
-    elif int(storage['disk_percent']) > 90:
+    if int(storage["disk_percent"]) > 80:
+        briefing += (
+            "⚠️ **Storage warning:** Disk usage above 80%. Consider running cleanup.\n\n"
+        )
+    elif int(storage["disk_percent"]) > 90:
         briefing += "🔴 **Storage critical:** Disk usage above 90%. Immediate cleanup recommended.\n\n"
 
     briefing += f"""---
@@ -187,11 +201,15 @@ def generate_briefing() -> str:
     # Dynamic action items based on state
     actions = []
 
-    if queue['total'] > 0:
-        actions.append(f"Upload {queue['total']} clip(s) from queue to TikTok/Shorts/Reels")
+    if queue["total"] > 0:
+        actions.append(
+            f"Upload {queue['total']} clip(s) from queue to TikTok/Shorts/Reels"
+        )
 
-    if int(storage['disk_percent']) > 80:
-        actions.append("Run storage cleanup: `python3 scripts/maintenance/storage_optimization.sh`")
+    if int(storage["disk_percent"]) > 80:
+        actions.append(
+            "Run storage cleanup: `python3 scripts/maintenance/storage_optimization.sh`"
+        )
 
     actions.append("Check for new recordings to process")
     actions.append("Review clip performance and log results")
@@ -223,18 +241,28 @@ python3 scripts/performance_baseline.py
 *Generated by Bolt at {today.strftime("%I:%M %p")}*
 """
 
-    return briefing
+    return briefing, briefing_sms_summary
+
 
 def main():
     """Main entry point."""
     import argparse
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).parent))
+    from send_notification import send_briefing
 
     parser = argparse.ArgumentParser(description="Generate Bolt Daily Briefing")
     parser.add_argument("--output", "-o", type=str, help="Output file path")
-    parser.add_argument("--print", "-p", action="store_true", help="Print to stdout only")
+    parser.add_argument(
+        "--print", "-p", action="store_true", help="Print to stdout only"
+    )
+    parser.add_argument(
+        "--send", "-s", action="store_true", help="Send to Billy via email/SMS"
+    )
     args = parser.parse_args()
 
-    briefing = generate_briefing()
+    briefing, sms_summary = generate_briefing()
 
     if args.print or not args.output:
         print(briefing)
@@ -249,7 +277,13 @@ def main():
     if args.output or not args.print:
         with open(output_path, "w") as f:
             f.write(briefing)
-        print(f"\nBriefing saved to: {output_path}", file=__import__('sys').stderr)
+        print(f"\nBriefing saved to: {output_path}", file=__import__("sys").stderr)
+
+    # Send notification if requested
+    if args.send:
+        send_briefing(briefing, sms_summary)
+        print("Briefing sent to Billy", file=__import__("sys").stderr)
+
 
 if __name__ == "__main__":
     main()

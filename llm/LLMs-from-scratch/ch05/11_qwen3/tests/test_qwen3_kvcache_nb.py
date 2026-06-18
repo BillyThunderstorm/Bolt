@@ -49,11 +49,13 @@ def dummy_cfg_base():
 @pytest.fixture
 def dummy_cfg_moe(dummy_cfg_base):
     cfg = dummy_cfg_base.copy()
-    cfg.update({
-        "num_experts": 4,
-        "num_experts_per_tok": 2,
-        "moe_intermediate_size": 64,
-    })
+    cfg.update(
+        {
+            "num_experts": 4,
+            "num_experts_per_tok": 2,
+            "moe_intermediate_size": 64,
+        }
+    )
     return cfg
 
 
@@ -62,8 +64,7 @@ def test_dummy_qwen3_forward(dummy_cfg_base, dummy_input, import_notebook_defs):
     torch.manual_seed(123)
     model = import_notebook_defs.Qwen3Model(dummy_cfg_base)
     out = model(dummy_input)
-    assert out.shape == (1, dummy_input.size(1), dummy_cfg_base["vocab_size"]), \
-        f"Expected shape (1, seq_len, vocab_size), got {out.shape}"
+    assert out.shape == (1, dummy_input.size(1), dummy_cfg_base["vocab_size"]), f"Expected shape (1, seq_len, vocab_size), got {out.shape}"
 
 
 @torch.inference_mode()

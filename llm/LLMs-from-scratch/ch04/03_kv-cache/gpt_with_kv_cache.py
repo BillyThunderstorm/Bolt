@@ -25,11 +25,7 @@ class MultiHeadAttention(nn.Module):
         self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)
         self.out_proj = nn.Linear(d_out, d_out)  # Linear layer to combine head outputs
         self.dropout = nn.Dropout(dropout)
-        self.register_buffer(
-            "mask",
-            torch.triu(torch.ones(context_length, context_length), diagonal=1),
-            persistent=False
-        )
+        self.register_buffer("mask", torch.triu(torch.ones(context_length, context_length), diagonal=1), persistent=False)
 
         ####################################################
         # NEW
@@ -77,9 +73,7 @@ class MultiHeadAttention(nn.Module):
         num_tokens_Q = queries.shape[-2]
         num_tokens_K = keys.shape[-2]
         if use_cache:
-            mask_bool = self.mask.bool()[
-                self.ptr_current_pos:self.ptr_current_pos + num_tokens_Q, :num_tokens_K
-            ]
+            mask_bool = self.mask.bool()[self.ptr_current_pos : self.ptr_current_pos + num_tokens_Q, :num_tokens_K]
             self.ptr_current_pos += num_tokens_Q
         ####################################################
         # Original mask truncated to the number of tokens and converted to boolean
@@ -89,7 +83,7 @@ class MultiHeadAttention(nn.Module):
         # Use the mask to fill attention scores
         attn_scores.masked_fill_(mask_bool, -torch.inf)
 
-        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
         attn_weights = self.dropout(attn_weights)
 
         # Shape: (b, num_tokens, num_heads, head_dim)
@@ -106,6 +100,7 @@ class MultiHeadAttention(nn.Module):
     def reset_cache(self):
         self.cache_k, self.cache_v = None, None
         self.ptr_current_pos = 0
+
     ####################################################
 
 
@@ -131,10 +126,7 @@ class GELU(nn.Module):
         super().__init__()
 
     def forward(self, x):
-        return 0.5 * x * (1 + torch.tanh(
-            torch.sqrt(torch.tensor(2.0 / torch.pi)) *
-            (x + 0.044715 * torch.pow(x, 3))
-        ))
+        return 0.5 * x * (1 + torch.tanh(torch.sqrt(torch.tensor(2.0 / torch.pi)) * (x + 0.044715 * torch.pow(x, 3))))
 
 
 class FeedForward(nn.Module):
@@ -159,7 +151,8 @@ class TransformerBlock(nn.Module):
             context_length=cfg["context_length"],
             num_heads=cfg["n_heads"],
             dropout=cfg["drop_rate"],
-            qkv_bias=cfg["qkv_bias"])
+            qkv_bias=cfg["qkv_bias"],
+        )
         self.ff = FeedForward(cfg)
         self.norm1 = LayerNorm(cfg["emb_dim"])
         self.norm2 = LayerNorm(cfg["emb_dim"])
@@ -200,8 +193,7 @@ class GPTModel(nn.Module):
         #    *[TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
         ####################################################
         # NEW
-        self.trf_blocks = nn.ModuleList(
-            [TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
+        self.trf_blocks = nn.ModuleList([TransformerBlock(cfg) for _ in range(cfg["n_layers"])])
 
         self.current_pos = 0
         ####################################################
@@ -246,13 +238,13 @@ class GPTModel(nn.Module):
         for blk in self.trf_blocks:
             blk.att.reset_cache()
         self.current_pos = 0
+
     ####################################################
 
 
 def generate_text_simple(model, idx, max_new_tokens, context_size):
     # idx is (B, T) array of indices in the current context
     for _ in range(max_new_tokens):
-
         # Crop current context if it exceeds the supported context size
         # E.g., if LLM supports only 5 tokens, and the context size is 10
         # then only the last 5 tokens are used as context
@@ -277,8 +269,7 @@ def generate_text_simple(model, idx, max_new_tokens, context_size):
 
 ####################################################
 # NEW
-def generate_text_simple_cached(model, idx, max_new_tokens,
-                                context_size=None, use_cache=True):
+def generate_text_simple_cached(model, idx, max_new_tokens, context_size=None, use_cache=True):
     model.eval()
     ctx_len = context_size or model.pos_emb.num_embeddings
 
@@ -302,18 +293,20 @@ def generate_text_simple_cached(model, idx, max_new_tokens,
                 idx = torch.cat([idx, next_idx], dim=1)
 
     return idx
+
+
 ####################################################
 
 
 def main():
     GPT_CONFIG_124M = {
-        "vocab_size": 50257,     # Vocabulary size
+        "vocab_size": 50257,  # Vocabulary size
         "context_length": 1024,  # Context length
-        "emb_dim": 768,          # Embedding dimension
-        "n_heads": 12,           # Number of attention heads
-        "n_layers": 12,          # Number of layers
-        "drop_rate": 0.1,        # Dropout rate
-        "qkv_bias": False        # Query-Key-Value bias
+        "emb_dim": 768,  # Embedding dimension
+        "n_heads": 12,  # Number of attention heads
+        "n_layers": 12,  # Number of layers
+        "drop_rate": 0.1,  # Dropout rate
+        "qkv_bias": False,  # Query-Key-Value bias
     }
 
     torch.manual_seed(123)
@@ -328,7 +321,7 @@ def main():
     encoded = tokenizer.encode(start_context)
     encoded_tensor = torch.tensor(encoded, device=device).unsqueeze(0)
 
-    print(f"\n{50*'='}\n{22*' '}IN\n{50*'='}")
+    print(f"\n{50 * '='}\n{22 * ' '}IN\n{50 * '='}")
     print("\nInput text:", start_context)
     print("Encoded input text:", encoded)
     print("encoded_tensor.shape:", encoded_tensor.shape)
@@ -359,16 +352,16 @@ def main():
 
     decoded_text = tokenizer.decode(token_ids.squeeze(0).tolist())
 
-    print(f"\n\n{50*'='}\n{22*' '}OUT\n{50*'='}")
+    print(f"\n\n{50 * '='}\n{22 * ' '}OUT\n{50 * '='}")
     print("\nOutput:", token_ids)
     print("Output length:", len(token_ids[0]))
     print("Output text:", decoded_text)
 
     print(f"\nTime: {total_time:.2f} sec")
-    print(f"{int(len(token_ids[0])/total_time)} tokens/sec")
+    print(f"{int(len(token_ids[0]) / total_time)} tokens/sec")
     if torch.cuda.is_available():
         max_mem_bytes = torch.cuda.max_memory_allocated()
-        max_mem_gb = max_mem_bytes / (1024 ** 3)
+        max_mem_gb = max_mem_bytes / (1024**3)
         print(f"Max memory allocated: {max_mem_gb:.2f} GB")
 
 

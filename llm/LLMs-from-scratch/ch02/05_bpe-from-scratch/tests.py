@@ -48,13 +48,9 @@ def verdict_file(imported_module):
     download_file_if_absent = getattr(imported_module, "download_file_if_absent", None)
 
     verdict_path = download_file_if_absent(
-        url=(
-            "https://raw.githubusercontent.com/rasbt/"
-            "LLMs-from-scratch/main/ch02/01_main-chapter-code/"
-            "the-verdict.txt"
-        ),
+        url=("https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/main/ch02/01_main-chapter-code/the-verdict.txt"),
         filename="the-verdict.txt",
-        search_dirs=["ch02/01_main-chapter-code/", "../01_main-chapter-code/", "."]
+        search_dirs=["ch02/01_main-chapter-code/", "../01_main-chapter-code/", "."],
     )
 
     return verdict_path
@@ -68,10 +64,9 @@ def gpt2_files(imported_module):
     search_directories = ["ch02/02_bonus_bytepair-encoder/gpt2_model/", "../02_bonus_bytepair-encoder/gpt2_model/", "."]
     files_to_download = {
         "https://openaipublic.blob.core.windows.net/gpt-2/models/124M/vocab.bpe": "vocab.bpe",
-        "https://openaipublic.blob.core.windows.net/gpt-2/models/124M/encoder.json": "encoder.json"
+        "https://openaipublic.blob.core.windows.net/gpt-2/models/124M/encoder.json": "encoder.json",
     }
-    paths = {filename: download_file_if_absent(url, filename, search_directories)
-             for url, filename in files_to_download.items()}
+    paths = {filename: download_file_if_absent(url, filename, search_directories) for url, filename in files_to_download.items()}
 
     return paths
 
@@ -88,14 +83,13 @@ def test_tokenizer_training(imported_module, verdict_file):
     assert len(tokenizer.bpe_merges) == 742, "Tokenizer BPE merges count mismatch."
 
     input_text = "Jack embraced beauty through art and life."
-    invalid_whitespace_tokens = [
-        tok for tok in tokenizer.vocab.values()
-        if "Ġ" in tok and tok != "Ġ" and not tok.startswith("Ġ")
-    ]
+    invalid_whitespace_tokens = [tok for tok in tokenizer.vocab.values() if "Ġ" in tok and tok != "Ġ" and not tok.startswith("Ġ")]
     assert not invalid_whitespace_tokens, "Training should not learn tokens with non-leading Ġ markers."
 
     token_ids = tokenizer.encode(input_text)
-    assert token_ids == [74, 361, 310, 109, 98, 420, 397, 100, 300, 428, 116, 121, 519, 699, 299, 808, 534], "Token IDs do not match expected output."
+    assert token_ids == [74, 361, 310, 109, 98, 420, 397, 100, 300, 428, 116, 121, 519, 699, 299, 808, 534], (
+        "Token IDs do not match expected output."
+    )
 
     assert tokenizer.decode(token_ids) == input_text, "Decoded text does not match the original input."
 
@@ -109,9 +103,7 @@ def test_gpt2_tokenizer_openai_simple(imported_module, gpt2_files):
     BPETokenizerSimple = getattr(imported_module, "BPETokenizerSimple", None)
 
     tokenizer_gpt2 = BPETokenizerSimple()
-    tokenizer_gpt2.load_vocab_and_merges_from_openai(
-        vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"]
-    )
+    tokenizer_gpt2.load_vocab_and_merges_from_openai(vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"])
 
     assert len(tokenizer_gpt2.vocab) == 50257, "GPT-2 tokenizer vocabulary size mismatch."
 
@@ -124,16 +116,17 @@ def test_gpt2_tokenizer_openai_edgecases(imported_module, gpt2_files):
     BPETokenizerSimple = getattr(imported_module, "BPETokenizerSimple", None)
 
     tokenizer_gpt2 = BPETokenizerSimple()
-    tokenizer_gpt2.load_vocab_and_merges_from_openai(
-        vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"]
-    )
+    tokenizer_gpt2.load_vocab_and_merges_from_openai(vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"])
     tik_tokenizer = tiktoken.get_encoding("gpt2")
 
     test_cases = [
         ("Hello,", [15496, 11]),
         ("Implementations", [3546, 26908, 602]),
-        ("asdf asdfasdf a!!, @aba 9asdf90asdfk", [292, 7568, 355, 7568, 292, 7568, 257, 3228, 11, 2488, 15498, 860, 292, 7568, 3829, 292, 7568, 74]),
-        ("Hello, world. Is this-- a test?", [15496, 11, 995, 13, 1148, 428, 438, 257, 1332, 30])
+        (
+            "asdf asdfasdf a!!, @aba 9asdf90asdfk",
+            [292, 7568, 355, 7568, 292, 7568, 257, 3228, 11, 2488, 15498, 860, 292, 7568, 3829, 292, 7568, 74],
+        ),
+        ("Hello, world. Is this-- a test?", [15496, 11, 995, 13, 1148, 428, 438, 257, 1332, 30]),
     ]
 
     errors = []
@@ -149,12 +142,16 @@ def test_gpt2_tokenizer_openai_edgecases(imported_module, gpt2_files):
         print("-" * 40)
 
         if tik_tokens != expected_tokens:
-            errors.append(f"Tiktokenized output does not match expected GPT-2 encoding for '{input_text}'.\n"
-                          f"Expected: {expected_tokens}, Got: {tik_tokens}")
+            errors.append(
+                f"Tiktokenized output does not match expected GPT-2 encoding for '{input_text}'.\n"
+                f"Expected: {expected_tokens}, Got: {tik_tokens}"
+            )
 
         if gpt2_tokens != expected_tokens:
-            errors.append(f"Tokenized output does not match expected GPT-2 encoding for '{input_text}'.\n"
-                          f"Expected: {expected_tokens}, Got: {gpt2_tokens}")
+            errors.append(
+                f"Tokenized output does not match expected GPT-2 encoding for '{input_text}'.\n"
+                f"Expected: {expected_tokens}, Got: {gpt2_tokens}"
+            )
 
     if errors:
         pytest.fail("\n".join(errors))
@@ -164,9 +161,7 @@ def test_gpt2_newline_and_eot_ids(imported_module, gpt2_files):
     BPETokenizerSimple = getattr(imported_module, "BPETokenizerSimple", None)
 
     tok = BPETokenizerSimple()
-    tok.load_vocab_and_merges_from_openai(
-        vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"]
-    )
+    tok.load_vocab_and_merges_from_openai(vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"])
 
     assert "Ċ" in tok.inverse_vocab, "Missing GPT-2 newline glyph 'Ċ' in inverse_vocab"
     assert "<|endoftext|>" in tok.inverse_vocab, "Missing EOT in inverse_vocab"
@@ -185,9 +180,7 @@ def test_gpt2_newline_and_eot_ids(imported_module, gpt2_files):
 def test_no_eot_aliasing_and_disallowed_logic(imported_module, gpt2_files):
     BPETokenizerSimple = getattr(imported_module, "BPETokenizerSimple", None)
     tok = BPETokenizerSimple()
-    tok.load_vocab_and_merges_from_openai(
-        vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"]
-    )
+    tok.load_vocab_and_merges_from_openai(vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"])
     tik = tiktoken.get_encoding("gpt2")
 
     text = "Hello<|endoftext|>\nworld"
@@ -214,9 +207,7 @@ def test_no_eot_aliasing_and_disallowed_logic(imported_module, gpt2_files):
 def test_newline_roundtrip_and_equivalence(imported_module, gpt2_files, text):
     BPETokenizerSimple = getattr(imported_module, "BPETokenizerSimple", None)
     tok = BPETokenizerSimple()
-    tok.load_vocab_and_merges_from_openai(
-        vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"]
-    )
+    tok.load_vocab_and_merges_from_openai(vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"])
     tik = tiktoken.get_encoding("gpt2")
 
     ids_ours = tok.encode(text)
@@ -234,9 +225,7 @@ def test_newline_roundtrip_and_equivalence(imported_module, gpt2_files, text):
 def test_space_newline_space_patterns(imported_module, gpt2_files):
     BPETokenizerSimple = getattr(imported_module, "BPETokenizerSimple", None)
     tok = BPETokenizerSimple()
-    tok.load_vocab_and_merges_from_openai(
-        vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"]
-    )
+    tok.load_vocab_and_merges_from_openai(vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"])
     tik = tiktoken.get_encoding("gpt2")
 
     samples = [
@@ -250,9 +239,7 @@ def test_space_newline_space_patterns(imported_module, gpt2_files):
 def test_multiple_leading_spaces_roundtrip(imported_module, gpt2_files):
     BPETokenizerSimple = getattr(imported_module, "BPETokenizerSimple", None)
     tok = BPETokenizerSimple()
-    tok.load_vocab_and_merges_from_openai(
-        vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"]
-    )
+    tok.load_vocab_and_merges_from_openai(vocab_path=gpt2_files["encoder.json"], bpe_merges_path=gpt2_files["vocab.bpe"])
 
     text = "  Hello World."
     assert tok.decode(tok.encode(text)) == text

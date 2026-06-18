@@ -27,14 +27,18 @@ class TitleGeneratorTests(unittest.TestCase):
         self.assertIn("#MarvelRivals", hashtags)
 
     def test_ai_titles_are_cached_when_enabled(self):
-        response = json.dumps({
-            "titles": ["Billy just erased the lobby.", "That fight got personal."],
-            "hashtags": ["MarvelRivals", "#Gaming"]
-        })
+        response = json.dumps(
+            {
+                "titles": ["Billy just erased the lobby.", "That fight got personal."],
+                "hashtags": ["MarvelRivals", "#Gaming"],
+            }
+        )
 
-        with patch.object(titles, "TITLE_CACHE", self.cache_path), \
-             patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test"}, clear=False), \
-             patch("modules.LLM_Handler.ask_llm", return_value=response) as ask_llm:
+        with (
+            patch.object(titles, "TITLE_CACHE", self.cache_path),
+            patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test"}, clear=False),
+            patch("modules.LLM_Handler.ask_llm", return_value=response) as ask_llm,
+        ):
             generated, hashtags = titles.generate_titles(
                 trigger="multi_kill",
                 game="Marvel Rivals",
@@ -60,9 +64,11 @@ class TitleGeneratorTests(unittest.TestCase):
         ask_llm.assert_called_once()
 
     def test_ai_failure_falls_back_to_templates(self):
-        with patch.object(titles, "TITLE_CACHE", self.cache_path), \
-             patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test"}, clear=False), \
-             patch("modules.LLM_Handler.ask_llm", return_value="not json"):
+        with (
+            patch.object(titles, "TITLE_CACHE", self.cache_path),
+            patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test"}, clear=False),
+            patch("modules.LLM_Handler.ask_llm", return_value="not json"),
+        ):
             generated, hashtags = titles.generate_titles(
                 trigger="ace",
                 game="Marvel Rivals",

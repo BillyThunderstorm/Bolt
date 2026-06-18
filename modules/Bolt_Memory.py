@@ -41,6 +41,7 @@ from typing import Optional
 
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     pass
@@ -48,19 +49,20 @@ except ImportError:
 try:
     from modules.notifier import notify
 except ImportError:
+
     def notify(msg, level="info", reason=None):
         print(f"  [{level.upper()}] {msg}")
 
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 
-MEMORY_ROOT  = Path(__file__).parent.parent / "memory"
-MEMORY_FILE  = MEMORY_ROOT / "MEMORY.md"
-GLOSSARY     = MEMORY_ROOT / "glossary.md"
-PEOPLE_DIR   = MEMORY_ROOT / "people"
+MEMORY_ROOT = Path(__file__).parent.parent / "memory"
+MEMORY_FILE = MEMORY_ROOT / "MEMORY.md"
+GLOSSARY = MEMORY_ROOT / "glossary.md"
+PEOPLE_DIR = MEMORY_ROOT / "people"
 PROJECTS_DIR = MEMORY_ROOT / "projects"
-CONTEXT_DIR  = MEMORY_ROOT / "context"
-CONTENT_DIR  = MEMORY_ROOT / "content"
+CONTEXT_DIR = MEMORY_ROOT / "context"
+CONTENT_DIR = MEMORY_ROOT / "content"
 
 try:
     from modules.Memory_Index import (
@@ -75,6 +77,7 @@ except ImportError:
 
 
 # ── Load memory ────────────────────────────────────────────────────────────────
+
 
 def _read_file(path: Path) -> str:
     """Safely read a file, return empty string if missing."""
@@ -151,6 +154,7 @@ def load_all_memory() -> str:
 
 # ── Recall — ask OpenAI something using memory as context ─────────────────────
 
+
 def retrieve_context(question: str, limit: int = 5) -> str:
     """
     Retrieve the most relevant local memory snippets for a question.
@@ -189,7 +193,9 @@ def recall(question: str, quiet: bool = False, use_retrieval: bool = True) -> st
         return "OPENAI_API_KEY not set in .env"
 
     memory_context = load_all_memory()
-    retrieved_context = retrieve_context(question) if use_retrieval else "(retrieval disabled)"
+    retrieved_context = (
+        retrieve_context(question) if use_retrieval else "(retrieval disabled)"
+    )
 
     client = OpenAI(api_key=api_key)
 
@@ -208,20 +214,26 @@ RELEVANT RETRIEVED MEMORY:
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",   # fast + cheap for quick recalls
+            model="gpt-4o-mini",  # fast + cheap for quick recalls
             max_tokens=512,
-            
-            messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": question}]
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": question},
+            ],
         )
         answer = response.choices[0].message.content.strip()
         if not quiet:
-            notify(f"Memory recall: {answer[:100]}{'...' if len(answer) > 100 else ''}", level="info")
+            notify(
+                f"Memory recall: {answer[:100]}{'...' if len(answer) > 100 else ''}",
+                level="info",
+            )
         return answer
     except Exception as e:
         return f"Recall failed: {e}"
 
 
 # ── Remember — save a new fact to MEMORY.md ───────────────────────────────────
+
 
 def remember(fact: str, section: str = "Session Notes") -> bool:
     """
@@ -251,15 +263,18 @@ def remember(fact: str, section: str = "Session Notes") -> bool:
             updated = existing.replace(
                 f"## {section}",
                 f"## {section}{entry}",
-                1  # only replace the first occurrence
+                1,  # only replace the first occurrence
             )
         else:
             # Add a new section at the end
             updated = existing + f"\n\n## {section}{entry}\n"
 
         MEMORY_FILE.write_text(updated, encoding="utf-8")
-        notify(f"Memory saved: {fact[:80]}{'...' if len(fact) > 80 else ''}", level="success",
-               reason="Added to memory/MEMORY.md — Bolt will remember this next session.")
+        notify(
+            f"Memory saved: {fact[:80]}{'...' if len(fact) > 80 else ''}",
+            level="success",
+            reason="Added to memory/MEMORY.md — Bolt will remember this next session.",
+        )
         return True
 
     except Exception as e:
@@ -268,6 +283,7 @@ def remember(fact: str, section: str = "Session Notes") -> bool:
 
 
 # ── Auto-remember key session events ──────────────────────────────────────────
+
 
 def remember_session_event(event_type: str, **kwargs):
     """
@@ -280,10 +296,10 @@ def remember_session_event(event_type: str, **kwargs):
     """
     templates = {
         "phase_complete": "Phase {phase} marked complete",
-        "game_change":    "Game switched to {game}",
-        "clips_posted":   "{count} clip(s) posted — {titles}",
-        "bot_connected":  "Twitch bot ({account}) confirmed connected",
-        "setting_changed":"{setting} changed to {value} in config.json",
+        "game_change": "Game switched to {game}",
+        "clips_posted": "{count} clip(s) posted — {titles}",
+        "bot_connected": "Twitch bot ({account}) confirmed connected",
+        "setting_changed": "{setting} changed to {value} in config.json",
     }
     template = templates.get(event_type, f"{event_type}: {kwargs}")
     try:
@@ -318,7 +334,7 @@ if __name__ == "__main__":
 
     if "--search" in sys.argv:
         idx = sys.argv.index("--search")
-        query = " ".join(sys.argv[idx + 1:]).strip()
+        query = " ".join(sys.argv[idx + 1 :]).strip()
         if not query:
             print("  Usage: python -m modules.Bolt_Memory --search 'your query'")
             sys.exit(1)
