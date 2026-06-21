@@ -288,7 +288,12 @@ class StreamMonitor:
                 self.on_record_stop(path)
 
         elif event_type == "CurrentProgramSceneChanged":
-            scene_name = event_data.get("currentProgramSceneName", "")
+            # OBS WebSocket 5.x uses "sceneName" in the eventData, not
+            # "currentProgramSceneName" (that field only appears in request
+            # responses, not in the event payload).
+            scene_name = event_data.get("sceneName", "") or event_data.get(
+                "currentProgramSceneName", ""
+            )
             self._handle_scene_change(scene_name)
 
         elif event_type == "InputVolumeMeters":
