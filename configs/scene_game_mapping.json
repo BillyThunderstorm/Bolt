@@ -1,19 +1,10 @@
 {
+  "live_scene": "Live Scene",
   "scenes": {
-    "Live Scene": "Marvel Rivals",
-    "Starting Screen": "Just Chatting",
-    "Pause Screen": "Just Chatting",
-    "Intermission Screen": "Just Chatting",
-    "Just Chatting Screen": "Just Chatting",
-    "Ending Screen": "Just Chatting",
-    "Marvel Rivals": "Marvel Rivals",
-    "Hades 2": "Hades 2",
-    "Deadlock": "Deadlock",
-    "Valorant": "Valorant",
-    "Apex Legends": "Apex Legends",
-    "Fortnite": "Fortnite",
-    "Overwatch 2": "Overwatch 2",
-    "CS2": "Counter-Strike 2",
-    "Warzone": "Call of Duty: Warzone"
+    "Live Scene": "__twitch__",
+    "Starting Soon": "Just Chatting",
+    "BRB": "Just Chatting",
+    "Intermission": "Just Chatting",
+    "Ending": "Just Chatting"
   }
 }
