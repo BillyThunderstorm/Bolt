@@ -8,7 +8,7 @@ from modules.Highlight_Detector import detect_highlights
 from modules.Clip_Generator import generate_clips
 from modules.Subtitle_Generator import generate_subtitles
 from modules.Title_Generator import generate_title
-from modules.Twitch_API import get_all_twitch_data  # ← NEW: Import Twitch data fetcher
+from modules.twitch_api import get_all_twitch_data  # migrated to new auth-aware module
 
 # ── Bolt Voice ──────────────────────────────────────────────────────────────
 # Uses macOS's built-in `say` command with Nathan (Enhanced) — Billy's pick.
