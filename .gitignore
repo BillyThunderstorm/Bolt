@@ -41,3 +41,6 @@ venv/
 vertical_clips/
 yolov5
 .env.local
+.env.local.bak
+configs/storage_alerts.env
+configs/*.secrets.env
