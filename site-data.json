@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-20 21:42:23",
+  "generated_at": "2026-06-21 06:15:02",
   "status": {
     "clips_made": 80,
     "vertical_clips": 52,
@@ -7,7 +7,7 @@
     "recordings_processed": 128,
     "api_keys": {
       "twitch": true,
-      "obs": false,
+      "obs": true,
       "discord": true,
       "tiktok": false
     }
@@ -129,7 +129,7 @@
       "end_hour": 22,
       "start_display": "7 PM",
       "end_display": "10 PM",
-      "active": true
+      "active": false
     }
   ]
 }
