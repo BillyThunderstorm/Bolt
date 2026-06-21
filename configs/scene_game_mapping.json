@@ -1,9 +1,14 @@
 {
   "scenes": {
+    "Live Scene": "Marvel Rivals",
+    "Starting Screen": "Just Chatting",
+    "Pause Screen": "Just Chatting",
+    "Intermission Screen": "Just Chatting",
+    "Just Chatting Screen": "Just Chatting",
+    "Ending Screen": "Just Chatting",
     "Marvel Rivals": "Marvel Rivals",
     "Hades 2": "Hades 2",
     "Deadlock": "Deadlock",
-    "Just Chatting": "Just Chatting",
     "Valorant": "Valorant",
     "Apex Legends": "Apex Legends",
     "Fortnite": "Fortnite",

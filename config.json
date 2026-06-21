@@ -1,5 +1,5 @@
 {
-  "game": "Hades 2",
+  "game": "Marvel Rivals",
   "recordings_folder": "recordings",
   "clips_folder": "clips",
   "vertical_clips_folder": "vertical_clips",
@@ -13,7 +13,7 @@
   "min_clip_duration": 15,
   "max_clip_duration": 60,
   "min_clip_score": 65,
-  "highlight_sensitivity": 0.20,
+  "highlight_sensitivity": 0.2,
   "quality_tiers": {
     "discard_below": 60,
     "queue_at": 80,
