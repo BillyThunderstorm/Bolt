@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-22 12:15:03",
+  "generated_at": "2026-06-22 14:15:02",
   "status": {
     "clips_made": 111,
     "vertical_clips": 0,
@@ -121,7 +121,7 @@
       "end_hour": 14,
       "start_display": "12 PM",
       "end_display": "2 PM",
-      "active": true
+      "active": false
     },
     {
       "label": "Prime Time",
