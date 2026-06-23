@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-23 06:15:02",
+  "generated_at": "2026-06-23 08:15:02",
   "status": {
     "clips_made": 101,
     "vertical_clips": 0,
@@ -99,11 +99,13 @@
     }
   ],
   "briefing": {
-    "date": "Saturday, June 20, 2026",
+    "date": "Tuesday, June 23, 2026",
     "action_items": [
-      "Upload 36 clip(s) from queue to TikTok/Shorts/Reels",
-      "Check for new recordings to process",
-      "Review clip performance and log results"
+      "Review last clip performance and log outcomes",
+      "Memory flagged: Clip performance: kill, multi_kill for Marvel Rivals \u2014 Posted clip outcome for Marvel Rivals: trigger=kill, multi_kill, views=4, likes=0, success=False, clip=. \" I dont have a",
+      "Creator note active: Creator Context \u2014 # Creator Context",
+      "Upload 132 clip(s) from queue to TikTok/Shorts/Reels",
+      "Check for new recordings to process"
     ]
   },
   "peaks": [
@@ -113,7 +115,7 @@
       "end_hour": 9,
       "start_display": "7 AM",
       "end_display": "9 AM",
-      "active": false
+      "active": true
     },
     {
       "label": "Lunch",
