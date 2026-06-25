@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-25 08:15:02",
+  "generated_at": "2026-06-25 10:15:01",
   "status": {
     "clips_made": 42,
     "vertical_clips": 0,
@@ -115,7 +115,7 @@
       "end_hour": 9,
       "start_display": "7 AM",
       "end_display": "9 AM",
-      "active": true
+      "active": false
     },
     {
       "label": "Lunch",
