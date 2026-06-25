@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-06-25 13:11:27",
+  "generated_at": "2026-06-25 14:15:02",
   "status": {
-    "clips_made": 42,
-    "vertical_clips": 0,
+    "clips_made": 84,
+    "vertical_clips": 14,
     "ready_to_post": 132,
-    "recordings_processed": 139,
+    "recordings_processed": 144,
     "api_keys": {
       "twitch": true,
       "obs": true,
@@ -123,7 +123,7 @@
       "end_hour": 14,
       "start_display": "12 PM",
       "end_display": "2 PM",
-      "active": true
+      "active": false
     },
     {
       "label": "Prime Time",
