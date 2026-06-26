@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-25 18:15:02",
+  "generated_at": "2026-06-25 20:15:02",
   "status": {
     "clips_made": 84,
-    "vertical_clips": 55,
+    "vertical_clips": 72,
     "ready_to_post": 132,
     "recordings_processed": 144,
     "api_keys": {
@@ -131,7 +131,7 @@
       "end_hour": 22,
       "start_display": "7 PM",
       "end_display": "10 PM",
-      "active": false
+      "active": true
     }
   ]
 }
