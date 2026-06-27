@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-27 12:15:02",
+  "generated_at": "2026-06-27 14:15:01",
   "status": {
     "clips_made": 83,
-    "vertical_clips": 72,
+    "vertical_clips": 71,
     "ready_to_post": 132,
     "recordings_processed": 144,
     "api_keys": {
@@ -123,7 +123,7 @@
       "end_hour": 14,
       "start_display": "12 PM",
       "end_display": "2 PM",
-      "active": true
+      "active": false
     },
     {
       "label": "Prime Time",
