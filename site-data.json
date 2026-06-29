@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-06-29 06:15:02",
+  "generated_at": "2026-06-29 08:15:03",
   "status": {
     "clips_made": 83,
-    "vertical_clips": 71,
-    "ready_to_post": 132,
+    "vertical_clips": 22,
+    "ready_to_post": 83,
     "recordings_processed": 144,
     "api_keys": {
       "twitch": true,
@@ -14,92 +14,92 @@
   },
   "queue": [
     {
-      "id": "be211e22",
-      "created": "2026-05-29T06:06:38.227773",
-      "title": "Ready clip",
+      "id": "reprocess-000",
+      "created": "2026-06-29T07:05:13.167726",
+      "title": "2026-06-21 14-06-53 clip01 - Highlight 152",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "4a45e3a7",
-      "created": "2026-05-29T06:06:38.229236",
-      "title": "Ready clip",
+      "id": "reprocess-001",
+      "created": "2026-06-29T07:05:18.078649",
+      "title": "2026-06-21 14-06-53 clip02 - Highlight 708",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "0fc3aed6",
-      "created": "2026-05-29T06:06:38.230327",
-      "title": "Ready clip",
+      "id": "reprocess-002",
+      "created": "2026-06-29T07:05:23.667692",
+      "title": "2026-06-21 17-39-53 clip01 - Highlight 4",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "5448e1fe",
-      "created": "2026-05-29T06:06:38.232474",
-      "title": "Ready clip",
+      "id": "reprocess-003",
+      "created": "2026-06-29T07:05:32.111031",
+      "title": "2026-06-21 17-39-53 clip02 - Highlight 132",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "f13097df",
-      "created": "2026-06-02T12:44:49.325457",
-      "title": "Ready clip",
+      "id": "reprocess-004",
+      "created": "2026-06-29T07:05:40.362219",
+      "title": "2026-06-21 17-39-53 clip03 - Highlight 162",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "29896cfb",
-      "created": "2026-06-02T12:44:49.328068",
-      "title": "Ready clip",
+      "id": "reprocess-005",
+      "created": "2026-06-29T07:05:49.735488",
+      "title": "2026-06-21 17-39-53 clip04 - Highlight 212",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "ffcd58ec",
-      "created": "2026-06-02T12:44:49.329379",
-      "title": "Ready clip",
+      "id": "reprocess-006",
+      "created": "2026-06-29T07:05:58.753509",
+      "title": "2026-06-21 17-39-53 clip05 - Highlight 244",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "1bcd8b7e",
-      "created": "2026-06-02T12:44:49.332776",
-      "title": "Ready clip",
+      "id": "reprocess-007",
+      "created": "2026-06-29T07:06:08.557424",
+      "title": "2026-06-21 17-39-53 clip06 - Highlight 287",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "ba0c55ec",
-      "created": "2026-06-07T04:17:03.193757",
-      "title": "Ready clip",
+      "id": "reprocess-008",
+      "created": "2026-06-29T07:06:18.295452",
+      "title": "2026-06-21 17-39-53 clip07 - Highlight 335",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "372ca716",
-      "created": "2026-06-07T04:17:03.195440",
-      "title": "Ready clip",
+      "id": "reprocess-009",
+      "created": "2026-06-29T07:06:27.354136",
+      "title": "2026-06-21 17-39-53 clip08 - Highlight 395",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "cc337b0d",
-      "created": "2026-06-07T04:17:03.196522",
-      "title": "Ready clip",
+      "id": "reprocess-010",
+      "created": "2026-06-29T07:06:32.120788",
+      "title": "2026-06-22 01-16-58 clip01 - Highlight 39",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "db341bdf",
-      "created": "2026-06-07T04:17:03.198599",
-      "title": "Ready clip",
+      "id": "reprocess-011",
+      "created": "2026-06-29T07:06:41.559562",
+      "title": "2026-06-22 01-16-58 clip02 - Highlight 233",
       "platforms": 4,
       "status": "manual_upload_ready"
     }
   ],
   "briefing": {
-    "date": "Sunday, June 28, 2026",
+    "date": "Monday, June 29, 2026",
     "action_items": [
       "Review last clip performance and log outcomes",
       "Memory flagged: Clip performance: kill, multi_kill for Marvel Rivals \u2014 Posted clip outcome for Marvel Rivals: trigger=kill, multi_kill, views=4, likes=0, success=False, clip=. \" I dont have a",
@@ -115,7 +115,7 @@
       "end_hour": 9,
       "start_display": "7 AM",
       "end_display": "9 AM",
-      "active": false
+      "active": true
     },
     {
       "label": "Lunch",
