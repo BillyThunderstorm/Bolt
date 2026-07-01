@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-01 00:15:06",
+  "generated_at": "2026-07-01 08:15:02",
   "status": {
     "clips_made": 81,
     "vertical_clips": 83,
@@ -99,7 +99,7 @@
     }
   ],
   "briefing": {
-    "date": "Tuesday, June 30, 2026",
+    "date": "Wednesday, July 01, 2026",
     "action_items": [
       "Review last clip performance and log outcomes",
       "Memory flagged: Clip performance: kill, multi_kill for Marvel Rivals \u2014 Posted clip outcome for Marvel Rivals: trigger=kill, multi_kill, views=4, likes=0, success=False, clip=. \" I dont have a",
@@ -115,7 +115,7 @@
       "end_hour": 9,
       "start_display": "7 AM",
       "end_display": "9 AM",
-      "active": false
+      "active": true
     },
     {
       "label": "Lunch",
