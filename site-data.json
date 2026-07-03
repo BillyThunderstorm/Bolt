@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-07-03 08:15:07",
+  "generated_at": "2026-07-03 16:15:01",
   "status": {
-    "clips_made": 43,
-    "vertical_clips": 83,
-    "ready_to_post": 83,
+    "clips_made": 51,
+    "vertical_clips": 91,
+    "ready_to_post": 92,
     "recordings_processed": 144,
     "api_keys": {
       "twitch": true,
@@ -115,7 +115,7 @@
       "end_hour": 9,
       "start_display": "7 AM",
       "end_display": "9 AM",
-      "active": true
+      "active": false
     },
     {
       "label": "Lunch",
