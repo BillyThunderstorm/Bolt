@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-03 06:30:13",
+  "generated_at": "2026-07-03 08:15:07",
   "status": {
     "clips_made": 43,
     "vertical_clips": 83,
@@ -99,7 +99,7 @@
     }
   ],
   "briefing": {
-    "date": "Thursday, July 02, 2026",
+    "date": "Friday, July 03, 2026",
     "action_items": [
       "Review last clip performance and log outcomes",
       "Memory flagged: Clip performance: audio_spike for Marvel Rivals \u2014 Posted clip outcome for Marvel Rivals: trigger=audio_spike, views=71, likes=0, success=False, clip=. \ud83d\udd25 Rivals gaming cli",
@@ -115,7 +115,7 @@
       "end_hour": 9,
       "start_display": "7 AM",
       "end_display": "9 AM",
-      "active": false
+      "active": true
     },
     {
       "label": "Lunch",
