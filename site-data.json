@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-07-03 18:15:01",
+  "generated_at": "2026-07-03 20:15:01",
   "status": {
     "clips_made": 51,
     "vertical_clips": 91,
-    "ready_to_post": 92,
+    "ready_to_post": 96,
     "recordings_processed": 144,
     "api_keys": {
       "twitch": true,
@@ -131,7 +131,7 @@
       "end_hour": 22,
       "start_display": "7 PM",
       "end_display": "10 PM",
-      "active": false
+      "active": true
     }
   ]
 }
