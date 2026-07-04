@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-04 06:15:01",
+  "generated_at": "2026-07-04 08:15:01",
   "status": {
     "clips_made": 13,
     "vertical_clips": 91,
@@ -99,12 +99,12 @@
     }
   ],
   "briefing": {
-    "date": "Friday, July 03, 2026",
+    "date": "Saturday, July 04, 2026",
     "action_items": [
       "Review last clip performance and log outcomes",
       "Memory flagged: Clip performance: audio_spike for Marvel Rivals \u2014 Posted clip outcome for Marvel Rivals: trigger=audio_spike, views=71, likes=0, success=False, clip=. \ud83d\udd25 Rivals gaming cli",
       "Memory flagged: Clip performance: manual for Marvel Rivals \u2014 Posted clip outcome for Marvel Rivals: trigger=manual, views=1, likes=0, success=False, clip=. no idea",
-      "Upload 83 clip(s) from queue to TikTok/Shorts/Reels",
+      "Upload 96 clip(s) from queue to TikTok/Shorts/Reels",
       "Check for new recordings to process"
     ]
   },
@@ -115,7 +115,7 @@
       "end_hour": 9,
       "start_display": "7 AM",
       "end_display": "9 AM",
-      "active": false
+      "active": true
     },
     {
       "label": "Lunch",
