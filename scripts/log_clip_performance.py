@@ -46,7 +46,83 @@ def _load_config_game() -> str:
                 return json.load(f).get("game", "Unknown")
         except Exception:
             pass
-    return "Unknown"
+    return "Gaming"
+
+
+def _load_history() -> dict:
+    f = ROOT / "clip_history.json"
+    if f.exists():
+        try:
+            return json.load(open(f))
+        except Exception:
+            return {}
+    return {}
+
+
+def show_current(game: str):
+    """Print what's currently in clip_history.json for the current game."""
+    history = _load_history()
+    game_data = history.get(game, {})
+    if not game_data:
+        print(f"\n  No history yet for '{game}'. Log your first clip!\n")
+        return
+
+    print(f"\n  Performance history for: {game}")
+    print(f"  {'-' * 60}")
+    print(
+        f"  {'Trigger':<14} {'Clips':>6} {'Total Views':>12} "
+        f"{'Avg Views':>10} {'Boost':>7}"
+    )
+    print(f"  {'-' * 60}")
+    for trigger, data in sorted(
+        game_data.items(), key=lambda kv: kv[1].get("avg_views", 0), reverse=True
+    ):
+        clips = data.get("total_clips", 0)
+        views = data.get("total_views", 0)
+        avg = data.get("avg_views", 0)
+        boost = min(15.0, (avg / 10_000) * 15.0)
+        print(f"  {trigger:<14} {clips:>6} {views:>12,} {avg:>10,} {boost:>6.1f}p")
+    print()
+
+
+def interactive(game: str):
+    """Walk Billy through logging a clip step-by-step."""
+    print(f"\n  Logging clip performance for: {game}")
+    print(f"  (Press Ctrl+C any time to cancel)\n")
+
+    print("  Trigger types: kill, multi_kill, ace, donation, raid, sub,")
+    print("                 resub, bits, chat_hype, highlight, manual\n")
+
+    trigger = input("  Trigger type: ").strip().lower()
+    if not trigger:
+        print("  No trigger entered — aborted.")
+        return
+
+    try:
+        views = int(input("  Views (after 24h+): ").strip().replace(",", ""))
+    except ValueError:
+        print("  Invalid number — aborted.")
+        return
+
+    likes_raw = input("  Likes (optional, press enter to skip): ").strip()
+    likes = 0
+    if likes_raw:
+        try:
+            likes = int(likes_raw.replace(",", ""))
+        except ValueError:
+            print("  Invalid likes — using 0.")
+            likes = 0
+
+    clip_path = input("  Clip filename/path (optional): ").strip()
+    note = input("  Note about why it worked/flopped (optional): ").strip()
+
+    _commit(game, trigger, views, likes, clip_path=clip_path, note=note)
+
+
+def _like_rate(views: int, likes: int) -> float:
+    if views <= 0:
+        return 0.0
+    return round(likes / views, 4)
 
 
 def _is_success(views: int, likes: int) -> bool:
@@ -184,13 +260,31 @@ def list_recent(limit: int = 20):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Log clip performance for Bolt")
-    parser.add_argument("--game", "-g", help="Game name (defaults to config.json game)")
-    parser.add_argument("--trigger", "-t", help="Trigger type, e.g. ace, kill, clutch")
-    parser.add_argument("--views", "-v", type=int, help="View count after ~24h")
-    parser.add_argument("--likes", "-l", type=int, default=0, help="Like count")
-    parser.add_argument("--list", action="store_true", help="List recent entries")
-    args = parser.parse_args()
+    p = argparse.ArgumentParser(
+        description="Log a posted clip's TikTok performance so Bolt learns what works.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p.add_argument("--trigger", help="Clip trigger type (kill, ace, donation, etc.)")
+    p.add_argument("--views", type=int, help="View count after 24h+")
+    p.add_argument("--likes", type=int, default=0, help="Like count (optional)")
+    p.add_argument(
+        "--clip", default="", help="Clip path or filename this performance belongs to"
+    )
+    p.add_argument(
+        "--game", default=None, help="Override game name (defaults to config.json)"
+    )
+    p.add_argument(
+        "--platform", default="TikTok", help="Platform posted to (default: TikTok)"
+    )
+    p.add_argument(
+        "--note", default="", help="Optional note about why it worked/flopped"
+    )
+    p.add_argument(
+        "--list", action="store_true", help="Show current performance history and exit"
+    )
+
+    args = p.parse_args()
+    game = args.game or _load_config_game()
 
     if args.list:
         list_recent()

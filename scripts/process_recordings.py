@@ -130,7 +130,6 @@ def print_output_paths():
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 
-
 def main():
     import argparse
 

@@ -29,7 +29,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv(".env.local")
+if not load_dotenv(".env.local"):
+    load_dotenv()
 
 from modules.notifier import notify, notify_startup, notify_error
 from modules.Config_Loader import load_config
@@ -260,14 +261,17 @@ def process_recording(
         or config.get("title_generation", {}).get("enabled")
         or config.get("quality_tiers", {}).get("use_ai_titles")
     )
-    use_nexus = content_type != "gaming" or config.get("use_nexus_captions", False)
+use_nexus = content_type != "gaming" or config.get("use_nexus_captions", False)
 
-    notify(
-        f"Step 3/6 — Generating titles ({content_type})…",
-        level="info",
-        reason=(
-            "Nexus Creator optimizing captions via Gemini."
-            if use_nexus
+notify(
+    f"Step 3/6 — Generating titles ({content_type})…",
+    level="info",
+    reason=(
+        "Nexus Creator optimizing captions via Gemini."
+        if use_nexus
+        else "AI titles are enabled; Bolt will use cached LLM captions with template fallback."
+        if use_ai_titles
+
             else "Using local templates to generate TikTok titles. "
             "Enable use_ai_titles when you want cached LLM captions."
         ),
@@ -723,7 +727,6 @@ def _start_chat_bot(creator_brain: str):
 
 # ── 5. Main loop ───────────────────────────────────────────────────────────────
 
-
 def main():
     # Push current site data once at startup. This used to be a
     # module-level side effect; moving it here avoids a GitHub push on
@@ -747,7 +750,6 @@ def main():
         print(
             "⚠️ BrainController has no ingest_all_sources(); skipping source ingestion."
         )
-
     game = config.get("game", "Gaming")
     sensitivity = config.get("highlight_sensitivity", 0.7)
 

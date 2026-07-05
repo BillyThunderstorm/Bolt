@@ -90,8 +90,6 @@ except ImportError:
 
     def search_and_answer(q, **kw):
         return None
-
-
 try:
     from modules.Bolt_Voice import speak as _voice_speak
 
@@ -484,12 +482,12 @@ if TWITCHIO_OK:
         Bolt does when things happen.
         """
 
-        def __init__(self, brain: str, use_voice: bool = False):
-            self.brain = brain
-            self.memory = SessionMemory()
-            self._last_message_at = 0.0  # rate limiting
-            self.use_voice = use_voice and VOICE_OK
-            self.conv_memory = ConversationMemory() if CONV_OK else None
+def __init__(self, brain: str, use_voice: bool = False):
+    self.brain = brain
+    self.memory = SessionMemory()
+    self._last_message_at = 0.0  # rate limiting
+    self.use_voice = use_voice and VOICE_OK
+    self.conv_memory = ConversationMemory() if CONV_OK else None
 
             super().__init__(
                 token=BOT_TOKEN,
@@ -887,7 +885,7 @@ def start_chat_bot(brain: str = "", use_voice: bool = False) -> Optional[BoltBot
         notify(
             f"Bolt chat bot starting in #{CHANNEL}…",
             level="info",
-            reason=f"Bot name: {BOT_NAME}. Voice: {'on' if use_voice else 'off'}. "
+reason=f"Bot name: {BOT_NAME}. Voice: {'on' if use_voice else 'off'}. "
             "Bolt will greet viewers, react to highlights, and answer !Bolt questions. "
             "Give her ~10 seconds to connect.",
         )
@@ -921,7 +919,7 @@ if __name__ == "__main__":
     print(
         f"  OpenAI:   {'available ✓' if OPENAI_OK and OPENAI_KEY else 'not configured'}"
     )
-    print(f"  Voice:    {'enabled ✓' if VOICE_OK else 'not configured'}")
+print(f"  Voice:    {'enabled ✓' if VOICE_OK else 'not configured'}")
     print()
 
     if "--check" in sys.argv:

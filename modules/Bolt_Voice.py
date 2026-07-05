@@ -64,11 +64,9 @@ MUTED = os.getenv("Bolt_VOICE_MUTE", "false").lower() == "true"
 EDGE_TTS_VOICE = os.getenv("Bolt_EDGE_VOICE", "en-US-ChristopherNeural")
 EDGE_TTS_RATE = os.getenv("Bolt_EDGE_RATE", "+0%")  # e.g. +10% faster, -10% slower
 
-# ElevenLabs — PRIMARY TTS
-ELEVENLABS_KEY = os.getenv(
-    "ELEVENLABS_API_KEY", "sk_ab867a447da9976e33d40f8d2c1da14b9ee2b12bad1df904"
-)
-ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "o3VpiaQ9JcGIFpOrkHHf")  # Cowboy
+# ElevenLabs (kept for future use, not active)
+ELEVENLABS_KEY = os.getenv("ELEVENLABS_API_KEY", "")
+ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "")
 
 
 # ── What Bolt says for each event type ────────────────────────────────────────
