@@ -55,6 +55,8 @@ python-dotenv    # Environment variable management
 schedule         # Job scheduling
 psutil           # System monitoring
 pytz             # Timezone support
+imagehash        # Perceptual hashing for clip deduplication
+Pillow           # Image processing (frame extraction for pHash)
 
 # Note: backports.zoneinfo removed - Python 3.9+ has zoneinfo built-in
 # Note: openai-whisper removed - using openai API for transcription instead

@@ -1,0 +1,15 @@
+{
+  "name": "HabitLog",
+  "type": "object",
+  "properties": {
+    "habitName": {
+      "type": "string",
+      "description": "The habit this log entry belongs to"
+    },
+    "completedOn": {
+      "type": "date-time",
+      "description": "When this was completed"
+    }
+  },
+  "required": ["habitName", "completedOn"]
+}

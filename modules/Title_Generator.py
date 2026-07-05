@@ -14,6 +14,11 @@ import re
 from pathlib import Path
 from typing import List, Optional, Tuple
 
+# ── LLM Backend: Gemini (via Nexus) or OpenAI fallback ───────────────────────
+# Bolt now uses Gemini by default for title generation since it's free.
+# Set USE_GEMINI_TITLES=false in .env to fall back to OpenAI.
+USE_GEMINI = os.getenv("USE_GEMINI_TITLES", "true").lower() not in ("false", "0", "no")
+
 try:
     from modules.notifier import notify
 except ImportError:
@@ -30,7 +35,8 @@ except ImportError:
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 TITLE_CACHE = PROJECT_ROOT / "data" / "title_cache.json"
 BRAIN_FILES = (PROJECT_ROOT / "bolt_brain.md", PROJECT_ROOT / "Bolt_brain.md")
-AI_MODEL = "gpt-4o-mini"
+AI_MODEL = "gpt-4o-mini"  # OpenAI fallback (requires credits)
+GEMINI_MODEL = "gemini-2.5-flash"  # Free tier
 
 # ── Template library ───────────────────────────────────────────────────────────
 
@@ -183,24 +189,32 @@ def _llm_titles(
         )
         return cached.get("titles", []), cached.get("hashtags", [])
 
-    if not _has_openai_key():
-        notify(
-            "AI titles enabled, but OPENAI_API_KEY is not configured",
-            level="warning",
-            reason="Bolt will keep working with local template titles.",
-        )
-        return None
-
     prompt = _build_title_prompt(trigger, game, score, context, count)
     notify(
         f"Generating AI titles for {trigger} clip (score {score:.0f})",
         level="info",
         reason="Using Billy's creator profile plus clip context, with template fallback.",
     )
-    try:
-        from modules.LLM_Handler import ask_llm
 
-        raw = ask_llm(prompt, model=AI_MODEL)
+    # ── Try Gemini first (free), fall back to OpenAI ──────────────────────
+    raw = None
+    try:
+        if USE_GEMINI and _has_gemini_key():
+            raw = _ask_gemini(prompt)
+        elif _has_openai_key():
+            from modules.LLM_Handler import ask_llm
+            raw = ask_llm(prompt, model=AI_MODEL)
+        else:
+            notify(
+                "AI titles enabled, but no API key configured (GEMINI_API_KEY or OPENAI_API_KEY)",
+                level="warning",
+                reason="Bolt will keep working with local template titles.",
+            )
+            return None
+
+        if not raw or raw.startswith("Nexus unavailable") or raw.startswith("LLM unavailable"):
+            raise ValueError("LLM returned empty or error response")
+
         result = _parse_title_response(raw)
         titles = _clean_titles(result.get("titles", []), count)
         hashtags = _clean_hashtags(result.get("hashtags", []), game, trigger)
@@ -306,6 +320,27 @@ def _cache_key(trigger: str, game: str, score: float, context: dict, count: int)
 def _has_openai_key() -> bool:
     key = os.getenv("OPENAI_API_KEY", "").strip()
     return bool(key and key != "sk_your_key_here")
+
+
+def _has_gemini_key() -> bool:
+    key = os.getenv("GEMINI_API_KEY", "").strip()
+    return bool(key)
+
+
+def _ask_gemini(prompt: str) -> str:
+    """Ask Gemini for titles using the google-genai SDK directly."""
+    try:
+        from google import genai
+        import os as _os
+
+        client = genai.Client(api_key=_os.getenv("GEMINI_API_KEY"))
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+        )
+        return response.text or ""
+    except Exception as e:
+        return f"LLM unavailable: {str(e)[:120]}"
 
 
 def _parse_title_response(raw: str) -> dict:

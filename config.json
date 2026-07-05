@@ -7,24 +7,24 @@
   "obs_host": "localhost",
   "obs_port": 4455,
   "obs_path": "",
-  "tiktok_style": "letterbox",
+  "tiktok_style": "crop",
   "auto_format_tiktok": true,
   "max_clips_per_session": 5,
   "min_clip_duration": 15,
   "max_clip_duration": 60,
   "min_clip_score": 65,
-  "highlight_sensitivity": 0.2,
+  "highlight_sensitivity": 0.05,
   "quality_tiers": {
-    "discard_below": 60,
-    "queue_at": 80,
+    "discard_below": 5.0,
+    "queue_at": 15.0,
     "use_ai_titles": true,
     "_comment": "score < discard_below = discard; discard_below <= score < min_post_score = mid; score >= min_post_score and < queue_at = queue without Discord ping; score >= queue_at = auto-queue + Discord alert"
   },
   "highlight": {
-    "energy_multiplier": 3.5,
+    "energy_multiplier": 1.5,
     "min_gap_seconds": 30,
-    "sensitivity": 0.55,
-    "min_confidence": 0.15,
+    "sensitivity": 0.05,
+    "min_confidence": 0.02,
     "pad_before": 8,
     "pad_after": 12
   },
@@ -69,5 +69,9 @@
   },
   "notes": "Auto-posting has safeguards: Bolt asks for review 30 minutes before peak time, posts if approved or if the deadline is missed, and holds rejected clips with a required reason.",
   "auto_rank": true,
-  "min_post_score": 65
+  "min_post_score": 5,
+  "use_ai_titles": true,
+  "title_generation": {
+    "enabled": true
+  }
 }

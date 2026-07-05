@@ -1,0 +1,28 @@
+{
+  "name": "Reminder",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "What to be reminded of"
+    },
+    "content": {
+      "type": "string",
+      "description": "Additional details"
+    },
+    "triggerDate": {
+      "type": "date-time",
+      "description": "When to show the reminder"
+    },
+    "isRecurring": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "completed", "dismissed"],
+      "default": "pending"
+    }
+  },
+  "required": ["title", "triggerDate"]
+}

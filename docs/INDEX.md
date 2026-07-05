@@ -134,9 +134,17 @@ Bolt provides multiple ways to interact:
 | Interface | Command | Description |
 |-----------|---------|-------------|
 | CLI Launcher | `python3 launch.py` | Main entry point |
-| Bot Runtime | `python3 bot.py` | Direct execution |
+| Bot Runtime | `python3 bot.py` | Direct execution (45ms import after June 21 fix) |
 | Chat Module | `python3 -m modules.Bolt_Chat` | Local chat testing |
 | Voice Module | `python3 -m modules.Bolt_Voice "text"` | TTS output |
+| Voice Conversation | `python3 -m modules.Bolt_Conversation` | Hands-free voice chat with memory |
+| Chat with Voice | `python3 -m modules.Bolt_Chat --voice` | Twitch chat with spoken replies |
+| Daily Briefing | `python3 scripts/daily_briefing.py [--print\|--send]` | Memory-aware morning briefing |
+| Weekly Analysis | `python3 scripts/weekly_analysis.py [--print\|--send]` | Memory-aware Sunday insights |
+| Calendar Feeds | `python3 scripts/generate_calendar.py` | RFC 5545 ICS feeds |
+| Thumbnails | `python3 scripts/generate_thumbnails.py` | JPG thumbnails via ffmpeg |
+| Twitch Auto-Clip | `python3 scripts/auto_clip_twitch.py` | Download VODs → clip pipeline (NEW) |
+| Highlight Reel | `python3 scripts/make_twitch_highlights.py` | Compile best clips into VOD (NEW) |
 
 ### Memory Interfaces
 | Interface | Command | Description |
@@ -144,6 +152,7 @@ Bolt provides multiple ways to interact:
 | Memory Index | `python3 -m modules.Memory_Index` | Searchable index |
 | Memory Browser | `python3 -m modules.Bolt_Memory` | Full operations |
 | Refresh Index | `python3 scripts/refresh_memory_index.py` | Rebuild index |
+| Creator-Lane Tests | `python3 -m unittest tests.test_creator_lanes_reachable` | 9 tests, all 7 lanes reachable |
 
 ### Storage Interfaces
 | Interface | Command | Description |
@@ -184,6 +193,24 @@ Bolt provides multiple ways to interact:
 | `scripts/legacy/README.md` | Old script notes |
 | `docs/guides/TWITCH_INTEGRATION_GUIDE_docs.md` | Older writeup for reference |
 
+## Active Cron Schedule
+
+```bash
+crontab -l
+```
+
+| Schedule | Task | Description |
+|----------|------|-------------|
+| `*/30 * * * *` | Video Compression | HandBrake H.264/H.265 |
+| `0 */3 * * *` | Storage Monitor | Disk usage + email/SMS alerts |
+| `0 */6 * * *` | Media Rotation | Size-based archival |
+| `0 3 * * *` | Storage Optimization | Nightly cleanup (3-day retention) |
+| `0 5 * * *` | **Thumbnail Refresh** | JPGs for clips/ + vertical_clips/ |
+| `*/15 * * * *` | Site Data Push | Recommended (not in default crontab) |
+| `0 7 * * *` | **Daily Briefing** | Memory-aware briefing + calendar feeds |
+| `0 */2 * * *` | **Auto-Process** | New recordings pipeline |
+| `0 9 * * 0` | **Weekly Analysis** | Sunday insights + recommendations |
+
 ---
 
-*Last updated: June 8, 2026 - Added storage management docs and user interfaces index*
+*Last updated: July 1, 2026 - Added Twitch VOD auto-clipping pipeline and highlight reel compiler. Total test suite: 122 passing.*

@@ -1,0 +1,172 @@
+# Billy's Gaming & Tech Review Roadmap
+
+## Your Step-by-Step Timeline
+
+---
+
+### WEEK 1 (June 26 - July 2): Foundation
+
+**☐ Watch/read the review template**
+- File: `Bolt/reviews/review_template.md`
+- Learn the short-form and long-form review structures
+
+**☐ Pick 3 things you already own to review**
+- Ideas: gaming headset, keyboard, mouse, monitor, phone, desk accessory
+- Choose stuff you have strong opinions on (good or bad)
+
+**☐ Film your first review**
+- Use the short-form template (30-60 seconds)
+- Film on your phone — doesn't need to be fancy
+- Follow the structure: Hook → What It Is → Demo → Pros/Cons → Verdict
+- Include the disclosure line only if it was gifted (skip if it's your own stuff)
+
+**☐ Edit and post Review #1**
+- Post to TikTok, YouTube Shorts, and Instagram Reels
+- Use hashtags: #techreview #gaminggear #review #[brand] #[product]
+
+---
+
+### WEEK 2 (July 3 - July 9): Build the Portfolio
+
+**☐ Film and post Review #2**
+- Same structure, different product
+- Try a long-form version for YouTube too (5-10 min)
+
+**☐ Film and post Review #3**
+- Short-form for all platforms
+
+**☐ Set up Amazon Associates account**
+- Go to: affiliate-program.amazon.com
+- Sign up with your existing Amazon account
+- Get your affiliate links ready for products you mention in reviews
+- Put affiliate links in video descriptions
+
+**☐ Set up a professional email**
+- Option A: Buy a domain (simplybilly.com or your brand name) at Namecheap (~$10/year)
+- Set up custom email: billy@simplybilly.com via Google Workspace or Namecheap
+- Option B (free): Create a clean Gmail like billy.simplybilly@gmail.com
+- Update your media kit and social bios with this email
+
+---
+
+### WEEK 3 (July 10 - July 16): Keep Shipping + Prep Outreach
+
+**☐ Film and post Review #4**
+- Short-form + try long-form on YouTube
+
+**☐ Film and post Review #5**
+- You now have 5 review videos — that's your portfolio
+
+**☐ Export your media kit as PDF**
+- File: `Bolt/reviews/media_kit.md`
+- Open in any markdown editor or use an online converter
+- Save as: `Billy_Media_Kit.pdf`
+
+**☐ Update all social profiles**
+- YouTube bio: "Gaming & tech reviews — honest, no-fluff. New videos weekly."
+- TikTok bio: "Gaming clips + tech reviews 🔥"
+- X bio: "Gaming & tech content creator | Reviews, clips, and builds"
+- Add contact email to YouTube About page
+- Add links to all platforms cross-referenced
+
+---
+
+### WEEK 4 (July 17 - July 23): Start Pitching Brands
+
+**☐ Read the pitch email templates**
+- File: `Bolt/reviews/pitch_templates.md`
+- Customize the "Template 1: Cold Outreach" for each brand
+
+**☐ Pitch 5 brands from the starter list**
+1. Keychron — keyboards (keychron.com/pages/affiliate-program)
+2. Redragon — budget gaming gear (redragonshop.com)
+3. UGREEN — tech accessories (ugreen.com)
+4. Glorious PC Gaming Race — mice, keyboards (pcgamingrace.com)
+5. Anker — accessories (anker.com/affiliates)
+
+**☐ Log each pitch in the review tracker**
+- File: `Bolt/reviews/review_tracker.json`
+- Note: brand, date sent, product requested, status
+
+**☐ Continue posting gaming clips (3/day on schedule)**
+- Your clip queue runs through July 19
+- Keep the momentum on both content types
+
+---
+
+### WEEK 5 (July 24 - July 30): Follow Up + Keep Building
+
+**☐ Follow up on pitches with no response (after 7 days)**
+- Use Template 4 from pitch_templates.md
+
+**☐ Pitch 5 more brands**
+6. HyperX — headsets, keyboards (hyperx.com)
+7. SteelSeries — headsets, mice (steelseries.com)
+8. Elgato — streaming gear (elgato.com)
+9. Twelve South — accessories (twelvesouth.com)
+10. Razer — full gaming gear (razer.com/affiliate-program)
+
+**☐ Film and post Review #6 and #7**
+- Try reviewing something different (new category within gaming/tech)
+
+**☐ Join product testing platforms**
+- BzzAgent (bzzagent.com)
+- Influenster (influenster.com)
+- SampleSource (samplesource.com)
+- Fill out profiles completely
+
+---
+
+### WEEK 6+ (July 31 onward): Scale Up
+
+**☐ Keep posting 1-2 reviews per week**
+- Consistency is what brands look for
+
+**☐ Check Amazon Vine eligibility**
+- You need consistent Amazon review history
+- Write detailed, helpful reviews on products you buy
+- Vine is invite-only — Amazon invites active, quality reviewers
+
+**☐ If you've received any products to review:**
+- Film and post within 3-5 days
+- Log in review_tracker.json
+- Mark as posted and add platform links
+
+**☐ Evaluate what's working**
+- Which review videos got the most views?
+- Which products got the most engagement?
+- Double down on what works
+
+**☐ Long-term goal: brands start reaching out to you**
+- Keep your profiles active and professional
+- Add a PO Box to your YouTube About page once you're comfortable
+- Set clear review policies on your About page
+
+---
+
+## Key Resources (All in Bolt/reviews/)
+
+| File | What It Is |
+|------|-----------|
+| `media_kit.md` | Your one-page creator resume for brands |
+| `review_tracker.json` | Track pitches, products, and review status |
+| `pitch_templates.md` | Copy-paste email templates + 10 starter brands |
+| `review_template.md` | Script structure for short & long reviews |
+
+---
+
+## Golden Rules
+
+1. **Honesty over everything.** Bad reviews build trust. Shilling kills it.
+2. **Consistency wins.** 1-2 reviews/week + 3 clips/day = momentum.
+3. **Start small.** Cheap accessories are easier to get than expensive gear.
+4. **Follow up.** One follow-up email after 7 days, then move on.
+5. **Disclose everything.** #ad or "sponsored by [brand]" is non-negotiable.
+6. **Track everything.** Log every pitch, every product, every review in the tracker.
+7. **Your audience is small but that's fine.** Engaged 2K > dead 200K. Brands care about fit and engagement.
+
+---
+
+*Print this and keep it visible. Check off boxes as you go.*
+
+*Created: June 26, 2026*

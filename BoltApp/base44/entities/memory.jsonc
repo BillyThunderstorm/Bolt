@@ -1,0 +1,21 @@
+{
+  "name": "Memory",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "description": "Category of this memory (e.g., 'facts', 'preferences', 'goals', 'relationships')"
+    },
+    "content": {
+      "type": "string",
+      "description": "The stored memory or fact"
+    },
+    "importance": {
+      "type": "string",
+      "enum": ["low", "medium", "high"],
+      "default": "medium",
+      "description": "How important this memory is"
+    }
+  },
+  "required": ["category", "content"]
+}

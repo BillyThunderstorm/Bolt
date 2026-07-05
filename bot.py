@@ -36,7 +36,11 @@ from modules.Config_Loader import load_config
 from modules.Think_Learn_Decide import ThinkLearnDecideEngine
 from scripts.site_data_writer import write_site_data
 
-write_site_data(push=True)
+# NOTE: write_site_data(push=True) used to live here at module-import time,
+# which meant every `from bot import process_recording` triggered a GitHub
+# push — adding ~2 seconds of latency to scripts/process_recordings.py and
+# the test suite. The push now happens inside main() so it only runs when
+# bot.py is executed as a script (`python3 bot.py`) or via launch.py.
 # ── Constants ──────────────────────────────────────────────────────────────────
 BRAIN_FILE = "Bolt_brain.md"
 CONFIG_FILE = "config.json"
@@ -249,23 +253,28 @@ def process_recording(
         reason="Clips saved to clips/ folder.",
     )
 
-    # ── Step C: Generate AI titles (Billy's profile injected here) ────────────
+    # ── Step C: Generate titles (gaming) or Nexus-optimized captions (review/skincare/tech) ─
+    content_type = config.get("content_type", "gaming")
     use_ai_titles = bool(
         config.get("use_ai_titles")
         or config.get("title_generation", {}).get("enabled")
         or config.get("quality_tiers", {}).get("use_ai_titles")
     )
+    use_nexus = content_type != "gaming" or config.get("use_nexus_captions", False)
+
     notify(
-        "Step 3/6 — Generating titles…",
+        f"Step 3/6 — Generating titles ({content_type})…",
         level="info",
         reason=(
-            "AI titles are enabled; Bolt will use cached LLM captions with template fallback."
-            if use_ai_titles
+            "Nexus Creator optimizing captions via Gemini."
+            if use_nexus
             else "Using local templates to generate TikTok titles. "
             "Enable use_ai_titles when you want cached LLM captions."
         ),
     )
     clip_titles = {}  # keyed by output_file path string
+
+    # ── Generate base titles from templates ──────────────────────────────
     try:
         from modules.Title_Generator import generate_titles
 
@@ -277,7 +286,7 @@ def process_recording(
                 context={"creator_brain": creator_brain, "config": config},
             )
             clip_titles[clip.output_file] = {"titles": titles, "hashtags": hashtags}
-            notify(f"  Title: {titles[0]}", level="success")
+            notify(f"  Template title: {titles[0]}", level="success")
     except Exception as e:
         notify_error("Title_Generator", e)
         for clip in successful_clips:
@@ -285,6 +294,66 @@ def process_recording(
                 "titles": [f"Clip from {game}"],
                 "hashtags": [],
             }
+
+    # ── Nexus Creator: optimize captions for non-gaming or when enabled ──────
+    if use_nexus:
+        try:
+            from modules.Nexus_Creator import NexusCreator
+
+            nexus = NexusCreator()
+            nexus_context = (
+                f"Game: {game} | Content type: {content_type} | "
+                f"Clips: {len(successful_clips)} | Creator: Billy (@simplybilly_)\n"
+                f"Performance: Hades 2 averaging 2.6x more views than Marvel Rivals. "
+                f"TikTok is strongest platform."
+            )
+
+            for clip in successful_clips:
+                clip_name = Path(clip.output_file).name
+                transcript = clip_titles.get(clip.output_file, {}).get("transcript", "")
+                desc = f"Template title: {clip_titles[clip.output_file]['titles'][0]}"
+                if transcript:
+                    desc += f"\nTranscript excerpt: {transcript[:200]}"
+
+                result = nexus.optimize_caption(
+                    clip_name=clip_name,
+                    clip_description=desc,
+                    platform="tiktok",
+                )
+                nexus_advice = result.get("advice", "")
+
+                # Parse Nexus advice — it should give us caption + hashtags
+                # Nexus returns markdown; extract the first line as title
+                lines = nexus_advice.strip().split("\n")
+                nexus_title = None
+                nexus_hashtags = []
+
+                for line in lines:
+                    line = line.strip().lstrip("*#").strip()
+                    if not line:
+                        continue
+                    # First non-empty, non-header line that looks like a caption
+                    if not nexus_title and len(line) < 200 and not line.startswith("#"):
+                        nexus_title = line
+                    # Collect hashtags
+                    if "#" in line:
+                        nexus_hashtags.extend(
+                            [w for w in line.split() if w.startswith("#")]
+                        )
+
+                if nexus_title:
+                    old_titles = clip_titles[clip.output_file]["titles"]
+                    clip_titles[clip.output_file]["titles"] = [nexus_title] + old_titles
+                    notify(f"  Nexus title: {nexus_title}", level="success")
+                if nexus_hashtags:
+                    clip_titles[clip.output_file]["hashtags"] = nexus_hashtags[:5]
+
+        except Exception as e:
+            notify(
+                f"Nexus caption optimization skipped: {e}",
+                level="warning",
+                reason="Continuing with template titles. Check GEMINI_API_KEY in .env",
+            )
 
     # ── Step D: Generate subtitles ────────────────────────────────────────────
     notify(
@@ -546,7 +615,7 @@ def process_recording(
                     f"ALTERNATES:\n"
                     f"  {alternates}\n\n"
                     f"SCORE: {score:.0f}/100\n"
-                    f"GAME:  {game}\n"
+                    f"TYPE:  {content_type.upper()}\n"
                 )
                 caption_path.write_text(caption_text, encoding="utf-8")
                 notify(
@@ -656,6 +725,19 @@ def _start_chat_bot(creator_brain: str):
 
 
 def main():
+    # Push current site data once at startup. This used to be a
+    # module-level side effect; moving it here avoids a GitHub push on
+    # every `from bot import …` from other scripts and tests.
+    try:
+        write_site_data(push=True)
+    except Exception as exc:
+        # Never let a site-data push failure block the pipeline.
+        notify(
+            "site_data push skipped",
+            level="warning",
+            reason=f"write_site_data failed at startup: {exc}",
+        )
+
     creator_brain = load_brain()
     config = load_config()
     intelligence = ThinkLearnDecideEngine(config)

@@ -132,11 +132,34 @@ def print_output_paths():
 
 
 def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Bolt — Process recordings into TikTok-ready clips"
+    )
+    parser.add_argument(
+        "mode",
+        nargs="?",
+        default="all",
+        help="all | latest | list | 1..N (default: all)",
+    )
+    parser.add_argument(
+        "--content-type", "-t",
+        default="gaming",
+        choices=["gaming", "review", "skincare", "tech"],
+        help="Content type: gaming (default), review, skincare, tech — controls title style and caption strategy",
+    )
+    args = parser.parse_args()
+    mode = args.mode
+    content_type = args.content_type
+
     print_header()
+    if content_type != "gaming":
+        print(f"  📂  Content type: {content_type.upper()}")
+        print()
 
     folder = find_recordings_folder()
     recordings = find_recordings(folder)
-    mode = sys.argv[1] if len(sys.argv) > 1 else "all"
 
     # ── List mode ─────────────────────────────────────────────────────────────
     if mode == "list":
@@ -155,7 +178,7 @@ def main():
         to_process = recordings
         print(f"  Processing all {len(recordings)} recording(s)…")
     else:
-        # Try treating argv[1] as a number (index)
+        # Try treating mode as a number (index)
         try:
             idx = int(mode) - 1
             to_process = [recordings[idx]]
@@ -163,7 +186,7 @@ def main():
         except (ValueError, IndexError):
             print(f"  ✗  Unknown mode: {mode}")
             print(
-                "     Usage: python3 process_recordings.py [all | latest | list | 1..N]"
+                "     Usage: python3 process_recordings.py [all | latest | list | 1..N] [--content-type gaming|review|skincare|tech]"
             )
             return
 
@@ -182,6 +205,9 @@ def main():
     print()
 
     brain_controller = BrainController(config, brain)
+
+    # ── Inject content_type into config so bot.py can use it ─────────────────
+    config["content_type"] = content_type
 
     # ── Process each recording ────────────────────────────────────────────────
     from bot import process_recording

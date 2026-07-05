@@ -1,0 +1,11 @@
+{
+  "reviews": [],
+  "outreach_log": [],
+  "products_received": [],
+  "settings": {
+    "review_frequency_goal": "1-2 per week",
+    "platforms": ["tiktok", "youtube_shorts", "youtube_long", "instagram_reels"],
+    "niche": "gaming & tech gear",
+    "disclosure_required": true
+  }
+}

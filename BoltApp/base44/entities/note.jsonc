@@ -1,0 +1,25 @@
+{
+  "name": "Note",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the note"
+    },
+    "content": {
+      "type": "string",
+      "description": "The full note content, supports formatting"
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Tags for organizing notes"
+    },
+    "pinned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this note is pinned to the top"
+    }
+  },
+  "required": ["content"]
+}

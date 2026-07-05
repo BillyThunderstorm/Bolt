@@ -32,7 +32,10 @@ sys.path.insert(0, str(ROOT))
 from modules.Clip_Ranker import update_historical_performance
 
 DATA_DIR = ROOT / "data"
-OUTCOMES_FILE = DATA_DIR / "performance_outcomes.jsonl"
+PERFORMANCE_OUTCOMES_FILE = DATA_DIR / "performance_outcomes.jsonl"
+
+# Back-compat alias for any external caller still using the old name.
+OUTCOMES_FILE = PERFORMANCE_OUTCOMES_FILE
 
 
 def _load_config_game() -> str:
@@ -46,9 +49,40 @@ def _load_config_game() -> str:
     return "Unknown"
 
 
-def log_performance(game: str, trigger: str, views: int, likes: int) -> dict:
-    """Append a performance outcome and update historical averages."""
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+def _is_success(views: int, likes: int) -> bool:
+    """Return True if a clip is considered successful by Bolt's learning loop.
+
+    A clip is successful when it reaches 1000+ views OR has a >=5% like rate.
+    The like-rate check is skipped when there are zero views to avoid
+    divide-by-zero.
+    """
+    if views >= 1000:
+        return True
+    if views > 0 and likes > 0:
+        return (likes / views) >= 0.05
+    return False
+
+
+def _record_learning_outcome(
+    game: str,
+    trigger: str,
+    views: int,
+    likes: int,
+    clip_path: str = "",
+    platform: str = "",
+    note: str = "",
+) -> dict:
+    """Append an enriched performance outcome and feed it to the learning loop.
+
+    Writes the same JSONL shape Bolt has been collecting historically
+    (timestamp, game, trigger, views, likes, like_rate, success, clip_path,
+    platform, note), then notifies the decision engine and refreshes the
+    memory index so retrieval can use the new signal immediately.
+    """
+    PERFORMANCE_OUTCOMES_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+    like_rate = round((likes / views) * 100, 2) if views > 0 else 0.0
+    success = _is_success(views, likes)
 
     entry = {
         "timestamp": datetime.now().isoformat(),
@@ -56,15 +90,63 @@ def log_performance(game: str, trigger: str, views: int, likes: int) -> dict:
         "trigger": trigger,
         "views": views,
         "likes": likes,
-        "success": views >= 1000 or (likes / views * 100) >= 5 if views > 0 else False,
+        "like_rate": like_rate,
+        "success": success,
+        "clip_path": clip_path,
+        "platform": platform,
+        "note": note,
     }
 
-    with open(OUTCOMES_FILE, "a") as f:
+    with open(PERFORMANCE_OUTCOMES_FILE, "a") as f:
         f.write(json.dumps(entry) + "\n")
 
-    update_historical_performance(game, trigger, views, likes)
+    # Keep clip_history.json averages in sync for Clip_Ranker.
+    try:
+        update_historical_performance(game, trigger, views, likes)
+    except Exception as exc:  # pragma: no cover - history is best-effort
+        print(f"[log_clip_performance] clip history update skipped: {exc}")
+
+    # Feed the decision engine so future proposals can rank triggers better.
+    try:
+        from modules.Think_Learn_Decide import ThinkLearnDecideEngine
+
+        engine = ThinkLearnDecideEngine()
+        engine.learn_from_outcome(
+            "clip_performance",
+            success,
+            {
+                "game": game,
+                "trigger": trigger,
+                "views": views,
+                "likes": likes,
+                "like_rate": like_rate,
+                "platform": platform,
+                "note": note,
+            },
+        )
+    except Exception as exc:  # pragma: no cover - learning is best-effort
+        print(f"[log_clip_performance] learning loop skipped: {exc}")
+
+    # Refresh the memory index so retrieval sees the new outcome right away.
+    try:
+        from modules.Memory_Index import refresh_memory_index
+
+        refresh_memory_index()
+    except Exception as exc:  # pragma: no cover - index refresh is best-effort
+        print(f"[log_clip_performance] memory refresh skipped: {exc}")
 
     return entry
+
+
+def log_performance(game: str, trigger: str, views: int, likes: int) -> dict:
+    """Backwards-compatible thin wrapper kept for callers that don't pass
+    clip_path / platform / note."""
+    return _record_learning_outcome(
+        game=game,
+        trigger=trigger,
+        views=views,
+        likes=likes,
+    )
 
 
 def list_recent(limit: int = 20):
