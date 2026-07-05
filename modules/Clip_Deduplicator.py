@@ -3,17 +3,25 @@
 modules/Clip_Deduplicator.py — Filter duplicate clips
 ======================================================
 Uses three complementary signals to detect duplicates:
-  1. Perceptual hash (pHash) of the first frame
+  1. Perceptual hash (pHash) of a content frame (skips black intro frames)
   2. Timestamp proximity (clips within 30s of each other)
   3. File size similarity (within 10%)
 
 If imagehash + Pillow are installed, pHash comparison is enabled.
 Otherwise, only timestamp + size checks are used.
+
+Key fix: Videos with black intro frames / letterbox bars produce
+all-black thumbnails from frame 1.  We now:
+  - Seek to 3s into the video (skips intro/title cards)
+  - Crop to the non-black content area before hashing
+  - Fall back to multiple seek positions if the first is black
 """
 
 import os
 import json
 import time
+import subprocess
+import tempfile
 from pathlib import Path
 from typing import List, Optional
 
@@ -33,7 +41,6 @@ except ImportError:
 try:
     import imagehash
     from PIL import Image
-    import subprocess as _sp
 
     HAS_PHASH = True
 except ImportError:
@@ -43,6 +50,8 @@ SEEN_FILE = "seen_clips.json"
 TIMESTAMP_WINDOW_S = 30.0  # clips within this many seconds are suspect
 SIZE_RATIO_THRESHOLD = 0.10  # within 10% file size = suspect
 PHASH_THRESHOLD = 8  # Hamming distance (lower = more similar)
+FRAME_SEEK_SECONDS = [3, 7, 12, 20]  # try these timestamps to find a non-black frame
+BLACK_THRESHOLD = 10  # pixel value below which we consider a frame "black"
 
 
 class ClipDeduplicator:
@@ -88,7 +97,7 @@ class ClipDeduplicator:
                 notify(
                     f"Duplicate detected: {path.name}",
                     level="warning",
-                    reason=f"Matches previously seen clip at timestamp {seen.get('timestamp', '?'):.1f}s. "
+                    reason=f"Matches previously seen clip {Path(seen.get('path', '?')).name}. "
                     "Skipping to avoid duplicate posts.",
                 )
                 return True
@@ -170,12 +179,117 @@ def filter_with_report(clips: list, timestamps: Optional[List[float]] = None) ->
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
 
+def _is_black_frame(img: Image.Image) -> bool:
+    """Check if an image is mostly black (all pixels below threshold)."""
+    w, h = img.size
+    # Sample a grid of pixels
+    samples = []
+    for y in range(0, h, max(1, h // 20)):
+        for x in range(0, w, max(1, w // 20)):
+            px = img.getpixel((x, y))
+            if isinstance(px, tuple):
+                samples.append(max(px[:3]))
+            else:
+                samples.append(px)
+    avg = sum(samples) / len(samples) if samples else 0
+    return avg < BLACK_THRESHOLD
+
+
+def _crop_to_content(img: Image.Image) -> Image.Image:
+    """
+    Crop away black letterbox bars (top/bottom/left/right).
+    Returns the cropped image with only the visible content area.
+    """
+    w, h = img.size
+    top, bottom, left, right = 0, h, 0, w
+
+    # Find top boundary (scan center column)
+    for y in range(0, h, 5):
+        px = img.getpixel((w // 2, y))
+        val = max(px[:3]) if isinstance(px, tuple) else px
+        if val > BLACK_THRESHOLD:
+            top = max(0, y - 5)
+            break
+
+    # Find bottom boundary
+    for y in range(h - 1, 0, -5):
+        px = img.getpixel((w // 2, y))
+        val = max(px[:3]) if isinstance(px, tuple) else px
+        if val > BLACK_THRESHOLD:
+            bottom = min(h, y + 5)
+            break
+
+    # Find left boundary (scan center row)
+    for x in range(0, w, 5):
+        px = img.getpixel((x, h // 2))
+        val = max(px[:3]) if isinstance(px, tuple) else px
+        if val > BLACK_THRESHOLD:
+            left = max(0, x - 5)
+            break
+
+    # Find right boundary
+    for x in range(w - 1, 0, -5):
+        px = img.getpixel((x, h // 2))
+        val = max(px[:3]) if isinstance(px, tuple) else px
+        if val > BLACK_THRESHOLD:
+            right = min(w, x + 5)
+            break
+
+    # Only crop if we found meaningful boundaries
+    if bottom > top and right > left:
+        return img.crop((left, top, right, bottom))
+    return img
+
+
 def _compute_phash(clip_path: str) -> Optional[object]:
-    """Extract first frame and compute perceptual hash."""
+    """
+    Extract a content frame from the video and compute perceptual hash.
+
+    Fixes for real-world issues:
+    - Seeks past black intro/title card frames (tries 3s, 7s, 12s, 20s)
+    - Crops away letterbox black bars before hashing so pHash samples
+      actual game content, not black borders
+    - Returns None if no non-black frame can be found
+    """
     if not HAS_PHASH:
         return None
-    import subprocess, tempfile, os
 
+    for seek_sec in FRAME_SEEK_SECONDS:
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+            tmp_path = tmp.name
+        try:
+            subprocess.run(
+                [
+                    "ffmpeg", "-y",
+                    "-ss", str(seek_sec),
+                    "-i", clip_path,
+                    "-vframes", "1",
+                    "-q:v", "2",
+                    tmp_path,
+                ],
+                capture_output=True,
+                timeout=15,
+            )
+            if not (os.path.exists(tmp_path) and os.path.getsize(tmp_path) > 0):
+                continue
+
+            img = Image.open(tmp_path)
+            if _is_black_frame(img):
+                continue  # try next seek position
+
+            # Crop to content area to avoid letterbox bars skewing the hash
+            cropped = _crop_to_content(img)
+            return imagehash.phash(cropped)
+
+        except Exception:
+            continue
+        finally:
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
+
+    # All seek positions yielded black frames — last resort: try frame 1
     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
         tmp_path = tmp.name
     try:
@@ -186,7 +300,9 @@ def _compute_phash(clip_path: str) -> Optional[object]:
         )
         if os.path.exists(tmp_path) and os.path.getsize(tmp_path) > 0:
             img = Image.open(tmp_path)
-            return imagehash.phash(img)
+            if not _is_black_frame(img):
+                cropped = _crop_to_content(img)
+                return imagehash.phash(cropped)
     except Exception:
         pass
     finally:
@@ -194,6 +310,7 @@ def _compute_phash(clip_path: str) -> Optional[object]:
             os.unlink(tmp_path)
         except Exception:
             pass
+
     return None
 
 
@@ -209,7 +326,7 @@ def _is_match(seen: dict, size: int, timestamp: float, phash: Optional[object]) 
             if ratio <= SIZE_RATIO_THRESHOLD:
                 return True
 
-    # pHash check (if available)
+    # pHash check (if available) — this is the strongest signal
     if phash is not None and seen.get("phash"):
         try:
             seen_hash = imagehash.hex_to_hash(seen["phash"])

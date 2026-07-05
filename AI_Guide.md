@@ -1,13 +1,13 @@
-# Bolt — AI Session Guide
+# Bolt - AI Session Guide
 *Read this at the start of every session. It tells you who Billy is, what Bolt does, and where things stand.*
 
 ---
 
 ## What Bolt Is
 
-Bolt is Billy's personal AI producer — a behind-the-scenes system that handles the technical side of content creation so Billy can focus on creating. Think Jarvis, but for streaming.
+Bolt is Billy's personal AI producer - a behind-the-scenes system that handles the technical side of content creation so Billy can focus on creating. Think Jarvis, but for streaming.
 
-**Read `Bolt_brain.md` next** — it has Billy's full creator profile, platforms, vibe, blockers, and how to communicate with him.
+**Read `Bolt_brain.md` next** - it has Billy's full creator profile, platforms, vibe, blockers, and how to communicate with him.
 
 ---
 
@@ -52,18 +52,18 @@ Bolt/
 │   ├── Clip_Deduplicator.py  ← Prevents re-processing the same recording
 │   ├── Peak_Hour_Notifier.py ← Tracks ready clips, alerts Billy at peak hours.
 │   │                          NEW: only tier='queue' clips trigger Discord pings
-│   ├── TikTok_Publisher.py   ← DEPRECATED — kept for reference only, not used
+│   ├── TikTok_Publisher.py   ← DEPRECATED - kept for reference only, not used
 │   ├── Post_Queue.py         ← Background peak-hour checker, wraps Peak_Hour_Notifier
 │   ├── Bolt_Chat.py          ← Twitch chat bot with AI personality (Phase 3)
 │   ├── Bolt_Voice.py         ← TTS spoken alerts for highlights/raids/subs (Phase 3)
-│   ├── Bolt_Memory.py        ← Phase 4 — long-term memory store (WIP)
-│   ├── Bolt_Search.py        ← Phase 4 — semantic search over memory (WIP)
-│   ├── Brain_Controller.py   ← Phase 4 — central decision engine (WIP, NOT yet
+│   ├── Bolt_Memory.py        ← Phase 4 - long-term memory store (WIP)
+│   ├── Bolt_Search.py        ← Phase 4 - semantic search over memory (WIP)
+│   ├── Brain_Controller.py   ← Phase 4 - central decision engine (WIP, NOT yet
 │   │                          wired into bot.py). Has its own tier constants
 │   │                          (TIER_1_THRESHOLD=80, TIER_2_THRESHOLD=50) that
 │   │                          must be reconciled with Clip_Ranker's tiers
 │   │                          (discard<60, queue>=80) before wiring it in
-│   ├── Think_Learn_Decide.py ← Phase 4 — intelligence layer used by bot.py
+│   ├── Think_Learn_Decide.py ← Phase 4 - intelligence layer used by bot.py
 │   │                          to gate which clips proceed through the queue
 │   ├── Checkup_Writer.py     ← Generates Bolt_Checkup.html from runtime state
 │   ├── Watcher.py            ← Watches recordings/ for new files
@@ -73,9 +73,9 @@ Bolt/
 │   └── (others)              ← misc support
 │
 ├── recordings/         ← Drop .mp4 or .mkv files here. Auto-processed.
-│                          ⚠ NOT synced to iCloud — stays on local Mac only (too large)
-├── clips/              ← Generated highlight clips (output) — synced via iCloud
-├── vertical_clips/     ← TikTok-formatted 9:16 clips (output) — synced via iCloud
+│                          ⚠ NOT synced to iCloud - stays on local Mac only (too large)
+├── clips/              ← Generated highlight clips (output) - synced via iCloud
+├── vertical_clips/     ← TikTok-formatted 9:16 clips (output) - synced via iCloud
 ├── data/               ← Runtime data: rankings.json, post queue, etc.
 ├── logs/               ← Auto-generated logs. daily_log.txt is the main one.
 ├── docs/               ← Setup guides, Stream Deck layout, project status
@@ -83,7 +83,6 @@ Bolt/
 └── scripts/
     ├── setup.sh                  ← First-time setup on any Mac (installs packages, creates .env)
     ├── move_to_icloud.sh         ← Run ONCE on main Mac to move Bolt into iCloud Drive
-    ├── cleanup_Bolt.sh           ← Deletes junk files (Bolt 2/, __pycache__, .DS_Store)
     ├── get_twitch_token.py       ← Generates TWITCH_BOT_TOKEN via twitchtokengenerator.com
     ├── log_clip_performance.py   ← NEW: log TikTok views/likes back into clip_history.json
     │                              so Clip_Ranker._history_boost actually has data to work with
@@ -98,7 +97,7 @@ Bolt/
 
 ---
 
-## Compatibility shims (NOT stubs — these are intentional)
+## Compatibility shims (NOT stubs - these are intentional)
 
 A few files at the root forward to canonical locations in `modules/` or `scripts/`.
 These exist so old commands and imports keep working. **Do not delete them.**
@@ -139,7 +138,7 @@ python3 launch.py            # go
 | vertical_clips/ | ✅ Yes | TikTok-format clips |
 | docs/, assets/, scripts/ | ✅ Yes | Project files |
 | .env | ✅ Yes | API keys (already encrypted by iCloud) |
-| recordings/ | ❌ No | Too large — stays on streaming Mac |
+| recordings/ | ❌ No | Too large - stays on streaming Mac |
 | logs/ | ❌ No | Local-only runtime logs |
 
 ---
@@ -150,8 +149,8 @@ python3 launch.py            # go
 |-------|-------------|--------|
 | Phase 1 | Dashboard + personality shell | ✅ Done (Bolt_Checkup.html in docs/) |
 | Phase 2 | Live API connections | ✅ Done |
-| Phase 3 | Voice + personality layer | 🔄 Almost there (Apr 28 2026) — env verified via `--check`, TWITCH_BOT_TOKEN active, Codex reachable. Still needs live `!Bolt hi` test in chat to confirm twitchio connection works. |
-| Phase 4 | Self-improving memory | 🔄 Started — Bolt_Memory.py / Bolt_Search.py / Brain_Controller.py / Think_Learn_Decide.py scaffolded, NOT yet integrated |
+| Phase 3 | Voice + personality layer | 🔄 Almost there (Apr 28 2026) - env verified via `--check`, TWITCH_BOT_TOKEN active, Codex reachable. Still needs live `!Bolt hi` test in chat to confirm twitchio connection works. |
+| Phase 4 | Self-improving memory | 🔄 Started - Bolt_Memory.py / Bolt_Search.py / Brain_Controller.py / Think_Learn_Decide.py scaffolded, NOT yet integrated |
 | Quality Gating | Hard confidence + tier system | ✅ Done Apr 28 2026 |
 | Performance Loop | log_clip_performance.py CLI | ✅ Done Apr 28 2026 (Billy must run it after each posting session for Bolt to learn) |
 
@@ -160,10 +159,10 @@ python3 launch.py            # go
 - ✅ Voice checklist built and wired into launch.py
 - ✅ Streamlabs monitor connected (token in .env)
 - ✅ OBS WebSocket connected (password in .env)
-- ✅ Discord webhook connected (in .env) — used for peak-hour posting alerts
-- ✅ TikTok auto-posting REMOVED by design — replaced with Peak_Hour_Notifier
-  - Bolt now alerts Billy at peak hours (7–9AM, 12–2PM, 7–10PM) via Discord
- -✅ Billy posts manually — no TikTok API token needed
+- ✅ Discord webhook connected (in .env) - used for peak-hour posting alerts
+- ✅ TikTok auto-posting REMOVED by design - replaced with Peak_Hour_Notifier
+  - Bolt now alerts Billy at peak hours (7-9AM, 12-2PM, 7-10PM) via Discord
+ -✅ Billy posts manually - no TikTok API token needed
 
 ---
 
@@ -174,16 +173,16 @@ python3 launch.py            # go
 | ANTHROPIC_API_KEY | ✅ Set | Already in .env |
 | TWITCH_CLIENT_ID | ✅ Set | dev.twitch.tv |
 | TWITCH_CLIENT_SECRET | ✅ Set | dev.twitch.tv → Your App → Manage |
-| TWITCH_CHANNEL | ✅ Set (BillyandRandy) | — |
+| TWITCH_CHANNEL | ✅ Set (BillyandRandy) | - |
 | OBS_PASSWORD | ✅ Set | OBS → Tools → WebSocket Server Settings |
-| TIKTOK_ACCESS_TOKEN | 🚫 Not needed | Auto-posting removed — Billy posts manually |
+| TIKTOK_ACCESS_TOKEN | 🚫 Not needed | Auto-posting removed - Billy posts manually |
 | STREAMLABS_SOCKET_TOKEN | ✅ Set | streamlabs.com → Settings → API Settings |
 | DISCORD_WEBHOOK_URL | ✅ Set | Discord → Channel Settings → Integrations |
 | TWITCH_BOT_TOKEN | ✅ Set | Generated via twitchtokengenerator.com (Bot Chat Token scope) |
 | TWITCH_BOT_NAME | ✅ Set | Bot's Twitch username |
 | TWITCH_OAUTH_TOKEN | ✅ Set | User OAuth for Twitch_API (follower count, stream info) |
 | TWITCH_REFRESH_TOKEN | ✅ Set | For refreshing the OAuth token when it expires |
-| Bolt_VOICE | ⬜ Optional | macOS voice name — default: Nathan (Enhanced) (run: say -v ?) — ElevenLabs skipped, edge-tts is a free upgrade option |
+| Bolt_VOICE | ⬜ Optional | macOS voice name - default: Nathan (Enhanced) (run: say -v ?) - ElevenLabs skipped, edge-tts is a free upgrade option |
 | Bolt_VOICE_MUTE | ⬜ Optional | Set to "true" to silence TTS |
 
 ---
@@ -235,25 +234,21 @@ python3 -m modules.Bolt_Voice --list-events           # Show all built-in event 
 
 ## Billy's Communication Style
 
-- Self-taught — explain the *why* behind every change, not just the *what*
-- Gets frustrated when things feel overwhelming — keep next steps simple and clear
-- Learns by doing — always leave something working and runnable
-- Wants to grow alongside Bolt — this is a collaboration, not just a tool
+- Self-taught - explain the *why* behind every change, not just the *what*
+- Gets frustrated when things feel overwhelming - keep next steps simple and clear
+- Learns by doing - always leave something working and runnable
+- Wants to grow alongside Bolt - this is a collaboration, not just a tool
 
 **Phase 3 progress:**
-- ✅ Bolt_Chat.py — Twitch chat bot with Codex-powered personality, session memory, greets viewers, reacts to highlights/raids/subs/bits, answers !Bolt questions
-- ✅ Bolt_Voice.py — TTS voice using macOS `say` command, speaks for highlights/raids/subs, ElevenLabs upgrade path ready
-- ✅ bot.py updated — starts chat bot, wires highlight events into Bolt_Chat + Bolt_Voice
-- ✅ launch.py updated — checks Phase 3 config at startup, speaks "Bolt online" line
+- ✅ Bolt_Chat.py - Twitch chat bot with Codex-powered personality, session memory, greets viewers, reacts to highlights/raids/subs/bits, answers !Bolt questions
+- ✅ Bolt_Voice.py - TTS voice using macOS `say` command, speaks for highlights/raids/subs, ElevenLabs upgrade path ready
+- ✅ bot.py updated - starts chat bot, wires highlight events into Bolt_Chat + Bolt_Voice
+- ✅ launch.py updated - checks Phase 3 config at startup, speaks "Bolt online" line
 - ⬜ Needs: `pip3 install twitchio anthropic --break-system-packages`
 - ✅ Done: TWITCH_BOT_TOKEN generated and saved to .env (Apr 2026)
 - ⬜ Final smoke test: `python3 -m modules.Bolt_Chat` to verify it connects to chat
 
-*Last updated: 2026-05-15 — Quality gating shipped (hard confidence floor in
-Highlight_Detector, three-tier classifier in Clip_Ranker, per-clip failure
-recovery in Clip_Generator, tier-aware queue + alerts in Peak_Hour_Notifier,
-performance feedback CLI at scripts/log_clip_performance.py). Documented the
-compatibility shims at root. Phase 4 modules scaffolded but not yet wired.*
+*Last updated: July 1, 2026 - Added Twitch VOD auto-clipping (`auto_clip_twitch.py`) and highlight reel compiler (`make_twitch_highlights.py`). Twitch client secret rotated. Channel: ThunderstormBilly (user ID: 441598765). All 15 existing VODs processed. 2 new clips posted (Ehkay, Bam) to TikTok/YouTube Shorts/X. Queue: 84 clips, 13 posted.*
 
 ## Open architectural decisions (for next session)
 
@@ -268,9 +263,9 @@ compatibility shims at root. Phase 4 modules scaffolded but not yet wired.*
 3. **Langchain memory build (per Upgrade_thoughts doc).** `memory/` folder
    exists but is empty of indexed data. Run `pip install langchain
    langchain-community langchain-text-splitters chromadb` and then build
-   the vectorstore — but swap `OpenAIEmbeddings` for `HuggingFaceEmbeddings`
+   the vectorstore - but swap `OpenAIEmbeddings` for `HuggingFaceEmbeddings`
    to avoid needing an OpenAI key on top of Anthropic.
-remove Anthropic key. 
+remove Anthropic key.
 4. **Motion detection** to complete the "no audio peaks AND no motion"
    filter from Upgrade_thoughts. Audio gate is live; motion would require
    cv2 + optical flow on each candidate window. Defer until you find audio

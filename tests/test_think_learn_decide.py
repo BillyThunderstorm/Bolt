@@ -209,5 +209,228 @@ class ThinkLearnDecideTests(unittest.TestCase):
         add_to_queue.assert_called_once()
 
 
+class ThinkAndProposeTests(unittest.TestCase):
+    """The single-call bridge between think() and propose_actions().
+
+    These tests prove the convenience method wires retrieved memory into
+    ranking without forcing callers to thread memory_influence through
+    every candidate by hand. They also verify back-compat: callers who
+    already pass memory_influence on a candidate are not overwritten.
+    """
+
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        root = Path(self.tempdir.name)
+
+        tld.DATA_DIR = root / "data"
+        tld.LOGS_DIR = root / "logs"
+        tld.MEMORY_DIR = root / "memory"
+        tld.UNIFIED_MEMORY_FILE = tld.DATA_DIR / "unified_memory.jsonl"
+        tld.SOURCE_REGISTRY_FILE = tld.DATA_DIR / "source_registry.json"
+        tld.DECISION_MODEL_FILE = tld.DATA_DIR / "decision_model.json"
+        tld.AUDIT_LOG_FILE = tld.LOGS_DIR / "decision_audit.log"
+        tld.PENDING_PROPOSALS_FILE = tld.DATA_DIR / "pending_proposals.json"
+
+        tld.DATA_DIR.mkdir(parents=True, exist_ok=True)
+        tld.LOGS_DIR.mkdir(parents=True, exist_ok=True)
+        tld.MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+        (tld.MEMORY_DIR / "MEMORY.md").write_text(
+            "# Notes\n- test fact", encoding="utf-8"
+        )
+
+        self.engine = tld.ThinkLearnDecideEngine(
+            {"decision_allowlist": ["queue_clip"], "decision_denylist": ["delete_clip"]}
+        )
+
+    def tearDown(self):
+        self.tempdir.cleanup()
+
+    def test_supportive_memory_boosts_matching_proposal(self):
+        """A supportive memory hit should raise the proposal's confidence."""
+        with (
+            patch("modules.Think_Learn_Decide.refresh_memory_index"),
+            patch(
+                "modules.Think_Learn_Decide.retrieve_memory",
+                return_value=[
+                    {
+                        "title": "Past Marvel Rivals clip was queued",
+                        "source": "logs/decision_audit.log",
+                        "kind": "decision_audit",
+                        "score": 0.8,
+                        "signal": "supportive",
+                        "matched_terms": ["marvel", "rivals"],
+                        "summary": "Past Marvel Rivals clip was queued for manual review.",
+                    }
+                ],
+            ),
+        ):
+            baseline = self.engine.propose_actions(
+                [{"action": "queue_clip", "score": 70, "clip_path": "a.mp4"}]
+            )[0]
+            thought, proposals = self.engine.think_and_propose(
+                {"game": "Marvel Rivals", "recording": "a.mp4"},
+                [{"action": "queue_clip", "score": 70, "clip_path": "a.mp4"}],
+            )
+
+        self.assertEqual(thought["retrieved_memory_count"], 1)
+        self.assertEqual(thought["memory_influence"]["net_direction"], "supportive")
+        self.assertGreater(proposals[0].confidence, baseline.confidence)
+        self.assertIn("memory boosted confidence", proposals[0].reason)
+
+    def test_cautionary_memory_reduces_proposal_confidence(self):
+        """A cautionary memory hit should lower the proposal's confidence."""
+        with (
+            patch("modules.Think_Learn_Decide.refresh_memory_index"),
+            patch(
+                "modules.Think_Learn_Decide.retrieve_memory",
+                return_value=[
+                    {
+                        "title": "Past clip was rejected",
+                        "source": "logs/decision_audit.log",
+                        "kind": "decision_audit",
+                        "score": 0.8,
+                        "signal": "cautionary",
+                        "matched_terms": ["rejected"],
+                        "summary": "Similar clip was rejected and below score floor.",
+                    }
+                ],
+            ),
+        ):
+            baseline = self.engine.propose_actions(
+                [{"action": "queue_clip", "score": 70, "clip_path": "a.mp4"}]
+            )[0]
+            thought, proposals = self.engine.think_and_propose(
+                {"game": "Test", "recording": "a.mp4"},
+                [{"action": "queue_clip", "score": 70, "clip_path": "a.mp4"}],
+            )
+
+        self.assertEqual(thought["memory_influence"]["net_direction"], "cautionary")
+        self.assertLess(proposals[0].confidence, baseline.confidence)
+        self.assertIn("memory reduced confidence", proposals[0].reason)
+
+    def test_no_memory_match_returns_proposals_unchanged(self):
+        """With empty retrieval, think_and_propose matches plain propose_actions."""
+        with (
+            patch("modules.Think_Learn_Decide.refresh_memory_index"),
+            patch(
+                "modules.Think_Learn_Decide.retrieve_memory", return_value=[]
+            ),
+        ):
+            thought, proposals = self.engine.think_and_propose(
+                {"game": "Anything", "recording": "a.mp4"},
+                [{"action": "queue_clip", "score": 70, "clip_path": "a.mp4"}],
+            )
+
+        self.assertEqual(thought["retrieved_memory_count"], 0)
+        self.assertEqual(thought["memory_influence"]["net_direction"], "neutral")
+        # Confidence should equal the plain-score baseline.
+        plain = self.engine.propose_actions(
+            [{"action": "queue_clip", "score": 70, "clip_path": "a.mp4"}]
+        )[0]
+        self.assertAlmostEqual(proposals[0].confidence, plain.confidence, places=6)
+
+    def test_caller_provided_memory_influence_is_not_overwritten(self):
+        """If the caller already attached memory_influence, keep it intact."""
+        caller_influence = {
+            "supportive": 5,
+            "cautionary": 0,
+            "mixed": 0,
+            "context": 0,
+            "net_direction": "supportive",
+            "confidence_delta": 0.10,
+            "strongest_match": {"title": "Caller-provided hit"},
+        }
+        with (
+            patch("modules.Think_Learn_Decide.refresh_memory_index"),
+            patch(
+                "modules.Think_Learn_Decide.retrieve_memory",
+                return_value=[
+                    {
+                        "title": "Different memory",
+                        "source": "x",
+                        "kind": "decision_audit",
+                        "score": 0.5,
+                        "signal": "cautionary",
+                        "summary": "should be ignored",
+                    }
+                ],
+            ),
+        ):
+            thought, proposals = self.engine.think_and_propose(
+                {"game": "Test", "recording": "a.mp4"},
+                [
+                    {
+                        "action": "queue_clip",
+                        "score": 70,
+                        "clip_path": "a.mp4",
+                        "memory_influence": caller_influence,
+                    }
+                ],
+            )
+
+        # Reason should reference the caller's hit, not the retrieved one.
+        self.assertIn("Caller-provided hit", proposals[0].reason)
+        self.assertNotIn("should be ignored", proposals[0].reason)
+        # And the retrieved memory is still surfaced in the thought for logging.
+        self.assertEqual(thought["retrieved_memory_count"], 1)
+
+    def test_think_and_propose_returns_ranked_proposals(self):
+        """The returned proposals are still sorted by confidence descending."""
+        with (
+            patch("modules.Think_Learn_Decide.refresh_memory_index"),
+            patch(
+                "modules.Think_Learn_Decide.retrieve_memory",
+                return_value=[
+                    {
+                        "title": "Helpful memory",
+                        "source": "x",
+                        "kind": "decision_audit",
+                        "score": 0.7,
+                        "signal": "supportive",
+                        "summary": "boost the second candidate",
+                    }
+                ],
+            ),
+        ):
+            _, proposals = self.engine.think_and_propose(
+                {"game": "Test", "recording": "a.mp4"},
+                [
+                    {"action": "queue_clip", "score": 90, "clip_path": "a.mp4"},
+                    {"action": "queue_clip", "score": 60, "clip_path": "b.mp4"},
+                ],
+            )
+
+        # Proposals sorted by confidence descending.
+        confidences = [p.confidence for p in proposals]
+        self.assertEqual(confidences, sorted(confidences, reverse=True))
+
+    def test_propose_actions_unchanged_for_back_compat(self):
+        """Old callers that call propose_actions() directly still work."""
+        # Regression guard: the existing memory_influence path still works.
+        proposals = self.engine.propose_actions(
+            [
+                {"action": "queue_clip", "score": 70, "clip_path": "plain.mp4"},
+                {
+                    "action": "queue_clip",
+                    "score": 70,
+                    "clip_path": "boosted.mp4",
+                    "memory_influence": {
+                        "supportive": 3,
+                        "cautionary": 0,
+                        "mixed": 0,
+                        "context": 0,
+                        "net_direction": "supportive",
+                        "confidence_delta": 0.06,
+                        "strongest_match": {"title": "Manual memory"},
+                    },
+                },
+            ]
+        )
+        # The boosted one wins because its reason includes the manual hit.
+        boosted = next(p for p in proposals if "Manual memory" in p.reason)
+        plain = next(p for p in proposals if "Manual memory" not in p.reason)
+        self.assertGreater(boosted.confidence, plain.confidence)
+
+
 if __name__ == "__main__":
     unittest.main()

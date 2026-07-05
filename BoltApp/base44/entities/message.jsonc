@@ -1,0 +1,23 @@
+{
+  "name": "Message",
+  "type": "object",
+  "properties": {
+    "conversationId": {
+      "type": "string",
+      "description": "ID of the conversation this message belongs to"
+    },
+    "content": {
+      "type": "string",
+      "description": "The text content of the message"
+    },
+    "sender": {
+      "type": "string",
+      "description": "Who sent the message ('user' or 'ai')"
+    },
+    "createdAt": {
+      "type": "date-time",
+      "description": "When this message was created"
+    }
+  },
+  "required": ["content", "sender"]
+}

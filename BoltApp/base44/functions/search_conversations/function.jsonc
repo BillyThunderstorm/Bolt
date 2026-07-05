@@ -1,0 +1,20 @@
+{
+  "name": "search_conversations",
+  "description": "Search through all messages across conversations for a given keyword or phrase",
+  "args_schema": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "The search query to look for in messages"
+      }
+    },
+    "required": ["query"]
+  },
+  "return_schema": {
+    "type": "array",
+    "items": {
+      "type": "object"
+    }
+  }
+}

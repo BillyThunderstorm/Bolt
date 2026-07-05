@@ -1,0 +1,31 @@
+{
+  "name": "Goal",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "The goal title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Details about this goal"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["planning", "active", "paused", "completed"],
+      "default": "planning"
+    },
+    "progress": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 0,
+      "description": "Completion percentage"
+    },
+    "dueDate": {
+      "type": "date-time",
+      "description": "Target completion date"
+    }
+  },
+  "required": ["title"]
+}

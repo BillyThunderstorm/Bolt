@@ -372,6 +372,58 @@ class ThinkLearnDecideEngine:
                 continue
         return out
 
+    def think_and_propose(
+        self,
+        current_context: Dict[str, Any],
+        candidates: List[Dict[str, Any]],
+    ) -> tuple[Dict[str, Any], List[ProposedAction]]:
+        """Single-call bridge: think about the situation, then rank actions.
+
+        Calls ``self.think(current_context)`` to retrieve relevant memory
+        and compute ``memory_influence``. That influence is then attached
+        to each candidate that doesn't already carry one, so the existing
+        ``propose_actions`` ranking gets memory-aware confidence boosts /
+        reductions automatically.
+
+        Callers that want to control the memory flow manually can still
+        call ``think`` and ``propose_actions`` separately — this method
+        is a convenience, not a replacement.
+
+        Returns a ``(thought, proposals)`` tuple. ``thought`` is the dict
+        returned by ``think``; ``proposals`` is the ranked list from
+        ``propose_actions``.
+        """
+        thought = self.think(current_context)
+        influence = thought.get("memory_influence") or {}
+
+        # If retrieval returned nothing meaningful, do not touch the
+        # candidates — let propose_actions fall through to its existing
+        # plain-score path.
+        if not influence or not isinstance(influence, dict):
+            return thought, self.propose_actions(candidates)
+
+        net_direction = str(influence.get("net_direction") or "neutral")
+        total = sum(
+            int(influence.get(key) or 0)
+            for key in ("supportive", "cautionary", "mixed", "context")
+        )
+        if net_direction == "neutral" or total == 0:
+            return thought, self.propose_actions(candidates)
+
+        enriched: List[Dict[str, Any]] = []
+        for candidate in candidates:
+            if not isinstance(candidate, dict):
+                enriched.append(candidate)
+                continue
+            # Don't overwrite an influence the caller already attached.
+            if isinstance(candidate.get("memory_influence"), dict):
+                enriched.append(candidate)
+                continue
+            enriched.append(
+                {**candidate, "memory_influence": dict(influence)}
+            )
+        return thought, self.propose_actions(enriched)
+
     def propose_actions(self, candidates: List[Dict[str, Any]]) -> List[ProposedAction]:
         proposed: List[ProposedAction] = []
         for idx, candidate in enumerate(candidates, start=1):

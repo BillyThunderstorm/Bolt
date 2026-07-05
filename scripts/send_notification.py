@@ -76,18 +76,40 @@ def _check_config(label: str) -> bool:
     return True
 
 
-def _send_mail(to: str, subject: str, body: str) -> bool:
-    """Send one email via SMTP."""
+def _send_mail(
+    to: str, subject: str, body: str, attachments: list = None
+) -> bool:
+    """Send one email via SMTP.
+
+    `attachments` is an optional list of `(filename, path)` tuples. Paths
+    are read as bytes; missing files are skipped with a warning.
+    """
     if not _check_config("email"):
         return False
 
     server, port, user, password, from_email = _configured()
 
-    msg = MIMEMultipart("alternative")
+    msg = MIMEMultipart("mixed")
     msg["Subject"] = subject
     msg["From"] = from_email
     msg["To"] = to
     msg.attach(MIMEText(body, "plain"))
+
+    for filename, path in attachments or []:
+        try:
+            data = Path(path).read_bytes()
+        except OSError as exc:
+            print(f"Skipping attachment {filename}: {exc}")
+            continue
+        part = MIMEText(data.decode("utf-8", errors="replace"), "calendar")
+        del part["Content-Type"]
+        part.add_header(
+            "Content-Type", "text/calendar; method=PUBLISH; charset=UTF-8"
+        )
+        part.add_header(
+            "Content-Disposition", f'attachment; filename="{filename}.ics"'
+        )
+        msg.attach(part)
 
     try:
         with smtplib.SMTP(server, port, timeout=15) as smtp:
@@ -125,22 +147,39 @@ def send_sms(message: str) -> bool:
     return ok
 
 
-def send_email(subject: str, body: str, to_email: str = None) -> bool:
-    """Send an email to the configured address (or to_email override)."""
+def send_email(
+    subject: str,
+    body: str,
+    to_email: str = None,
+    attachments: list = None,
+) -> bool:
+    """Send an email to the configured address (or to_email override).
+
+    `attachments` is an optional list of `(filename, path)` tuples. Each
+    file is attached using its basename and read as bytes.
+    """
     if not to_email:
         to_email = os.getenv("ALERT_EMAIL", "")
     if not to_email:
         print("Email not configured: add ALERT_EMAIL to storage_alerts.env")
         return False
 
-    ok = _send_mail(to_email, subject, body)
+    ok = _send_mail(to_email, subject, body, attachments=attachments)
     if ok:
         print(f"Email sent to {to_email}: {subject}")
     return ok
 
 
-def send_briefing(briefing_text: str, sms_summary: str = "") -> bool:
-    """Send daily/weekly briefing: SMS summary + full email."""
+def send_briefing(
+    briefing_text: str,
+    sms_summary: str = "",
+    attachments: list = None,
+) -> bool:
+    """Send daily/weekly briefing: SMS summary + full email.
+
+    `attachments` is forwarded to send_email so the briefing email can ship
+    alongside calendar ICS files for one-click subscription.
+    """
     if sms_summary:
         sms_text = "Bolt Briefing: " + sms_summary
     else:
@@ -153,7 +192,7 @@ def send_briefing(briefing_text: str, sms_summary: str = "") -> bool:
         sms_text = "Bolt Briefing: " + " | ".join(lines[:3])
 
     sms_ok = send_sms(sms_text)
-    email_ok = send_email("Bolt Briefing", briefing_text)
+    email_ok = send_email("Bolt Briefing", briefing_text, attachments=attachments)
     return sms_ok or email_ok
 
 
