@@ -28,7 +28,7 @@ DATA_DIR = Path("data")
 CLIPS_DIR = Path("clips")
 VERTICAL_DIR = Path("vertical_clips")
 RANKINGS_FILE = DATA_DIR / "rankings.json"
-QUEUE_FILE = DATA_DIR / "multi_platform_queue.json"
+QUEUE_FILE = DATA_DIR / "ready_to_post.json"
 OUTPUT_FILE = DATA_DIR / "Bolt_data.js"
 
 
@@ -105,22 +105,23 @@ def gather_stats() -> dict:
     vertical = _count_vertical_clips()
     keys = _check_env_keys()
 
-    # Load performance outcomes for real metrics
-    perf_file = DATA_DIR / "performance_outcomes.jsonl"
-    total_views = 0
-    total_likes = 0
-    clips_posted = 0
-    if perf_file.exists():
-        with open(perf_file) as f:
-            for line in f:
-                if line.strip():
-                    try:
-                        data = json.loads(line)
-                        total_views += data.get("views", 0)
-                        total_likes += data.get("likes", 0)
-                        clips_posted += 1
-                    except Exception:
-                        pass
+# Load performance outcomes for real metrics
+perf_file = DATA_DIR / "performance_outcomes.jsonl"
+total_views = 0
+total_likes = 0
+clips_posted = 0
+if perf_file.exists():
+    with open(perf_file) as f:
+        for line in f:
+            if line.strip():
+                try:
+                    data = json.loads(line)
+                    total_views += data.get("views", 0)
+                    total_likes += data.get("likes", 0)
+                    clips_posted += 1
+                except Exception:
+                    pass
+
 
     # Count highlights from rankings (each ranking entry = one detected highlight clip)
     highlight_count = len(rankings)
@@ -164,10 +165,10 @@ def gather_stats() -> dict:
         "avg_score": avg_score,
         "top_clip": top_clip,
         "api_keys": keys,
-        "clips_posted": clips_posted,
-        "total_views": total_views,
-        "total_likes": total_likes,
-        "recordings_processed": recordings_processed,
+"clips_posted": clips_posted,
+"total_views": total_views,
+"total_likes": total_likes,
+"recordings_processed": recordings_processed,
         "phase": {
             "current": 3,
             "p1_done": True,

@@ -41,6 +41,7 @@ except ImportError:
 try:
     import imagehash
     from PIL import Image
+import subprocess, tempfile, os
 
     HAS_PHASH = True
 except ImportError:
@@ -97,7 +98,7 @@ class ClipDeduplicator:
                 notify(
                     f"Duplicate detected: {path.name}",
                     level="warning",
-                    reason=f"Matches previously seen clip {Path(seen.get('path', '?')).name}. "
+reason=f"Matches previously seen clip {Path(seen.get('path', '?')).name} at {seen.get('timestamp', '?')}s. "
                     "Skipping to avoid duplicate posts.",
                 )
                 return True
@@ -239,7 +240,6 @@ def _crop_to_content(img: Image.Image) -> Image.Image:
     if bottom > top and right > left:
         return img.crop((left, top, right, bottom))
     return img
-
 
 def _compute_phash(clip_path: str) -> Optional[object]:
     """

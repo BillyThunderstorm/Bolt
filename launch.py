@@ -689,8 +689,7 @@ def _run_voice_checklist(config: dict):
     notify(
         "Starting pre-stream checklist…",
         level="info",
-        reason="Say a task out loud to check it off (e.g., 'OBS is good', 'title set'), "
-        "OR type part of a task name and press Enter. "
+reason="Say any task out loud to check it off (for example: 'OBS is good', 'title set', 'Streamlabs on'), OR type part of a task name and press Enter. "
         "Press Ctrl+C at any time to skip the rest and continue.",
     )
 
@@ -698,7 +697,7 @@ def _run_voice_checklist(config: dict):
         from modules.Voice_Checklist import VoiceChecklist
 
         # Use keyboard mode if voice is disabled in config
-        use_voice = config.get("use_voice_checklist", False)  # Default to keyboard mode
+use_voice = config.get("use_voice_checklist", True)
         timeout = config.get("checklist_timeout_minutes", 15)
 
         checklist = VoiceChecklist(use_voice=use_voice)
@@ -718,8 +717,7 @@ def _run_voice_checklist(config: dict):
         notify(
             f"Checklist error: {e}",
             level="warning",
-            reason="The checklist should still work in keyboard mode. "
-            "Run 'python3 -m modules.Voice_Checklist --keyboard' to test.",
+reason="Install speech_recognition to enable voice: pip3 install SpeechRecognition pyaudio --break-system-packages. Bolt will continue in keyboard mode; run 'python3 -m modules.Voice_Checklist --keyboard' to test.",
         )
 
 

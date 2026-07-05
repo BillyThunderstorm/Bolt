@@ -214,7 +214,6 @@ def _llm_titles(
 
         if not raw or raw.startswith("Nexus unavailable") or raw.startswith("LLM unavailable"):
             raise ValueError("LLM returned empty or error response")
-
         result = _parse_title_response(raw)
         titles = _clean_titles(result.get("titles", []), count)
         hashtags = _clean_hashtags(result.get("hashtags", []), game, trigger)
