@@ -22,6 +22,19 @@ import json
 import platform
 from pathlib import Path
 
+# Post-reorg: launch.py lives at Core/src/launch.py. Add Core/ to sys.path
+# so `from modules import X` resolves, and chdir to the repo root so any
+# CWD-relative paths below (config.json, .env, logs/, etc.) work as if
+# the script had been invoked from there.
+_HERE = Path(__file__).resolve().parent          # Core/src/
+_CORE = _HERE.parent                              # Core/
+_REPO = _CORE.parent                              # repo root
+for _p in (_CORE, _REPO):
+    _sp = str(_p)
+    if _sp not in sys.path:
+        sys.path.insert(0, _sp)
+os.chdir(_REPO)
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -30,7 +43,8 @@ from modules.notifier import notify, notify_startup
 
 from modules.Config_Loader import load_config
 
-CONFIG_FILE = "config.json"
+# Post-reorg: config.json moved from the repo root to Core/config.json.
+CONFIG_FILE = "Core/config.json"
 ENV_FILE = ".env"
 
 REQUIRED_KEYS = []
@@ -117,7 +131,8 @@ def main():
     )
 
     try:
-        args = [sys.executable, "bot.py"] + sys.argv[1:]
+        # Post-reorg: bot.py moved to Core/bot.py.
+        args = [sys.executable, "Core/bot.py"] + sys.argv[1:]
         os.execv(sys.executable, args)
     except Exception as exc:
         notify(f"Failed to start bot.py: {exc}", level="error")
@@ -689,7 +704,7 @@ def _run_voice_checklist(config: dict):
     notify(
         "Starting pre-stream checklist…",
         level="info",
-reason="Say any task out loud to check it off (for example: 'OBS is good', 'title set', 'Streamlabs on'), OR type part of a task name and press Enter. "
+        reason="Say any task out loud to check it off (for example: 'OBS is good', 'title set', 'Streamlabs on'), OR type part of a task name and press Enter. "
         "Press Ctrl+C at any time to skip the rest and continue.",
     )
 
@@ -697,7 +712,7 @@ reason="Say any task out loud to check it off (for example: 'OBS is good', 'titl
         from modules.Voice_Checklist import VoiceChecklist
 
         # Use keyboard mode if voice is disabled in config
-use_voice = config.get("use_voice_checklist", True)
+        use_voice = config.get("use_voice_checklist", True)
         timeout = config.get("checklist_timeout_minutes", 15)
 
         checklist = VoiceChecklist(use_voice=use_voice)

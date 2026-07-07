@@ -6,13 +6,18 @@ Generates site-data.json from Bolt's live data and optionally
 commits it to GitHub so the Cloudflare Worker can serve it.
 
 Usage:
-  python3 scripts/site_data_writer.py          # Generate only
-  python3 scripts/site_data_writer.py --push   # Generate + git push
-  python3 scripts/site_data_writer.py --path /custom/path/site-data.json
+  python3 3rd_Party/colabs/scripts/site_data_writer.py          # Generate only
+  python3 3rd_Party/colabs/scripts/site_data_writer.py --push   # Generate + git push
+  python3 3rd_Party/colabs/scripts/site_data_writer.py --path /custom/path/site-data.json
 
 Add to bot.py pipeline:
-  from scripts.site_data_writer import write_site_data
+  from site_data_writer import write_site_data
   write_site_data(push=True)
+
+Post-reorg (July 2026): the script was moved from scripts/ to
+3rd_Party/colabs/scripts/ but its internal REPO_ROOT math wasn't
+updated. Now uses _paths.py so REPO_ROOT, DATA_DIR, CLIPS_DIR etc.
+resolve against the new layout.
 """
 
 import json
@@ -22,15 +27,24 @@ import sys
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
-# Bolt project root
-BOLT_ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = BOLT_ROOT / "data"
-CLIPS_DIR = BOLT_ROOT / "clips"
-VERTICAL_DIR = BOLT_ROOT / "vertical_clips"
-BRIEFINGS_DIR = BOLT_ROOT / "briefings" / "daily"
+# Post-reorg: REPO_ROOT and standard subpaths.
+# Make _paths importable in BOTH direct invocation and `from scripts import X`.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+from _paths import (  # noqa: E402
+    REPO_ROOT, DATA_DIR, CLIPS_DIR, DAILY_BRIEFINGS_DIR, CONFIG_FILE,
+)
+
+DATA_DIR = DATA_DIR  # alias kept for backwards compat with downstream code
+CLIPS_DIR = CLIPS_DIR
+VERTICAL_DIR = REPO_ROOT / "media" / "vertical_clips"
+BRIEFINGS_DIR = DAILY_BRIEFINGS_DIR
+# Post-reorg: queue and site-data files now live under Data/data/.
 QUEUE_FILE = DATA_DIR / "multi_platform_queue.json"
-CONFIG_FILE = BOLT_ROOT / "config.json"
-SITE_DATA_FILE = BOLT_ROOT / "site-data.json"
+CONFIG_FILE = CONFIG_FILE  # now Core/config.json
+SITE_DATA_FILE = DATA_DIR / "site-data.json"
 
 CT = timezone(timedelta(hours=-5))
 
@@ -115,7 +129,7 @@ def _system_status():
     try:
         from dotenv import load_dotenv
 
-        load_dotenv(BOLT_ROOT / ".env")
+        load_dotenv(REPO_ROOT / ".env")
     except ImportError:
         pass
 
@@ -180,7 +194,7 @@ def write_site_data(push=False, output_path=None):
 
     Args:
         push: If True, git add + commit + push after writing.
-        output_path: Override output path (default: BOLT_ROOT/site-data.json)
+        output_path: Override output path (default: Data/data/site-data.json)
 
     Returns:
         Path to the written file.
@@ -201,19 +215,19 @@ def write_site_data(push=False, output_path=None):
         try:
             subprocess.run(
                 ["git", "add", str(path)],
-                cwd=str(BOLT_ROOT),
+                cwd=str(REPO_ROOT),
                 check=True,
                 capture_output=True,
             )
             msg = f"Update site data — {datetime.now(CT).strftime('%b %d, %H:%M')}"
             subprocess.run(
                 ["git", "commit", "-m", msg],
-                cwd=str(BOLT_ROOT),
+                cwd=str(REPO_ROOT),
                 check=True,
                 capture_output=True,
             )
             subprocess.run(
-                ["git", "push"], cwd=str(BOLT_ROOT), check=True, capture_output=True
+                ["git", "push"], cwd=str(REPO_ROOT), check=True, capture_output=True
             )
             print(f"  ⚡  Pushed to GitHub")
         except subprocess.CalledProcessError as e:

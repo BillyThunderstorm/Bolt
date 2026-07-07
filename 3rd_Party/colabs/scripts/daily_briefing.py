@@ -2,6 +2,10 @@
 """
 Bolt Daily Briefing Generator
 Generates a morning briefing with queue status, storage, and action items.
+
+Post-reorg (July 2026): uses _paths.py to resolve REPO_ROOT and the
+standard subpaths. Output now lands in Docs/briefings/daily/ (was
+briefings/daily/ at the repo root).
 """
 
 import json
@@ -11,18 +15,17 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-# Ensure project root is importable so `from modules import ...` works whether
-# this script is invoked directly (`python3 scripts/daily_briefing.py`) or
-# imported (`from scripts import daily_briefing`).
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+# Single source of truth for paths (REPO_ROOT, DATA_DIR, CLIPS_DIR, etc.).
+# _paths.py also cd's us to the repo root, so any CWD-relative paths the
+# rest of this script uses still work as if invoked from there.
+# Make _paths importable in BOTH direct invocation and `from scripts import X`.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
 
-# Paths
-DATA_DIR = PROJECT_ROOT / "data"
-CLIPS_DIR = PROJECT_ROOT / "clips"
-LOGS_DIR = PROJECT_ROOT / "logs"
-OUTPUT_DIR = PROJECT_ROOT / "briefings" / "daily"
+from _paths import (  # noqa: E402
+    REPO_ROOT, DATA_DIR, CLIPS_DIR, LOGS_DIR, DAILY_BRIEFINGS_DIR,
+)
 
 # Memory-aware briefing config
 MEMORY_QUERIES = [
@@ -136,7 +139,10 @@ def get_storage_status() -> dict:
         except Exception as e:
             return 0, f"error ({e})"
 
-    recordings_gb, recordings_str = get_dir_size(PROJECT_ROOT / "recordings")
+    # Post-reorg: live recordings/ was deleted (2026-07-07). Show 0
+    # rather than failing on a missing folder.
+    from _paths import RECORDINGS_DIR as _recordings_dir
+    recordings_gb, recordings_str = get_dir_size(_recordings_dir)
     clips_gb, clips_str = get_dir_size(CLIPS_DIR)
     logs_gb, logs_str = get_dir_size(LOGS_DIR)
 

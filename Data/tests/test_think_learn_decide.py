@@ -37,6 +37,18 @@ class ThinkLearnDecideTests(unittest.TestCase):
         (tld.MEMORY_DIR / "MEMORY.md").write_text(
             "# Notes\n- test fact", encoding="utf-8"
         )
+        # Add a memory_content/ directory with a couple of .md files so
+        # ingest_all_sources() finds at least 2 source paths (memory_hot
+        # + memory_content) and the test_ingestion_writes_unified_memory
+        # assertion `count >= 2` holds.
+        content_dir = tld.MEMORY_DIR / "content"
+        content_dir.mkdir(exist_ok=True)
+        (content_dir / "creator-vision.md").write_text(
+            "# Creator Vision\n- test content", encoding="utf-8"
+        )
+        (content_dir / "productivity.md").write_text(
+            "# Productivity\n- test productivity", encoding="utf-8"
+        )
         (tld.LOGS_DIR / "Bolt_2026-04-28.log").write_text(
             json.dumps({"level": "info", "msg": "started", "reason": "test"}) + "\n",
             encoding="utf-8",

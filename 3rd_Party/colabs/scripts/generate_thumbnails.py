@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-scripts/generate_thumbnails.py — Generate JPG thumbnails for Bolt clips
-======================================================================
-Walks one or more clip directories (default: clips/, vertical_clips/),
+3rd_Party/colabs/scripts/generate_thumbnails.py — Generate JPG thumbnails for Bolt clips
+=========================================================================================
+Walks one or more clip directories (default: media/clips/, media/vertical_clips/),
 extracts a representative frame from each .mp4 via ffmpeg, and writes a
 matching .jpg alongside the source. Skips videos that already have a
 fresh thumbnail (newer than the source) unless --force is given.
@@ -15,15 +15,15 @@ Frame selection strategy (configurable, defaults to "smart"):
   - middle: always duration/2
 
 Usage:
-  python3 scripts/generate_thumbnails.py
-  python3 scripts/generate_thumbnails.py clips/ vertical_clips/
-  python3 scripts/generate_thumbnails.py --strategy first
-  python3 scripts/generate_thumbnails.py --force
-  python3 scripts/generate_thumbnails.py --dry-run
+  python3 3rd_Party/colabs/scripts/generate_thumbnails.py
+  python3 3rd_Party/colabs/scripts/generate_thumbnails.py media/clips/ media/vertical_clips/
+  python3 3rd_Party/colabs/scripts/generate_thumbnails.py --strategy first
+  python3 3rd_Party/colabs/scripts/generate_thumbnails.py --force
+  python3 3rd_Party/colabs/scripts/generate_thumbnails.py --dry-run
 
 Library use:
-  from scripts.generate_thumbnails import generate_thumbnail
-  path = generate_thumbnail("clips/clip01.mp4")
+  from generate_thumbnails import generate_thumbnail
+  path = generate_thumbnail("media/clips/clip01.mp4")
 """
 
 import argparse
@@ -36,23 +36,30 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-# Resolve project root and put it on sys.path so direct CLI invocation can
-# import from modules.* if needed.
-ROOT = Path(__file__).resolve().parent.parent
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+# Post-reorg: REPO_ROOT and standard subpaths. _paths.py also chdir's us
+# to the repo root so any CWD-relative paths below still work.
+# Make _paths importable in BOTH direct invocation and `from scripts import X`.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+from _paths import (  # noqa: E402
+    REPO_ROOT, CLIPS_DIR, VERTICAL_CLIPS_DIR, DATA_DIR,
+)
 
 
 # --- Configuration --------------------------------------------------------
 
-DEFAULT_DIRECTORIES = ["clips", "vertical_clips"]
+# Post-reorg: default directories moved to media/.
+DEFAULT_DIRECTORIES = [str(CLIPS_DIR), str(VERTICAL_CLIPS_DIR)]
 SUPPORTED_EXTENSIONS = {".mp4", ".mov", ".m4v", ".webm"}
 THUMBNAIL_EXTENSION = ".jpg"
 DEFAULT_WIDTH = 1280
 JPEG_QUALITY = 2  # ffmpeg q:v scale (lower = better, 2 is visually lossless)
 LUMA_MIN = 24  # 0-255; below this we treat the frame as "mostly black"
 SEEK_FRACTIONS = (1 / 3, 1 / 2, 2 / 3)  # tried in order for the smart strategy
-STATE_FILE = ROOT / "data" / "thumbnail_state.json"
+# Post-reorg: state file now under Data/data/.
+STATE_FILE = DATA_DIR / "thumbnail_state.json"
 
 # External tools
 FFMPEG = shutil.which("ffmpeg") or "ffmpeg"

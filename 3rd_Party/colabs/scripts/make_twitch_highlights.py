@@ -11,9 +11,10 @@ Usage:
   python3 make_twitch_highlights.py --count 15         → compile top 15 clips
   python3 make_twitch_highlights.py --game "Hades 2"   → filter by game
   python3 make_twitch_highlights.py --list              → show top clips by score
-  python3 make_twitch_highlights.py --output custom.mp4 → custom output name
+  python3 make_twitch_highlights.py --output custom.mp4 → custom output path
 
-Output: highlight_reels/YYYY-MM-DD_highlight_reel.mp4
+Output: a single MP4 file (use --output to choose where; default lands
+in the current working directory).
 """
 
 from __future__ import annotations
@@ -28,16 +29,25 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+# Make _paths importable in BOTH direct invocation and `from scripts import X`.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
 
-CLIPS_DIR = PROJECT_ROOT / "clips"
-VERTICAL_DIR = PROJECT_ROOT / "vertical_clips"
-QUEUE_FILE = PROJECT_ROOT / "data" / "ready_to_post.json"
-PERFORMANCE_FILE = PROJECT_ROOT / "data" / "performance_outcomes.jsonl"
-SEEN_CLIPS_FILE = PROJECT_ROOT / "data" / "seen_clips.json"
-OUTPUT_DIR = PROJECT_ROOT / "highlight_reels"
+from _paths import (  # noqa: E402
+    REPO_ROOT, CLIPS_DIR as _CLIPS_DIR, VERTICAL_CLIPS_DIR as _VERTICAL_DIR,
+    DATA_DIR, MEDIA_DIR,
+)
+
+# Post-reorg: live clips/ and vertical_clips/ now live under media/.
+CLIPS_DIR = _CLIPS_DIR
+VERTICAL_DIR = _VERTICAL_DIR
+QUEUE_FILE = DATA_DIR / "ready_to_post.json"
+PERFORMANCE_FILE = DATA_DIR / "performance_outcomes.jsonl"
+SEEN_CLIPS_FILE = DATA_DIR / "seen_clips.json"
+# Post-reorg: there is no longer a dedicated highlight_reels/ folder. The
+# default output lands at media/output/ (was highlight_reels/ at the root).
+OUTPUT_DIR = MEDIA_DIR / "output"
 TITLE_FONT = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
 
 # ── Helpers ─────────────────────────────────────────────────────────────────────
@@ -156,7 +166,7 @@ def make_title_card(title: str, subtitle: str, duration: float = 3.0,
     draw.text(((width - sw) // 2, (height // 2) + 20), subtitle, font=sub_font,
               fill=(180, 180, 180))
 
-    out_path = str(PROJECT_ROOT / "highlight_reels" / "_title_card.png")
+    out_path = str(OUTPUT_DIR / "_title_card.png")
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     img.save(out_path)
     return out_path

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-scripts/weekly_analysis.py — Bolt's Sunday Morning Insights
-============================================================
+3rd_Party/colabs/scripts/weekly_analysis.py — Bolt's Sunday Morning Insights
+============================================================================
 Analyzes the past week's performance data and sends Billy actionable insights:
 - Which trigger types performed best
 - Optimal posting times
@@ -9,6 +9,9 @@ Analyzes the past week's performance data and sends Billy actionable insights:
 - What to double down on next week
 
 Runs automatically every Sunday at 9am via cron.
+
+Post-reorg (July 2026): paths resolved via _paths.py. Data files moved
+from data/ at the repo root to Data/data/.
 """
 
 import json
@@ -17,15 +20,20 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from collections import defaultdict
 
-ROOT = Path(__file__).resolve().parent.parent
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+# Post-reorg: REPO_ROOT and standard subpaths.
+# Make _paths importable in BOTH direct invocation and `from scripts import X`.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
 
-PERFORMANCE_FILE = ROOT / "data" / "performance_outcomes.jsonl"
-CLIPS_DIR = ROOT / "clips"
-QUEUE_FILE = ROOT / "data" / "multi_platform_queue.json"
+from _paths import (  # noqa: E402
+    REPO_ROOT, DATA_DIR, CLIPS_DIR,
+)
 
-from scripts.send_notification import send_email, send_sms, send_briefing
+PERFORMANCE_FILE = DATA_DIR / "performance_outcomes.jsonl"
+QUEUE_FILE = DATA_DIR / "multi_platform_queue.json"
+
+from send_notification import send_email, send_sms, send_briefing
 
 # Memory-aware weekly insights config
 WEEKLY_MEMORY_QUERIES = [
