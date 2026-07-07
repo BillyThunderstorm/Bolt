@@ -133,5 +133,198 @@ class AutoPostingSafeguardTests(unittest.TestCase):
             )
 
 
+class PublishBackoffTests(unittest.TestCase):
+    """Tests for the backoff retry logic in _publish_clip / process_auto_post_queue.
+
+    Verifies:
+    1. A failed publish increments attempt_count and sets next_eligible_at.
+    2. A clip with next_eligible_at in the future is NOT retried.
+    3. A clip with next_eligible_at in the past IS retried.
+    4. After max_publish_attempts failures the clip is auto-held.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.ready = self.root / "ready_to_post.json"
+        self.config = self.root / "config.json"
+        self.rejections = self.root / "post_rejections.jsonl"
+        self.clip = self.root / "clip.mp4"
+        self.clip.write_bytes(b"fake video")
+        self.config.write_text(
+            '{"min_clip_score": 65, "auto_posting": {'
+            '"enabled": true, "review_window_minutes": 30, '
+            '"auto_post_if_deadline_missed": true, '
+            '"max_publish_attempts": 3, "min_retry_gap_minutes": 5}}'
+        )
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _patch_files(self):
+        return patch.multiple(
+            notifier,
+            READY_FILE=self.ready,
+            CONFIG_FILE=self.config,
+            REJECTION_LOG=self.rejections,
+            POSTING_TIMEZONE="America/Chicago",
+        )
+
+    def test_failed_publish_increments_attempt_and_sets_next_eligible(self):
+        from datetime import timedelta
+        now = datetime.fromisoformat("2026-05-27T19:00:00-05:00")
+        with (
+            self._patch_files(),
+            patch.object(notifier, "_now", return_value=now),
+            patch.object(notifier, "_send_discord"),
+            patch(
+                "modules.TikTok_Publisher.publish_clip",
+                return_value={"success": False, "error": "tiktok api down"},
+            ),
+        ):
+            notifier.queue_clip(str(self.clip), "Test", ["#Gaming"], score=90)
+            # Force the plan into a state where publish will fire:
+            # deadline in the past, status=awaiting_approval.
+            data = notifier._load_ready()
+            plan = data["clips"][0]["auto_post"]
+            plan["status"] = "awaiting_approval"
+            plan["scheduled_for"] = (now - timedelta(minutes=1)).isoformat()
+            plan["review_starts_at"] = (now - timedelta(minutes=31)).isoformat()
+            plan["approval_deadline"] = (now - timedelta(minutes=1)).isoformat()
+            notifier._save_ready(data)
+            stats = notifier.process_auto_post_queue(now)
+            data = notifier._load_ready()
+            plan = data["clips"][0]["auto_post"]
+
+        self.assertEqual(stats["failed"], 1)
+        self.assertEqual(plan["attempt_count"], 1)
+        self.assertIn("next_eligible_at", plan)
+        self.assertEqual(plan["status"], "publish_failed")
+        # next_eligible should be 5 min in the future (config default).
+        expected = now + timedelta(minutes=5)
+        actual = datetime.fromisoformat(plan["next_eligible_at"])
+        self.assertEqual(actual, expected)
+
+    def test_publish_failed_clip_not_retried_before_next_eligible(self):
+        now = datetime.fromisoformat("2026-05-27T19:00:00-05:00")
+        with (
+            self._patch_files(),
+            patch.object(notifier, "_now", return_value=now),
+            patch.object(notifier, "_send_discord"),
+            patch(
+                "modules.TikTok_Publisher.publish_clip",
+                return_value={"success": False, "error": "transient"},
+            ) as publish,
+        ):
+            notifier.queue_clip(str(self.clip), "Test", ["#Gaming"], score=90)
+            data = notifier._load_ready()
+            plan = data["clips"][0]["auto_post"]
+            plan["status"] = "awaiting_approval"
+            plan["scheduled_for"] = (now.replace(hour=18, minute=0)).isoformat()
+            plan["review_starts_at"] = (now.replace(hour=17, minute=30)).isoformat()
+            plan["approval_deadline"] = (now.replace(hour=18, minute=0)).isoformat()
+            notifier._save_ready(data)
+
+            # First attempt fails
+            notifier.process_auto_post_queue(now)
+            self.assertEqual(publish.call_count, 1)
+
+            # Run again immediately — should NOT retry (still in backoff window)
+            publish.reset_mock()
+            stats = notifier.process_auto_post_queue(now)
+
+        self.assertEqual(publish.call_count, 0,
+                         "publish_clip should not be called during backoff window")
+        self.assertEqual(stats["failed"], 0)
+        self.assertEqual(stats["posted"], 0)
+
+    def test_publish_failed_clip_retried_after_next_eligible(self):
+        from datetime import timedelta
+        now = datetime.fromisoformat("2026-05-27T19:00:00-05:00")
+        later = datetime.fromisoformat("2026-05-27T19:10:00-05:00")  # 10 min later
+        with (
+            self._patch_files(),
+            patch.object(notifier, "_now", return_value=now),
+            patch.object(notifier, "_send_discord"),
+            patch(
+                "modules.TikTok_Publisher.publish_clip",
+                side_effect=[
+                    {"success": False, "error": "transient"},
+                    {"success": True, "url": "https://example.com/post"},
+                ],
+            ) as publish,
+        ):
+            notifier.queue_clip(str(self.clip), "Test", ["#Gaming"], score=90)
+            data = notifier._load_ready()
+            plan = data["clips"][0]["auto_post"]
+            plan["status"] = "awaiting_approval"
+            # Deadline 1 min ago so process_auto_post_queue will fire.
+            plan["scheduled_for"] = (now - timedelta(minutes=1)).isoformat()
+            plan["review_starts_at"] = (now - timedelta(minutes=31)).isoformat()
+            plan["approval_deadline"] = (now - timedelta(minutes=1)).isoformat()
+            notifier._save_ready(data)
+
+            # First attempt fails
+            notifier.process_auto_post_queue(now)
+            self.assertEqual(publish.call_count, 1)
+
+            # 10 min later: backoff window has passed, should retry and succeed
+            stats = notifier.process_auto_post_queue(later)
+            self.assertEqual(publish.call_count, 2)
+            self.assertEqual(stats["posted"], 1)
+            data = notifier._load_ready()
+            self.assertEqual(data["clips"][0]["status"], "posted")
+            self.assertEqual(data["clips"][0]["auto_post"]["attempt_count"], 2)
+
+    def test_clip_held_after_max_failed_attempts(self):
+        from datetime import timedelta
+        # max=2 so the test is quick.
+        self.config.write_text(
+            '{"min_clip_score": 65, "auto_posting": {'
+            '"enabled": true, "review_window_minutes": 30, '
+            '"auto_post_if_deadline_missed": true, '
+            '"max_publish_attempts": 2, "min_retry_gap_minutes": 5}}'
+        )
+        now = datetime.fromisoformat("2026-05-27T19:00:00-05:00")
+        later1 = datetime.fromisoformat("2026-05-27T19:10:00-05:00")
+        later2 = datetime.fromisoformat("2026-05-27T19:20:00-05:00")
+
+        with (
+            self._patch_files(),
+            patch.object(notifier, "_now", return_value=now),
+            patch.object(notifier, "_send_discord"),
+            patch(
+                "modules.TikTok_Publisher.publish_clip",
+                return_value={"success": False, "error": "rate limited"},
+            ),
+        ):
+            notifier.queue_clip(str(self.clip), "Test", ["#Gaming"], score=90)
+            data = notifier._load_ready()
+            plan = data["clips"][0]["auto_post"]
+            plan["status"] = "awaiting_approval"
+            plan["scheduled_for"] = (now - timedelta(minutes=1)).isoformat()
+            plan["review_starts_at"] = (now - timedelta(minutes=31)).isoformat()
+            plan["approval_deadline"] = (now - timedelta(minutes=1)).isoformat()
+            notifier._save_ready(data)
+
+            notifier.process_auto_post_queue(now)    # attempt 1
+            notifier.process_auto_post_queue(later1)  # attempt 2 — should hold
+            data = notifier._load_ready()
+            clip = data["clips"][0]
+            plan = clip["auto_post"]
+
+            # After 2 attempts, clip should be auto-held.
+            self.assertEqual(clip["status"], "held")
+            self.assertIn("publish_failed_after_2_attempts", clip["hold_reason"])
+            self.assertIn("rate limited", clip["hold_reason"])
+            self.assertEqual(plan["status"], "held_after_retries")
+            # A third process call should NOT touch it (held clips are filtered out).
+            before_count = plan["attempt_count"]
+            notifier.process_auto_post_queue(later2)
+            after_count = notifier._load_ready()["clips"][0]["auto_post"]["attempt_count"]
+            self.assertEqual(before_count, after_count,
+                             "held clip should not be retried further")
+
+
 if __name__ == "__main__":
     unittest.main()

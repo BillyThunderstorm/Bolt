@@ -113,6 +113,15 @@ def _auto_posting_config() -> dict:
         ),
         "require_rejection_reason": bool(auto.get("require_rejection_reason", True)),
         "privacy": str(auto.get("privacy", "PUBLIC_TO_EVERYONE")),
+        # Backoff for failed publishes: after publish_clip returns
+        # success=False, the clip stays ready and the queue will retry
+        # it on the next process_auto_post_queue run, but not before
+        # `min_retry_gap_minutes` have passed since the last attempt.
+        # After `max_publish_attempts` failed attempts the clip is
+        # auto-held with reason 'publish_failed_after_N_attempts' so
+        # Billy can see it without it spinning forever.
+        "max_publish_attempts": int(auto.get("max_publish_attempts", 3)),
+        "min_retry_gap_minutes": int(auto.get("min_retry_gap_minutes", 5)),
     }
 
 
@@ -714,10 +723,29 @@ def process_auto_post_queue(now: datetime = None) -> dict:
             and plan.get("auto_post_if_deadline_missed")
         )
         approved_due = status == "approved" and now >= deadline
-        if deadline_missed or approved_due:
-            result = _publish_clip(
-                clip, now, reason="deadline missed" if deadline_missed else "approved"
-            )
+        # Backoff retry: a clip that previously failed to publish is
+        # eligible to retry once `next_eligible_at` has passed. The
+        # attempt counter is bumped in _publish_clip; after
+        # max_publish_attempts failures the clip is auto-held, so
+        # this branch only fires for clips that still have retries
+        # left.
+        retry_eligible = False
+        if status == "publish_failed":
+            next_eligible = _parse_dt(plan.get("next_eligible_at", ""))
+            if next_eligible and now >= next_eligible:
+                retry_eligible = True
+            elif not next_eligible:
+                # Failed before backoff was wired in — give it one
+                # chance immediately rather than spinning forever.
+                retry_eligible = True
+        if deadline_missed or approved_due or retry_eligible:
+            if deadline_missed:
+                publish_reason = "deadline missed"
+            elif approved_due:
+                publish_reason = "approved"
+            else:
+                publish_reason = f"retry attempt {plan.get('attempt_count', 0) + 1}"
+            result = _publish_clip(clip, now, reason=publish_reason)
             if result.get("success"):
                 stats["posted"] += 1
             else:
@@ -742,17 +770,20 @@ def process_auto_post_queue(now: datetime = None) -> dict:
 
 def _publish_clip(clip: dict, now: datetime, reason: str) -> dict:
     plan = _ensure_auto_post_plan(clip, now)
+    cfg = _auto_posting_config()
     plan["last_publish_attempt_at"] = now.isoformat()
     plan["last_publish_reason"] = reason
+    # Bump the attempt counter before we call the publisher so a crash
+    # inside publish_clip still counts as an attempt.
+    plan["attempt_count"] = int(plan.get("attempt_count", 0)) + 1
     try:
         from modules.TikTok_Publisher import publish_clip
 
-        config = _auto_posting_config()
         result = publish_clip(
             clip.get("clip_path", ""),
             clip.get("title", ""),
             hashtags=clip.get("hashtags", []),
-            privacy=config["privacy"],
+            privacy=cfg["privacy"],
         )
     except Exception as exc:
         result = {"success": False, "error": str(exc)}
@@ -766,16 +797,47 @@ def _publish_clip(clip: dict, now: datetime, reason: str) -> dict:
         notify(
             f"Auto-posted clip {clip.get('id')}",
             level="success",
-            reason=f"Published after {reason}.",
+            reason=f"Published after {reason} (attempt {plan['attempt_count']}).",
         )
     else:
         plan["status"] = "publish_failed"
         plan["publish_error"] = result.get("error", "unknown error")
-        notify(
-            f"Auto-post failed for clip {clip.get('id')}",
-            level="warning",
-            reason=f"{plan['publish_error']}. Clip remains ready for manual posting or retry.",
-        )
+        # Schedule the next eligible attempt `min_retry_gap_minutes`
+        # from now, and decide whether to give up entirely.
+        next_eligible = now + timedelta(minutes=cfg["min_retry_gap_minutes"])
+        plan["next_eligible_at"] = next_eligible.isoformat()
+        if plan["attempt_count"] >= cfg["max_publish_attempts"]:
+            # Out of retries. Hold the clip so the queue stops touching
+            # it and Billy sees it as a known failure in the queue UI.
+            clip["status"] = "held"
+            clip["held_at"] = now.isoformat()
+            hold_reason = (
+                f"publish_failed_after_{plan['attempt_count']}_attempts: "
+                f"{plan['publish_error']}"
+            )
+            clip["hold_reason"] = hold_reason
+            plan["status"] = "held_after_retries"
+            plan["held_at"] = now.isoformat()
+            plan["hold_reason"] = hold_reason
+            notify(
+                f"Auto-post gave up on clip {clip.get('id')}",
+                level="warning",
+                reason=(
+                    f"{plan['attempt_count']} failed attempts. "
+                    f"Last error: {plan['publish_error']}. "
+                    f"Clip is now held; manual post or `!postnow` will retry."
+                ),
+            )
+        else:
+            notify(
+                f"Auto-post failed for clip {clip.get('id')} "
+                f"(attempt {plan['attempt_count']}/{cfg['max_publish_attempts']})",
+                level="warning",
+                reason=(
+                    f"{plan['publish_error']}. "
+                    f"Will retry after {cfg['min_retry_gap_minutes']}m."
+                ),
+            )
     return result
 
 
