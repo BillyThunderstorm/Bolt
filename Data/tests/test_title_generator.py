@@ -36,6 +36,40 @@ class TitleGeneratorTests(unittest.TestCase):
         self.assertEqual(len(generated), 3)
         self.assertIn("#MarvelRivals", hashtags)
 
+    def test_on_screen_stats_prepend_to_template_titles(self):
+        # Tier 2.1 wiring: when Video_Intelligence surfaces stats, they
+        # are prepended to each title so the result is a data-driven
+        # title like "15 KILL STREAK — Billy..." instead of just the
+        # template alone.
+        generated, hashtags = titles.generate_titles(
+            trigger="kill",
+            game="Marvel Rivals",
+            context={
+                "config": {"quality_tiers": {"use_ai_titles": False}},
+                "on_screen_stats": ["15 KILL STREAK", "Score 27 - 19"],
+            },
+        )
+        self.assertEqual(len(generated), 3)
+        for t in generated:
+            self.assertTrue(
+                t.startswith("15 KILL STREAK — "),
+                f"expected title to start with stat, got: {t!r}",
+            )
+
+    def test_no_on_screen_stats_keeps_template_intact(self):
+        # When there's no OCR signal, titles should NOT have a leading
+        # dash artifact.
+        generated, _ = titles.generate_titles(
+            trigger="kill",
+            game="Marvel Rivals",
+            context={"config": {"quality_tiers": {"use_ai_titles": False}}},
+        )
+        for t in generated:
+            self.assertFalse(
+                t.startswith(" — "),
+                f"title should not have empty prefix, got: {t!r}",
+            )
+
     def test_ai_titles_are_cached_when_enabled(self):
         response = json.dumps(
             {

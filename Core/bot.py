@@ -326,15 +326,45 @@ def process_recording(
     # ── Generate base titles from templates ──────────────────────────────
     try:
         from modules.Title_Generator import generate_titles
+        from modules.Video_Intelligence import extract_stats as _ocr_stats
 
         for clip in successful_clips:
             trigger = _guess_trigger(clip.output_file, highlights)
+
+            # Tier 2.1: pull on-screen text from the clip via OCR. If a stat
+            # is visible ("15 KILL STREAK", "3v5 CLUTCH", "Score 27-19"),
+            # the title gets prepended with it for a data-driven headline.
+            on_screen_stats: list = []
+            try:
+                on_screen_stats = _ocr_stats(str(clip.output_file))
+                if on_screen_stats:
+                    notify(
+                        f"On-screen stats detected: {on_screen_stats[0]}",
+                        level="info",
+                        reason="Video_Intelligence surfaced this from the clip frame.",
+                    )
+            except Exception as e:
+                # OCR is optional — never block the pipeline on it.
+                notify(
+                    f"On-screen OCR skipped: {e}",
+                    level="warning",
+                    reason="Continuing without stat-augmented titles.",
+                )
+
             titles, hashtags = generate_titles(
                 trigger=trigger,
                 game=game,
-                context={"creator_brain": creator_brain, "config": config},
+                context={
+                    "creator_brain": creator_brain,
+                    "config": config,
+                    "on_screen_stats": on_screen_stats,
+                },
             )
-            clip_titles[clip.output_file] = {"titles": titles, "hashtags": hashtags}
+            clip_titles[clip.output_file] = {
+                "titles": titles,
+                "hashtags": hashtags,
+                "on_screen_stats": on_screen_stats,
+            }
             notify(f"  Template title: {titles[0]}", level="success")
     except Exception as e:
         notify_error("Title_Generator", e)
