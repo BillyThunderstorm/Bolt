@@ -160,9 +160,26 @@ Bolt provides multiple ways to interact:
 
 ### Chat Commands (when running)
 ```text
-!queue                    - Show current clip queue status
+!queue                    - One-line summary of posting queue counts
+!qstatus                  - Rich per-clip dashboard (id, score, status,
+                            attempt count, hold reasons)
 !recall <topic>           - Search memory for topic
+!postnow [clip_id]        - Approve and publish the next ready clip
+!dontpost [clip_id] <reason>  - Hold a clip and save why
+!stopclip                 - Reject the next auto-post
+!skip [clip_id]           - Skip the next post
+!rank [score]             - Show or override a clip's ranking score
+!config                   - Show current config summary
 ```
+
+### Auto-Posting Safeguards
+The queue has a 30-minute review window before each peak posting
+time. Discord pings Billy, who can respond with `!postnow` / `!dontpost`
+or let the deadline pass. Failed publishes get retried up to
+`max_publish_attempts` times with `min_retry_gap_minutes` between
+attempts, then auto-held. After 3 consecutive ignored reviews the
+next Discord ping is prefixed with a `🚨 URGENT` banner. See
+`Docs/BOLT_COMMANDS.md` for the full state machine.
 
 ## Memory And Learning
 
