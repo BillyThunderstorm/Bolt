@@ -544,7 +544,8 @@ def alert_review_window(now: datetime = None) -> int:
                 c
                 for c in ready
                 if c.get("auto_post", {}).get("status") == "awaiting_approval"
-            ]
+            ],
+            ignored_count=int(data.get("consecutive_ignored_reviews", 0)),
         )
         _send_discord(message)
         notify(
@@ -558,19 +559,43 @@ def alert_review_window(now: datetime = None) -> int:
     return count
 
 
-def _review_message(clips: list[dict]) -> str:
-    lines = [
-        "🔔 **Post ready and awaiting your approval.**",
-        "Peak hours are close. Reply in Twitch chat with `!postnow` to approve now or `!dontpost <reason>` to hold.",
-        "If the deadline passes with no rejection, Bolt will try to auto-post.",
-        "",
-    ]
+def _review_message(clips: list[dict], ignored_count: int = 0) -> str:
+    lines = []
+    # Audit #2: After 3+ consecutive reviews went by without a
+    # !postnow or !dontpost, prefix the message with a louder
+    # banner. The counter resets to 0 the moment Billy responds
+    # (approve_next_clip / reject_next_clip) so the escalation is
+    # tied to *consecutive* silence, not lifetime total.
+    if ignored_count >= 3:
+        lines.append(
+            f"🚨 **URGENT: {ignored_count} reviews ignored in a row — please respond.**"
+        )
+    lines.extend(
+        [
+            "🔔 **Post ready and awaiting your approval.**",
+            "Peak hours are close. Reply in Twitch chat with `!postnow` to approve now or `!dontpost <reason>` to hold.",
+            "If the deadline passes with no rejection, Bolt will try to auto-post.",
+            "",
+        ]
+    )
     for clip in clips:
         plan = clip.get("auto_post", {})
         lines.append(
             f"- `{clip.get('id')}` **{clip.get('title')}** | score {clip.get('score')} | deadline {plan.get('approval_deadline')}"
         )
     return "\n".join(lines)
+
+
+def _increment_ignored_reviews(data: dict) -> int:
+    """Bump the consecutive-ignored counter. Returns the new value."""
+    data["consecutive_ignored_reviews"] = int(
+        data.get("consecutive_ignored_reviews", 0)
+    ) + 1
+    return data["consecutive_ignored_reviews"]
+
+
+def _reset_ignored_reviews(data: dict) -> None:
+    data["consecutive_ignored_reviews"] = 0
 
 
 def approve_next_clip(clip_id: str = None) -> dict:
@@ -586,6 +611,8 @@ def approve_next_clip(clip_id: str = None) -> dict:
         if plan.get("status") in {"scheduled", "awaiting_approval", "publish_failed"}:
             plan["status"] = "approved"
             plan["approved_at"] = now.isoformat()
+            # Audit #2: Billy responded, clear the escalation counter.
+            _reset_ignored_reviews(data)
             _save_ready(data)
             notify(
                 f"Approved clip {clip.get('id')} for auto-post",
@@ -623,6 +650,8 @@ def reject_next_clip(reason: str = "", clip_id: str = None) -> dict:
             plan["rejected_at"] = now.isoformat()
             plan["rejection_reason"] = reason
             _record_rejection(clip, reason)
+            # Audit #2: Billy responded, clear the escalation counter.
+            _reset_ignored_reviews(data)
             _save_ready(data)
             notify(
                 f"Held clip {clip.get('id')}",
@@ -687,6 +716,8 @@ def post_now(clip_id: str = None, force: bool = True) -> dict:
         if not force and not _is_alertable_clip(clip):
             continue
         result = _publish_clip(clip, now, reason="manual override")
+        # Audit #2: Billy responded, clear the escalation counter.
+        _reset_ignored_reviews(data)
         _save_ready(data)
         return {"clip": clip, "result": result}
     return {"clip": None, "result": {"success": False, "error": "No ready clip found"}}
@@ -741,6 +772,11 @@ def process_auto_post_queue(now: datetime = None) -> dict:
         if deadline_missed or approved_due or retry_eligible:
             if deadline_missed:
                 publish_reason = "deadline missed"
+                # Audit #2: a deadline-driven publish means Billy
+                # didn't respond during the review window. Bump the
+                # consecutive-ignored counter so the next review
+                # message gets the urgent banner.
+                _increment_ignored_reviews(data)
             elif approved_due:
                 publish_reason = "approved"
             else:
@@ -757,7 +793,10 @@ def process_auto_post_queue(now: datetime = None) -> dict:
             for c in data["clips"]
             if c.get("auto_post", {}).get("status") == "awaiting_approval"
         ]
-        _send_discord(_review_message(waiting))
+        _send_discord(_review_message(
+            waiting,
+            ignored_count=int(data.get("consecutive_ignored_reviews", 0)),
+        ))
         notify(
             "Post ready and awaiting your approval.",
             level="success",
@@ -770,6 +809,15 @@ def process_auto_post_queue(now: datetime = None) -> dict:
 
 def _publish_clip(clip: dict, now: datetime, reason: str) -> dict:
     plan = _ensure_auto_post_plan(clip, now)
+    # Audit #3: de-dup lock. If another process is already
+    # publishing this clip (e.g. !postnow racing the deadline
+    # auto-post), bail out instead of calling publish_clip twice.
+    if plan.get("status") == "publishing":
+        return {
+            "success": False,
+            "error": "publish already in progress for this clip",
+        }
+    plan["status"] = "publishing"
     cfg = _auto_posting_config()
     plan["last_publish_attempt_at"] = now.isoformat()
     plan["last_publish_reason"] = reason
@@ -799,6 +847,18 @@ def _publish_clip(clip: dict, now: datetime, reason: str) -> dict:
             level="success",
             reason=f"Published after {reason} (attempt {plan['attempt_count']}).",
         )
+        # Audit #4: close the loop with a Discord confirmation.
+        # The publisher's result dict usually carries the post URL —
+        # surface it so Billy can click through and verify.
+        post_url = (result.get("url") or result.get("post_url") or "").strip()
+        if post_url:
+            _send_discord(
+                f"✅ Posted: **{clip.get('title', '(untitled)')}** — {post_url}"
+            )
+        else:
+            _send_discord(
+                f"✅ Posted: **{clip.get('title', '(untitled)')}** (no URL returned)"
+            )
     else:
         plan["status"] = "publish_failed"
         plan["publish_error"] = result.get("error", "unknown error")

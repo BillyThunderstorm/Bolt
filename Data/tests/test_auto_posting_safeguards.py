@@ -9,9 +9,8 @@ for _p in [_repo_root / 'Core']:
         sys.path.insert(0, _sp)
 
 import tempfile
+from datetime import datetime, timezone
 import unittest
-from datetime import datetime
-from pathlib import Path
 from unittest.mock import patch
 
 from modules import Bolt_Chat as chat
@@ -324,6 +323,308 @@ class PublishBackoffTests(unittest.TestCase):
             after_count = notifier._load_ready()["clips"][0]["auto_post"]["attempt_count"]
             self.assertEqual(before_count, after_count,
                              "held clip should not be retried further")
+
+
+class ReviewEscalationTests(unittest.TestCase):
+    """Tests for the consecutive-ignored counter (Audit #2).
+
+    Verifies:
+    1. A deadline-missed publish increments the counter.
+    2. approve_next_clip / reject_next_clip / post_now reset the counter to 0.
+    3. _review_message prefixes a URGENT banner when count >= 3.
+    4. The counter persists across _load_ready calls (it's in the queue file).
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.ready = self.root / "ready_to_post.json"
+        self.config = self.root / "config.json"
+        self.rejections = self.root / "post_rejections.jsonl"
+        self.clip = self.root / "clip.mp4"
+        self.clip.write_bytes(b"fake video")
+        self.config.write_text(
+            '{"min_clip_score": 65, "auto_posting": {'
+            '"enabled": true, "review_window_minutes": 30, '
+            '"auto_post_if_deadline_missed": true}}'
+        )
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _patch_files(self):
+        return patch.multiple(
+            notifier,
+            READY_FILE=self.ready,
+            CONFIG_FILE=self.config,
+            REJECTION_LOG=self.rejections,
+            POSTING_TIMEZONE="America/Chicago",
+        )
+
+    def test_deadline_missed_increments_ignored_counter(self):
+        from datetime import timedelta
+        now = datetime.fromisoformat("2026-05-27T19:00:00-05:00")
+        with (
+            self._patch_files(),
+            patch.object(notifier, "_now", return_value=now),
+            patch.object(notifier, "_send_discord"),
+            patch(
+                "modules.TikTok_Publisher.publish_clip",
+                return_value={"success": True, "url": "https://example.com/p1"},
+            ),
+        ):
+            notifier.queue_clip(str(self.clip), "Test", ["#Gaming"], score=90)
+            data = notifier._load_ready()
+            plan = data["clips"][0]["auto_post"]
+            plan["status"] = "awaiting_approval"
+            plan["scheduled_for"] = (now - timedelta(minutes=1)).isoformat()
+            plan["review_starts_at"] = (now - timedelta(minutes=31)).isoformat()
+            plan["approval_deadline"] = (now - timedelta(minutes=1)).isoformat()
+            notifier._save_ready(data)
+            notifier.process_auto_post_queue(now)
+            data = notifier._load_ready()
+
+        self.assertEqual(data.get("consecutive_ignored_reviews"), 1)
+
+    def test_approve_resets_counter(self):
+        # Pre-seed the counter so we can confirm approve clears it.
+        from datetime import timedelta
+        now = datetime.fromisoformat("2026-05-27T19:00:00-05:00")
+        with self._patch_files():
+            notifier.queue_clip(str(self.clip), "Test", ["#Gaming"], score=90)
+            data = notifier._load_ready()
+            data["consecutive_ignored_reviews"] = 5
+            data["clips"][0]["auto_post"]["status"] = "awaiting_approval"
+            data["clips"][0]["auto_post"]["scheduled_for"] = (
+                now - timedelta(minutes=1)
+            ).isoformat()
+            notifier._save_ready(data)
+            notifier.approve_next_clip()
+            data = notifier._load_ready()
+
+        self.assertEqual(data.get("consecutive_ignored_reviews"), 0)
+
+    def test_reject_resets_counter(self):
+        from datetime import timedelta
+        with self._patch_files():
+            notifier.queue_clip(str(self.clip), "Test", ["#Gaming"], score=90)
+            data = notifier._load_ready()
+            data["consecutive_ignored_reviews"] = 5
+            data["clips"][0]["auto_post"]["status"] = "awaiting_approval"
+            notifier._save_ready(data)
+            notifier.reject_next_clip(reason="not ready")
+            data = notifier._load_ready()
+
+        self.assertEqual(data.get("consecutive_ignored_reviews"), 0)
+
+    def test_review_message_prefixes_urgent_banner(self):
+        clips = [{"id": "abc", "title": "Test", "score": 90,
+                  "auto_post": {"approval_deadline": "2026-05-27T19:00:00-05:00"}}]
+        msg = notifier._review_message(clips, ignored_count=3)
+        self.assertIn("URGENT: 3 reviews ignored", msg)
+        self.assertIn("**Post ready", msg)
+
+    def test_review_message_no_banner_below_threshold(self):
+        clips = [{"id": "abc", "title": "Test", "score": 90,
+                  "auto_post": {"approval_deadline": "2026-05-27T19:00:00-05:00"}}]
+        msg = notifier._review_message(clips, ignored_count=2)
+        self.assertNotIn("URGENT", msg)
+
+    def test_review_message_default_count_is_zero(self):
+        clips = [{"id": "abc", "title": "Test", "score": 90,
+                  "auto_post": {"approval_deadline": "2026-05-27T19:00:00-05:00"}}]
+        msg = notifier._review_message(clips)
+        self.assertNotIn("URGENT", msg)
+
+
+class PublishLockTests(unittest.TestCase):
+    """Tests for the de-dup lock in _publish_clip (Audit #3).
+
+    Verifies:
+    1. While a clip is in 'publishing' state, a second _publish_clip
+       call returns an error and does NOT call publish_clip again.
+    2. The lock is released on success (status -> 'posted').
+    3. The lock is released on failure (status -> 'publish_failed').
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.ready = self.root / "ready_to_post.json"
+        self.config = self.root / "config.json"
+        self.rejections = self.root / "post_rejections.jsonl"
+        self.clip = self.root / "clip.mp4"
+        self.clip.write_bytes(b"fake video")
+        self.config.write_text(
+            '{"min_clip_score": 65, "auto_posting": {'
+            '"enabled": true, "review_window_minutes": 30, '
+            '"auto_post_if_deadline_missed": true}}'
+        )
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _patch_files(self):
+        return patch.multiple(
+            notifier,
+            READY_FILE=self.ready,
+            CONFIG_FILE=self.config,
+            REJECTION_LOG=self.rejections,
+            POSTING_TIMEZONE="America/Chicago",
+        )
+
+    def _queued_clip(self):
+        notifier.queue_clip(str(self.clip), "Test", ["#Gaming"], score=90)
+        data = notifier._load_ready()
+        return data["clips"][0]
+
+    def test_second_publish_returns_error_when_locked(self):
+        with (
+            self._patch_files(),
+            patch(
+                "modules.TikTok_Publisher.publish_clip",
+                return_value={"success": True, "url": "https://example.com/p"},
+            ) as publish,
+        ):
+            clip = self._queued_clip()
+            # Simulate another publish already in progress by setting
+            # the plan to publishing state.
+            clip["auto_post"]["status"] = "publishing"
+            result = notifier._publish_clip(
+                clip, datetime.now(timezone.utc), reason="test"
+            )
+            self.assertFalse(result["success"])
+            self.assertIn("in progress", result["error"])
+            publish.assert_not_called()
+
+    def test_lock_released_on_success(self):
+        with (
+            self._patch_files(),
+            patch(
+                "modules.TikTok_Publisher.publish_clip",
+                return_value={"success": True, "url": "https://example.com/p"},
+            ),
+        ):
+            clip = self._queued_clip()
+            result = notifier._publish_clip(
+                clip, datetime.now(timezone.utc), reason="test"
+            )
+            self.assertTrue(result["success"])
+            # _publish_clip mutates the in-memory plan. Persist via
+            # _save_ready with a fresh load so the next _load_ready
+            # sees the updated status.
+            notifier._save_ready({"clips": [clip]})
+            data = notifier._load_ready()
+            # Lock should be released — status is 'posted', not 'publishing'.
+            self.assertEqual(data["clips"][0]["auto_post"]["status"], "posted")
+
+    def test_lock_released_on_failure(self):
+        with (
+            self._patch_files(),
+            patch(
+                "modules.TikTok_Publisher.publish_clip",
+                return_value={"success": False, "error": "rate limited"},
+            ),
+        ):
+            clip = self._queued_clip()
+            result = notifier._publish_clip(
+                clip, datetime.now(timezone.utc), reason="test"
+            )
+            self.assertFalse(result["success"])
+            notifier._save_ready({"clips": [clip]})
+            data = notifier._load_ready()
+            # Lock should be released — status is 'publish_failed', not 'publishing'.
+            self.assertEqual(data["clips"][0]["auto_post"]["status"], "publish_failed")
+
+
+class PostPublishConfirmationTests(unittest.TestCase):
+    """Tests for the post-publish Discord confirmation (Audit #4)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.ready = self.root / "ready_to_post.json"
+        self.config = self.root / "config.json"
+        self.rejections = self.root / "post_rejections.jsonl"
+        self.clip = self.root / "clip.mp4"
+        self.clip.write_bytes(b"fake video")
+        self.config.write_text(
+            '{"min_clip_score": 65, "auto_posting": {'
+            '"enabled": true, "review_window_minutes": 30, '
+            '"auto_post_if_deadline_missed": true}}'
+        )
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _patch_files(self):
+        return patch.multiple(
+            notifier,
+            READY_FILE=self.ready,
+            CONFIG_FILE=self.config,
+            REJECTION_LOG=self.rejections,
+            POSTING_TIMEZONE="America/Chicago",
+        )
+
+    def test_successful_publish_sends_confirmation_with_url(self):
+        with (
+            self._patch_files(),
+            patch.object(notifier, "_send_discord") as send,
+            patch(
+                "modules.TikTok_Publisher.publish_clip",
+                return_value={"success": True, "url": "https://example.com/p/abc"},
+            ),
+        ):
+            notifier.queue_clip(str(self.clip), "Billy kills 3", ["#Gaming"], score=90)
+            data = notifier._load_ready()
+            clip = data["clips"][0]
+            notifier._publish_clip(clip, datetime.now(timezone.utc), reason="test")
+
+        # One of the calls to _send_discord should be the post-publish confirmation.
+        confirmations = [c for c in send.call_args_list
+                         if c.args and "✅" in c.args[0]]
+        self.assertEqual(len(confirmations), 1)
+        msg = confirmations[0].args[0]
+        self.assertIn("✅ Posted", msg)
+        self.assertIn("Billy kills 3", msg)
+        self.assertIn("https://example.com/p/abc", msg)
+
+    def test_successful_publish_sends_confirmation_without_url(self):
+        with (
+            self._patch_files(),
+            patch.object(notifier, "_send_discord") as send,
+            patch(
+                "modules.TikTok_Publisher.publish_clip",
+                return_value={"success": True},  # no url
+            ),
+        ):
+            notifier.queue_clip(str(self.clip), "Test clip", ["#Gaming"], score=90)
+            data = notifier._load_ready()
+            clip = data["clips"][0]
+            notifier._publish_clip(clip, datetime.now(timezone.utc), reason="test")
+
+        confirmations = [c for c in send.call_args_list
+                         if c.args and "✅" in c.args[0]]
+        self.assertEqual(len(confirmations), 1)
+        self.assertIn("(no URL returned)", confirmations[0].args[0])
+
+    def test_failed_publish_does_not_send_confirmation(self):
+        with (
+            self._patch_files(),
+            patch.object(notifier, "_send_discord") as send,
+            patch(
+                "modules.TikTok_Publisher.publish_clip",
+                return_value={"success": False, "error": "rate limited"},
+            ),
+        ):
+            notifier.queue_clip(str(self.clip), "Test", ["#Gaming"], score=90)
+            data = notifier._load_ready()
+            clip = data["clips"][0]
+            notifier._publish_clip(clip, datetime.now(timezone.utc), reason="test")
+
+        confirmations = [c for c in send.call_args_list
+                         if c.args and "✅" in c.args[0]]
+        self.assertEqual(confirmations, [])
 
 
 if __name__ == "__main__":
