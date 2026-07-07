@@ -27,6 +27,11 @@ from _paths import (  # noqa: E402
     REPO_ROOT, DATA_DIR, CLIPS_DIR, LOGS_DIR, DAILY_BRIEFINGS_DIR,
 )
 
+# Backward-compatible aliases for code that uses `ROOT` / `PROJECT_ROOT`.
+PROJECT_ROOT = REPO_ROOT
+ROOT = REPO_ROOT
+
+
 # Memory-aware briefing config
 MEMORY_QUERIES = [
     ("recent clip performance", "performance_outcome"),

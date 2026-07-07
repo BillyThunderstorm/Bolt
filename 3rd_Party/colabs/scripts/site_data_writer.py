@@ -37,6 +37,11 @@ from _paths import (  # noqa: E402
     REPO_ROOT, DATA_DIR, CLIPS_DIR, DAILY_BRIEFINGS_DIR, CONFIG_FILE,
 )
 
+# Backward-compatible aliases for code that uses `ROOT` / `PROJECT_ROOT`.
+PROJECT_ROOT = REPO_ROOT
+ROOT = REPO_ROOT
+
+
 DATA_DIR = DATA_DIR  # alias kept for backwards compat with downstream code
 CLIPS_DIR = CLIPS_DIR
 VERTICAL_DIR = REPO_ROOT / "media" / "vertical_clips"

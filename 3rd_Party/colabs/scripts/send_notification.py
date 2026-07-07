@@ -28,6 +28,20 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+# Post-reorg path bootstrap. Adds the script's own dir to sys.path so
+# `from _paths import …` works in both direct invocation and `from
+# scripts import X` (test) contexts. The helper itself adds Core/ and
+# 3rd_Party/llm/ to sys.path so `from modules import Y` resolves, and
+# chdirs to the repo root for any CWD-relative paths the script uses.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+from _paths import REPO_ROOT, DATA_DIR, CLIPS_DIR, LOGS_DIR, CONFIG_FILE  # noqa: E402
+
+# Backward-compatible aliases for code that uses `ROOT` / `PROJECT_ROOT`.
+PROJECT_ROOT = REPO_ROOT
+ROOT = REPO_ROOT
+
 ROOT = Path(__file__).parent.parent
 CONFIG_DIR = ROOT / "configs"
 ENV_FILE = CONFIG_DIR / "storage_alerts.env"

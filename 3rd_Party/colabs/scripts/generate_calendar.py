@@ -44,8 +44,36 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterable, Optional
+# Make _paths importable in BOTH direct invocation (script dir on
+# sys.path) and `from scripts import X` (tests). The helper also adds
+# Core/ and 3rd_Party/llm/ to sys.path so `from modules import Y` works
+# without any per-script sys.path shim, and chdirs to the repo root so
+# CWD-relative paths the rest of the script uses still resolve.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+from _paths import (  # noqa: E402
+    REPO_ROOT,
+    DATA_DIR,
+    CLIPS_DIR,
+    VERTICAL_CLIPS_DIR,
+    MEDIA_DIR,
+    LOGS_DIR,
+    DAILY_BRIEFINGS_DIR,
+    CONFIG_FILE,
+    BOT_FILE,
+    BOLT_BRAIN_FILE,
+    VOD_SAMPLES_DIR,
+    RECORDINGS_DIR,
+)
 
-ROOT = Path(__file__).resolve().parent.parent
+# Backward-compatible aliases for code that uses `ROOT` / `PROJECT_ROOT`.
+PROJECT_ROOT = REPO_ROOT
+ROOT = REPO_ROOT
+
+REPO_ROOT  # keep linter quiet about unused import
+DATA_DIR
+
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 

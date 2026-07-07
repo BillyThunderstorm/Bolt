@@ -33,6 +33,11 @@ from _paths import (  # noqa: E402
     ARCHIVE_DIR,
 )
 
+# Backward-compatible aliases for code that uses `ROOT` / `PROJECT_ROOT`.
+PROJECT_ROOT = REPO_ROOT
+ROOT = REPO_ROOT
+
+
 
 def mark(ok, label, detail=""):
     icon = "PASS" if ok else "FAIL"
