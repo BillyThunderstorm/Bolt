@@ -80,6 +80,10 @@ class TitleGeneratorTests(unittest.TestCase):
 
         with (
             patch.object(titles, "TITLE_CACHE", self.cache_path),
+            # Force OpenAI path so the ask_llm mock is actually reached.
+            # Without this, the live GEMINI_API_KEY in .env makes the
+            # real Gemini call fire first and the mock is bypassed.
+            patch.object(titles, "USE_GEMINI", False),
             patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test"}, clear=False),
             patch("modules.LLM_Handler.ask_llm", return_value=response) as ask_llm,
         ):

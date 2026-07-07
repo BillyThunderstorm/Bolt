@@ -17,6 +17,10 @@ Requires:
   - .env with TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_CHANNEL
   - yt-dlp installed (pip install yt-dlp)
   - ffmpeg installed
+
+Post-reorg (July 2026): the script was moved from scripts/ to
+3rd_Party/colabs/scripts/ but its internal PROJECT_ROOT math wasn't
+updated. Now uses _paths.py so REPO_ROOT and module imports resolve.
 """
 
 from __future__ import annotations
@@ -31,13 +35,20 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
-# Make project root importable
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+# Post-reorg: _paths.py adds the right directories to sys.path and chdir's
+# to the repo root. Import after stdlib so any '# Make _paths importable in BOTH direct invocation and `from scripts import X`.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+from _paths import …' sees
+# the corrected sys.path.
+from _paths import (  # noqa: E402
+    REPO_ROOT, VOD_SAMPLES_DIR, DATA_DIR,
+)
 
 from dotenv import load_dotenv
-load_dotenv(PROJECT_ROOT / ".env")
+load_dotenv(REPO_ROOT / ".env")
 
 from modules import twitch_auth
 from modules.Config_Loader import load_config
@@ -51,9 +62,10 @@ except ImportError:
 
 CHANNEL_LOGIN = os.getenv("TWITCH_CHANNEL", "").strip()
 TWITCH_CLIENT_ID = os.getenv("TWITCH_CLIENT_ID", "").strip()
-VODS_DIR = PROJECT_ROOT / "vods"
-PROCESSED_LOG = PROJECT_ROOT / "data" / "twitch_vods_processed.json"
-QUEUE_FILE = PROJECT_ROOT / "data" / "ready_to_post.json"
+# Post-reorg: VODs now live under 3rd_Party/vod_samples/ (was vods/ at root).
+VODS_DIR = VOD_SAMPLES_DIR
+PROCESSED_LOG = DATA_DIR / "twitch_vods_processed.json"
+QUEUE_FILE = DATA_DIR / "ready_to_post.json"
 MAX_VOD_DURATION_SECONDS = 3 * 3600  # Skip VODs longer than 3 hours
 
 
@@ -172,7 +184,7 @@ def run_clip_pipeline(recording_path: str, config: dict) -> bool:
         from bot import process_recording
         from modules.Think_Learn_Decide import ThinkLearnDecideEngine
 
-        brain_path = PROJECT_ROOT / "Bolt_brain.md"
+        brain_path = REPO_ROOT / "Core" / "bolt_brain.md"
         brain = brain_path.read_text() if brain_path.exists() else ""
 
         engine = ThinkLearnDecideEngine(config)

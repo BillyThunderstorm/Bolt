@@ -7,10 +7,11 @@ for _p in [_repo_root / 'Core']:
     _sp = str(_p)
     if _sp not in sys.path:
         sys.path.insert(0, _sp)
-
 import tempfile
-from datetime import datetime, timezone
 import unittest
+from contextlib import ExitStack
+from datetime import datetime, timezone
+from pathlib import Path
 from unittest.mock import patch
 
 from modules import Bolt_Chat as chat
@@ -558,23 +559,39 @@ class PostPublishConfirmationTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def _patch_files(self):
-        return patch.multiple(
-            notifier,
-            READY_FILE=self.ready,
-            CONFIG_FILE=self.config,
-            REJECTION_LOG=self.rejections,
-            POSTING_TIMEZONE="America/Chicago",
+        # Force off-peak so queue_clip() doesn't also fire the peak-hour
+        # alert in addition to the post-publish confirmation we're asserting
+        # on. Otherwise this test would fail whenever it runs during 7-9 AM,
+        # 12-2 PM, or 7-10 PM Chicago time.
+        return (
+            patch.multiple(
+                notifier,
+                READY_FILE=self.ready,
+                CONFIG_FILE=self.config,
+                REJECTION_LOG=self.rejections,
+                POSTING_TIMEZONE="America/Chicago",
+            ),
+            patch.object(
+                notifier,
+                "_is_peak_now",
+                return_value=(False, "Next peak: 7:00 AM"),
+            ),
+            patch.object(notifier, "alert_peak_window", return_value=None),
         )
 
     def test_successful_publish_sends_confirmation_with_url(self):
-        with (
-            self._patch_files(),
-            patch.object(notifier, "_send_discord") as send,
-            patch(
-                "modules.TikTok_Publisher.publish_clip",
-                return_value={"success": True, "url": "https://example.com/p/abc"},
-            ),
-        ):
+        with ExitStack() as stack:
+            for ctx in self._patch_files():
+                stack.enter_context(ctx)
+            send = stack.enter_context(
+                patch.object(notifier, "_send_discord")
+            )
+            stack.enter_context(
+                patch(
+                    "modules.TikTok_Publisher.publish_clip",
+                    return_value={"success": True, "url": "https://example.com/p/abc"},
+                )
+            )
             notifier.queue_clip(str(self.clip), "Billy kills 3", ["#Gaming"], score=90)
             data = notifier._load_ready()
             clip = data["clips"][0]
@@ -590,14 +607,18 @@ class PostPublishConfirmationTests(unittest.TestCase):
         self.assertIn("https://example.com/p/abc", msg)
 
     def test_successful_publish_sends_confirmation_without_url(self):
-        with (
-            self._patch_files(),
-            patch.object(notifier, "_send_discord") as send,
-            patch(
-                "modules.TikTok_Publisher.publish_clip",
-                return_value={"success": True},  # no url
-            ),
-        ):
+        with ExitStack() as stack:
+            for ctx in self._patch_files():
+                stack.enter_context(ctx)
+            send = stack.enter_context(
+                patch.object(notifier, "_send_discord")
+            )
+            stack.enter_context(
+                patch(
+                    "modules.TikTok_Publisher.publish_clip",
+                    return_value={"success": True},  # no url
+                )
+            )
             notifier.queue_clip(str(self.clip), "Test clip", ["#Gaming"], score=90)
             data = notifier._load_ready()
             clip = data["clips"][0]
@@ -609,14 +630,18 @@ class PostPublishConfirmationTests(unittest.TestCase):
         self.assertIn("(no URL returned)", confirmations[0].args[0])
 
     def test_failed_publish_does_not_send_confirmation(self):
-        with (
-            self._patch_files(),
-            patch.object(notifier, "_send_discord") as send,
-            patch(
-                "modules.TikTok_Publisher.publish_clip",
-                return_value={"success": False, "error": "rate limited"},
-            ),
-        ):
+        with ExitStack() as stack:
+            for ctx in self._patch_files():
+                stack.enter_context(ctx)
+            send = stack.enter_context(
+                patch.object(notifier, "_send_discord")
+            )
+            stack.enter_context(
+                patch(
+                    "modules.TikTok_Publisher.publish_clip",
+                    return_value={"success": False, "error": "rate limited"},
+                )
+            )
             notifier.queue_clip(str(self.clip), "Test", ["#Gaming"], score=90)
             data = notifier._load_ready()
             clip = data["clips"][0]

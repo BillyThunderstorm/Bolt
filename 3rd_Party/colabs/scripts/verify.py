@@ -3,7 +3,11 @@
 Bolt setup verifier.
 
 Run from anywhere with:
-    python3 scripts/verify.py
+    python3 3rd_Party/colabs/scripts/verify.py
+
+Post-reorg (July 2026): the verifier is rooted via the `scripts/_paths.py`
+helper, which computes REPO_ROOT and adds the right directories to sys.path.
+All required files / directories / module paths below use the new layout.
 """
 
 import importlib
@@ -12,10 +16,22 @@ import os
 import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-os.chdir(PROJECT_ROOT)
+# Single source of truth for the repo root and standard subpaths.
+# Make _paths importable in BOTH direct invocation and `from scripts import X`.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+from _paths import (  # noqa: E402
+    REPO_ROOT,
+    CORE_DIR,
+    DATA_DIR,
+    DOCS_DIR,
+    LOGS_DIR,
+    MEDIA_DIR,
+    MODULES_DIR,
+    ARCHIVE_DIR,
+)
 
 
 def mark(ok, label, detail=""):
@@ -26,32 +42,33 @@ def mark(ok, label, detail=""):
 
 def check_files():
     print("\nChecking project files...")
+    # Post-reorg: files moved to Core/, Docs/, etc. _paths.py chdir's us to
+    # the repo root, so these relative paths resolve from there.
     required_files = [
-        "bot.py",
-        "launch.py",
-        "config.json",
-        "requirements.txt",
-        "README.md",
-        "Bolt_brain.md",
-        "docs/guides/SETUP_GUIDE.md",
-        "docs/PROJECT_STATUS.md",
+        "Core/bot.py",
+        "Core/src/launch.py",
+        "Core/config.json",
+        "Docs/requirements.txt",
+        "Core/bolt_brain.md",
+        "Docs/guides/SETUP_GUIDE.md",
+        "Docs/PROJECT_STATUS.md",
     ]
     required_modules = [
-        "modules/Watcher.py",
-        "modules/Highlight_Detector.py",
-        "modules/Clip_Generator.py",
-        "modules/Subtitle_Generator.py",
-        "modules/AI_Title_Generator.py",
-        "modules/Title_Generator.py",
-        "modules/Clip_Ranker.py",
-        "modules/Clip_Deduplicator.py",
-        "modules/TikTok_Publisher.py",
-        "modules/OBS_Integration.py",
-        "modules/Clip_Factory.py",
-        "modules/Post_Queue.py",
-        "modules/Peak_Hour_Notifier.py",
-        "modules/Think_Learn_Decide.py",
-        "modules/Multi_Publisher.py",
+        "Core/modules/Watcher.py",
+        "Core/modules/Highlight_Detector.py",
+        "Core/modules/Clip_Generator.py",
+        "Core/modules/Subtitle_Generator.py",
+        "Core/modules/AI_Title_Generator.py",
+        "Core/modules/Title_Generator.py",
+        "Core/modules/Clip_Ranker.py",
+        "Core/modules/Clip_Deduplicator.py",
+        "Core/modules/TikTok_Publisher.py",
+        "Core/modules/OBS_Integration.py",
+        "Core/modules/Clip_Factory.py",
+        "Core/modules/Post_Queue.py",
+        "Core/modules/Peak_Hour_Notifier.py",
+        "Core/modules/Think_Learn_Decide.py",
+        "Core/modules/Multi_Publisher.py",
     ]
     missing = []
     for rel in required_files + required_modules:
@@ -65,15 +82,17 @@ def check_files():
 def check_directories():
     print("\nChecking directories...")
     all_ok = True
+    # Post-reorg: media/ is the live tree (clips/vertical_clips), Data/archive
+    # holds the (archived) recordings, Data/data holds persistent state.
     for rel in [
-        "recordings",
-        "clips",
-        "vertical_clips",
-        "modules",
-        "assets",
-        "data",
+        "Data/archive/recordings",
+        "media/clips",
+        "media/vertical_clips",
+        "Core/modules",
+        "App/assets",
+        "Data/data",
         "logs",
-        "memory",
+        "Data/data/content",
     ]:
         path = Path(rel)
         if not path.exists():
@@ -87,14 +106,14 @@ def check_directories():
 def check_config():
     print("\nChecking configuration...")
     try:
-        config = json.loads(Path("config.json").read_text(encoding="utf-8"))
+        # Post-reorg: config moved to Core/config.json.
+        config = json.loads(Path("Core/config.json").read_text(encoding="utf-8"))
     except Exception as exc:
-        mark(False, "config.json", str(exc))
+        mark(False, "Core/config.json", str(exc))
         return False
 
     required = [
         "game",
-        "auto_format_tiktok",
         "highlight_sensitivity",
         "max_clips_per_session",
     ]

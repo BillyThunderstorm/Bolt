@@ -14,11 +14,9 @@ How it works:
     detect highlights → cut clips → generate titles → add subtitles
     → rank by virality → format to 9:16 → save to post queue
 
-Where clips are saved:
-  clips/           → raw highlight clips (horizontal, same as your recording)
-  vertical_clips/  → TikTok-ready 9:16 format (this is what you post)
-
-"Both folders are inside your Bolt project folder."
+Where clips are saved (post-reorg):
+  media/clips/         → raw highlight clips (horizontal, same as your recording)
+  media/vertical_clips/ → TikTok-ready 9:16 format (this is what you post)
 """
 
 import os
@@ -26,10 +24,18 @@ import sys
 import json
 from pathlib import Path
 
-# Make project root importable when this script is run directly
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+# Make project root importable when this script is run directly.
+# The helper module adds Core/ and 3rd_Party/colabs/ to sys.path so
+# `from modules import X` and `from bot import process_recording` resolve.
+# Make _paths importable in BOTH direct invocation and `from scripts import X`.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+from _paths import (  # noqa: E402
+    REPO_ROOT, CLIPS_DIR, VERTICAL_CLIPS_DIR, RECORDINGS_DIR,
+    BOLT_BRAIN_FILE, DATA_DIR,
+)
 
 from modules.Config_Loader import load_config
 
@@ -51,14 +57,23 @@ def find_recordings_folder() -> Path:
     """
     Find the recordings folder, trying a few common locations.
     Returns the folder path (creates it if needed).
+
+    Post-reorg: live recordings/ at the repo root was deleted (2026-07-07
+    reorg). The archived copy lives at Data/archive/recordings. We look
+    there first, then fall back to config.json, .env, and finally a
+    CWD-relative path.
     """
-    # Check config.json first
-    config_path = Path("config.json")
+    # Post-reorg: archived recordings are the only on-disk set we know about.
+    if RECORDINGS_DIR.exists():
+        return RECORDINGS_DIR
+
+    # Check config.json first (config may have a custom path)
+    config_path = Path("Core/config.json")
     if config_path.exists():
         try:
             with open(config_path) as f:
                 config = json.load(f)
-                folder = Path(config.get("recordings_folder", "recordings"))
+                folder = Path(config.get("recordings_folder", "Data/archive/recordings"))
                 if folder.exists():
                     return folder
         except Exception:
@@ -69,9 +84,9 @@ def find_recordings_folder() -> Path:
     if env_folder and Path(env_folder).exists():
         return Path(env_folder)
 
-    # Default: relative recordings/ folder
-    folder = Path("recordings")
-    folder.mkdir(exist_ok=True)
+    # Default: the archived recordings folder
+    folder = Path("Data/archive/recordings")
+    folder.mkdir(parents=True, exist_ok=True)
     return folder
 
 
@@ -116,8 +131,10 @@ def print_recordings(recordings: list, folder: Path):
 
 
 def print_output_paths():
-    clips_dir = PROJECT_ROOT / config.get("clips_folder", "clips")
-    vertical_dir = PROJECT_ROOT / config.get("vertical_clips_folder", "vertical_clips")
+    # Post-reorg: default to media/clips and media/vertical_clips, but
+    # honor config.json if it specifies custom paths.
+    clips_dir = REPO_ROOT / config.get("clips_folder", "media/clips")
+    vertical_dir = REPO_ROOT / config.get("vertical_clips_folder", "media/vertical_clips")
 
     clips_dir.mkdir(parents=True, exist_ok=True)
     vertical_dir.mkdir(parents=True, exist_ok=True)
@@ -194,12 +211,13 @@ def main():
     # config is already loaded at the top through Config_Loader
 
     brain = ""
-    brain_path = PROJECT_ROOT / "Bolt_brain.md"
+    # Post-reorg: bolt_brain.md moved to Core/bolt_brain.md.
+    brain_path = BOLT_BRAIN_FILE
     if brain_path.exists():
         brain = brain_path.read_text()
-        print("  ✓  Bolt_brain.md loaded — AI titles will match your style")
+        print("  ✓  bolt_brain.md loaded — AI titles will match your style")
     else:
-        print("  ○  Bolt_brain.md not found — using generic AI titles")
+        print("  ○  bolt_brain.md not found — using generic AI titles")
 
     print()
 
@@ -236,7 +254,8 @@ def main():
 
     # ── Show post queue summary ───────────────────────────────────────────────
     try:
-        queue_file = Path("data/ready_to_post.json")
+        # Post-reorg: queue file lives under Data/data/.
+        queue_file = DATA_DIR / "ready_to_post.json"
         if queue_file.exists():
             with open(queue_file) as f:
                 queue = json.load(f)
