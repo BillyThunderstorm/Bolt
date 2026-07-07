@@ -30,6 +30,7 @@ import json
 import time
 import requests
 from pathlib import Path
+from typing import Dict, List
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -241,6 +242,51 @@ class TwitchStats:
             }
             for c in clips
         ]
+
+    def get_videos(
+        self,
+        user_id: str,
+        video_type: str = "archive",
+        limit: int = 20,
+    ) -> list:
+        """
+        List past broadcasts / saved highlights for a Twitch user.
+
+        `video_type` is one of:
+          - "archive"   : past broadcasts (auto-recorded VODs from live streams)
+          - "highlight" : manually-saved highlight reels
+          - "upload"    : manual uploads
+
+        Returns a list of dicts:
+          { id, title, created_at, duration, view_count, thumbnail_url, url }
+
+        The Helix `videos` endpoint paginates with `after` cursors; this
+        helper stops at `limit` results and doesn't follow pagination. If
+        you need more, call repeatedly and pass the `cursor` from the
+        response, or bump `limit`.
+        """
+        params: Dict = {
+            "user_id": user_id,
+            "type": video_type,
+            "first": min(limit, 100),  # Helix hard limit
+        }
+        data = self._get("videos", params)
+        items = data.get("data", [])
+        out = []
+        for v in items:
+            vid = v.get("id", "")
+            out.append(
+                {
+                    "id": vid,
+                    "title": v.get("title", ""),
+                    "created_at": v.get("created_at", "")[:10],
+                    "duration": v.get("duration", ""),  # ISO 8601 string e.g. "2h13m47s"
+                    "view_count": v.get("view_count", 0),
+                    "thumbnail_url": v.get("thumbnail_url", ""),
+                    "url": v.get("url", f"https://www.twitch.tv/videos/{vid}"),
+                }
+            )
+        return out
 
     # ── All-in-one ─────────────────────────────────────────────────────────────
 
