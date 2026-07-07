@@ -401,6 +401,15 @@ def _template_titles(trigger: str, game: str, context: dict, count: int) -> List
         except KeyError:
             filled.append(t.replace("{game}", game).replace("{trigger}", trigger))
 
+    # If Video_Intelligence surfaced on-screen stats, prepend the strongest
+    # one to each title. The result: "15 KILL STREAK — Billy just erased
+    # the lobby" instead of just the template alone. This is the Tier 2.1
+    # "data-driven titles" piece of the spec.
+    on_screen = context.get("on_screen_stats") or []
+    if on_screen:
+        headline = on_screen[0]
+        filled = [f"{headline} — {t}" for t in filled]
+
     while len(filled) < count:
         filled.append(f"This {game} clip goes crazy 🔥 #{game}")
     return filled
