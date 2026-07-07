@@ -28,7 +28,9 @@ archive/
 archive/docs.env
 clips/
 credentials.json
-data/
+Data/archive/
+Data/data/
+Data/logs/
 docs.env
 env/
 llm-env/
@@ -44,3 +46,12 @@ yolov5
 .env.local.bak
 configs/storage_alerts.env
 configs/*.secrets.env
+
+# ── Third-party SDK checkouts, build outputs, and bundled apps — never tracked ─
+google-cloud-sdk/
+dist/
+build/
+llm/
+3rd_Party/google-cloud-sdk/
+3rd_Party/llm/
+*.app/
