@@ -1,21 +1,9 @@
 {
   "Marvel Rivals": {
-    "kill, multi_kill": {
-      "total_clips": 1,
-      "total_views": 4,
-      "total_likes": 0,
-      "avg_views": 4
-    },
-    "manual": {
-      "total_clips": 1,
-      "total_views": 1,
-      "total_likes": 0,
-      "avg_views": 1
-    },
     "multi_kill": {
-      "total_clips": 22,
-      "total_views": 26400,
-      "total_likes": 1760,
+      "total_clips": 15,
+      "total_views": 18000,
+      "total_likes": 1200,
       "avg_views": 1200
     }
   }

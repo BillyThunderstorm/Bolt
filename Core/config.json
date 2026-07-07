@@ -1,0 +1,10 @@
+{
+    "game": "Gaming",
+    "highlight_sensitivity": 0.7,
+    "recordings_folder": "recordings",
+    "clips_folder": "clips",
+    "vertical_clips_folder": "vertical_clips",
+    "use_brain": true,
+    "use_voice": true,
+    "use_twitch": false
+}
