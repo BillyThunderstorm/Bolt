@@ -106,6 +106,46 @@ Output
 └── tiktok_session.json → Upload queue
 ```
 
+## 💬 Twitch Chat Commands
+
+When the Bolt chat bot is connected to a Twitch channel, Billy can
+control the auto-posting queue from chat:
+
+```text
+!queue        - One-line summary of posting queue counts
+!qstatus      - Rich per-clip dashboard (id, score, plan status,
+                attempt count, hold reasons, ignored counter)
+!recall <q>   - Search memory for a topic
+!postnow [id] - Approve and publish the next ready clip now
+!dontpost <id> <reason>  - Hold a clip and save why
+!stopclip     - Reject the next auto-post (emergency stop)
+!skip [id]    - Skip the next post
+!rank [score] - Show or override a clip's ranking score
+!config       - Show current config summary
+```
+
+### Auto-Posting Flow
+
+The queue runs in three states per clip: `scheduled` → `awaiting_approval` → `posted` (or `held`). Safeguards:
+
+```text
+Review window:   30 min before scheduled peak time. Discord ping goes out.
+                 !postnow / !dontpost response, OR the deadline passes
+                 and Bolt auto-posts.
+Backoff:         Failed publishes retry after min_retry_gap_minutes
+                 (default 5), up to max_publish_attempts (default 3).
+Auto-hold:       After max attempts the clip is held with
+                 'publish_failed_after_N_attempts: <error>'.
+De-dup lock:     A clip in 'publishing' state is locked — !postnow
+                 and the deadline auto-post can't both fire.
+Confirmation:    Successful publishes send '✅ Posted: <title> — <url>'.
+Escalation:      3+ consecutive ignored reviews prefix the next
+                 Discord ping with '🚨 URGENT: N reviews ignored'.
+Dashboard:       !qstatus shows the full state of every clip.
+```
+
+Tunables live in `Data/data/config.json` → `auto_posting.*`.
+
 ## 📊 Virality Scoring Example
 
 ```

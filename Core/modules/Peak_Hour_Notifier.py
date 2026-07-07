@@ -983,7 +983,94 @@ def queue_summary() -> dict:
         ),
         "posted": sum(1 for c in clips if c.get("status") == "posted"),
         "total": len(clips),
+        "consecutive_ignored_reviews": int(
+            data.get("consecutive_ignored_reviews", 0)
+        ),
     }
+
+
+def render_dashboard(max_clips: int = 8, max_chars: int = 480) -> str:
+    """
+    Build a Twitch-chat-friendly dashboard of the current posting queue.
+
+    Designed to fit in 1-2 Twitch messages (~480 chars each) and show
+    enough detail to make an informed !postnow / !dontpost decision
+    without leaving chat. Shows:
+
+      - Header line with the ignored-reviews counter and total counts
+      - One line per clip: id, score, status, plan status, attempts
+      - Tail line with the held-clip count and held-reason snippets
+
+    If there are more than `max_clips` clips, the tail line says
+    "...and N more" rather than truncating. Callers can use the
+    underlying dict (queue_summary()) for full data.
+
+    The output is designed for terminal-style display (monospace
+    friendly) but works in any context.
+    """
+    summary = queue_summary()
+    data = _load_ready()
+    clips = data["clips"]
+    ignored = summary.get("consecutive_ignored_reviews", 0)
+    header = (
+        f"📋 Queue: {summary['ready']} alertable / "
+        f"{summary['ready_total']} ready / "
+        f"{summary['awaiting_approval']} awaiting / "
+        f"{summary['approved']} approved / "
+        f"{summary['held']} held / "
+        f"{summary['publish_failed']} retrying"
+    )
+    if ignored > 0:
+        header += f"  ⚠️ ignored×{ignored}"
+
+    lines = [header, "─" * 40]
+    shown = 0
+    for clip in clips:
+        if shown >= max_clips:
+            break
+        if clip.get("status") in ("posted",):
+            continue  # Don't bother showing the history
+        plan = clip.get("auto_post", {}) or {}
+        plan_status = plan.get("status", "—")
+        attempts = plan.get("attempt_count", 0)
+        title = (clip.get("title", "?") or "?")[:24]
+        score = clip.get("score", 0)
+        clip_id = clip.get("id", "????")
+        # Compose a compact status indicator.
+        bits = []
+        if plan_status != "—":
+            bits.append(plan_status)
+        if attempts:
+            bits.append(f"try{attempts}")
+        if clip.get("hold_reason"):
+            reason = (clip.get("hold_reason", "") or "")[:30]
+            bits.append(f"reason={reason}")
+        status_text = "/".join(bits) if bits else "—"
+        lines.append(f"  {clip_id} ⭐{score:>3} | {title:<24} | {status_text}")
+        shown += 1
+
+    if len(clips) > max_clips:
+        lines.append(f"  …and {len(clips) - max_clips} more")
+    if summary["held"]:
+        # Show a tiny held-reason digest so Billy doesn't have to dig
+        # through the queue file to see why clips are stuck.
+        reasons = []
+        for c in clips:
+            if c.get("status") == "held" and c.get("hold_reason"):
+                reasons.append(f"{c.get('id')}:{c['hold_reason'][:40]}")
+        if reasons:
+            lines.append("─" * 40)
+            lines.append("Held clips:")
+            for r in reasons[:3]:
+                lines.append(f"  • {r}")
+            if len(reasons) > 3:
+                lines.append(f"  …and {len(reasons) - 3} more")
+
+    out = "\n".join(lines)
+    # Trim if we somehow blew past the limit.
+    if len(out) > max_chars:
+        out = out[: max_chars - 3] + "…"
+    return out
 
 
 # ── CLI ────────────────────────────────────────────────────────────────────────

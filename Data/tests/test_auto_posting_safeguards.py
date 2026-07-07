@@ -627,5 +627,130 @@ class PostPublishConfirmationTests(unittest.TestCase):
         self.assertEqual(confirmations, [])
 
 
+class QueueDashboardTests(unittest.TestCase):
+    """Tests for the !qstatus dashboard (Peak_Hour_Notifier.render_dashboard)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.ready = self.root / "ready_to_post.json"
+        self.config = self.root / "config.json"
+        self.rejections = self.root / "post_rejections.jsonl"
+        self.clip = self.root / "clip.mp4"
+        self.clip.write_bytes(b"fake video")
+        self.config.write_text(
+            '{"min_clip_score": 65, "auto_posting": {'
+            '"enabled": true, "review_window_minutes": 30, '
+            '"auto_post_if_deadline_missed": true}}'
+        )
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _patch_files(self):
+        return patch.multiple(
+            notifier,
+            READY_FILE=self.ready,
+            CONFIG_FILE=self.config,
+            REJECTION_LOG=self.rejections,
+            POSTING_TIMEZONE="America/Chicago",
+        )
+
+    def test_empty_queue_dashboard_is_minimal(self):
+        with self._patch_files():
+            out = notifier.render_dashboard()
+        self.assertIn("📋 Queue:", out)
+        self.assertIn("0 alertable", out)
+        # No clip rows when the queue is empty.
+        self.assertNotIn("⭐", out)
+
+    def test_dashboard_shows_ignored_counter(self):
+        with self._patch_files():
+            data = notifier._load_ready()
+            data["consecutive_ignored_reviews"] = 4
+            notifier._save_ready(data)
+            out = notifier.render_dashboard()
+        self.assertIn("ignored×4", out)
+
+    def test_dashboard_lists_each_clip(self):
+        with self._patch_files():
+            notifier.queue_clip(str(self.clip), "Billy kills 3", ["#Gaming"], score=92)
+            notifier.queue_clip(str(self.clip), "A clutch moment", ["#Gaming"], score=85)
+            out = notifier.render_dashboard()
+        self.assertIn("Billy kills 3", out)
+        self.assertIn("A clutch moment", out)
+        # Each clip should have a star score next to it.
+        self.assertIn("⭐ 92", out)
+        self.assertIn("⭐ 85", out)
+
+    def test_dashboard_truncates_long_titles(self):
+        with self._patch_files():
+            notifier.queue_clip(
+                str(self.clip),
+                "This is a very long title that should be cut off in the dashboard",
+                ["#Gaming"],
+                score=80,
+            )
+            out = notifier.render_dashboard()
+        # 24-char truncation; the long string is sliced to its first 24 chars.
+        self.assertIn("This is a very long tit", out)
+        # The full long title should NOT be present (i.e., truncation happened).
+        full = "This is a very long title that should be cut off in the dashboard"
+        self.assertNotIn(full, out)
+
+    def test_dashboard_shows_attempt_count(self):
+        with self._patch_files():
+            notifier.queue_clip(str(self.clip), "test", ["#Gaming"], score=80)
+            data = notifier._load_ready()
+            data["clips"][0]["auto_post"]["status"] = "publish_failed"
+            data["clips"][0]["auto_post"]["attempt_count"] = 2
+            notifier._save_ready(data)
+            out = notifier.render_dashboard()
+        self.assertIn("publish_failed/try2", out)
+
+    def test_dashboard_shows_hold_reason(self):
+        with self._patch_files():
+            notifier.queue_clip(str(self.clip), "stuck clip", ["#Gaming"], score=80)
+            data = notifier._load_ready()
+            data["clips"][0]["status"] = "held"
+            data["clips"][0]["hold_reason"] = "publish_failed_after_3_attempts: rate limited"
+            notifier._save_ready(data)
+            out = notifier.render_dashboard()
+        self.assertIn("publish_failed_after_3_attempts", out)
+        self.assertIn("Held clips:", out)
+
+    def test_dashboard_skips_posted_clips(self):
+        with self._patch_files():
+            notifier.queue_clip(str(self.clip), "old posted", ["#Gaming"], score=80)
+            data = notifier._load_ready()
+            data["clips"][0]["status"] = "posted"
+            notifier._save_ready(data)
+            out = notifier.render_dashboard()
+        self.assertNotIn("old posted", out)
+
+    def test_dashboard_truncates_at_max_clips(self):
+        with self._patch_files():
+            # Add 12 clips; with a higher char limit so the clip-count
+            # limit (default 8) is what causes truncation, not the
+            # default 480-char safety net.
+            for i in range(12):
+                notifier.queue_clip(str(self.clip), f"clip {i:02d}", ["#Gaming"], score=70)
+            out = notifier.render_dashboard(max_chars=2000)
+        # Should show '...and 4 more' (12 - 8 = 4).
+        self.assertIn("…and 4 more", out)
+        # It should show 8 of the 12 clips, not all 12.
+        self.assertIn("clip 07", out)
+        self.assertNotIn("clip 11", out)
+
+    def test_dashboard_respects_max_chars(self):
+        with self._patch_files():
+            for i in range(20):
+                notifier.queue_clip(
+                    str(self.clip), f"clip {i:02d}", ["#Gaming"], score=70
+                )
+            out = notifier.render_dashboard(max_chars=200)
+        self.assertLessEqual(len(out), 200)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -211,7 +211,9 @@ python3 -m modules.Bolt_Voice --list-events
 
 ### Chat Commands (when Bolt is running)
 ```text
-!queue                    - Show current clip queue status
+!queue                    - One-line summary of the posting queue counts
+!qstatus                  - Rich per-clip dashboard (id, score, plan status,
+                            attempt count, hold reasons, ignored counter)
 !recall <topic>           - Search memory for topic
 !clip                     - Confirm last highlight count
 !highlights               - How many highlights this session
@@ -220,8 +222,42 @@ python3 -m modules.Bolt_Voice --list-events
 !dontpost [clip_id] <reason>  - Hold a clip and save why
 !stopclip                 - Reject the next auto-post
 !skip [clip_id]           - Skip the next post
-!rank                     - Show current clip ranking settings
+!rank [score]             - Show or set the next clip's ranking score
 !config                   - Show current config summary
+```
+
+### Auto-Posting Safeguards (Tier 4.1)
+The posting queue runs in three states per clip: `scheduled` → `awaiting_approval` → `posted` (or `held`). The safeguards are:
+
+```text
+Review window:   30 min before scheduled peak time. Discord ping goes out,
+                 Billy responds with !postnow / !dontpost, OR the
+                 deadline passes and Bolt auto-posts (configurable).
+Backoff:         If publish fails (e.g. TikTok rate limit), the clip is
+                 retried on the next process tick after
+                 min_retry_gap_minutes (default 5) and up to
+                 max_publish_attempts times (default 3).
+Auto-hold:       After max_publish_attempts failures the clip is held
+                 with reason 'publish_failed_after_N_attempts: <error>'
+                 so Billy can see what's stuck without it spinning.
+De-dup lock:     A clip in 'publishing' state is locked — concurrent
+                 !postnow and deadline auto-posts can't both fire.
+Confirmation:    Successful publishes send a Discord message
+                 '✅ Posted: <title> — <url>'.
+Escalation:      3 consecutive ignored reviews prefix the next
+                 Discord ping with '🚨 URGENT: N reviews ignored'.
+Dashboard:       !qstatus shows the full state — see command list above.
+```
+
+Tunables (in `Data/data/config.json` → `auto_posting`):
+```json
+"auto_posting": {
+  "enabled": true,
+  "review_window_minutes": 30,
+  "auto_post_if_deadline_missed": true,
+  "max_publish_attempts": 3,
+  "min_retry_gap_minutes": 5
+}
 ```
 
 ## Memory Operations

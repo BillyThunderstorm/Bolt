@@ -263,6 +263,23 @@ def format_queue_status() -> str:
     )
 
 
+def format_queue_dashboard() -> str:
+    """
+    Return a richer per-clip view of the posting queue.
+
+    Designed for `!qstatus` and the `render_dashboard` function in
+    Peak_Hour_Notifier. Shows id, score, plan status, attempt count,
+    and hold reasons so Billy can make an informed !postnow / !dontpost
+    decision without leaving Twitch chat.
+    """
+    try:
+        from modules.Peak_Hour_Notifier import render_dashboard
+
+        return render_dashboard()
+    except Exception as exc:
+        return f"queue dashboard unavailable: {exc}"
+
+
 def approve_next_post(clip_id: str = "") -> str:
     try:
         from modules.Peak_Hour_Notifier import approve_next_clip
@@ -626,6 +643,11 @@ if TWITCHIO_OK:
         async def cmd_queue(self, ctx):
             """!queue — show local posting queue counts."""
             await self._say(format_queue_status())
+
+        @twitch_commands.command(name="qstatus")
+        async def cmd_qstatus(self, ctx):
+            """!qstatus — show per-clip state for the posting queue (rich dashboard)."""
+            await self._say(format_queue_dashboard())
 
         @twitch_commands.command(name="postnow")
         async def cmd_postnow(self, ctx):
