@@ -484,6 +484,101 @@ def process_recording(
         notify_error("Clip_Ranker", e, recoverable=True)
         ranked_clips = successful_clips[:max_clips]
 
+    # ── Step E.5: Tier 4 — Anomaly + Predictive scoring ──────────────────────
+    # After ranking, run two smart checks on the surviving clips:
+    #   4.2 Anomaly_Detector: is the source recording anomalous? If a
+    #       stream died, had a corrupted audio track, or was mostly
+    #       menu/loading, the ranked clips are likely junk — flag them
+    #       and route to manual review instead of auto-posting.
+    #   4.4 Predictive_Analytics: based on past performance of similar
+    #       clips, is this one likely to outperform? Flag viral picks
+    #       so Billy can pull them forward in the review window.
+    # Both checks fail-open — if they error out, the clips continue
+    # through the queue as if nothing happened.
+    try:
+        from modules.Anomaly_Detector import (
+            extract_audio_profile,
+            load_profiles,
+            fit_baseline,
+            score as _anomaly_score,
+            save_profile,
+        )
+        from modules.Predictive_Analytics import predict as _predict_views
+
+        # Build the anomaly baseline once for this game.
+        _anomaly_baseline = fit_baseline(
+            load_profiles(game), game=game
+        )
+        # Build a (game, trigger) prediction for each clip.
+        _predictions = {}
+        for _clip in ranked_clips:
+            _trigger = _guess_trigger(_clip.output_file, highlights)
+            _predictions[str(_clip.output_file)] = _predict_views(
+                {"game": game, "trigger": _trigger, "platform": None}
+            )
+    except Exception as e:
+        notify(
+            f"Tier 4 scoring unavailable: {e}",
+            level="warning",
+            reason="Continuing without anomaly detection and view prediction.",
+        )
+        _anomaly_baseline = None
+        _predictions = {}
+
+    filtered_after_anomaly = []
+    for _clip in ranked_clips:
+        _clip_path = str(_clip.output_file)
+
+        # 4.2 Anomaly score on the source recording
+        try:
+            _profile = extract_audio_profile(_clip_path)
+            if _profile is not None:
+                _anomaly_report = _anomaly_score(_profile, _anomaly_baseline)
+                # Save the new profile so the baseline grows each run.
+                save_profile(_clip_path, game, _profile)
+                if _anomaly_report.is_anomalous and _anomaly_report.severity in ("medium", "high"):
+                    notify(
+                        f"Anomalous recording: {Path(_clip_path).name}",
+                        level="warning",
+                        reason=_anomaly_report.summary,
+                    )
+                    # High-severity anomalies are routed to manual review —
+                    # they're excluded from the auto-post queue but kept
+                    # available if Billy wants to override.
+                    if _anomaly_report.severity == "high":
+                        notify(
+                            f"  Skipping auto-post: severity={_anomaly_report.severity}",
+                            level="warning",
+                            reason="Anomalous recordings are held for manual review.",
+                        )
+                        continue
+        except Exception as e:
+            # Anomaly detection is best-effort. If it errors, fall through
+            # to the predictive check and queue as normal.
+            _anomaly_report = None
+
+        # 4.4 View prediction
+        _prediction = _predictions.get(_clip_path)
+        if _prediction is not None and not _prediction.insufficient_data:
+            _clip.prediction_summary = _prediction.summary
+            if _prediction.is_potential_viral:
+                notify(
+                    f"Viral pick: {Path(_clip_path).name} "
+                    f"(predicted {int(_prediction.high_views):,}+ views)",
+                    level="success",
+                    reason=_prediction.summary,
+                )
+        filtered_after_anomaly.append(_clip)
+
+    if len(filtered_after_anomaly) != len(ranked_clips):
+        notify(
+            f"Tier 4 filter: {len(ranked_clips)} → {len(filtered_anomaly_clips := filtered_after_anomaly)} "
+            f"({len(ranked_clips) - len(filtered_after_anomaly)} dropped for anomalies)",
+            level="info",
+            reason="Anomaly_Detector flagged these recordings for manual review.",
+        )
+        ranked_clips = filtered_after_anomaly
+
     # ── Step F: Format for TikTok + notify Billy at peak hours ───────────────
     if not config.get("auto_format_tiktok", True):
         notify(
