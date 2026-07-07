@@ -23,7 +23,7 @@ import time
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
 
 try:
     from modules.notifier import notify
@@ -41,8 +41,6 @@ except ImportError:
 try:
     import imagehash
     from PIL import Image
-import subprocess, tempfile, os
-
     HAS_PHASH = True
 except ImportError:
     HAS_PHASH = False
@@ -152,6 +150,136 @@ reason=f"Matches previously seen clip {Path(seen.get('path', '?')).name} at {see
                 json.dump(self._seen, f, indent=2)
         except Exception:
             pass
+
+    # ── Highlight series (Tier 2 spec: "group related clips into series") ───
+    #
+    # A series is a set of clips that look visually similar — the same kill
+    # from slightly different angles, or the same moment captured at slightly
+    # different timestamps. Grouping them lets:
+    #   - the user pick the best one
+    #   - the auto-publisher keep the highest-scoring one and drop the rest
+    #   - analytics aggregate views across the series instead of splitting them
+
+    def group_into_series(self, clips: list) -> List[List]:
+        """
+        Cluster clips that are visually similar into "highlight series".
+
+        Parameters
+        ----------
+        clips : list of objects, each with .output_file (and ideally .score)
+                Objects without .output_file are silently dropped.
+
+        Returns
+        -------
+        list of series. Each series is a list of clip objects that look alike.
+        Singletons (clips with no near-match) are still returned as their
+        own series so callers can iterate uniformly.
+
+        The algorithm is O(n^2) which is fine up to a few hundred clips per
+        batch — clip generation rarely produces more than that in one run.
+        """
+        valid = [c for c in clips if getattr(c, "output_file", "")]
+        if not valid:
+            return []
+
+        # Compute pHashes up front so we only do it once per clip.
+        hashes: List[Optional[object]] = []
+        for c in valid:
+            hashes.append(
+                _compute_phash(str(c.output_file)) if HAS_PHASH else None
+            )
+
+        parent = list(range(len(valid)))
+
+        def find(i: int) -> int:
+            while parent[i] != i:
+                parent[i] = parent[parent[i]]
+                i = parent[i]
+            return i
+
+        def union(i: int, j: int) -> None:
+            ri, rj = find(i), find(j)
+            if ri != rj:
+                parent[ri] = rj
+
+        for i in range(len(valid)):
+            for j in range(i + 1, len(valid)):
+                if hashes[i] is None or hashes[j] is None:
+                    continue
+                if abs(hashes[i] - hashes[j]) <= PHASH_THRESHOLD:
+                    union(i, j)
+
+        # Collect groups by root.
+        groups: Dict[int, List] = {}
+        for idx in range(len(valid)):
+            root = find(idx)
+            groups.setdefault(root, []).append(valid[idx])
+
+        # Stable order: sort groups by their best score (desc), then by first
+        # appearance. Helps the user see "winner + alternates" in summary output.
+        series = sorted(
+            groups.values(),
+            key=lambda grp: (-max(getattr(c, "score", 0) for c in grp), grp[0].output_file),
+        )
+        return series
+
+    def keep_best_in_each_series(
+        self, clips: list, min_group_size: int = 2
+    ) -> Tuple[list, dict]:
+        """
+        Group clips into series, keep the highest-scoring one per series,
+        drop the rest. Series with only one clip are passed through unchanged
+        (no similarity match — nothing to dedupe against).
+
+        Returns (kept_clips, series_info) where series_info maps each kept
+        clip's output_file to a dict describing its series (size, dropped
+        paths, best score).
+        """
+        series = self.group_into_series(clips)
+        kept: list = []
+        info: Dict[str, dict] = {}
+
+        for group in series:
+            if len(group) < min_group_size:
+                # No near-duplicates — pass through, but tag so downstream
+                # code can still see "this wasn't in a series".
+                kept.extend(group)
+                for c in group:
+                    info[str(c.output_file)] = {
+                        "series_size": 1,
+                        "dropped": [],
+                        "best_score": getattr(c, "score", 0),
+                        "winner": True,
+                    }
+                continue
+
+            winner = max(group, key=lambda c: getattr(c, "score", 0))
+            dropped = [c for c in group if c is not winner]
+            kept.append(winner)
+
+            info[str(winner.output_file)] = {
+                "series_size": len(group),
+                "dropped": [str(c.output_file) for c in dropped],
+                "best_score": getattr(winner, "score", 0),
+                "winner": True,
+            }
+            for c in dropped:
+                info[str(c.output_file)] = {
+                    "series_size": len(group),
+                    "dropped": [],
+                    "best_score": getattr(winner, "score", 0),
+                    "winner": False,
+                }
+
+        notify(
+            f"Highlight series: {len(series)} group(s) from {len(clips)} clip(s)",
+            level="info",
+            reason=(
+                f"Kept {len(kept)} (best per series); "
+                f"dropped {len(clips) - len(kept)} near-duplicate(s)."
+            ),
+        )
+        return kept, info
 
 
 def filter_with_report(clips: list, timestamps: Optional[List[float]] = None) -> tuple:
