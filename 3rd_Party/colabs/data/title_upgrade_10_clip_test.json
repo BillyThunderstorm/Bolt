@@ -1,0 +1,178 @@
+{
+  "generated_at": "2026-07-07T08:28:43",
+  "scenario_count": 10,
+  "passed": 10,
+  "failed": 0,
+  "results": [
+    {
+      "clip_number": 1,
+      "trigger": "kill",
+      "score": 72,
+      "status": "passed",
+      "title": "My brain can't compute that hit.",
+      "hashtags": [
+        "#MarvelRivals",
+        "#Gaming",
+        "#LuckyShot",
+        "#Clips",
+        "#FunnyMoments",
+        "#Gamer",
+        "#UnexpectedKill",
+        "#BillyReacts"
+      ]
+    },
+    {
+      "clip_number": 2,
+      "trigger": "multi_kill",
+      "score": 88,
+      "status": "passed",
+      "title": "That's a quick triple kill right there.",
+      "hashtags": [
+        "#MarvelRivals",
+        "#TripleKill",
+        "#Gaming",
+        "#BillyGamer",
+        "#MultiKill",
+        "#HeroShooter",
+        "#FastPaced",
+        "#CleanPlay"
+      ]
+    },
+    {
+      "clip_number": 3,
+      "trigger": "ace",
+      "score": 95,
+      "status": "passed",
+      "title": "I still can't believe I aced that.",
+      "hashtags": [
+        "#MarvelRivals",
+        "#Ace",
+        "#Gaming",
+        "#Clutch",
+        "#Unbelievable",
+        "#MarvelGames",
+        "#FPSGaming",
+        "#GamingReactions"
+      ]
+    },
+    {
+      "clip_number": 4,
+      "trigger": "chat_hype",
+      "score": 82,
+      "status": "passed",
+      "title": "My chat's always a step ahead.",
+      "hashtags": [
+        "#MarvelRivals",
+        "#Gaming",
+        "#GamerLife",
+        "#Streamer",
+        "#ChatHype",
+        "#CalledIt",
+        "#GamingCommunity",
+        "#PlayerVsChat"
+      ]
+    },
+    {
+      "clip_number": 5,
+      "trigger": "reaction",
+      "score": 78,
+      "status": "passed",
+      "title": "No way that actually worked.",
+      "hashtags": [
+        "#MarvelRivals",
+        "#Gaming",
+        "#Gamer",
+        "#Reaction",
+        "#Unexpected",
+        "#GamingMoments",
+        "#BillyReacts",
+        "#WhatJustHappened"
+      ]
+    },
+    {
+      "clip_number": 6,
+      "trigger": "highlight",
+      "score": 70,
+      "status": "passed",
+      "title": "I didn't think that would work.",
+      "hashtags": [
+        "#MarvelRivals",
+        "#GamingHighlight",
+        "#CleanPlay",
+        "#Unexpected",
+        "#Gamer",
+        "#FunnyGaming",
+        "#Reaction",
+        "#Shorts"
+      ]
+    },
+    {
+      "clip_number": 7,
+      "trigger": "manual",
+      "score": 76,
+      "status": "passed",
+      "title": "Saving that one. Easy.",
+      "hashtags": [
+        "#MarvelRivals",
+        "#BillyPlays",
+        "#Gaming",
+        "#Gamer",
+        "#EasySave",
+        "#Clutch",
+        "#NoSweat",
+        "#HeroPlay"
+      ]
+    },
+    {
+      "clip_number": 8,
+      "trigger": "donation",
+      "score": 84,
+      "status": "passed",
+      "title": "Someone just paid me to play Marvel Rivals.",
+      "hashtags": [
+        "#MarvelRivals",
+        "#Gaming",
+        "#Streamer",
+        "#Donation",
+        "#BillyReacts",
+        "#GamingHumor",
+        "#SupportTheStream",
+        "#LiveGaming"
+      ]
+    },
+    {
+      "clip_number": 9,
+      "trigger": "raid",
+      "score": 86,
+      "status": "passed",
+      "title": "Just raided for 86, that's how it's done.",
+      "hashtags": [
+        "#MarvelRivals",
+        "#Raid",
+        "#Gaming",
+        "#Gamer",
+        "#HighScore",
+        "#Marvel",
+        "#BillyPlays",
+        "#GamingHighlights"
+      ]
+    },
+    {
+      "clip_number": 10,
+      "trigger": "sub",
+      "score": 80,
+      "status": "passed",
+      "title": "Perfect timing on that sub.",
+      "hashtags": [
+        "#MarvelRivals",
+        "#Gaming",
+        "#Twitch",
+        "#Streamer",
+        "#Subscribers",
+        "#PerfectTiming",
+        "#Clutch",
+        "#Gamer"
+      ]
+    }
+  ]
+}

@@ -47,6 +47,11 @@ from _paths import (  # noqa: E402
     REPO_ROOT, VOD_SAMPLES_DIR, DATA_DIR,
 )
 
+# Backward-compatible aliases for code that uses `ROOT` / `PROJECT_ROOT`.
+PROJECT_ROOT = REPO_ROOT
+ROOT = REPO_ROOT
+
+
 from dotenv import load_dotenv
 load_dotenv(REPO_ROOT / ".env")
 

@@ -39,6 +39,11 @@ from _paths import (  # noqa: E402
     DATA_DIR, MEDIA_DIR,
 )
 
+# Backward-compatible aliases for code that uses `ROOT` / `PROJECT_ROOT`.
+PROJECT_ROOT = REPO_ROOT
+ROOT = REPO_ROOT
+
+
 # Post-reorg: live clips/ and vertical_clips/ now live under media/.
 CLIPS_DIR = _CLIPS_DIR
 VERTICAL_DIR = _VERTICAL_DIR

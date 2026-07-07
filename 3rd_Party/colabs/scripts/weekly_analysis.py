@@ -30,6 +30,11 @@ from _paths import (  # noqa: E402
     REPO_ROOT, DATA_DIR, CLIPS_DIR,
 )
 
+# Backward-compatible aliases for code that uses `ROOT` / `PROJECT_ROOT`.
+PROJECT_ROOT = REPO_ROOT
+ROOT = REPO_ROOT
+
+
 PERFORMANCE_FILE = DATA_DIR / "performance_outcomes.jsonl"
 QUEUE_FILE = DATA_DIR / "multi_platform_queue.json"
 

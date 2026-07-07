@@ -75,11 +75,51 @@ Top-level entry points that did NOT move, but now live one level deeper:
 > `parents[0] = scripts/`, `parents[1] = colabs/`, `parents[2] = 3rd_Party/`,
 > `parents[3] = repo root`.) They also still expect files at the old
 > top-level layout (`bot.py` at root, `modules/` at root, `recordings/`,
-> `clips/`, `vertical_clips/`, `data/`, `memory/` at root). Running them
-> as-is will fail. See the **Stale-Internal-Paths** section at the bottom
-> of this file for the full list of affected scripts and the follow-up fix.
-
-## Local Paths
+|> `clips/`, `vertical_clips/`, `data/`, `memory/` at root). Running them
+|> as-is will fail. See the **Stale-Internal-Paths** section at the bottom
+|> of this file for the full list of affected scripts and the follow-up fix.
+|
+|## `bolt` CLI Wrapper (NEW - July 7, 2026)
+|
+|A single entry-point command for every Bolt script and command lives at
+|`bin/bolt`. It does the sys.path bootstrap once, then dispatches to the
+|right script.
+|
+|Invoke directly (no setup required):
+|
+|```bash
+|/Users/carter/developer/Bolt/bin/bolt verify
+|/Users/carter/developer/Bolt/bin/bolt recordings
+|/Users/carter/developer/Bolt/bin/bolt nexus "How do I title my clips?"
+|/Users/carter/developer/Bolt/bin/bolt test              # full test suite
+|/Users/carter/developer/Bolt/bin/bolt help              # show all subcommands
+|```
+|
+|Or add a shell alias so you can just type `bolt <thing>` from any
+|directory. Put this in `~/.zshrc` (or `~/.bashrc`):
+|
+|```bash
+|alias bolt='/Users/carter/developer/Bolt/bin/bolt'
+|```
+|
+|Then `source ~/.zshrc` (or open a new terminal) and:
+|
+|```bash
+|bolt verify
+|bolt recordings
+|bolt thumbnails --dry-run
+|bolt briefing --send
+|bolt launch         # start the bot (Core/src/launch.py)
+|bolt test           # run the full test suite
+|bolt help           # show all subcommands
+|```
+|
+|Every subcommand listed in this doc maps 1:1 to a `bolt <name>`
+|invocation. The wrapper does the path setup, so the long
+|`3rd_Party/colabs/scripts/X.py` paths in the rest of this doc become
+|short `bolt X` commands.
+|
+|## Local Paths
 
 Real Bolt repo:
 
@@ -1033,7 +1073,7 @@ constant. Scripts that import from `_paths` automatically resolve
 `LOGS_DIR`, `DAILY_BRIEFINGS_DIR`, `DOCS_DIR`, `ARCHIVE_DIR`, `RECORDINGS_DIR`,
 `CONFIG_FILE`, `BOT_FILE`, `BOLT_BRAIN_FILE`, `VOD_SAMPLES_DIR`, etc.
 
-**Status (post-fix):**
+**Status (post-fix, all scripts migrated):**
 
 | Script | Fixed? | How |
 |--------|--------|-----|
@@ -1045,8 +1085,8 @@ constant. Scripts that import from `_paths` automatically resolve
 | `generate_thumbnails.py` | ✓ | Uses `_paths`. `--help` works. |
 | `site_data_writer.py` | ✓ | Uses `_paths`. Wrote `Data/data/site-data.json` successfully. |
 | `weekly_analysis.py` | ✓ | Uses `_paths`. `--help` works. |
-| `Watcher.py`, `Filter_Backlog.py`, `bot_with_twitch.py`, `make_highlights.py`, `build_env.py`, `load_bolt_personality.py`, `setup_env.py`, `autostart.py`, `get_twitch_token.py`, `get_twitch_bot_token.py`, `update_game_from_obs.py`, `start_obs_game_tracker.py` | not yet | All use CWD-relative or single-level `parent.parent` patterns; safe to run from repo root but not from arbitrary CWDs. |
-| `nexus_advice.py`, `refresh_memory_index.py`, `generate_calendar.py`, `log_clip_performance.py`, `clip_deduplicator.py`, `performance_baseline.py`, `monitor_title_results.py`, `test_title_upgrade_10_clips.py`, `get_tiktok_token.py`, `send_notification.py`, `twitch_vod_downloader.py` | not yet | These compute `ROOT = parents[1]` and walk old top-level paths. Will fail when run as `python3 3rd_Party/colabs/scripts/X.py`. |
+| `generate_calendar.py`, `nexus_advice.py`, `refresh_memory_index.py`, `log_clip_performance.py`, `monitor_title_results.py`, `performance_baseline.py`, `test_title_upgrade_10_clips.py`, `get_tiktok_token.py`, `get_twitch_bot_token.py`, `get_twitch_token.py`, `send_notification.py`, `update_game_from_obs.py`, `start_obs_game_tracker.py`, `Filter_Backlog.py`, `bot_with_twitch.py`, `twitch_vod_downloader.py` | ✓ | All use the `_paths` bootstrap shim plus `ROOT = REPO_ROOT` and `PROJECT_ROOT = REPO_ROOT` backward-compat aliases. `from modules import X` and `from scripts import X` (tests) both work. |
+| `Watcher.py`, `make_highlights.py`, `build_env.py`, `load_bolt_personality.py`, `setup_env.py`, `autostart.py` | n/a | CWD-relative only; no `from modules.X` import. Safe to run from repo root. |
 
 **If you add or update a script in `3rd_Party/colabs/scripts/`**, import
 `REPO_ROOT` and the standard subpaths from `_paths` rather than computing
@@ -1078,8 +1118,12 @@ repo root (`bot.py`, `launch.py`, `config.json`, `modules/`, `data/`,
 `clips/`, `recordings/`) now live one level deeper. `Docs/Scratchpad:`
 renamed to `Docs/Scratchpad_archive/`. `Docs/reorganize_bolt.sh` and
 `Docs/REORGANIZE_MANUAL.md` moved to `3rd_Party/colabs/scripts/legacy/`.
-A `_paths.py` helper was added to the scripts folder and 8 of the scripts
-were updated to use it. Two syntax bugs in `Core/src/launch.py` (indented
-code at column 0 inside a `try:` block and inside a `notify(...)` call)
-were repaired, and `launch.py` now sets up sys.path and uses
-`Core/bot.py` for the handoff. **Full test suite: 215 tests, 0 failures.**
+A `_paths.py` helper was added to the scripts folder and ALL scripts
+were updated to use it (with `ROOT = REPO_ROOT` and
+`PROJECT_ROOT = REPO_ROOT` backward-compat aliases for code that
+still uses those names). Two syntax bugs in `Core/src/launch.py`
+(indented code at column 0 inside a `try:` block and inside a
+`notify(...)` call) were repaired, and `launch.py` now sets up
+sys.path and uses `Core/bot.py` for the handoff. **`bin/bolt`
+single-entry CLI wrapper added** — see the `bolt CLI Wrapper`
+section above. **Full test suite: 215 tests, 0 failures.**

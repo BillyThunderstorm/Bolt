@@ -1,0 +1,208 @@
+#!/usr/bin/env python3
+"""
+Bolt CLI — single entry point for every Bolt script and command.
+
+Run with no args to see the available subcommands:
+
+    python3 bin/bolt
+
+Run a subcommand:
+
+    python3 bin/bolt verify                # check the install
+    python3 bin/bolt recordings            # process latest recordings
+    python3 bin/bolt thumbnails --dry-run  # generate thumbnails
+    python3 bin/bolt nexus "How do I title my clips?"
+    python3 bin/bolt briefing --send       # generate + send daily briefing
+    python3 bin/bolt launch                # start the bot (Core/src/launch.py)
+    python3 bin/bolt test                  # run the full test suite
+    python3 bin/bolt test test_title_generator  # run a specific test module
+
+Add a shell alias to invoke it as just `bolt`:
+
+    # in ~/.zshrc or ~/.bashrc
+    alias bolt='python3 /Users/carter/developer/Bolt/bin/bolt'
+
+Then from anywhere:
+
+    bolt verify
+    bolt recordings
+    bolt launch
+
+Setup wizard (first-time use):
+
+    bolt setup
+
+Subcommands map 1:1 onto the scripts in `3rd_Party/colabs/scripts/`
+(their hyphenated names match the script basenames). The wrapper does
+the sys.path bootstrap once, then exec's the target script with all
+remaining args passed through. This is faster and easier to remember
+than typing the full path to every script.
+
+The wrapper itself is intentionally tiny (no imports of Bolt's source
+code) so it works even if the source tree is broken.
+"""
+from __future__ import annotations
+
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+# Resolve the repo root from this file's location (bin/bolt -> repo root is
+# parents[1]). Don't depend on _paths.py — the wrapper should work even if
+# the source tree is in a half-broken state.
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS_DIR = REPO_ROOT / "3rd_Party" / "colabs" / "scripts"
+CORE_DIR = REPO_ROOT / "Core"
+VENV_PYTHON = REPO_ROOT / ".venv" / "bin" / "python3"
+
+# Subcommand -> relative script path (in 3rd_Party/colabs/scripts/).
+# Multiple aliases are allowed. Subcommands that are NOT just script
+# passthroughs (like "launch", "test", "setup") are handled specially.
+SUBCOMMANDS: dict[str, str] = {
+    # Script passthroughs (script name with no .py and lowercase).
+    # The wrapper looks up the actual file by lowercased name.
+    "verify": "verify.py",
+    "recordings": "process_recordings.py",
+    "auto_clip_twitch": "auto_clip_twitch.py",
+    "auto-clip-twitch": "auto_clip_twitch.py",
+    "highlights": "make_twitch_highlights.py",
+    "twitch_highlights": "make_twitch_highlights.py",
+    "briefing": "daily_briefing.py",
+    "briefings": "daily_briefing.py",
+    "thumbnails": "generate_thumbnails.py",
+    "calendar": "generate_calendar.py",
+    "nexus": "nexus_advice.py",
+    "advice": "nexus_advice.py",
+    "performance": "performance_baseline.py",
+    "site": "site_data_writer.py",
+    "weekly": "weekly_analysis.py",
+    "monthly": "weekly_analysis.py",
+    "log_perf": "log_clip_performance.py",
+    "log_performance": "log_clip_performance.py",
+    "monitor_titles": "monitor_title_results.py",
+    "test_titles": "test_title_upgrade_10_clips.py",
+    "vods": "twitch_vod_downloader.py",
+    "vod_download": "twitch_vod_downloader.py",
+    "twitch_token": "get_twitch_token.py",
+    "twitch_bot_token": "get_twitch_bot_token.py",
+    "tiktok_token": "get_tiktok_token.py",
+    "send": "send_notification.py",
+    "notify": "send_notification.py",
+    "refresh_memory": "refresh_memory_index.py",
+    "filter_backlog": "Filter_Backlog.py",
+    "watch": "Watcher.py",
+    "bot_with_twitch": "bot_with_twitch.py",
+    "clip_dedupe": "clip_deduplicator.py",
+    "make_highlights": "make_highlights.py",
+}
+
+HELP_TEXT = """
+Bolt — single-command access to every Bolt script and command.
+
+Usage:  bolt <subcommand> [args...]
+
+Script subcommands (each maps to 3rd_Party/colabs/scripts/X.py):
+  verify                  Run the install/setup verifier
+  recordings [mode]       Process existing recordings
+  auto_clip_twitch        Auto-clip highlights from Twitch VODs
+  highlights              Compile top clips into a Twitch highlight reel
+  briefing                Generate (and optionally send) the daily briefing
+  thumbnails [args]       Generate JPG thumbnails for clips
+  calendar                Generate ICS calendar feeds
+  nexus "<question>"      Ask Nexus for content strategy advice
+  performance             Run a performance baseline
+  site [--push]           Write site-data.json
+  weekly                  Generate weekly performance insights
+  log_perf [args]         Log a clip's performance
+  monitor_titles          Summarize title-generation signals
+  test_titles             Run the 10-clip title-upgrade smoke test
+  vods                    Download Twitch VOD samples
+  twitch_token            Get a Twitch chat token
+  twitch_bot_token        Get a Twitch bot chat token
+  tiktok_token            Get a TikTok OAuth token
+  send "<msg>"            Send an SMS / email notification
+  refresh_memory          Rebuild the memory index
+  filter_backlog          Move low-scoring clips to clips/_low_score/
+  watch                   Watch the recordings folder for new files
+
+Built-in subcommands (not script passthroughs):
+  launch                  Start the bot (Core/src/launch.py)
+  test [testmodule]       Run the full test suite (or a specific test module)
+  setup                   Run the first-time setup wizard (Core/bot.py setup)
+  help                    Show this message
+  version                 Show Bolt's repo path and Python version
+
+Setup:
+  Add to your shell rc (so you can just type 'bolt <thing>'):
+    alias bolt='python3 /Users/carter/developer/Bolt/bin/bolt'
+"""
+
+
+def find_script(name: str) -> Path | None:
+    """Look up a subcommand name in SUBCOMMANDS. Return the absolute path
+    to the script file, or None if the subcommand isn't a known script."""
+    if name in SUBCOMMANDS:
+        return SCRIPTS_DIR / SUBCOMMANDS[name]
+    return None
+
+
+def main() -> int:
+    args = sys.argv[1:]
+
+    if not args or args[0] in ("-h", "--help", "help"):
+        print(HELP_TEXT)
+        return 0
+
+    if args[0] in ("-V", "--version", "version"):
+        print(f"bolt {REPO_ROOT}")
+        print(f"  python  {sys.executable}")
+        print(f"  venv    {VENV_PYTHON}  ({'exists' if VENV_PYTHON.exists() else 'NOT FOUND'})")
+        return 0
+
+    subcommand, *rest = args
+
+    # Built-in: launch
+    if subcommand == "launch":
+        cmd = [str(VENV_PYTHON if VENV_PYTHON.exists() else sys.executable), "Core/src/launch.py"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT))
+
+    # Built-in: test
+    if subcommand == "test":
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}:{SCRIPTS_DIR.parent}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        test_args = rest if rest else ["discover", "-s", "Data/tests", "-t", "."]
+        cmd = [str(VENV_PYTHON if VENV_PYTHON.exists() else sys.executable),
+               "-m", "unittest"] + test_args
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: setup
+    if subcommand == "setup":
+        cmd = [str(VENV_PYTHON if VENV_PYTHON.exists() else sys.executable), "Core/bot.py", "setup"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT))
+
+    # Script passthrough
+    script = find_script(subcommand)
+    if script is None:
+        print(f"bolt: unknown subcommand '{subcommand}'", file=sys.stderr)
+        print(f"  Run 'bolt help' for the full list of subcommands.", file=sys.stderr)
+        return 2
+
+    if not script.exists():
+        print(f"bolt: script not found: {script}", file=sys.stderr)
+        return 1
+
+    # Exec the script with the rest of the args, using the venv Python so
+    # `dotenv` and `Pillow` are available.
+    cmd = [str(VENV_PYTHON if VENV_PYTHON.exists() else sys.executable), str(script)] + rest
+    os.chdir(REPO_ROOT)
+    return subprocess.call(cmd, cwd=str(REPO_ROOT))
+
+
+if __name__ == "__main__":
+    sys.exit(main())
