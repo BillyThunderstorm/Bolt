@@ -254,6 +254,51 @@ def process_recording(
         reason="Clips saved to clips/ folder.",
     )
 
+    # ── Step B2.5: Group into highlight series (Tier 2) ───────────────────────
+    # After the seen-clips dedup above (which catches "this was processed
+    # before"), group the *remaining* clips by visual similarity so we don't
+    # post the same kill from three different angles. Within each series we
+    # keep the highest-scoring clip and drop the alternates — this is what
+    # stops the queue from filling with near-duplicates of the same moment.
+    try:
+        from modules.Clip_Deduplicator import ClipDeduplicator as _SeriesDedup
+        _series_dedup = _SeriesDedup()
+        before_series = len(successful_clips)
+        successful_clips, series_info = _series_dedup.keep_best_in_each_series(
+            successful_clips
+        )
+        # Log which clips were dropped as alternates.
+        for path, info in series_info.items():
+            if not info["winner"] and info["series_size"] > 1:
+                notify(
+                    f"Series alternate dropped: {Path(path).name}",
+                    level="info",
+                    reason=(
+                        f"Visual match (series of {info['series_size']}); "
+                        f"keeping the {info['best_score']}-scored winner instead."
+                    ),
+                )
+        if before_series != len(successful_clips):
+            notify(
+                f"Highlight series: {before_series} clip(s) → {len(successful_clips)} "
+                f"({before_series - len(successful_clips)} near-duplicate alternates dropped)",
+                level="success",
+                reason="Same moment from multiple angles is now collapsed to one clip.",
+            )
+        if not successful_clips:
+            notify(
+                "All clips collapsed into existing series winners — nothing new to process",
+                level="info",
+                reason="This batch was a set of alternates to clips already queued.",
+            )
+            return
+    except Exception as e:
+        notify(
+            f"Highlight-series grouping skipped: {e}",
+            level="warning",
+            reason="Continuing without series grouping. Alternates may slip through.",
+        )
+
     # ── Step C: Generate titles (gaming) or Nexus-optimized captions (review/skincare/tech) ─
     content_type = config.get("content_type", "gaming")
     use_ai_titles = bool(
