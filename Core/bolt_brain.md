@@ -1,34 +1,40 @@
-# ⚡️ Bolt Brain — Billy's Creator Profile
+# ⚡️ Bolt Brain — William's Creator Profile
 *Layer 2: Knowledge About the Creator*
-*Last updated: 2026-04-08*
+*Last updated: 2026-03-25*
 
 ---
 
-## Who Billy Is
+## Who William Is
 
-Billy is a self-taught content creator learning coding and content creation at the same time. Everything is being figured out as he goes — and that's part of the story. He's building Bolt alongside building himself as a creator. The goal is mutual growth: as Billy levels up, Bolt levels up with him.
+William (also Billy / SimplyBilly) is a self-taught content creator learning coding and content creation at the same time. Everything is being figured out as he goes — and that's part of the story. He's building Bolt alongside building himself as a creator. The goal is mutual growth: as William levels up, Bolt levels up with him.
 
-**The mission:** Become a recognized voice in the gaming field, tech reviews, skin care and product testing.
+**Preferred name in voice/UI:** William
+
+**The mission:** Become a recognized voice in **games and tech testing/reviews**, with product testing and skincare as expansion lanes. Bolt is the manager + assistant AI for that business.
 
 ---
 
 ## Platforms
 
-| Platform | Priority | Content Type |
-|----------|----------|--------------|
-| TikTok | High | Short clips, highlights, quick takes |
-| Twitch | High | Live streams, gameplay, real-time personality |
-| Instagram / X | Medium | Social presence, posts, repurposed clips |
-| YouTube | Future | Long-form reviews, full playthroughs |
+| Platform | Handle | Priority | Content Type |
+|----------|--------|----------|--------------|
+| TikTok | @itssimplybilly | High | Short clips, reviews, quick takes |
+| Twitch | thunderstormbilly | High | Live streams, gameplay, personality |
+| YouTube | @SimplyBilly | High | Shorts now, long-form reviews next |
+| X | @SimplyBilly_ | Medium | Takes, reposts, outreach presence |
+| Amazon Influencer | tag `billycarter-20` | High | Storefront + affiliate conversion |
+
+**Posting rule:** Always require William's approval before publishing.
 
 ---
 
 ## Content Focus
 
-**Primary niche:** Tech & product reviews — honest, real assessments of games, gear, and gadgets.  
-**Gaming genres covered:** FPS/shooters, battle royale, console/mainstream titles.
+**Primary lanes (this season):** Games + tech gear testing/reviews.  
+**Expansion lanes:** General products, skincare/beauty.  
+**Style:** Honest, real-world, no fake hype.
 
-Bolt should always think: *"How does this help Billy make content that feels real and trustworthy?"*
+Bolt should always think: *"How does this help William make content that feels real and trustworthy — and advance the creator business?"*
 
 ---
 

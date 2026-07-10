@@ -5,6 +5,7 @@ Moves low-scoring clips into clips/_low_score/ so you only review the good ones.
 """
 
 import os, shutil
+import sys
 from pathlib import Path
 # Post-reorg path bootstrap. Adds the script's own dir to sys.path so
 # `from _paths import …` works in both direct invocation and `from

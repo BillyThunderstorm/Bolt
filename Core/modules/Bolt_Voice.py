@@ -76,7 +76,7 @@ ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "")
 # (If you want Bolt heard by viewers, route your mic — ask Billy.)
 
 VOICE_LINES = {
-    "startup": "All systems online, Billy. Bolt is ready when you are.",
+    "startup": "All systems online, William. Bolt is ready when you are.",
     "highlight": "Highlight sequence detected. Archiving the moment.",
     "highlight_3": "That is the third highlight of the session. Confidence in your performance is increasing.",
     "sub": "New subscriber confirmed. {name} has joined the channel.",
@@ -85,9 +85,10 @@ VOICE_LINES = {
     "raid_small": "{raider} has arrived with reinforcements. Welcome to the channel.",
     "bits": "Contribution received from {name}. {amount} bits. Acknowledged.",
     "going_live": "Stream is active. O B S is connected. I am monitoring.",
-    "peak_alert": "Billy — optimal posting window is now open. Your clips are standing by in Discord.",
+    "peak_alert": "William — optimal posting window is now open. Your clips are standing by for approval.",
+    "morning": "Good morning, William. Loading your creator briefing.",
     "error": "Alert. A system error has occurred. Terminal review recommended.",
-    "shutdown": "Signing off. It was a good session, Billy.",
+    "shutdown": "Signing off. It was a good session, William.",
 }
 
 
@@ -312,7 +313,7 @@ def is_available() -> bool:
 
 def test_voice():
     """Speak a test line and wait for it to finish. Used at startup to confirm TTS works."""
-    speak("Hey Billy, Bolt voice is working.")
+    speak("Hey William, Bolt voice is working.")
     _speech_queue.join()  # wait for queue to drain
 
 

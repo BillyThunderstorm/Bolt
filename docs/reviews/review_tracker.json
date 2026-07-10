@@ -1,11 +1,48 @@
 {
   "reviews": [],
   "outreach_log": [],
-  "products_received": [],
+  "products_received": [
+    {
+      "name": "Starter FPS Session Notes",
+      "lane": "game",
+      "status": "idea",
+      "asin": "",
+      "added_at": "2026-07-09T22:44:07"
+    },
+    {
+      "name": "Daily Driver Gaming Headset",
+      "lane": "tech",
+      "status": "testing",
+      "asin": "",
+      "added_at": "2026-07-09T22:44:07"
+    },
+    {
+      "name": "Mouse",
+      "lane": "tech",
+      "status": "testing",
+      "asin": "B085HNRKPX",
+      "added_at": "2026-07-10T07:36:07"
+    }
+  ],
   "settings": {
     "review_frequency_goal": "1-2 per week",
-    "platforms": ["tiktok", "youtube_shorts", "youtube_long", "instagram_reels"],
-    "niche": "gaming & tech gear",
-    "disclosure_required": true
+    "platforms": [
+      "tiktok",
+      "youtube_shorts",
+      "youtube_long",
+      "x",
+      "twitch"
+    ],
+    "niche": "games & tech gear (priority); products & skincare expansion",
+    "disclosure_required": true,
+    "require_post_approval": true,
+    "creator_name": "William",
+    "amazon_tag": "billycarter-20",
+    "handles": {
+      "tiktok": "@itssimplybilly",
+      "twitch": "thunderstormbilly",
+      "youtube": "@SimplyBilly",
+      "x": "@SimplyBilly_"
+    }
   }
 }

@@ -1,0 +1,1152 @@
+#!/usr/bin/env python3
+"""
+Content_Manager.py — Bolt as William's creator manager + business assistant
+==========================================================================
+Local-first system of record for:
+  - game / tech / product / skincare testing
+  - review drafts
+  - Amazon storefront (affiliate tag billycarter-20)
+  - social connectivity + approval-gated post plans
+  - sponsor / affiliate prospects
+  - business learning + Bolt advancement
+  - "Good Morning Bolt" spoken briefing
+
+CLI (via bolt or python -m modules.Content_Manager):
+  manage add|list|note|draft|next|status
+  store add|list|feature-next
+  social status|package|queue
+  sponsors find|pitch|log|next
+  business lesson|next
+  advance next
+  morning [--speak|--quiet]
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from datetime import date, datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+from uuid import uuid4
+
+# Repo root: Core/modules/thisfile -> parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DATA_DIR = REPO_ROOT / "Data" / "data"
+CONTENT_DIR = DATA_DIR / "content"
+BUSINESS_DIR = DATA_DIR / "business"
+DOCS_REVIEWS = REPO_ROOT / "Docs" / "reviews"
+BRIEFINGS_DIR = REPO_ROOT / "Docs" / "briefings" / "daily"
+
+CATALOG_FILE = CONTENT_DIR / "catalog.json"
+STOREFRONT_FILE = CONTENT_DIR / "storefront.json"
+SPONSORS_FILE = CONTENT_DIR / "sponsors.json"
+SOCIAL_FILE = CONTENT_DIR / "social_connections.json"
+REVIEW_TRACKER = DOCS_REVIEWS / "review_tracker.json"
+BUSINESS_PLAYBOOK = BUSINESS_DIR / "business-playbook.md"
+ADVANCEMENT_FILE = BUSINESS_DIR / "bolt-advancement.md"
+
+# Creator prefs (William)
+CREATOR_NAME = "William"
+PREFERRED_LANES = ["game", "tech"]
+AMAZON_TAG = "billycarter-20"
+REQUIRE_POST_APPROVAL = True
+
+LANES = ("game", "tech", "product", "skincare")
+STATUSES = ("idea", "queued", "testing", "drafting", "ready", "posted", "shelved")
+
+# Seed sponsor prospects (starter-friendly; local research list, not live scrape)
+DEFAULT_SPONSORS: List[Dict[str, Any]] = [
+    {
+        "name": "Razer",
+        "lanes": ["game", "tech"],
+        "type": "brand+affiliate",
+        "fit": 9,
+        "why": "Core gaming peripherals; strong starter review products (mice, pads, headsets).",
+        "affiliate_hint": "RazerStore affiliate / creator programs",
+        "contact_hint": "creators@razer.com / brand portal",
+    },
+    {
+        "name": "Logitech G",
+        "lanes": ["game", "tech"],
+        "type": "brand+affiliate",
+        "fit": 9,
+        "why": "Mice, keyboards, headsets — easy first reviews from gear William already uses.",
+        "affiliate_hint": "Logitech affiliate / creator program",
+        "contact_hint": "influencer marketing / press kit",
+    },
+    {
+        "name": "SteelSeries",
+        "lanes": ["game", "tech"],
+        "type": "brand",
+        "fit": 8,
+        "why": "Headset and mouse reviews perform well for FPS/BR audiences.",
+        "affiliate_hint": "SteelSeries affiliate",
+        "contact_hint": "press@steelseries.com",
+    },
+    {
+        "name": "HyperX",
+        "lanes": ["game", "tech"],
+        "type": "brand+affiliate",
+        "fit": 8,
+        "why": "Accessible price tiers; good for honest mid-range gear content.",
+        "affiliate_hint": "HP/HyperX affiliate portals",
+        "contact_hint": "creator outreach form",
+    },
+    {
+        "name": "Elgato",
+        "lanes": ["tech", "game"],
+        "type": "brand",
+        "fit": 8,
+        "why": "Stream setup gear (lights, capture, mic arms) pairs with Twitch growth story.",
+        "affiliate_hint": "Corsair/Elgato creator",
+        "contact_hint": "creator@elgato.com",
+    },
+    {
+        "name": "Secretlab",
+        "lanes": ["tech", "game"],
+        "type": "brand",
+        "fit": 7,
+        "why": "High AOV chair reviews; needs longer test journal.",
+        "affiliate_hint": "Secretlab affiliate",
+        "contact_hint": "influencers@secretlab.co",
+    },
+    {
+        "name": "Amazon Influencer / Associates",
+        "lanes": ["product", "tech", "game", "skincare"],
+        "type": "affiliate",
+        "fit": 10,
+        "why": "William already has tag billycarter-20 — primary monetization path.",
+        "affiliate_hint": f"tag={AMAZON_TAG}",
+        "contact_hint": "associates / influencer dashboard",
+    },
+    {
+        "name": "Anker / Soundcore",
+        "lanes": ["tech", "product"],
+        "type": "brand+affiliate",
+        "fit": 7,
+        "why": "Chargers, earbuds, power banks — constant short-form review fuel.",
+        "affiliate_hint": "Anker affiliate",
+        "contact_hint": "influencer@anker.com",
+    },
+    {
+        "name": "CeraVe",
+        "lanes": ["skincare"],
+        "type": "brand",
+        "fit": 6,
+        "why": "Accessible skincare; good when beauty lane is active.",
+        "affiliate_hint": "often via Amazon",
+        "contact_hint": "L'Oréal / CeraVe PR",
+    },
+    {
+        "name": "The Ordinary",
+        "lanes": ["skincare"],
+        "type": "brand",
+        "fit": 6,
+        "why": "Ingredient-led content pairs with honest testing journals.",
+        "affiliate_hint": "Deciem affiliate when available",
+        "contact_hint": "PR / creator form",
+    },
+]
+
+
+def _now_iso() -> str:
+    return datetime.now().isoformat(timespec="seconds")
+
+
+def _today() -> str:
+    return date.today().isoformat()
+
+
+def _slug(text: str) -> str:
+    s = re.sub(r"[^a-zA-Z0-9]+", "-", text.strip().lower()).strip("-")
+    return s[:48] or uuid4().hex[:8]
+
+
+def _safe_load(path: Path, default: Any) -> Any:
+    try:
+        if path.exists():
+            with open(path, "r", encoding="utf-8") as fh:
+                return json.load(fh)
+    except Exception:
+        pass
+    return default
+
+
+def _safe_write(path: Path, payload: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, indent=2, ensure_ascii=False)
+        fh.write("\n")
+
+
+def _ensure_seed_files() -> None:
+    CONTENT_DIR.mkdir(parents=True, exist_ok=True)
+    BUSINESS_DIR.mkdir(parents=True, exist_ok=True)
+    BRIEFINGS_DIR.mkdir(parents=True, exist_ok=True)
+
+    if not CATALOG_FILE.exists():
+        _safe_write(
+            CATALOG_FILE,
+            {
+                "version": 1,
+                "updated_at": _now_iso(),
+                "preferred_lanes": PREFERRED_LANES,
+                "items": [],
+            },
+        )
+
+    if not STOREFRONT_FILE.exists():
+        _safe_write(
+            STOREFRONT_FILE,
+            {
+                "version": 1,
+                "affiliate_tag": AMAZON_TAG,
+                "storefront_status": "influencer_active",
+                "updated_at": _now_iso(),
+                "items": [],
+            },
+        )
+
+    if not SPONSORS_FILE.exists():
+        prospects = []
+        for row in DEFAULT_SPONSORS:
+            prospects.append(
+                {
+                    "id": _slug(row["name"]),
+                    "name": row["name"],
+                    "lanes": row["lanes"],
+                    "type": row["type"],
+                    "fit": row["fit"],
+                    "why": row["why"],
+                    "affiliate_hint": row["affiliate_hint"],
+                    "contact_hint": row["contact_hint"],
+                    "status": "prospect",
+                    "outreach": [],
+                    "added_at": _now_iso(),
+                }
+            )
+        _safe_write(
+            SPONSORS_FILE,
+            {
+                "version": 1,
+                "updated_at": _now_iso(),
+                "prospects": prospects,
+            },
+        )
+
+    if not SOCIAL_FILE.exists():
+        _safe_write(
+            SOCIAL_FILE,
+            {
+                "version": 1,
+                "require_approval": REQUIRE_POST_APPROVAL,
+                "updated_at": _now_iso(),
+                "platforms": {
+                    "tiktok": {
+                        "handle": "@itssimplybilly",
+                        "status": "configured",
+                        "upload_mode": "api_when_token",
+                        "notes": "Primary short-form. Use Content Posting API when token present.",
+                    },
+                    "twitch": {
+                        "handle": "thunderstormbilly",
+                        "status": "configured",
+                        "upload_mode": "live_source",
+                        "notes": "Live gameplay + highlight source.",
+                    },
+                    "youtube": {
+                        "handle": "@SimplyBilly",
+                        "status": "configured",
+                        "upload_mode": "manual_assisted",
+                        "notes": "Long-form reviews + Shorts. API needs OAuth app approval.",
+                    },
+                    "x": {
+                        "handle": "@SimplyBilly_",
+                        "status": "configured",
+                        "upload_mode": "manual_assisted",
+                        "notes": "Quick takes and reposts.",
+                    },
+                    "instagram": {
+                        "handle": "TBD",
+                        "status": "not_connected",
+                        "upload_mode": "manual_assisted",
+                        "notes": "Optional Reels later.",
+                    },
+                },
+                "queue": [],
+            },
+        )
+
+    if not BUSINESS_PLAYBOOK.exists():
+        BUSINESS_PLAYBOOK.write_text(
+            """# Creator Business Playbook (William + Bolt)
+
+## North Star
+Become a trusted voice for **games and tech testing**, with product/skincare lanes as expansion.
+Monetize via Amazon Influencer (`billycarter-20`), affiliates, then brand deals.
+
+## Stage Map
+1. **Proof** — post consistent honest reviews/clips (games + tech first)
+2. **Portfolio** — 5+ public reviews + media kit
+3. **Affiliate** — every review has a tracked link when relevant
+4. **Outreach** — pitch 5 brands/week with templates
+5. **Deals** — negotiate gifting → paid once metrics exist
+6. **Systems** — Bolt automates research, drafts, queue, follow-ups
+
+## Weekly Rhythm (starter)
+- Mon: pick 1 game or tech item to test / film
+- Tue: journal notes + short-form cut
+- Wed: post + engage comments
+- Thu: long-form or stream segment
+- Fri: pitch 5 brands / check affiliate dashboard
+- Sat: stream (Twitch) + clip harvest
+- Sun: review numbers + plan next week with Bolt
+
+## Disclosures
+- Always disclose gifted/sponsored content (#ad / #gifted)
+- Affiliate links need honest opinion first; never fake results
+
+## First Money Paths
+1. Amazon Associates / Influencer with tag `billycarter-20`
+2. Platform creator funds (TikTok Creativity, YT Partner later)
+3. Affiliate programs (peripheral brands)
+4. Sponsored reviews after portfolio exists
+
+## Advancement Rule
+Ship content before perfect systems. Bolt upgrades should reduce friction on posting and testing.
+""",
+            encoding="utf-8",
+        )
+
+    if not ADVANCEMENT_FILE.exists():
+        ADVANCEMENT_FILE.write_text(
+            """# Bolt Advancement Roadmap
+
+Priority order for making Bolt a better manager:
+
+1. Content Manager catalog + journals (done when this ships)
+2. Good Morning Bolt spoken briefing
+3. Amazon storefront linking on every review draft
+4. Social package planner with approval gate
+5. Sponsor prospector + pitch drafts
+6. Real YouTube/X OAuth upload when apps approved
+7. Stream companion intents (manage/next during voice chat)
+8. Performance feedback loop into next-content suggestions
+
+## How William advances Bolt
+- After each content session, tell Bolt what felt slow
+- Prefer local tools over paid APIs when possible
+- One upgrade at a time; finish > start
+""",
+            encoding="utf-8",
+        )
+
+
+def load_catalog() -> Dict[str, Any]:
+    _ensure_seed_files()
+    return _safe_load(CATALOG_FILE, {"items": []})
+
+
+def save_catalog(data: Dict[str, Any]) -> None:
+    data["updated_at"] = _now_iso()
+    _safe_write(CATALOG_FILE, data)
+
+
+def load_storefront() -> Dict[str, Any]:
+    _ensure_seed_files()
+    return _safe_load(STOREFRONT_FILE, {"items": [], "affiliate_tag": AMAZON_TAG})
+
+
+def save_storefront(data: Dict[str, Any]) -> None:
+    data["updated_at"] = _now_iso()
+    data["affiliate_tag"] = data.get("affiliate_tag") or AMAZON_TAG
+    _safe_write(STOREFRONT_FILE, data)
+
+
+def load_sponsors() -> Dict[str, Any]:
+    _ensure_seed_files()
+    return _safe_load(SPONSORS_FILE, {"prospects": []})
+
+
+def save_sponsors(data: Dict[str, Any]) -> None:
+    data["updated_at"] = _now_iso()
+    _safe_write(SPONSORS_FILE, data)
+
+
+def load_social() -> Dict[str, Any]:
+    _ensure_seed_files()
+    return _safe_load(SOCIAL_FILE, {"platforms": {}, "queue": []})
+
+
+def save_social(data: Dict[str, Any]) -> None:
+    data["updated_at"] = _now_iso()
+    data["require_approval"] = REQUIRE_POST_APPROVAL
+    _safe_write(SOCIAL_FILE, data)
+
+
+def _find_item(catalog: Dict[str, Any], name: str) -> Optional[Dict[str, Any]]:
+    key = name.strip().lower()
+    for item in catalog.get("items", []):
+        if item.get("name", "").lower() == key or item.get("id") == key:
+            return item
+        if key in item.get("name", "").lower():
+            return item
+    return None
+
+
+def add_item(
+    name: str,
+    lane: str = "tech",
+    status: str = "testing",
+    notes: str = "",
+    asin: str = "",
+) -> Dict[str, Any]:
+    lane = lane.lower().strip()
+    if lane not in LANES:
+        raise ValueError(f"lane must be one of {LANES}")
+    status = status.lower().strip()
+    if status not in STATUSES:
+        raise ValueError(f"status must be one of {STATUSES}")
+
+    catalog = load_catalog()
+    existing = _find_item(catalog, name)
+    if existing:
+        existing["status"] = status
+        existing["lane"] = lane
+        if notes:
+            existing.setdefault("notes_log", []).append(
+                {"day": None, "text": notes, "at": _now_iso()}
+            )
+        if asin:
+            existing["asin"] = asin
+        save_catalog(catalog)
+        return existing
+
+    item = {
+        "id": _slug(name),
+        "name": name.strip(),
+        "lane": lane,
+        "status": status,
+        "asin": asin or "",
+        "started_at": _today(),
+        "created_at": _now_iso(),
+        "notes_log": [],
+        "verdict": None,
+        "priority": 10 if lane in PREFERRED_LANES else 5,
+    }
+    if notes:
+        item["notes_log"].append({"day": 1, "text": notes, "at": _now_iso()})
+    catalog.setdefault("items", []).append(item)
+    save_catalog(catalog)
+
+    # Sync lightweight review tracker
+    tracker = _safe_load(
+        REVIEW_TRACKER,
+        {"reviews": [], "outreach_log": [], "products_received": [], "settings": {}},
+    )
+    tracker.setdefault("products_received", []).append(
+        {
+            "name": item["name"],
+            "lane": lane,
+            "status": status,
+            "asin": asin,
+            "added_at": _now_iso(),
+        }
+    )
+    _safe_write(REVIEW_TRACKER, tracker)
+    return item
+
+
+def list_items(lane: Optional[str] = None, status: Optional[str] = None) -> List[Dict[str, Any]]:
+    items = load_catalog().get("items", [])
+    if lane:
+        items = [i for i in items if i.get("lane") == lane.lower()]
+    if status:
+        items = [i for i in items if i.get("status") == status.lower()]
+    # preferred lanes first, then testing
+    def sort_key(i: Dict[str, Any]):
+        pref = 0 if i.get("lane") in PREFERRED_LANES else 1
+        st = 0 if i.get("status") == "testing" else 1
+        return (pref, st, i.get("name", ""))
+
+    return sorted(items, key=sort_key)
+
+
+def add_note(name: str, text: str, day: Optional[int] = None) -> Dict[str, Any]:
+    catalog = load_catalog()
+    item = _find_item(catalog, name)
+    if not item:
+        raise ValueError(f"No catalog item matching '{name}'. Add it first.")
+    entry = {"day": day, "text": text.strip(), "at": _now_iso()}
+    item.setdefault("notes_log", []).append(entry)
+    if item.get("status") == "idea":
+        item["status"] = "testing"
+    save_catalog(catalog)
+    return item
+
+
+def build_draft(name: str, format: str = "short") -> Dict[str, Any]:
+    catalog = load_catalog()
+    item = _find_item(catalog, name)
+    if not item:
+        raise ValueError(f"No catalog item matching '{name}'.")
+
+    notes = item.get("notes_log") or []
+    note_text = " | ".join(n.get("text", "") for n in notes[-5:]) or "Still gathering real-world notes."
+    lane = item.get("lane", "tech")
+    store = load_storefront()
+    tag = store.get("affiliate_tag", AMAZON_TAG)
+    asin = item.get("asin") or ""
+    affiliate = (
+        f"https://www.amazon.com/dp/{asin}/?tag={tag}" if asin else f"(add ASIN; tag={tag})"
+    )
+
+    shape = {
+        "what_it_is": f"{item['name']} ({lane})",
+        "why_tested": "Real-world game/tech testing for honest creator reviews.",
+        "first_impression": notes[0]["text"] if notes else "Not logged yet.",
+        "what_worked": note_text,
+        "what_got_in_the_way": "Call out friction honestly when logged.",
+        "who_it_is_for": "Gamers and tech buyers who want practical takes, not hype.",
+        "verdict": item.get("verdict") or "Pending — keep testing until a clear call.",
+    }
+
+    if format == "short":
+        script = (
+            f"Hook: I've been testing the {item['name']} — honest take.\n"
+            f"What it is: {shape['what_it_is']}\n"
+            f"Demo notes: {shape['what_worked']}\n"
+            f"Who it's for: {shape['who_it_is_for']}\n"
+            f"Verdict: {shape['verdict']}\n"
+            f"Affiliate: {affiliate}\n"
+            f"Disclosure: honest opinion; links may earn commission."
+        )
+    else:
+        script = (
+            f"1. Intro/hook — {item['name']}\n"
+            f"2. What it is — {shape['what_it_is']}\n"
+            f"3. Why William tested it — {shape['why_tested']}\n"
+            f"4. First impression — {shape['first_impression']}\n"
+            f"5. What worked — {shape['what_worked']}\n"
+            f"6. What got in the way — {shape['what_got_in_the_way']}\n"
+            f"7. Who it's for — {shape['who_it_is_for']}\n"
+            f"8. Verdict — {shape['verdict']}\n"
+            f"9. Link — {affiliate}\n"
+        )
+
+    draft = {
+        "item_id": item["id"],
+        "name": item["name"],
+        "lane": lane,
+        "format": format,
+        "shape": shape,
+        "script": script,
+        "affiliate_link": affiliate,
+        "platforms": ["tiktok", "youtube_shorts", "x"] if format == "short" else ["youtube", "twitch"],
+        "created_at": _now_iso(),
+    }
+    item["last_draft"] = draft
+    item["status"] = "drafting" if item.get("status") in ("testing", "idea", "queued") else item.get("status")
+    save_catalog(catalog)
+    return draft
+
+
+def next_actions(limit: int = 3) -> List[Dict[str, str]]:
+    """One clear stack: content, business, bolt advance — preferred lanes first."""
+    actions: List[Dict[str, str]] = []
+    items = list_items()
+
+    # Content: testing with few notes
+    for item in items:
+        if item.get("status") in ("testing", "queued", "idea") and item.get("lane") in PREFERRED_LANES:
+            n = len(item.get("notes_log") or [])
+            if n == 0:
+                actions.append(
+                    {
+                        "type": "content",
+                        "title": f"Log day-1 notes for {item['name']}",
+                        "why": "No journal yet — reviews need real observations.",
+                        "command": f'bolt manage note "{item["name"]}" --day 1 --text "..."',
+                    }
+                )
+                break
+            if item.get("status") == "testing" and n >= 2 and not item.get("last_draft"):
+                actions.append(
+                    {
+                        "type": "content",
+                        "title": f"Draft short review for {item['name']}",
+                        "why": "Enough notes to ship a short-form take.",
+                        "command": f'bolt manage draft "{item["name"]}" --format short',
+                    }
+                )
+                break
+
+    if not any(a["type"] == "content" for a in actions):
+        if not items:
+            actions.append(
+                {
+                    "type": "content",
+                    "title": "Add first game or tech item to the catalog",
+                    "why": "Preferred lanes are games and tech — start with gear you already own.",
+                    "command": 'bolt manage add "Your headset" --lane tech --status testing',
+                }
+            )
+        else:
+            top = items[0]
+            actions.append(
+                {
+                    "type": "content",
+                    "title": f"Move {top['name']} forward ({top.get('status')})",
+                    "why": "Keep one item shipping instead of starting five.",
+                    "command": f'bolt manage draft "{top["name"]}" --format short',
+                }
+            )
+
+    # Business
+    sponsors = load_sponsors().get("prospects", [])
+    untouched = [s for s in sponsors if s.get("status") == "prospect"]
+    if untouched:
+        s = sorted(untouched, key=lambda x: -int(x.get("fit", 0)))[0]
+        actions.append(
+            {
+                "type": "business",
+                "title": f"Pitch or research {s['name']}",
+                "why": s.get("why", "Strong fit for game/tech lane."),
+                "command": f'bolt sponsors pitch "{s["name"]}"',
+            }
+        )
+    else:
+        actions.append(
+            {
+                "type": "business",
+                "title": "Log affiliate dashboard check",
+                "why": "Tag billycarter-20 should be on active review links.",
+                "command": "bolt business lesson",
+            }
+        )
+
+    # Bolt advance
+    actions.append(
+        {
+            "type": "advance",
+            "title": "Ship one content action before the next Bolt feature",
+            "why": "Content proof advances the business faster than idle tooling.",
+            "command": "bolt advance next",
+        }
+    )
+    return actions[:limit]
+
+
+def store_add(name: str, asin: str = "", category: str = "tech", notes: str = "") -> Dict[str, Any]:
+    data = load_storefront()
+    asin = asin.strip().upper()
+    tag = data.get("affiliate_tag", AMAZON_TAG)
+    link = f"https://www.amazon.com/dp/{asin}/?tag={tag}" if asin else ""
+    item = {
+        "id": _slug(name),
+        "name": name.strip(),
+        "asin": asin,
+        "category": category,
+        "affiliate_link": link,
+        "status": "active",
+        "notes": notes,
+        "added_at": _now_iso(),
+    }
+    # de-dupe by asin or name
+    items = data.setdefault("items", [])
+    for existing in items:
+        if (asin and existing.get("asin") == asin) or existing.get("name", "").lower() == name.lower():
+            existing.update({k: v for k, v in item.items() if v})
+            save_storefront(data)
+            return existing
+    items.append(item)
+    save_storefront(data)
+    # also ensure catalog entry
+    try:
+        add_item(name=name, lane="tech" if category in ("tech", "game") else "product", asin=asin, notes=notes)
+    except Exception:
+        pass
+    return item
+
+
+def store_list() -> List[Dict[str, Any]]:
+    return load_storefront().get("items", [])
+
+
+def store_feature_next() -> Dict[str, Any]:
+    items = store_list()
+    if not items:
+        return {
+            "message": "Storefront is empty. Add an ASIN from gear you already use.",
+            "command": 'bolt store add --name "Logitech mouse" --asin B0XXXX --category tech',
+        }
+    # Prefer items not yet drafted in catalog
+    catalog = {i.get("asin"): i for i in load_catalog().get("items", []) if i.get("asin")}
+    for s in items:
+        cat = catalog.get(s.get("asin"))
+        if not cat or not cat.get("last_draft"):
+            return {
+                "feature": s,
+                "message": f"Feature {s['name']} next — build a short review with affiliate link.",
+                "command": f'bolt manage draft "{s["name"]}" --format short',
+            }
+    s = items[0]
+    return {
+        "feature": s,
+        "message": f"All storefront items have drafts. Revisit {s['name']} with a comparison angle.",
+        "command": f'bolt manage note "{s["name"]}" --text "comparison angle"',
+    }
+
+
+def social_status() -> Dict[str, Any]:
+    return load_social()
+
+
+def social_package(name: str, platforms: Optional[List[str]] = None) -> Dict[str, Any]:
+    draft = build_draft(name, format="short")
+    social = load_social()
+    plats = platforms or ["tiktok", "youtube", "x"]
+    packages = []
+    for p in plats:
+        meta = social.get("platforms", {}).get(p, {})
+        packages.append(
+            {
+                "platform": p,
+                "handle": meta.get("handle", ""),
+                "caption": (
+                    f"{draft['name']}: honest first take. "
+                    f"{draft['shape']['verdict']} "
+                    f"{'Link in bio / description.' if p != 'x' else draft.get('affiliate_link', '')}"
+                )[:220],
+                "upload_mode": meta.get("upload_mode", "manual_assisted"),
+                "requires_approval": REQUIRE_POST_APPROVAL,
+            }
+        )
+    entry = {
+        "id": uuid4().hex[:10],
+        "item": draft["name"],
+        "created_at": _now_iso(),
+        "status": "awaiting_approval",
+        "packages": packages,
+        "script": draft["script"],
+    }
+    social.setdefault("queue", []).append(entry)
+    save_social(social)
+    return entry
+
+
+def social_queue() -> List[Dict[str, Any]]:
+    return load_social().get("queue", [])
+
+
+def sponsors_find(lane: Optional[str] = None, limit: int = 5) -> List[Dict[str, Any]]:
+    prospects = load_sponsors().get("prospects", [])
+    if lane:
+        lane = lane.lower()
+        prospects = [p for p in prospects if lane in (p.get("lanes") or [])]
+    # Prefer preferred content lanes when no filter
+    if not lane:
+        prospects = sorted(
+            prospects,
+            key=lambda p: (
+                0 if any(l in PREFERRED_LANES for l in p.get("lanes", [])) else 1,
+                -int(p.get("fit", 0)),
+            ),
+        )
+    else:
+        prospects = sorted(prospects, key=lambda p: -int(p.get("fit", 0)))
+    return prospects[:limit]
+
+
+def sponsors_pitch(name: str) -> Dict[str, str]:
+    data = load_sponsors()
+    match = None
+    key = name.lower()
+    for p in data.get("prospects", []):
+        if key in p.get("name", "").lower() or p.get("id") == key:
+            match = p
+            break
+    brand = match["name"] if match else name
+    lanes = ", ".join((match or {}).get("lanes", PREFERRED_LANES))
+    subject = f"Review opportunity — SimplyBilly × {brand}"
+    body = f"""Hi {brand} team,
+
+I'm William (SimplyBilly) — I create game and tech testing content on TikTok (@itssimplybilly), Twitch (thunderstormbilly), YouTube (@SimplyBilly), and X (@SimplyBilly_).
+
+I'd like to create an honest review of a {brand} product for my audience. My style is practical: what it is, real-world use, what works, what gets in the way, and who it's actually for.
+
+Deliverables I can provide:
+- Short-form review (TikTok + YouTube Shorts)
+- Stream segment or longer YouTube review when it fits
+- Affiliate tracking where appropriate (Amazon tag billycarter-20 / brand program)
+- Clear FTC disclosure
+
+Media kit available on request. Happy to start with a product that fits {lanes}.
+
+Thanks,
+William
+TikTok: tiktok.com/@itssimplybilly
+Twitch: twitch.tv/thunderstormbilly
+YouTube: youtube.com/@SimplyBilly
+X: x.com/SimplyBilly_
+"""
+    if match:
+        match.setdefault("outreach", []).append(
+            {"status": "pitch_drafted", "at": _now_iso()}
+        )
+        if match.get("status") == "prospect":
+            match["status"] = "pitch_ready"
+        save_sponsors(data)
+    return {"subject": subject, "body": body, "brand": brand}
+
+
+def sponsors_log(name: str, status: str, note: str = "") -> Dict[str, Any]:
+    data = load_sponsors()
+    key = name.lower()
+    for p in data.get("prospects", []):
+        if key in p.get("name", "").lower() or p.get("id") == key:
+            p["status"] = status
+            p.setdefault("outreach", []).append(
+                {"status": status, "note": note, "at": _now_iso()}
+            )
+            save_sponsors(data)
+            return p
+    # create new
+    row = {
+        "id": _slug(name),
+        "name": name,
+        "lanes": PREFERRED_LANES,
+        "type": "brand",
+        "fit": 5,
+        "why": note or "Added manually",
+        "status": status,
+        "outreach": [{"status": status, "note": note, "at": _now_iso()}],
+        "added_at": _now_iso(),
+    }
+    data.setdefault("prospects", []).append(row)
+    save_sponsors(data)
+    return row
+
+
+def business_lesson() -> str:
+    _ensure_seed_files()
+    lessons = [
+        "Proof before pitches: one honest game/tech review online beats ten unsent emails.",
+        f"Every product mention should carry tag {AMAZON_TAG} when it is an Amazon link.",
+        "Disclose clearly. Trust is the product.",
+        "Pitch 5 brands only after you have something to show — even if views are low.",
+        "Pick one item in testing. Journal it. Film it. Post it. Then upgrade Bolt.",
+        "Twitch builds personality; TikTok builds discovery; YouTube builds depth; Amazon converts.",
+    ]
+    # rotate by day of year
+    idx = date.today().timetuple().tm_yday % len(lessons)
+    return lessons[idx]
+
+
+def advance_next() -> Dict[str, str]:
+    _ensure_seed_files()
+    steps = [
+        {
+            "title": "Use Content Manager daily for game/tech items",
+            "why": "Catalog + notes are the foundation for reviews and storefront links.",
+            "command": "bolt manage next",
+        },
+        {
+            "title": "Run Good Morning Bolt each day",
+            "why": "Spoken briefing removes decision paralysis.",
+            "command": "bolt morning",
+        },
+        {
+            "title": "Attach ASINs to storefront items you already own",
+            "why": "Affiliate revenue needs tracked links on real reviews.",
+            "command": "bolt store feature-next",
+        },
+        {
+            "title": "Package one post for social (approval required)",
+            "why": "Cross-post planning without auto-posting risk.",
+            "command": 'bolt social package "ITEM"',
+        },
+        {
+            "title": "Draft one sponsor pitch this week",
+            "why": "Outreach compounds only if it starts.",
+            "command": "bolt sponsors next",
+        },
+    ]
+    idx = date.today().timetuple().tm_yday % len(steps)
+    return steps[idx]
+
+
+def build_morning_briefing() -> Dict[str, Any]:
+    actions = next_actions(limit=3)
+    testing = list_items(status="testing")
+    store = store_feature_next()
+    sponsors = sponsors_find(limit=3)
+    lesson = business_lesson()
+    advance = advance_next()
+
+    lines = [
+        f"Good morning, {CREATOR_NAME}. Bolt is online.",
+        f"Focus lanes today: games and tech.",
+        f"Items currently testing: {len(testing)}.",
+    ]
+    if testing:
+        lines.append(f"Top test item: {testing[0]['name']}.")
+    if actions:
+        lines.append(f"Content action: {actions[0]['title']}.")
+    biz = next((a for a in actions if a["type"] == "business"), None)
+    if biz:
+        lines.append(f"Business action: {biz['title']}.")
+    lines.append(f"Bolt advance: {advance['title']}.")
+    lines.append(f"Business lesson: {lesson}")
+    if store.get("feature"):
+        lines.append(f"Storefront feature idea: {store['feature']['name']}.")
+    if sponsors:
+        lines.append(f"Hopeful partner to research: {sponsors[0]['name']}.")
+    lines.append("All social posts still need your approval. Let's make something real today.")
+
+    spoken = " ".join(lines)
+    md_lines = [
+        f"# Good Morning Bolt — {date.today().isoformat()}",
+        "",
+        f"Creator: {CREATOR_NAME}",
+        f"Priority lanes: {', '.join(PREFERRED_LANES)}",
+        f"Amazon tag: `{AMAZON_TAG}`",
+        f"Posting: approval required = {REQUIRE_POST_APPROVAL}",
+        "",
+        "## Spoken Briefing",
+        spoken,
+        "",
+        "## Next Actions",
+    ]
+    for a in actions:
+        md_lines.append(f"- **{a['type']}**: {a['title']} — {a['why']}")
+        md_lines.append(f"  - `{a['command']}`")
+    md_lines.extend(
+        [
+            "",
+            "## Storefront",
+            store.get("message", ""),
+            f"Command: `{store.get('command', '')}`",
+            "",
+            "## Sponsor Watchlist",
+        ]
+    )
+    for s in sponsors:
+        md_lines.append(f"- {s['name']} (fit {s.get('fit')}): {s.get('why')}")
+    md_lines.extend(["", "## Business Lesson", lesson, "", "## Advance Bolt", advance["title"], advance["why"], f"`{advance['command']}`", ""])
+
+    path = BRIEFINGS_DIR / f"morning_{date.today().isoformat()}.md"
+    path.write_text("\n".join(md_lines), encoding="utf-8")
+    latest = BRIEFINGS_DIR / "latest_morning.md"
+    latest.write_text("\n".join(md_lines), encoding="utf-8")
+
+    return {
+        "spoken": spoken,
+        "actions": actions,
+        "path": str(path),
+        "lesson": lesson,
+        "advance": advance,
+        "store": store,
+        "sponsors": sponsors,
+    }
+
+
+def morning(speak_aloud: bool = True) -> Dict[str, Any]:
+    briefing = build_morning_briefing()
+    if speak_aloud:
+        try:
+            from modules.Bolt_Voice import speak
+
+            speak(briefing["spoken"])
+        except Exception as exc:
+            print(f"[voice fallback] {exc}")
+            print(briefing["spoken"])
+    return briefing
+
+
+def is_good_morning_phrase(text: str) -> bool:
+    t = re.sub(r"[^a-z\s]", "", (text or "").lower()).strip()
+    patterns = (
+        "good morning bolt",
+        "good morning bolt!",
+        "morning bolt",
+        "hey bolt good morning",
+        "bolt good morning",
+    )
+    return any(p in t for p in patterns) or t in {"good morning", "morning bolt"}
+
+
+# ── CLI ──────────────────────────────────────────────────────────────────────
+
+
+def _print_item(item: Dict[str, Any]) -> None:
+    notes = len(item.get("notes_log") or [])
+    print(
+        f"  - {item.get('name')} [{item.get('lane')}/{item.get('status')}] "
+        f"notes={notes} id={item.get('id')}"
+    )
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    _ensure_seed_files()
+    parser = argparse.ArgumentParser(prog="content-manager", description="Bolt Content Manager")
+    sub = parser.add_subparsers(dest="cmd")
+
+    # manage
+    p_add = sub.add_parser("add", help="Add catalog item")
+    p_add.add_argument("name")
+    p_add.add_argument("--lane", default="tech", choices=LANES)
+    p_add.add_argument("--status", default="testing", choices=STATUSES)
+    p_add.add_argument("--asin", default="")
+    p_add.add_argument("--notes", default="")
+
+    p_list = sub.add_parser("list", help="List catalog")
+    p_list.add_argument("--lane", default=None)
+    p_list.add_argument("--status", default=None)
+
+    p_note = sub.add_parser("note", help="Add test journal note")
+    p_note.add_argument("name")
+    p_note.add_argument("--text", required=True)
+    p_note.add_argument("--day", type=int, default=None)
+
+    p_draft = sub.add_parser("draft", help="Build review draft")
+    p_draft.add_argument("name")
+    p_draft.add_argument("--format", default="short", choices=["short", "long"])
+
+    sub.add_parser("next", help="Show next actions")
+    sub.add_parser("status", help="Manager status snapshot")
+
+    # store
+    p_sadd = sub.add_parser("store-add", help="Add Amazon storefront item")
+    p_sadd.add_argument("--name", required=True)
+    p_sadd.add_argument("--asin", default="")
+    p_sadd.add_argument("--category", default="tech")
+    p_sadd.add_argument("--notes", default="")
+    sub.add_parser("store-list")
+    sub.add_parser("store-feature-next")
+
+    # social
+    sub.add_parser("social-status")
+    p_pkg = sub.add_parser("social-package")
+    p_pkg.add_argument("name")
+    p_pkg.add_argument("--platforms", default="tiktok,youtube,x")
+    sub.add_parser("social-queue")
+
+    # sponsors
+    p_find = sub.add_parser("sponsors-find")
+    p_find.add_argument("--lane", default=None)
+    p_find.add_argument("--limit", type=int, default=5)
+    p_pitch = sub.add_parser("sponsors-pitch")
+    p_pitch.add_argument("name")
+    p_log = sub.add_parser("sponsors-log")
+    p_log.add_argument("name")
+    p_log.add_argument("--status", required=True)
+    p_log.add_argument("--note", default="")
+    sub.add_parser("sponsors-next")
+
+    # business / advance / morning
+    sub.add_parser("business-lesson")
+    sub.add_parser("business-next")
+    sub.add_parser("advance-next")
+    p_m = sub.add_parser("morning")
+    p_m.add_argument("--speak", action="store_true", default=True)
+    p_m.add_argument("--quiet", action="store_true")
+
+    args = parser.parse_args(argv)
+    if not args.cmd:
+        parser.print_help()
+        return 0
+
+    try:
+        if args.cmd == "add":
+            item = add_item(args.name, args.lane, args.status, args.notes, args.asin)
+            print(f"Added/updated: {item['name']} ({item['lane']}/{item['status']})")
+        elif args.cmd == "list":
+            for item in list_items(args.lane, args.status):
+                _print_item(item)
+        elif args.cmd == "note":
+            item = add_note(args.name, args.text, args.day)
+            print(f"Note added to {item['name']} (total notes: {len(item.get('notes_log', []))})")
+        elif args.cmd == "draft":
+            draft = build_draft(args.name, args.format)
+            print(draft["script"])
+            print(f"\nAffiliate: {draft['affiliate_link']}")
+        elif args.cmd == "next":
+            for a in next_actions():
+                print(f"[{a['type']}] {a['title']}\n  why: {a['why']}\n  run: {a['command']}\n")
+        elif args.cmd == "status":
+            print(f"Creator: {CREATOR_NAME}")
+            print(f"Preferred lanes: {PREFERRED_LANES}")
+            print(f"Amazon tag: {AMAZON_TAG}")
+            print(f"Approval required: {REQUIRE_POST_APPROVAL}")
+            print(f"Catalog items: {len(list_items())}")
+            print(f"Storefront items: {len(store_list())}")
+            print(f"Social queue: {len(social_queue())}")
+        elif args.cmd == "store-add":
+            item = store_add(args.name, args.asin, args.category, args.notes)
+            print(json.dumps(item, indent=2))
+        elif args.cmd == "store-list":
+            for s in store_list():
+                print(f"  - {s.get('name')} asin={s.get('asin')} {s.get('affiliate_link')}")
+        elif args.cmd == "store-feature-next":
+            print(json.dumps(store_feature_next(), indent=2))
+        elif args.cmd == "social-status":
+            data = social_status()
+            for name, meta in data.get("platforms", {}).items():
+                print(f"  {name}: {meta.get('handle')} [{meta.get('status')}] mode={meta.get('upload_mode')}")
+            print(f"  require_approval={data.get('require_approval', True)}")
+        elif args.cmd == "social-package":
+            plats = [p.strip() for p in args.platforms.split(",") if p.strip()]
+            entry = social_package(args.name, plats)
+            print(json.dumps(entry, indent=2))
+            print("\nStatus: awaiting_approval (will not post automatically)")
+        elif args.cmd == "social-queue":
+            for q in social_queue():
+                print(f"  {q.get('id')} {q.get('item')} [{q.get('status')}]")
+        elif args.cmd == "sponsors-find":
+            for s in sponsors_find(args.lane, args.limit):
+                print(f"  {s['name']} fit={s.get('fit')} lanes={s.get('lanes')} — {s.get('why')}")
+        elif args.cmd == "sponsors-pitch":
+            pitch = sponsors_pitch(args.name)
+            print(f"Subject: {pitch['subject']}\n")
+            print(pitch["body"])
+        elif args.cmd == "sponsors-log":
+            row = sponsors_log(args.name, args.status, args.note)
+            print(json.dumps(row, indent=2))
+        elif args.cmd == "sponsors-next":
+            found = sponsors_find(limit=1)
+            if found:
+                print(f"Next: {found[0]['name']} — {found[0].get('why')}")
+                print(f"Run: bolt sponsors pitch \"{found[0]['name']}\"")
+            else:
+                print("No prospects. Add with: bolt sponsors log NAME --status prospect")
+        elif args.cmd == "business-lesson":
+            print(business_lesson())
+        elif args.cmd == "business-next":
+            for a in next_actions():
+                if a["type"] == "business":
+                    print(f"{a['title']}\n{a['why']}\n{a['command']}")
+                    break
+        elif args.cmd == "advance-next":
+            step = advance_next()
+            print(f"{step['title']}\n{step['why']}\n{step['command']}")
+        elif args.cmd == "morning":
+            result = morning(speak_aloud=not args.quiet)
+            print(result["spoken"])
+            print(f"\nSaved: {result['path']}")
+        else:
+            parser.print_help()
+    except Exception as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    # Allow `python -m modules.Content_Manager` from Core/
+    if str(REPO_ROOT / "Core") not in sys.path:
+        sys.path.insert(0, str(REPO_ROOT / "Core"))
+    raise SystemExit(main())

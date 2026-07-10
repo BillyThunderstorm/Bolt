@@ -20,6 +20,7 @@ WHY persistence matters:
 """
 
 import os
+import sys
 import json
 import time
 from pathlib import Path
@@ -32,9 +33,21 @@ except ImportError:
         return False
 
 
+# Post-reorg: Watcher lives in Core/modules but the canonical post-reorg
+# paths live in 3rd_Party/colabs/scripts/_paths.py. Add that dir to sys.path
+# so we can import it here.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_CORE_DIR = _SCRIPT_DIR.parent
+_REPO_ROOT = _CORE_DIR.parent
+_PATHS_DIR = _REPO_ROOT / "3rd_Party" / "colabs" / "scripts"
+if str(_PATHS_DIR) not in sys.path:
+    sys.path.insert(0, str(_PATHS_DIR))
+
+from _paths import RECORDINGS_DIR  # noqa: E402
+
 load_dotenv()
 
-RECORDINGS_FOLDER = os.getenv("RECORDINGS_FOLDER", "recordings")
+RECORDINGS_FOLDER = os.getenv("RECORDINGS_FOLDER", str(RECORDINGS_DIR))
 WATCH_INTERVAL = float(os.getenv("WATCH_INTERVAL", "5"))
 WATCH_EXTENSIONS = {".mp4", ".mkv", ".mov", ".avi"}
 STABLE_WAIT_SEC = 3.0  # seconds to wait before declaring the file stable

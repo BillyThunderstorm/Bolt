@@ -97,6 +97,19 @@ SUBCOMMANDS: dict[str, str] = {
     "make_highlights": "make_highlights.py",
 }
 
+# Content-manager subcommands handled by Core/modules/Content_Manager.py
+MANAGER_COMMANDS = {
+    "manage",
+    "store",
+    "social",
+    "sponsors",
+    "business",
+    "advance",
+    "morning",
+    "good-morning",
+    "goodmorning",
+}
+
 HELP_TEXT = """
 Bolt — single-command access to every Bolt script and command.
 
@@ -125,6 +138,15 @@ Script subcommands (each maps to 3rd_Party/colabs/scripts/X.py):
   refresh_memory          Rebuild the memory index
   filter_backlog          Move low-scoring clips to clips/_low_score/
   watch                   Watch the recordings folder for new files
+
+Content manager / creator business (Core/modules/Content_Manager.py):
+  manage add|list|note|draft|next|status
+  store add|list|feature-next
+  social status|package|queue
+  sponsors find|pitch|log|next
+  business lesson|next
+  advance next
+  morning [--quiet]       Good Morning Bolt spoken daily briefing
 
 Built-in subcommands (not script passthroughs):
   launch                  Start the bot (Core/src/launch.py)
@@ -161,10 +183,11 @@ def main() -> int:
         return 0
 
     subcommand, *rest = args
+    py = str(VENV_PYTHON if VENV_PYTHON.exists() else sys.executable)
 
     # Built-in: launch
     if subcommand == "launch":
-        cmd = [str(VENV_PYTHON if VENV_PYTHON.exists() else sys.executable), "Core/src/launch.py"] + rest
+        cmd = [py, "Core/src/launch.py"] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT))
 
@@ -175,16 +198,82 @@ def main() -> int:
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
         test_args = rest if rest else ["discover", "-s", "Data/tests", "-t", "."]
-        cmd = [str(VENV_PYTHON if VENV_PYTHON.exists() else sys.executable),
-               "-m", "unittest"] + test_args
+        cmd = [py, "-m", "unittest"] + test_args
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
     # Built-in: setup
     if subcommand == "setup":
-        cmd = [str(VENV_PYTHON if VENV_PYTHON.exists() else sys.executable), "Core/bot.py", "setup"] + rest
+        cmd = [py, "Core/bot.py", "setup"] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT))
+
+    # Content manager / Good Morning Bolt
+    if subcommand in MANAGER_COMMANDS or subcommand.startswith("manage"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        # Map friendly CLI to Content_Manager main() argv
+        cm_args: list[str] = []
+        if subcommand in ("morning", "good-morning", "goodmorning"):
+            cm_args = ["morning"] + rest
+        elif subcommand == "manage":
+            cm_args = rest if rest else ["status"]
+        elif subcommand == "store":
+            # store add|list|feature-next -> store-add|store-list|store-feature-next
+            if not rest:
+                cm_args = ["store-list"]
+            else:
+                action, *tail = rest
+                mapping = {
+                    "add": "store-add",
+                    "list": "store-list",
+                    "feature-next": "store-feature-next",
+                    "feature": "store-feature-next",
+                }
+                cm_args = [mapping.get(action, action)] + tail
+        elif subcommand == "social":
+            if not rest:
+                cm_args = ["social-status"]
+            else:
+                action, *tail = rest
+                mapping = {
+                    "status": "social-status",
+                    "package": "social-package",
+                    "queue": "social-queue",
+                }
+                cm_args = [mapping.get(action, action)] + tail
+        elif subcommand == "sponsors":
+            if not rest:
+                cm_args = ["sponsors-find"]
+            else:
+                action, *tail = rest
+                mapping = {
+                    "find": "sponsors-find",
+                    "pitch": "sponsors-pitch",
+                    "log": "sponsors-log",
+                    "next": "sponsors-next",
+                }
+                cm_args = [mapping.get(action, action)] + tail
+        elif subcommand == "business":
+            if not rest:
+                cm_args = ["business-lesson"]
+            else:
+                action, *tail = rest
+                mapping = {
+                    "lesson": "business-lesson",
+                    "next": "business-next",
+                }
+                cm_args = [mapping.get(action, action)] + tail
+        elif subcommand == "advance":
+            cm_args = ["advance-next"] + rest
+        else:
+            cm_args = [subcommand] + rest
+
+        cmd = [py, "-m", "modules.Content_Manager"] + cm_args
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
     # Script passthrough
     script = find_script(subcommand)

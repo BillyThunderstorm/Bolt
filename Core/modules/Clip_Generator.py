@@ -8,10 +8,23 @@ with configurable padding before/after each highlight.
 """
 
 import os
+import sys
 import subprocess
 from pathlib import Path
 from dataclasses import dataclass
 from typing import List, Optional
+
+# Post-reorg: this module lives in Core/modules but the canonical post-reorg
+# paths live in 3rd_Party/colabs/scripts/_paths.py. Add that dir to sys.path
+# so we can import it here.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_CORE_DIR = _SCRIPT_DIR.parent
+_REPO_ROOT = _CORE_DIR.parent
+_PATHS_DIR = _REPO_ROOT / "3rd_Party" / "colabs" / "scripts"
+if str(_PATHS_DIR) not in sys.path:
+    sys.path.insert(0, str(_PATHS_DIR))
+
+from _paths import CLIPS_DIR
 
 try:
     from modules.notifier import notify
@@ -66,16 +79,18 @@ def _resolve_output_dir(output_dir: str | None = None) -> Path:
     Priority:
     1. Explicit output_dir passed into generate_clips()
     2. clips_folder from config.json
-    3. fallback folder named "clips" in the Bolt project root
+    3. fallback: media/clips/ in the Bolt project root
     """
-    chosen = output_dir or CONFIG.get("clips_folder", "clips")
+    chosen = output_dir or CONFIG.get("clips_folder")
 
-    path = Path(chosen)
-
-    # If config says "clips", keep it anchored to the Bolt project root.
-    # If config gives an absolute path, respect it.
-    if not path.is_absolute():
-        path = PROJECT_ROOT / path
+    if chosen:
+        path = Path(chosen)
+        # If config gives an absolute path, respect it.
+        # If config gives a relative path, anchor it to the repo root.
+        if not path.is_absolute():
+            path = _REPO_ROOT / path
+    else:
+        path = CLIPS_DIR
 
     path.mkdir(parents=True, exist_ok=True)
     return path

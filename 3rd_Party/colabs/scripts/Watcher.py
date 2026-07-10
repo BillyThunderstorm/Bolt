@@ -20,21 +20,31 @@ WHY persistence matters:
 """
 
 import os
+import sys
 import json
 import time
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Post-reorg: this script lives in 3rd_Party/colabs/scripts but the canonical
+# post-reorg paths live in the _paths.py next to it. Make sure that module is
+# importable and use its RECORDINGS_DIR as the default watch target.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+from _paths import RECORDINGS_DIR, DATA_DIR
+
 load_dotenv()
 
-RECORDINGS_FOLDER = os.getenv("RECORDINGS_FOLDER", "recordings")
+RECORDINGS_FOLDER = os.getenv("RECORDINGS_FOLDER", str(RECORDINGS_DIR))
 WATCH_INTERVAL = float(os.getenv("WATCH_INTERVAL", "5"))
 WATCH_EXTENSIONS = {".mp4", ".mkv", ".mov", ".avi"}
 STABLE_WAIT_SEC = 3.0  # seconds to wait before declaring the file stable
 
 # Where we persist the list of already-processed filenames across restarts.
 # Without this file, every launch re-runs the full pipeline on every recording.
-PROCESSED_LOG = Path(__file__).parent.parent / "data" / "processed_recordings.json"
+PROCESSED_LOG = DATA_DIR / "processed_recordings.json"
 
 
 def _load_processed() -> set:
