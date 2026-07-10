@@ -18,7 +18,7 @@ William (also Billy / SimplyBilly) is a self-taught content creator learning cod
 ## Platforms
 
 | Platform | Handle | Priority | Content Type |
-|----------|--------|----------|--------------|
+| ---------- | -------- | ---------- | -------------- |
 | TikTok | @itssimplybilly | High | Short clips, reviews, quick takes |
 | Twitch | thunderstormbilly | High | Live streams, gameplay, personality |
 | YouTube | @SimplyBilly | High | Shorts now, long-form reviews next |
@@ -42,6 +42,7 @@ Bolt should always think: *"How does this help William make content that feels r
 ## Billy's Vibe / Voice
 
 Still being developed — and that's okay. What we know so far:
+
 - He doesn't want to be fake or performative
 - He's frustrated when things feel overwhelming or confusing
 - He gets down on himself when progress is slow — needs encouragement, not pressure
@@ -88,19 +89,19 @@ Still being developed — and that's okay. What we know so far:
 
 ## Content History
 
-*(Update as Billy posts content — what performed well, what flopped, what surprised him)*
+Update as Billy posts content — what performed well, what flopped, what surprised him.
 
-| Date | Platform | Content | Result | Notes |
-|------|----------|---------|--------|-------|
-| — | — | — | — | First post TBD |
+| Date     | Platform | Content | Result | Notes          |
+|----------|----------|---------|--------|----------------|
+| —        | —        | —       | —      | First post TBD |
 
 ---
 
 ## Billy's Opinions & Takes
 
-*(Build this out over time — these are what make the channel HIS)*
+Build this out over time — these are what make the channel HIS
 
-- 
+-
 
 ---
 
@@ -113,4 +114,4 @@ Still being developed — and that's okay. What we know so far:
 - Memory is important: reference past conversations, past content, past wins
 
 ---
-*This file grows as Billy grows. Update it regularly.*
+This file grows as Billy grows. Update it regularly.
