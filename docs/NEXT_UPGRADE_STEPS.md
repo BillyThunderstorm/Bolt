@@ -1,8 +1,33 @@
 # NEXT_UPGRADE_STEPS.md
 
-## 🚀 Upgrade Status (June 6, 2026)
+## 🚀 Upgrade Status
 
-### Completed Upgrades ✅
+### 🔴 MANAGER — Content Manager OS ✅ COMPLETE (Jul 9, 2026)
+
+| # | Upgrade | Status | Date |
+|---|---------|--------|------|
+| M1 | Content catalog + journals (game/tech priority) | ✅ COMPLETE | Jul 9 |
+| M2 | Review draft builder + Amazon tag `billycarter-20` | ✅ COMPLETE | Jul 9 |
+| M3 | Good Morning Bolt spoken briefing | ✅ COMPLETE | Jul 9 |
+| M4 | Amazon storefront tracker | ✅ COMPLETE | Jul 9 |
+| M5 | Social package queue (approval required) | ✅ COMPLETE | Jul 9 |
+| M6 | Sponsor/affiliate prospector + pitches | ✅ COMPLETE | Jul 9 |
+| M7 | Business playbook + Bolt advancement docs | ✅ COMPLETE | Jul 9 |
+| M8 | `bin/bolt` manager subcommands + tests | ✅ COMPLETE | Jul 9 |
+
+**Where to look:** 🔴 `Core/modules/Content_Manager.py` · 🟢 `Docs/BOLT_COMMANDS.md` · 🔵 `Data/data/content/` · 🔵 `Data/data/business/`
+
+### Next manager upgrades (not done yet)
+
+| # | Upgrade | Status | Why |
+|---|---------|--------|-----|
+| M9 | Real ASINs on owned gear | 🔜 NEXT | Needed for affiliate links on reviews |
+| M10 | First shipped game + tech review posts | 🔜 NEXT | Proof before more brand pitches |
+| M11 | TikTok API token end-to-end publish (still approval-gated) | ⏳ LATER | Token/app scopes |
+| M12 | YouTube/X OAuth upload | ⏳ LATER | Platform app review |
+| M13 | Live sponsor research enrichment | ⏳ LATER | Keep local list honest first |
+
+### Earlier infrastructure upgrades ✅ (June 6, 2026)
 
 | # | Upgrade | Status | Date |
 |---|---------|--------|------|

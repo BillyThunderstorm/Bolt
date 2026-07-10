@@ -20,7 +20,20 @@ Falls back to moviepy only if ffmpeg is unavailable.
 import os
 import subprocess
 import shutil
+import sys
 from pathlib import Path
+
+# Post-reorg: this module lives in Core/modules but the canonical post-reorg
+# paths live in 3rd_Party/colabs/scripts/_paths.py. Add that dir to sys.path
+# so we can import it here.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_CORE_DIR = _SCRIPT_DIR.parent
+_REPO_ROOT = _CORE_DIR.parent
+_PATHS_DIR = _REPO_ROOT / "3rd_Party" / "colabs" / "scripts"
+if str(_PATHS_DIR) not in sys.path:
+    sys.path.insert(0, str(_PATHS_DIR))
+
+from _paths import VERTICAL_CLIPS_DIR
 
 TARGET_W = 1080
 TARGET_H = 1920
@@ -31,24 +44,15 @@ DEFAULT_PRESET = "slow"
 def format_for_tiktok(
     video_path: str,
     transcript_segments: list = None,
-    output_dir: str = "vertical_clips",
+    output_dir: str | None = None,
     style: str = "crop",
     crf: int = DEFAULT_CRF,
     preset: str = DEFAULT_PRESET,
 ) -> str:
     """
     Convert clip to vertical 9:16 format. Returns output path.
-
-    Parameters
-    ----------
-    video_path : path to the source horizontal clip
-    transcript_segments : optional, for future subtitle overlay
-    output_dir : where to write the vertical clip
-    style : "crop" (centre-crop, fills frame) or "letterbox" (black bars)
-    crf : Constant Rate Factor (lower = higher quality). 28 = high quality,
-          reasonable file size. 23 = visually lossless but large.
-    preset : x264 encoding preset. "medium" = good balance, "slow" = best quality.
     """
+    output_dir = output_dir or str(VERTICAL_CLIPS_DIR)
     os.makedirs(output_dir, exist_ok=True)
     base = os.path.splitext(os.path.basename(video_path))[0]
     out_path = os.path.join(output_dir, f"{base}_tiktok.mp4")

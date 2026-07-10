@@ -29,11 +29,17 @@ from pathlib import Path
 _HERE = Path(__file__).resolve().parent          # Core/src/
 _CORE = _HERE.parent                              # Core/
 _REPO = _CORE.parent                              # repo root
-for _p in (_CORE, _REPO):
+_SCRIPTS_DIR = _REPO / "3rd_Party" / "colabs" / "scripts"
+for _p in (_CORE, _REPO, _SCRIPTS_DIR):
     _sp = str(_p)
     if _sp not in sys.path:
         sys.path.insert(0, _sp)
 os.chdir(_REPO)
+
+# Re-execute under the venv Python if available so `dotenv` etc. are present.
+_VENV_PYTHON = _REPO / ".venv" / "bin" / "python3"
+if _VENV_PYTHON.exists() and sys.executable != str(_VENV_PYTHON):
+    os.execv(str(_VENV_PYTHON), [str(_VENV_PYTHON), str(__file__)] + sys.argv[1:])
 
 from dotenv import load_dotenv
 
@@ -576,7 +582,7 @@ def _start_obs_game_tracker():
 
     def run_tracker():
         try:
-            from scripts.update_game_from_obs import main as tracker_main
+            from update_game_from_obs import main as tracker_main
 
             tracker_main()
         except Exception as e:

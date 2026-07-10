@@ -4,7 +4,7 @@
 
 Bolt is a working local-first creator assistant with a stable clip pipeline and a growing memory/learning layer.
 
-The current mission is broader than Twitch clips. Bolt should support gaming, tech learning, AI development, product testing, Amazon Influencer storefront reviews, beauty/skincare testing, and the long-term goal of becoming Billy's virtual teammate.
+The current mission is broader than Twitch clips. Bolt is William's **content manager + business assistant** for game/tech testing (priority), product/skincare expansion, Amazon Influencer (`billycarter-20`), social packaging (approval required), sponsor/affiliate prospecting, and voice briefings (`Good Morning Bolt` / `bolt morning`).
 
 ## Active Runtime
 
@@ -95,22 +95,31 @@ python3 scripts/refresh_memory_index.py
 
 ## Current Commands
 
+Full reference (labeled): 🟢 `Docs/BOLT_COMMANDS.md`
+
+### 🔴 Manager (use these daily)
 ```bash
-python3 -m pip install -r requirements.txt
-python3 launch.py
-python3 launch.py process
-python3 scripts/verify.py
-python3 -m unittest
+bolt morning
+bolt manage next
+bolt manage add "Item" --lane tech --status testing
+bolt manage note "Item" --day 1 --text "..."
+bolt manage draft "Item" --format short
+bolt store feature-next
+bolt social status
+bolt sponsors next
+bolt business lesson
+bolt advance next
+```
+
+### Pipeline / legacy entry points
+```bash
+python3 -m pip install -r Docs/requirements.txt
+python3 Core/src/launch.py
+python3 -m unittest discover -s Data/tests -t .
 python3 -m modules.Bolt_Chat
-python3 -m modules.Bolt_Chat --voice
 python3 -m modules.Bolt_Conversation
 python3 -m modules.Bolt_Voice "say this out loud"
-python3 scripts/log_clip_performance.py --list
-python3 scripts/auto_clip_twitch.py --list
-python3 scripts/auto_clip_twitch.py
-python3 scripts/make_twitch_highlights.py --list
-python3 scripts/make_twitch_highlights.py
-python3 llm/neural_model.py
+# Prefer: bolt recordings | bolt briefing | bolt highlights | bolt test
 ```
 
 ## Calendar Feeds
@@ -152,12 +161,19 @@ crontab -l
 
 ## What Still Needs Finish Work
 
+### 🔴 Manager follow-ups
+1. Add real ASINs for gear William already owns → storefront links
+2. Film/post first game + tech short from catalog drafts
+3. TikTok Content Posting token when ready for assisted upload
+4. YouTube/X OAuth upload later (planner exists; auto-upload blocked on app approval)
+5. Expand sponsor list with real contact outcomes after outreach starts
+
+### Core system follow-ups
 1. Keep `Think_Learn_Decide` canonical and avoid reintroducing duplicate decision systems
 2. Continue making retrieved memory change actual decisions, not only summaries
 3. Add upgrade layers sequentially: one feature, one verification loop, one memory refresh
-4. Decide how daily briefings should run locally before connecting calendar/email automation
-5. Keep product/skincare/Amazon/AI learning lanes represented in future features
-6. The old `BillyThunderstorm-site/` tree has been removed from the active repo layout
+4. Keep product/skincare/Amazon/AI learning lanes represented in future features
+5. Fix remaining stale script paths under `3rd_Party/colabs/scripts/` (prefer `bolt` wrapper)
 
 ### June 21, 2026 - Lazy Loading + Startup Perf Fix ✅
 - **Bug fix**: `bot.py` was calling `write_site_data(push=True)` at

@@ -2,19 +2,33 @@
 
 Use this page as the central map for Bolt.
 
+## Color / Label Map
+
+| Label | Path root | Use for |
+|-------|-----------|---------|
+| 🟡 CORE | `Core/` | Code, modules, brain, config |
+| 🔵 DATA | `Data/data/` | Catalog, storefront, sponsors, memory |
+| 🟢 DOCS | `Docs/` | Commands, status, briefings, reviews |
+| 🟣 APP | `App/` | UI / brand |
+| 🟠 MEDIA | `media/` | Clips / recordings |
+| 🔴 MANAGER | `Content_Manager` + `bin/bolt` | Daily creator OS |
+
 ## Start Here
 
-| File | Description |
-|------|-------------|
-| `README.md` | High-level project overview and setup |
-| `BOLT_COMMANDS.md` | Complete command reference with all user interfaces |
-| `launch.py` | Startup checks and launcher |
-| `bot.py` | Main runtime pipeline |
-| `config.json` | Runtime configuration |
-| `requirements.txt` | Python dependency list |
-| `docs/PROJECT_STATUS.md` | Current build status and completed upgrades |
-| `NEXT_UPGRADE_STEPS.md` | Upgrade completion status and next steps |
-| `OPTIMIZATION_ROADMAP.md` | Long-term optimization plan |
+| Label | File | Description |
+|-------|------|-------------|
+| 🔴 | `Docs/BOLT_COMMANDS.md` | **All commands** (manager + pipeline) |
+| 🟢 | `Docs/PROJECT_STATUS.md` | Current build status + manager progress |
+| 🟢 | `Docs/NEXT_UPGRADE_STEPS.md` | Upgrade tracker (manager M1–M13) |
+| 🟢 | `Docs/INDEX.md` | This map |
+| 🟡 | `Core/modules/Content_Manager.py` | Creator manager implementation |
+| 🟡 | `Core/bolt_brain.md` | William creator profile |
+| 🟡 | `bin/bolt` | Single CLI entry |
+| 🔵 | `Data/data/business/business-playbook.md` | How to grow the creator business |
+| 🔵 | `Data/data/business/bolt-advancement.md` | How to advance Bolt itself |
+| 🟢 | `Docs/briefings/daily/latest_morning.md` | Latest Good Morning briefing |
+| 🟢 | `Docs/requirements.txt` | Python dependencies |
+| 🟢 | `Docs/OPTIMIZATION_ROADMAP.md` | Long-term optimization plan |
 
 ## Canonical Runtime Docs
 

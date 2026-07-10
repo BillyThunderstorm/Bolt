@@ -1,0 +1,22 @@
+[
+  {
+    "role": "user",
+    "content": "good morning bolt good morning Bolt",
+    "timestamp": "2026-07-10T08:27:49.687634"
+  },
+  {
+    "role": "assistant",
+    "content": "Oops! My thoughts got tangled! Let's try that again!",
+    "timestamp": "2026-07-10T08:27:50.019350"
+  },
+  {
+    "role": "user",
+    "content": "good morning Bol",
+    "timestamp": "2026-07-10T08:27:59.136073"
+  },
+  {
+    "role": "assistant",
+    "content": "Oops! My thoughts got tangled! Let's try that again!",
+    "timestamp": "2026-07-10T08:27:59.313392"
+  }
+]

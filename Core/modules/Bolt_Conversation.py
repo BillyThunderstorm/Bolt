@@ -338,7 +338,8 @@ def conversation_loop(text_mode: bool = False):
     memory = ConversationMemory()
 
     greeting = (
-        "Hey Billy! Bolt is here and ready to chat! What are we working on today?"
+        "Hey William! Bolt is here and ready to manage the day! "
+        "Say Good Morning Bolt for your briefing, or tell me what we're testing."
     )
     print(f"\n  🤖  {greeting}\n")
     speak_response(greeting)
@@ -362,11 +363,18 @@ def conversation_loop(text_mode: bool = False):
 
             memory.add("user", user_input)
 
+            try:
+                from modules.Content_Manager import is_good_morning_phrase
+                already_spoke = is_good_morning_phrase(user_input)
+            except Exception:
+                already_spoke = False
+
             reply = generate_response(user_input, memory)
             memory.add("assistant", reply)
 
             print(f"  Bolt: {reply}\n")
-            speak_response(reply)
+            if not already_spoke:
+                speak_response(reply)
 
     except KeyboardInterrupt:
         pass
@@ -385,10 +393,17 @@ def single_exchange(prompt: str):
     """Process one prompt and exit — useful for scripts and shortcuts."""
     memory = ConversationMemory()
     memory.add("user", prompt)
+    # Good Morning path already speaks inside morning(); avoid double TTS.
+    try:
+        from modules.Content_Manager import is_good_morning_phrase
+        already_spoke = is_good_morning_phrase(prompt)
+    except Exception:
+        already_spoke = False
     reply = generate_response(prompt, memory)
     memory.add("assistant", reply)
     print(reply)
-    speak_response(reply)
+    if not already_spoke:
+        speak_response(reply)
 
 
 # ── CLI ────────────────────────────────────────────────────────────────────────

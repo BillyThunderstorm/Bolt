@@ -53,13 +53,13 @@ CONFIG_DIR: Path = DATA_DIR / "configs"
 CONTENT_DIR: Path = DATA_DIR / "content"
 MEMORY_HOT_FILE: Path = DATA_DIR / "MEMORY.md"
 ARCHIVE_DIR: Path = REPO_ROOT / "Data" / "archive"
-RECORDINGS_DIR: Path = ARCHIVE_DIR / "recordings"  # live recordings were deleted 2026-07-07
 
-# Media tree
+# Media tree — active recordings live here in the new layout.
 MEDIA_DIR: Path = REPO_ROOT / "media"
 CLIPS_DIR: Path = MEDIA_DIR / "clips"
 VERTICAL_CLIPS_DIR: Path = MEDIA_DIR / "vertical_clips"
 OUTPUT_DIR: Path = MEDIA_DIR / "output"
+RECORDINGS_DIR: Path = MEDIA_DIR / "Recordings"
 
 # Docs tree
 DOCS_DIR: Path = REPO_ROOT / "Docs"

@@ -1,19 +1,50 @@
 # Bolt Commands To Remember
 
-This file keeps the current Bolt commands in one place. Updated after the
-July 2026 color-coded folder reorganization.
+This file keeps the current Bolt commands in one place.
+**Last major update:** Content Manager OS for William (game/tech priority) — 2026-07-09.
+
+## Color / Label Map (find things fast)
+
+| Label | Color cue | Where it lives | What it's for |
+|-------|-----------|----------------|---------------|
+| 🟡 **CORE** | yellow / code | `Core/` | Source: bot, modules, config, brain |
+| 🔵 **DATA** | blue / memory | `Data/data/` | Catalog, storefront, sponsors, memory |
+| 🟢 **DOCS** | green / guides | `Docs/` | Commands, status, briefings, reviews |
+| 🟣 **APP** | purple / UI | `App/` | Desktop/web UI, brand, overlays |
+| 🟠 **MEDIA** | orange / clips | `media/` | Recordings, clips, vertical exports |
+| ⚪ **SCRIPTS** | gray / tools | `3rd_Party/colabs/scripts/` | Utility scripts (use `bolt` wrapper) |
+| 🔴 **MANAGER** | red / daily use | `Core/modules/Content_Manager.py` | Creator manager commands below |
+
+### Daily-use files (bookmark these)
+
+| Label | Path |
+|-------|------|
+| 🔴 Commands (this file) | `Docs/BOLT_COMMANDS.md` |
+| 🟢 Progress status | `Docs/PROJECT_STATUS.md` |
+| 🟢 Upgrade tracker | `Docs/NEXT_UPGRADE_STEPS.md` |
+| 🟢 Doc index | `Docs/INDEX.md` |
+| 🔵 Catalog | `Data/data/content/catalog.json` |
+| 🔵 Storefront | `Data/data/content/storefront.json` |
+| 🔵 Sponsors | `Data/data/content/sponsors.json` |
+| 🔵 Social | `Data/data/content/social_connections.json` |
+| 🔵 Business playbook | `Data/data/business/business-playbook.md` |
+| 🔵 Bolt advancement | `Data/data/business/bolt-advancement.md` |
+| 🟢 Morning briefing | `Docs/briefings/daily/latest_morning.md` |
+| 🟡 Manager module | `Core/modules/Content_Manager.py` |
+| 🟡 Brain / creator profile | `Core/bolt_brain.md` |
+| 🟡 CLI entry | `bin/bolt` |
 
 ## Top-Level Layout (Post-Reorg)
 
-| Folder | Holds |
-|--------|-------|
-| `Core/` | Source code — `bot.py`, `config.json`, `requirements.txt`, `src/launch.py`, `modules/`, `data/` (memory index, decision model) |
-| `App/` | Web/desktop app — `BoltApp/` (React/Vite), `assets/`, `brand/`, `overlay/`, `Bolt.app` |
-| `Data/` | App data — `data/` (config, memory, content, projects, people), `tests/`, `archive/`, `conversations/` |
-| `Docs/` | Documentation — `BOLT_COMMANDS.md`, `INDEX.md`, `PROJECT_STATUS.md`, `guides/`, `architecture/`, `planning/`, `reviews/`, `requirements/`, `upgrade/`, `site/`, `briefings/`, `reports/`, `Scratchpad_archive/` |
-| `3rd_Party/` | Vendor + utilities — `colabs/scripts/` (Bolt's main scripts), `google-cloud-sdk/`, `llm/` (neural_model.py), `integrations/`, `vendor/`, `docker/`, `vod_samples/`, `my_agent/` |
-| `media/` | Media — `clips/`, `output/` (videos, vertical variants) |
-| `purple/`, `green/`, `dist/`, `logs/`, `New Folder With Items/` | Reserved / leftover from the reorg |
+| Folder | Label | Holds |
+|--------|-------|-------|
+| `Core/` | 🟡 CORE | Source — `bot.py`, `config.json`, `src/launch.py`, `modules/`, brain |
+| `App/` | 🟣 APP | Web/desktop — `BoltApp/`, `assets/`, `brand/`, `overlay/`, `Bolt.app` |
+| `Data/` | 🔵 DATA | Catalog, storefront, sponsors, memory, tests, conversations |
+| `Docs/` | 🟢 DOCS | Commands, status, guides, briefings, reviews, requirements |
+| `3rd_Party/` | ⚪ SCRIPTS | Scripts, LLM tools, docker, vendor |
+| `media/` | 🟠 MEDIA | Clips, recordings, vertical exports |
+| `bin/` | 🔴 MANAGER | `bolt` CLI wrapper |
 
 ## Script Path Map
 
@@ -79,7 +110,32 @@ Top-level entry points that did NOT move, but now live one level deeper:
 |> as-is will fail. See the **Stale-Internal-Paths** section at the bottom
 |> of this file for the full list of affected scripts and the follow-up fix.
 |
-|## `bolt` CLI Wrapper (NEW - July 7, 2026)
+|## Content Manager (William's creator OS)
+
+```bash
+bolt morning                 # Good Morning Bolt — spoken daily briefing
+bolt manage add "Headset" --lane tech --status testing
+bolt manage note "Headset" --day 1 --text "Mic is clear, clamp is tight"
+bolt manage draft "Headset" --format short
+bolt manage next
+bolt manage list --lane game
+bolt store add --name "Mouse" --asin B0XXXX --category tech
+bolt store feature-next
+bolt social status
+bolt social package "Headset" --platforms tiktok,youtube,x
+bolt social queue            # items await approval; nothing auto-posts
+bolt sponsors find --lane game
+bolt sponsors pitch "Razer"
+bolt sponsors next
+bolt business lesson
+bolt advance next
+```
+
+Voice: say **Good Morning Bolt** in conversation mode (`python -m modules.Bolt_Conversation`).
+
+Amazon tag: `billycarter-20`. Handles: TikTok @itssimplybilly, Twitch thunderstormbilly, YouTube @SimplyBilly, X @SimplyBilly_.
+
+## `bolt` CLI Wrapper (NEW - July 7, 2026)
 |
 |A single entry-point command for every Bolt script and command lives at
 |`bin/bolt`. It does the sys.path bootstrap once, then dispatches to the
