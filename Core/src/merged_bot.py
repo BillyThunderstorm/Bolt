@@ -1923,7 +1923,7 @@ def _run_voice_checklist(config: dict):
 
 if __name__ == "__main__":
     if "--briefing" in sys.argv:
-        from Daily_Briefing import generate_briefing
+        from Docs.briefings.Daily_Briefing import generate_briefing
         generate_briefing()
         sys.exit(0)
 

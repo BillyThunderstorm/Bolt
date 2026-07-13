@@ -744,7 +744,7 @@ reason="Install speech_recognition to enable voice: pip3 install SpeechRecogniti
 
 if __name__ == "__main__":
     if "--briefing" in sys.argv:
-        from Daily_Briefing import generate_briefing
+        from Docs.briefings.Daily_Briefing import generate_briefing
 
         generate_briefing()
         sys.exit(0)
