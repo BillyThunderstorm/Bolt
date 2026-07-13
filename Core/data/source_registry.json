@@ -1,75 +1,75 @@
 {
-  "generated_at": "2026-07-13T16:56:32.735157",
+  "generated_at": "2026-07-13T17:05:10.971678",
   "sources": [
     {
       "id": "daily_log",
       "path": "/Users/carter/developer/Bolt/Core/logs/daily_log.txt",
       "type": "log",
       "exists": false,
-      "last_seen": "2026-07-13T16:56:32.735168"
+      "last_seen": "2026-07-13T17:05:10.971693"
     },
     {
       "id": "memory_hot",
       "path": "/Users/carter/developer/Bolt/Core/memory/MEMORY.md",
       "type": "markdown",
       "exists": false,
-      "last_seen": "2026-07-13T16:56:32.735175"
+      "last_seen": "2026-07-13T17:05:10.971700"
     },
     {
       "id": "memory_people",
       "path": "/Users/carter/developer/Bolt/Core/memory/people",
       "type": "markdown_dir",
       "exists": false,
-      "last_seen": "2026-07-13T16:56:32.735180"
+      "last_seen": "2026-07-13T17:05:10.971706"
     },
     {
       "id": "memory_projects",
       "path": "/Users/carter/developer/Bolt/Core/memory/projects",
       "type": "markdown_dir",
       "exists": false,
-      "last_seen": "2026-07-13T16:56:32.735183"
+      "last_seen": "2026-07-13T17:05:10.971711"
     },
     {
       "id": "memory_context",
       "path": "/Users/carter/developer/Bolt/Core/memory/context",
       "type": "markdown_dir",
       "exists": false,
-      "last_seen": "2026-07-13T16:56:32.735187"
+      "last_seen": "2026-07-13T17:05:10.971715"
     },
     {
       "id": "memory_content",
       "path": "/Users/carter/developer/Bolt/Core/memory/content",
       "type": "markdown_dir",
       "exists": false,
-      "last_seen": "2026-07-13T16:56:32.735191"
+      "last_seen": "2026-07-13T17:05:10.971720"
     },
     {
       "id": "memory_glossary",
       "path": "/Users/carter/developer/Bolt/Core/memory/glossary.md",
       "type": "markdown",
       "exists": false,
-      "last_seen": "2026-07-13T16:56:32.735199"
+      "last_seen": "2026-07-13T17:05:10.971726"
     },
     {
       "id": "ready_to_post",
       "path": "/Users/carter/developer/Bolt/Core/data/ready_to_post.json",
       "type": "json",
       "exists": false,
-      "last_seen": "2026-07-13T16:56:32.735204"
+      "last_seen": "2026-07-13T17:05:10.971731"
     },
     {
       "id": "rankings",
       "path": "/Users/carter/developer/Bolt/Core/data/rankings.json",
       "type": "json",
       "exists": false,
-      "last_seen": "2026-07-13T16:56:32.735208"
+      "last_seen": "2026-07-13T17:05:10.971736"
     },
     {
       "id": "seen_clips",
       "path": "/Users/carter/developer/Bolt/Core/seen_clips.json",
       "type": "json",
       "exists": false,
-      "last_seen": "2026-07-13T16:56:32.735213"
+      "last_seen": "2026-07-13T17:05:10.971741"
     }
   ]
 }

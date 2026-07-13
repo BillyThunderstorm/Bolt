@@ -13,7 +13,7 @@ def _section(title: str, body: str) -> str:
 
 def _calendar_context() -> str:
     try:
-        from modules.Google_Calender import format_for_briefing
+        from modules.Google_Calendar import format_for_briefing
 
         return format_for_briefing()
     except Exception as exc:
