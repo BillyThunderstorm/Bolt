@@ -1,0 +1,11 @@
+{
+  "weights": {
+    "recency": 0.25,
+    "success_rate": 0.45,
+    "feedback": 0.3
+  },
+  "feedback_by_action": {
+    "queue_clip": -5.0
+  },
+  "outcomes_by_action": {}
+}

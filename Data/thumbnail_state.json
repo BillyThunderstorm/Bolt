@@ -1,0 +1,20 @@
+{
+  "last_run": {
+    "dry_run": false,
+    "results": [
+      {
+        "duration_sec": null,
+        "error": "directory not found: vertical_clips",
+        "output": null,
+        "seek_seconds": null,
+        "skipped": false,
+        "source": "vertical_clips",
+        "strategy": "smart",
+        "width": 1280
+      }
+    ],
+    "strategy": "smart",
+    "timestamp": "2026-07-13T05:00:00.995719",
+    "width": 1280
+  }
+}
