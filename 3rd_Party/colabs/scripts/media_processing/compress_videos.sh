@@ -8,9 +8,12 @@ set -euo pipefail
 # Set PATH to include homebrew binaries (needed for cron execution)
 export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 
-CLIPS_DIR="/Users/carter/developer/Bolt/clips"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../" && pwd)"
+
+CLIPS_DIR="${REPO_ROOT}/clips"
 BACKUP_DIR="${CLIPS_DIR}/originals_backup"
-LOG_FILE="/Users/carter/developer/Bolt/logs/video_compression.log"
+LOG_FILE="${REPO_ROOT}/logs/video_compression.log"
 HANDBRAKE_CLI="/opt/homebrew/bin/HandBrakeCLI"
 
 # Create backup directory if it doesn't exist

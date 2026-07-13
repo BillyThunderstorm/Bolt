@@ -145,7 +145,7 @@ class BotImportSideEffectTests(unittest.TestCase):
                 [sys.executable, str(script_path)],
                 capture_output=True,
                 text=True,
-                cwd="/Users/carter/developer/Bolt",
+                cwd=str(_repo_root),
                 timeout=30,
             )
         self.assertEqual(result.returncode, 0, msg=result.stderr)
@@ -196,7 +196,7 @@ class BotImportSpeedTests(unittest.TestCase):
                 [sys.executable, str(script_path)],
                 capture_output=True,
                 text=True,
-                cwd="/Users/carter/developer/Bolt",
+                cwd=str(_repo_root),
                 timeout=30,
             )
         self.assertEqual(result.returncode, 0, msg=result.stderr)

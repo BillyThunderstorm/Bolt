@@ -31,10 +31,7 @@ for _p in (_HERE, _SCRIPTS_DIR):
         sys.path.insert(0, _sp)
 os.chdir(_REPO)
 
-# Re-execute under the venv Python if available so `dotenv` etc. are present.
-_VENV_PYTHON = _REPO / ".venv" / "bin" / "python3"
-if _VENV_PYTHON.exists() and sys.executable != str(_VENV_PYTHON):
-    os.execv(str(_VENV_PYTHON), [str(_VENV_PYTHON), str(__file__)] + sys.argv[1:])
+
 
 # _paths sets up the canonical post-reorg subpaths (Core/, Data/, media/, etc.)
 from _paths import REPO_ROOT, CORE_DIR, RECORDINGS_DIR, BOLT_BRAIN_FILE
@@ -288,4 +285,8 @@ def main():
         notify("Bolt stopped cleanly.", level="info")
 
 if __name__ == "__main__":
+    # Re-execute under the venv Python if available so `dotenv` etc. are present.
+    _VENV_PYTHON = _REPO / ".venv" / "bin" / "python3"
+    if _VENV_PYTHON.exists() and sys.executable != str(_VENV_PYTHON):
+        os.execv(str(_VENV_PYTHON), [str(_VENV_PYTHON), str(__file__)] + sys.argv[1:])
     main()

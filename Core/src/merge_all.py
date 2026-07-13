@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 
-PROJECT_ROOT = Path("/Users/carter/developer/Bolt")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
 def get_all_py_files():
