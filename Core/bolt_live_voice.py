@@ -1,13 +1,15 @@
 import os
 import sys
 import asyncio
+from pathlib import Path
 from google import genai
 from google.genai import types
 
 def load_bolt_context() -> str:
     """Assembles Bolt's identity and core instructions."""
     try:
-        with open("/Users/carter/developer/Bolt/Bolt_Personality.txt", "r", encoding="utf-8") as f:
+        project_root = Path(__file__).resolve().parent.parent
+        with open(project_root / "Bolt_Personality.txt", "r", encoding="utf-8") as f:
             return f.read().strip()
     except FileNotFoundError:
         return "You are Bolt, a cheerful and high-energy assistant."

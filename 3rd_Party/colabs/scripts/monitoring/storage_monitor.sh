@@ -280,7 +280,9 @@ print_config() {
 # =============================================================================
 # Load Configuration
 # =============================================================================
-CONFIG_FILE="/Users/carter/developer/Bolt/configs/storage_alerts.env"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../" && pwd)"
+CONFIG_FILE="${REPO_ROOT}/configs/storage_alerts.env"
 if [[ -f "$CONFIG_FILE" ]]; then
     # shellcheck disable=SC1090
     source "$CONFIG_FILE"

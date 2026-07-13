@@ -1,5 +1,6 @@
 import os
 import sys
+from pathlib import Path
 from google import genai
 from google.genai import types
 
@@ -7,7 +8,8 @@ def load_bolt_personality():
     """
     Points directly to the absolute path of your Bolt developer folder.
     """
-    file_path = "/Users/carter/developer/Bolt/Bolt_Personality.txt"
+    project_root = Path(__file__).resolve().parents[3]
+    file_path = project_root / "Bolt_Personality.txt"
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             return f.read().strip()

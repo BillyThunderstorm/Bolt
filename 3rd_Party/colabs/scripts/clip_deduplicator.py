@@ -13,9 +13,10 @@ from datetime import datetime
 from pathlib import Path
 
 # Configuration
-CLIPS_DIR = Path("/Users/carter/developer/Bolt/clips")
-RECORDINGS_DIR = Path("/Users/carter/developer/Bolt/recordings")
-HASH_DB_PATH = Path("/Users/carter/developer/Bolt/data/media_hash_db.json")
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+CLIPS_DIR = PROJECT_ROOT / "clips"
+RECORDINGS_DIR = PROJECT_ROOT / "recordings"
+HASH_DB_PATH = PROJECT_ROOT / "Data" / "media_hash_db.json"
 DRY_RUN = False
 
 
