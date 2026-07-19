@@ -2,6 +2,33 @@
 
 Source of truth: `/Users/carter/developer/Bolt`
 
+*Last updated: July 19, 2026*
+
+## Manager tier (M1–M13) — all complete
+
+- [x] M1 — Content catalog + journals
+- [x] M2 — Review draft builder + Amazon tag `billycarter-20`
+- [x] M3 — Good Morning Bolt spoken briefing
+- [x] M4 — Amazon storefront tracker
+- [x] M5 — Social package queue (approval required)
+- [x] M6 — Sponsor/affiliate prospector + pitches
+- [x] M7 — Business playbook + Bolt advancement docs
+- [x] M8 — `bin/bolt` manager subcommands + tests
+- [x] M9 — Real ASINs on owned gear (code complete; operator adds the ASINs)
+- [x] M10 — First shipped game + tech review posts (`mark_ready` + `mark_posted` reachable)
+- [x] M11 — TikTok API end-to-end publish (gated on TikTok `video.publish` scope approval)
+- [x] M12 — YouTube/X OAuth upload (manual-assist bridge; real API publishers pending platform app review)
+- [x] M13 — Live sponsor research enrichment (web search results attached to prospects)
+
+## ML ranking — recency-weighted learned model (Jul 19, 2026)
+
+- [x] 4-component score: audio + trigger bonus + hand-coded history + learned boost
+- [x] `learned_boost()`: 14-day half-life recency decay, like_rate-aware, 3-sample minimum, capped at 20 points
+- [x] `update_historical_performance()` now appends to an `observations` array (capped at 200 per (game, trigger))
+- [x] `inspect_learned_model(game=None)` and `learning_loop_status()` for visibility
+- [x] 15 new tests in `Data/tests/test_clip_ranker.py` (module had zero coverage before this)
+- [x] Back-compat with legacy `total_clips` / `avg_views` / `total_likes` aggregate fields
+
 ## Week 1: LLM Titles
 
 - [x] Copy code from `UPGRADE_CODE_EXAMPLES.md`
