@@ -1,0 +1,176 @@
+{
+  "version": 1,
+  "updated_at": "2026-07-10T07:43:34",
+  "prospects": [
+    {
+      "id": "razer",
+      "name": "Razer",
+      "lanes": [
+        "game",
+        "tech"
+      ],
+      "type": "brand+affiliate",
+      "fit": 9,
+      "why": "Core gaming peripherals; strong starter review products (mice, pads, headsets).",
+      "affiliate_hint": "RazerStore affiliate / creator programs",
+      "contact_hint": "creators@razer.com / brand portal",
+      "status": "pitch_ready",
+      "outreach": [
+        {
+          "status": "pitch_drafted",
+          "at": "2026-07-10T07:42:20"
+        }
+      ],
+      "added_at": "2026-07-09T22:44:07"
+    },
+    {
+      "id": "logitech-g",
+      "name": "Logitech G",
+      "lanes": [
+        "game",
+        "tech"
+      ],
+      "type": "brand+affiliate",
+      "fit": 9,
+      "why": "Mice, keyboards, headsets — easy first reviews from gear William already uses.",
+      "affiliate_hint": "Logitech affiliate / creator program",
+      "contact_hint": "influencer marketing / press kit",
+      "status": "prospect",
+      "outreach": [],
+      "added_at": "2026-07-09T22:44:07"
+    },
+    {
+      "id": "steelseries",
+      "name": "SteelSeries",
+      "lanes": [
+        "game",
+        "tech"
+      ],
+      "type": "brand",
+      "fit": 8,
+      "why": "Headset and mouse reviews perform well for FPS/BR audiences.",
+      "affiliate_hint": "SteelSeries affiliate",
+      "contact_hint": "press@steelseries.com",
+      "status": "prospect",
+      "outreach": [],
+      "added_at": "2026-07-09T22:44:07"
+    },
+    {
+      "id": "hyperx",
+      "name": "HyperX",
+      "lanes": [
+        "game",
+        "tech"
+      ],
+      "type": "brand+affiliate",
+      "fit": 8,
+      "why": "Accessible price tiers; good for honest mid-range gear content.",
+      "affiliate_hint": "HP/HyperX affiliate portals",
+      "contact_hint": "creator outreach form",
+      "status": "prospect",
+      "outreach": [],
+      "added_at": "2026-07-09T22:44:07"
+    },
+    {
+      "id": "elgato",
+      "name": "Elgato",
+      "lanes": [
+        "tech",
+        "game"
+      ],
+      "type": "brand",
+      "fit": 8,
+      "why": "Stream setup gear (lights, capture, mic arms) pairs with Twitch growth story.",
+      "affiliate_hint": "Corsair/Elgato creator",
+      "contact_hint": "creator@elgato.com",
+      "status": "prospect",
+      "outreach": [],
+      "added_at": "2026-07-09T22:44:07"
+    },
+    {
+      "id": "secretlab",
+      "name": "Secretlab",
+      "lanes": [
+        "tech",
+        "game"
+      ],
+      "type": "brand",
+      "fit": 7,
+      "why": "High AOV chair reviews; needs longer test journal.",
+      "affiliate_hint": "Secretlab affiliate",
+      "contact_hint": "influencers@secretlab.co",
+      "status": "prospect",
+      "outreach": [],
+      "added_at": "2026-07-09T22:44:07"
+    },
+    {
+      "id": "amazon-influencer-associates",
+      "name": "Amazon Influencer / Associates",
+      "lanes": [
+        "product",
+        "tech",
+        "game",
+        "skincare"
+      ],
+      "type": "affiliate",
+      "fit": 10,
+      "why": "William already has tag billycarter-20 — primary monetization path.",
+      "affiliate_hint": "tag=billycarter-20",
+      "contact_hint": "associates / influencer dashboard",
+      "status": "pitch_ready",
+      "outreach": [
+        {
+          "status": "pitch_drafted",
+          "at": "2026-07-10T07:43:34"
+        }
+      ],
+      "added_at": "2026-07-09T22:44:07"
+    },
+    {
+      "id": "anker-soundcore",
+      "name": "Anker / Soundcore",
+      "lanes": [
+        "tech",
+        "product"
+      ],
+      "type": "brand+affiliate",
+      "fit": 7,
+      "why": "Chargers, earbuds, power banks — constant short-form review fuel.",
+      "affiliate_hint": "Anker affiliate",
+      "contact_hint": "influencer@anker.com",
+      "status": "prospect",
+      "outreach": [],
+      "added_at": "2026-07-09T22:44:07"
+    },
+    {
+      "id": "cerave",
+      "name": "CeraVe",
+      "lanes": [
+        "skincare"
+      ],
+      "type": "brand",
+      "fit": 6,
+      "why": "Accessible skincare; good when beauty lane is active.",
+      "affiliate_hint": "often via Amazon",
+      "contact_hint": "L'Oréal / CeraVe PR",
+      "status": "prospect",
+      "outreach": [],
+      "added_at": "2026-07-09T22:44:07"
+    },
+    {
+      "id": "the-ordinary",
+      "name": "The Ordinary",
+      "lanes": [
+        "skincare"
+      ],
+      "type": "brand",
+      "fit": 6,
+      "why": "Ingredient-led content pairs with honest testing journals.",
+      "affiliate_hint": "Deciem affiliate when available",
+      "contact_hint": "PR / creator form",
+      "status": "prospect",
+      "outreach": [],
+      "added_at": "2026-07-09T22:44:07"
+    }
+  ]
+}

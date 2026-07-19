@@ -1,0 +1,10 @@
+{
+  "live_scene": "Live Scene",
+  "scenes": {
+    "Live Scene": "__twitch__",
+    "Starting Soon": "Just Chatting",
+    "BRB": "Just Chatting",
+    "Intermission": "Just Chatting",
+    "Ending": "Just Chatting"
+  }
+}

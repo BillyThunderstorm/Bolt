@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-07-14 20:37:55",
+  "status": {
+    "clips_made": 887,
+    "vertical_clips": 17,
+    "ready_to_post": 0,
+    "recordings_processed": 0,
+    "api_keys": {
+      "twitch": true,
+      "obs": false,
+      "discord": true,
+      "tiktok": false
+    }
+  },
+  "queue": [],
+  "briefing": {
+    "date": "Saturday, July 04, 2026",
+    "action_items": [
+      "Review last clip performance and log outcomes",
+      "Memory flagged: Clip performance: audio_spike for Marvel Rivals \u2014 Posted clip outcome for Marvel Rivals: trigger=audio_spike, views=71, likes=0, success=False, clip=. \ud83d\udd25 Rivals gaming cli",
+      "Memory flagged: Clip performance: manual for Marvel Rivals \u2014 Posted clip outcome for Marvel Rivals: trigger=manual, views=1, likes=0, success=False, clip=. no idea",
+      "Upload 96 clip(s) from queue to TikTok/Shorts/Reels",
+      "Check for new recordings to process"
+    ]
+  },
+  "peaks": []
+}

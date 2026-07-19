@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "affiliate_tag": "billycarter-20",
+  "storefront_status": "influencer_active",
+  "updated_at": "2026-07-10T07:36:07",
+  "items": [
+    {
+      "id": "daily-driver-gaming-headset",
+      "name": "Daily Driver Gaming Headset",
+      "asin": "",
+      "category": "tech",
+      "affiliate_link": "",
+      "status": "active",
+      "notes": "Add real ASIN when ready",
+      "added_at": "2026-07-09T22:44:07"
+    },
+    {
+      "id": "mouse",
+      "name": "Mouse",
+      "asin": "B085HNRKPX",
+      "category": "tech",
+      "affiliate_link": "https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20",
+      "status": "active",
+      "notes": "",
+      "added_at": "2026-07-10T07:36:07"
+    }
+  ]
+}
