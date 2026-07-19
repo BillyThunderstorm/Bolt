@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "require_approval": true,
+  "updated_at": "2026-07-09T22:44:07",
+  "platforms": {
+    "tiktok": {
+      "handle": "@itssimplybilly",
+      "status": "configured",
+      "upload_mode": "api_when_token",
+      "notes": "Primary short-form. Use Content Posting API when token present."
+    },
+    "twitch": {
+      "handle": "thunderstormbilly",
+      "status": "configured",
+      "upload_mode": "live_source",
+      "notes": "Live gameplay + highlight source."
+    },
+    "youtube": {
+      "handle": "@SimplyBilly",
+      "status": "configured",
+      "upload_mode": "manual_assisted",
+      "notes": "Long-form reviews + Shorts. API needs OAuth app approval."
+    },
+    "x": {
+      "handle": "@SimplyBilly_",
+      "status": "configured",
+      "upload_mode": "manual_assisted",
+      "notes": "Quick takes and reposts."
+    },
+    "instagram": {
+      "handle": "TBD",
+      "status": "not_connected",
+      "upload_mode": "manual_assisted",
+      "notes": "Optional Reels later."
+    }
+  },
+  "queue": []
+}
