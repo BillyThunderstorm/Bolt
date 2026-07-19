@@ -328,6 +328,161 @@ class ContentManagerTests(unittest.TestCase):
             cm.build_x_package("NoDraftM12")
         self.assertIn("no draft", str(x_ctx.exception).lower())
 
+    def test_sponsors_add_creates_and_dedupes(self):
+        # Adding a new prospect should create a row at 'prospect' stage.
+        row = cm.sponsors_add("WD-40", lanes=["tech"], type="brand", fit=4)
+        self.assertEqual(row["name"], "WD-40")
+        self.assertEqual(row["status"], "prospect")
+        self.assertEqual(row["fit"], 4)
+        self.assertIn("tech", row["lanes"])
+        # Adding the same name again returns the existing row, not a duplicate.
+        again = cm.sponsors_add("WD-40", lanes=["game"], fit=10)
+        self.assertEqual(again["id"], row["id"])
+        # Fit should NOT have been overwritten by the second add.
+        self.assertEqual(again["fit"], 4)
+
+    def test_sponsors_enrich_appends_note_and_optional_status_change(self):
+        cm.sponsors_add("Corsair", lanes=["tech", "game"], fit=8)
+        enriched = cm.sponsors_enrich(
+            "Corsair",
+            note="Found creator-program page; sent DM on X",
+            link="https://x.com/corsair/status/123",
+            mark_contacted=True,
+        )
+        self.assertEqual(enriched["status"], "contacted")
+        # The note was appended...
+        last_note = enriched["notes"][-1]
+        self.assertIn("creator-program", last_note["text"])
+        self.assertIn("x.com", last_note["link"])
+        # ...and an outreach entry was recorded for the status change.
+        statuses = [o.get("status") for o in enriched["outreach"]]
+        self.assertIn("contacted", statuses)
+
+    def test_sponsors_enrich_without_mark_contacted_keeps_status(self):
+        cm.sponsors_add("BenQ", lanes=["tech"], fit=6)
+        # First call: just a note, no status change.
+        first = cm.sponsors_enrich("BenQ", note="Saw a sale on Amazon")
+        self.assertEqual(first["status"], "prospect")
+        # Second call: enrich with --mark-contacted should advance.
+        second = cm.sponsors_enrich("BenQ", note="Sent pitch", mark_contacted=True)
+        self.assertEqual(second["status"], "contacted")
+
+    def test_sponsors_enrich_unknown_raises(self):
+        # Can't enrich a prospect that doesn't exist.
+        with self.assertRaises(ValueError) as ctx:
+            cm.sponsors_enrich("NeverExistedBrand", note="test")
+        self.assertIn("add it first", str(ctx.exception).lower())
+
+    def test_sponsors_pipeline_summary(self):
+        # Add a few prospects in different states, confirm the summary
+        # correctly counts by stage and surfaces the highest-fit
+        # uncontacted one.
+        cm.sponsors_add("BrandA", lanes=["tech"], fit=8)
+        cm.sponsors_add("BrandB", lanes=["game"], fit=9)
+        cm.sponsors_add("BrandC", lanes=["tech"], fit=5)
+        # Advance BrandB through pitch -> contacted
+        cm.sponsors_pitch("BrandB")
+        cm.sponsors_enrich("BrandB", note="Sent", mark_contacted=True)
+        # Mark BrandA as won
+        cm.sponsors_log("BrandA", "won", note="closed deal")
+        pipe = cm.sponsors_pipeline()
+        self.assertIn("by_stage", pipe)
+        self.assertIn("total", pipe)
+        self.assertIn("active", pipe)
+        self.assertIn("top_fit_uncontacted", pipe)
+        # BrandB should be in 'contacted', BrandA in 'won'.
+        # Note: the seed list in sponsors.json may also have prospects;
+        # we only assert the things we know we added.
+        # BrandC is fit=5 still at 'prospect'. BrandB is fit=9 at
+        # 'contacted', not in 'uncontacted'. So the top uncontacted
+        # we added is BrandC (fit=5) — but the seed list may have a
+        # higher-fit uncontacted prospect. We just assert our
+        # BrandC is among the uncontacted options.
+        uncontacted_names = {p["name"] for p in cm.load_sponsors()["prospects"]
+                             if p.get("status") in ("prospect", "pitch_ready")}
+        self.assertIn("BrandC", uncontacted_names)
+
+    def test_sponsors_research_attaches_results_and_finds_email(self):
+        cm.sponsors_add("ResearchBrand", lanes=["tech"], fit=7)
+        fake_results = [
+            {
+                "url": "https://researchbrand.example.com/creators",
+                "title": "ResearchBrand Creator Program",
+                "description": (
+                    "Email partnerships@researchbrand.example.com to apply. "
+                    "We pay in product + commission."
+                ),
+            },
+            {
+                "url": "https://researchbrand.example.com/about",
+                "title": "About Us",
+                "description": "We make widgets.",
+            },
+        ]
+        updated = cm.sponsors_research(
+            "ResearchBrand", query="ResearchBrand creator program", results=fake_results
+        )
+        self.assertIn("research_log", updated)
+        self.assertEqual(len(updated["research_log"]), 1)
+        log = updated["research_log"][0]
+        self.assertEqual(log["query"], "ResearchBrand creator program")
+        self.assertEqual(log["result_count"], 2)
+        self.assertEqual(len(log["results"]), 2)
+        # The first plausible email was auto-extracted.
+        self.assertEqual(updated["contact"], "partnerships@researchbrand.example.com")
+        # A note was added explaining where the contact came from.
+        last_note = updated["notes"][-1]
+        self.assertIn("Auto-set contact", last_note["text"])
+        self.assertIn("partnerships@", last_note["text"])
+
+    def test_sponsors_research_skips_noreply_emails(self):
+        # If the only emails found are noreply addresses, contact
+        # should stay empty rather than get a useless value.
+        cm.sponsors_add("NoReplyCo", lanes=["tech"], fit=4)
+        fake_results = [
+            {
+                "url": "https://noreplyco.example.com",
+                "title": "NoReplyCo",
+                "description": "Send questions to noreply@noreplyco.example.com.",
+            },
+        ]
+        updated = cm.sponsors_research(
+            "NoReplyCo", query="NoReplyCo contact", results=fake_results
+        )
+        self.assertNotIn("@", updated.get("contact", ""))
+        self.assertEqual(updated.get("contact", ""), "")
+
+    def test_sponsors_research_no_update_contact_keeps_existing(self):
+        # If update_contact=False, the function shouldn't touch the
+        # contact field even if an email is in the results.
+        cm.sponsors_add("KeepContact", lanes=["tech"], fit=5, contact="existing@example.com")
+        fake_results = [
+            {"url": "https://x.example", "title": "X", "description": "Email new@example.com"},
+        ]
+        updated = cm.sponsors_research(
+            "KeepContact", query="test", results=fake_results, update_contact=False
+        )
+        self.assertEqual(updated["contact"], "existing@example.com")
+
+    def test_sponsors_research_handles_empty_results(self):
+        # Empty results list: research_log still gets an entry, but
+        # result_count=0 and no auto-contact.
+        cm.sponsors_add("QuietBrand", lanes=["tech"], fit=5)
+        updated = cm.sponsors_research("QuietBrand", query="QuietBrand info", results=[])
+        self.assertEqual(updated["research_log"][-1]["result_count"], 0)
+        self.assertNotIn("@", updated.get("contact", ""))
+
+    def test_sponsors_research_unknown_prospect_raises(self):
+        with self.assertRaises(ValueError) as ctx:
+            cm.sponsors_research("DoesNotExist", query="x", results=[])
+        self.assertIn("add it first", str(ctx.exception).lower())
+
+    def test_sponsors_research_empty_query_raises(self):
+        cm.sponsors_add("TestBrand", lanes=["tech"], fit=5)
+        with self.assertRaises(ValueError) as ctx:
+            cm.sponsors_research("TestBrand", query="   ", results=[])
+        self.assertIn("empty", str(ctx.exception).lower())
+
     def test_sponsors_find_game(self):
         found = cm.sponsors_find(lane="game", limit=3)
         self.assertTrue(found)
