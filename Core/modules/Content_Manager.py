@@ -376,6 +376,219 @@ def save_review_tracker(data: Dict[str, Any]) -> None:
     _safe_write(REVIEW_TRACKER, data)
 
 
+# ---------------------------------------------------------------------------
+# TikTok publishing bridge
+#
+# M11 is "TikTok API token end-to-end publish (still approval-gated)".
+# The code to do the publish already lives in `modules/TikTok_Publisher.py`.
+# What's missing is the bridge from the catalog (a `ready` item with a
+# draft) to the publisher, plus a status report so the operator can tell
+# what's blocking a real publish (missing creds, expired token, missing
+# video.publish scope, etc.).
+# ---------------------------------------------------------------------------
+
+
+def tiktok_publish_status() -> Dict[str, Any]:
+    """Report what's blocking a real TikTok publish.
+
+    The four things that need to be true for `bolt manage post` to
+    actually upload:
+
+      1. .env has TIKTOK_CLIENT_KEY
+      2. .env has TIKTOK_CLIENT_SECRET
+      3. .env has a non-placeholder TIKTOK_ACCESS_TOKEN
+      4. The token's scope includes video.publish (best-effort check
+         based on TIKTOK_SCOPE; TikTok ultimately decides what the
+         app is approved for)
+    """
+    status: Dict[str, Any] = {
+        "ready": False,
+        "checks": [],
+        "next_steps": [],
+    }
+    try:
+        from modules import TikTok_Auth as auth
+
+        env = auth.load_env()
+    except Exception as exc:  # pragma: no cover - defensive
+        status["checks"].append({"name": "load_env", "ok": False, "detail": str(exc)})
+        return status
+
+    has_key = bool(env.get("TIKTOK_CLIENT_KEY"))
+    has_secret = bool(env.get("TIKTOK_CLIENT_SECRET")) and not env.get(
+        "TIKTOK_CLIENT_SECRET", ""
+    ).startswith("TIKTOK_")
+    token = env.get("TIKTOK_ACCESS_TOKEN", "")
+    has_token = bool(token) and not token.startswith("TIKTOK_")
+    scope = env.get("TIKTOK_SCOPE", "")
+    has_publish_scope = "video.publish" in scope
+
+    status["checks"].extend([
+        {"name": "TIKTOK_CLIENT_KEY", "ok": has_key,
+         "detail": "set" if has_key else "missing or placeholder"},
+        {"name": "TIKTOK_CLIENT_SECRET", "ok": has_secret,
+         "detail": "set" if has_secret else "missing or placeholder"},
+        {"name": "TIKTOK_ACCESS_TOKEN", "ok": has_token,
+         "detail": "set" if has_token else "missing or placeholder"},
+        {"name": "scope includes video.publish", "ok": has_publish_scope,
+         "detail": scope or "(no TIKTOK_SCOPE set)"},
+    ])
+
+    if not has_key:
+        status["next_steps"].append("Set TIKTOK_CLIENT_KEY in .env (TikTok developer portal).")
+    if not has_secret:
+        status["next_steps"].append("Set TIKTOK_CLIENT_SECRET in .env.")
+    if not has_token:
+        status["next_steps"].append(
+            "Run `bolt tiktok_token` to do the OAuth flow and write tokens to .env."
+        )
+    if not has_publish_scope and has_token:
+        status["next_steps"].append(
+            "Re-run the OAuth flow requesting video.publish scope. "
+            "If TikTok has not approved your app for that scope yet, "
+            "M11 stays blocked at TikTok's side."
+        )
+
+    status["ready"] = has_key and has_secret and has_token
+    return status
+
+
+def tiktok_publish_dry_run(name: str) -> Dict[str, Any]:
+    """Show what a real `bolt manage post` would do without touching
+    the network. Returns the resolved video path, the title and
+    hashtag set that would be sent, and the publisher status.
+    """
+    catalog = load_catalog()
+    item = _find_item(catalog, name)
+    if not item:
+        raise ValueError(f"No catalog item matching '{name}'.")
+    if not item.get("last_draft"):
+        raise ValueError(
+            f"'{item['name']}' has no draft. Run "
+            f"`bolt manage draft \"{item['name']}\"` first."
+        )
+    if item.get("status") == "posted":
+        raise ValueError(f"'{item['name']}' is already posted.")
+
+    # Find a video for this item. Convention: media/clips/<id>.mp4
+    # or media/vertical_clips/<id>.mp4. Fall back to the most recent
+    # clip in either directory if no exact match.
+    repo = REPO_ROOT
+    candidates = []
+    item_id = item.get("id", _slug(item["name"]))
+    for clips_dir in (repo / "media" / "clips", repo / "media" / "vertical_clips"):
+        for ext in (".mp4", ".mov", ".mkv"):
+            candidate = clips_dir / f"{item_id}{ext}"
+            if candidate.exists():
+                candidates.append(candidate)
+    resolved_video = str(candidates[0]) if candidates else None
+
+    draft = item.get("last_draft", {})
+    title = f"{item['name']} — honest take"
+    hashtags = ["#gaming", "#tech"] if item.get("lane") == "tech" else ["#gaming"]
+
+    return {
+        "name": item["name"],
+        "status": item.get("status"),
+        "video_path": resolved_video,
+        "video_found": bool(resolved_video),
+        "title": title,
+        "hashtags": hashtags,
+        "affiliate_link": draft.get("affiliate_link"),
+        "publisher_status": tiktok_publish_status(),
+    }
+
+
+def tiktok_publish_item(
+    name: str,
+    approve: bool = False,
+    video_path: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Actually publish a `ready` or `drafting` catalog item to TikTok.
+
+    Refuses unless `approve=True` is passed (REQUIRE_POST_APPROVAL).
+    On success, advances the catalog to 'posted' via mark_posted and
+    records the platform + post URL.
+
+    Returns a dict with success/error, the post URL if successful, and
+    the mark_posted result.
+    """
+    if not approve:
+        raise PermissionError(
+            "Refusing to post without --approve. Approval-gated by "
+            "REQUIRE_POST_APPROVAL in your Content Manager settings."
+        )
+
+    catalog = load_catalog()
+    item = _find_item(catalog, name)
+    if not item:
+        raise ValueError(f"No catalog item matching '{name}'.")
+    if item.get("status") not in ("ready", "drafting"):
+        raise ValueError(
+            f"'{item['name']}' is status='{item.get('status')}'. "
+            f"Mark it ready first with `bolt manage mark-ready \"{item['name']}\"`."
+        )
+    if not item.get("last_draft"):
+        raise ValueError(
+            f"'{item['name']}' has no draft. Run `bolt manage draft \"{item['name']}\"`."
+        )
+
+    pub_status = tiktok_publish_status()
+    if not pub_status["ready"]:
+        return {
+            "success": False,
+            "error": "publisher_not_ready",
+            "publisher_status": pub_status,
+            "next_steps": pub_status["next_steps"],
+        }
+
+    # Resolve the video path: explicit override, or the dry-run's pick.
+    if not video_path:
+        preview = tiktok_publish_dry_run(name)
+        video_path = preview["video_path"]
+    if not video_path or not Path(video_path).exists():
+        return {
+            "success": False,
+            "error": "video_not_found",
+            "video_path": video_path,
+            "hint": (
+                "Drop the clip in media/clips/<item_id>.mp4 or pass "
+                "--video /path/to/clip.mp4"
+            ),
+        }
+
+    try:
+        from modules import TikTok_Publisher as tp
+    except Exception as exc:  # pragma: no cover - import error
+        return {"success": False, "error": f"import_failed: {exc}"}
+
+    draft = item.get("last_draft", {})
+    title = f"{item['name']} — honest take"
+    hashtags = ["#gaming", "#tech"] if item.get("lane") == "tech" else ["#gaming"]
+
+    result = tp.publish_clip(video_path, title, hashtags=hashtags)
+    if not result.get("success"):
+        return {
+            "success": False,
+            "error": result.get("error", "publish_failed"),
+            "publish_id": result.get("publish_id"),
+        }
+
+    # Auto-advance the catalog to 'posted' with the platform + URL.
+    post_record = mark_posted(
+        name,
+        platforms=["tiktok"],
+        where=result.get("url") or result.get("publish_id", ""),
+        note="auto-recorded by bolt manage post",
+    )
+    return {
+        "success": True,
+        "url": result.get("url"),
+        "publish_id": result.get("publish_id"),
+        "post_record": post_record,
+    }
+
+
 def mark_ready(name: str, verdict: str = "", note: str = "") -> Dict[str, Any]:
     """Move a catalog item from 'drafting' to 'ready' (review is done,
     draft is approved, ready to be posted).
@@ -1191,6 +1404,30 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_posted.add_argument("--note", default="")
 
     sub.add_parser("shipped", help="List shipped reviews")
+
+    p_post = sub.add_parser(
+        "post", help="Publish a ready catalog item to TikTok (approval-gated)"
+    )
+    p_post.add_argument("name")
+    p_post.add_argument(
+        "--approve", action="store_true",
+        help="Required. Without it, the publish is a dry-run.",
+    )
+    p_post.add_argument(
+        "--video", default=None,
+        help="Override the video file (default: look in media/clips/<id>.mp4)",
+    )
+
+    p_dry = sub.add_parser(
+        "post-dry-run", help="Show what a post would do without touching the network"
+    )
+    p_dry.add_argument("name")
+
+    sub.add_parser(
+        "tiktok-status",
+        help="Report what's blocking a real TikTok publish (creds, scope, etc.)",
+    )
+
     sub.add_parser("next", help="Show next actions")
     sub.add_parser("status", help="Manager status snapshot")
 
@@ -1262,6 +1499,26 @@ def main(argv: Optional[List[str]] = None) -> int:
                 plats = ",".join(r.get("platforms", [])) or "-"
                 where = r.get("where", "") or "-"
                 print(f"  {r['posted_at']} {r['name']} [{r.get('lane')}] {plats} {where}")
+        elif args.cmd == "post":
+            result = tiktok_publish_item(
+                args.name, approve=args.approve, video_path=args.video
+            )
+            print(json.dumps(result, indent=2, default=str))
+        elif args.cmd == "post-dry-run":
+            result = tiktok_publish_dry_run(args.name)
+            print(json.dumps(result, indent=2, default=str))
+        elif args.cmd == "tiktok-status":
+            st = tiktok_publish_status()
+            for c in st["checks"]:
+                mark = "OK  " if c["ok"] else "MISS"
+                print(f"  [{mark}] {c['name']}: {c['detail']}")
+            print()
+            if st["ready"]:
+                print("Publisher is ready. Run `bolt manage post \"NAME\" --approve` to publish.")
+            else:
+                print("Publisher is NOT ready. Next steps:")
+                for s in st["next_steps"]:
+                    print(f"  - {s}")
         elif args.cmd == "next":
             for a in next_actions():
                 print(f"[{a['type']}] {a['title']}\n  why: {a['why']}\n  run: {a['command']}\n")
