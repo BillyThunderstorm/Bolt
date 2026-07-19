@@ -32,7 +32,7 @@ Setup wizard (first-time use):
 
     bolt setup
 
-Subcommands map 1:1 onto the scripts in `3rd_Party/colabs/scripts/`
+Subcommands map 1:1 onto the scripts in `scripts/`
 (their hyphenated names match the script basenames). The wrapper does
 the sys.path bootstrap once, then exec's the target script with all
 remaining args passed through. This is faster and easier to remember
@@ -52,11 +52,11 @@ from pathlib import Path
 # parents[1]). Don't depend on _paths.py — the wrapper should work even if
 # the source tree is in a half-broken state.
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SCRIPTS_DIR = REPO_ROOT / "3rd_Party" / "colabs" / "scripts"
+SCRIPTS_DIR = REPO_ROOT / "scripts"
 CORE_DIR = REPO_ROOT / "Core"
 VENV_PYTHON = REPO_ROOT / ".venv" / "bin" / "python3"
 
-# Subcommand -> relative script path (in 3rd_Party/colabs/scripts/).
+# Subcommand -> relative script path (in scripts/).
 # Multiple aliases are allowed. Subcommands that are NOT just script
 # passthroughs (like "launch", "test", "setup") are handled specially.
 SUBCOMMANDS: dict[str, str] = {
@@ -95,6 +95,8 @@ SUBCOMMANDS: dict[str, str] = {
     "bot_with_twitch": "bot_with_twitch.py",
     "clip_dedupe": "clip_deduplicator.py",
     "make_highlights": "make_highlights.py",
+    "layout": "check_layout.py",
+    "check_layout": "check_layout.py",
 }
 
 # Content-manager subcommands handled by Core/modules/Content_Manager.py
@@ -115,7 +117,7 @@ Bolt — single-command access to every Bolt script and command.
 
 Usage:  bolt <subcommand> [args...]
 
-Script subcommands (each maps to 3rd_Party/colabs/scripts/X.py):
+Script subcommands (each maps to scripts/X.py):
   verify                  Run the install/setup verifier
   recordings [mode]       Process existing recordings
   auto_clip_twitch        Auto-clip highlights from Twitch VODs
@@ -138,6 +140,7 @@ Script subcommands (each maps to 3rd_Party/colabs/scripts/X.py):
   refresh_memory          Rebuild the memory index
   filter_backlog          Move low-scoring clips to clips/_low_score/
   watch                   Watch the recordings folder for new files
+  layout [--quiet|--json] Report any files misplaced at the repo root (no moves)
 
 Content manager / creator business (Core/modules/Content_Manager.py):
   manage add|list|note|draft|next|status

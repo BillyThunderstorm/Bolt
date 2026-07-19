@@ -21,10 +21,10 @@ from pathlib import Path
 # Post-reorg: Core/bot.py may be invoked directly or via launch.py/bin/bolt.
 # Ensure Core/ and the scripts dir are on sys.path and CWD is repo root so
 # `from modules import X` and `from scripts import X` resolve to the new
-# layout (Core/modules/ and 3rd_Party/colabs/scripts/).
+# layout (Core/modules/ and scripts/).
 _HERE = Path(__file__).resolve().parent          # Core/
 _REPO = _HERE.parent                              # repo root
-_SCRIPTS_DIR = _REPO / "3rd_Party" / "colabs" / "scripts"
+_SCRIPTS_DIR = _REPO / "scripts"
 for _p in (_HERE, _SCRIPTS_DIR):
     _sp = str(_p)
     if _sp not in sys.path:

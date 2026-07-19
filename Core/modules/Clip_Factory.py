@@ -24,12 +24,12 @@ import sys
 from pathlib import Path
 
 # Post-reorg: this module lives in Core/modules but the canonical post-reorg
-# paths live in 3rd_Party/colabs/scripts/_paths.py. Add that dir to sys.path
+# paths live in scripts/_paths.py. Add that dir to sys.path
 # so we can import it here.
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _CORE_DIR = _SCRIPT_DIR.parent
 _REPO_ROOT = _CORE_DIR.parent
-_PATHS_DIR = _REPO_ROOT / "3rd_Party" / "colabs" / "scripts"
+_PATHS_DIR = _REPO_ROOT / "scripts"
 if str(_PATHS_DIR) not in sys.path:
     sys.path.insert(0, str(_PATHS_DIR))
 
