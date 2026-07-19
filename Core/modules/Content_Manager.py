@@ -366,6 +366,119 @@ def save_storefront(data: Dict[str, Any]) -> None:
     _safe_write(STOREFRONT_FILE, data)
 
 
+def load_review_tracker() -> Dict[str, Any]:
+    _ensure_seed_files()
+    return _safe_load(REVIEW_TRACKER, {"reviews": [], "outreach_log": [], "products_received": [], "settings": {}})
+
+
+def save_review_tracker(data: Dict[str, Any]) -> None:
+    data["updated_at"] = _now_iso()
+    _safe_write(REVIEW_TRACKER, data)
+
+
+def mark_ready(name: str, verdict: str = "", note: str = "") -> Dict[str, Any]:
+    """Move a catalog item from 'drafting' to 'ready' (review is done,
+    draft is approved, ready to be posted).
+
+    Refuses to mark items as ready that have no draft. Records the
+    transition so it's visible in the catalog history.
+    """
+    catalog = load_catalog()
+    item = _find_item(catalog, name)
+    if not item:
+        raise ValueError(f"No catalog item matching '{name}'.")
+    if not item.get("last_draft"):
+        raise ValueError(
+            f"'{item['name']}' has no draft yet. Run "
+            f"`bolt manage draft \"{item['name']}\"` first."
+        )
+    if item.get("status") == "posted":
+        raise ValueError(f"'{item['name']}' is already posted.")
+    item["status"] = "ready"
+    if verdict:
+        item["verdict"] = verdict
+    if note:
+        item.setdefault("notes_log", []).append(
+            {"day": None, "text": f"Ready: {note}", "at": _now_iso()}
+        )
+    item["marked_ready_at"] = _now_iso()
+    save_catalog(catalog)
+    return item
+
+
+def mark_posted(
+    name: str,
+    platforms: Optional[List[str]] = None,
+    where: str = "",
+    note: str = "",
+) -> Dict[str, Any]:
+    """Record that a 'ready' item was actually posted. Appends an entry
+    to review_tracker.json so the shipped review is auditable, and
+    flips the catalog status to 'posted'.
+
+    `platforms` is a list like ['tiktok', 'youtube_shorts']. `where`
+    is a free-text field for the post URL or video ID.
+    """
+    catalog = load_catalog()
+    item = _find_item(catalog, name)
+    if not item:
+        raise ValueError(f"No catalog item matching '{name}'.")
+    if item.get("status") not in ("ready", "drafting"):
+        raise ValueError(
+            f"'{item['name']}' is status='{item.get('status')}'. "
+            f"Mark it ready first with `bolt manage mark-ready \"{item['name']}\"`."
+        )
+
+    platforms = platforms or []
+    draft = item.get("last_draft") or {}
+    review_entry = {
+        "id": _slug(f"{item['name']}-{_now_iso()}"),
+        "item_id": item.get("id"),
+        "name": item["name"],
+        "lane": item.get("lane", "tech"),
+        "format": draft.get("format", "short"),
+        "platforms": platforms,
+        "where": where,
+        "verdict": item.get("verdict"),
+        "affiliate_link": item.get("last_draft", {}).get("affiliate_link"),
+        "script": draft.get("script", ""),
+        "note": note,
+        "posted_at": _now_iso(),
+        "posted_by": CREATOR_NAME,
+    }
+    tracker = load_review_tracker()
+    tracker.setdefault("reviews", []).append(review_entry)
+    save_review_tracker(tracker)
+
+    item["status"] = "posted"
+    item["posted_at"] = _now_iso()
+    item["posted_platforms"] = platforms
+    item["posted_where"] = where
+    save_catalog(catalog)
+    return {"catalog_item": item, "review_entry": review_entry}
+
+
+def shipped_reviews(limit: int = 50) -> List[Dict[str, Any]]:
+    """Return shipped review entries from review_tracker, newest first."""
+    tracker = load_review_tracker()
+    reviews = tracker.get("reviews", [])
+    return list(reversed(reviews[-limit:]))
+
+
+def shipped_summary() -> Dict[str, Any]:
+    """Compact summary for `manage status` and morning briefing."""
+    reviews = shipped_reviews(limit=1000)
+    by_lane: Dict[str, int] = {}
+    for r in reviews:
+        lane = r.get("lane", "unknown")
+        by_lane[lane] = by_lane.get(lane, 0) + 1
+    return {
+        "total": len(reviews),
+        "by_lane": by_lane,
+        "last_posted_at": reviews[0]["posted_at"] if reviews else None,
+    }
+
+
 def load_sponsors() -> Dict[str, Any]:
     _ensure_seed_files()
     return _safe_load(SPONSORS_FILE, {"prospects": []})
@@ -934,11 +1047,13 @@ def build_morning_briefing() -> Dict[str, Any]:
     sponsors = sponsors_find(limit=3)
     lesson = business_lesson()
     advance = advance_next()
+    ship = shipped_summary()
 
     lines = [
         f"Good morning, {CREATOR_NAME}. Bolt is online.",
         f"Focus lanes today: games and tech.",
         f"Items currently testing: {len(testing)}.",
+        f"Shipped reviews: {ship['total']} (last: {ship['last_posted_at'] or 'never'}).",
     ]
     if testing:
         lines.append(f"Top test item: {testing[0]['name']}.")
@@ -1064,6 +1179,18 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_draft.add_argument("name")
     p_draft.add_argument("--format", default="short", choices=["short", "long"])
 
+    p_ready = sub.add_parser("mark-ready", help="Mark a draft as ready to post")
+    p_ready.add_argument("name")
+    p_ready.add_argument("--verdict", default="")
+    p_ready.add_argument("--note", default="")
+
+    p_posted = sub.add_parser("mark-posted", help="Record a review as shipped")
+    p_posted.add_argument("name")
+    p_posted.add_argument("--platforms", default="tiktok,youtube_shorts,x")
+    p_posted.add_argument("--where", default="", help="URL or video ID of the post")
+    p_posted.add_argument("--note", default="")
+
+    sub.add_parser("shipped", help="List shipped reviews")
     sub.add_parser("next", help="Show next actions")
     sub.add_parser("status", help="Manager status snapshot")
 
@@ -1122,6 +1249,19 @@ def main(argv: Optional[List[str]] = None) -> int:
             draft = build_draft(args.name, args.format)
             print(draft["script"])
             print(f"\nAffiliate: {draft['affiliate_link']}")
+        elif args.cmd == "mark-ready":
+            item = mark_ready(args.name, verdict=args.verdict, note=args.note)
+            print(f"Marked ready: {item['name']} (status={item['status']})")
+        elif args.cmd == "mark-posted":
+            plats = [p.strip() for p in args.platforms.split(",") if p.strip()]
+            result = mark_posted(args.name, platforms=plats, where=args.where, note=args.note)
+            print(f"Posted: {result['catalog_item']['name']} -> {plats or '(no platforms)'}")
+            print(f"Review entry: {result['review_entry']['id']}")
+        elif args.cmd == "shipped":
+            for r in shipped_reviews():
+                plats = ",".join(r.get("platforms", [])) or "-"
+                where = r.get("where", "") or "-"
+                print(f"  {r['posted_at']} {r['name']} [{r.get('lane')}] {plats} {where}")
         elif args.cmd == "next":
             for a in next_actions():
                 print(f"[{a['type']}] {a['title']}\n  why: {a['why']}\n  run: {a['command']}\n")
@@ -1142,6 +1282,13 @@ def main(argv: Optional[List[str]] = None) -> int:
                     "  M9 blockers (need ASINs to feature): "
                     + ", ".join(summary["missing_asin_names"])
                 )
+            ship = shipped_summary()
+            by_lane_str = ", ".join(f"{k}:{v}" for k, v in sorted(ship["by_lane"].items())) or "none"
+            print(
+                f"Shipped reviews: {ship['total']} ({by_lane_str})"
+            )
+            if ship["last_posted_at"]:
+                print(f"  last posted: {ship['last_posted_at']}")
             print(f"Social queue: {len(social_queue())}")
         elif args.cmd == "store-add":
             item = store_add(args.name, args.asin, args.category, args.notes)

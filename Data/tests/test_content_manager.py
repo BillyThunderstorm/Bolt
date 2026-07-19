@@ -111,6 +111,49 @@ class ContentManagerTests(unittest.TestCase):
         self.assertIn("verify_status", item)
         self.assertIn(item["verify_status"], {"ok", "no_match", "error"})
 
+    def test_mark_ready_requires_draft(self):
+        # An item with no draft can't be marked ready.
+        cm.add_item("NoDraftYet", lane="tech", status="testing")
+        with self.assertRaises(ValueError) as ctx:
+            cm.mark_ready("NoDraftYet")
+        self.assertIn("no draft", str(ctx.exception).lower())
+
+    def test_mark_ready_then_posted_records_review(self):
+        # Build a draft, mark it ready, then post it. The shipped
+        # summary should reflect the post.
+        cm.add_item("ShipMe", lane="tech", status="testing", asin="B0SHIP1")
+        cm.add_note("ShipMe", "It works, sound is clear.")
+        cm.add_note("ShipMe", "Mic arm is flimsy but the audio is good.")
+        cm.build_draft("ShipMe", format="short")
+        ready = cm.mark_ready("ShipMe", verdict="Recommended for budget buyers")
+        self.assertEqual(ready["status"], "ready")
+        self.assertEqual(ready["verdict"], "Recommended for budget buyers")
+
+        result = cm.mark_posted(
+            "ShipMe", platforms=["tiktok", "youtube_shorts"], where="vid_12345"
+        )
+        self.assertEqual(result["catalog_item"]["status"], "posted")
+        self.assertEqual(result["catalog_item"]["posted_platforms"], ["tiktok", "youtube_shorts"])
+        self.assertEqual(result["review_entry"]["name"], "ShipMe")
+        self.assertEqual(result["review_entry"]["where"], "vid_12345")
+
+        ship = cm.shipped_summary()
+        self.assertEqual(ship["total"], 1)
+        self.assertEqual(ship["by_lane"].get("tech"), 1)
+        self.assertIsNotNone(ship["last_posted_at"])
+
+        reviews = cm.shipped_reviews()
+        self.assertEqual(reviews[0]["name"], "ShipMe")
+        self.assertIn("tiktok", reviews[0]["platforms"])
+
+    def test_mark_posted_refuses_unready_items(self):
+        # An idea-status item (never tested, never drafted) can't be
+        # marked posted.
+        cm.add_item("NotReady", lane="tech", status="idea")
+        with self.assertRaises(ValueError) as ctx:
+            cm.mark_posted("NotReady", platforms=["tiktok"])
+        self.assertIn("mark it ready", str(ctx.exception).lower())
+
     def test_sponsors_find_game(self):
         found = cm.sponsors_find(lane="game", limit=3)
         self.assertTrue(found)
