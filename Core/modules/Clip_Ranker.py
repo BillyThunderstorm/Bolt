@@ -32,7 +32,8 @@ try:
 except ImportError:
     GeneratedClip = object
 
-HISTORY_FILE = "clip_history.json"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]  # Bolt/ (repo root)
+HISTORY_FILE = PROJECT_ROOT / "Data" / "clip_history.json"
 
 # ── Quality tiers ─────────────────────────────────────────────────────────────
 # Three lanes for ranked clips:

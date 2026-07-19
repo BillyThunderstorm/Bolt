@@ -64,13 +64,13 @@ RULES: List[Tuple[str, str, str]] = [
     # Bulk media / state files that should never sit at the repo root.
     (
         "clip_history.json",
-        "Data/data/clip_history.json",
+        "Data/clip_history.json",
         "Clip history is a data file, not a project artifact.",
     ),
     (
         "seen_clips.json",
-        "Data/data/seen_clips.json",
-        "Dedup state belongs under Data/data/.",
+        "Data/seen_clips.json",
+        "Dedup state belongs under Data/.",
     ),
     (
         "structure.txt",

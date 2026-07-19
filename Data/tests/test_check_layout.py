@@ -113,7 +113,7 @@ class FindMisplacedTests(unittest.TestCase):
         self.assertFalse(payload["ok"])
         self.assertEqual(payload["count"], 1)
         self.assertEqual(payload["findings"][0]["file"], "clip_history.json")
-        self.assertEqual(payload["findings"][0]["expected"], "Data/data/clip_history.json")
+        self.assertEqual(payload["findings"][0]["expected"], "Data/clip_history.json")
 
 
 if __name__ == "__main__":
