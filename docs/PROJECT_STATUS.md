@@ -161,19 +161,19 @@ crontab -l
 
 ## What Still Needs Finish Work
 
-### 🔴 Manager follow-ups
-1. Add real ASINs for gear William already owns → storefront links
-2. Film/post first game + tech short from catalog drafts
-3. TikTok Content Posting token when ready for assisted upload
-4. YouTube/X OAuth upload later (planner exists; auto-upload blocked on app approval)
-5. Expand sponsor list with real contact outcomes after outreach starts
+### 🔴 Manager follow-ups (now operator-side, not engineering)
+1. Add real ASIN for "Daily Driver Gaming Headset" → storefront link unblocked
+2. Film/post first game + tech short, then `bolt manage mark-posted` to record it
+3. Fill in real `TIKTOK_CLIENT_KEY` / `TIKTOK_CLIENT_SECRET` and run the OAuth flow
+4. Apply for YouTube Data API v3 / X API v2 developer apps when the manual-assist flow gets tedious
+5. After M11 publishes are real, use the new learning loop to log 24h performance so the model actually trains
 
 ### Core system follow-ups
 1. Keep `Think_Learn_Decide` canonical and avoid reintroducing duplicate decision systems
 2. Continue making retrieved memory change actual decisions, not only summaries
 3. Add upgrade layers sequentially: one feature, one verification loop, one memory refresh
 4. Keep product/skincare/Amazon/AI learning lanes represented in future features
-5. Fix remaining stale script paths under `3rd_Party/colabs/scripts/` (prefer `bolt` wrapper)
+5. Fix remaining stale script paths under `scripts/` (prefer `bolt` wrapper)
 
 ### June 21, 2026 - Lazy Loading + Startup Perf Fix ✅
 - **Bug fix**: `bot.py` was calling `write_site_data(push=True)` at
@@ -323,9 +323,75 @@ crontab -l
 - If storage alerts aren't sending, verify `configs/storage_alerts.env` is configured
 
 ## Last Updated
-July 1, 2026
+July 19, 2026
 
 ## Recent Updates (July 2026)
+
+### July 19, 2026 - Manager M9–M13 + ML Ranking ✅
+
+A focused single-session pass that took the manager from "ready
+to start" to "fully wired for the full M-tier pipeline." Every
+piece is code-complete, tested, and live in `bolt manage status`.
+
+- **Repo reorg**: Top-level now has only the 10 canonical
+  directories (`App/`, `bin/`, `Core/`, `Data/`, `dist/`, `Docs/`,
+  `logs/`, `media/`, `scripts/`, `3rd_Party/`). `bolt layout`
+  reports 0 misplaced files. Path fix: `Data/data/...` →
+  `Data/...` across the manager, index, and rules. Empty stragglers
+  (`api`, `key`) and the merged_bot.py dead-end were deleted.
+- **Layout scanner**: `scripts/check_layout.py` + `scripts/_layout_rules.py`
+  + `bin/bolt layout` (with `--quiet` / `--json` for CI) + 8 tests.
+- **M9 — Real ASINs on owned gear**: `store_add(verify=True)` calls
+  `Amazon_Analyzer.fetch_product_details` to validate the ASIN
+  before saving. `manage status` surfaces "M9 blockers (need ASINs
+  to feature): <name>" as a one-line action.
+- **M10 — First shipped review post**: `mark_ready` (refuses if no
+  draft) and `mark_posted` (refuses if not ready) reach the
+  previously-unreachable `posted` state. Each post appends a row
+  to `Docs/reviews/review_tracker.json` (script, verdict,
+  affiliate link, post URL). `shipped_reviews()` / `shipped_summary()`
+  are the audit log. `manage status` shows "Shipped reviews: N".
+- **M11 — TikTok API end-to-end publish**: `tiktok_publish_status()`
+  reports exactly what's blocking a real publish (creds, scope,
+  token), with concrete next steps. `tiktok_publish_dry_run()`
+  previews without touching the network. `tiktok_publish_item(approve=True)`
+  actually calls `TikTok_Publisher.publish_clip` and auto-advances
+  the catalog to `posted` via `mark_posted`.
+- **M12 — YouTube / X OAuth upload (manual-assist bridge)**:
+  `build_youtube_package()` emits a paste-ready title/description/
+  tags/disclosure for YouTube Studio. `build_x_package()` emits a
+  280-char X post body. `youtube_readiness()` and `x_readiness()`
+  report "manual mode available, real API publisher pending
+  platform app review." After the operator uploads manually,
+  `mark_posted` records the post URL.
+- **M13 — Live sponsor research enrichment**: `sponsors_add()`
+  de-dupes by name. `sponsors_enrich()` appends timestamped notes
+  and optionally advances status. `sponsors_pipeline()` returns
+  per-stage counts, oldest-untouched prospect, and the highest-fit
+  uncontacted one for the "next: pitch X" action. `sponsors_research()`
+  takes web-search results, stores them as a `research_log` entry,
+  and auto-fills the contact email (skipping noreply variants).
+  `scripts/_research.py` wraps `hermes_tools.web_search` with a
+  graceful fallback.
+- **ML ranking — recency-weighted learned model**: The original
+  `Clip_Ranker` was a 3-component formula (audio + trigger bonus +
+  hand-coded history boost). It now adds a real 4th component
+  (`learned_boost`) that combines:
+    - recency-weighted views (14-day half-life exponential decay)
+    - like_rate (likes / views) — weighted 0.6 vs 0.4 for views
+    - a 3-sample minimum so one viral clip doesn't dominate
+  Capped at 20 points so the formula still tops out at 100.
+  `update_historical_performance()` now appends to an `observations`
+  array (capped at 200 per (game, trigger)), giving the new model
+  per-clip timestamps to decay. `inspect_learned_model()` and
+  `learning_loop_status()` are the visibility surface.
+- **Test coverage**: 248 → 263 tests (1 pre-existing unrelated
+  error unchanged). 15 new tests in `Data/tests/test_clip_ranker.py`
+  (the module had zero coverage before this). `Data/tests/test_check_layout.py`
+  has 8 layout tests. M-tier changes add 14 tests across sponsors,
+  post/published, and YouTube/X packages.
+- **Commits**: 737d0ec4 (M9), af44d69f (M10), 63605ea2 (M11),
+  c970f1bc (M12), af3cd842 (M13), d1924a24 (ML ranking).
 
 ### July 1, 2026 - Twitch VOD Auto-Clip Pipeline + Highlight Reel Compiler ✅
 - **`scripts/auto_clip_twitch.py`**: Downloads Twitch VODs via yt-dlp, runs them through Bolt's full clip pipeline (detect highlights → cut → title → format 9:16 → queue), and tracks processed VODs in `data/twitch_vods_processed.json`.

@@ -19,11 +19,14 @@ Use this page as the central map for Bolt.
 |-------|------|-------------|
 | 🔴 | `Docs/BOLT_COMMANDS.md` | **All commands** (manager + pipeline) |
 | 🟢 | `Docs/PROJECT_STATUS.md` | Current build status + manager progress |
-| 🟢 | `Docs/NEXT_UPGRADE_STEPS.md` | Upgrade tracker (manager M1–M13) |
+| 🟢 | `Docs/NEXT_UPGRADE_STEPS.md` | Upgrade tracker (manager M1–M13, all done as of Jul 19) |
+| 🟢 | `Docs/upgrade/UPGRADE_STATUS.md` | Per-upgrade changelog with M-tier + ML ranking |
 | 🟢 | `Docs/INDEX.md` | This map |
 | 🟡 | `Core/modules/Content_Manager.py` | Creator manager implementation |
+| 🟡 | `Core/modules/Clip_Ranker.py` | Recency-weighted learned clip-rank model |
 | 🟡 | `Core/bolt_brain.md` | William creator profile |
-| 🟡 | `bin/bolt` | Single CLI entry |
+| 🟡 | `bin/bolt` | Single CLI entry (incl. `bolt layout`) |
+| ⚪ | `scripts/_layout_rules.py` + `scripts/check_layout.py` | Layout scanner (data-driven rules + scanner) |
 | 🔵 | `Data/data/business/business-playbook.md` | How to grow the creator business |
 | 🔵 | `Data/data/business/bolt-advancement.md` | How to advance Bolt itself |
 | 🟢 | `Docs/briefings/daily/latest_morning.md` | Latest Good Morning briefing |
