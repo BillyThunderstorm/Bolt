@@ -154,6 +154,102 @@ class ContentManagerTests(unittest.TestCase):
             cm.mark_posted("NotReady", platforms=["tiktok"])
         self.assertIn("mark it ready", str(ctx.exception).lower())
 
+    def test_tiktok_publish_status_reports_missing_creds(self):
+        # With no real creds in .env, the status report should flag
+        # exactly what's missing and give actionable next steps.
+        st = cm.tiktok_publish_status()
+        self.assertIn("checks", st)
+        self.assertIn("next_steps", st)
+        # ready=False unless someone has filled in real values
+        self.assertFalse(st["ready"])
+        # At least one of the next_steps should mention the OAuth flow
+        self.assertTrue(any("tiktok_token" in s for s in st["next_steps"]))
+
+    def test_tiktok_publish_status_with_fake_full_env(self):
+        # Pretend .env is fully populated. Use a temp env file via
+        # monkey-patching load_env.
+        from modules import TikTok_Auth as auth
+        real_load = auth.load_env
+
+        def fake_load():
+            return {
+                "TIKTOK_CLIENT_KEY": "key123",
+                "TIKTOK_CLIENT_SECRET": "secret-abc",
+                "TIKTOK_ACCESS_TOKEN": "act.real.token",
+                "TIKTOK_SCOPE": "user.info.basic,video.publish",
+            }
+
+        with mock.patch.object(auth, "load_env", fake_load):
+            st = cm.tiktok_publish_status()
+            self.assertTrue(st["ready"])
+            self.assertTrue(all(c["ok"] for c in st["checks"]))
+        # restore
+        auth.load_env = real_load
+
+    def test_tiktok_publish_item_refuses_without_approve(self):
+        # The approval gate must be enforced — even with valid creds.
+        cm.add_item("PostMe", lane="tech", status="testing", asin="B0POST1")
+        cm.add_note("PostMe", "Works fine")
+        cm.build_draft("PostMe", format="short")
+        cm.mark_ready("PostMe")
+        with self.assertRaises(PermissionError) as ctx:
+            cm.tiktok_publish_item("PostMe", approve=False)
+        self.assertIn("--approve", str(ctx.exception).lower())
+
+    def test_tiktok_publish_dry_run_does_not_touch_network(self):
+        # Build a draft, dry-run should report what would happen
+        # without actually publishing.
+        cm.add_item("DryRunMe", lane="tech", status="testing", asin="B0DRY1")
+        cm.add_note("DryRunMe", "Sample note")
+        cm.build_draft("DryRunMe", format="short")
+        # build_draft itself moves testing -> drafting; that's documented.
+        # The dry-run must NOT advance it further (still 'drafting', not
+        # 'ready' or 'posted').
+        result = cm.tiktok_publish_dry_run("DryRunMe")
+        self.assertEqual(result["name"], "DryRunMe")
+        self.assertIn("publisher_status", result)
+        still = next(
+            i for i in cm.list_items() if i["name"] == "DryRunMe"
+        )
+        self.assertEqual(still["status"], "drafting")
+
+    def test_tiktok_publish_item_with_mocked_publisher(self):
+        # Mock the actual TikTok call to confirm the bridge advances
+        # the catalog to 'posted' on success.
+        from modules import TikTok_Publisher as tp
+
+        def fake_publish(video_path, title, hashtags=None, **kwargs):
+            return {
+                "success": True,
+                "publish_id": "pub_abc",
+                "url": "https://www.tiktok.com/video/abc",
+            }
+
+        cm.add_item("MockedPost", lane="tech", status="testing", asin="B0MOCK1")
+        cm.add_note("MockedPost", "Good value")
+        cm.build_draft("MockedPost", format="short")
+        cm.mark_ready("MockedPost")
+
+        with mock.patch.object(tp, "publish_clip", fake_publish):
+            with mock.patch.object(cm, "tiktok_publish_status",
+                                   return_value={"ready": True, "checks": [], "next_steps": []}):
+                # Touch a real video file so the path-resolution check passes
+                fake_video = cm.REPO_ROOT / "media" / "clips" / "mockedpost.mp4"
+                fake_video.parent.mkdir(parents=True, exist_ok=True)
+                fake_video.write_bytes(b"")
+                try:
+                    result = cm.tiktok_publish_item("MockedPost", approve=True)
+                    self.assertTrue(result["success"])
+                    self.assertEqual(result["url"], "https://www.tiktok.com/video/abc")
+                    self.assertEqual(
+                        result["post_record"]["catalog_item"]["status"], "posted"
+                    )
+                    self.assertEqual(
+                        result["post_record"]["review_entry"]["name"], "MockedPost"
+                    )
+                finally:
+                    fake_video.unlink(missing_ok=True)
+
     def test_sponsors_find_game(self):
         found = cm.sponsors_find(lane="game", limit=3)
         self.assertTrue(found)
