@@ -1,18 +1,10 @@
 {
     "game": "Gaming",
     "highlight_sensitivity": 0.7,
-    "recordings_folder": "media/Recordings",
-    "clips_folder": "media/clips",
-    "vertical_clips_folder": "media/vertical_clips",
+    "recordings_folder": "recordings",
+    "clips_folder": "clips",
+    "vertical_clips_folder": "vertical_clips",
     "use_brain": true,
     "use_voice": true,
-    "use_twitch": false,
-    "max_clips_per_session": 5,
-    "min_clip_score": 65,
-    "min_post_score": 65,
-    "tiktok_style": "letterbox",
-    "min_clip_duration": 15,
-    "max_clip_duration": 60,
-    "use_obs_integration": false,
-    "skip_checklist": true
+    "use_twitch": false
 }
