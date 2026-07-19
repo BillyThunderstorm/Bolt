@@ -28,14 +28,14 @@ from typing import Any, Dict, Iterable, List, Optional
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]  # Bolt/ (repo root)
-MEMORY_DIR = PROJECT_ROOT / "Data" / "data" / "memory"
-DATA_DIR = PROJECT_ROOT / "Data" / "data"
-LOGS_DIR = PROJECT_ROOT / "Data" / "data" / "logs"
+MEMORY_DIR = PROJECT_ROOT / "Data" / "memory"
+DATA_DIR = PROJECT_ROOT / "Data"
+LOGS_DIR = PROJECT_ROOT / "Data" / "logs"
 
 MEMORY_INDEX_FILE = DATA_DIR / "memory_index.json"
 UNIFIED_MEMORY_FILE = DATA_DIR / "unified_memory.jsonl"
 PROCESSED_RECORDINGS_FILE = DATA_DIR / "processed_recordings.json"
-SEEN_CLIPS_FILE = PROJECT_ROOT / "seen_clips.json"
+SEEN_CLIPS_FILE = DATA_DIR / "seen_clips.json"
 DECISION_AUDIT_FILE = LOGS_DIR / "decision_audit.log"
 PERFORMANCE_OUTCOMES_FILE = DATA_DIR / "performance_outcomes.jsonl"
 VECTOR_DIMENSIONS = 256

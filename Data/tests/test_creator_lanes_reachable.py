@@ -45,20 +45,20 @@ from modules.Memory_Index import MEMORY_INDEX_FILE
 # (lane label, natural query, expected source substrings)
 LANES = [
     ("gaming",            "game testing review verdict honest",
-     ["Data/data/content/game-testing.md"]),
+     ["Data/content/game-testing.md"]),
     ("tech",              "tech learning gadget review first impressions",
-     ["Data/data/content/product-reviews.md"]),
+     ["Data/content/product-reviews.md"]),
     ("AI development",    "AI development learning bolt building",
-     ["Data/data/content/ai-development.md"]),
+     ["Data/content/ai-development.md"]),
     ("product testing",   "product testing first impressions verdict review",
-     ["Data/data/content/product-reviews.md"]),
+     ["Data/content/product-reviews.md"]),
     ("Amazon storefront", "amazon influencer storefront",
-     ["Data/data/content/product-reviews.md"]),
+     ["Data/content/product-reviews.md"]),
     ("beauty/skincare",   "beauty skincare routine test results",
-     ["Data/data/content/beauty-skincare.md"]),
+     ["Data/content/beauty-skincare.md"]),
     ("Bolt-building",     "build bolt virtual teammate features roadmap",
-     ["Data/data/content/ai-development.md",
-      "Data/data/content/assistant-productivity.md"]),
+     ["Data/content/ai-development.md",
+      "Data/content/assistant-productivity.md"]),
 ]
 
 TOP_N = 8  # How deep to look in the results before declaring "unreachable".
@@ -114,15 +114,15 @@ class CreatorLaneFilesExistTests(unittest.TestCase):
     """Guard against a lane file being deleted or renamed silently."""
 
     EXPECTED_FILES = [
-        Path("Data/data/content/game-testing.md"),
-        Path("Data/data/content/product-reviews.md"),
-        Path("Data/data/content/ai-development.md"),
-        Path("Data/data/content/beauty-skincare.md"),
-        Path("Data/data/content/assistant-productivity.md"),
-        Path("Data/data/content/full-creator-vision.md"),
-        Path("Data/data/content/live-streaming.md"),
-        Path("Data/data/content/content-creation.md"),
-        Path("Data/data/content/social-media-management.md"),
+        Path("Data/content/game-testing.md"),
+        Path("Data/content/product-reviews.md"),
+        Path("Data/content/ai-development.md"),
+        Path("Data/content/beauty-skincare.md"),
+        Path("Data/content/assistant-productivity.md"),
+        Path("Data/content/full-creator-vision.md"),
+        Path("Data/content/live-streaming.md"),
+        Path("Data/content/content-creation.md"),
+        Path("Data/content/social-media-management.md"),
     ]
 
     def test_all_lane_files_present(self):
@@ -140,12 +140,12 @@ class CreatorLaneContentQualityTests(unittest.TestCase):
     """
 
     EXPECTED_HEADINGS = {
-        Path("Data/data/content/game-testing.md"): ["direction", "review shape"],
-        Path("Data/data/content/product-reviews.md"): ["direction", "amazon"],
-        Path("Data/data/content/ai-development.md"): ["direction"],
-        Path("Data/data/content/beauty-skincare.md"): ["direction"],
-        Path("Data/data/content/assistant-productivity.md"): ["direction"],
-        Path("Data/data/content/full-creator-vision.md"): ["north star", "risk"],
+        Path("Data/content/game-testing.md"): ["direction", "review shape"],
+        Path("Data/content/product-reviews.md"): ["direction", "amazon"],
+        Path("Data/content/ai-development.md"): ["direction"],
+        Path("Data/content/beauty-skincare.md"): ["direction"],
+        Path("Data/content/assistant-productivity.md"): ["direction"],
+        Path("Data/content/full-creator-vision.md"): ["north star", "risk"],
     }
 
     def test_each_lane_has_meaningful_content(self):
