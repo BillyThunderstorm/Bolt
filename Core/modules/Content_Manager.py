@@ -1447,6 +1447,279 @@ def sponsors_log(name: str, status: str, note: str = "") -> Dict[str, Any]:
     return row
 
 
+# ---------------------------------------------------------------------------
+# M13: live sponsor research enrichment + pipeline
+#
+# M13 is "live sponsor research enrichment". The static seed in
+# sponsors.json is a starting list of 10 hand-picked brands. "Live"
+# enrichment means: as you do research and outreach, the list grows
+# with notes, links, contact attempts, and real pipeline state.
+#
+# This adds three things on top of the existing seed:
+#   - sponsors_add(): proper creation (vs the side-effect in
+#     sponsors_log), with lanes, type, fit, and an initial note.
+#   - sponsors_enrich(): append a timestamped note/link to an
+#     existing prospect without changing its pipeline state.
+#   - sponsors_pipeline(): a per-stage summary so manage status can
+#     show the real outreach state, not just "10 prospects".
+# ---------------------------------------------------------------------------
+
+PIPELINE_STAGES = (
+    "prospect",      # not contacted yet
+    "pitch_ready",   # pitch drafted, not sent
+    "contacted",     # pitch sent, awaiting reply
+    "replied",       # they responded (positive or negative)
+    "negotiating",   # terms/deal in discussion
+    "won",           # deal closed
+    "lost",          # passed / no fit
+    "shelved",       # paused, revisit later
+)
+
+
+def sponsors_add(
+    name: str,
+    lanes: Optional[List[str]] = None,
+    type: str = "brand",
+    fit: int = 5,
+    contact: str = "",
+    note: str = "",
+) -> Dict[str, Any]:
+    """Create a new sponsor prospect. De-dupes by case-insensitive
+    name: if a prospect with this name already exists, return it
+    unchanged rather than creating a duplicate.
+
+    `lanes` is a list like ['game', 'tech']. Defaults to
+    PREFERRED_LANES if not given.
+    """
+    data = load_sponsors()
+    name_key = name.strip()
+    if not name_key:
+        raise ValueError("Sponsor name cannot be empty.")
+    for p in data.get("prospects", []):
+        if p.get("name", "").lower() == name_key.lower():
+            return p  # de-dupe: caller can enrich if they want
+    lanes = lanes or list(PREFERRED_LANES)
+    # Filter to valid lanes; warn silently on unknowns.
+    lanes = [l for l in lanes if l in LANES] or list(PREFERRED_LANES)
+    fit = max(1, min(10, int(fit)))
+    row = {
+        "id": _slug(name_key),
+        "name": name_key,
+        "lanes": lanes,
+        "type": type,
+        "fit": fit,
+        "contact": contact,
+        "why": note or "Added via bolt sponsors add",
+        "status": "prospect",
+        "outreach": [],
+        "notes": [{"text": note, "at": _now_iso()}] if note else [],
+        "added_at": _now_iso(),
+    }
+    data.setdefault("prospects", []).append(row)
+    save_sponsors(data)
+    return row
+
+
+def sponsors_enrich(name: str, note: str = "", link: str = "", mark_contacted: bool = False) -> Dict[str, Any]:
+    """Append a timestamped note (and optional link) to an existing
+    prospect. Optionally also advance status from 'pitch_ready' to
+    'contacted' if you mark_contacted=True — i.e. "I just sent the
+    pitch email, here's the link to the thread".
+
+    The note/link is stored in the prospect's `notes` array (not
+    `outreach`, which is reserved for pipeline transitions). The
+    `outreach` array gets a new entry only if mark_contacted=True.
+    """
+    data = load_sponsors()
+    key = name.lower()
+    for p in data.get("prospects", []):
+        if key in p.get("name", "").lower() or p.get("id") == key:
+            entry = {"at": _now_iso()}
+            if note:
+                entry["text"] = note
+            if link:
+                entry["link"] = link
+            p.setdefault("notes", []).append(entry)
+            if mark_contacted:
+                p["status"] = "contacted"
+                p.setdefault("outreach", []).append(
+                    {"status": "contacted", "note": note or link, "at": _now_iso()}
+                )
+            save_sponsors(data)
+            return p
+    raise ValueError(
+        f"No sponsor prospect matching '{name}'. Add it first with "
+        f"`bolt sponsors add \"{name}\"`."
+    )
+
+
+# ---------------------------------------------------------------------------
+# M13: live web-research enrichment
+#
+# The above functions are operator-typed. sponsors_research() is the
+# live part: it takes a web-search query (and the results it returned),
+# attaches them to a prospect as a timestamped `research` entry, and
+# optionally updates the prospect's `why`/`contact` fields based on
+# what was found.
+#
+# Decoupled from the network on purpose: the caller passes in the
+# search results, so the function is testable without internet. The
+# CLI command `bolt manage sponsors-research NAME QUERY` is the
+# caller that actually fetches results (via the project's web_search
+# helper or a similar tool).
+# ---------------------------------------------------------------------------
+
+
+def sponsors_research(
+    name: str,
+    query: str,
+    results: List[Dict[str, str]],
+    update_contact: bool = True,
+) -> Dict[str, Any]:
+    """Attach web-search findings to a sponsor prospect.
+
+    `results` is a list of {"url", "title", "description"} dicts
+    (the shape the standard web_search tool returns). The function
+    stores the query and the results as a single `research` entry on
+    the prospect, and — if `update_contact` is True and a contact
+    email was found in the results — sets the prospect's `contact`
+    field to the first plausible email address.
+
+    Returns the updated prospect row.
+    """
+    if not query.strip():
+        raise ValueError("Research query cannot be empty.")
+    data = load_sponsors()
+    key = name.lower()
+    for p in data.get("prospects", []):
+        if key in p.get("name", "").lower() or p.get("id") == key:
+            # Drop empty/None entries; keep only dicts with at least
+            # a url or title so the saved data stays useful.
+            cleaned = []
+            for r in results or []:
+                if not isinstance(r, dict):
+                    continue
+                if r.get("url") or r.get("title"):
+                    cleaned.append({
+                        "url": r.get("url", ""),
+                        "title": r.get("title", ""),
+                        "description": r.get("description", "")[:500],
+                    })
+            entry = {
+                "at": _now_iso(),
+                "query": query,
+                "results": cleaned,
+                "result_count": len(cleaned),
+            }
+            p.setdefault("research_log", []).append(entry)
+
+            if update_contact and not p.get("contact"):
+                email = _extract_first_email(cleaned)
+                if email:
+                    p["contact"] = email
+                    p.setdefault("notes", []).append({
+                        "at": _now_iso(),
+                        "text": f"Auto-set contact from research query '{query}': {email}",
+                    })
+            save_sponsors(data)
+            return p
+    raise ValueError(
+        f"No sponsor prospect matching '{name}'. Add it first with "
+        f"`bolt sponsors add \"{name}\"`."
+    )
+
+
+import re as _re  # local alias to avoid shadowing any other `re`
+
+
+def _extract_first_email(results: List[Dict[str, str]]) -> str:
+    """Pull the first plausible email address out of search-result
+    descriptions. Looks for `name@domain.tld` patterns. Stops at the
+    first hit and returns it lowercased. Returns "" if nothing found.
+    """
+    pattern = _re.compile(r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}")
+    for r in results:
+        for field in ("description", "title", "url"):
+            text = r.get(field, "") or ""
+            match = pattern.search(text)
+            if match:
+                # Skip common noreply/no-reply variants — they can't
+                # be replied to.
+                lower = match.group(0).lower()
+                if lower.startswith(("noreply", "no-reply", "donotreply", "do-not-reply")):
+                    continue
+                return lower
+    return ""
+
+
+def sponsors_pipeline() -> Dict[str, Any]:
+    """Summarize the sponsor pipeline so `manage status` can show
+    where the outreach actually stands.
+
+    Returns a dict with:
+      - by_stage: count per PIPELINE_STAGES (zero-filled)
+      - total: total prospect count
+      - active: anything not in (won, lost, shelved)
+      - oldest_untouched: the prospect whose last note is oldest, as
+        a nudge to revisit
+      - top_fit_uncontacted: the highest-fit prospect still in
+        'prospect' or 'pitch_ready' stage, for the next action
+    """
+    data = load_sponsors()
+    prospects = data.get("prospects", [])
+
+    by_stage = {stage: 0 for stage in PIPELINE_STAGES}
+    for p in prospects:
+        stage = p.get("status", "prospect")
+        if stage in by_stage:
+            by_stage[stage] += 1
+        else:
+            by_stage["prospect"] += 1  # unknown stage counts as prospect
+
+    active = sum(
+        v for k, v in by_stage.items() if k not in ("won", "lost", "shelved")
+    )
+
+    # Find the prospect whose last contact/note is oldest.
+    def _last_ts(p: Dict[str, Any]) -> str:
+        timestamps = []
+        for entry in p.get("outreach", []) + p.get("notes", []):
+            if "at" in entry:
+                timestamps.append(entry["at"])
+        if timestamps:
+            return max(timestamps)
+        return p.get("added_at", "")
+
+    untouched = None
+    if prospects:
+        candidates = [p for p in prospects if p.get("status") not in ("won", "lost")]
+        if candidates:
+            untouched = min(candidates, key=_last_ts)
+
+    # Highest-fit uncontacted prospect.
+    uncontacted = [
+        p for p in prospects
+        if p.get("status") in ("prospect", "pitch_ready")
+    ]
+    top_fit = None
+    if uncontacted:
+        top_fit = max(uncontacted, key=lambda p: int(p.get("fit", 0)))
+
+    return {
+        "total": len(prospects),
+        "active": active,
+        "by_stage": by_stage,
+        "oldest_untouched": (
+            {"name": untouched.get("name"), "last_touched_at": _last_ts(untouched)}
+            if untouched else None
+        ),
+        "top_fit_uncontacted": (
+            {"name": top_fit.get("name"), "fit": top_fit.get("fit")}
+            if top_fit else None
+        ),
+    }
+
+
 def business_lesson() -> str:
     _ensure_seed_files()
     lessons = [
@@ -1684,6 +1957,35 @@ def main(argv: Optional[List[str]] = None) -> int:
     sub.add_parser("youtube-status", help="YouTube publishing readiness")
     sub.add_parser("x-status", help="X publishing readiness")
 
+    p_sadd = sub.add_parser("sponsors-add", help="Add a new sponsor prospect")
+    p_sadd.add_argument("name")
+    p_sadd.add_argument("--lanes", default="", help="comma-separated, e.g. game,tech")
+    p_sadd.add_argument("--type", default="brand")
+    p_sadd.add_argument("--fit", type=int, default=5)
+    p_sadd.add_argument("--contact", default="")
+    p_sadd.add_argument("--note", default="")
+
+    p_senrich = sub.add_parser("sponsors-enrich", help="Add a note/link to a prospect")
+    p_senrich.add_argument("name")
+    p_senrich.add_argument("--note", default="")
+    p_senrich.add_argument("--link", default="")
+    p_senrich.add_argument("--mark-contacted", action="store_true",
+                            help="Also advance status to 'contacted'")
+
+    sub.add_parser("sponsors-pipeline", help="Show sponsor outreach pipeline summary")
+
+    p_sres = sub.add_parser(
+        "sponsors-research",
+        help="Run a web search and attach findings to a sponsor prospect",
+    )
+    p_sres.add_argument("name")
+    p_sres.add_argument("query", help="Search query, e.g. 'Razer creator program'")
+    p_sres.add_argument("--limit", type=int, default=5)
+    p_sres.add_argument("--no-update-contact", action="store_true",
+                          help="Don't auto-fill the contact field from results")
+    p_sres.add_argument("--json", action="store_true",
+                          help="Output the raw search results as JSON instead of the prospect row")
+
     sub.add_parser("next", help="Show next actions")
     sub.add_parser("status", help="Manager status snapshot")
 
@@ -1799,6 +2101,69 @@ def main(argv: Optional[List[str]] = None) -> int:
             print("Next steps:")
             for s in st["next_steps"]:
                 print(f"  - {s}")
+        elif args.cmd == "sponsors-add":
+            lanes = [l.strip() for l in args.lanes.split(",") if l.strip()]
+            row = sponsors_add(
+                args.name,
+                lanes=lanes or None,
+                type=args.type,
+                fit=args.fit,
+                contact=args.contact,
+                note=args.note,
+            )
+            print(json.dumps(row, indent=2, default=str))
+        elif args.cmd == "sponsors-enrich":
+            row = sponsors_enrich(
+                args.name, note=args.note, link=args.link,
+                mark_contacted=args.mark_contacted,
+            )
+            print(json.dumps(row, indent=2, default=str))
+        elif args.cmd == "sponsors-pipeline":
+            p = sponsors_pipeline()
+            print(f"Total prospects: {p['total']}  (active: {p['active']})")
+            print("By stage:")
+            for stage, count in p["by_stage"].items():
+                print(f"  {stage:14s} {count}")
+            if p["oldest_untouched"]:
+                ot = p["oldest_untouched"]
+                print(f"Oldest untouched: {ot['name']} (last {ot['last_touched_at'] or 'never'})")
+            if p["top_fit_uncontacted"]:
+                tf = p["top_fit_uncontacted"]
+                print(f"Top uncontacted:  {tf['name']} (fit={tf['fit']})")
+        elif args.cmd == "sponsors-research":
+            # Try to use the project's web_search helper if available;
+            # otherwise print a clear error so the operator can run
+            # the search elsewhere and call sponsors_research directly.
+            try:
+                from scripts._research import web_search_results  # type: ignore
+            except Exception:
+                try:
+                    from _research import web_search_results  # type: ignore
+                except Exception:
+                    web_search_results = None
+            if web_search_results is None:
+                print(
+                    "No web_search helper available. Either run this from the "
+                    "agent environment, or call sponsors_research() with results "
+                    "you fetched yourself.",
+                    file=sys.stderr,
+                )
+                sys.exit(2)
+            results = web_search_results(args.query, limit=args.limit)
+            if args.json:
+                print(json.dumps(results, indent=2, default=str))
+                return 0
+            updated = sponsors_research(
+                args.name,
+                query=args.query,
+                results=results,
+                update_contact=not args.no_update_contact,
+            )
+            last = updated.get("research_log", [])[-1] if updated.get("research_log") else {}
+            print(f"Attached {last.get('result_count', 0)} results to {updated['name']}.")
+            if updated.get("contact"):
+                print(f"Contact now: {updated['contact']}")
+            print(json.dumps(updated, indent=2, default=str))
         elif args.cmd == "next":
             for a in next_actions():
                 print(f"[{a['type']}] {a['title']}\n  why: {a['why']}\n  run: {a['command']}\n")
@@ -1826,6 +2191,16 @@ def main(argv: Optional[List[str]] = None) -> int:
             )
             if ship["last_posted_at"]:
                 print(f"  last posted: {ship['last_posted_at']}")
+            sp = sponsors_pipeline()
+            stage_str = ", ".join(
+                f"{k}:{v}" for k, v in sp["by_stage"].items() if v
+            ) or "none"
+            print(
+                f"Sponsor pipeline: {sp['active']} active of {sp['total']} ({stage_str})"
+            )
+            if sp["top_fit_uncontacted"]:
+                tf = sp["top_fit_uncontacted"]
+                print(f"  next: pitch {tf['name']} (fit={tf['fit']})")
             print(f"Social queue: {len(social_queue())}")
         elif args.cmd == "store-add":
             item = store_add(args.name, args.asin, args.category, args.notes)
