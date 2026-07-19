@@ -34,7 +34,7 @@ from uuid import uuid4
 
 # Repo root: Core/modules/thisfile -> parents[2]
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = REPO_ROOT / "Data" / "data"
+DATA_DIR = REPO_ROOT / "Data"
 CONTENT_DIR = DATA_DIR / "content"
 BUSINESS_DIR = DATA_DIR / "business"
 DOCS_REVIEWS = REPO_ROOT / "Docs" / "reviews"
@@ -640,12 +640,21 @@ def next_actions(limit: int = 3) -> List[Dict[str, str]]:
     return actions[:limit]
 
 
-def store_add(name: str, asin: str = "", category: str = "tech", notes: str = "") -> Dict[str, Any]:
+def store_add(name: str, asin: str = "", category: str = "tech", notes: str = "",
+              verify: bool = False) -> Dict[str, Any]:
+    """Add or update a storefront item.
+
+    If `verify` is True, calls `Amazon_Analyzer.fetch_product_details(asin)`
+    to confirm the ASIN resolves to a real Amazon product before saving.
+    On any network/HTTP error or missing product data, the item is still
+    saved but `verify_error` is recorded on the item so the operator
+    can fix the ASIN later.
+    """
     data = load_storefront()
     asin = asin.strip().upper()
     tag = data.get("affiliate_tag", AMAZON_TAG)
     link = f"https://www.amazon.com/dp/{asin}/?tag={tag}" if asin else ""
-    item = {
+    item: Dict[str, Any] = {
         "id": _slug(name),
         "name": name.strip(),
         "asin": asin,
@@ -655,6 +664,25 @@ def store_add(name: str, asin: str = "", category: str = "tech", notes: str = ""
         "notes": notes,
         "added_at": _now_iso(),
     }
+
+    # Optional: verify the ASIN resolves to a real product. Network failures
+    # are recorded but never block the add.
+    if verify and asin:
+        item["verify_status"] = "pending"
+        try:
+            from modules.Amazon_Analyzer import fetch_product_details
+            details = fetch_product_details(asin)
+            title = details.get("title") if isinstance(details, dict) else None
+            if title and "Unknown" not in str(title):
+                item["verified_title"] = title
+                item["verify_status"] = "ok"
+            else:
+                item["verify_status"] = "no_match"
+                item["verify_error"] = "Amazon did not return a product title for this ASIN"
+        except Exception as exc:  # network / import / parse
+            item["verify_status"] = "error"
+            item["verify_error"] = f"{type(exc).__name__}: {exc}"
+
     # de-dupe by asin or name
     items = data.setdefault("items", [])
     for existing in items:
@@ -674,6 +702,26 @@ def store_add(name: str, asin: str = "", category: str = "tech", notes: str = ""
 
 def store_list() -> List[Dict[str, Any]]:
     return load_storefront().get("items", [])
+
+
+def store_missing_asins() -> List[Dict[str, Any]]:
+    """Return storefront items that have no ASIN. These are the items
+    blocking M9 (real ASINs on owned gear) and the items that should
+    be featured first once an ASIN is attached."""
+    return [i for i in store_list() if not (i.get("asin") or "").strip()]
+
+
+def store_summary() -> Dict[str, Any]:
+    """Compact summary for `manage status` and the morning briefing."""
+    items = store_list()
+    with_asin = [i for i in items if (i.get("asin") or "").strip()]
+    without_asin = [i for i in items if not (i.get("asin") or "").strip()]
+    return {
+        "total": len(items),
+        "with_asin": len(with_asin),
+        "missing_asin": len(without_asin),
+        "missing_asin_names": [i.get("name", "?") for i in without_asin],
+    }
 
 
 def store_feature_next() -> Dict[str, Any]:
@@ -1083,7 +1131,17 @@ def main(argv: Optional[List[str]] = None) -> int:
             print(f"Amazon tag: {AMAZON_TAG}")
             print(f"Approval required: {REQUIRE_POST_APPROVAL}")
             print(f"Catalog items: {len(list_items())}")
-            print(f"Storefront items: {len(store_list())}")
+            summary = store_summary()
+            print(
+                f"Storefront items: {summary['total']} "
+                f"({summary['with_asin']} with ASIN, "
+                f"{summary['missing_asin']} missing ASIN)"
+            )
+            if summary["missing_asin"]:
+                print(
+                    "  M9 blockers (need ASINs to feature): "
+                    + ", ".join(summary["missing_asin_names"])
+                )
             print(f"Social queue: {len(social_queue())}")
         elif args.cmd == "store-add":
             item = store_add(args.name, args.asin, args.category, args.notes)

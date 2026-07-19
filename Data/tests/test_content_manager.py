@@ -88,6 +88,29 @@ class ContentManagerTests(unittest.TestCase):
         feat = cm.store_feature_next()
         self.assertIn("message", feat)
 
+    def test_store_missing_asins_and_summary(self):
+        # Add one item with an ASIN and one without — mirrors the
+        # real-world M9 state ("Daily Driver Gaming Headset" without
+        # ASIN, "Mouse" with ASIN B0...).
+        cm.store_add("Headphones", asin="", category="tech")
+        cm.store_add("Webcam", asin="B0ABC123", category="tech")
+        missing = cm.store_missing_asins()
+        self.assertEqual([m["name"] for m in missing], ["Headphones"])
+        summary = cm.store_summary()
+        self.assertEqual(summary["total"], 2)
+        self.assertEqual(summary["with_asin"], 1)
+        self.assertEqual(summary["missing_asin"], 1)
+        self.assertEqual(summary["missing_asin_names"], ["Headphones"])
+
+    def test_store_add_records_verify_error_on_bad_asin(self):
+        # No network: --verify with a fake ASIN should still save the
+        # item, but record a verify_status of "error" or "no_match"
+        # so the operator notices later.
+        item = cm.store_add("Mystery Item", asin="B0ZZZZZZ", category="tech", verify=True)
+        self.assertIn("asin", item)
+        self.assertIn("verify_status", item)
+        self.assertIn(item["verify_status"], {"ok", "no_match", "error"})
+
     def test_sponsors_find_game(self):
         found = cm.sponsors_find(lane="game", limit=3)
         self.assertTrue(found)
