@@ -1986,6 +1986,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_sres.add_argument("--json", action="store_true",
                           help="Output the raw search results as JSON instead of the prospect row")
 
+    p_inspect = sub.add_parser(
+        "model-inspect",
+        help="Show the learned clip-ranking model state (per game, per trigger)",
+    )
+    p_inspect.add_argument("--game", default=None, help="Limit to one game")
+
+    sub.add_parser("model-status", help="Show learning loop summary")
+
     sub.add_parser("next", help="Show next actions")
     sub.add_parser("status", help="Manager status snapshot")
 
@@ -2164,6 +2172,47 @@ def main(argv: Optional[List[str]] = None) -> int:
             if updated.get("contact"):
                 print(f"Contact now: {updated['contact']}")
             print(json.dumps(updated, indent=2, default=str))
+        elif args.cmd == "model-inspect":
+            from modules.Clip_Ranker import inspect_learned_model, LEARNED_MIN_SAMPLES
+            model = inspect_learned_model(game=args.game)
+            print(f"Games with data: {model['summary']['total_games']}")
+            print(
+                f"Triggers with signal (>= {LEARNED_MIN_SAMPLES} samples): "
+                f"{model['summary']['triggers_with_signal']}"
+            )
+            print(
+                f"Triggers without signal: {model['summary']['triggers_without_signal']}"
+            )
+            print()
+            for game, gdata in model["games"].items():
+                if args.game and args.game != game:
+                    continue
+                print(f"=== {game} ===")
+                for t in gdata["triggers"]:
+                    print(
+                        f"  {t['trigger']:14s} n={t['samples']:4d} "
+                        f"avg_views={t['avg_views']:>8.0f} "
+                        f"like_rate={t['like_rate']:.2%} "
+                        f"boost={t['learned_boost']:>5.1f}"
+                    )
+                print()
+        elif args.cmd == "model-status":
+            from modules.Clip_Ranker import learning_loop_status
+            ll = learning_loop_status()
+            print(f"Total outcomes logged: {ll['total_outcomes']}")
+            print(f"Last observation: {ll['last_observation_at'] or 'never'}")
+            print(
+                f"(game, trigger) pairs with signal: {ll['pairs_with_signal']} "
+                f"of {ll['pairs_total']}"
+            )
+            if ll["top_boost"]:
+                tb = ll["top_boost"]
+                print(
+                    f"Top boost: {tb['trigger']} on {tb['game']} "
+                    f"(+{tb['boost']}, {tb['samples']} samples)"
+                )
+            else:
+                print("No (game, trigger) pair has enough data yet.")
         elif args.cmd == "next":
             for a in next_actions():
                 print(f"[{a['type']}] {a['title']}\n  why: {a['why']}\n  run: {a['command']}\n")
@@ -2201,6 +2250,21 @@ def main(argv: Optional[List[str]] = None) -> int:
             if sp["top_fit_uncontacted"]:
                 tf = sp["top_fit_uncontacted"]
                 print(f"  next: pitch {tf['name']} (fit={tf['fit']})")
+            # Learning loop: how much signal is the ranker model
+            # actually working with?
+            from modules.Clip_Ranker import learning_loop_status
+            ll = learning_loop_status()
+            print(
+                f"Learning loop: {ll['pairs_with_signal']}/{ll['pairs_total']} "
+                f"(game, trigger) pairs have signal "
+                f"({ll['total_outcomes']} outcomes)"
+            )
+            if ll["top_boost"]:
+                tb = ll["top_boost"]
+                print(
+                    f"  top boost: {tb['trigger']} on {tb['game']} "
+                    f"(+{tb['boost']}, {tb['samples']} samples)"
+                )
             print(f"Social queue: {len(social_queue())}")
         elif args.cmd == "store-add":
             item = store_add(args.name, args.asin, args.category, args.notes)
