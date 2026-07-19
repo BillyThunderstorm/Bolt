@@ -1079,6 +1079,248 @@ def social_status() -> Dict[str, Any]:
     return load_social()
 
 
+# ---------------------------------------------------------------------------
+# Per-platform manual-assist package generators (M12)
+#
+# YouTube and X are flagged as `upload_mode: "manual_assisted"` in
+# social_connections.json because real OAuth app review is still
+# pending. Until that's granted, the best we can do is generate the
+# exact text to paste into the upload UI on each platform, in the
+# format that platform expects (title length, description, tags,
+# disclosure). That gives the operator a one-command prep step and
+# keeps the M10 audit trail intact (mark_posted after upload).
+# ---------------------------------------------------------------------------
+
+
+def _platform_settings() -> Dict[str, Any]:
+    """Return the per-platform rules for title/description lengths,
+    tag style, and disclosure language. These come from the platforms'
+    own docs; if you need to tune them, edit here."""
+    return {
+        "youtube": {
+            "title_max": 100,
+            "description_max": 5000,
+            "tag_max": 30,  # per-tag char limit
+            "max_tags": 15,
+            "disclosure": (
+                "Includes affiliate links. As an Amazon Associate I earn from "
+                "qualifying purchases. Honest opinion only."
+            ),
+            "default_tags": ["gaming", "tech review", "honest review"],
+        },
+        "x": {
+            "title_max": 280,  # X post character limit
+            "description_max": 280,
+            "tag_max": 0,  # X doesn't use tags, uses @mentions + hashtags in body
+            "max_tags": 3,
+            "disclosure": "(affiliate link; honest opinion)",
+            "default_tags": [],
+        },
+    }
+
+
+def _truncate(text: str, limit: int) -> str:
+    if len(text) <= limit:
+        return text
+    return text[: max(0, limit - 1)].rstrip() + "…"
+
+
+def build_youtube_package(name: str) -> Dict[str, Any]:
+    """Build a YouTube-ready upload package for a catalog item:
+    title, description (with timestamps, links, disclosure), tags,
+    affiliate link. Designed to be pasted into the YouTube upload UI."""
+    settings = _platform_settings()["youtube"]
+    catalog = load_catalog()
+    item = _find_item(catalog, name)
+    if not item:
+        raise ValueError(f"No catalog item matching '{name}'.")
+    if not item.get("last_draft"):
+        raise ValueError(
+            f"'{item['name']}' has no draft. Run `bolt manage draft \"{item['name']}\"` first."
+        )
+
+    draft = item["last_draft"]
+    shape = draft.get("shape", {})
+    asin = item.get("asin", "")
+    affiliate = draft.get("affiliate_link", "")
+
+    # Title: short and search-friendly
+    base_title = f"{item['name']} — honest review"
+    title = _truncate(base_title, settings["title_max"])
+
+    # Description: hook, what it is, what worked, what didn't, who it's for,
+    # verdict, link, disclosure. Each on its own line for readability.
+    desc_lines = [
+        shape.get("first_impression", "First impression notes from real use."),
+        "",
+        "What worked:",
+        shape.get("what_worked", "Notes from the test journal."),
+        "",
+        "What got in the way:",
+        shape.get("what_got_in_the_way", "Honest friction points from the test."),
+        "",
+        "Who it's for:",
+        shape.get("who_it_is_for", "Practical buyers, not hype-chasers."),
+        "",
+        f"Verdict: {shape.get('verdict', 'Pending.')}",
+        "",
+    ]
+    if affiliate and not affiliate.startswith("("):
+        desc_lines.append(f"Buy it: {affiliate}")
+    else:
+        desc_lines.append("Buy it: (add ASIN to the catalog item for an Amazon link)")
+    desc_lines.extend([
+        "",
+        settings["disclosure"],
+        "",
+        f"#shorts  #review  #{item.get('lane', 'tech')}  #honest",
+    ])
+    description = _truncate("\n".join(desc_lines), settings["description_max"])
+
+    # Tags: include the item name words, the lane, the default tags,
+    # and a sanitized form of the verdict.
+    raw_tags = list(settings["default_tags"])
+    raw_tags.append(item.get("lane", "tech"))
+    raw_tags.append(item["name"].lower().replace(" ", "-")[: settings["tag_max"]])
+    verdict_word = (shape.get("verdict") or "").split()[0:1]
+    if verdict_word:
+        raw_tags.append(verdict_word[0].lower())
+    tags = []
+    seen = set()
+    for t in raw_tags:
+        t = t.strip().lstrip("#")
+        if not t or t in seen:
+            continue
+        seen.add(t)
+        tags.append(_truncate(t, settings["tag_max"]))
+        if len(tags) >= settings["max_tags"]:
+            break
+
+    return {
+        "platform": "youtube",
+        "platform_status": "manual_assisted",
+        "handle": "TBD",  # filled in by caller if needed
+        "title": title,
+        "description": description,
+        "tags": tags,
+        "affiliate_link": affiliate,
+        "category_suggestion": (
+            "Science & Technology" if item.get("lane") == "tech" else "Gaming"
+        ),
+        "upload_url": "https://studio.youtube.com/channel/upload",
+        "next_step": (
+            "Paste the title, description, and tags into the YouTube upload UI. "
+            "After the video is live, run: bolt manage mark-posted \"{name}\" "
+            "--platforms youtube_shorts --where <video_url>".format(name=item["name"])
+        ),
+    }
+
+
+def build_x_package(name: str) -> Dict[str, Any]:
+    """Build an X (Twitter)-ready post for a catalog item. Short by
+    design (280 chars), uses a single hashtag, points at the
+    long-form content (TikTok/YouTube) via the catalog item's last
+    draft."""
+    settings = _platform_settings()["x"]
+    catalog = load_catalog()
+    item = _find_item(catalog, name)
+    if not item:
+        raise ValueError(f"No catalog item matching '{name}'.")
+    if not item.get("last_draft"):
+        raise ValueError(
+            f"'{item['name']}' has no draft. Run `bolt manage draft \"{item['name']}\"` first."
+        )
+
+    draft = item["last_draft"]
+    shape = draft.get("shape", {})
+    verdict = (shape.get("verdict") or "Honest take").split(".")[0]
+    body = f"{item['name']}: {verdict}. {settings['disclosure']}"
+    post_text = _truncate(body, settings["title_max"])
+    hashtags = [f"#{item.get('lane', 'gaming')}"]
+
+    return {
+        "platform": "x",
+        "platform_status": "manual_assisted",
+        "handle": "TBD",
+        "post_text": post_text,
+        "hashtags": hashtags[: settings["max_tags"]],
+        "affiliate_link": draft.get("affiliate_link", ""),
+        "upload_url": "https://x.com/compose/post",
+        "next_step": (
+            "Paste post_text + hashtags into the X compose UI. "
+            "If the review has a video, attach it from your phone/desktop "
+            "X client after the text is composed. After it's posted, run: "
+            f"bolt manage mark-posted \"{item['name']}\" --platforms x "
+            "--where <post_url>"
+        ),
+    }
+
+
+def youtube_readiness() -> Dict[str, Any]:
+    """What M12 needs to switch from manual_assisted to real API
+    upload. Right now YouTube is always 'manual' because the OAuth
+    app review hasn't been done. This helper reports the gap and
+    lists the next steps."""
+    return {
+        "ready": False,  # always — until we build a real YouTube publisher
+        "checks": [
+            {
+                "name": "YouTube Data API v3 OAuth app",
+                "ok": False,
+                "detail": (
+                    "Not yet implemented. Until then, `bolt manage youtube-pkg` "
+                    "generates a paste-ready upload package."
+                ),
+            },
+            {
+                "name": "manual upload package generator",
+                "ok": True,
+                "detail": "Available now as `bolt manage youtube-pkg NAME`.",
+            },
+        ],
+        "next_steps": [
+            "Use `bolt manage youtube-pkg \"ITEM\"` to generate the title, "
+            "description, and tags to paste into the YouTube upload UI.",
+            "After the upload is live, run `bolt manage mark-posted \"ITEM\" "
+            "--platforms youtube_shorts --where <video_url>` to record it.",
+            "If/when you want a real API publisher: create a Google Cloud "
+            "project, enable YouTube Data API v3, set up OAuth consent screen, "
+            "get client_id/secret into .env, then build Core/modules/YouTube_Publisher.py "
+            "modeled on modules/TikTok_Publisher.py.",
+        ],
+    }
+
+
+def x_readiness() -> Dict[str, Any]:
+    """Same shape as youtube_readiness, for X."""
+    return {
+        "ready": False,
+        "checks": [
+            {
+                "name": "X API v2 OAuth app",
+                "ok": False,
+                "detail": (
+                    "Not yet implemented. Until then, `bolt manage x-pkg` "
+                    "generates a paste-ready post body."
+                ),
+            },
+            {
+                "name": "manual post package generator",
+                "ok": True,
+                "detail": "Available now as `bolt manage x-pkg NAME`.",
+            },
+        ],
+        "next_steps": [
+            "Use `bolt manage x-pkg \"ITEM\"` to generate the 280-char post body.",
+            "After the post is live, run `bolt manage mark-posted \"ITEM\" "
+            "--platforms x --where <post_url>` to record it.",
+            "For real API upload later: get an X developer app, set "
+            "X_API_KEY/X_API_SECRET/X_BEARER_TOKEN in .env, and build "
+            "Core/modules/X_Publisher.py.",
+        ],
+    }
+
+
 def social_package(name: str, platforms: Optional[List[str]] = None) -> Dict[str, Any]:
     draft = build_draft(name, format="short")
     social = load_social()
@@ -1428,6 +1670,20 @@ def main(argv: Optional[List[str]] = None) -> int:
         help="Report what's blocking a real TikTok publish (creds, scope, etc.)",
     )
 
+    p_yt = sub.add_parser(
+        "youtube-pkg",
+        help="Build a YouTube-ready upload package (manual-assist, M12)",
+    )
+    p_yt.add_argument("name")
+
+    p_x = sub.add_parser(
+        "x-pkg", help="Build an X (Twitter)-ready post body (manual-assist, M12)"
+    )
+    p_x.add_argument("name")
+
+    sub.add_parser("youtube-status", help="YouTube publishing readiness")
+    sub.add_parser("x-status", help="X publishing readiness")
+
     sub.add_parser("next", help="Show next actions")
     sub.add_parser("status", help="Manager status snapshot")
 
@@ -1519,6 +1775,30 @@ def main(argv: Optional[List[str]] = None) -> int:
                 print("Publisher is NOT ready. Next steps:")
                 for s in st["next_steps"]:
                     print(f"  - {s}")
+        elif args.cmd == "youtube-pkg":
+            pkg = build_youtube_package(args.name)
+            print(json.dumps(pkg, indent=2, default=str))
+        elif args.cmd == "x-pkg":
+            pkg = build_x_package(args.name)
+            print(json.dumps(pkg, indent=2, default=str))
+        elif args.cmd == "youtube-status":
+            st = youtube_readiness()
+            for c in st["checks"]:
+                mark = "OK  " if c["ok"] else "MISS"
+                print(f"  [{mark}] {c['name']}: {c['detail']}")
+            print()
+            print("Next steps:")
+            for s in st["next_steps"]:
+                print(f"  - {s}")
+        elif args.cmd == "x-status":
+            st = x_readiness()
+            for c in st["checks"]:
+                mark = "OK  " if c["ok"] else "MISS"
+                print(f"  [{mark}] {c['name']}: {c['detail']}")
+            print()
+            print("Next steps:")
+            for s in st["next_steps"]:
+                print(f"  - {s}")
         elif args.cmd == "next":
             for a in next_actions():
                 print(f"[{a['type']}] {a['title']}\n  why: {a['why']}\n  run: {a['command']}\n")

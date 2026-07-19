@@ -250,6 +250,84 @@ class ContentManagerTests(unittest.TestCase):
                 finally:
                     fake_video.unlink(missing_ok=True)
 
+    def test_youtube_package_shape_and_lengths(self):
+        cm.add_item("Webcam", lane="tech", status="testing", asin="B0CAM1")
+        cm.add_note("Webcam", "Image is sharp; mic is weak")
+        cm.add_note("Webcam", "Mounting clip is awkward")
+        cm.build_draft("Webcam", format="short")
+        pkg = cm.build_youtube_package("Webcam")
+        self.assertEqual(pkg["platform"], "youtube")
+        self.assertEqual(pkg["platform_status"], "manual_assisted")
+        # Title length within YouTube's 100-char limit
+        self.assertLessEqual(len(pkg["title"]), 100)
+        # Description within YouTube's 5000-char limit
+        self.assertLessEqual(len(pkg["description"]), 5000)
+        # Each tag is short and there are not too many
+        self.assertLessEqual(len(pkg["tags"]), 15)
+        for t in pkg["tags"]:
+            self.assertLessEqual(len(t), 30)
+        # The package points at the YouTube studio and gives a next step
+        self.assertIn("studio.youtube.com", pkg["upload_url"])
+        self.assertIn("mark-posted", pkg["next_step"])
+        # Disclosure language is present
+        self.assertIn("affiliate", pkg["description"].lower())
+
+    def test_youtube_package_handles_missing_asin(self):
+        # When the catalog item has no ASIN, the description should
+        # explain that, not silently include a broken link.
+        cm.add_item("NoAsinYet", lane="tech", status="testing")
+        cm.add_note("NoAsinYet", "TBD review")
+        cm.build_draft("NoAsinYet", format="short")
+        pkg = cm.build_youtube_package("NoAsinYet")
+        self.assertIn("add ASIN", pkg["description"])
+
+    def test_x_package_within_280_chars(self):
+        cm.add_item("Mouse", lane="tech", status="testing", asin="B085HNRKPX")
+        cm.add_note("Mouse", "Comfortable grip")
+        cm.build_draft("Mouse", format="short")
+        pkg = cm.build_x_package("Mouse")
+        self.assertEqual(pkg["platform"], "x")
+        self.assertEqual(pkg["platform_status"], "manual_assisted")
+        # X post must be <= 280 chars
+        self.assertLessEqual(len(pkg["post_text"]), 280)
+        # Hashtags are present and short
+        self.assertGreater(len(pkg["hashtags"]), 0)
+        self.assertLessEqual(len(pkg["hashtags"]), 3)
+        # Disclosure is in the body
+        self.assertIn("affiliate", pkg["post_text"].lower())
+        # Points at the X compose UI and gives a next step
+        self.assertIn("x.com/compose", pkg["upload_url"])
+        self.assertIn("mark-posted", pkg["next_step"])
+
+    def test_youtube_and_x_readiness_reports_manual_mode(self):
+        # Until the OAuth app is reviewed, both readiness reports
+        # should be ready=False but with a clear 'manual pkg available'
+        # message and concrete next steps.
+        for readiness in (cm.youtube_readiness(), cm.x_readiness()):
+            self.assertFalse(readiness["ready"])
+            # At least one of the checks should confirm the manual pkg
+            # generator is available.
+            ok_checks = [c for c in readiness["checks"] if c["ok"]]
+            self.assertTrue(ok_checks, "at least one ok check should be present")
+            self.assertTrue(
+                any("pkg" in c["detail"] for c in ok_checks),
+                f"no 'pkg' mention in any ok check: {ok_checks}",
+            )
+            self.assertGreater(len(readiness["next_steps"]), 0)
+            self.assertTrue(
+                any("mark-posted" in s for s in readiness["next_steps"])
+            )
+
+    def test_youtube_and_x_packages_require_draft(self):
+        # No draft, no package.
+        cm.add_item("NoDraftM12", lane="tech", status="testing")
+        with self.assertRaises(ValueError) as yt_ctx:
+            cm.build_youtube_package("NoDraftM12")
+        self.assertIn("no draft", str(yt_ctx.exception).lower())
+        with self.assertRaises(ValueError) as x_ctx:
+            cm.build_x_package("NoDraftM12")
+        self.assertIn("no draft", str(x_ctx.exception).lower())
+
     def test_sponsors_find_game(self):
         found = cm.sponsors_find(lane="game", limit=3)
         self.assertTrue(found)
