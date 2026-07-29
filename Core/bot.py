@@ -112,6 +112,47 @@ def process_recording(
     style = config.get("tiktok_style", "letterbox")
     min_score = config.get("min_post_score", config.get("min_clip_score", 50))
 
+    # === Decision Engine + Nexus enrichment ===
+    try:
+        from modules.Think_Learn_Decide import ThinkLearnDecideEngine
+        intelligence = ThinkLearnDecideEngine(config)
+
+        # Build candidates for this recording
+        candidates = [
+            {"action": "process_and_queue", "score": 70, "reason": "default"},
+            {"action": "hold_for_review", "score": 40, "reason": "low confidence"}
+        ]
+
+        thought, proposals = intelligence.think_and_propose(
+            input_data={
+                "recording": recording_path,
+                "game": config.get("game", "Unknown"),
+                "filename": Path(recording_path).name
+            },
+            candidates=candidates
+        )
+
+        # Log the insight
+        if thought.get("nexus_insight"):
+            notify(
+                f"Nexus insight for {Path(recording_path).name}: {thought['nexus_insight'][:180]}...",
+                level="info"
+            )
+
+            # Optional: store in memory / decision log
+            if hasattr(intelligence, "record_event"):
+                intelligence.record_event(
+                    source="pipeline",
+                    intent="recording_decision",
+                    action="nexus_enrichment",
+                    result="completed",
+                    confidence=0.85,
+                    reason=thought["nexus_insight"][:300],
+                    metadata={"recording": recording_path}
+                )
+    except Exception as e:
+        notify(f"Decision Engine enrichment skipped: {e}", level="warning")
+        
     # ── Step A: Detect highlights ─────────────────────────────────────────────
     notify("Step 1/6 — Detecting highlights…", level="info")
 

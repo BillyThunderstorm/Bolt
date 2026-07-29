@@ -1,10 +1,99 @@
 {
-    "game": "Gaming",
-    "highlight_sensitivity": 0.7,
-    "recordings_folder": "recordings",
-    "clips_folder": "clips",
-    "vertical_clips_folder": "vertical_clips",
-    "use_brain": true,
-    "use_voice": true,
-    "use_twitch": false
+  "game": "Gaming",
+  "highlight_sensitivity": 0.7,
+  "max_clips_per_session": 5,
+  "min_clip_score": 65,
+  "min_post_score": 65,
+  "recordings_folder": "recordings",
+  "clips_folder": "clips",
+  "vertical_clips_folder": "vertical_clips",
+  "use_brain": true,
+  "use_voice": true,
+  "use_voice_checklist": true,
+  "whisper_model": "base",
+  "hashtags": [
+    "gaming",
+    "clips",
+    "viral",
+    "trending",
+    "fyp"
+  ],
+  "use_twitch": false,
+  "quality_tiers": {
+      "discard_below": 60,
+       "queue_at": 80
+    },
+  "nexus": {
+  "preferred": "ollama",
+  "grok_for_high": true,
+  "use_obs_integration": true,
+  "obs_host": "localhost",
+  "obs_port": 4455,
+  "obs_path": "",
+  "tiktok_style": "crop",
+  "auto_format_tiktok": true,
+  "min_clip_duration": 15,
+  "max_clip_duration": 60,
+  "min_clip_score": 65,
+  "highlight_sensitivity": 0.05,
+  "quality_tiers": {
+    "discard_below": 5.0,
+    "queue_at": 15.0,
+    "use_ai_titles": true,
+    "_comment": "score < discard_below = discard; discard_below <= score < min_post_score = mid; score >= min_post_score and < queue_at = queue without Discord ping; score >= queue_at = auto-queue + Discord alert"
+  },
+  "highlight": {
+    "energy_multiplier": 1.5,
+    "min_gap_seconds": 30,
+    "sensitivity": 0.05,
+    "min_confidence": 0.02,
+    "pad_before": 8,
+    "pad_after": 12
+  },
+  "use_voice_checklist": true,
+  "whisper_model": "base",
+  "hashtags": [
+    "gaming",
+    "clips",
+    "viral",
+    "trending",
+    "fyp"
+  ],
+  "peak_notifications": {
+    "enabled": true,
+    "windows": [
+      {
+        "label": "Morning",
+        "start_hour": 7,
+        "end_hour": 9
+      },
+      {
+        "label": "Lunch",
+        "start_hour": 12,
+        "end_hour": 14
+      },
+      {
+        "label": "Prime Time",
+        "start_hour": 19,
+        "end_hour": 22
+      }
+    ],
+    "check_interval_minutes": 15,
+    "discord_enabled": true
+  },
+  "auto_posting": {
+    "enabled": true,
+    "review_window_minutes": 30,
+    "auto_post_if_deadline_missed": true,
+    "require_rejection_reason": true,
+    "privacy": "PUBLIC_TO_EVERYONE"
+  },
+  "notes": "Auto-posting has safeguards: Bolt asks for review 30 minutes before peak time, posts if approved or if the deadline is missed, and holds rejected clips with a required reason.",
+  "auto_rank": true,
+  "min_post_score": 5,
+  "use_ai_titles": true,
+  "title_generation": {
+    "enabled": true
+  }
+}
 }

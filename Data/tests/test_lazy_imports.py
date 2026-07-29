@@ -19,6 +19,9 @@ for _p in [_repo_root / 'Core', _repo_root / '3rd_Party' / 'colabs']:
     if _sp not in sys.path:
         sys.path.insert(0, _sp)
 
+_VENV = _repo_root / '.venv' / 'bin' / 'python3'
+VENV_PYTHON = str(_VENV) if _VENV.exists() else sys.executable
+
 import importlib
 import subprocess
 import sys
@@ -142,7 +145,7 @@ class BotImportSideEffectTests(unittest.TestCase):
             script_path = Path(td) / "probe.py"
             script_path.write_text(script, encoding="utf-8")
             result = subprocess.run(
-                [sys.executable, str(script_path)],
+                [VENV_PYTHON, str(script_path)],
                 capture_output=True,
                 text=True,
                 cwd=str(_repo_root),
@@ -193,7 +196,7 @@ class BotImportSpeedTests(unittest.TestCase):
             script_path = Path(td) / "probe.py"
             script_path.write_text(script, encoding="utf-8")
             result = subprocess.run(
-                [sys.executable, str(script_path)],
+                [VENV_PYTHON, str(script_path)],
                 capture_output=True,
                 text=True,
                 cwd=str(_repo_root),

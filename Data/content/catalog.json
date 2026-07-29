@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-07-19T02:39:12",
+  "updated_at": "2026-07-20T07:27:46",
   "preferred_lanes": [
     "game",
     "tech"
@@ -28,7 +28,7 @@
       "id": "daily-driver-gaming-headset",
       "name": "Daily Driver Gaming Headset",
       "lane": "tech",
-      "status": "ready",
+      "status": "drafting",
       "asin": "",
       "started_at": "2026-07-09",
       "created_at": "2026-07-09T22:44:07",
@@ -52,6 +52,11 @@
           "day": null,
           "text": "Ready: Day 1 in daily use",
           "at": "2026-07-19T02:39:12"
+        },
+        {
+          "day": 1,
+          "text": "Mic is clear, clamp is tight",
+          "at": "2026-07-20T07:17:19"
         }
       ],
       "verdict": "Honest budget pick",
@@ -65,19 +70,19 @@
           "what_it_is": "Daily Driver Gaming Headset (tech)",
           "why_tested": "Real-world game/tech testing for honest creator reviews.",
           "first_impression": "Review gear you already own first",
-          "what_worked": "Review gear you already own first | Add real ASIN when ready | for the price, I'm not disappointed. I wish there was a way to control it a little more like a volume or a mute button, but I didnt expect there to be one to begin with",
+          "what_worked": "Review gear you already own first | Add real ASIN when ready | for the price, I'm not disappointed. I wish there was a way to control it a little more like a volume or a mute button, but I didnt expect there to be one to begin with | Ready: Day 1 in daily use | Mic is clear, clamp is tight",
           "what_got_in_the_way": "Call out friction honestly when logged.",
           "who_it_is_for": "Gamers and tech buyers who want practical takes, not hype.",
-          "verdict": "Pending — keep testing until a clear call."
+          "verdict": "Honest budget pick"
         },
-        "script": "Hook: I've been testing the Daily Driver Gaming Headset — honest take.\nWhat it is: Daily Driver Gaming Headset (tech)\nDemo notes: Review gear you already own first | Add real ASIN when ready | for the price, I'm not disappointed. I wish there was a way to control it a little more like a volume or a mute button, but I didnt expect there to be one to begin with\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: Pending — keep testing until a clear call.\nAffiliate: (add ASIN; tag=billycarter-20)\nDisclosure: honest opinion; links may earn commission.",
+        "script": "Hook: I've been testing the Daily Driver Gaming Headset — honest take.\nWhat it is: Daily Driver Gaming Headset (tech)\nDemo notes: Review gear you already own first | Add real ASIN when ready | for the price, I'm not disappointed. I wish there was a way to control it a little more like a volume or a mute button, but I didnt expect there to be one to begin with | Ready: Day 1 in daily use | Mic is clear, clamp is tight\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: Honest budget pick\nAffiliate: (add ASIN; tag=billycarter-20)\nDisclosure: honest opinion; links may earn commission.",
         "affiliate_link": "(add ASIN; tag=billycarter-20)",
         "platforms": [
           "tiktok",
           "youtube_shorts",
           "x"
         ],
-        "created_at": "2026-07-10T07:26:27"
+        "created_at": "2026-07-20T07:17:40"
       },
       "marked_ready_at": "2026-07-19T02:39:12"
     },
@@ -89,7 +94,13 @@
       "asin": "B085HNRKPX",
       "started_at": "2026-07-10",
       "created_at": "2026-07-10T07:36:07",
-      "notes_log": [],
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Its cute, lightweight, easy to charge and connect, and very affordable.",
+          "at": "2026-07-20T07:27:46"
+        }
+      ],
       "verdict": null,
       "priority": 10
     }

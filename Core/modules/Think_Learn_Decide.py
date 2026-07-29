@@ -106,6 +106,41 @@ class ProposedAction:
 class ThinkLearnDecideEngine:
     """Small local decision helper used by bot.py."""
 
+    def log_nexus_insight(self, insight: str, context: dict = None):
+        """Persist Nexus insight into decision history."""
+        try:
+            from pathlib import Path
+            import json
+            from datetime import datetime
+
+            log_path = Path("Data/data/decision_history.jsonl")
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+
+            entry = {
+                "timestamp": datetime.now().isoformat(),
+                "type": "nexus_insight",
+                "insight": insight[:1000],
+                "context": context or {}
+            }
+
+            with log_path.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(entry) + "\n")
+
+            # Also push into vector DB so future decisions can retrieve it
+            try:
+                from modules.Local_Vector_DB import LocalVectorDB
+                db = LocalVectorDB()
+                db.add_documents([{
+                    "id": f"nexus_{datetime.now().timestamp()}",
+                    "text": insight,
+                    "metadata": {"source": "nexus_insight", "lane": "decision"}
+                }])
+            except Exception:
+                pass
+
+        except Exception as e:
+            print(f"Failed to log Nexus insight: {e}")
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config or {}
         self.model = _safe_load_json(
@@ -372,84 +407,69 @@ class ThinkLearnDecideEngine:
                 continue
         return out
 
-    def think_and_propose(
-        self,
-        current_context: Dict[str, Any],
-        candidates: List[Dict[str, Any]],
-    ) -> tuple[Dict[str, Any], List[ProposedAction]]:
-        """Single-call bridge: think about the situation, then rank actions.
+    def _get_nexus_insight(self, context: str, task_type: str = "decision") -> str:
+        """Get strategic insight from Nexus (Ollama heavy + Grok when needed)."""
+        try:
+            from modules.Nexus_Creator import NexusCreator
+            nexus = NexusCreator()
+            result = nexus.consult(
+                topic="Analyze this situation and recommend the best next actions",
+                context=context,
+                task_type=task_type,
+                complexity="high" if "high" in task_type or "strategy" in task_type else "medium"
+            )
+            return result.get("advice", "")
+        except Exception as e:
+            print(f"Nexus insight skipped: {e}")
+            return ""
 
-        Calls ``self.think(current_context)`` to retrieve relevant memory
-        and compute ``memory_influence``. That influence is then attached
-        to each candidate that doesn't already carry one, so the existing
-        ``propose_actions`` ranking gets memory-aware confidence boosts /
-        reductions automatically.
-
-        Callers that want to control the memory flow manually can still
-        call ``think`` and ``propose_actions`` separately — this method
-        is a convenience, not a replacement.
-
-        Returns a ``(thought, proposals)`` tuple. ``thought`` is the dict
-        returned by ``think``; ``proposals`` is the ranked list from
-        ``propose_actions``.
+    def think_and_propose(self, input_data: dict, candidates: list) -> tuple:
         """
-        thought = self.think(current_context)
+        Enhanced version with Nexus + Vector memory enrichment.
+        Returns (thought, ranked_proposals)
+        """
+        from datetime import datetime
+
+        # Build rich context
+        context_parts = [
+            f"Input: {input_data}",
+            f"Candidates: {candidates}",
+            f"Game/Focus: {self.config.get('game', 'Unknown') if hasattr(self, 'config') else 'Unknown'}"
+        ]
+        full_context = "\n".join(str(p) for p in context_parts)
+
+        # Get Nexus strategic insight
+        nexus_insight = self._get_nexus_insight(full_context, task_type="decision")
+
+        # Existing thinking path
+        thought = self.think(input_data)
+        thought["nexus_insight"] = nexus_insight
+        thought["timestamp"] = datetime.now().isoformat()
+
+        # Log the insight (must be before any return)
+        if nexus_insight:
+            self.log_nexus_insight(nexus_insight, context={"input": input_data})
+
+        # Attach memory influence if available
         influence = thought.get("memory_influence") or {}
 
-        # If retrieval returned nothing meaningful, do not touch the
-        # candidates — let propose_actions fall through to its existing
-        # plain-score path.
-        if not influence or not isinstance(influence, dict):
-            return thought, self.propose_actions(candidates)
+        if influence and isinstance(influence, dict):
+            enriched = []
+            for candidate in candidates:
+                if not isinstance(candidate, dict):
+                    enriched.append(candidate)
+                    continue
+                if isinstance(candidate.get("memory_influence"), dict):
+                    enriched.append(candidate)
+                    continue
+                enriched.append({**candidate, "memory_influence": dict(influence)})
+            return thought, enriched
 
-        net_direction = str(influence.get("net_direction") or "neutral")
-        total = sum(
-            int(influence.get(key) or 0)
-            for key in ("supportive", "cautionary", "mixed", "context")
-        )
-        if net_direction == "neutral" or total == 0:
-            return thought, self.propose_actions(candidates)
-
-        enriched: List[Dict[str, Any]] = []
-        for candidate in candidates:
-            if not isinstance(candidate, dict):
-                enriched.append(candidate)
-                continue
-            # Don't overwrite an influence the caller already attached.
-            if isinstance(candidate.get("memory_influence"), dict):
-                enriched.append(candidate)
-                continue
-            enriched.append(
-                {**candidate, "memory_influence": dict(influence)}
-            )
-        return thought, self.propose_actions(enriched)
-
-    def propose_actions(self, candidates: List[Dict[str, Any]]) -> List[ProposedAction]:
-        proposed: List[ProposedAction] = []
-        for idx, candidate in enumerate(candidates, start=1):
-            action = candidate.get("action", "queue_clip")
-            score = float(candidate.get("score", 0))
-            memory_adjustment, memory_reason = self._memory_adjustment(candidate)
-            confidence = max(
-                0.0, min(0.99, (score / 100.0) * 0.6 + 0.35 + memory_adjustment)
-            )
-            risk = "high" if action in {"delete_clip", "publish_now"} else "low"
-            reason = f"Local action proposal from clip score={score:.1f}"
-            if memory_reason:
-                reason += f"; {memory_reason}"
-            proposed.append(
-                ProposedAction(
-                    action_id=f"act_{idx}_{int(score)}",
-                    action=action,
-                    confidence=confidence,
-                    risk=risk,
-                    reason=reason,
-                    payload=candidate,
-                )
-            )
-        proposed.sort(key=lambda p: p.confidence, reverse=True)
-        return proposed
-
+        return thought, candidates
+        # Log the insight
+        if nexus_insight:
+            self.log_nexus_insight(nexus_insight, context={"input": input_data})
+            
     def _memory_adjustment(self, candidate: Dict[str, Any]) -> tuple[float, str]:
         memory_items = (
             candidate.get("memory_context") or candidate.get("retrieved_memory") or []
