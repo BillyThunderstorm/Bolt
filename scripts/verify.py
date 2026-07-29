@@ -51,7 +51,7 @@ def check_files():
     # the repo root, so these relative paths resolve from there.
     required_files = [
         "Core/bot.py",
-        "Core/src/launch.py",
+        "Core/launch.py",
         "Core/config.json",
         "Docs/requirements.txt",
         "Core/bolt_brain.md",
@@ -90,7 +90,7 @@ def check_directories():
     # Post-reorg: media/ is the live tree (clips/vertical_clips), Data/archive
     # holds the (archived) recordings, Data/data holds persistent state.
     for rel in [
-        "Data/archive/recordings",
+        "media/recordings",
         "media/clips",
         "media/vertical_clips",
         "Core/modules",

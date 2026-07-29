@@ -6,9 +6,9 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:bolt-peak-hours@bolt
-DTSTAMP:20260711T070001
-DTSTART:20260711T190000
-DTEND:20260711T210000
+DTSTAMP:20260726T051037
+DTSTART:20260726T190000
+DTEND:20260726T210000
 SUMMARY:Peak posting window (7-9pm)
 DESCRIPTION:Billy's peak audience hours per memory/content/live-streaming.md. Best time to post clips\, run a stream\, or send social announcements.
 RRULE:FREQ=DAILY

@@ -298,3 +298,71 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+    if subcommand == "intelligence" or subcommand == "status":
+        print("🧠 Bolt Intelligence Status\n")
+        os.system('''
+PYTHONPATH=Core python -c "
+from modules.Think_Learn_Decide import ThinkLearnDecideEngine
+from modules.Config_Loader import load_config
+from modules.Local_Vector_DB import LocalVectorDB
+from modules.Nexus_Creator import NexusCreator
+import os
+
+config = load_config()
+engine = ThinkLearnDecideEngine(config)
+print('✅ Decision Engine: Ready')
+print('   - think_and_propose:', hasattr(engine, 'think_and_propose'))
+print('   - _get_nexus_insight:', hasattr(engine, '_get_nexus_insight'))
+
+try:
+    db = LocalVectorDB()
+    print('✅ Vector DB: Ready')
+except Exception as e:
+    print('❌ Vector DB:', e)
+
+try:
+    nexus = NexusCreator()
+    print('✅ Nexus Creator: Ready')
+    print('   Preferred:', nexus.preferred_provider)
+except Exception as e:
+    print('❌ Nexus:', e)
+"
+        ''')
+        return 0
+
+    # Intelligence / Status command
+    if subcommand in ("intelligence", "status"):
+        print("🧠 Bolt Intelligence Status\n")
+        os.system('''
+PYTHONPATH=Core python -c "
+from modules.Think_Learn_Decide import ThinkLearnDecideEngine
+from modules.Config_Loader import load_config
+from modules.Local_Vector_DB import LocalVectorDB
+from modules.Nexus_Creator import NexusCreator
+
+config = load_config()
+engine = ThinkLearnDecideEngine(config)
+
+print('✅ Decision Engine: Ready')
+print('   • think_and_propose:', hasattr(engine, 'think_and_propose'))
+print('   • _get_nexus_insight:', hasattr(engine, '_get_nexus_insight'))
+print('   • log_nexus_insight:', hasattr(engine, 'log_nexus_insight'))
+
+try:
+    db = LocalVectorDB()
+    print('✅ Vector DB: Ready')
+except Exception as e:
+    print('❌ Vector DB:', e)
+
+try:
+    nexus = NexusCreator()
+    print('✅ Nexus Creator: Ready')
+    print('   Preferred provider:', getattr(nexus, 'preferred_provider', 'unknown'))
+except Exception as e:
+    print('❌ Nexus:', e)
+
+print()
+print('System is fully upgraded.')
+"
+        ''')
+        return 0

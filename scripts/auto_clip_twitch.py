@@ -41,8 +41,6 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
-from _paths import …' sees
-# the corrected sys.path.
 from _paths import (  # noqa: E402
     REPO_ROOT, VOD_SAMPLES_DIR, DATA_DIR,
 )

@@ -4,4 +4,13 @@ PRODID:-//Bolt//Calendar Feeds//EN
 X-WR-CALNAME:Scheduled Posts
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
+BEGIN:VEVENT
+UID:bolt-post-1bc8a5f9-youtube_shorts-1785072000@bolt
+DTSTAMP:20260726T051037
+DTSTART:20260726T082000
+DTEND:20260726T083000
+SUMMARY:Post to YouTube Shorts: Clip 1bc8a5f9
+DESCRIPTION:queue_id: 1bc8a5f9\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2824351512_clip01_audio_spike_76_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (1bc8a5f9)
+END:VEVENT
 END:VCALENDAR

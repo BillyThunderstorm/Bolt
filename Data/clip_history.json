@@ -13,9 +13,9 @@
       "avg_views": 1
     },
     "multi_kill": {
-      "total_clips": 56,
-      "total_views": 67200,
-      "total_likes": 4480,
+      "total_clips": 61,
+      "total_views": 73200,
+      "total_likes": 4880,
       "avg_views": 1200,
       "observations": [
         {
@@ -95,6 +95,31 @@
         },
         {
           "at": "2026-07-19T08:28:53",
+          "views": 1200,
+          "likes": 80
+        },
+        {
+          "at": "2026-07-19T08:29:12",
+          "views": 1200,
+          "likes": 80
+        },
+        {
+          "at": "2026-07-20T17:25:32",
+          "views": 1200,
+          "likes": 80
+        },
+        {
+          "at": "2026-07-20T17:31:26",
+          "views": 1200,
+          "likes": 80
+        },
+        {
+          "at": "2026-07-20T17:31:36",
+          "views": 1200,
+          "likes": 80
+        },
+        {
+          "at": "2026-07-20T17:31:45",
           "views": 1200,
           "likes": 80
         }

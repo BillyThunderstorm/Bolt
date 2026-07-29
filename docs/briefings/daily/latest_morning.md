@@ -1,34 +1,78 @@
-# Good Morning Bolt — 2026-07-10
+# Bolt Daily Briefing
 
-Creator: William
-Priority lanes: game, tech
-Amazon tag: `billycarter-20`
-Posting: approval required = True
+**Tuesday, July 28, 2026**
 
-## Spoken Briefing
-Good morning, William. Bolt is online. Focus lanes today: games and tech. Items currently testing: 1. Top test item: Daily Driver Gaming Headset. Content action: Draft short review for Daily Driver Gaming Headset. Business action: Pitch or research Amazon Influencer / Associates. Bolt advance: Run Good Morning Bolt each day. Business lesson: Twitch builds personality; TikTok builds discovery; YouTube builds depth; Amazon converts. Storefront feature idea: Daily Driver Gaming Headset. Hopeful partner to research: Amazon Influencer / Associates. All social posts still need your approval. Let's make something real today.
+## Queue Status
 
-## Next Actions
-- **content**: Draft short review for Daily Driver Gaming Headset — Enough notes to ship a short-form take.
-  - `bolt manage draft "Daily Driver Gaming Headset" --format short`
-- **business**: Pitch or research Amazon Influencer / Associates — William already has tag billycarter-20 — primary monetization path.
-  - `bolt sponsors pitch "Amazon Influencer / Associates"`
-- **advance**: Ship one content action before the next Bolt feature — Content proof advances the business faster than idle tooling.
-  - `bolt advance next`
+**Clips ready to post:** 0
 
-## Storefront
-Feature Daily Driver Gaming Headset next — build a short review with affiliate link.
-Command: `bolt manage draft "Daily Driver Gaming Headset" --format short`
+*No clips currently in queue.*
 
-## Sponsor Watchlist
-- Amazon Influencer / Associates (fit 10): William already has tag billycarter-20 — primary monetization path.
-- Razer (fit 9): Core gaming peripherals; strong starter review products (mice, pads, headsets).
-- Logitech G (fit 9): Mice, keyboards, headsets — easy first reviews from gear William already uses.
+---
 
-## Business Lesson
-Twitch builds personality; TikTok builds discovery; YouTube builds depth; Amazon converts.
+## Storage Status
 
-## Advance Bolt
-Run Good Morning Bolt each day
-Spoken briefing removes decision paralysis.
-`bolt morning`
+| Directory | Size |
+|-----------|------|
+| Recordings | 114GB |
+
+---
+
+🎯 NEXUS STRATEGY INSIGHT:
+**Morning Priorities**
+
+As we start the day, here are my top recommendations for Billy's morning routine:
+
+1. **Beginner-friendly habit:** Spend 10-15 minutes reviewing the previous day's performance on all platforms (TikTok, Twitch, YouTube, X). This will help identify areas of improvement and provide valuable context for today's content creation.
+2. **Prioritize self-care:** Allocate time for a quick workout or meditation session to boost focus and energy levels. A clear mind is essential for tackling the day's tasks.
+
+**Content Plan**
+
+Considering Billy's M-tier progress, our content strategy should focus on:
+
+1. **Building momentum on TikTok:**
+	* Create 3 engaging short-form videos showcasing game reviews or product testing.
+	* Utilize relevant hashtags and collaborate with other creators to expand reach.
+	* Allocate time for responding to comments and building a community around the content.
+2. **Streamlining YouTube:**
+	* Plan and create a single, high-quality video focusing on in-depth gaming analysis or tech review.
+	* Develop an outline for future long-form reviews, ensuring consistency and quality.
+3. **Twitch and X:**
+	* Schedule at least one live stream per week to engage with the growing audience.
+	* Update X content with curated takes from TikTok and Twitch streams.
+
+**Action Items**
+
+To ensure a productive day, I recommend completing these tasks:
+
+1. **Content creation:**
+	* Write and schedule three TikTok short-form videos (see above).
+	* Plan and outline the YouTube long-form review.
+2. **Platform management:**
+	* Review and respond to comments on all platforms.
+	* Update X content with relevant takes from recent streams and reviews.
+3. **Personal development:**
+	* Allocate time for self-care, focusing on a quick workout or meditation session.
+
+**Queue and Recent Performance**
+
+Considering the current queue and recent performance, I suggest prioritizing tasks that have been stuck in limbo. Focus on completing high-priority items first to maintain momentum.
+
+**M-Tier Progress**
+
+As we continue toward M-tier progress, our goals should remain focused on:
+
+1. **Increasing engagement:** Expand reach through collaborations and hashtags.
+2. **Quality content creation:** Develop consistent, high-quality videos showcasing gaming analysis and product reviews.
+3. **Audience growth:** Engage with the growing audience on all platforms.
+
+By following this morning routine, prioritizing self-care, and focusing on actionable tasks, Billy will be well-prepared to tackle the day's content creation challenges and move closer to M-tier progress.
+
+---
+
+## Action Items For Today
+
+1. Review recent clips
+2. Process new recordings
+
+*Generated by Bolt at 04:33 PM*
