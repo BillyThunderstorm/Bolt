@@ -1,0 +1,121 @@
+═══════════════════════════════════════════════════════════════════════════
+  BOLT — WHAT BOLT NEEDS TO REMEMBER ABOUT ME
+  Print this. Tape it where you work. Update when something changes.
+  Last updated: 2026-07-29
+═══════════════════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────────────────
+  VISION — what I'm building toward
+───────────────────────────────────────────────────────────────────────────
+
+Build a content-career reviewing products that companies send. Travel to
+company sites to test products firsthand. Being chosen by gaming companies
+to test their newest releases and asked to present or host at game awards
+and events like Dream Con. Creating with Marvel.
+
+Voice must matter and be valuable. Never sell the next gimmick.
+
+Income target: brand sponsorships + event hosting + Amazon affiliate.
+NOT ad revenue.
+
+───────────────────────────────────────────────────────────────────────────
+  BOTTLENECK — what's actually in my way
+───────────────────────────────────────────────────────────────────────────
+
+Not time. Not a list of things to do. The bottleneck is no roadmap — no
+one to model after, no example of where I want to be.
+
+IMPLICATION FOR BOLT: This is a direction-finding problem, not an
+execution problem. Research comes before production. When given a to-do
+list, push back with "do we know this is the right list?" before
+charging ahead.
+
+───────────────────────────────────────────────────────────────────────────
+  TIME — how I work
+───────────────────────────────────────────────────────────────────────────
+
+  •  ~40 hours/week total budget
+  •  Bursty: max ~8 hours in a day, NOT consecutive
+  •  Within a session: harder tasks FIRST, finish each completely
+     before moving on. No half-done tasks left open.
+
+───────────────────────────────────────────────────────────────────────────
+  LANES — what I make content about (parallel trials, 25% each)
+───────────────────────────────────────────────────────────────────────────
+
+  □  Gaming + anime + entertainment ............ 25%
+  □  Tech gadgets + AI development ............. 25%
+  □  General product testing ................... 25%
+  □  Skincare + personal advice ................ 25%
+
+ALL FOUR LANES ARE IN TRIAL. Every lane gets evaluated at intervals
+against the test: "Would I want to be known for this?" + "Believe in,
+stand behind, trust it."
+
+───────────────────────────────────────────────────────────────────────────
+  HARD CONSTRAINTS — never cross these (C1-C7)
+───────────────────────────────────────────────────────────────────────────
+
+  C1  No content that sells the next gimmick. Hyped-but-broken product
+      = "don't cover," not "cover this."
+
+  C2  Direction over execution. When given a list, push back before
+      charging ahead.
+
+  C3  Capture the PROCESS. Build a roadmap another person could follow
+      end-to-end.
+
+  C4  Bursty ≤8 hrs/day, non-consecutive. Within-session: harder first,
+      finish before moving on.
+
+  C5  Every recommendation cross-checked against my actual interests.
+      "Would I want to be known for this?" is a hard gate.
+
+  C6  AUTHENTICITY OUTRANKS PROFITABILITY. A deal that pays well but
+      doesn't pass the "believe in / stand behind / trust it" test is
+      rejected, regardless of upside.
+
+  C7  No support of Donald Trump, MAGA, or anything that insults
+      intelligence. No indirect associations either.
+
+───────────────────────────────────────────────────────────────────────────
+  RISK TOLERANCE — what Bolt does on its own (approved 2026-07-29)
+───────────────────────────────────────────────────────────────────────────
+
+  NEVER without explicit approval:
+    □ Posting clips to TikTok / YouTube / X
+    □ Replying to comments / DMs
+    □ Modifying Bolt config or catalog
+    □ Deleting or moving media files
+    □ Adding products to Amazon storefront
+    □ Anything financial (links, codes, deal terms)
+
+  DO IT but flag for review:
+    □ Sending sponsor outreach messages (drafts OK, sends need approval)
+    □ Changing posting schedule or queue (reorder is fine; auto-post needs review)
+
+───────────────────────────────────────────────────────────────────────────
+  CHANNELS — how Bolt reaches me (priority order)
+───────────────────────────────────────────────────────────────────────────
+
+  1.  APPLE REMINDERS  (default — summary + alert, iCloud sync)
+  2.  SMS              (fallback — when reminders can't be created)
+  3.  EMAIL            (tertiary — long briefings, full-text, attachments)
+  4.  DISCORD          (rarely used — only critical/urgent)
+
+  Phone: 7075678495 (AT&T)  |  Email: billycarteriv@gmail.com
+
+───────────────────────────────────────────────────────────────────────────
+  ASPIRATIONS — the tier of recognition I'm aiming for
+───────────────────────────────────────────────────────────────────────────
+
+  □  Chosen by gaming companies to test newest releases
+  □  Hosting/presenting at game awards and events like Dream Con
+  □  Creating with Marvel (or similar tier of brand partnership)
+
+Dream Con and Marvel are EXAMPLES of the tier, not literal targets.
+
+═══════════════════════════════════════════════════════════════════════════
+  END OF PROFILE — Revise by editing Data/memory/user_profile.json
+  or re-run the interview to revise answers.
+═══════════════════════════════════════════════════════════════════════════

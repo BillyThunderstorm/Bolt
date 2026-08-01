@@ -1,0 +1,265 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "created_at": "2026-07-29T04:25:00",
+    "last_updated": "2026-07-29T05:42:00",
+    "interview_status": "complete",
+    "questions_answered": ["q1", "q2", "q3_partial", "q4", "q5", "q6", "q7", "q8", "schedule_decision"],
+    "questions_open": ["q3_allocation"],
+    "note": "Interview complete (Q3 allocation open by user choice — 'not sure how to allocate'). Schedule decision: keep night-shift, sync with husband. Profile now reflects full vision, 7 hard constraints, parallel-trial lane mix, channel priority order, night-shift work pattern, revenue scenario with 4 tiers. Ready for Phase 1.2 (memory consolidation) and Phase 2 (researcher role)."
+  },
+  "vision": {
+    "career_goal": "Build a content-career reviewing products that companies send. Travel to company sites to test products firsthand. Being chosen by gaming companies to test their newest releases and asked to present or host at game awards and events like Dream Con. Creating with Marvel. Voice must matter and be valuable; never sell the next gimmick.",
+    "success_lookalike": "Honest product reviewer who companies send products to and invite on-site to test, endorse products and host events. Travels regularly. Has a recognizable voice that audiences trust for honest takes. Income from sponsor deals + brand partnerships + Amazon affiliate, not ads.",
+    "primary_monetization": "brand_sponsorships_and_partnerships",
+    "secondary_monetization": "event_hosting_and_product_promotion",
+    "brand_promise": "honest_takes_only",
+    "voice_positioning": "My voice must matter and be valuable. I am not selling the next gimmick.",
+    "named_aspirations": [
+      "chosen by gaming companies to test newest releases",
+      "presenting or hosting at game awards and events like Dream Con",
+      "creating with Marvel"
+    ],
+    "note": "Dream Con and Marvel are referenced as aspiration examples (similar tier of recognition), not necessarily as the only paths. 'Creating with Marvel' implies Marvel-adjacent content partnerships."
+  },
+  "bottleneck": {
+    "primary_blocker": "no_roadmap_or_example_to_follow",
+    "secondary_blocker": null,
+    "user_words": "I have no knowledge of how to start it, what to do to maintain it, no successful roadmap I know of or anyone to look at as a goal or example of where I want to be.",
+    "implication": "This is a direction-finding problem, not an execution problem. Bolt must prioritize research before management/production. When given a to-do list, Bolt should push back with 'do we know this is the right list?' before charging ahead."
+  },
+  "time_budget": {
+    "hours_per_week_total": 40,
+    "pattern": "bursty_night_shift_with_focused_daylight_coordination",
+    "pattern_detail": "Up to ~8 hours in a single wake-period, but not consecutively. Long sessions with breaks, not marathon runs. Within a session, harder tasks first, finish each completely before moving on (no half-done tasks).",
+    "wake_window": "evening_through_morning",
+    "wake_window_detail": "Husband works 6pm-6am on certain nights; user keeps schedule synced to his. Wake window is roughly evening (6pm onward) through morning. Sleep during the day.",
+    "daylight_coordination_window": "2_to_3_hours_per_week_focused",
+    "daylight_coordination_purpose": "Same-day sponsor/brand email reply, real-time coordination with US-business-hours partners. Not a regular work block — a focused coordination window.",
+    "daylight_coordination_pattern": "Anchor to husband's lunch break or a fixed time. Batch-process sponsor email, brand outreach, calls, and any other time-sensitive coordination in this window. ~30 min/day, 4-6 days/week, or longer block 2x/week.",
+    "schedule_decision_date": "2026-07-29",
+    "schedule_decision_rationale": "Relationship-sync preference (keep schedule aligned with husband) is the primary constraint. User confirmed willingness to add focused daylight hours for career coordination. Bolt's role: shift cron jobs to evening wake-hours, use Apple Reminders as async inbox, surface daylight-coordination items so user can batch-process them in 2-3 focused hours/week.",
+    "schedule_mode": "hybrid_mostly_night",
+    "schedule_mode_note": "Mostly night (≈37 hrs/week evening-through-morning) + small daylight coordination window (2-3 hrs/week). Daylight is for time-sensitive coordination only, not regular creator work.",
+    "allocation": null,
+    "allocation_default_pending_review": {
+      "filming_editing": 15,
+      "posting_community": 5,
+      "brand_sponsor_work": 8,
+      "learning_research": 8,
+      "business_admin": 4
+    },
+    "allocation_note": "User explicitly asked to revisit allocation. Default listed for Bolt's use only until user confirms or overrides. Brand/sponsor work allocation includes the daylight coordination window."
+  },
+  "hard_constraints": [
+    {
+      "id": "C1",
+      "text": "No content that sells the next gimmick. If a product is hyped but doesn't deliver, Bolt flags it as 'don't cover,' not 'cover this.'",
+      "rationale": "Honest-take brand promise is the moat. Compromising it loses the audience and the brand deals."
+    },
+    {
+      "id": "C2",
+      "text": "Bolt prioritizes direction-finding over execution. When given a to-do list, push back with 'do we know this is the right list?' before charging ahead.",
+      "rationale": "User's bottleneck is no roadmap. Following a list without validating direction wastes the user's bursty time budget on the wrong things."
+    },
+    {
+      "id": "C3",
+      "text": "Bolt captures the process of building this career, not just the outputs. The goal is producing a roadmap another person could follow end-to-end.",
+      "rationale": "User explicitly asked for this. The roadmap must be operable by a stranger, not just notes for the user."
+    },
+    {
+      "id": "C4",
+      "text": "Work pattern is bursty night-shift with focused daylight coordination: wake window roughly evening-through-morning (synced with husband's 6pm-6am work schedule). Within a wake-period, max ~8 hours, not consecutive. Within a session, work on harder tasks first and finish each one completely before starting the next. No half-done tasks left open when a session ends. Plus 2-3 hours/week of focused daylight coordination for time-sensitive sponsor/brand reply — anchored to a fixed time (e.g. husband's lunch break), not scattered.",
+      "rationale": "User stated this explicitly during Q3 (bursty pattern), confirmed during follow-up (harder-first, complete-before-moving-on, scoped to within-session), chose to keep night schedule on 2026-07-29 for relationship-sync reasons, then on 2026-07-29 added willingness to include 2-3 focused daylight hours/week for coordination. This is compatible with parallel-trial lane mix across the week and with durable-content production model."
+    },
+    {
+      "id": "C5",
+      "text": "Bolt does not recommend content lanes, topics, or products unless they've been cross-checked against the user's actual interests and history. 'Would you want to be known for this?' is a hard gate, not a soft preference.",
+      "rationale": "Q4 user words: 'I have ideas but nothing truly authentic or passionate enough to honestly make worthy content of. It doesn't feel authentic to me.'"
+    },
+    {
+      "id": "C6",
+      "text": "Authenticity outranks profitability. A deal, lane, or product that pays well but doesn't pass the 'believe in / stand behind / trust it' test is rejected, regardless of upside.",
+      "rationale": "Q4 user quote: 'I don't want to be known for something I don't really care about. Even if it makes me rich. It sounds great, but I want to believe in it, stand behind it, and trust it.' This is THE foundational test for every recommendation."
+    },
+    {
+      "id": "C7",
+      "text": "No content, partnerships, sponsorships, or product coverage that supports Donald Trump, MAGA, or anything that insults the user's intelligence. Including indirect associations (e.g., a brand whose parent company is Trump-affiliated, products whose marketing aligns with that brand).",
+      "rationale": "Q7 user words: 'I will not support Donald Trump or MAGA supported items or anything that insults intelligence.'"
+    }
+  ],
+  "lane_mix": {
+    "status": "answered",
+    "current": {
+      "gaming_anime_entertainment": 95,
+      "tech_gadgets_ai": 0,
+      "general_product_testing": 0,
+      "skincare_personal_advice": 5,
+      "_total": 100
+    },
+    "target": {
+      "gaming_anime_entertainment": 25,
+      "tech_gadgets_ai": 25,
+      "general_product_testing": 25,
+      "skincare_personal_advice": 25,
+      "_total": 100
+    },
+    "approach": "parallel_trials",
+    "approach_note": "User explicitly chose 25/25/25/25 — meaning all four lanes run in parallel from this point. NOT weighted-exploration. Each lane gets equal focus.",
+    "lane_definitions": {
+      "gaming_anime_entertainment": "Gameplay/highlights + anime reactions/entertainment commentary. Anchored by user's existing Twitch presence.",
+      "tech_gadgets_ai": "Tech product reviews + AI tools/development coverage. Aligns with Q1 'gaming companies test newest releases' + AI-development lane doc.",
+      "general_product_testing": "Cross-category product testing that doesn't fit tech, gaming, or skincare. The 'company sends me stuff to test' lane.",
+      "skincare_personal_advice": "Skincare and personal-care content. Aligns with CeraVe/The Ordinary brands already in Content_Manager."
+    },
+    "user_words": "gaming, anime and entertainment / tech gadgets and latest AI development and advancement / general product testing / skincare and personal advice. Focus these evenly. each have 25% out of 100% of my content.",
+    "trial_status": "all four lanes are in trial from this point. Each lane gets evaluated at intervals against the C5/C6 tests ('would I want to be known for this?' + 'believe in / stand behind / trust it')."
+  },
+  "risk_tolerance": {
+    "status": "approved",
+    "approved_at": "2026-07-29T05:30:00",
+    "approval_note": "User confirmed seeded defaults are 'perfect at the moment'. Each entry below is now authoritative; future changes require explicit user review.",
+    "default_seed": {
+      "posting_clips_to_social": {
+        "level": "never_without_explicit_approval",
+        "rationale": "C6: authenticity is the moat. Auto-posting can never substitute for 'I stand behind this.'"
+      },
+      "replying_to_comments_dms": {
+        "level": "never_without_explicit_approval",
+        "rationale": "Voice is the brand. Even short replies are on-the-record statements."
+      },
+      "sending_sponsor_outreach": {
+        "level": "do_with_review_flag",
+        "rationale": "Drafts and contact-list updates are Bolt's job. Sending the actual message requires user approval per C6."
+      },
+      "modifying_bolt_config_or_catalog": {
+        "level": "never_without_explicit_approval",
+        "rationale": "Catalog = strategic record. Modifying it = changing the user's stated direction."
+      },
+      "deleting_or_moving_media_files": {
+        "level": "never_without_explicit_approval",
+        "rationale": "User memory: 'data safety over persistence.' Previous reorg incident caused data loss."
+      },
+      "adding_products_to_amazon_storefront": {
+        "level": "never_without_explicit_approval",
+        "rationale": "Storefront listings imply endorsement. C6 gate."
+      },
+      "changing_posting_schedule_or_queue": {
+        "level": "do_with_review_flag",
+        "rationale": "Reordering pending review is fine. Final-deadline auto-post is the existing escalation in Peak_Hour_Notifier — user can override that."
+      },
+      "anything_financial": {
+        "level": "never_without_explicit_approval",
+        "rationale": "Hard rule. Affiliate links, codes, deal terms, payments — all require user."
+      }
+    },
+    "note": "Defaults seeded from C1/C6 + user memory. Each entry needs user review before being treated as authoritative."
+  },
+  "cadence": {
+    "status": "answered",
+    "default_channel": "apple_reminders",
+    "default_cadence": "summary_only",
+    "transport": "eventkit_to_icloud_reminders",
+    "channel_priority_order": [
+      "apple_reminders",
+      "sms",
+      "email",
+      "discord"
+    ],
+    "channel_priority_rationale": "User preference order: Apple Reminders is primary, SMS is secondary fallback, email is tertiary (used after SMS when needed), Discord is rarely used so it sits last and gets only critical/urgent traffic.",
+    "channels": {
+      "apple_reminders": {
+        "level": "summary_only",
+        "is_default": true,
+        "transport": "macOS EventKit framework → Reminders.app → iCloud sync",
+        "config": {
+          "list_name": "Bolt",
+          "alert": true,
+          "due_date_offset": "next_morning_8am",
+          "priority": "summary_only_by_default"
+        },
+        "rationale": "User explicit Q8: 'Change from sms to summarized apple reminder / todo list if possible with an alert'. Each Bolt briefing surfaces as a Reminders.app entry with an alert, synced to iPhone/iPad via iCloud. No SMS cost; lives in your task system where you'll actually action it.",
+        "note": "Implementation deferred to Phase 2 (assistant role). Requires: macOS Reminders permission for the Bolt process, EventKit access. Each daily briefing → one summary reminder with action items. Weekly briefing → one summary reminder with the week's priorities."
+      },
+      "sms": {
+        "level": "fallback_only",
+        "is_default": false,
+        "config": {
+          "phone": "7075678495",
+          "carrier": "att",
+          "gateway": "txt.att.net"
+        },
+        "rationale": "Previous default. Demoted to secondary fallback for cases where reminders can't be created (EventKit denied, no iCloud, etc.). Used after Apple Reminders in priority order."
+      },
+      "email": {
+        "level": "tertiary",
+        "is_default": false,
+        "config": {
+          "to": "billycarteriv@gmail.com",
+          "smtp_server": "smtp.gmail.com"
+        },
+        "rationale": "User preference: 'email is preferred after sms'. Used for content that doesn't fit Reminders (long briefings, attachments, full-text reports). Sits after SMS in priority order."
+      },
+      "discord": {
+        "level": "rarely_used",
+        "is_default": false,
+        "note": "User: 'I don't use discord often at all'. Lowest priority. Discord only gets urgent/critical traffic that the user would miss without it. Most briefings skip Discord entirely."
+      },
+      "briefings_daily_weekly": {
+        "level": "always",
+        "is_default": false,
+        "note": "The full briefing text is always written to logs/briefings/. Apple Reminders carries the summary + alert. Email can carry the full text when set. Discord only gets pinged on critical events."
+      },
+      "in_chat": {
+        "level": "always",
+        "is_default": false,
+        "note": "When user runs `bolt <command>`, output always appears in terminal. This is the canonical back-and-forth."
+      }
+    },
+    "open_question": "Closed. All channels have explicit priority."
+  },
+  "revenue_scenario": {
+    "framing": "Don't budget against a specific dollar amount. Budget against life-changes — what shifts in your day-to-day at each tier? Pick the number that triggers the change you actually want.",
+    "tiers": {
+      "tier_1_0_to_500": {
+        "duration": "0-6 months typical",
+        "what_it_looks_like": "First sponsor deals, learning what to charge, building relationships. Twitch audience conversion starts here.",
+        "life_change": "Side income, doesn't change the day-to-day yet."
+      },
+      "tier_2_500_to_3000": {
+        "duration": "6-18 months typical for honest-product creators who actually do the work",
+        "what_it_looks_like": "Consistent sponsor deals, Amazon affiliate starts compounding, some product seeding (free products = cost-of-living offset).",
+        "life_change": "Replaces a part-time job's worth of income. Day-to-day starts to bend toward creator work."
+      },
+      "tier_3_3000_to_8000": {
+        "duration": "12-24 months",
+        "what_it_looks_like": "Multiple sponsor relationships, regular event invitations, possible Patreon/membership. Dream Con / Marvel-tier recognition lives here or above.",
+        "life_change": "Creator becomes the actual job. Day-to-day fully shifts."
+      },
+      "tier_4_above_8000": {
+        "duration": "24+ months",
+        "what_it_looks_like": "Brand ambassador deals, retainers, event appearance fees, scaled affiliate.",
+        "life_change": "Top-tier. Comfortable full-time income from the work."
+      }
+    },
+    "levers_that_move_revenue_up": [
+      "Travel content commands premium per-deal rates (companies pay more for creator-on-site filming than 60-second reviews)",
+      "Honest-takes command a premium (trust is the actual product)",
+      "Event hosting is a separate revenue line (often on top of content deal)",
+      "Multi-platform amplification (TikTok + YouTube + X + blog doubles value without doubling work)"
+    ],
+    "levers_that_move_revenue_down": [
+      "Audience size vs engagement: trust beats vanity numbers, but there's still a floor",
+      "Inconsistency: 25/25/25/25 lane mix means each lane needs to produce enough to count",
+      "Authenticity tax: saying no to a deal is a real cost; pays back in long-term brand relationships",
+      "C7 filter closes some doors; other doors open with brands that specifically want honest creators"
+    ],
+    "what_bolt_cant_predict": [
+      "Actual audience growth rate",
+      "Which brands will pay at your tier",
+      "Whether tech-AI or skincare lane monetizes faster than gaming",
+      "Whether 'creating with Marvel' is realistic at all"
+    ],
+    "user_target_question": "What changes in your life at $1,000/mo vs $3,000/mo? If the answer is 'not much', $1k is fine. If the answer is 'everything changes at $3k', that's the real target."
+  }
+}

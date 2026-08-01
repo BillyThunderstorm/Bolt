@@ -1,0 +1,77 @@
+# Rotation Policy Configuration for Bolt Media Management
+# This file defines the retention policies for different types of media
+
+retention_policy:
+  # Recordings (video files, full captures)
+  recordings:
+    max_size_gb: 50
+    max_days: 30
+    priority: high
+    file_types: [".mp4", ".mov", ".mkv", ".avi"]
+    archive_location: "archive/recordings"
+    compression_enabled: true
+    delete_after_archive: true  # Set to true when you want to delete instead of archive
+
+  # Clips (short video segments, highlights)
+  clips:
+    max_size_gb: 1
+    max_days: 7
+    priority: medium
+    file_types: [".mp4", ".mov", ".mkv"]
+    archive_location: "archive/clips"
+    compression_enabled: true
+    delete_after_archive: true
+
+  # Screenshots and thumbnails
+  thumbnails:
+    max_size_gb: 2
+    max_days: 14
+    priority: low
+    file_types: [".jpg", ".jpeg", ".png", ".webp"]
+    archive_location: "archive/thumbnails"
+    compression_enabled: true
+    delete_after_archive: true
+
+  # Audio files
+  audio:
+    max_size_gb: 5
+    max_days: 60
+    priority: low
+    file_types: [".mp3", ".wav", ".m4a", ".flac", ".aac"]
+    archive_location: "archive/audio"
+    compression_enabled: true
+    delete_after_archive: true
+
+# Global settings
+global:
+  # Enable/disable the rotation system
+  enabled: true
+  
+  # Run frequency (in hours) - for cron job scheduling
+  run_interval_hours: 6
+  
+  # Minimum free space required (GB) before forcing cleanup
+  min_free_space_gb: 10
+  
+  # Whether to compress files before archiving
+  compression_algorithm: "gzip"  # Options: gzip, bzip2, xz, none
+  
+  # Archive compression level (1-9, where 9 is maximum compression)
+  compression_level: 6
+  
+  # Log rotation activities
+  log_file: "logs/media_rotation.log"
+  
+  # Send notifications when cleanup occurs
+  notify_on_cleanup: false
+  
+  # Emergency cleanup threshold (when disk usage exceeds this percentage)
+  emergency_threshold_percent: 95
+
+# Exclusion patterns (files to never delete/archive)
+exclusions:
+  - "*.important.*"
+  - "keep_forever.*"
+  - ".gitkeep"
+  - "README*"
+  - "LICENSE*"
