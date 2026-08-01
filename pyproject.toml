@@ -1,0 +1,122 @@
+[project]
+name = "bolt"
+version = "0.1.0"
+description = "Bolt — Billy Carter's local-first AI content manager and business assistant."
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+
+# ── Author ────────────────────────────────────────────────────────────────────
+authors = [
+    { name = "Billy Carter", email = "carter@example.com" },
+]
+
+# ── Channels ──────────────────────────────────────────────────────────────────
+# `uv add <pkg>` writes here. Manual edits should preserve the same style.
+# Versions intentionally left open-ended to mirror the existing
+# scripts/requirements.txt so `uv sync` doesn't introduce new pins during the
+# migration. Tighten in follow-up phases if needed.
+
+dependencies = [
+    # CORE VIDEO/AUDIO PROCESSING
+    "moviepy",            # Video editing and clip generation
+    "librosa",            # Audio analysis for highlight detection
+    "numpy",              # Required by librosa, moviepy, etc.
+    "opencv-python",      # Computer vision for frame analysis
+
+    # AI/LLM INTEGRATION
+    "openai",             # Chat completions and embeddings
+    "langchain",          # RAG and memory retrieval
+    "langchain-huggingface",   # HuggingFace model integration
+    "langchain-community",     # Community langchain integrations
+    "langchain-text-splitters",# Text chunking for RAG
+    "chromadb",           # Vector database for memory storage
+    "sentence-transformers",  # Embedding models
+
+    # PLATFORM INTEGRATIONS
+    "twitchio<3.0.0",     # Twitch chat and API (pinned for stability)
+    "obs-websocket-py",   # OBS Studio control
+    "python-socketio[client]", # Streamlabs real-time events
+    "websocket-client",   # Low-level WebSocket support
+    "requests",           # HTTP requests for APIs
+
+    # GOOGLE SERVICES
+    "google-api-python-client",  # Gmail, Calendar APIs
+    "google-auth-httplib2",      # Google auth support
+    "google-auth-oauthlib",      # OAuth2 flow for Google
+
+    # VOICE/SPEECH
+    "edge-tts",           # Microsoft TTS for voice output
+    "SpeechRecognition",  # Speech-to-text (optional)
+
+    # WEB/QUEUE
+    "flask",              # Local web server for callbacks
+
+    # UTILITIES
+    "python-dotenv",      # Environment variable management
+    "schedule",           # Job scheduling
+    "psutil",             # System monitoring
+    "pytz",               # Timezone support
+    "imagehash",          # Perceptual hashing for clip deduplication
+    "Pillow",             # Frame extraction for pHash
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[project.scripts]
+# Single entry point: `uv run bolt <subcommand>`. The wrapper at bin/bolt
+# preserves the manual flow for back-compat; this section makes the same
+# surface available to `uv tool install`.
+bolt = "bin.bolt:main"
+
+
+# ── Build system ──────────────────────────────────────────────────────────────
+# uv doesn't need a [build-system] for a non-publishable app like Bolt, but
+# some uv subcommands look it up. We use hatchling for forward-compat with
+# `uv tool install` and friends.
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+# ── uv configuration ──────────────────────────────────────────────────────────
+[tool.uv]
+# Pin to the Python interpreter that's actually installed by the uv-managed
+# cpython-3.11.15 slot on this machine. Changing this only after first
+# running `uv python pin` so all contributors land on the same runtime.
+# (See .python-version — uv reads that and prefers it.)
+managed = true
+package = false                    # Bolt is an app, not a publishable library
+python-preference = "managed"      # Always use uv-managed interpreters, not the system one
+resolution = "highest"             # Resolver picks the newest compatible version
+
+# Lock schedule: lock on first run, refresh on `uv lock --upgrade`.
+[[tool.uv.index]]
+# Default PyPI — declared explicitly so future private indexes can layer on
+# without changing this file's shape.
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
+
+# Dev dependencies live in PEP 735 dependency-groups (uv >= 0.5).
+# Use `uv add --dev <pkg>` to add entries here.
+[dependency-groups]
+dev = [
+    "pytest",
+]  
+
+
+# ── Tool configuration: ruff-style formatting + simple test defaults ─────────
+[tool.pytest.ini_options]
+testpaths = ["Data/tests"]
+addopts = "-ra --tb=short"
+
+
+# ── Project metadata ──────────────────────────────────────────────────────────
+[tool.bolt]
+# Used by `bin/bolt verify` and the in-repo DocWriter to confirm version
+# coupling between docs and code. Not part of the Python packaging metadata.
+bolt_version_pinned = "0.1.0"
+phase_1_status = "complete"        # Phase 1.2 + 1.3 shipped 2026-07-31

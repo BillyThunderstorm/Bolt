@@ -4,23 +4,25 @@ Bolt CLI — single entry point for every Bolt script and command.
 
 Run with no args to see the available subcommands:
 
+    uv run bolt
+    # or, with the venv activated:
     python3 bin/bolt
 
 Run a subcommand:
 
-    python3 bin/bolt verify                # check the install
-    python3 bin/bolt recordings            # process latest recordings
-    python3 bin/bolt thumbnails --dry-run  # generate thumbnails
-    python3 bin/bolt nexus "How do I title my clips?"
-    python3 bin/bolt briefing --send       # generate + send daily briefing
-    python3 bin/bolt launch                # start the bot (Core/src/launch.py)
-    python3 bin/bolt test                  # run the full test suite
-    python3 bin/bolt test test_title_generator  # run a specific test module
+    uv run bolt verify                # check the install
+    uv run bolt recordings            # process latest recordings
+    uv run bolt thumbnails --dry-run  # generate thumbnails
+    uv run bolt nexus "How do I title my clips?"
+    uv run bolt briefing --send       # generate + send daily briefing
+    uv run bolt launch                # start the bot (Core/src/launch.py)
+    uv run bolt test                  # run the full test suite
+    uv run bolt test test_title_generator  # run a specific test module
 
 Add a shell alias to invoke it as just `bolt`:
 
     # in ~/.zshrc or ~/.bashrc
-    alias bolt='python3 /Users/carter/developer/Bolt/bin/bolt'
+    alias bolt='uv run --directory /Users/carter/developer/Bolt bolt'
 
 Then from anywhere:
 
@@ -30,7 +32,12 @@ Then from anywhere:
 
 Setup wizard (first-time use):
 
-    bolt setup
+    uv run bolt setup
+
+> `uv run` automatically uses the lockfile (uv.lock) and the pinned
+> interpreter (.python-version), so you don't need to activate the venv
+> manually. If you don't have `uv` installed yet, get it from
+> https://docs.astral.sh/uv/ then run `uv sync` once to populate .venv.
 
 Subcommands map 1:1 onto the scripts in `scripts/`
 (their hyphenated names match the script basenames). The wrapper does
@@ -278,64 +285,13 @@ def main() -> int:
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Script passthrough
-    script = find_script(subcommand)
-    if script is None:
-        print(f"bolt: unknown subcommand '{subcommand}'", file=sys.stderr)
-        print(f"  Run 'bolt help' for the full list of subcommands.", file=sys.stderr)
-        return 2
-
-    if not script.exists():
-        print(f"bolt: script not found: {script}", file=sys.stderr)
-        return 1
-
-    # Exec the script with the rest of the args, using the venv Python so
-    # `dotenv` and `Pillow` are available.
-    cmd = [str(VENV_PYTHON if VENV_PYTHON.exists() else sys.executable), str(script)] + rest
-    os.chdir(REPO_ROOT)
-    return subprocess.call(cmd, cwd=str(REPO_ROOT))
-
-
-if __name__ == "__main__":
-    sys.exit(main())
-    if subcommand == "intelligence" or subcommand == "status":
-        print("🧠 Bolt Intelligence Status\n")
-        os.system('''
-PYTHONPATH=Core python -c "
-from modules.Think_Learn_Decide import ThinkLearnDecideEngine
-from modules.Config_Loader import load_config
-from modules.Local_Vector_DB import LocalVectorDB
-from modules.Nexus_Creator import NexusCreator
-import os
-
-config = load_config()
-engine = ThinkLearnDecideEngine(config)
-print('✅ Decision Engine: Ready')
-print('   - think_and_propose:', hasattr(engine, 'think_and_propose'))
-print('   - _get_nexus_insight:', hasattr(engine, '_get_nexus_insight'))
-
-try:
-    db = LocalVectorDB()
-    print('✅ Vector DB: Ready')
-except Exception as e:
-    print('❌ Vector DB:', e)
-
-try:
-    nexus = NexusCreator()
-    print('✅ Nexus Creator: Ready')
-    print('   Preferred:', nexus.preferred_provider)
-except Exception as e:
-    print('❌ Nexus:', e)
-"
-        ''')
-        return 0
-
-    # Intelligence / Status command
+    # Built-in: intelligence/status
     if subcommand in ("intelligence", "status"):
-        print("🧠 Bolt Intelligence Status\n")
-        os.system('''
-PYTHONPATH=Core python -c "
-from modules.Think_Learn_Decide import ThinkLearnDecideEngine
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        script = '''from modules.Think_Learn_Decide import ThinkLearnDecideEngine
 from modules.Config_Loader import load_config
 from modules.Local_Vector_DB import LocalVectorDB
 from modules.Nexus_Creator import NexusCreator
@@ -363,6 +319,28 @@ except Exception as e:
 
 print()
 print('System is fully upgraded.')
-"
-        ''')
-        return 0
+'''
+        cmd = [py, "-c", script]
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Script passthrough
+    script = find_script(subcommand)
+    if script is None:
+        print(f"bolt: unknown subcommand '{subcommand}'", file=sys.stderr)
+        print(f"  Run 'bolt help' for the full list of subcommands.", file=sys.stderr)
+        return 2
+
+    if not script.exists():
+        print(f"bolt: script not found: {script}", file=sys.stderr)
+        return 1
+
+    # Exec the script with the rest of the args, using the venv Python so
+    # `dotenv` and `Pillow` are available.
+    cmd = [str(VENV_PYTHON if VENV_PYTHON.exists() else sys.executable), str(script)] + rest
+    os.chdir(REPO_ROOT)
+    return subprocess.call(cmd, cwd=str(REPO_ROOT))
+
+
+if __name__ == "__main__":
+    sys.exit(main())
