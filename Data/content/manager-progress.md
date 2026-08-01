@@ -21,13 +21,15 @@
 
 | Item | Lane | Status |
 |------|------|--------|
-| Daily Driver Gaming Headset | tech | testing |
 | Starter FPS Session Notes | game | idea |
+| Mouse | tech | testing |
+
+*(Example "Daily Driver Gaming Headset" removed 2026-08-01 — was a placeholder, not real gear.)*
 
 ## Next actions for William
 
-1. Replace placeholder ASIN on owned gear
-2. Film first tech short from draft
+1. Add real products you already own via `bolt manage add "Name" --lane tech --asin <ASIN>`
+2. Film first tech short from a real item draft
 3. Log one real game session note
 4. Run `bolt morning` daily
 5. Pitch only after 1–2 public reviews exist

@@ -4,14 +4,15 @@ modules/Bolt_Memory.py — Bolt's long-term memory system (Phase 4)
 =================================================================
 Gives Bolt the ability to remember things across sessions and recall
 them when needed. No LangChain, no vector database, no OpenAI key.
-Just OpenAI + the memory/ folder you already have.
+Just OpenAI + the Data/ memory tree you already have.
 
 How it works:
-  - memory/MEMORY.md  → hot cache (most important stuff, always loaded)
-  - memory/people/    → notes on people Billy works with or talks about
-  - memory/projects/  → project-specific notes (Bolt, ClipBot, etc.)
-  - memory/context/   → creator setup, stream notes, brand context
-  - memory/glossary.md → decoder ring for Billy's shorthand
+  - Data/MEMORY.md     → hot cache (most important stuff, always loaded)
+  - Data/people/       → notes on people Billy works with or talks about
+  - Data/projects/     → project-specific notes (Bolt, ClipBot, etc.)
+  - Data/context/      → creator setup, stream notes, brand context
+  - Data/glossary.md   → decoder ring for Billy's shorthand
+  - Data/memory/       → user_profile, research_log, phase checklists
 
 The `recall()` function loads all of this and asks OpenAI a question
 using the memory as context. This is Phase 4's "self-awareness" — Bolt
@@ -55,8 +56,11 @@ except ImportError:
 
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
+# Core/modules/Bolt_Memory.py → parents[2] is the repo root (Bolt/).
+# After the Jul 2026 reorg, creator memory lives under Data/, not Core/memory/.
 
-MEMORY_ROOT = Path(__file__).parent.parent / "memory"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+MEMORY_ROOT = PROJECT_ROOT / "Data"
 MEMORY_FILE = MEMORY_ROOT / "MEMORY.md"
 GLOSSARY = MEMORY_ROOT / "glossary.md"
 PEOPLE_DIR = MEMORY_ROOT / "people"
@@ -307,6 +311,107 @@ def remember_session_event(event_type: str, **kwargs):
     except KeyError:
         fact = f"{event_type}: {kwargs}"
     remember(fact)
+
+
+# ── Briefing memory retrieval ─────────────────────────────────────────────────
+# Tests patch `scripts.<module>._retrieve_briefing_memory` so this function
+# needs to be importable from the scripts layer. We define it here in the
+# canonical place, then re-export it from the scripts via a thin wrapper.
+
+
+def _retrieve_briefing_memory(query: str = "", limit: int = 5) -> list:
+    """Return ranked memory hits for a briefing query.
+
+    Designed to be called from scripts/daily_briefing.py and
+    scripts/weekly_analysis.py. Returns [] if no memory is available — never
+    crashes the caller. Hits are ranked by score (highest first), capped at
+    `limit` (default 5).
+
+    Hit shape:
+        {
+            "kind": str,        # "creator_note" | "decision_event" | "performance_outcome" | "constraint" | etc.
+            "text": str,        # human-readable summary
+            "score": float,     # 0.0-1.0 relevance/confidence
+            "source": str,      # where this hit came from
+            "timestamp": str,   # ISO timestamp
+        }
+
+    Sources, in priority order:
+        1. Memory_Index.retrieve_memory (vector-style, against content/* .md)
+        2. Data/unified_memory.jsonl (decision events from past sessions)
+        3. Data/memory/user_profile.json (hard constraints surfaced as reminders)
+    """
+    hits: list = []
+
+    # Source 1: Memory_Index vector retrieval (preferred)
+    if retrieve_memory is not None:
+        try:
+            indexed = retrieve_memory(query=query, limit=limit) or []
+            for h in indexed:
+                hits.append({
+                    "kind": h.get("kind", "memory_index"),
+                    "text": h.get("text", "") or h.get("title", ""),
+                    "score": float(h.get("score", 0.5)),
+                    "source": h.get("source", "memory_index"),
+                    "timestamp": h.get("updated_at", ""),
+                })
+        except Exception:
+            pass  # fall through to next source
+
+    # Source 2: unified_memory.jsonl recent decision events
+    try:
+        unified_path = PROJECT_ROOT / "Data" / "unified_memory.jsonl"
+        if unified_path.exists():
+            recent_events: list = []
+            with unified_path.open("r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        import json as _json
+                        evt = _json.loads(line)
+                    except Exception:
+                        continue
+                    if not isinstance(evt, dict):
+                        continue
+                    text = evt.get("reason") or evt.get("feedback") or evt.get("action") or ""
+                    if not text:
+                        continue
+                    recent_events.append({
+                        "kind": "decision_event",
+                        "text": f"Follow up on recent decision: {evt.get('action', '?')}",
+                        "score": 0.7,
+                        "source": "unified_memory",
+                        "timestamp": evt.get("timestamp", ""),
+                    })
+            # Take last 3 events (most recent), score already descending
+            hits.extend(recent_events[-3:])
+    except Exception:
+        pass
+
+    # Source 3: user_profile.json hard constraints (lowest priority)
+    try:
+        profile_path = PROJECT_ROOT / "Data" / "memory" / "user_profile.json"
+        if profile_path.exists():
+            import json as _json
+            with profile_path.open("r", encoding="utf-8") as f:
+                profile = _json.load(f)
+            constraints = profile.get("hard_constraints", []) or []
+            for c in constraints[:2]:  # top 2 constraints
+                hits.append({
+                    "kind": "constraint",
+                    "text": f"Reminder: {c.get('text', '')}",
+                    "score": 0.5,
+                    "source": "user_profile",
+                    "timestamp": "",
+                })
+    except Exception:
+        pass
+
+    # Sort by score desc, cap at limit
+    hits.sort(key=lambda h: h.get("score", 0), reverse=True)
+    return hits[:limit]
 
 
 # ── CLI — test from terminal ───────────────────────────────────────────────────

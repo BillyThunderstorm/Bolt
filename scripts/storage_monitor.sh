@@ -273,8 +273,8 @@ print_config() {
     log_message "INFO" "  Critical threshold: ${THRESHOLD_CRIT}%"
     log_message "INFO" "  Email alerts: ${ALERT_EMAIL:-disabled}"
     log_message "INFO" "  SMS alerts: ${ALERT_PHONE:-disabled} (${CARRIER:-unknown})"
-    log_message "INFO" "  Webhook: ${WEBHOOK_URL:-disabled}"
-    log_message "INFO" "  Discord: ${DISCORD_WEBHOOK:-disabled}"
+    log_message "INFO" "  Webhook: $([[ -n "$WEBHOOK_URL" ]] && echo set || echo disabled)"
+    log_message "INFO" "  Discord: $([[ -n "$DISCORD_WEBHOOK" ]] && echo set || echo disabled)"
 }
 
 # =============================================================================

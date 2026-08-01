@@ -2,7 +2,7 @@
 """
 modules/Gmail_Briefing.py -- Gmail input for Bolt's daily briefing.
 
-Uses the same Google OAuth app style as Google_Calender.py, but stores a
+Uses the same Google OAuth app style as Google_Calendar.py, but stores a
 separate Gmail token because Gmail needs a different read-only scope.
 """
 

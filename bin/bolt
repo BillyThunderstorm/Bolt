@@ -158,6 +158,10 @@ Content manager / creator business (Core/modules/Content_Manager.py):
   advance next
   morning [--quiet]       Good Morning Bolt spoken daily briefing
 
+Direction-finding researcher (Core/modules/Researcher.py):
+  research [status|questions|candidates|log]
+                          Profile-aware research role (C5/C6/C7 gates + log)
+
 Built-in subcommands (not script passthroughs):
   launch                  Start the bot (Core/src/launch.py)
   test [testmodule]       Run the full test suite (or a specific test module)
@@ -282,6 +286,16 @@ def main() -> int:
             cm_args = [subcommand] + rest
 
         cmd = [py, "-m", "modules.Content_Manager"] + cm_args
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: researcher role (direction-finding)
+    if subcommand in ("research", "researcher"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Researcher"] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
