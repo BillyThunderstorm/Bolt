@@ -427,6 +427,18 @@ class ThinkLearnDecideEngine:
         """
         Enhanced version with Nexus + Vector memory enrichment.
         Returns (thought, ranked_proposals)
+
+        What this does:
+            1. Run the Nexus enrichment (best-effort, non-blocking).
+            2. Run `think()` to retrieve memory context + compute
+               `memory_influence` (counts by signal + net_direction +
+               confidence_delta + strongest_match).
+            3. For each candidate:
+                - if the caller already supplied a `memory_influence` dict,
+                  keep it untouched (back-compat).
+                - otherwise attach the freshly-computed `thought["memory_influence"]`
+                  to the candidate so `propose_actions()` can use it.
+            4. Delegate ranking + confidence adjustment to `propose_actions`.
         """
         from datetime import datetime
 
@@ -438,38 +450,40 @@ class ThinkLearnDecideEngine:
         ]
         full_context = "\n".join(str(p) for p in context_parts)
 
-        # Get Nexus strategic insight
+        # Get Nexus strategic insight (best effort — non-blocking on failure)
         nexus_insight = self._get_nexus_insight(full_context, task_type="decision")
 
-        # Existing thinking path
+        # Existing thinking path: this populates memory_influence.
         thought = self.think(input_data)
         thought["nexus_insight"] = nexus_insight
         thought["timestamp"] = datetime.now().isoformat()
 
-        # Log the insight (must be before any return)
+        # Log the insight (best effort)
         if nexus_insight:
             self.log_nexus_insight(nexus_insight, context={"input": input_data})
 
-        # Attach memory influence if available
-        influence = thought.get("memory_influence") or {}
+        # Attach memory influence when the caller hasn't already done so.
+        # We never overwrite a caller-provided `memory_influence` so the
+        # caller always wins (test_caller_provided_memory_influence covers this).
+        influence = thought.get("memory_influence") if isinstance(thought.get("memory_influence"), dict) else {}
+        enriched_candidates = []
+        for candidate in candidates:
+            if not isinstance(candidate, dict):
+                enriched_candidates.append(candidate)
+                continue
+            if isinstance(candidate.get("memory_influence"), dict):
+                enriched_candidates.append(candidate)
+                continue
+            if influence and influence.get("net_direction") not in (None, "", "neutral"):
+                enriched_candidates.append({**candidate, "memory_influence": dict(influence)})
+            else:
+                enriched_candidates.append(candidate)
 
-        if influence and isinstance(influence, dict):
-            enriched = []
-            for candidate in candidates:
-                if not isinstance(candidate, dict):
-                    enriched.append(candidate)
-                    continue
-                if isinstance(candidate.get("memory_influence"), dict):
-                    enriched.append(candidate)
-                    continue
-                enriched.append({**candidate, "memory_influence": dict(influence)})
-            return thought, enriched
+        # Delegate to propose_actions so memory deltas become confidence
+        # deltas and reasons carry the strongest-match title.
+        ranked = self.propose_actions(enriched_candidates)
+        return thought, ranked
 
-        return thought, candidates
-        # Log the insight
-        if nexus_insight:
-            self.log_nexus_insight(nexus_insight, context={"input": input_data})
-            
     def _memory_adjustment(self, candidate: Dict[str, Any]) -> tuple[float, str]:
         memory_items = (
             candidate.get("memory_context") or candidate.get("retrieved_memory") or []
@@ -561,6 +575,135 @@ class ThinkLearnDecideEngine:
             adjustment,
             f"memory {direction} confidence by {abs(adjustment):.2f} from {len(memory_items)} match(es){title_part}",
         )
+
+    # ── risk classification + scoring helpers ─────────────────────────────────
+
+    _HIGH_RISK_ACTIONS = {"delete_clip", "publish_now"}
+
+    @classmethod
+    def _risk_for(cls, action: str) -> str:
+        return "high" if str(action) in cls._HIGH_RISK_ACTIONS else "low"
+
+    @staticmethod
+    def _base_confidence_from_score(score) -> float:
+        """Convert a numeric clip score (0-100 scale typically) into 0..1 confidence.
+
+        Keeps provenance of the original score available on the proposal's
+        `payload` so test fixtures that pass `score=70` get a confidence
+        around 0.7. Anything that's not a number falls back to 0.5 so the
+        pipeline still produces a usable rank.
+        """
+        try:
+            value = float(score)
+        except (TypeError, ValueError):
+            return 0.5
+        # Tame out-of-range inputs instead of raising so a noisy candidate
+        # can't crash the ranker.
+        if value < 0:
+            return 0.0
+        if value > 100:
+            return 1.0
+        return value / 100.0
+
+    @staticmethod
+    def _build_reason(candidate: Dict[str, Any], adjustment: float, base_reason: str) -> str:
+        """Compose the human-facing reason for a proposed action.
+
+        The test suite asserts two exact substrings:
+            - "memory boosted confidence" (any positive adjustment)
+            - "memory reduced confidence" (any negative adjustment)
+        Plus the strongest-match title when present.
+        """
+        if abs(adjustment) < 0.005:
+            return base_reason
+        direction = "boosted" if adjustment > 0 else "reduced"
+        strength = abs(adjustment)
+        verb = "memory boosted confidence" if direction == "boosted" else "memory reduced confidence"
+        influence = candidate.get("memory_influence") if isinstance(candidate.get("memory_influence"), dict) else {}
+        strongest = influence.get("strongest_match") if isinstance(influence.get("strongest_match"), dict) else {}
+        title = strongest.get("title") if strongest else ""
+        title_part = f" — strongest match: {title}" if title else ""
+        return f"{base_reason}; {verb} by {strength:.2f}{title_part}"
+
+    @staticmethod
+    def _candidate_payload(candidate: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract everything except the reserved scoring fields into payload.
+
+        Keeps the engine from accidentally re-scoring a field it doesn't
+        know about, while still allowing callers to attach metadata that
+        later survives the queue trip.
+        """
+        payload_keys = {"action", "score", "memory_context", "memory_influence", "retrieved_memory"}
+        return {k: v for k, v in candidate.items() if k not in payload_keys}
+
+    def propose_actions(self, candidates: List[Dict[str, Any]]) -> List[ProposedAction]:
+        """Rank a list of candidate actions into ProposedAction objects.
+
+        Each candidate is at minimum:
+            {"action": str, "score": number, "clip_path": str (optional), ...}
+
+        Optional fields:
+            "memory_context":       list[dict]  — memory hits to consider
+            "memory_influence":     dict       — pre-computed influence override
+            "memory_influence.strongest_match.title": drives the reason wording
+
+        Memory adjustments come from either:
+            1. `candidate["memory_influence"]` if present (caller-provided wins)
+            2. else `candidate["memory_context"]` / `candidate["retrieved_memory"]`
+
+        Returns proposals sorted by confidence (descending) and assigns each
+        a deterministic action_id of the form `<action>:<clip_path>:<rank>`.
+        """
+        proposals: List[ProposedAction] = []
+
+        for idx, candidate in enumerate(candidates):
+            if not isinstance(candidate, dict):
+                continue
+
+            action = str(candidate.get("action") or "queue_clip")
+            score = candidate.get("score", 50)
+            confidence = self._base_confidence_from_score(score)
+            base_reason = f"score {score} → confidence {confidence:.2f}"
+
+            adjustment, adj_reason = self._memory_adjustment(candidate)
+            if adjustment:
+                confidence = max(0.0, min(1.0, confidence + adjustment))
+                reason = self._build_reason(candidate, adjustment, base_reason)
+            else:
+                # If memory gave no numeric delta but has a strongest_match
+                # title (e.g. caller provided a neutral memory_influence),
+                # still surface the title in the reason for traceability.
+                reason = base_reason
+                influence = candidate.get("memory_influence") if isinstance(candidate.get("memory_influence"), dict) else {}
+                strongest = influence.get("strongest_match") if isinstance(influence.get("strongest_match"), dict) else {}
+                title = strongest.get("title") if strongest else ""
+                net_dir = str(influence.get("net_direction") or "neutral")
+                if title and net_dir != "neutral":
+                    reason = f"{base_reason}; memory {net_dir} — strongest match: {title}"
+
+            clip_path = str(candidate.get("clip_path") or f"clip_{idx}")
+            payload = self._candidate_payload(candidate)
+            # Keep the original score inside the payload so downstream stages
+            # can recover it (and so existing test_apply_approved_executes_queue_clip
+            # still works once we fall back to clip_path for missing values).
+            payload.setdefault("score", float(score) if isinstance(score, (int, float)) else 0.0)
+            payload.setdefault("clip_path", clip_path)
+
+            proposals.append(
+                ProposedAction(
+                    action_id=f"{action}:{Path(clip_path).name}:{idx}",
+                    action=action,
+                    confidence=confidence,
+                    risk=self._risk_for(action),
+                    reason=reason,
+                    payload=payload,
+                )
+            )
+
+        # Stable sort by confidence desc; ties broken by original order so
+        # scores with equal confidence come out in user-supplied order.
+        proposals.sort(key=lambda p: p.confidence, reverse=True)
+        return proposals
 
     def confirm_action(self, proposal: ProposedAction) -> bool:
         """
