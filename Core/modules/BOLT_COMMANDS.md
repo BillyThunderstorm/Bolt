@@ -190,7 +190,7 @@ Voice: say **Good Morning Bolt** in conversation mode (`python -m modules.Bolt_C
 
 Amazon tag: `billycarter-20`. Handles: TikTok @itssimplybilly, Twitch thunderstormbilly, YouTube @SimplyBilly, X @SimplyBilly_.
 
-## `bolt` CLI Wrapper (NEW - July 7, 2026)
+## `bolt` CLI Wrapper (NEW - July 7, 2026; uv-canonical since July 31, 2026)
 |
 |A single entry-point command for every Bolt script and command lives at
 |`bin/bolt`. It does the sys.path bootstrap once, then dispatches to the
@@ -199,18 +199,22 @@ Amazon tag: `billycarter-20`. Handles: TikTok @itssimplybilly, Twitch thundersto
 |Invoke directly (no setup required):
 |
 |```bash
-|/Users/carter/developer/Bolt/bin/bolt verify
-|/Users/carter/developer/Bolt/bin/bolt recordings
-|/Users/carter/developer/Bolt/bin/bolt nexus "How do I title my clips?"
-|/Users/carter/developer/Bolt/bin/bolt test              # full test suite
-|/Users/carter/developer/Bolt/bin/bolt help              # show all subcommands
+|uv run --directory /Users/carter/developer/Bolt bolt verify
+|uv run --directory /Users/carter/developer/Bolt bolt recordings
+|uv run --directory /Users/carter/developer/Bolt bolt nexus "How do I title my clips?"
+|uv run --directory /Users/carter/developer/Bolt bolt test              # full test suite
+|uv run --directory /Users/carter/developer/Bolt bolt help              # show all subcommands
 |```
 |
 |Or add a shell alias so you can just type `bolt <thing>` from any
 |directory. Put this in `~/.zshrc` (or `~/.bashrc`):
 |
 |```bash
-|alias bolt='/Users/carter/developer/Bolt/bin/bolt'
+|# Canonical — `uv run` resolves the lockfile and pinned interpreter:
+|alias bolt='uv run --directory /Users/carter/developer/Bolt bolt'
+|
+|# Fallback (only if `uv` is missing/broken on this box):
+|# alias bolt='/Users/carter/developer/Bolt/bin/bolt'
 |```
 |
 |Then `source ~/.zshrc` (or open a new terminal) and:
@@ -510,21 +514,38 @@ Refresh the local searchable memory index after editing memory files.
 The memory index lives in `Data/data/memory_index.json` and `Core/data/memory_index.json`.
 
 ```bash
-PYTHONPATH=scripts python3 scripts/refresh_memory_index.py
+# uv-canonical (Phase 1.4):
+uv run --directory /Users/carter/developer/Bolt bolt refresh_memory
 ```
 
 ### Search Memory
 Search memory through the index module:
 
 ```bash
-PYTHONPATH=Core:scripts python3 -m modules.Memory_Index --refresh "Amazon Influencer storefront product testing"
+uv run --directory /Users/carter/developer/Bolt python -m modules.Memory_Index --refresh "Amazon Influencer storefront product testing"
 ```
 
 Search memory through Bolt memory (the higher-level wrapper):
 
 ```bash
-PYTHONPATH=Core:scripts python3 -m modules.Bolt_Memory --search "beauty skincare routine product test results"
+uv run --directory /Users/carter/developer/Bolt python -m modules.Bolt_Memory --search "beauty skincare routine product test results"
 ```
+
+### Briefing Memory Retrieval (Phase 1.2)
+
+Both `scripts/daily_briefing.py` and `scripts/weekly_analysis.py` expose
+a module-level `_retrieve_*_memory(query, limit)` helper that gets
+patched in tests. Callers should NOT call the helper directly — it's an
+internal hook. The expected contract:
+
+- Returns ranked memory hits by score desc, capped at `limit` (default 5).
+- Returns `[]` if the memory stack is unavailable — never crashes.
+- Three sources, in priority order: `Memory_Index.retrieve_memory` →
+  `Data/unified_memory.jsonl` recent decisions →
+  `Data/memory/user_profile.json` hard constraints.
+- Test fixtures live in `Data/tests/test_daily_briefing.py` (11/11) and
+  `Data/tests/test_weekly_analysis.py` (8/8). If you change the helper's
+  shape, update the tests in the same commit.
 
 ## Content Results And Learning
 
@@ -1025,6 +1046,25 @@ those as concrete action items instead of generic placeholders.
 - SMS summary now includes `N memory notes` so you can see at a glance
   whether memory is shaping the briefing
 
+**Canonical command** (uv-canonical since 2026-07-31):
+
+```bash
+uv run --directory /Users/carter/developer/Bolt bolt briefing --print
+uv run --directory /Users/carter/developer/Bolt bolt briefing --send
+```
+
+**Memory hit kinds** that surface as action items (Phase 1.2 contract):
+
+| `kind`                | Action-item prefix                              |
+|-----------------------|-------------------------------------------------|
+| `performance_outcome` | `Review last clip performance and log outcomes` |
+| `decision_event`      | `Follow up on recent decision: <action>`        |
+| `creator_note` / `markdown` | `Creator note active: <title>`           |
+
+Capped at 3 memory-driven action items. The first `performance_outcome`
+hit becomes the canonical review item; subsequent hits dedup on the
+prefix. Generic actions render when memory retrieval returns zero.
+
 ## Weekly Analysis (memory-aware)
 
 Generate Sunday-morning weekly insights with trigger breakdown, memory
@@ -1043,12 +1083,37 @@ PYTHONPATH=scripts python3 scripts/weekly_analysis.py --send
 
 **Cron Schedule**: Runs automatically at 9:00 AM Sundays
 
+**Canonical command** (uv-canonical since 2026-07-31):
+
+```bash
+uv run --directory /Users/carter/developer/Bolt bolt weekly --print
+uv run --directory /Users/carter/developer/Bolt bolt weekly --days 14
+uv run --directory /Users/carter/developer/Bolt bolt weekly --send
+```
+
 **Report Includes**:
-- Performance summary table (clips logged, total views, total likes, success rate)
-- Top performing trigger types with avg views + success rate
-- **🧠 Memory Highlights** section (top 8 retrieved hits per week)
-- **Memory-grounded Recommendations** (max 2, deduped by title theme)
+- Performance summary (clips logged, queue size, memory hit count)
+- **🧠 Memory Highlights** section — every retrieved hit with `kind`,
+  title, and source path
+- **Recommendations for Next Week** (heading changed from `## Recommendations`
+  in Phase 1.2 — confirm your cron output uses the new title)
+- **Memory-grounded Recommendations** with prefix-by-kind (Phase 1.2 contract):
+
+| `kind`                | Recommendation prefix                                  |
+|-----------------------|--------------------------------------------------------|
+| `markdown` / `creator_note` | `Honor creator note: <title>`                    |
+| `decision_event`      | `Carry forward recent decision: <action>`              |
+| `performance_outcome` | `Reflect last week's outcome: <title>`                 |
+| fallback (no memory)  | `Start logging performance`                            |
+
+Dual cap: ≤3 hits → all surface, ≥4 hits → cap at 2 (deduped by the
+prefix before the first `:`). The single universal fallback
+`Start logging performance` renders when memory retrieval returns
+nothing — gives you a clean reminder to log outcomes.
+
 - SMS summary includes `N memory hits`
+- `load_outcomes(days)` + `load_queue_stats()` feed the `--send` path.
+  Both are module-level functions, patchable by tests, no extra config.
 
 ## Calendar Feeds
 
@@ -1119,31 +1184,55 @@ PYTHONPATH=scripts python3 scripts/generate_thumbnails.py --width 1920
 
 The decision engine now has a single-call bridge that ties memory
 retrieval into proposal ranking without manual wiring. Module lives at
-`Core/modules/Think_Learn_Decide.py`:
+`Core/modules/Think_Learn_Decide.py` — two methods shipped in Phase 1.2:
+`propose_actions()` (rank + memory-adjust) and `think_and_propose()`
+(retrieve-memory + rank in one call).
 
 ```python
-import sys
-sys.path.insert(0, "Core")
+# uv-canonical (preferred):
 from modules.Think_Learn_Decide import ThinkLearnDecideEngine
 
-engine = ThinkLearnDecideEngine()
+engine = ThinkLearnDecideEngine({})
 candidates = [
     {"action": "queue_clip", "score": 82, "clip_path": "media/clips/ace.mp4"},
     {"action": "queue_clip", "score": 75, "clip_path": "media/clips/kill.mp4"},
 ]
 
-# Old way (still works): think() → manually attach memory_influence → propose_actions()
-# New way: think_and_propose() does it all
+# Old way (still works): think() → manually attach memory_influence →
+# propose_actions(). Useful when you already have the influence available.
+thought = engine.think({"game": "Marvel Rivals", "recording": "ace.mp4"})
+candidates = [
+    {**c, "memory_influence": thought["memory_influence"]}
+    for c in candidates
+]
+proposals = engine.propose_actions(candidates)
+
+# New way: think_and_propose() does it all in one call.
 thought, proposals = engine.think_and_propose(
     {"game": "Marvel Rivals", "recording": "ace.mp4"},
     candidates,
 )
-# proposals[0] is the memory-aware top pick
+# proposals[0] is the memory-aware top pick.
+# proposals[0].reason mentions the strongest memory match:
+#   "...memory boosted confidence by 0.04 — strongest match: <title>"
+#   "...memory reduced confidence by 0.05 — strongest match: <title>"
 ```
 
+|Confidence pipeline (per candidate):
+|  base_confidence = score / 100            (clamped 0..1)
+|  adjustment     = memory_influence.confidence_delta (signed)
+|                   OR derived from candidate.memory_context / retrieved_memory
+|  confidence     = clamp(0..1, base + adjustment)
+|
+|Risk is auto-classified: `delete_clip` and `publish_now` get `risk="high"`,
+|everything else gets `risk="low"`. `enforce_action_policy()` blocks the
+|high-risk actions even if they win on score.
+
 If the caller already attached `memory_influence` to a candidate, the
-bridge respects it. Old callers that call `propose_actions` directly are
-unaffected.
+bridge respects it (caller wins). Old callers that call `propose_actions`
+directly are unaffected. Existing tests in
+`Data/tests/test_think_learn_decide.py` (15/15) and
+`Data/tests/test_weekly_analysis.py` (8/8) lock this contract in.
 
 ### Twitch Integration Commands
 
