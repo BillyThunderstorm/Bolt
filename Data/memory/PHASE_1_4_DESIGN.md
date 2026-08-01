@@ -104,11 +104,22 @@ with `pyproject.toml`. If a contributor adds or changes a dep in
   `package = false`. A future phase can flip this if/when Bolt starts
   being `uv tool install`'d on machines that don't have a working copy
   checked out.
-- **Did not remove the `--break-system-packages` Pillow install from
-  the global uv-managed Python.** Leaving it there doesn't hurt anything
-  (the venv shadows it), and removing it would require a separate
-  destructive op. Future contributors will not be affected: `.venv/bin/
-  python` wins anyway.
+
+## Cleanup update (Phase 1.4 final state, 2026-07-31 21:30)
+
+After this phase landed, the Pillow / imagehash packages that were
+installed via `--break-system-packages` into the global uv-managed
+Python interpreter (cpython-3.11.15-macos-aarch64-none) were uninstalled
+in a follow-up cleanup commit. The global uv interpreter is now back to
+a clean base that doesn't leak packages to other projects created from
+it. Bolt's `.venv` still has `Pillow 11.3.0` and `imagehash 4.3.2`
+installed by `uv sync` from `pyproject.toml` — which is exactly the
+durable, isolated state we want.
+
+The test suite is still 310 / 310 green after the cleanup:
+- `uv run python -m unittest discover Data/tests` → 310 OK (skipped=5)
+- `.venv/bin/python -c "import PIL, imagehash"` → both importable
+- `/Users/carter/.local/bin/python -c "import PIL"` → ImportError (clean global)
 
 ## Effect on each entry-point (audit)
 
