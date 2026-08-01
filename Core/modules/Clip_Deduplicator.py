@@ -17,6 +17,8 @@ all-black thumbnails from frame 1.  We now:
   - Fall back to multiple seek positions if the first is black
 """
 
+from __future__ import annotations  # so type hints like Image.Image don't evaluate at import
+
 import os
 import json
 import time
