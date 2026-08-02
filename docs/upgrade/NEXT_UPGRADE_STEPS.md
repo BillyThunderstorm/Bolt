@@ -2,6 +2,23 @@
 
 ## 🚀 Upgrade Status
 
+### 🟠 COMMAND CENTER — Missions in bin/bolt ✅ COMPLETE (Aug 1, 2026)
+
+| # | Upgrade | Status | Date | Notes |
+|---|---------|--------|------|-------|
+| CC1 | Skill playbook under `Core/skills/creator-command-center/` | ✅ COMPLETE | Aug 1 | Was root `bolt-creator-command-center/` |
+| CC2 | `Command_Center` module + mission scaffold | ✅ COMPLETE | Aug 1 | Profile + research + catalog context |
+| CC3 | `bolt mission` / `command-center` / `ccc` | ✅ COMPLETE | Aug 1 | start, list, show, next, checkin, playbook |
+| CC4 | Unit tests | ✅ COMPLETE | Aug 1 | `Data/tests/test_command_center.py` |
+
+**Operator loop:**
+```bash
+bolt mission checkin
+bolt mission start "your goal" --hours 6 --budget 40 --assets "…"
+bolt mission show latest
+bolt mission next
+```
+
 ### 🟣 RESEARCHER — Direction-finding role ✅ COMPLETE (Aug 1, 2026)
 
 | # | Upgrade | Status | Date | Notes |

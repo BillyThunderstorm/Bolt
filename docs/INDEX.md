@@ -24,6 +24,8 @@ Use this page as the central map for Bolt.
 | 🟢 | `Docs/INDEX.md` | This map |
 | 🟡 | `Core/modules/Content_Manager.py` | Creator manager implementation |
 | 🟡 | `Core/modules/Researcher.py` | Direction-finding research role (C5/C6/C7) |
+| 🟡 | `Core/modules/Command_Center.py` | Creator Command Center (`bolt mission` / `ccc`) |
+| 🟡 | `Core/skills/creator-command-center/` | Mission playbook skill (SKILL.md) |
 | 🟡 | `Core/modules/Clip_Ranker.py` | Recency-weighted learned clip-rank model |
 | 🟡 | `Core/bolt_brain.md` | William creator profile |
 | 🔵 | `Data/memory/user_profile.json` | Hard constraints + vision for Researcher |

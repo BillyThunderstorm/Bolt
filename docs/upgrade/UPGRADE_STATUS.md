@@ -16,6 +16,15 @@ Source of truth: `/Users/carter/developer/Bolt`
 
 **Nightly content loop:** research first → C5 keep/drop → then produce.
 
+
+## Creator Command Center — in bin/bolt (Aug 1, 2026)
+
+- [x] CC1 — Skill playbook at `Core/skills/creator-command-center/SKILL.md`
+- [x] CC2 — `Core/modules/Command_Center.py` mission scaffold (profile + research + catalog)
+- [x] CC3 — CLI: `bolt mission` / `bolt command-center` / `bolt ccc`
+- [x] CC4 — Tests in `Data/tests/test_command_center.py`
+- [x] Missions store: `Data/memory/missions/*.md`
+
 ## Manager tier (M1–M13) — all complete
 
 - [x] M1 — Content catalog + journals
