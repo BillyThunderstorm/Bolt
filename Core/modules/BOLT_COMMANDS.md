@@ -32,6 +32,26 @@ python3 bin/bolt <command> [options]
 
 Run `bolt help` to show the built-in summary. Commands that expose their own help accept `--help`.
 
+## LLM provider (Grok / OpenAI)
+
+All conversation and `!Bolt` replies go through `Core/modules/LLM_Handler.py`.
+
+```bash
+# .env (local only — never commit real keys)
+BOLT_LLM_PROVIDER=xai          # openai | xai
+BOLT_LLM_FALLBACK=none         # openai | xai | none
+XAI_API_KEY=...
+# OPENAI_API_KEY=...           # optional; still used for Whisper if present
+# BOLT_XAI_MODEL=grok-4.5
+# BOLT_OPENAI_MODEL=gpt-4o-mini
+```
+
+Quick health check:
+
+```bash
+PYTHONPATH=Core python3 -m modules.LLM_Handler
+```
+
 ## Core commands
 
 ```bash
@@ -273,22 +293,49 @@ bolt send "message" [--subject "subject"] [--sms-only|--email-only]
 
 ## Starting conversation mode
 
-Start a text conversation:
+Text conversation:
 
 ```bash
-uv run --directory /Users/carter/developer/Bolt python Core/Bolt_Conversation.py --text
+PYTHONPATH=Core python3 -m Bolt_Conversation --text
 ```
 
-Start voice conversation mode:
+Voice conversation:
 
 ```bash
-uv run --directory /Users/carter/developer/Bolt python Core/Bolt_Conversation.py
+PYTHONPATH=Core python3 -m Bolt_Conversation
 ```
+
+One-shot:
+
+```bash
+PYTHONPATH=Core python3 -m Bolt_Conversation --once "What should I do next?"
+```
+
+Status / clear history:
+
+```bash
+PYTHONPATH=Core python3 -m Bolt_Conversation --status
+PYTHONPATH=Core python3 -m Bolt_Conversation --clear
+```
+
+### Natural language intents (no exact CLI required)
+
+In conversation mode, these phrases trigger real Bolt actions before free-form Grok chat:
+
+| You say | Bolt does |
+|---------|-----------|
+| Good morning Bolt / morning briefing | Daily manager briefing (`morning`) |
+| What should I do next? / what's next | Next actions stack |
+| How are things? / status report | Manager status summary |
+| Show the queue / posting queue | Queue status |
+| Research status / research candidates | Research summary |
+| Mission status / command center | Mission status |
+
+Anything else is answered by Grok with personality + conversation history.
 
 Inside conversation mode:
 
 - Ask Bolt a normal question or give a normal instruction in plain language.
-- Say or type `Good Morning Bolt`, `Good morning`, or `Morning Bolt` for the daily manager briefing.
 - Type or say `exit`, `quit`, `bye`, or `goodbye` to end the conversation.
 
 ## Twitch chat commands
@@ -296,7 +343,7 @@ Inside conversation mode:
 These commands are available while the Bolt Twitch chat bot is connected:
 
 ```text
-!Bolt <question>                  Ask Bolt a question
+!Bolt <question>                  Ask Bolt a question (Grok via LLM_Handler)
 !clip                             Check whether a highlight was detected
 !uptime                           Show the current session uptime
 !highlights                       Show the session highlight count
