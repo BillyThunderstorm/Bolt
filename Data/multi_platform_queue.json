@@ -268259,6 +268259,210 @@
           "aspect_ratio": "9:16"
         }
       ]
+    },
+    {
+      "queue_id": "b9e70059",
+      "created_at": "2026-08-02T16:29:20.164187",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-02T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip37_audio_spike_1209_tiktok.mp4",
+          "caption": "The moment of the stream #Gaming #gaming #clips\n\n#Gaming #highlight #gaming #clips #viral",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-03T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip37_audio_spike_1209_tiktok.mp4",
+          "title": "The moment of the stream #Gaming #gaming #clips",
+          "description": "The moment of the stream #Gaming #gaming #clips\n\nDaily gaming highlights.\n\n#Shorts #Gaming #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip37_audio_spike_1209_tiktok.mp4",
+          "caption": "The moment of the stream #Gaming #gaming #clips\n\n#Gaming #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-02T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip37_audio_spike_1209_tiktok.mp4",
+          "title": "The moment of the stream #Gaming #gaming #clips",
+          "description": "Highlight from the stream: 2026-08-02_15-53-57_clip37_audio_spike_1209_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "82c7affa",
+      "created_at": "2026-08-02T16:29:29.522028",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-02T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip61_audio_spike_1771_tiktok.mp4",
+          "caption": "You have to see this #Gaming clip \ud83c\udfae\n\n#Gaming #highlight #gaming #clips #viral",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-03T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip61_audio_spike_1771_tiktok.mp4",
+          "title": "You have to see this #Gaming clip \ud83c\udfae",
+          "description": "You have to see this #Gaming clip \ud83c\udfae\n\nDaily gaming highlights.\n\n#Shorts #Gaming #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip61_audio_spike_1771_tiktok.mp4",
+          "caption": "You have to see this #Gaming clip \ud83c\udfae\n\n#Gaming #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-02T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip61_audio_spike_1771_tiktok.mp4",
+          "title": "You have to see this #Gaming clip \ud83c\udfae",
+          "description": "Highlight from the stream: 2026-08-02_15-53-57_clip61_audio_spike_1771_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "37f822b5",
+      "created_at": "2026-08-02T16:29:38.292993",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-02T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip17_audio_spike_736_tiktok.mp4",
+          "caption": "The moment of the stream #Gaming #gaming #clips\n\n#Gaming #highlight #gaming #clips #viral",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-03T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip17_audio_spike_736_tiktok.mp4",
+          "title": "The moment of the stream #Gaming #gaming #clips",
+          "description": "The moment of the stream #Gaming #gaming #clips\n\nDaily gaming highlights.\n\n#Shorts #Gaming #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip17_audio_spike_736_tiktok.mp4",
+          "caption": "The moment of the stream #Gaming #gaming #clips\n\n#Gaming #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-02T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip17_audio_spike_736_tiktok.mp4",
+          "title": "The moment of the stream #Gaming #gaming #clips",
+          "description": "Highlight from the stream: 2026-08-02_15-53-57_clip17_audio_spike_736_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "906dc9f5",
+      "created_at": "2026-08-02T16:29:48.474635",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-02T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip39_audio_spike_1270_tiktok.mp4",
+          "caption": "You have to see this #Gaming clip \ud83c\udfae\n\n#Gaming #highlight #gaming #clips #viral",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-03T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip39_audio_spike_1270_tiktok.mp4",
+          "title": "You have to see this #Gaming clip \ud83c\udfae",
+          "description": "You have to see this #Gaming clip \ud83c\udfae\n\nDaily gaming highlights.\n\n#Shorts #Gaming #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip39_audio_spike_1270_tiktok.mp4",
+          "caption": "You have to see this #Gaming clip \ud83c\udfae\n\n#Gaming #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-02T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-02_15-53-57_clip39_audio_spike_1270_tiktok.mp4",
+          "title": "You have to see this #Gaming clip \ud83c\udfae",
+          "description": "Highlight from the stream: 2026-08-02_15-53-57_clip39_audio_spike_1270_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
     }
   ]
 }
