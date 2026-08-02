@@ -7,14 +7,15 @@ Back-and-forth voice (or text) conversation with Billy.
 What it does:
   - Listens via microphone using speech_recognition + Whisper (OpenAI) with Google fallback
   - Maintains persistent conversation history (Project Memory)
+  - Routes high-value intents (morning, next, status, queue, research, mission) to real actions
   - Generates personality-driven responses via LLM_Handler (OpenAI or xAI/Grok)
   - Speaks responses aloud through Bolt_Voice (ElevenLabs primary)
   - Can be used hands-free during streams or desk work
 
 Usage:
-  PYTHONPATH=Core python3 -m modules.Bolt_Conversation          # start voice chat loop
-  PYTHONPATH=Core python3 -m modules.Bolt_Conversation --text   # text-only mode (still speaks replies)
-  PYTHONPATH=Core python3 -m modules.Bolt_Conversation --once "What should I post today?"
+  PYTHONPATH=Core python3 -m Bolt_Conversation          # start voice chat loop
+  PYTHONPATH=Core python3 -m Bolt_Conversation --text   # text-only mode (still speaks replies)
+  PYTHONPATH=Core python3 -m Bolt_Conversation --once "What should I post today?"
 
 Environment:
   BOLT_LLM_PROVIDER / XAI_API_KEY / OPENAI_API_KEY  — response generation
@@ -38,7 +39,7 @@ try:
 except ImportError:
     pass
 
-# ── Imports ───────────────────────────────────────────────────────────────────
+# ── Imports ────────────────────────────────────────────────────────────────────
 
 try:
     import speech_recognition as sr
@@ -71,6 +72,16 @@ except ImportError:
         return {}
 
 try:
+    from modules.Intent_Router import try_handle_intent
+
+    INTENT_OK = True
+except ImportError:
+    INTENT_OK = False
+
+    def try_handle_intent(text):
+        return None
+
+try:
     from modules.Bolt_Voice import speak, say_event
 
     VOICE_OK = True
@@ -97,7 +108,7 @@ except ImportError:
             print(f"     → {reason}")
 
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# ── Config ──────────────────────────────────────────────────────────────────────
 
 OPENAI_KEY = os.getenv("OPENAI_API_KEY", "")
 CONVERSATION_DIR = Path("data/conversations")
@@ -113,7 +124,7 @@ LISTEN_TIMEOUT = int(os.getenv("BOLT_LISTEN_TIMEOUT", "10"))
 PHRASE_TIMEOUT = int(os.getenv("BOLT_PHRASE_TIMEOUT", "5"))
 
 
-# ── Conversation Memory ───────────────────────────────────────────────────
+# ── Conversation Memory ───────────────────────────────────────────────────────
 
 
 class ConversationMemory:
@@ -178,7 +189,7 @@ class ConversationMemory:
         self._save()
 
 
-# ── Personality & Brain Loaders ───────────────────────────────────────────────
+# ── Personality & Brain Loaders ────────────────────────────────────────────────
 
 
 def _load_file(path: Path, fallback: str = "") -> str:
@@ -217,6 +228,9 @@ VOICE CONVERSATION RULES:
 - One clear next step per response. Do not dump lists.
 - If you don't know something, say so cheerfully rather than making it up.
 - Never use markdown formatting or bullet points in spoken responses. Plain sentences only.
+
+You can also act on real system requests. If Billy asks for morning briefing, next actions,
+status, queue, research, or missions, the system may already have handled it before you reply.
 """
 
 
@@ -303,15 +317,22 @@ def _transcribe_with_whisper(audio_path: str) -> Optional[str]:
         return None
 
 
-# ── Response Generation ───────────────────────────────────────────────────
+# ── Response Generation ───────────────────────────────────────────────────────
 
 
 def generate_response(user_text: str, memory: ConversationMemory) -> str:
     """
-    Generate a personality-driven response via LLM_Handler (OpenAI or xAI/Grok).
+    Generate a response.
 
-    Loads the full personality + brain + conversation history into context.
+    1. Try Intent_Router for high-value system actions (morning, next, status...).
+    2. Otherwise use LLM_Handler (Grok/OpenAI) with personality + history.
     """
+    # Intent path first — real actions beat pure chat when the user clearly wants one
+    if INTENT_OK:
+        handled = try_handle_intent(user_text)
+        if handled is not None:
+            return handled
+
     system_prompt = build_system_prompt()
 
     try:
@@ -331,7 +352,7 @@ def generate_response(user_text: str, memory: ConversationMemory) -> str:
         return "Oops! My thoughts got tangled! Let's try that again!"
 
 
-# ── Voice Output ──────────────────────────────────────────────────────────────
+# ── Voice Output ────────────────────────────────────────────────────────────────
 
 
 def speak_response(text: str):
@@ -339,7 +360,7 @@ def speak_response(text: str):
     speak(text)
 
 
-# ── Main Conversation Loop ───────────────────────────────────────────────
+# ── Main Conversation Loop ──────────────────────────────────────────────────────
 
 
 def conversation_loop(text_mode: bool = False):
@@ -377,11 +398,15 @@ def conversation_loop(text_mode: bool = False):
 
             memory.add("user", user_input)
 
+            # Detect if morning path already spoke so we don't double-TTS
+            already_spoke = False
             try:
                 from modules.Content_Manager import is_good_morning_phrase
-                already_spoke = is_good_morning_phrase(user_input)
+
+                if is_good_morning_phrase(user_input):
+                    already_spoke = True
             except Exception:
-                already_spoke = False
+                pass
 
             reply = generate_response(user_input, memory)
             memory.add("assistant", reply)
@@ -407,12 +432,16 @@ def single_exchange(prompt: str):
     """Process one prompt and exit — useful for scripts and shortcuts."""
     memory = ConversationMemory()
     memory.add("user", prompt)
-    # Good Morning path already speaks inside morning(); avoid double TTS.
+
+    already_spoke = False
     try:
         from modules.Content_Manager import is_good_morning_phrase
-        already_spoke = is_good_morning_phrase(prompt)
+
+        if is_good_morning_phrase(prompt):
+            already_spoke = True
     except Exception:
-        already_spoke = False
+        pass
+
     reply = generate_response(prompt, memory)
     memory.add("assistant", reply)
     print(reply)
@@ -420,7 +449,7 @@ def single_exchange(prompt: str):
         speak_response(reply)
 
 
-# ── CLI ─────────────────────────────────────────────────────────────────────
+# ── CLI ────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -438,6 +467,7 @@ if __name__ == "__main__":
         print(f"  History file:  {HISTORY_FILE}")
         print(f"  Speech input:  {'✓' if SPEECH_OK else '✗'}")
         print(f"  Voice output:  {'✓' if VOICE_OK else '✗'}")
+        print(f"  Intent router: {'✓' if INTENT_OK else '✗'}")
         print(f"  LLM provider:  {get_active_provider()}")
         print(f"  LLM status:    {status}")
         print(f"\n  Recent context:\n{mem.last_summary()}\n")
