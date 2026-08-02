@@ -6,9 +6,9 @@ Owns one job: always return a valid Helix App Access Token.
 
 Twitch's Helix API requires a Bearer token on every call, and tokens expire.
 We fetch one via the OAuth 2.0 "client_credentials" grant and cache it on disk
-at data/twitch_token_cache.json so we don't re-auth on every request.
+at Core/data/twitch_token_cache.json so we don't re-auth on every request.
 
-Required .env values:
+Required .env values (repo-root .env):
     TWITCH_CLIENT_ID=<client id from https://dev.twitch.tv/console/apps>
     TWITCH_CLIENT_SECRET=<client secret from the same page>
     TWITCH_CHANNEL=<your channel login>
@@ -41,9 +41,26 @@ logger = logging.getLogger("bolt.twitch_auth")
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
-ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+# Core/modules/twitch_auth.py → parents[0]=modules, [1]=Core, [2]=repo root
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_CORE_DIR = Path(__file__).resolve().parents[1]
+
+# Prefer the repo-root .env (same place launch.py and the rest of Bolt use).
+# Fall back to Core/.env only if the root one is missing (legacy layouts).
+_ENV_CANDIDATES = [
+    _REPO_ROOT / ".env",
+    _CORE_DIR / ".env",
+]
+
 if load_dotenv is not None:
-    load_dotenv(ENV_PATH)
+    for _env_path in _ENV_CANDIDATES:
+        if _env_path.exists():
+            load_dotenv(_env_path)
+            break
+    else:
+        # Still call load_dotenv() so any already-exported env vars work,
+        # and so a future root .env is picked up if created later.
+        load_dotenv(_REPO_ROOT / ".env")
 
 TWITCH_CLIENT_ID = os.getenv("TWITCH_CLIENT_ID", "").strip()
 TWITCH_CLIENT_SECRET = os.getenv("TWITCH_CLIENT_SECRET", "").strip()
@@ -54,7 +71,8 @@ OAUTH_TOKEN_URL = "https://id.twitch.tv/oauth2/token"
 
 # Cached token location. Disk (not memory) so it survives process restarts
 # and is shared if Bolt is ever split into multiple processes.
-CACHE_PATH = Path(__file__).resolve().parent.parent / "data" / "twitch_token_cache.json"
+# Kept under Core/data to match the existing cache path that already has a token.
+CACHE_PATH = _CORE_DIR / "data" / "twitch_token_cache.json"
 
 # Refresh this many seconds BEFORE actual expiry — safety margin for clock
 # skew and slow requests.
@@ -238,12 +256,18 @@ def _print_check() -> int:
 
     if not state["client_id_set"] or not state["client_secret_set"]:
         print("\n✗ Missing credentials in .env")
+        print("  Expected .env at the repo root (same place launch.py uses).")
+        print("  Make sure TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, and TWITCH_CHANNEL are set.")
         return 1
 
     print("\n→ Requesting a fresh token to verify credentials work…")
     try:
         new = get_app_token(force_refresh=True)
         print(f"✓ Got token ({len(new)} chars). Auth looks healthy.")
+        if state["channel"]:
+            print(f"✓ Channel configured as: {state['channel']}")
+        else:
+            print("○ TWITCH_CHANNEL is empty — set it in .env to ItsSimplyBilly")
         return 0
     except TwitchAuthError as exc:
         print(f"✗ {exc}")
