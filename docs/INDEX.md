@@ -17,15 +17,17 @@ Use this page as the central map for Bolt.
 
 | Label | File | Description |
 |-------|------|-------------|
-| 🔴 | `Docs/BOLT_COMMANDS.md` | **All commands** (manager + pipeline) |
-| 🟢 | `Docs/PROJECT_STATUS.md` | Current build status + manager progress |
-| 🟢 | `Docs/NEXT_UPGRADE_STEPS.md` | Upgrade tracker (manager M1–M13, all done as of Jul 19) |
-| 🟢 | `Docs/upgrade/UPGRADE_STATUS.md` | Per-upgrade changelog with M-tier + ML ranking |
+| 🔴 | `Core/modules/BOLT_COMMANDS.md` | **All commands** (manager + researcher + pipeline) |
+| 🟢 | `Docs/PROJECT_STATUS.md` | Current build status + manager/researcher progress |
+| 🟢 | `Docs/upgrade/NEXT_UPGRADE_STEPS.md` | Upgrade tracker (M1–M13 + R1–R7) |
+| 🟢 | `Docs/upgrade/UPGRADE_STATUS.md` | Per-upgrade changelog (M-tier + ML + Researcher) |
 | 🟢 | `Docs/INDEX.md` | This map |
 | 🟡 | `Core/modules/Content_Manager.py` | Creator manager implementation |
+| 🟡 | `Core/modules/Researcher.py` | Direction-finding research role (C5/C6/C7) |
 | 🟡 | `Core/modules/Clip_Ranker.py` | Recency-weighted learned clip-rank model |
 | 🟡 | `Core/bolt_brain.md` | William creator profile |
-| 🟡 | `bin/bolt` | Single CLI entry (incl. `bolt layout`) |
+| 🔵 | `Data/memory/user_profile.json` | Hard constraints + vision for Researcher |
+| 🟡 | `bin/bolt` | Single CLI entry (incl. `bolt layout`, `bolt research`) |
 | ⚪ | `scripts/_layout_rules.py` + `scripts/check_layout.py` | Layout scanner (data-driven rules + scanner) |
 | 🔵 | `Data/data/business/business-playbook.md` | How to grow the creator business |
 | 🔵 | `Data/data/business/bolt-advancement.md` | How to advance Bolt itself |

@@ -1,8 +1,20 @@
-       # Bolt Upgrade Status
+# Bolt Upgrade Status
 
 Source of truth: `/Users/carter/developer/Bolt`
 
-*Last updated: July 19, 2026*
+*Last updated: August 1, 2026*
+
+## Researcher tier (R1–R7) — complete (Aug 1, 2026)
+
+- [x] R1 — User profile + hard constraints C1–C7 (`Data/memory/user_profile.json`)
+- [x] R2 — Researcher module with C5/C6/C7 gating
+- [x] R3 — Append-only research log + unit tests
+- [x] R4 — `bolt research` read CLI (status / questions / candidates / log)
+- [x] R5 — `bolt research` write CLI (add / note / c5 keep|drop / pending)
+- [x] R6 — Daily briefing Research Notes + pending-C5 action items
+- [x] R7 — Commands + roadmaps updated
+
+**Nightly content loop:** research first → C5 keep/drop → then produce.
 
 ## Manager tier (M1–M13) — all complete
 
