@@ -234,12 +234,29 @@ def _calendar_block() -> str:
         if not TOKEN_PATH.exists():
             return ""
         body = (format_for_briefing() or "").strip()
-        if not body or body.lower().startswith("no events"):
-            # Still show a quiet empty day so Billy knows calendar is wired.
-            if body:
-                return f"## Today's Calendar\n\n{body}\n\n---\n\n"
+        if not body:
             return ""
         return f"## Today's Calendar\n\n{body}\n\n---\n\n"
+    except Exception:
+        return ""
+
+
+def _gmail_block() -> str:
+    """Important unread Gmail, if already authorized. Best-effort.
+
+    Same rule as calendar: never trigger interactive OAuth from briefings.
+    """
+    try:
+        from modules.Gmail_Briefing import TOKEN_PATH, format_for_briefing
+        if not TOKEN_PATH.exists():
+            return ""
+        body = (format_for_briefing() or "").strip()
+        if not body:
+            return ""
+        # Skip the "credentials missing" string path if it ever leaks through
+        if body.lower().startswith("gmail unavailable"):
+            return ""
+        return f"## Important Gmail\n\n{body}\n\n---\n\n"
     except Exception:
         return ""
 
@@ -280,8 +297,9 @@ def generate_briefing():
     text += "---\n\n"
     text += f"## Storage Status\n\n| Directory | Size |\n|-----------|------|\n| Recordings | {_storage_line()} |\n\n---\n\n"
 
-    # Calendar (best-effort; silent if no credentials)
+    # Calendar + Gmail (best-effort; silent if no token)
     text += _calendar_block()
+    text += _gmail_block()
 
     # Memory notes
     if memory_hits:
@@ -324,15 +342,15 @@ def generate_briefing():
             "Review clip performance and log results",
             "Check for new recordings to process",
         ]
-    # If research has cleared candidates waiting on C5, surface that first.
+    # If research has candidates waiting on C5, surface that first.
     try:
         from modules.Researcher import summary as research_summary
         rs = research_summary()
-        if rs.get("candidates_cleared", 0) > 0:
+        pending = int(rs.get("candidates_pending_c5") or 0)
+        if pending > 0:
             c5_item = (
-                f"C5 review: answer 'Would I want to be known for this?' for "
-                f"{rs['candidates_cleared']} cleared candidate creator(s) "
-                f"(`bolt research candidates`)"
+                f"C5 review: {pending} candidate creator(s) need keep/drop "
+                f"(`bolt research pending` → `bolt research c5 keep|drop \"Name\"`)"
             )
             if c5_item not in actions:
                 actions = [c5_item] + actions
