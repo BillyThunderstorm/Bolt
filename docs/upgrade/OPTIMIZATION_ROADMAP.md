@@ -1,6 +1,22 @@
 # Bolt Optimization Roadmap
 
-## 🎯 Current State (July 19, 2026)
+## 🎯 Current State (August 1, 2026)
+
+### Researcher tier ✅ COMPLETE (Aug 1, 2026)
+
+Direction-finding is first-class. Profile + research log drive briefings
+and a full CLI loop:
+
+```
+profile → research candidates → C7/C6 gate → Billy C5 keep|drop →
+then produce content (manager catalog / clips)
+```
+
+```bash
+bolt research pending
+bolt research c5 keep "Name" --why "…"
+bolt research add "Name" --platform YouTube --summary "…" --why "…"
+```
 
 ### Manager tier + ML ranking ✅ COMPLETE (Jul 19, 2026)
 
@@ -13,27 +29,16 @@ publish (or paste-and-upload) → mark posted → log 24h performance →
 model updates the next rank
 ```
 
-Visible from `bolt manage status`:
-
-```
-Catalog items: 3
-Storefront items: 2 (1 with ASIN, 1 missing ASIN)
-  M9 blockers (need ASINs to feature): Daily Driver Gaming Headset
-Shipped reviews: 0 (none)
-Sponsor pipeline: 10 active of 10 (prospect:8, pitch_ready:2)
-  next: pitch Amazon Influencer / Associates (fit=10)
-Learning loop: 1/3 (game, trigger) pairs have signal (5 outcomes)
-  top boost: multi_kill on Marvel Rivals (+5.8, 45 samples)
-```
+Catalog (after Aug 1 cleanup): Mouse (real ASIN) + Starter FPS Session Notes.
+Example "Daily Driver Gaming Headset" removed — it was never real gear.
 
 What the operator still has to do (not engineering work):
 
-1. Add the real ASIN for "Daily Driver Gaming Headset" (M9)
-2. Post the headset review on TikTok, then `bolt manage mark-posted`
-3. Fill in real `TIKTOK_CLIENT_KEY` / `TIKTOK_CLIENT_SECRET` and run
-   the OAuth flow so `tiktok-status` reports ready
-4. Apply for the YouTube Data API v3 / X API v2 developer apps when
-   the manual-assist flow gets tedious
+1. Clear C5 research queue (`bolt research pending`)
+2. Add real owned products with ASINs when ready
+3. Post first real short → `bolt manage mark-posted`
+4. Fill in real `TIKTOK_CLIENT_KEY` / `TIKTOK_CLIENT_SECRET` when auto-publish is needed
+5. Apply for YouTube/X API apps when manual-assist gets tedious
 
 See `Docs/upgrade/NEXT_UPGRADE_STEPS.md` and
 `Docs/upgrade/UPGRADE_STATUS.md` for the per-upgrade changelog and

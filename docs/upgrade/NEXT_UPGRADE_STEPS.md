@@ -2,6 +2,28 @@
 
 ## 🚀 Upgrade Status
 
+### 🟣 RESEARCHER — Direction-finding role ✅ COMPLETE (Aug 1, 2026)
+
+| # | Upgrade | Status | Date | Notes |
+|---|---------|--------|------|-------|
+| R1 | User profile (`Data/memory/user_profile.json`) + C1–C7 | ✅ COMPLETE | Jul 29 | Interview complete; night-shift + authenticity gates |
+| R2 | Researcher module + C5/C6/C7 gating | ✅ COMPLETE | Jul 30 | `Core/modules/Researcher.py` |
+| R3 | Research log + unit tests (37→46+) | ✅ COMPLETE | Jul 30–Aug 1 | `Data/memory/research_log.jsonl` |
+| R4 | `bolt research` read CLI | ✅ COMPLETE | Aug 1 | status / questions / candidates / log |
+| R5 | `bolt research` write CLI | ✅ COMPLETE | Aug 1 | add / note / c5 keep\|drop / pending |
+| R6 | Briefing integration | ✅ COMPLETE | Aug 1 | Research Notes + pending C5 action item |
+| R7 | Command docs + roadmaps | ✅ COMPLETE | Aug 1 | BOLT_COMMANDS + PROJECT_STATUS + this file |
+
+**Operator loop (not engineering):**
+```bash
+bolt research pending
+bolt research c5 keep "Name" --why "…"
+bolt research c5 drop "Name" --why "…"
+bolt research add "Name" --platform YouTube --summary "…" --why "…"
+```
+
+**Where to look:** 🟡 `Core/modules/Researcher.py` · 🔵 `Data/memory/` · 🔴 `bin/bolt research`
+
 ### 🔴 MANAGER — Content Manager OS ✅ COMPLETE (Jul 9, 2026)
 
 | # | Upgrade | Status | Date |
@@ -40,10 +62,12 @@
 
 ### Operator follow-ups (not engineering work)
 
-- Add the real ASINs for owned gear (1 item currently: "Daily Driver Gaming Headset")
-- Run `bolt manage mark-posted "Daily Driver Gaming Headset" --platforms tiktok --where <url>` after the first real publish
+- **Research:** clear C5 queue with `bolt research pending` + `c5 keep|drop` (content focus for tonight)
+- **Catalog:** add real owned products (`bolt manage add … --asin …`). Placeholder headset removed Aug 1; Mouse remains with ASIN
+- **Ship:** first real post → `bolt manage mark-posted "Name" --platforms tiktok --where <url>`
 - Fill in real `TIKTOK_CLIENT_KEY` / `TIKTOK_CLIENT_SECRET` and run the OAuth flow so `tiktok-status` reports ready
 - Apply for the YouTube Data API v3 / X API v2 developer apps when the manual-assist flow gets tedious
+- Optional Google OAuth once: drop `credentials.json` in `Core/` so briefing calendar/gmail sections light up
 
 ### Earlier infrastructure upgrades ✅ (June 6, 2026)
 

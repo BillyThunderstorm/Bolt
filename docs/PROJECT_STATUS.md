@@ -2,9 +2,11 @@
 
 ## Current State
 
-Bolt is a working local-first creator assistant with a stable clip pipeline and a growing memory/learning layer.
+Bolt is a working local-first creator assistant with a stable clip pipeline, a content manager OS (M1–M13), and a **direction-finding Researcher role** so content work is guided by Billy's profile (C5/C6/C7) instead of random to-do lists.
 
-The current mission is broader than Twitch clips. Bolt is William's **content manager + business assistant** for game/tech testing (priority), product/skincare expansion, Amazon Influencer (`billycarter-20`), social packaging (approval required), sponsor/affiliate prospecting, and voice briefings (`Good Morning Bolt` / `bolt morning`).
+The current mission is broader than Twitch clips. Bolt is William's **content manager + business assistant** for game/tech testing (priority), product/skincare expansion, Amazon Influencer (`billycarter-20`), social packaging (approval required), sponsor/affiliate prospecting, voice briefings (`Good Morning Bolt` / `bolt morning`), and research that answers "what should I be known for?" before production ramps.
+
+**Last engineering ship:** 2026-08-01 — Researcher CLI write path (`add` / `note` / `c5 keep|drop` / `pending`), memory-aware briefing with live queue + research notes, Google Calendar rename + Gmail best-effort hook, example "Daily Driver Gaming Headset" removed from catalog.
 
 ## Active Runtime
 
@@ -14,7 +16,7 @@ What is active now:
 - Hard highlight confidence gate
 - Deduplication before expensive stages
 - Per-clip failure recovery
-- Clip ranking tiers
+- Clip ranking tiers + recency-weighted learned boost
 - Title generation and subtitles
 - Vertical clip formatting
 - OBS, Twitch, Streamlabs, and Discord integration
@@ -26,6 +28,9 @@ What is active now:
 - Local queue and memory chat commands
 - Runtime checkup dashboard generation
 - Local memory retrieval through `modules/Memory_Index.py`
+- **Content Manager OS** — `bolt manage|store|social|sponsors|morning` (M1–M13 code-complete)
+- **Researcher role** — `bolt research` (status, pending, add, note, c5 keep|drop); profile + research log; surfaces in daily briefing
+- **Memory-aware daily/weekly briefings** — constraints from `user_profile.json`, live queue counts
 - Filed loose docs in canonical `docs/`, `memory/`, `teaching/rag/`, and `docs/upgrade/` locations
 
 ## Storage Management (NEW - June 6, 2026)
@@ -161,19 +166,20 @@ crontab -l
 
 ## What Still Needs Finish Work
 
-### 🔴 Manager follow-ups (now operator-side, not engineering)
-1. Add real ASIN for "Daily Driver Gaming Headset" → storefront link unblocked
-2. Film/post first game + tech short, then `bolt manage mark-posted` to record it
-3. Fill in real `TIKTOK_CLIENT_KEY` / `TIKTOK_CLIENT_SECRET` and run the OAuth flow
-4. Apply for YouTube Data API v3 / X API v2 developer apps when the manual-assist flow gets tedious
-5. After M11 publishes are real, use the new learning loop to log 24h performance so the model actually trains
+### 🔴 Operator follow-ups (content — not engineering)
+1. **C5 reviews tonight** — `bolt research pending` then `bolt research c5 keep|drop "Name" --why "..."`
+2. Add real products you own: `bolt manage add "Name" --lane tech --asin <ASIN>` (example headset removed 2026-08-01; catalog has Mouse + Starter FPS notes)
+3. Film/post first real short, then `bolt manage mark-posted "Name" --platforms tiktok --where <url>`
+4. Fill in real `TIKTOK_CLIENT_KEY` / `TIKTOK_CLIENT_SECRET` and run OAuth when ready to auto-publish
+5. After real publishes, log 24h performance so the ML ranker trains: `bolt log_perf …`
+6. Optional: place Google `credentials.json` under `Core/` and run calendar/gmail once so briefings show live schedule/mail
 
-### Core system follow-ups
-1. Keep `Think_Learn_Decide` canonical and avoid reintroducing duplicate decision systems
-2. Continue making retrieved memory change actual decisions, not only summaries
-3. Add upgrade layers sequentially: one feature, one verification loop, one memory refresh
-4. Keep product/skincare/Amazon/AI learning lanes represented in future features
-5. Fix remaining stale script paths under `scripts/` (prefer `bolt` wrapper)
+### Core system follow-ups (engineering, lower priority)
+1. Keep `Think_Learn_Decide` canonical — no parallel decision engines
+2. Deepen memory → decision influence beyond briefing text
+3. Apple Reminders delivery channel (profile priority #1) — not wired yet
+4. `bolt-creator-command-center/` skill is external to `bin/bolt` (optional Grok skill)
+5. Prefer `bolt` wrapper over raw script paths
 
 ### June 21, 2026 - Lazy Loading + Startup Perf Fix ✅
 - **Bug fix**: `bot.py` was calling `write_site_data(push=True)` at
@@ -323,7 +329,19 @@ crontab -l
 - If storage alerts aren't sending, verify `configs/storage_alerts.env` is configured
 
 ## Last Updated
-July 19, 2026
+August 1, 2026
+
+## Recent Updates (August 2026)
+
+### August 1, 2026 - Researcher write path + briefing wiring ✅
+- **`bolt research add|note|c5|pending`**: full operator loop for direction-finding without editing JSON by hand
+- **C5 decisions** rewrite matching `candidate_creator` rows + append `c5_decision` audit entries
+- **Daily briefing**: live queue counts, research notes with *pending* C5 only, Gmail/Calendar best-effort when tokens exist
+- **Bolt_Memory** paths fixed to `Data/` post-reorg
+- **Google_Calendar** is canonical; misspelled `Google_Calender` kept as alias
+- **Catalog cleanup**: removed placeholder "Daily Driver Gaming Headset"
+- **Profile + research log** under `Data/memory/` committed and live
+- Commands: 🟡 `Core/modules/BOLT_COMMANDS.md` · entry: `bin/bolt research …`
 
 ## Recent Updates (July 2026)
 
