@@ -159,8 +159,10 @@ Content manager / creator business (Core/modules/Content_Manager.py):
   morning [--quiet]       Good Morning Bolt spoken daily briefing
 
 Direction-finding researcher (Core/modules/Researcher.py):
-  research [status|questions|candidates|log]
+  research [status|questions|candidates|pending|log|add|note|c5]
                           Profile-aware research role (C5/C6/C7 gates + log)
+                          c5 keep|drop "Name"  — record your C5 decision
+                          add "Name" --platform … --summary … --why …
 
 Built-in subcommands (not script passthroughs):
   launch                  Start the bot (Core/src/launch.py)

@@ -20,14 +20,19 @@ The Researcher does NOT:
 - Predict revenue (covered in revenue_scenario block of profile).
 
 Output goes to:
-- Data/memory/research_log.jsonl (one JSON per finding, append-only)
-- Apple Reminders via the assistant role (when wired)
+- Data/memory/research_log.jsonl (findings + C5 decisions)
+- Daily briefing Research Notes (`bolt briefing` / `bolt morning`)
+
+CLI (`bolt research`):
+- status | questions | candidates | pending | log
+- add | note | c5 keep|drop|maybe
 
 Read-only access to:
 - Data/memory/user_profile.json
 
 Designed for night-shift work: research runs async, surfaces in evening
-briefings, never blocks Billy's other work.
+briefings, never blocks Billy's other work. Apple Reminders delivery is
+still a future channel (profile priority #1) — not wired in this phase.
 """
 
 from __future__ import annotations
@@ -348,6 +353,11 @@ def log_finding(
 
 def read_log(limit: int = 50) -> List[Dict[str, Any]]:
     """Read the most recent findings from the log (newest last)."""
+    return _read_all_entries()[-limit:]
+
+
+def _read_all_entries() -> List[Dict[str, Any]]:
+    """Read every valid JSONL entry (oldest first)."""
     _ensure_log_exists()
     entries: List[Dict[str, Any]] = []
     with RESEARCH_LOG.open("r", encoding="utf-8") as f:
@@ -359,7 +369,214 @@ def read_log(limit: int = 50) -> List[Dict[str, Any]]:
                 entries.append(json.loads(line))
             except json.JSONDecodeError:
                 continue
-    return entries[-limit:]
+    return entries
+
+
+def _write_all_entries(entries: List[Dict[str, Any]]) -> None:
+    """Rewrite the research log (used for in-place C5 updates)."""
+    _ensure_log_exists()
+    with RESEARCH_LOG.open("w", encoding="utf-8") as f:
+        for entry in entries:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+
+def _candidate_name(entry: Dict[str, Any]) -> str:
+    return (entry.get("name") or entry.get("creator") or "").strip()
+
+
+def _name_matches(entry: Dict[str, Any], query: str) -> bool:
+    """Case-insensitive exact or substring match on name/creator."""
+    q = (query or "").strip().lower()
+    if not q:
+        return False
+    name = _candidate_name(entry).lower()
+    if not name:
+        return False
+    return name == q or q in name or name in q
+
+
+def list_candidates(
+    *,
+    pending_c5_only: bool = False,
+    limit: int = 100,
+) -> List[Dict[str, Any]]:
+    """Return candidate_creator entries, newest first."""
+    entries = [
+        e for e in _read_all_entries()
+        if e.get("finding_type") == "candidate_creator"
+    ]
+    if pending_c5_only:
+        entries = [
+            e for e in entries
+            if (e.get("gate") or {}).get("verdict") == "cleared"
+            and not e.get("c5_verdict")
+        ]
+    entries = list(reversed(entries))
+    return entries[:limit]
+
+
+def add_candidate(
+    name: str,
+    *,
+    platform: str = "",
+    summary: str = "",
+    why_match: str = "",
+    public_signal: str = "",
+    profile: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Log a new candidate creator (auto-gated with profile)."""
+    if profile is None:
+        profile = load_profile()
+    finding = {
+        "name": name.strip(),
+        "platform": (platform or "").strip() or "unknown",
+        "summary": (summary or "").strip(),
+        "why_match": (why_match or "").strip(),
+        "public_signal": (public_signal or summary or "").strip(),
+    }
+    return log_finding(finding, finding_type="candidate_creator", profile=profile or None)
+
+
+def add_note(
+    text: str,
+    *,
+    finding_type: str = "general",
+    title: str = "",
+    extra: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Log a free-form research note (pattern, lane signal, general)."""
+    allowed = {"general", "pattern_note", "lane_signal"}
+    if finding_type not in allowed:
+        raise ValueError(f"finding_type must be one of {sorted(allowed)}")
+    finding: Dict[str, Any] = {"text": text.strip(), "summary": text.strip()}
+    if title:
+        finding["title"] = title.strip()
+        finding["name"] = title.strip()
+    if extra:
+        finding.update(extra)
+    return log_finding(finding, finding_type=finding_type)
+
+
+# Normalize operator-facing C5 verbs to stored verdicts
+C5_VERDICT_ALIASES = {
+    "keep": "fits",
+    "fits": "fits",
+    "yes": "fits",
+    "y": "fits",
+    "pass": "fits",
+    "drop": "no",
+    "no": "no",
+    "n": "no",
+    "reject": "no",
+    "skip": "no",
+    "maybe": "maybe",
+    "later": "maybe",
+    "hold": "maybe",
+}
+
+
+def set_c5_verdict(
+    name: str,
+    verdict: str,
+    *,
+    why: str = "",
+    only_pending: bool = True,
+) -> Dict[str, Any]:
+    """Record Billy's C5 decision on a candidate creator.
+
+    Updates the matching candidate_creator row(s) in the log and appends a
+    short audit entry so the decision is searchable later.
+
+    Args:
+        name: creator name (exact or unique substring)
+        verdict: keep|drop|fits|no|maybe (aliases accepted)
+        why: optional free-text reason in Billy's words
+        only_pending: if True, only update candidates without c5_verdict
+
+    Returns:
+        {
+          "updated": [names...],
+          "verdict": normalized,
+          "why": why,
+          "matches": int,
+        }
+
+    Raises:
+        ValueError on unknown verdict, no matches, or ambiguous multi-match
+        when more than one distinct name matches.
+    """
+    normalized = C5_VERDICT_ALIASES.get((verdict or "").strip().lower())
+    if not normalized:
+        raise ValueError(
+            f"Unknown C5 verdict '{verdict}'. Use: keep, drop, fits, no, maybe."
+        )
+
+    entries = _read_all_entries()
+    matches_idx: List[int] = []
+    matched_names: List[str] = []
+    for i, e in enumerate(entries):
+        if e.get("finding_type") != "candidate_creator":
+            continue
+        if not _name_matches(e, name):
+            continue
+        if only_pending and e.get("c5_verdict"):
+            continue
+        matches_idx.append(i)
+        matched_names.append(_candidate_name(e) or f"entry-{i}")
+
+    if not matches_idx:
+        raise ValueError(
+            f"No matching candidate for '{name}'"
+            + (" that still needs a C5 decision" if only_pending else "")
+            + ". Try: bolt research pending"
+        )
+
+    # Ambiguity: multiple different display names
+    unique_names = sorted({n.lower() for n in matched_names})
+    if len(unique_names) > 1:
+        raise ValueError(
+            f"Ambiguous name '{name}' matches: {', '.join(sorted(set(matched_names)))}. "
+            "Use a more specific name."
+        )
+
+    decided_at = _now_iso()
+    for i in matches_idx:
+        entries[i]["c5_verdict"] = normalized
+        entries[i]["c5_decided_at"] = decided_at
+        if why:
+            entries[i]["c5_user_words"] = why.strip()
+
+    # Audit trail as a separate finding (keeps history even if candidate re-added)
+    display = matched_names[0]
+    audit = {
+        "timestamp": decided_at,
+        "finding_type": "c5_decision",
+        "name": display,
+        "creator": display,
+        "c5_verdict": normalized,
+        "c5_user_words": (why or "").strip(),
+        "summary": f"C5 {normalized}: {display}"
+        + (f" — {why.strip()}" if why else ""),
+    }
+    entries.append(audit)
+    _write_all_entries(entries)
+
+    notify(
+        f"C5 recorded: {display} → {normalized}",
+        level="success",
+        reason=why.strip() if why else "Billy's call saved to research_log.jsonl",
+    )
+    return {
+        "updated": matched_names,
+        "verdict": normalized,
+        "why": (why or "").strip(),
+        "matches": len(matches_idx),
+        "decided_at": decided_at,
+    }
+
+
+def pending_c5_count() -> int:
+    return len(list_candidates(pending_c5_only=True, limit=10000))
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -374,28 +591,50 @@ def summary(profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     if profile is None:
         profile = load_profile()
 
-    vision = get_vision(profile)
     aspirations = get_named_aspirations(profile)
     questions = get_research_questions(profile)
 
-    recent = read_log(limit=10000)  # Read all; surface total in summary
+    recent = _read_all_entries()
 
-    candidates_total = sum(1 for r in recent if r.get("finding_type") == "candidate_creator")
+    candidates = [r for r in recent if r.get("finding_type") == "candidate_creator"]
+    candidates_total = len(candidates)
     candidates_cleared = sum(
-        1 for r in recent
-        if r.get("finding_type") == "candidate_creator"
-        and r.get("gate", {}).get("verdict") == "cleared"
+        1 for r in candidates
+        if (r.get("gate") or {}).get("verdict") == "cleared"
     )
     candidates_blocked = sum(
-        1 for r in recent
-        if r.get("finding_type") == "candidate_creator"
-        and r.get("gate", {}).get("verdict") == "blocked_c7"
+        1 for r in candidates
+        if (r.get("gate") or {}).get("verdict") == "blocked_c7"
     )
     candidates_flagged = sum(
-        1 for r in recent
-        if r.get("finding_type") == "candidate_creator"
-        and r.get("gate", {}).get("verdict") == "flagged_c6"
+        1 for r in candidates
+        if (r.get("gate") or {}).get("verdict") == "flagged_c6"
     )
+    candidates_pending_c5 = sum(
+        1 for r in candidates
+        if (r.get("gate") or {}).get("verdict") == "cleared" and not r.get("c5_verdict")
+    )
+    candidates_kept = sum(1 for r in candidates if r.get("c5_verdict") == "fits")
+    candidates_dropped = sum(1 for r in candidates if r.get("c5_verdict") == "no")
+
+    if candidates_pending_c5 > 0:
+        next_action = (
+            f"{candidates_pending_c5} candidate(s) need your C5 call. "
+            "Run `bolt research pending`, then "
+            "`bolt research c5 keep \"Name\"` or `bolt research c5 drop \"Name\"`. "
+            "Bolt cannot answer C5 for you."
+        )
+    elif candidates_total == 0:
+        next_action = (
+            "No candidates yet. Add one with "
+            "`bolt research add \"Name\" --platform YouTube --summary \"...\" --why \"...\"`."
+        )
+    else:
+        next_action = (
+            "All gated candidates have a C5 decision. "
+            "Add new candidates or dig into open research questions "
+            "(`bolt research questions`)."
+        )
 
     return {
         "role": "researcher",
@@ -407,11 +646,10 @@ def summary(profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         "candidates_cleared": candidates_cleared,
         "candidates_blocked_c7": candidates_blocked,
         "candidates_flagged_c6": candidates_flagged,
-        "next_action": (
-            "Review the cleared candidates in research_log.jsonl and answer "
-            "the C5 user test ('Would I want to be known for this?') for each. "
-            "Bolt cannot answer this for you."
-        ),
+        "candidates_pending_c5": candidates_pending_c5,
+        "candidates_kept": candidates_kept,
+        "candidates_dropped": candidates_dropped,
+        "next_action": next_action,
     }
 
 
@@ -439,6 +677,9 @@ def _print_summary() -> None:
     print("  Candidate creators:")
     print(f"    Total:        {s['candidates_total']}")
     print(f"    Cleared:      {s['candidates_cleared']}")
+    print(f"    Pending C5:   {s['candidates_pending_c5']}")
+    print(f"    Kept (fits):  {s['candidates_kept']}")
+    print(f"    Dropped:      {s['candidates_dropped']}")
     print(f"    Blocked (C7): {s['candidates_blocked_c7']}")
     print(f"    Flagged (C6): {s['candidates_flagged_c6']}")
     print(f"\nNext action: {s['next_action']}")
@@ -459,33 +700,42 @@ def _print_questions() -> None:
     print()
 
 
-def _print_candidates(limit: int = 20) -> None:
-    entries = [
-        e for e in read_log(limit=10000)
-        if e.get("finding_type") == "candidate_creator"
-    ]
-    # Newest last in the log; show newest first for review.
-    entries = list(reversed(entries))[:limit]
+def _format_candidate_line(e: Dict[str, Any]) -> None:
+    gate = e.get("gate") or {}
+    name = _candidate_name(e) or "(unnamed)"
+    platform = e.get("platform") or "?"
+    gate_verdict = gate.get("verdict", "ungated")
+    c5 = e.get("c5_verdict") or "pending"
+    print(f"\n• {name}  [{platform}]  gate={gate_verdict}  c5={c5}")
+    if e.get("summary"):
+        print(f"    {e['summary']}")
+    if e.get("why_match"):
+        print(f"    Why: {e['why_match']}")
+    if e.get("c5_user_words"):
+        print(f"    Your words: {e['c5_user_words']}")
+    elif not e.get("c5_verdict") and gate.get("c5_user_decision_required"):
+        print(f"    C5: {gate.get('user_test', 'Would you want to be known for this?')}")
+        print(f"    → bolt research c5 keep \"{name}\"")
+        print(f"    → bolt research c5 drop \"{name}\"")
+
+
+def _print_candidates(limit: int = 20, pending_only: bool = False) -> None:
+    entries = list_candidates(pending_c5_only=pending_only, limit=limit)
+    title = "PENDING C5 REVIEW" if pending_only else "CANDIDATE CREATORS"
     print("═" * 70)
-    print(f"  CANDIDATE CREATORS (showing {len(entries)}, newest first)")
+    print(f"  {title} (showing {len(entries)}, newest first)")
     print("═" * 70)
     if not entries:
-        print("\n  (no candidate_creator findings yet)")
-        print("  Log findings with Researcher.log_finding(... finding_type='candidate_creator')")
+        if pending_only:
+            print("\n  (none pending — all cleared candidates have a C5 decision)")
+            print("  Add more: bolt research add \"Name\" --platform YouTube --summary \"...\"")
+        else:
+            print("\n  (no candidate_creator findings yet)")
+            print("  Add one: bolt research add \"Name\" --platform YouTube --summary \"...\" --why \"...\"")
         print()
         return
     for e in entries:
-        gate = e.get("gate") or {}
-        name = e.get("name") or e.get("creator") or "(unnamed)"
-        platform = e.get("platform") or "?"
-        verdict = gate.get("verdict", "ungated")
-        print(f"\n• {name}  [{platform}]  verdict={verdict}")
-        if e.get("summary"):
-            print(f"    {e['summary']}")
-        if e.get("why_match"):
-            print(f"    Why: {e['why_match']}")
-        if gate.get("c5_user_decision_required"):
-            print(f"    C5: {gate.get('user_test', 'Would you want to be known for this?')}")
+        _format_candidate_line(e)
     print()
 
 
@@ -506,6 +756,8 @@ def _print_log(limit: int = 15) -> None:
         summary_text = e.get("summary") or e.get("why_this_creator") or e.get("text") or ""
         if summary_text:
             print(f"  {summary_text[:240]}")
+        if e.get("c5_verdict"):
+            print(f"  c5={e['c5_verdict']}")
     print()
 
 
@@ -521,35 +773,30 @@ def briefing_snippet(limit: int = 3) -> str:
 
     lines = ["## Research Notes", ""]
     total = s.get("research_log_total", 0)
-    cleared = s.get("candidates_cleared", 0)
+    pending = s.get("candidates_pending_c5", 0)
     if total == 0 and not s.get("named_aspirations"):
         return ""
 
     lines.append(
         f"- Log: **{total}** findings · "
-        f"**{cleared}** candidates cleared for C5 review · "
-        f"**{s.get('candidates_blocked_c7', 0)}** blocked (C7) · "
-        f"**{s.get('candidates_flagged_c6', 0)}** flagged (C6)"
+        f"**{pending}** pending C5 · "
+        f"**{s.get('candidates_kept', 0)}** kept · "
+        f"**{s.get('candidates_dropped', 0)}** dropped · "
+        f"**{s.get('candidates_blocked_c7', 0)}** blocked (C7)"
     )
 
-    # Surface recent cleared candidates that still need Billy's C5 call.
     try:
-        recent = [
-            e for e in reversed(read_log(limit=100))
-            if e.get("finding_type") == "candidate_creator"
-            and (e.get("gate") or {}).get("verdict") == "cleared"
-            and not e.get("c5_verdict")
-        ][:limit]
+        recent = list_candidates(pending_c5_only=True, limit=limit)
     except Exception:
         recent = []
 
     if recent:
         lines.append(
             "- Cleared candidates awaiting your C5 call "
-            "(\"Would I want to be known for this?\"):"
+            "(`bolt research c5 keep|drop \"Name\"`):"
         )
         for e in recent:
-            name = e.get("name") or e.get("creator") or "(unnamed)"
+            name = _candidate_name(e) or "(unnamed)"
             platform = e.get("platform") or "?"
             why = (e.get("why_match") or e.get("summary") or "").strip()
             if why:
@@ -570,49 +817,177 @@ def briefing_snippet(limit: int = 3) -> str:
 def main(argv: Optional[List[str]] = None) -> int:
     """CLI entry for `python -m modules.Researcher` / `bolt research`."""
     import argparse
+    import shlex
 
+    raw = list(argv) if argv is not None else None
+    # Allow: bolt research c5 keep "Name"  → command=c5, rest handled below
     parser = argparse.ArgumentParser(
         prog="bolt research",
-        description="Direction-finding researcher role (profile + C5/C6/C7 gates + log).",
+        description="Direction-finding researcher (profile + C5/C6/C7 gates + log).",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Examples:\n"
+            "  bolt research\n"
+            "  bolt research pending\n"
+            "  bolt research add \"iJustine\" --platform YouTube "
+            "--summary \"Tech reviews + events\" --why \"Industry insider path\"\n"
+            "  bolt research c5 keep \"iJustine\" --why \"Want that event path\"\n"
+            "  bolt research c5 drop \"Someone\" --why \"Not my voice\"\n"
+            "  bolt research note \"Through-line idea: honest tangent reviews\"\n"
+        ),
     )
     parser.add_argument(
         "command",
         nargs="?",
         default="status",
-        choices=["status", "questions", "candidates", "log", "help"],
-        help="What to show (default: status)",
+        help="status|questions|candidates|pending|log|add|note|c5|help",
     )
-    parser.add_argument(
-        "--limit",
-        type=int,
-        default=20,
-        help="Max entries for candidates/log (default: 20)",
-    )
-    args = parser.parse_args(argv)
+    parser.add_argument("rest", nargs=argparse.REMAINDER, help=argparse.SUPPRESS)
+    parser.add_argument("--limit", type=int, default=20, help="Max entries for list commands")
+    # Shared flags for add / note / c5 (parsed from rest when needed)
+    args, _unknown = parser.parse_known_args(raw)
 
-    if args.command == "help":
+    cmd = (args.command or "status").lower()
+    rest = list(args.rest or [])
+    # argparse.REMAINDER keeps a leading -- sometimes; strip empty
+    if rest and rest[0] == "--":
+        rest = rest[1:]
+
+    # --limit may land in rest because REMAINDER swallows trailing flags
+    limit = args.limit
+    cleaned_rest: List[str] = []
+    i = 0
+    while i < len(rest):
+        if rest[i] == "--limit" and i + 1 < len(rest):
+            try:
+                limit = int(rest[i + 1])
+            except ValueError:
+                pass
+            i += 2
+            continue
+        if rest[i].startswith("--limit="):
+            try:
+                limit = int(rest[i].split("=", 1)[1])
+            except ValueError:
+                pass
+            i += 1
+            continue
+        cleaned_rest.append(rest[i])
+        i += 1
+    rest = cleaned_rest
+
+    if cmd in ("help", "-h", "--help"):
         parser.print_help()
-        print(
-            "\nExamples:\n"
-            "  bolt research                 # status summary\n"
-            "  bolt research questions       # standing research questions\n"
-            "  bolt research candidates      # gated candidate creators\n"
-            "  bolt research log --limit 10  # recent findings\n"
-        )
         return 0
-    if args.command == "status":
+
+    if cmd == "status":
         _print_summary()
         return 0
-    if args.command == "questions":
+
+    if cmd == "questions":
         _print_questions()
         return 0
-    if args.command == "candidates":
-        _print_candidates(limit=args.limit)
+
+    if cmd == "candidates":
+        _print_candidates(limit=limit, pending_only=False)
         return 0
-    if args.command == "log":
-        _print_log(limit=args.limit)
+
+    if cmd == "pending":
+        _print_candidates(limit=limit, pending_only=True)
         return 0
-    return 1
+
+    if cmd == "log":
+        _print_log(limit=limit)
+        return 0
+
+    if cmd == "add":
+        add_parser = argparse.ArgumentParser(prog="bolt research add")
+        add_parser.add_argument("name", help="Creator name")
+        add_parser.add_argument("--platform", default="", help="YouTube, TikTok, Twitch, …")
+        add_parser.add_argument("--summary", default="", help="One-line description")
+        add_parser.add_argument("--why", default="", dest="why_match", help="Why they match Billy")
+        add_parser.add_argument(
+            "--signal",
+            default="",
+            dest="public_signal",
+            help="Public content sample for C6/C7 gating",
+        )
+        try:
+            add_args = add_parser.parse_args(rest)
+        except SystemExit:
+            return 2
+        if not add_args.name.strip():
+            print("error: name is required", flush=True)
+            return 2
+        entry = add_candidate(
+            add_args.name,
+            platform=add_args.platform,
+            summary=add_args.summary,
+            why_match=add_args.why_match,
+            public_signal=add_args.public_signal,
+        )
+        gate = (entry.get("gate") or {}).get("verdict", "ungated")
+        print(f"✓ Logged candidate: {entry.get('name')}  gate={gate}")
+        if gate == "cleared":
+            print(f"  C5 still needed: bolt research c5 keep \"{entry.get('name')}\"")
+        return 0
+
+    if cmd == "note":
+        note_parser = argparse.ArgumentParser(prog="bolt research note")
+        note_parser.add_argument("text", nargs="+", help="Note text")
+        note_parser.add_argument(
+            "--type",
+            default="general",
+            dest="finding_type",
+            choices=["general", "pattern_note", "lane_signal"],
+        )
+        note_parser.add_argument("--title", default="")
+        try:
+            note_args = note_parser.parse_args(rest)
+        except SystemExit:
+            return 2
+        text = " ".join(note_args.text).strip()
+        entry = add_note(text, finding_type=note_args.finding_type, title=note_args.title)
+        print(f"✓ Logged {entry.get('finding_type')}: {text[:80]}")
+        return 0
+
+    if cmd == "c5":
+        c5_parser = argparse.ArgumentParser(prog="bolt research c5")
+        c5_parser.add_argument(
+            "verdict",
+            help="keep|drop|fits|no|maybe",
+        )
+        c5_parser.add_argument("name", help="Creator name (substring OK if unique)")
+        c5_parser.add_argument("--why", default="", help="Your words — why keep or drop")
+        c5_parser.add_argument(
+            "--all",
+            action="store_true",
+            help="Also update candidates that already have a C5 verdict",
+        )
+        try:
+            c5_args = c5_parser.parse_args(rest)
+        except SystemExit:
+            return 2
+        try:
+            result = set_c5_verdict(
+                c5_args.name,
+                c5_args.verdict,
+                why=c5_args.why,
+                only_pending=not c5_args.all,
+            )
+        except ValueError as e:
+            print(f"error: {e}", flush=True)
+            return 1
+        names = ", ".join(result["updated"])
+        print(f"✓ C5 {result['verdict']}: {names}")
+        if result.get("why"):
+            print(f"  Why: {result['why']}")
+        print(f"  Pending remaining: {pending_c5_count()}")
+        return 0
+
+    print(f"bolt research: unknown command '{cmd}'", flush=True)
+    print("  Try: status | questions | candidates | pending | log | add | note | c5 | help")
+    return 2
 
 
 if __name__ == "__main__":

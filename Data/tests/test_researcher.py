@@ -390,16 +390,131 @@ class SummaryTests(unittest.TestCase):
         self.assertEqual(s["candidates_blocked_c7"], 1)
         self.assertEqual(s["candidates_flagged_c6"], 1)
 
-    def test_next_action_mentions_user_test(self):
+    def test_next_action_mentions_user_test_when_pending(self):
+        rs.log_finding(
+            {"name": "Pending Creator", "summary": "clean", "public_signal": "good"},
+            finding_type="candidate_creator", profile=SAMPLE_PROFILE,
+        )
         s = rs.summary()
         self.assertIn("C5", s["next_action"])
         self.assertIn("Bolt cannot answer", s["next_action"])
+        self.assertEqual(s["candidates_pending_c5"], 1)
+
+    def test_next_action_when_empty_log_suggests_add(self):
+        s = rs.summary()
+        self.assertIn("No candidates", s["next_action"])
 
     def test_summary_no_profile_does_not_crash(self):
         # Patch USER_PROFILE to missing
         with patch.object(rs, "USER_PROFILE", self.tmp_path / "missing.json"):
             s = rs.summary()
             self.assertIsInstance(s, dict)
+
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# C5 decisions + add helpers
+# ──────────────────────────────────────────────────────────────────────────────
+
+class C5AndAddTests(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.tmp_path = Path(self._tmp.name)
+        self._log_patcher = patch.object(
+            rs, "RESEARCH_LOG", self.tmp_path / "research_log.jsonl"
+        )
+        self._profile_patcher = patch.object(
+            rs, "USER_PROFILE", self.tmp_path / "user_profile.json"
+        )
+        self._log_patcher.start()
+        self._profile_patcher.start()
+        (self.tmp_path / "user_profile.json").write_text(json.dumps(SAMPLE_PROFILE))
+
+    def tearDown(self):
+        self._log_patcher.stop()
+        self._profile_patcher.stop()
+        self._tmp.cleanup()
+
+    def test_add_candidate_gates_and_logs(self):
+        entry = rs.add_candidate(
+            "Clean Creator",
+            platform="YouTube",
+            summary="Honest reviews",
+            why_match="Voice-first",
+            public_signal="honest product takes",
+        )
+        self.assertEqual(entry["gate"]["verdict"], "cleared")
+        self.assertEqual(rs.pending_c5_count(), 1)
+
+    def test_c5_keep_updates_candidate_and_appends_audit(self):
+        rs.add_candidate(
+            "Keep Me",
+            platform="YouTube",
+            summary="good",
+            public_signal="good",
+        )
+        result = rs.set_c5_verdict("Keep Me", "keep", why="Sounds like me")
+        self.assertEqual(result["verdict"], "fits")
+        self.assertEqual(rs.pending_c5_count(), 0)
+        entries = rs._read_all_entries()
+        candidates = [e for e in entries if e.get("finding_type") == "candidate_creator"]
+        self.assertEqual(candidates[0]["c5_verdict"], "fits")
+        self.assertEqual(candidates[0]["c5_user_words"], "Sounds like me")
+        audits = [e for e in entries if e.get("finding_type") == "c5_decision"]
+        self.assertEqual(len(audits), 1)
+        s = rs.summary()
+        self.assertEqual(s["candidates_kept"], 1)
+        self.assertEqual(s["candidates_pending_c5"], 0)
+
+    def test_c5_drop_alias(self):
+        rs.add_candidate("Drop Me", summary="x", public_signal="clean")
+        rs.set_c5_verdict("Drop Me", "drop")
+        s = rs.summary()
+        self.assertEqual(s["candidates_dropped"], 1)
+        self.assertEqual(s["candidates_pending_c5"], 0)
+
+    def test_c5_substring_match(self):
+        rs.add_candidate("Susan Yara (Mixed Makeup)", summary="x", public_signal="clean")
+        result = rs.set_c5_verdict("Susan Yara", "keep")
+        self.assertEqual(result["matches"], 1)
+
+    def test_c5_ambiguous_raises(self):
+        rs.add_candidate("Alex One", summary="x", public_signal="clean")
+        rs.add_candidate("Alex Two", summary="x", public_signal="clean")
+        with self.assertRaises(ValueError):
+            rs.set_c5_verdict("Alex", "keep")
+
+    def test_c5_unknown_verdict_raises(self):
+        rs.add_candidate("Zed", summary="x", public_signal="clean")
+        with self.assertRaises(ValueError):
+            rs.set_c5_verdict("Zed", "banana")
+
+    def test_list_pending_only(self):
+        rs.add_candidate("A", summary="x", public_signal="clean")
+        rs.add_candidate("B", summary="x", public_signal="clean")
+        rs.set_c5_verdict("A", "keep")
+        pending = rs.list_candidates(pending_c5_only=True)
+        self.assertEqual(len(pending), 1)
+        self.assertEqual(pending[0]["name"], "B")
+
+    def test_add_note_general(self):
+        entry = rs.add_note("Through-line idea", finding_type="pattern_note", title="Thread")
+        self.assertEqual(entry["finding_type"], "pattern_note")
+        self.assertIn("Through-line", entry["text"])
+
+    def test_cli_c5_and_add_roundtrip(self):
+        code = rs.main([
+            "add", "CLI Creator",
+            "--platform", "YouTube",
+            "--summary", "honest takes",
+            "--why", "fits voice",
+            "--signal", "honest product reviews",
+        ])
+        self.assertEqual(code, 0)
+        code = rs.main(["c5", "keep", "CLI Creator", "--why", "yes"])
+        self.assertEqual(code, 0)
+        self.assertEqual(rs.pending_c5_count(), 0)
+
 
 
 if __name__ == "__main__":

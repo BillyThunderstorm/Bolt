@@ -52,21 +52,37 @@ bolt layout --json                # Return the layout report as JSON
 ## Direction-finding researcher
 
 Profile-aware research role (C5/C6/C7 gates). Reads `Data/memory/user_profile.json`
-and appends findings to `Data/memory/research_log.jsonl`. Surfaces in
-`bolt briefing`.
+and writes `Data/memory/research_log.jsonl`. Surfaces in `bolt briefing`.
 
 ```bash
 bolt research                         # Status summary (default)
 bolt research status                  # Same as above
 bolt research questions               # Standing research questions from profile
-bolt research candidates              # Gated candidate creators (newest first)
-bolt research candidates --limit 10   # Cap how many candidates to show
-bolt research log                     # Recent findings from the research log
+bolt research candidates              # All gated candidates (newest first)
+bolt research candidates --limit 10
+bolt research pending                 # Only candidates still needing your C5 call
+bolt research log                     # Recent findings
 bolt research log --limit 15
+
+# Add a candidate (auto C7/C6 gate; C5 still yours)
+bolt research add "iJustine" --platform YouTube \
+  --summary "Tech + lifestyle reviews; attends industry events" \
+  --why "Path from reviewer to invited insider" \
+  --signal "honest first impressions at Apple events"
+
+# Free-form notes
+bolt research note "Through-line: honest tangent reviews" --type pattern_note
+bolt research note "Lane signal: skincare feels natural" --type lane_signal --title "Skincare"
+
+# Your C5 decision (keep = fits, drop = no; maybe also allowed)
+bolt research c5 keep "iJustine" --why "Want that event path"
+bolt research c5 drop "Someone" --why "Not my voice"
+bolt research c5 maybe "Name" --why "Revisit after 2 more samples"
 ```
 
 C5 ("Would I want to be known for this?") is always Billy's call — Bolt only
-gates C7 (hard block) and flags C6 (authenticity red flags).
+gates C7 (hard block) and flags C6 (authenticity red flags). Name match is
+case-insensitive substring when unique.
 
 ## Creator manager
 
