@@ -2,7 +2,32 @@
 
 Source of truth: `/Users/carter/developer/Bolt`
 
-*Last updated: August 1, 2026*
+*Last updated: August 2, 2026*
+
+## Grok / LLM layer (L1–L4) — complete (Aug 2, 2026)
+
+- [x] L1 — `LLM_Handler` multi-provider (OpenAI + xAI/Grok), env switch + fallback
+- [x] L2 — Voice conversation (`Bolt_Conversation`) routes replies through `ask_llm`
+- [x] L3 — Twitch chat (`Bolt_Chat` / `!Bolt`) routes replies through `ask_llm`
+- [x] L4 — `Intent_Router` maps plain phrases → real actions (morning, next, status, queue, research, mission)
+- [x] Merged to `main` via PR #3 (`feature/llm-handler-xai`)
+
+**Env (local `.env`, never commit keys):**
+```bash
+BOLT_LLM_PROVIDER=xai
+BOLT_LLM_FALLBACK=none
+XAI_API_KEY=...
+# Optional model overrides:
+# BOLT_XAI_MODEL=grok-4.5
+# BOLT_OPENAI_MODEL=gpt-4o-mini
+```
+
+**Natural phrases (conversation mode):**
+- "Good morning Bolt" / morning briefing → `morning()`
+- "What should I do next?" → `next_actions()`
+- "How are things?" / status → manager status summary
+- "Show the queue" → posting/social queue
+- research / mission status phrases → those modules
 
 ## Researcher tier (R1–R7) — complete (Aug 1, 2026)
 
@@ -76,9 +101,9 @@ python3 scripts/log_clip_performance.py --list
 
 ## Production Note
 
-AI titles are enabled in config, but live AI calls still require a real
-`OPENAI_API_KEY`. If the key is missing or still set to the placeholder, Bolt
-keeps working through the local template fallback.
+Chat / conversation replies default through `LLM_Handler`. Set `BOLT_LLM_PROVIDER=xai` and `XAI_API_KEY` for Grok. OpenAI remains available as fallback or for Whisper transcription only.
+
+AI titles may still call OpenAI when enabled; if that key has no credits, title generation falls back to local templates.
 
 ## Next: Auto-Posting With Safeguards
 
