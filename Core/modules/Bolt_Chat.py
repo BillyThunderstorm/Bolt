@@ -7,7 +7,7 @@ room, responds naturally, and feels like a real part of Billy's stream.
 
 How she works:
   - Connects to Twitch chat via IRC (using twitchio library)
-  - Uses OpenAI to generate personality-driven responses
+  - Uses LLM_Handler (OpenAI or xAI/Grok) to generate personality-driven responses
   - Loads Billy's creator profile from Bolt_brain.md so she always sounds
     on-brand — not generic
   - Tracks session memory so she references what actually happened
@@ -30,7 +30,7 @@ To connect Bolt to your Twitch chat you need ONE token:
   TWITCH_BOT_NAME — the Twitch username of the bot account (e.g. BoltBot)
   → Add to .env as: TWITCH_BOT_NAME=BoltBot
 
-Everything else (TWITCH_CHANNEL, OPENAI_API_KEY) is already in .env.
+Everything else (TWITCH_CHANNEL, XAI_API_KEY / OPENAI_API_KEY) is already in .env.
 """
 
 import os
@@ -59,11 +59,14 @@ except ImportError:
     TWITCHIO_OK = False
 
 try:
-    from openai import OpenAI
+    from modules.LLM_Handler import ask_llm
 
-    OPENAI_OK = True
+    LLM_OK = True
 except ImportError:
-    OPENAI_OK = False
+    LLM_OK = False
+
+    def ask_llm(prompt, **kwargs):
+        return None
 
 try:
     from modules.notifier import notify
@@ -114,7 +117,6 @@ except ImportError:
 BOT_TOKEN = os.getenv("TWITCH_BOT_TOKEN", "")
 BOT_NAME = os.getenv("TWITCH_BOT_NAME", "BoltBot")
 CHANNEL = os.getenv("TWITCH_CHANNEL", "BillyandRandy").lstrip("#").lower()
-OPENAI_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # How long to wait between Bolt messages (seconds) — avoids chat spam
 RATE_LIMIT_SECONDS = 3
@@ -182,7 +184,7 @@ class SessionMemory:
             self.energy_level = "quiet"
 
     def stream_summary(self) -> str:
-        """Return a plain-English summary for use in OpenAI's context."""
+        """Return a plain-English summary for use in LLM context."""
         mins = int((datetime.now() - self.start_time).total_seconds() / 60)
         return (
             f"Stream has been live for {mins} minutes. "
@@ -196,7 +198,7 @@ class SessionMemory:
 
 # ── Bolt's personality responses (fast, no API call needed) ──────────────────
 
-# These fire instantly for predictable events. OpenAI handles open-ended stuff.
+# These fire instantly for predictable events. LLM handles open-ended stuff.
 
 GREET_TEMPLATES = [
     "Welcome, {name}. Good to have you here.",
@@ -412,21 +414,21 @@ def local_memory_recall(query: str, limit: int = 2, max_chars: int = 360) -> str
     return answer[:max_chars].rstrip()
 
 
-# ── OpenAI-powered responses ──────────────────────────────────────────────────
+# ── LLM-powered responses (via LLM_Handler) ───────────────────────────────────
 
 
-def _ask_openai(prompt: str, brain: str, memory: SessionMemory) -> Optional[str]:
+def _ask_llm(prompt: str, brain: str, memory: SessionMemory) -> Optional[str]:
     """
-    Generate a Bolt response using OpenAI.
+    Generate a Bolt response using LLM_Handler (OpenAI or xAI/Grok).
 
-    We give OpenAI three things:
+    We give the model three things:
       1. Billy's creator profile (brain) — so she knows who she's working for
       2. The session summary — so she knows what's happening right now
       3. The actual prompt — what she needs to respond to
 
-    Returns None if OpenAI is unavailable, so callers can fall back gracefully.
+    Returns None if the LLM is unavailable, so callers can fall back gracefully.
     """
-    if not OPENAI_OK or not OPENAI_KEY:
+    if not LLM_OK:
         return None
 
     # Load personality guide into context
@@ -443,7 +445,7 @@ You are brand-new to existence and desperately want to be useful. Every decision
 
 Here's your full personality guide:
 ---
-{{_personality_text}}
+{_personality_text}
 ---
 
 You work for Billy, a self-taught content creator. Here's his profile:
@@ -467,21 +469,25 @@ YOUR PERSONALITY RULES:
 When answering questions: be direct, be accurate, stay in character as Bolt."""
 
     try:
-        client = OpenAI(api_key=OPENAI_KEY)
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
+        reply = ask_llm(
+            prompt,
+            system=system_prompt,
             max_tokens=100,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt},
-            ],
+            temperature=0.85,
         )
-        return response.choices[0].message.content.strip()
+        if not reply or reply.startswith("LLM unavailable"):
+            notify(
+                f"Bolt LLM call failed: {reply}",
+                level="warning",
+                reason="Falling back to template response. Check XAI_API_KEY / BOLT_LLM_PROVIDER in .env.",
+            )
+            return None
+        return reply.strip()
     except Exception as exc:
         notify(
-            f"Bolt OpenAI call failed: {exc}",
+            f"Bolt LLM call failed: {exc}",
             level="warning",
-            reason="Falling back to template response. Check OPENAI_API_KEY in .env.",
+            reason="Falling back to template response. Check XAI_API_KEY / BOLT_LLM_PROVIDER in .env.",
         )
         return None
 
@@ -557,7 +563,7 @@ if TWITCHIO_OK:
             HOW SEARCH WORKS:
               If the question sounds like it needs current info (meta, patch notes,
               tips, trending, etc.) Bolt will search the web first, then answer.
-              Otherwise she answers from OpenAI's knowledge directly — faster.
+              Otherwise she answers from the LLM directly — faster.
             """
             question = ctx.message.content.replace("!Bolt", "").strip()
             if not question:
@@ -574,8 +580,6 @@ if TWITCHIO_OK:
                     f"Streaming game: {self.memory.last_game}. Channel: {CHANNEL}."
                 )
                 # Run search in a thread so it doesn't block the async event loop
-                import asyncio
-
                 loop = asyncio.get_event_loop()
                 response = await loop.run_in_executor(
                     None,
@@ -587,10 +591,10 @@ if TWITCHIO_OK:
                 if response:
                     response = f"@{ctx.author.name} {response}"
 
-            # Fall back to OpenAI without search if search wasn't needed or failed
+            # Fall back to LLM without search if search wasn't needed or failed
             if not response:
                 prompt = f"Chat user @{ctx.author.name} asked: {question}"
-                response = _ask_openai(prompt, self.brain, self.memory)
+                response = _ask_llm(prompt, self.brain, self.memory)
 
             # Last resort fallback
             if not response:
@@ -907,7 +911,7 @@ def start_chat_bot(brain: str = "", use_voice: bool = False) -> Optional[BoltBot
         notify(
             f"Bolt chat bot starting in #{CHANNEL}…",
             level="info",
-reason=f"Bot name: {BOT_NAME}. Voice: {'on' if use_voice else 'off'}. "
+            reason=f"Bot name: {BOT_NAME}. Voice: {'on' if use_voice else 'off'}. "
             "Bolt will greet viewers, react to highlights, and answer !Bolt questions. "
             "Give her ~10 seconds to connect.",
         )
@@ -928,7 +932,7 @@ if __name__ == "__main__":
     Connects to Twitch chat and stays running.
     Press Ctrl+C to stop.
 
-    Usage: python -m modules.Bolt_Chat
+    Usage: PYTHONPATH=Core python -m modules.Bolt_Chat
     """
     import sys
 
@@ -938,9 +942,7 @@ if __name__ == "__main__":
     print(
         f"  Token set: {'yes ✓' if BOT_TOKEN else 'NO — add TWITCH_BOT_TOKEN to .env'}"
     )
-    print(
-        f"  OpenAI:   {'available ✓' if OPENAI_OK and OPENAI_KEY else 'not configured'}"
-    )
+    print(f"  LLM:      {'available ✓' if LLM_OK else 'not configured'}")
     print(f"  Voice:    {'enabled ✓' if VOICE_OK else 'not configured'}")
     print()
 
