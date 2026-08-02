@@ -8,7 +8,7 @@ William is building Bolt while also building his creator business. Bolt should r
 
 ## Handles
 - TikTok: @itssimplybilly
-- Twitch: thunderstormbilly
+- Twitch: ItsSimplyBilly
 - YouTube: @SimplyBilly
 - X: @SimplyBilly_
 

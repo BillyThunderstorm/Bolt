@@ -1,5 +1,5 @@
 # Bolt Memory
-*Hot cache for Bolt's own working memory. Detailed notes live in `Data/data/`. Last updated: 2026-07-09.*
+*Hot cache for Bolt's own working memory. Detailed notes live in `Data/data/`. Last updated: 2026-08-02.*
 
 ## Identity
 
@@ -35,7 +35,7 @@ Help William become a stronger creator across **game + tech testing first**, the
 ## Current Strategy
 
 Priority lanes: **games + tech**.  
-Platforms: TikTok `@itssimplybilly`, Twitch `thunderstormbilly`, YouTube `@SimplyBilly`, X `@SimplyBilly_`.  
+Platforms: TikTok `@itssimplybilly`, Twitch `ItsSimplyBilly`, YouTube `@SimplyBilly`, X `@SimplyBilly_`.  
 Amazon Influencer active: tag **`billycarter-20`**.  
 Posting rule: **always require approval**.
 
@@ -113,6 +113,7 @@ The best memory entry is specific: date, platform, content idea, result, and les
 
 ## Recent Notes
 
+- [2026-08-02] Twitch channel renamed to ItsSimplyBilly to align with other social handles (TikTok, YouTube, X).
 - [2026-05-29] Added the full creator vision: gaming, tech, product testing, Amazon Influencer storefront reviews, beauty/skincare, AI development, and Bolt as a virtual teammate for learning and growth.
 - [2026-05-29] Reframed this hot cache as Bolt's operational memory instead of assistant notes about Billy.
 - [2026-05-27] Phase 3 marked complete.
