@@ -5,20 +5,22 @@ modules/Bolt_Conversation.py — Bolt's voice conversation engine
 Back-and-forth voice (or text) conversation with Billy.
 
 What it does:
-  - Listens via microphone using speech_recognition + OpenAI Whisper
+  - Listens via microphone using speech_recognition + Whisper (OpenAI) with Google fallback
   - Maintains persistent conversation history (Project Memory)
-  - Generates personality-driven responses via OpenAI
+  - Routes high-value intents (morning, next, status, queue, research, mission) to real actions
+  - Generates personality-driven responses via LLM_Handler (OpenAI or xAI/Grok)
   - Speaks responses aloud through Bolt_Voice (ElevenLabs primary)
   - Can be used hands-free during streams or desk work
 
 Usage:
-  python3 -m modules.Bolt_Conversation          # start voice chat loop
-  python3 -m modules.Bolt_Conversation --text   # text-only mode (still speaks replies)
-  python3 -m modules.Bolt_Conversation --once "What should I post today?"
+  PYTHONPATH=Core python3 -m Bolt_Conversation          # start voice chat loop
+  PYTHONPATH=Core python3 -m Bolt_Conversation --text   # text-only mode (still speaks replies)
+  PYTHONPATH=Core python3 -m Bolt_Conversation --once "What should I post today?"
 
 Environment:
-  OPENAI_API_KEY       — required for transcription and responses
-  ELEVENLABS_API_KEY   — optional, Bolt_Voice uses it automatically if set
+  BOLT_LLM_PROVIDER / XAI_API_KEY / OPENAI_API_KEY  — response generation
+  OPENAI_API_KEY                                    — optional, for Whisper transcription only
+  ELEVENLABS_API_KEY                                — optional, Bolt_Voice uses it automatically if set
 """
 
 import os
@@ -26,7 +28,6 @@ import sys
 import json
 import time
 import tempfile
-import subprocess
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional
@@ -53,6 +54,32 @@ try:
     OPENAI_OK = True
 except ImportError:
     OPENAI_OK = False
+
+try:
+    from modules.LLM_Handler import ask_llm, get_active_provider, provider_status
+
+    LLM_OK = True
+except ImportError:
+    LLM_OK = False
+
+    def ask_llm(prompt, **kwargs):
+        return "Oh no! My brain is offline right now! That's a problem! Haha!"
+
+    def get_active_provider():
+        return "unavailable"
+
+    def provider_status():
+        return {}
+
+try:
+    from modules.Intent_Router import try_handle_intent
+
+    INTENT_OK = True
+except ImportError:
+    INTENT_OK = False
+
+    def try_handle_intent(text):
+        return None
 
 try:
     from modules.Bolt_Voice import speak, say_event
@@ -92,7 +119,6 @@ BRAIN_FILE = Path("bolt_brain.md")
 HISTORY_FILE = CONVERSATION_DIR / "voice_history.json"
 
 WHISPER_MODEL = os.getenv("BOLT_WHISPER_MODEL", "whisper-1")
-OPENAI_MODEL = os.getenv("BOLT_CONVERSATION_MODEL", "gpt-4o-mini")
 MAX_HISTORY_TURNS = int(os.getenv("BOLT_CONVERSATION_MEMORY", "20"))
 LISTEN_TIMEOUT = int(os.getenv("BOLT_LISTEN_TIMEOUT", "10"))
 PHRASE_TIMEOUT = int(os.getenv("BOLT_PHRASE_TIMEOUT", "5"))
@@ -147,7 +173,7 @@ class ConversationMemory:
         self._save()
 
     def as_openai_messages(self) -> List[Dict[str, str]]:
-        """Return history formatted for OpenAI chat completions."""
+        """Return history formatted for chat completions."""
         return [{"role": h["role"], "content": h["content"]} for h in self.history]
 
     def last_summary(self, n: int = 3) -> str:
@@ -202,6 +228,9 @@ VOICE CONVERSATION RULES:
 - One clear next step per response. Do not dump lists.
 - If you don't know something, say so cheerfully rather than making it up.
 - Never use markdown formatting or bullet points in spoken responses. Plain sentences only.
+
+You can also act on real system requests. If Billy asks for morning briefing, next actions,
+status, queue, research, or missions, the system may already have handled it before you reply.
 """
 
 
@@ -293,27 +322,33 @@ def _transcribe_with_whisper(audio_path: str) -> Optional[str]:
 
 def generate_response(user_text: str, memory: ConversationMemory) -> str:
     """
-    Generate a personality-driven response using OpenAI.
+    Generate a response.
 
-    Loads the full personality + brain + conversation history into context.
+    1. Try Intent_Router for high-value system actions (morning, next, status...).
+    2. Otherwise use LLM_Handler (Grok/OpenAI) with personality + history.
     """
-    if not OPENAI_OK or not OPENAI_KEY:
-        notify("OpenAI unavailable — using fallback response", level="warning")
-        return "Oh no! My brain is offline right now! That's a problem! Haha!"
+    # Intent path first — real actions beat pure chat when the user clearly wants one
+    if INTENT_OK:
+        handled = try_handle_intent(user_text)
+        if handled is not None:
+            return handled
 
     system_prompt = build_system_prompt()
-    messages = [{"role": "system", "content": system_prompt}]
-    messages.extend(memory.as_openai_messages())
-    messages.append({"role": "user", "content": user_text})
 
     try:
-        client = OpenAI(api_key=OPENAI_KEY)
-        response = client.chat.completions.create(
-            model=OPENAI_MODEL, max_tokens=250, temperature=0.85, messages=messages
+        reply = ask_llm(
+            user_text,
+            system=system_prompt,
+            history=memory.as_openai_messages(),
+            max_tokens=250,
+            temperature=0.85,
         )
-        return response.choices[0].message.content.strip()
+        if reply.startswith("LLM unavailable"):
+            notify("LLM unavailable — using fallback response", level="warning", reason=reply)
+            return "Oh no! My brain is offline right now! That's a problem! Haha!"
+        return reply
     except Exception as exc:
-        notify("OpenAI response failed", level="warning", reason=str(exc))
+        notify("LLM response failed", level="warning", reason=str(exc))
         return "Oops! My thoughts got tangled! Let's try that again!"
 
 
@@ -363,11 +398,15 @@ def conversation_loop(text_mode: bool = False):
 
             memory.add("user", user_input)
 
+            # Detect if morning path already spoke so we don't double-TTS
+            already_spoke = False
             try:
                 from modules.Content_Manager import is_good_morning_phrase
-                already_spoke = is_good_morning_phrase(user_input)
+
+                if is_good_morning_phrase(user_input):
+                    already_spoke = True
             except Exception:
-                already_spoke = False
+                pass
 
             reply = generate_response(user_input, memory)
             memory.add("assistant", reply)
@@ -393,12 +432,16 @@ def single_exchange(prompt: str):
     """Process one prompt and exit — useful for scripts and shortcuts."""
     memory = ConversationMemory()
     memory.add("user", prompt)
-    # Good Morning path already speaks inside morning(); avoid double TTS.
+
+    already_spoke = False
     try:
         from modules.Content_Manager import is_good_morning_phrase
-        already_spoke = is_good_morning_phrase(prompt)
+
+        if is_good_morning_phrase(prompt):
+            already_spoke = True
     except Exception:
-        already_spoke = False
+        pass
+
     reply = generate_response(prompt, memory)
     memory.add("assistant", reply)
     print(reply)
@@ -418,12 +461,15 @@ if __name__ == "__main__":
 
     if "--status" in args:
         mem = ConversationMemory()
+        status = provider_status()
         print(f"\n  🤖  Bolt Conversation Status")
         print(f"  History turns: {len(mem.history)}")
         print(f"  History file:  {HISTORY_FILE}")
         print(f"  Speech input:  {'✓' if SPEECH_OK else '✗'}")
         print(f"  Voice output:  {'✓' if VOICE_OK else '✗'}")
-        print(f"  OpenAI:        {'✓' if OPENAI_OK and OPENAI_KEY else '✗'}")
+        print(f"  Intent router: {'✓' if INTENT_OK else '✗'}")
+        print(f"  LLM provider:  {get_active_provider()}")
+        print(f"  LLM status:    {status}")
         print(f"\n  Recent context:\n{mem.last_summary()}\n")
         sys.exit(0)
 
