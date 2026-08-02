@@ -15,7 +15,7 @@ Run a subcommand:
     uv run bolt thumbnails --dry-run  # generate thumbnails
     uv run bolt nexus "How do I title my clips?"
     uv run bolt briefing --send       # generate + send daily briefing
-    uv run bolt launch                # start the bot (Core/src/launch.py)
+    uv run bolt launch                # start the bot (Core/launch.py)
     uv run bolt test                  # run the full test suite
     uv run bolt test test_title_generator  # run a specific test module
 
@@ -171,7 +171,7 @@ Creator Command Center (Core/modules/Command_Center.py):
   ccc …                   Short alias for mission
 
 Built-in subcommands (not script passthroughs):
-  launch                  Start the bot (Core/src/launch.py)
+  launch                  Start the bot (Core/launch.py)
   test [testmodule]       Run the full test suite (or a specific test module)
   setup                   Run the first-time setup wizard (Core/bot.py setup)
   help                    Show this message
@@ -209,7 +209,7 @@ def main() -> int:
 
     # Built-in: launch
     if subcommand == "launch":
-        cmd = [py, "Core/src/launch.py"] + rest
+        cmd = [py, "Core/launch.py"] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT))
 
