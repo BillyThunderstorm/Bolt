@@ -1,7 +1,7 @@
 {
   "version": 1,
   "require_approval": true,
-  "updated_at": "2026-07-09T22:44:07",
+  "updated_at": "2026-08-02T20:35:00",
   "platforms": {
     "tiktok": {
       "handle": "@itssimplybilly",
@@ -10,10 +10,10 @@
       "notes": "Primary short-form. Use Content Posting API when token present."
     },
     "twitch": {
-      "handle": "thunderstormbilly",
+      "handle": "ItsSimplyBilly",
       "status": "configured",
       "upload_mode": "live_source",
-      "notes": "Live gameplay + highlight source."
+      "notes": "Live gameplay + highlight source. Renamed to align with other social handles."
     },
     "youtube": {
       "handle": "@SimplyBilly",
