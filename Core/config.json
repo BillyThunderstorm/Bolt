@@ -2,11 +2,11 @@
   "game": "Gaming",
   "highlight_sensitivity": 0.7,
   "max_clips_per_session": 5,
-  "min_clip_score": 65,
-  "min_post_score": 65,
-  "recordings_folder": "recordings",
-  "clips_folder": "clips",
-  "vertical_clips_folder": "vertical_clips",
+  "min_clip_score": 5,
+  "min_post_score": 5,
+  "recordings_folder": "media/Recordings",
+  "clips_folder": "media/clips",
+  "vertical_clips_folder": "media/vertical_clips",
   "use_brain": true,
   "use_voice": true,
   "use_voice_checklist": true,
@@ -20,8 +20,8 @@
   ],
   "use_twitch": false,
   "quality_tiers": {
-      "discard_below": 60,
-       "queue_at": 80
+      "discard_below": 5.0,
+       "queue_at": 15.0
     },
   "nexus": {
   "preferred": "ollama",
@@ -34,7 +34,7 @@
   "auto_format_tiktok": true,
   "min_clip_duration": 15,
   "max_clip_duration": 60,
-  "min_clip_score": 65,
+  "min_clip_score": 5,
   "highlight_sensitivity": 0.05,
   "quality_tiers": {
     "discard_below": 5.0,
