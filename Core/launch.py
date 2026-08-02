@@ -22,14 +22,14 @@ import json
 import platform
 from pathlib import Path
 
-# Post-reorg: launch.py lives at Core/src/launch.py. Add Core/ to sys.path
-# so `from modules import X` resolves, and chdir to the repo root so any
-# CWD-relative paths below (config.json, .env, logs/, etc.) work as if
-# the script had been invoked from there.
-_HERE = Path(__file__).resolve().parent          # Core/src/
-_CORE = _HERE.parent                              # Core/
-_REPO = _CORE.parent                              # repo root
-_SCRIPTS_DIR = _REPO / "3rd_Party" / "colabs" / "scripts"
+# launch.py lives at Core/launch.py.
+# Add Core/ to sys.path so `from modules import X` resolves, and chdir to the
+# repo root so any CWD-relative paths below (config.json, .env, logs/, etc.)
+# work as if the script had been invoked from there.
+_HERE = Path(__file__).resolve().parent          # Core/
+_CORE = _HERE                                    # Core/
+_REPO = _HERE.parent                             # repo root
+_SCRIPTS_DIR = _REPO / "scripts"
 for _p in (_CORE, _REPO, _SCRIPTS_DIR):
     _sp = str(_p)
     if _sp not in sys.path:
@@ -43,13 +43,15 @@ if _VENV_PYTHON.exists() and sys.executable != str(_VENV_PYTHON):
 
 from dotenv import load_dotenv
 
-load_dotenv()
+# Prefer .env.local (gitignored local overrides) then fall back to .env
+if not load_dotenv(_REPO / ".env.local"):
+    load_dotenv(_REPO / ".env")
 
 from modules.notifier import notify, notify_startup
 
 from modules.Config_Loader import load_config
 
-# Post-reorg: config.json moved from the repo root to Core/config.json.
+# Post-reorg: config.json lives at Core/config.json.
 CONFIG_FILE = "Core/config.json"
 ENV_FILE = ".env"
 
@@ -333,8 +335,8 @@ def _open_obs(config: dict):
 
     defaults = {
         "Windows": [
-            r"C:\Program Files\obs-studio\bin\64bit\obs64.exe",
-            r"C:\Program Files (x86)\obs-studio\bin\32bit\obs32.exe",
+            r"C:\\Program Files\\obs-studio\\bin\\64bit\\obs64.exe",
+            r"C:\\Program Files (x86)\\obs-studio\\bin\\32bit\\obs32.exe",
         ],
         "Darwin": ["/Applications/OBS.app/Contents/MacOS/OBS"],
         "Linux": ["obs"],
@@ -396,8 +398,8 @@ def _run_setup_wizard():
     print("  Optional: add TWITCH_CLIENT_ID + TWITCH_OAUTH_TOKEN later for")
     print("  native Twitch clip creation.\n")
     twitch_channel = (
-        input("  Twitch channel name [BillyandRandyGaming]: ").strip()
-        or "BillyandRandyGaming"
+        input("  Twitch channel name [ItsSimplyBilly]: ").strip()
+        or "ItsSimplyBilly"
     )
     hype_threshold = (
         input("  Chat hype threshold — msgs/sec to trigger a clip [3]: ").strip() or "3"
@@ -738,7 +740,7 @@ def _run_voice_checklist(config: dict):
         notify(
             f"Checklist error: {e}",
             level="warning",
-reason="Install speech_recognition to enable voice: pip3 install SpeechRecognition pyaudio --break-system-packages. Bolt will continue in keyboard mode; run 'python3 -m modules.Voice_Checklist --keyboard' to test.",
+            reason="Install speech_recognition to enable voice: pip3 install SpeechRecognition pyaudio --break-system-packages. Bolt will continue in keyboard mode; run 'python3 -m modules.Voice_Checklist --keyboard' to test.",
         )
 
 
