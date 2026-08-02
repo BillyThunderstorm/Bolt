@@ -1,0 +1,11 @@
+interface:
+  display_name: B.O.L.T. Creator Command Center
+  short_description: Turn creator goals into printable missions
+  default_prompt: Use $bolt-creator-command-center to help me make money for upgrades.
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

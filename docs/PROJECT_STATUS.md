@@ -30,6 +30,7 @@ What is active now:
 - Local memory retrieval through `modules/Memory_Index.py`
 - **Content Manager OS** — `bolt manage|store|social|sponsors|morning` (M1–M13 code-complete)
 - **Researcher role** — `bolt research` (status, pending, add, note, c5 keep|drop); profile + research log; surfaces in daily briefing
+- **Creator Command Center** — `bolt mission` / `bolt ccc` turns goals into printable missions (`Core/skills/creator-command-center/`)
 - **Memory-aware daily/weekly briefings** — constraints from `user_profile.json`, live queue counts
 - Filed loose docs in canonical `docs/`, `memory/`, `teaching/rag/`, and `docs/upgrade/` locations
 
@@ -178,8 +179,8 @@ crontab -l
 1. Keep `Think_Learn_Decide` canonical — no parallel decision engines
 2. Deepen memory → decision influence beyond briefing text
 3. Apple Reminders delivery channel (profile priority #1) — not wired yet
-4. `bolt-creator-command-center/` skill is external to `bin/bolt` (optional Grok skill)
-5. Prefer `bolt` wrapper over raw script paths
+4. Prefer `bolt` wrapper over raw script paths
+5. Optional: live web research inside missions (scaffold + Nexus exist; deep source verification is still manual / agent-assisted)
 
 ### June 21, 2026 - Lazy Loading + Startup Perf Fix ✅
 - **Bug fix**: `bot.py` was calling `write_site_data(push=True)` at

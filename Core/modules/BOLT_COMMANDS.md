@@ -84,6 +84,31 @@ C5 ("Would I want to be known for this?") is always Billy's call — Bolt only
 gates C7 (hard block) and flags C6 (authenticity red flags). Name match is
 case-insensitive substring when unique.
 
+## Creator Command Center (missions)
+
+Turns a broad goal into a printable mission briefing (check-in → options →
+checklist). Playbook: `Core/skills/creator-command-center/SKILL.md`.
+Missions save under `Data/memory/missions/`. Planning only — nothing is
+posted or purchased without your approval.
+
+```bash
+bolt mission                              # Status / how to use
+bolt mission checkin                      # 5 check-in questions (limits first)
+bolt mission playbook                     # Print the full skill playbook
+bolt mission start "fund a new mic" \
+  --hours 6 --budget 50 \
+  --assets "OBS, Mouse ASIN, clips" \
+  --restrictions "no gimmick posts"
+bolt mission start "first Amazon review" --no-nexus   # skip AI fill-in
+bolt mission list
+bolt mission show latest
+bolt mission next                         # Section 13 only
+
+# Aliases
+bolt command-center …
+bolt ccc …
+```
+
 ## Creator manager
 
 Names containing spaces should be quoted.

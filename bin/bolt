@@ -164,6 +164,12 @@ Direction-finding researcher (Core/modules/Researcher.py):
                           c5 keep|drop "Name"  — record your C5 decision
                           add "Name" --platform … --summary … --why …
 
+Creator Command Center (Core/modules/Command_Center.py):
+  mission [status|checkin|playbook|list|show|start|next]
+                          Turn a goal into a printable mission briefing
+  command-center …        Alias for mission
+  ccc …                   Short alias for mission
+
 Built-in subcommands (not script passthroughs):
   launch                  Start the bot (Core/src/launch.py)
   test [testmodule]       Run the full test suite (or a specific test module)
@@ -298,6 +304,16 @@ def main() -> int:
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
         cmd = [py, "-m", "modules.Researcher"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: Creator Command Center (mission briefings)
+    if subcommand in ("mission", "command-center", "command_center", "ccc"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Command_Center"] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
