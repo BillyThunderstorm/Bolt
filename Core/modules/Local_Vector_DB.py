@@ -76,9 +76,16 @@ class LocalVectorDB:
                 
             for md_file in directory.rglob("*.md"):
                 try:
-                    text = md_file.read_text(encoding="utf-8")
+                    # Some files end in .md but aren't text (e.g. macOS Alias
+                    # files dropped into the repo). Try UTF-8 first; fall back
+                    # to lossy latin-1 decoding so we still get *something* to
+                    # embed, then skip if it's total garbage.
+                    try:
+                        text = md_file.read_text(encoding="utf-8")
+                    except UnicodeDecodeError:
+                        text = md_file.read_text(encoding="latin-1", errors="replace")
                     if len(text.strip()) < 50:
-                        continue  # Skip very short files
+                        continue  # Skip very short or all-nonsense files
                     documents.append({
                         "id": str(md_file.relative_to(self.repo_root)),
                         "text": text[:12000],   # Large chunks are fine for Chroma
