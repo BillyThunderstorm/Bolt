@@ -30,6 +30,7 @@ dependencies = [
     "langchain-community",     # Community langchain integrations
     "langchain-text-splitters",# Text chunking for RAG
     "chromadb",           # Vector database for memory storage
+    "ollama",             # Client SDK for local Ollama (used by chromadb's OllamaEmbeddingFunction + direct calls)
     "sentence-transformers",  # Embedding models
 
     # PLATFORM INTEGRATIONS
