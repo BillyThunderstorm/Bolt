@@ -1,6 +1,6 @@
 # Bolt Command Reference
 
-This is the current user-facing command list for Bolt. It contains the commands accepted by the live CLI, conversation interface, and Twitch chat bot.
+The current user-facing command list for Bolt. It contains every command the live CLI, conversation interface, and Twitch chat bot accept, with a one-line plain-English description per command. Run `bolt help` for the same list as printed at startup.
 
 ## Running Bolt commands
 
@@ -54,6 +54,8 @@ PYTHONPATH=Core python3 -m modules.LLM_Handler
 
 ## Core commands
 
+Inspect, launch, and maintain Bolt itself.
+
 ```bash
 bolt help                         # Show the CLI command summary
 bolt version                      # Show the repository and Python in use
@@ -61,9 +63,9 @@ bolt verify                       # Check required files, folders, config, and e
 bolt setup                        # Run first-time setup
 bolt launch                       # Start Bolt
 bolt status                       # Check the decision engine, vector DB, and Nexus
-bolt intelligence                 # Alias for status
+bolt intelligence                 # Alias for `status`
 bolt test                         # Run the full test suite
-bolt test <unittest-arguments>     # Run selected unittest targets
+bolt test <unittest-arguments>    # Run selected unittest targets
 bolt layout                       # Report misplaced root files; never moves them
 bolt layout --quiet               # Print only the layout summary
 bolt layout --json                # Return the layout report as JSON
@@ -125,8 +127,8 @@ bolt mission show latest
 bolt mission next                         # Section 13 only
 
 # Aliases
-bolt command-center …
-bolt ccc …
+bolt command-center …                     # Alias for `mission`
+bolt ccc …                                # Short alias for `mission`
 ```
 
 ## Creator manager
@@ -147,6 +149,18 @@ bolt manage mark-posted "Headset" [--platforms tiktok,youtube_shorts,x] [--where
 bolt manage shipped
 ```
 
+| Command | What it does |
+|---------|--------------|
+| `bolt manage status` | Show shipped count + today's pending actions for the manager OS |
+| `bolt manage next` | Print the top next-action stack across catalog, store, social, sponsors, business |
+| `bolt manage add "Name" --lane …` | Create a new catalog item with optional ASIN and notes |
+| `bolt manage list [--lane …] [--status …]` | List items filtered by lane and/or status |
+| `bolt manage note "Name" --text "…"` | Append a day-keyed note to an item's history |
+| `bolt manage draft "Name" --format short|long` | Build a draft post from notes (uses the LLM) |
+| `bolt manage mark-ready "Name" [--verdict …]` | Mark an item as ready to post (requires a draft) |
+| `bolt manage mark-posted "Name" --platforms … --where …` | Mark an item as posted, recording publish URLs |
+| `bolt manage shipped` | List every item that has been marked posted |
+
 ### Publishing and platform readiness
 
 `post-dry-run` previews a TikTok post. `post` remains a dry run unless `--approve` is present.
@@ -162,12 +176,28 @@ bolt manage x-pkg "Headset"
 bolt manage x-status
 ```
 
+| Command | What it does |
+|---------|--------------|
+| `bolt manage post-dry-run "Name"` | Preview a TikTok post without sending anything live |
+| `bolt manage post "Name"` | Default: dry-run only; refuses to publish |
+| `bolt manage post "Name" --approve` | Actually publish to TikTok (still requires `--video` if no draft video) |
+| `bolt manage tiktok-status` | Show whether the TikTok publisher is configured and ready |
+| `bolt manage youtube-pkg "Name"` | Build a YouTube Shorts package (title + description + tags) |
+| `bolt manage youtube-status` | Show whether the YouTube publisher is configured and ready |
+| `bolt manage x-pkg "Name"` | Build an X (Twitter) package from the item's draft |
+| `bolt manage x-status` | Show whether the X publisher is configured and ready |
+
 ### Learned ranking model
 
 ```bash
 bolt manage model-status
 bolt manage model-inspect [--game "Game Name"]
 ```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt manage model-status` | Show the trained ranker's stage, sample count, and last training time |
+| `bolt manage model-inspect [--game …]` | Show per-trigger learned weights for a specific game (or aggregate if omitted) |
 
 ## Storefront
 
@@ -179,6 +209,12 @@ bolt store feature-next
 
 Running `bolt store` with no action is the same as `bolt store list`.
 
+| Command | What it does |
+|---------|--------------|
+| `bolt store list` | List everything currently in the storefront catalog |
+| `bolt store add --name "…" [--asin …]` | Add a storefront product (Amazon ASIN optional, category required if given) |
+| `bolt store feature-next` | Recommend which storefront item to feature next, based on cadence and rotation |
+
 ## Social packages and queue
 
 ```bash
@@ -188,6 +224,12 @@ bolt social queue
 ```
 
 Running `bolt social` with no action is the same as `bolt social status`.
+
+| Command | What it does |
+|---------|--------------|
+| `bolt social status` | Show queue counts and the next posting window status |
+| `bolt social package "Name" --platforms …` | Build ready-to-publish packages for the listed platforms |
+| `bolt social queue` | Print the full posting queue (status, clip path, scheduled time) |
 
 ## Sponsors
 
@@ -202,16 +244,30 @@ bolt sponsors next
 
 Running `bolt sponsors` with no action is the same as `bolt sponsors find`.
 
+| Command | What it does |
+|---------|--------------|
+| `bolt sponsors find [--lane …] [--limit …]` | Find new sponsor candidates matching the given lane |
+| `bolt sponsors pitch "Name"` | Build a pitch email for the named sponsor |
+| `bolt sponsors log "Name" --status …` | Record an outreach status (contacted, replied, etc.) for an existing sponsor |
+| `bolt sponsors next` | Show the next sponsor outreach action |
+
 ### Sponsor records and research
 
 ```bash
 bolt manage sponsors-add "Razer" [--lanes game,tech] [--type brand] [--fit 9] [--contact <contact>] [--note "text"]
-bolt manage sponsors-enrich "Razer" [--note "text"] [--link <url>] [--mark-contacted]
+bolt manage sponsors-enrich "Name" [--note "text"] [--link <url>] [--mark-contacted]
 bolt manage sponsors-pipeline
 bolt manage sponsors-research "Razer" "Razer creator program" [--limit 5] [--no-update-contact] [--json]
 ```
 
 Sponsor research requires the repository's search provider to be configured.
+
+| Command | What it does |
+|---------|--------------|
+| `bolt manage sponsors-add "Name" --lanes …` | Add a new sponsor record with lanes, type, fit score, contact |
+| `bolt manage sponsors-enrich "Name" [--note …]` | Add a note or contact link to an existing sponsor |
+| `bolt manage sponsors-pipeline` | Show the full sponsor pipeline grouped by stage |
+| `bolt manage sponsors-research "Name" "query" …` | Run a research query (uses configured search provider) and surface findings |
 
 ## Business guidance and daily briefing
 
@@ -224,6 +280,14 @@ bolt morning --quiet
 ```
 
 `bolt good-morning` and `bolt goodmorning` are aliases for `bolt morning`.
+
+| Command | What it does |
+|---------|--------------|
+| `bolt business lesson` | Pull today's business-mindset lesson from the manager content |
+| `bolt business next` | Show the next business move Bolt recommends |
+| `bolt advance next` | Show the next concrete Bolt improvement to ship (roadmap pull) |
+| `bolt morning` | Run the full "Good Morning Bolt" spoken daily briefing |
+| `bolt morning --quiet` | Same as `morning`, but skip the spoken audio output |
 
 ## Recordings, clips, and highlights
 
@@ -243,6 +307,20 @@ bolt watch
 
 `recordings` defaults to `all` and gaming content. `auto-clip-twitch` is an alias for `auto_clip_twitch`.
 
+| Command | What it does |
+|---------|--------------|
+| `bolt recordings [mode]` | Process existing recordings (default: all) — detect, clip, title, subtitle, dedupe, queue |
+| `bolt auto_clip_twitch` | Auto-clip highlights from the latest unprocessed Twitch VOD |
+| `bolt auto_clip_twitch --all` | Run auto-clip for every unprocessed VOD |
+| `bolt auto_clip_twitch --list` | Show which VODs are unprocessed, without running anything |
+| `bolt auto_clip_twitch --vod <id>` | Process a single named VOD by ID |
+| `bolt auto_clip_twitch --twitch-clips` | Pull Twitch's own Clip API highlights for the latest VOD |
+| `bolt highlights` | Compile the top clips into a Twitch highlight reel |
+| `bolt thumbnails [dir…]` | Generate JPG thumbnails for clips in the given directories |
+| `bolt clip_dedupe` | Run duplicate detection across the clips folder (writes to `Data/seen_clips.json`) |
+| `bolt filter_backlog` | Move low-scoring clips to `clips/_low_score/` |
+| `bolt watch` | Watch the recordings folder for new files and trigger the pipeline |
+
 ## Twitch VOD downloads and authentication
 
 ```bash
@@ -255,6 +333,13 @@ bolt tiktok_token [--client-key <key>] [--client-secret <secret>] [--redirect-ur
 ```
 
 Token commands are interactive and may open a browser or prompt for credentials.
+
+| Command | What it does |
+|---------|--------------|
+| `bolt vods` | Download Twitch VOD samples for a channel with type/limit/sample filters |
+| `bolt twitch_token` | Get an OAuth token for the Twitch chat account (interactive) |
+| `bolt twitch_bot_token` | Get an OAuth token for the Bolt bot account (interactive) |
+| `bolt tiktok_token` | Get a TikTok OAuth token with optional client overrides |
 
 ## Advice, reporting, and learning
 
@@ -270,6 +355,16 @@ bolt weekly [--print] [--send] [--days <number>]
 ```
 
 Running `bolt log_perf` without performance values starts its interactive prompt.
+
+| Command | What it does |
+|---------|--------------|
+| `bolt nexus "question"` | Ask Nexus (an outside LLM wrapped by Bolt) for content-strategy advice |
+| `bolt performance` | Run a performance baseline / snapshot of recent clip outcomes |
+| `bolt log_perf …` | Log a clip's actual views/likes back to the ranker so it learns |
+| `bolt log_perf --list` | Show recent performance-log entries (most recent first) |
+| `bolt monitor_titles` | Summarize how generated titles are performing |
+| `bolt test_titles` | Run the 10-clip title-upgrade smoke test |
+| `bolt weekly` | Generate (and optionally send) the weekly performance insights |
 
 ## Briefings, calendars, memory, and site data
 
@@ -287,6 +382,18 @@ bolt site [--path <output-file>] [--push]
 
 `bolt site --push` writes site data and then attempts to commit and push it. Use it only when that is the intended action.
 
+| Command | What it does |
+|---------|--------------|
+| `bolt briefing` | Generate (and save) the current daily briefing under `Docs/briefings/` |
+| `bolt briefing --print` | Generate the briefing and print it to the terminal instead of saving |
+| `bolt calendar` | Generate ICS calendar feeds for scheduled posts |
+| `bolt refresh_memory` | Rebuild the clip memory index (`Data/memory_index.json`) |
+| `bolt refresh_vector_db` | Rebuild the vector DB used by Nexus for retrieval (`Data/vector_db/`) |
+| `bolt vector_db` | Alias: same as `refresh_vector_db` |
+| `bolt reindex` | Alias: same as `refresh_vector_db` |
+| `bolt site` | Write `site-data.json` for the web dashboard |
+| `bolt site --push` | Write site data AND attempt to commit + push it (use carefully) |
+
 ## Notifications
 
 ```bash
@@ -295,7 +402,16 @@ bolt send "message" [--subject "subject"] [--sms-only|--email-only]
 
 `bolt notify` is an alias for `bolt send`.
 
+| Command | What it does |
+|---------|--------------|
+| `bolt send "msg"` | Send an SMS / email / Discord notification (chosen by config) |
+| `bolt send "msg" --sms-only` | Force SMS, ignore email |
+| `bolt send "msg" --email-only` | Force email, ignore SMS |
+| `bolt send "msg" --subject "…"` | Override the email subject line |
+
 ## Starting conversation mode
+
+The CLI exposes flags on `Bolt_Conversation` for three modes: persistent text chat, persistent voice chat, and one-shot prompts.
 
 Text conversation:
 
@@ -321,6 +437,14 @@ Status / clear history:
 PYTHONPATH=Core python3 -m Bolt_Conversation --status
 PYTHONPATH=Core python3 -m Bolt_Conversation --clear
 ```
+
+| Flag | What it does |
+|------|--------------|
+| `-m Bolt_Conversation` | Run the voice-mode conversation loop (uses configured TTS/STT) |
+| `--text` | Run the same loop in text-only mode (no mic/speaker needed) |
+| `--once "question"` | Ask Bolt a single question, get one answer, exit |
+| `--status` | Print conversation-history state without sending a message |
+| `--clear` | Wipe conversation history |
 
 ### Natural language intents (no exact CLI required)
 
@@ -363,6 +487,22 @@ These commands are available while the Bolt Twitch chat bot is connected:
 !recall <query>                   Search Bolt's local memory
 ```
 
+| Command | What it does |
+|---------|--------------|
+| `!Bolt <question>` | Ask Bolt anything; reply comes from Grok via LLM_Handler |
+| `!clip` | Check whether the latest stream event was clipped |
+| `!uptime` | Show how long the current Twitch session has been live |
+| `!highlights` | Show how many highlights Bolt has detected this session |
+| `!queue` | Show the current posting queue counts |
+| `!qstatus` | Show per-clip status (channel-mod only) |
+| `!postnow [clip_id]` | Approve and publish the next (or named) ready clip |
+| `!dontpost <reason>` | Hold the next queued clip and record the reason |
+| `!stopclip <reason>` | Emergency hold on a clip |
+| `!skip <reason>` | Hold the next clip; rotate it later |
+| `!rank <score>` / `!rank <clip_id> <score>` | Manually set a clip's score (channel-mod) |
+| `!config <safe_key> <value>` | Change an allowed live configuration value (channel-mod) |
+| `!recall <query>` | Search Bolt's local memory and surface the best hit |
+
 Posting and configuration commands enforce the permissions and safeguards implemented by the running bot.
 
 ## Command aliases
@@ -381,3 +521,5 @@ These names perform the same actions as their primary commands:
 | `send` | `notify` |
 | `layout` | `check_layout` |
 | `refresh_vector_db` | `vector_db`, `reindex` |
+| `morning` | `good-morning`, `goodmorning` |
+| `mission` | `command-center`, `ccc` |
