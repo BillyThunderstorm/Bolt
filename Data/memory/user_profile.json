@@ -91,14 +91,14 @@
   "lane_mix": {
     "status": "answered",
     "current": {
-      "gaming_anime_entertainment": 95,
+      "pop_culture_superheroes_film_tv": 95,
       "tech_gadgets_ai": 0,
       "general_product_testing": 0,
       "skincare_personal_advice": 5,
       "_total": 100
     },
     "target": {
-      "gaming_anime_entertainment": 25,
+      "pop_culture_superheroes_film_tv": 25,
       "tech_gadgets_ai": 25,
       "general_product_testing": 25,
       "skincare_personal_advice": 25,
@@ -107,12 +107,12 @@
     "approach": "parallel_trials",
     "approach_note": "User explicitly chose 25/25/25/25 — meaning all four lanes run in parallel from this point. NOT weighted-exploration. Each lane gets equal focus.",
     "lane_definitions": {
-      "gaming_anime_entertainment": "Gameplay/highlights + anime reactions/entertainment commentary. Anchored by user's existing Twitch presence.",
+      "pop_culture_superheroes_film_tv": "Superhero (Marvel/DC) + film/TV review commentary. Anchored by user's existing Twitch presence.",
       "tech_gadgets_ai": "Tech product reviews + AI tools/development coverage. Aligns with Q1 'gaming companies test newest releases' + AI-development lane doc.",
       "general_product_testing": "Cross-category product testing that doesn't fit tech, gaming, or skincare. The 'company sends me stuff to test' lane.",
       "skincare_personal_advice": "Skincare and personal-care content. Aligns with CeraVe/The Ordinary brands already in Content_Manager."
     },
-    "user_words": "gaming, anime and entertainment / tech gadgets and latest AI development and advancement / general product testing / skincare and personal advice. Focus these evenly. each have 25% out of 100% of my content.",
+    "user_words": "gaming, pop culture (superheroes: Marvel/DC) and film/TV reviews / tech gadgets and latest AI development and advancement / general product testing / skincare and personal advice. Focus these evenly. each have 25% out of 100% of my content.",
     "trial_status": "all four lanes are in trial from this point. Each lane gets evaluated at intervals against the C5/C6 tests ('would I want to be known for this?' + 'believe in / stand behind / trust it')."
   },
   "risk_tolerance": {

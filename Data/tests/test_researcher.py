@@ -49,7 +49,7 @@ SAMPLE_PROFILE = {
     },
     "lane_mix": {
         "target": {
-            "gaming_anime_entertainment": 25,
+            "pop_culture_superheroes_film_tv": 25,
             "tech_gadgets_ai": 25,
             "general_product_testing": 25,
             "skincare_personal_advice": 25,
