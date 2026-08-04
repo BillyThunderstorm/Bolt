@@ -33,8 +33,8 @@ except ImportError:
     refresh_memory_index = None
     retrieve_memory = None
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = PROJECT_ROOT / "data"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]  # Bolt/ (repo root)
+DATA_DIR = PROJECT_ROOT / "Data"
 LOGS_DIR = PROJECT_ROOT / "logs"
 MEMORY_DIR = PROJECT_ROOT / "memory"
 
@@ -165,7 +165,7 @@ class ThinkLearnDecideEngine:
             ("memory_glossary", MEMORY_DIR / "glossary.md", "markdown"),
             ("ready_to_post", DATA_DIR / "ready_to_post.json", "json"),
             ("rankings", DATA_DIR / "rankings.json", "json"),
-            ("seen_clips", PROJECT_ROOT / "seen_clips.json", "json"),
+            ("seen_clips", PROJECT_ROOT / "Data" / "seen_clips.json", "json"),
         ]
         return {
             "generated_at": _now_iso(),

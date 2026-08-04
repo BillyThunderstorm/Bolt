@@ -47,7 +47,10 @@ try:
 except ImportError:
     HAS_PHASH = False
 
-SEEN_FILE = "seen_clips.json"
+# Anchor to repo root so the writer doesn't drift back to CWD.
+# 3 levels: Clip_Deduplicator.py -> modules/ -> Core/ -> <repo root>
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+SEEN_FILE = str(_PROJECT_ROOT / "Data" / "seen_clips.json")
 TIMESTAMP_WINDOW_S = 30.0  # clips within this many seconds are suspect
 SIZE_RATIO_THRESHOLD = 0.10  # within 10% file size = suspect
 PHASH_THRESHOLD = 8  # Hamming distance (lower = more similar)

@@ -101,7 +101,7 @@ python3 scripts/refresh_memory_index.py
 
 ## Current Commands
 
-Full reference (labeled): 🟢 `Docs/BOLT_COMMANDS.md`
+Full reference (labeled): 🟡 `Core/modules/BOLT_COMMANDS.md`
 
 ### 🔴 Manager (use these daily)
 ```bash
@@ -330,9 +330,24 @@ crontab -l
 - If storage alerts aren't sending, verify `configs/storage_alerts.env` is configured
 
 ## Last Updated
-August 1, 2026
+August 4, 2026
 
 ## Recent Updates (August 2026)
+
+### August 4, 2026 - Bolt CLI aliases + seen_clips drift fix ✅
+- **`bolt vector_db` / `bolt reindex`** added as short aliases for `bolt refresh_vector_db`
+  (the Vector DB rebuild for Nexus). `BOLT_COMMANDS.md` + `bin/bolt` docstring updated;
+  docstring alias example reconciled with the actual `~/.zshrc` (`/Users/carter/developer/Bolt/bin/bolt`).
+- **`seen_clips.json` drift fixed** at three writers:
+  - `Clip_Deduplicator.SEEN_FILE` anchored to `parents[2]/Data/seen_clips.json`
+    (was a bare CWD string recreating the file at the repo root each run)
+  - `Think_Learn_Decide.DATA_DIR` corrected from `parents[1]/"data"` → `parents[2]/"Data"`
+    (was the pre-2026-07-19 flatten bug lingering on this one file)
+  - `Core/data/source_registry.json` expected path updated to match
+  - Canonical file is now at `Data/seen_clips.json`; both old copies backed up in `logs/`.
+- **`bolt layout`** now reports zero drift at the repo root (was flagging `seen_clips.json`).
+- `uv.lock` and `Data/vector_db/` deliberately left alone (correct locations; uv requires the
+  lockfile at repo root, and `Local_Vector_DB` hardcodes `parents[2]/Data/vector_db`).
 
 ### August 1, 2026 - Researcher write path + briefing wiring ✅
 - **`bolt research add|note|c5|pending`**: full operator loop for direction-finding without editing JSON by hand

@@ -277,7 +277,7 @@
 ./archive/.DS_Store
 ./archive/recordings
 ./archive/clips
-./seen_clips.json
+./Data/seen_clips.json
 ./.pytest_cache
 ./.pytest_cache/CACHEDIR.TAG
 ./.pytest_cache/README.md
