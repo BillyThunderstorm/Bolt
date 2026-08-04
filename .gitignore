@@ -31,6 +31,7 @@ credentials.json
 Data/archive/
 Data/data/
 Data/logs/
+Data/vector_db/             # ChromaDB runtime cache; regenerated on every `bolt reindex`
 docs.env
 env/
 llm-env/
