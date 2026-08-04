@@ -23,7 +23,7 @@ The system operates as a single, sequential, and stateful pipeline. Input files 
 ### 2. B. Clip Generation & Cleanup
 **Module:** `modules/Clip_Generator.py` & `modules/Clip_Deduplicator.py`
 *   **Input:** List of highlight objects.
-*   **Action:** Crops the video around the highlight times, adds padding, and checks for duplicates against `data/seen_clips.json`.
+*   **Action:** Crops the video around the highlight times, adds padding, and checks for duplicates against `Data/seen_clips.json`.
 *   **Output:** A list of unique, raw video clips saved to `clips/`.
 
 ### 3. C. Meta-Data Enrichment (The Core Decision Gate)

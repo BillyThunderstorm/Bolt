@@ -7,13 +7,13 @@ This is the current user-facing command list for Bolt. It contains the commands 
 From any directory, use:
 
 ```bash
-uv run --directory /Users/carter/developer/Bolt bolt <command> [options]
+uv run --directory /Users/carter/developer/Bolt python bin/bolt <command> [options]
 ```
 
 For the shorter `bolt <command>` form, add this alias to `~/.zshrc`:
 
 ```bash
-alias bolt='uv run --directory /Users/carter/developer/Bolt bolt'
+alias bolt='/Users/carter/developer/Bolt/bin/bolt'
 ```
 
 Then reload the shell:
@@ -278,6 +278,10 @@ bolt briefing                    # Generate and save the current daily briefing
 bolt briefing --print            # Print it in the terminal
 bolt calendar [--output-dir <directory>] [--days 30] [--dry-run]
 bolt refresh_memory
+bolt refresh_vector_db        # Rebuild the vector DB for Nexus
+                              # Aliases: bolt vector_db · bolt reindex
+bolt vector_db                # Short alias for refresh_vector_db
+bolt reindex                  # Short alias for refresh_vector_db
 bolt site [--path <output-file>] [--push]
 ```
 
@@ -376,3 +380,4 @@ These names perform the same actions as their primary commands:
 | `vods` | `vod_download` |
 | `send` | `notify` |
 | `layout` | `check_layout` |
+| `refresh_vector_db` | `vector_db`, `reindex` |

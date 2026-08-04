@@ -1,5 +1,5 @@
 # Bolt Memory
-*Hot cache for Bolt's own working memory. Detailed notes live in `Data/data/`. Last updated: 2026-08-02.*
+*Hot cache for Bolt's own working memory. Detailed notes live in `Data/data/`. Last updated: 2026-08-04.*
 
 ## Identity
 
@@ -83,7 +83,7 @@ Bolt should retrieve from these local sources before guessing:
 - `memory/projects/bolt.md` for Bolt project context
 - `data/unified_memory.jsonl` for pipeline events and decisions
 - `data/performance_outcomes.jsonl` for content results and lessons
-- `seen_clips.json` and processed recording data for clip history
+- `Data/seen_clips.json` and processed recording data for clip history
 - `logs/decision_audit.log` for past decision traces
 
 ## Decision Rules
@@ -113,6 +113,7 @@ The best memory entry is specific: date, platform, content idea, result, and les
 
 ## Recent Notes
 
+- [2026-08-04] Anchored `seen_clips.json` to `Data/seen_clips.json` (was drifting to the repo root each run). Patched `Clip_Deduplicator.SEEN_FILE`, fixed `Think_Learn_Decide.DATA_DIR` depth (was the pre-2026-07-19 flatten bug), updated `Core/data/source_registry.json`. Added `bolt vector_db` / `bolt reindex` aliases for `refresh_vector_db`; reconciled `bin/bolt` docstring with the actual `~/.zshrc` alias.
 - [2026-08-02] Twitch channel renamed to ItsSimplyBilly to align with other social handles (TikTok, YouTube, X).
 - [2026-05-29] Added the full creator vision: gaming, tech, product testing, Amazon Influencer storefront reviews, beauty/skincare, AI development, and Bolt as a virtual teammate for learning and growth.
 - [2026-05-29] Reframed this hot cache as Bolt's operational memory instead of assistant notes about Billy.

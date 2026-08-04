@@ -57,9 +57,12 @@ except ImportError:
 
 POSTING_TIMEZONE = os.getenv("POSTING_TIMEZONE", "America/New_York")
 DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK_URL", "")
-READY_FILE = Path("data/ready_to_post.json")
-CONFIG_FILE = Path("config.json")
-REJECTION_LOG = Path("data/post_rejections.jsonl")
+# Anchor to repo root so the writer doesn't drift back to CWD.
+# 3 levels: Peak_Hour_Notifier.py -> modules/ -> Core/ -> <repo root>
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+READY_FILE = _PROJECT_ROOT / "Data" / "ready_to_post.json"
+CONFIG_FILE = _PROJECT_ROOT / "Core" / "config.json"
+REJECTION_LOG = _PROJECT_ROOT / "Data" / "post_rejections.jsonl"
 
 # Peak posting windows as (start_hour, end_hour) in 24h format
 PEAK_WINDOWS = [

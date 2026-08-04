@@ -87,7 +87,7 @@ Result: Rich metadata for each clip, smarter title/thumbnail generation
 ```
 
 ### 2.2 **Duplicate Detection**
-**Status:** seen_clips.json (basic dedup)  
+|**Status:** `Data/seen_clips.json` (basic dedup) — anchored to repo root, no longer drifts to CWD  
 **Upgrade:** Perceptual hashing
 
 ```python

@@ -32,7 +32,7 @@ flowchart TD
 
     StableFile --> Detect[Highlight_Detector.detect_highlights]
     Detect --> ClipGen[Clip_Generator.generate_clips]
-    ClipGen --> Dedup[Clip_Deduplicator + seen_clips.json]
+    ClipGen --> Dedup[Clip_Deduplicator + Data/seen_clips.json]
     Dedup --> Titles[Title_Generator using creator profile]
     Dedup --> Subtitles[Subtitle_Generator / Whisper path]
     Titles --> Rank[Clip_Ranker score + tier]
@@ -42,16 +42,16 @@ flowchart TD
     Decision --> Policy[allowlist / denylist]
     Policy --> Approval{approved?}
     Approval -->|yes| Format[Clip_Factory vertical format]
-    Approval -->|no / later| Pending[data/pending_proposals.json]
+    Approval -->|no / later| Pending[Data/pending_proposals.json]
 
-    Format --> Queue[Post_Queue / data/ready_to_post.json]
+    Format --> Queue[Post_Queue / Data/ready_to_post.json]
     Queue --> Captions[caption .txt files]
     Queue --> Alerts[Peak-hour notifications]
     Queue --> Chat[Bolt_Chat trigger after real approved clip]
     Queue --> Voice[Bolt_Voice local alert]
 
-    Decision --> Memory[data/unified_memory.jsonl]
-    Decision --> Model[data/decision_model.json]
+    Decision --> Memory[Data/unified_memory.jsonl]
+    Decision --> Model[Data/decision_model.json]
     Decision --> Audit[logs/decision_audit.log]
 ```
 
@@ -59,7 +59,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    Core[Bolt Core Today] --> Memory[memory/ + data/unified_memory.jsonl]
+    Core[Bolt Core Today] --> Memory[memory/ + Data/unified_memory.jsonl]
     Core --> Rules[config thresholds + action policy]
     Core --> Pipeline[clip pipeline]
     Core --> Queue[post queue]
@@ -164,7 +164,7 @@ Last checked from the iCloud workspace on 2026-05-18:
 - The synced `.venv/` is not portable across Macs; it points at the other Mac's
   Homebrew Python path. Use a local Python/venv per Mac instead of relying on a
   synced virtualenv.
-- `data/ready_to_post.json` currently has historical queue rows whose media files
+- `Data/ready_to_post.json` currently has historical queue rows whose media files
   are not present in this iCloud workspace. Peak alerts now ignore missing files
   and clips below the current score floor without deleting queue history.
 - The iCloud workspace was locally slimmed down on this Mac without deleting the
@@ -180,7 +180,7 @@ flowchart TD
     LocalBig --> LocalCode[active heavy-duty development]
 
     ICloud[/Users/carter/Library/Mobile Documents/com~apple~CloudDocs/Bolt/] --> SharedCode[cross-Mac shared code/docs]
-    ICloud --> SharedQueue[data/ready_to_post.json historical queue]
+    ICloud --> SharedQueue[Data/ready_to_post.json historical queue]
     ICloud --> Evicted[local downloads mostly evicted]
 
     SharedQueue --> QueueGate[Peak_Hour_Notifier alertable gate]

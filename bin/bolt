@@ -4,35 +4,36 @@ Bolt CLI — single entry point for every Bolt script and command.
 
 Run with no args to see the available subcommands:
 
-    uv run bolt
+    uv run python bin/bolt
     # or, with the venv activated:
     python3 bin/bolt
 
 Run a subcommand:
 
-    uv run bolt verify                # check the install
-    uv run bolt recordings            # process latest recordings
-    uv run bolt thumbnails --dry-run  # generate thumbnails
-    uv run bolt nexus "How do I title my clips?"
-    uv run bolt briefing --send       # generate + send daily briefing
-    uv run bolt launch                # start the bot (Core/launch.py)
-    uv run bolt test                  # run the full test suite
-    uv run bolt test test_title_generator  # run a specific test module
+    uv run python bin/bolt verify                # check the install
+    uv run python bin/bolt recordings            # process latest recordings
+    uv run python bin/bolt thumbnails --dry-run  # generate thumbnails
+    uv run python bin/bolt nexus "How do I title my clips?"
+    uv run python bin/bolt briefing --send       # generate + send daily briefing
+    uv run python bin/bolt launch                # start the bot (Core/launch.py)
+    uv run python bin/bolt test                  # run the full test suite
+    uv run python bin/bolt test test_title_generator  # run a specific test module
+    uv run python bin/bolt reindex               # rebuild the Vector DB
 
-Add a shell alias to invoke it as just `bolt`:
-
+Setup:
+  Add to your shell rc (so you can just type 'bolt <thing>'):
     # in ~/.zshrc or ~/.bashrc
-    alias bolt='uv run --directory /Users/carter/developer/Bolt bolt'
+    alias bolt='python3 /Users/carter/developer/Bolt/bin/bolt'
 
-Then from anywhere:
-
+  Source it (or restart your shell) once, then from anywhere:
     bolt verify
     bolt recordings
     bolt launch
+    bolt reindex                # rebuild the Vector DB (alias for refresh_vector_db)
 
 Setup wizard (first-time use):
 
-    uv run bolt setup
+    uv run python bin/bolt setup
 
 > `uv run` automatically uses the lockfile (uv.lock) and the pinned
 > interpreter (.python-version), so you don't need to activate the venv
@@ -98,6 +99,8 @@ SUBCOMMANDS: dict[str, str] = {
     "notify": "send_notification.py",
     "refresh_memory": "refresh_memory_index.py",
     "refresh_vector_db": "modules/Local_Vector_DB.py",
+    "vector_db": "modules/Local_Vector_DB.py",
+    "reindex": "modules/Local_Vector_DB.py",
     "filter_backlog": "Filter_Backlog.py",
     "watch": "Watcher.py",
     "bot_with_twitch": "bot_with_twitch.py",
@@ -146,7 +149,10 @@ Script subcommands (each maps to scripts/X.py):
   tiktok_token            Get a TikTok OAuth token
   send "<msg>"            Send an SMS / email notification
   refresh_memory          Rebuild the clip memory index (Data/memory_index.json)
-  refresh_vector_db        Rebuild the Vector DB for Nexus (Data/vector_db/)
+  refresh_vector_db        Rebuild the Vector DB for Nexus
+                          (alias: vector_db, reindex) — lives in Core/modules/
+  vector_db                Short alias for refresh_vector_db
+  reindex                  Short alias for refresh_vector_db
   filter_backlog          Move low-scoring clips to clips/_low_score/
   watch                   Watch the recordings folder for new files
   layout [--quiet|--json] Report any files misplaced at the repo root (no moves)
