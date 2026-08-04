@@ -531,13 +531,24 @@ def set_c5_verdict(
             + ". Try: bolt research pending"
         )
 
-    # Ambiguity: multiple different display names
-    unique_names = sorted({n.lower() for n in matched_names})
-    if len(unique_names) > 1:
-        raise ValueError(
-            f"Ambiguous name '{name}' matches: {', '.join(sorted(set(matched_names)))}. "
-            "Use a more specific name."
-        )
+    # Disambiguation: prefer exact (case-insensitive) matches over substring
+    # matches. Substring-only searches report ambiguity and refuse. This lets
+    # callers approve "Unbox Therapy (generalist mode)" verbatim even when a
+    # shorter "Unbox Therapy" also exists in the log.
+    q_lower = name.strip().lower()
+    exact_idx = [i for i in matches_idx if _candidate_name(entries[i]).lower() == q_lower]
+    substring_idx = [i for i in matches_idx if i not in exact_idx]
+    if exact_idx and len({_candidate_name(entries[i]).lower() for i in exact_idx}) == 1:
+        matches_idx = exact_idx
+        matched_names = [_candidate_name(entries[i]) for i in exact_idx]
+    elif substring_idx:
+        unique_names = sorted({_candidate_name(entries[i]).lower() for i in substring_idx})
+        if len(unique_names) > 1:
+            raise ValueError(
+                f"Ambiguous name '{name}' matches: {', '.join(sorted({_candidate_name(entries[i]) for i in matches_idx}))}. "
+                "Use a more specific name."
+            )
+        # Substring search disambiguated to exactly one pending candidate — proceed.
 
     decided_at = _now_iso()
     for i in matches_idx:
