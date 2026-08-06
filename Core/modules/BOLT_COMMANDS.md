@@ -60,8 +60,9 @@ Inspect, launch, and maintain Bolt itself.
 bolt help                         # Show the CLI command summary
 bolt version                      # Show the repository and Python in use
 bolt verify                       # Check required files, folders, config, and environment
-bolt setup                        # Run first-time setup
-bolt launch                       # Start Bolt
+bolt setup                        # Finite setup check (config + keys); exits when done
+bolt launch                       # Start live mode (folder watch + optional OBS)
+bolt launch --no-checklist        # Live mode without the pre-stream voice checklist
 bolt status                       # Check the decision engine, vector DB, and Nexus
 bolt intelligence                 # Alias for `status`
 bolt test                         # Run the full test suite
@@ -292,8 +293,15 @@ bolt morning --quiet
 ## Recordings, clips, and highlights
 
 ```bash
-bolt recordings [all|latest|list|<number>] [--content-type gaming|review|skincare|tech]
-bolt auto_clip_twitch                 # Process the latest unprocessed Twitch VOD
+bolt recordings                          # Default: latest unprocessed only
+bolt recordings latest                   # Same as default
+bolt recordings latest --force           # Reprocess even if already marked done
+bolt recordings all                      # Every unique recording (skips already-done)
+bolt recordings all --force              # Reprocess the full backlog
+bolt recordings list                     # List found recordings (no processing)
+bolt recordings 3                        # Process the Nth file from the list
+bolt recordings [mode] --content-type gaming|review|skincare|tech
+bolt auto_clip_twitch                    # Process the latest unprocessed Twitch VOD
 bolt auto_clip_twitch --all
 bolt auto_clip_twitch --list
 bolt auto_clip_twitch --vod <vod-id>
@@ -305,11 +313,26 @@ bolt filter_backlog
 bolt watch
 ```
 
-`recordings` defaults to `all` and gaming content. `auto-clip-twitch` is an alias for `auto_clip_twitch`.
+`recordings` defaults to **`latest`** (not `all`) and gaming content. Same-stem
+duplicates (`.mp4` / `.mov` / `.mkv`) are collapsed to one file. Already-processed
+names in `Core/data/processed_recordings.json` and `Data/processed_recordings.json`
+are skipped unless you pass `--force`.
+
+Highlight detection is intentionally strict (local peaks, prominence, confidence
+floor, min gap, candidate cap). Tune in `Core/config.json` under `highlight` and
+`max_highlight_candidates` / `max_clips_per_session`.
+
+`auto-clip-twitch` is an alias for `auto_clip_twitch`.
 
 | Command | What it does |
 |---------|--------------|
-| `bolt recordings [mode]` | Process existing recordings (default: all) — detect, clip, title, subtitle, dedupe, queue |
+| `bolt recordings` | Process the newest recording only (default mode: `latest`) |
+| `bolt recordings latest` | Same as default |
+| `bolt recordings latest --force` | Reprocess the newest even if already marked done |
+| `bolt recordings all` | Process every unique recording; skips already-done |
+| `bolt recordings all --force` | Reprocess the full backlog |
+| `bolt recordings list` | List recordings with sizes; no processing |
+| `bolt recordings <N>` | Process the Nth recording from that list |
 | `bolt auto_clip_twitch` | Auto-clip highlights from the latest unprocessed Twitch VOD |
 | `bolt auto_clip_twitch --all` | Run auto-clip for every unprocessed VOD |
 | `bolt auto_clip_twitch --list` | Show which VODs are unprocessed, without running anything |
@@ -372,12 +395,19 @@ Running `bolt log_perf` without performance values starts its interactive prompt
 bolt briefing                    # Generate and save the current daily briefing
 bolt briefing --print            # Print it in the terminal
 bolt calendar [--output-dir <directory>] [--days 30] [--dry-run]
-bolt refresh_memory
-bolt refresh_vector_db        # Rebuild the vector DB for Nexus
-                              # Aliases: bolt vector_db · bolt reindex
-bolt vector_db                # Short alias for refresh_vector_db
-bolt reindex                  # Short alias for refresh_vector_db
+bolt refresh_memory              # Rebuild Data/memory_index.json
+bolt refresh_vector_db           # Rebuild Data/vector_db/ for Nexus (needs Ollama)
+bolt vector_db                   # Alias for refresh_vector_db
+bolt reindex                     # Alias for refresh_vector_db
 bolt site [--path <output-file>] [--push]
+```
+
+Vector DB commands require a running Ollama with an embedding model
+(default `nomic-embed-text`). If Ollama is down they fail fast instead of hanging:
+
+```bash
+ollama pull nomic-embed-text
+bolt reindex
 ```
 
 `bolt site --push` writes site data and then attempts to commit and push it. Use it only when that is the intended action.
@@ -521,5 +551,12 @@ These names perform the same actions as their primary commands:
 | `send` | `notify` |
 | `layout` | `check_layout` |
 | `refresh_vector_db` | `vector_db`, `reindex` |
+| `status` | `intelligence` |
 | `morning` | `good-morning`, `goodmorning` |
 | `mission` | `command-center`, `ccc` |
+| `setup` | (routes to `Core/launch.py`) |
+
+---
+
+*Canonical path: `Core/modules/BOLT_COMMANDS.md` — this is the only BOLT_COMMANDS
+file in the repo. Prefer editing this markdown over duplicate Pages copies.*

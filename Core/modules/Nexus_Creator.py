@@ -27,10 +27,19 @@ class NexusCreator:
         self.preferred_provider = os.getenv("NEXUS_PREFERRED", "ollama")
 
     def _get_client(self, provider: str):
+        # Bound request time so a stuck provider can't freeze the pipeline
+        # for hours during bolt recordings / setup.
+        timeout = float(os.getenv("NEXUS_TIMEOUT_SEC", "45"))
         if provider == "ollama":
-            return OpenAI(base_url=self.ollama_base_url, api_key="ollama")
+            return OpenAI(
+                base_url=self.ollama_base_url, api_key="ollama", timeout=timeout
+            )
         elif provider == "grok" and self.xai_api_key:
-            return OpenAI(api_key=self.xai_api_key, base_url="https://api.x.ai/v1")
+            return OpenAI(
+                api_key=self.xai_api_key,
+                base_url="https://api.x.ai/v1",
+                timeout=timeout,
+            )
         elif provider == "gemini" and self.gemini_key:
             print("Using Gemini fallback")
             return None
@@ -49,14 +58,23 @@ class NexusCreator:
             return False
 
     def _enrich_with_vector_memory(self, topic: str, context: str = None, task_type: str = None):
+        # Skip entirely when Ollama (embeddings backend) is down — LocalVectorDB
+        # fails fast, but avoid even constructing it on the hot path.
+        if not self._is_ollama_healthy():
+            print("Vector DB enrichment skipped: Ollama not reachable")
+            return context or ""
         try:
             from modules.Local_Vector_DB import LocalVectorDB
             vector_db = LocalVectorDB()
+            # Don't filter by lane on first pass — many docs are tagged
+            # "general" and a strict lane filter returns empty results.
             relevant = vector_db.search(
                 query=topic + (f" {context}" if context else ""),
                 n_results=8,
-                filter={"lane": task_type} if task_type and task_type != "general" else None
+                filter=None,
             )
+            if not relevant:
+                return context or ""
             enriched = "\n\n--- Relevant Memory ---\n" + "\n\n".join(
                 [f"Source: {r['metadata'].get('file', 'unknown')}\n{r['text'][:700]}" for r in relevant]
             )
@@ -82,11 +100,28 @@ Focus: content creation, product testing, gaming, skincare, AI development, spon
             provider = "grok"
         elif self.preferred_provider == "ollama" and self._is_ollama_healthy():
             provider = "ollama"
-        else:
+        elif self.gemini_key:
             provider = "gemini"
+        elif self.xai_api_key:
+            provider = "grok"
+        else:
+            print("Nexus: no provider available (Ollama down, no XAI/Gemini keys)")
+            return {
+                "advice": "",
+                "provider": "none",
+                "model": "",
+                "task_type": task_type,
+            }
 
         try:
             client = self._get_client(provider)
+            if client is None:
+                return {
+                    "advice": "",
+                    "provider": provider,
+                    "model": "",
+                    "task_type": task_type,
+                }
             model = self.grok_model if provider == "grok" else self.ollama_model
 
             response = client.chat.completions.create(
@@ -99,7 +134,7 @@ Focus: content creation, product testing, gaming, skincare, AI development, spon
                 max_tokens=1600 if provider == "grok" else 2800,
             )
 
-            advice = response.choices[0].message.content.strip()
+            advice = (response.choices[0].message.content or "").strip()
             self._log_advice(topic, advice, provider, model, task_type)
 
             return {
@@ -110,7 +145,7 @@ Focus: content creation, product testing, gaming, skincare, AI development, spon
             }
         except Exception as e:
             print(f"{provider} failed: {e}")
-            return {"advice": "Fallback: Check API keys and Ollama.", "provider": "fallback"}
+            return {"advice": "", "provider": "fallback", "model": "", "task_type": task_type}
 
     def _log_advice(self, topic: str, advice: str, provider: str, model: str, task_type: str):
         log_path = Path("Data/data/nexus_advice.jsonl")

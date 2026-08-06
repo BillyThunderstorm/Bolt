@@ -18,7 +18,7 @@ Bolt's job is to help turn recordings, stream moments, product tests, creator id
 | 🔵 Social | `Data/data/content/social_connections.json` |
 | 🔵 Progress | `Data/data/content/manager-progress.md` |
 | 🔵 Business | `Data/data/business/` |
-| 🟢 Commands | `Docs/BOLT_COMMANDS.md` |
+| 🟢 Commands | `Core/modules/BOLT_COMMANDS.md` |
 | 🟢 Status | `Docs/PROJECT_STATUS.md` |
 
 ## Mission

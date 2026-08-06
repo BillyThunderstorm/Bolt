@@ -13,9 +13,9 @@
       "avg_views": 1
     },
     "multi_kill": {
-      "total_clips": 99,
-      "total_views": 118800,
-      "total_likes": 7920,
+      "total_clips": 100,
+      "total_views": 120000,
+      "total_likes": 8000,
       "avg_views": 1200,
       "observations": [
         {
@@ -310,6 +310,11 @@
         },
         {
           "at": "2026-08-02T00:03:56",
+          "views": 1200,
+          "likes": 80
+        },
+        {
+          "at": "2026-08-05T09:10:51",
           "views": 1200,
           "likes": 80
         }

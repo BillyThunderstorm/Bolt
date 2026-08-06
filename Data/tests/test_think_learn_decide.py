@@ -55,7 +55,12 @@ class ThinkLearnDecideTests(unittest.TestCase):
         )
 
         self.engine = tld.ThinkLearnDecideEngine(
-            {"decision_allowlist": ["queue_clip"], "decision_denylist": ["delete_clip"]}
+            {
+                "decision_allowlist": ["queue_clip"],
+                "decision_denylist": ["delete_clip"],
+                # Unit tests must not call live Ollama/Grok.
+                "nexus_enrich_decisions": False,
+            }
         )
 
     def tearDown(self):
@@ -261,7 +266,12 @@ class ThinkAndProposeTests(unittest.TestCase):
         )
 
         self.engine = tld.ThinkLearnDecideEngine(
-            {"decision_allowlist": ["queue_clip"], "decision_denylist": ["delete_clip"]}
+            {
+                "decision_allowlist": ["queue_clip"],
+                "decision_denylist": ["delete_clip"],
+                # Unit tests must not call live Ollama/Grok.
+                "nexus_enrich_decisions": False,
+            }
         )
 
     def tearDown(self):

@@ -498,13 +498,31 @@ class VoiceChecklist:
     # ── Voice listener ─────────────────────────────────────────────────────────
 
     def _listen_loop(self):
-        """Background thread — continuously listens to the mic and checks for matches."""
+        """Background thread — continuously listens to the mic and checks for matches.
+
+        If speech_recognition or PyAudio is missing (or the mic can't open), fall
+        back to keyboard mode instead of crashing the thread with a traceback.
+        """
         try:
             import speech_recognition as sr
         except ImportError:
             print(f"\n{YELLOW}  speech_recognition not installed.{RESET}")
             print(
-                f"  Run:  pip3 install SpeechRecognition pyaudio --break-system-packages\n"
+                f"  Run:  uv pip install SpeechRecognition pyaudio\n"
+                f"  (PyAudio also needs PortAudio: brew install portaudio)\n"
+            )
+            print(f"  Falling back to keyboard mode — type task names instead.\n")
+            self._keyboard_fallback()
+            return
+
+        # Probe mic availability before entering the listen loop so a missing
+        # PyAudio install becomes a clean keyboard fallback, not a Thread-1 boom.
+        try:
+            import pyaudio  # noqa: F401
+        except ImportError:
+            print(f"\n{YELLOW}  PyAudio not installed — voice checklist needs it.{RESET}")
+            print(
+                f"  Run:  brew install portaudio && uv pip install pyaudio\n"
             )
             print(f"  Falling back to keyboard mode — type task names instead.\n")
             self._keyboard_fallback()
@@ -515,29 +533,45 @@ class VoiceChecklist:
         recognizer.energy_threshold = 300
         recognizer.dynamic_energy_threshold = True
 
-        with sr.Microphone() as source:
-            recognizer.adjust_for_ambient_noise(source, duration=1)
+        try:
+            mic = sr.Microphone()
+        except (AttributeError, OSError) as e:
+            print(f"\n{YELLOW}  Could not open microphone: {e}{RESET}")
+            print(f"  Falling back to keyboard mode — type task names instead.\n")
+            self._keyboard_fallback()
+            return
 
-            while self._listening and not self._done_event.is_set():
-                try:
-                    audio = recognizer.listen(source, timeout=5, phrase_time_limit=6)
-                    text = recognizer.recognize_google(audio)
-                    print(f'  {GRAY}🎤 Heard: "{text}"{RESET}')
+        try:
+            with mic as source:
+                recognizer.adjust_for_ambient_noise(source, duration=1)
 
-                    task_id = self._match_task(text)
-                    if task_id:
-                        self._verify_task(task_id)
+                while self._listening and not self._done_event.is_set():
+                    try:
+                        audio = recognizer.listen(
+                            source, timeout=5, phrase_time_limit=6
+                        )
+                        text = recognizer.recognize_google(audio)
+                        print(f'  {GRAY}🎤 Heard: "{text}"{RESET}')
 
-                except sr.WaitTimeoutError:
-                    pass
-                except sr.UnknownValueError:
-                    pass
-                except sr.RequestError as e:
-                    print(f"\n  {YELLOW}Speech API error: {e}{RESET}")
-                    time.sleep(3)
-                except Exception as e:
-                    print(f"\n  {YELLOW}Listener error: {e}{RESET}")
-                    time.sleep(1)
+                        task_id = self._match_task(text)
+                        if task_id:
+                            self._verify_task(task_id)
+
+                    except sr.WaitTimeoutError:
+                        pass
+                    except sr.UnknownValueError:
+                        pass
+                    except sr.RequestError as e:
+                        print(f"\n  {YELLOW}Speech API error: {e}{RESET}")
+                        time.sleep(3)
+                    except Exception as e:
+                        print(f"\n  {YELLOW}Listener error: {e}{RESET}")
+                        time.sleep(1)
+        except Exception as e:
+            print(f"\n{YELLOW}  Microphone listen failed: {e}{RESET}")
+            print(f"  Falling back to keyboard mode — type task names instead.\n")
+            self._keyboard_fallback()
+
 
     def _keyboard_fallback(self):
         """If speech_recognition isn't installed, fall back to typing."""
