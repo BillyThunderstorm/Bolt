@@ -2,7 +2,7 @@
 name = "bolt"
 version = "0.1.0"
 description = "Bolt — Billy Carter's local-first AI content manager and business assistant."
-readme = "README.md"
+# No root README.md yet — omit readme= so hatchling can build the wheel.
 requires-python = ">=3.11,<3.13"
 
 # ── Author ────────────────────────────────────────────────────────────────────
@@ -68,10 +68,12 @@ dev = [
 ]
 
 [project.scripts]
-# Single entry point: `uv run bolt <subcommand>`. The wrapper at bin/bolt
-# preserves the manual flow for back-compat; this section makes the same
-# surface available to `uv tool install`.
-bolt = "bin.bolt:main"
+# After `uv sync`, these all work:
+#   uv run bolt <subcommand>
+#   .venv/bin/bolt <subcommand>
+#   bolt <subcommand>   # via shell alias → .venv/bin/bolt
+# The real CLI logic stays in bin/bolt; bolt_cli is a thin installable shim.
+bolt = "bolt_cli.cli:main"
 
 
 # ── Build system ──────────────────────────────────────────────────────────────
@@ -82,6 +84,17 @@ bolt = "bin.bolt:main"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+# Only ship the thin CLI package — not Core/, Data/, scripts/, etc.
+[tool.hatch.build.targets.wheel]
+packages = ["bolt_cli"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "bolt_cli",
+    "bin/bolt",
+    "pyproject.toml",
+]
+
 
 # ── uv configuration ──────────────────────────────────────────────────────────
 [tool.uv]
@@ -90,7 +103,7 @@ build-backend = "hatchling.build"
 # running `uv python pin` so all contributors land on the same runtime.
 # (See .python-version — uv reads that and prefers it.)
 managed = true
-package = false                    # Bolt is an app, not a publishable library
+package = true                     # Install bolt_cli so `uv run bolt` / .venv/bin/bolt work
 python-preference = "managed"      # Always use uv-managed interpreters, not the system one
 resolution = "highest"             # Resolver picks the newest compatible version
 

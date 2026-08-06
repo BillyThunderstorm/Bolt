@@ -603,7 +603,16 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "auto_post": {
+        "enabled": true,
+        "status": "approved",
+        "scheduled_for": "2026-08-06T07:00:00-04:00",
+        "review_starts_at": "2026-08-06T06:30:00-04:00",
+        "approval_deadline": "2026-08-06T07:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "approved_at": "2026-08-06T02:49:23.948564-04:00"
+      }
     },
     {
       "id": "adc6ee16",
@@ -6482,5 +6491,6 @@
         }
       ]
     }
-  ]
+  ],
+  "consecutive_ignored_reviews": 0
 }

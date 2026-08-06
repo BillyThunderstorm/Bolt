@@ -19,6 +19,7 @@ Why this is safer than blind auto-posting:
 
 import os
 import json
+import sys
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -1078,64 +1079,236 @@ def render_dashboard(max_clips: int = 8, max_chars: int = 480) -> str:
 
 # ── CLI ────────────────────────────────────────────────────────────────────────
 
-if __name__ == "__main__":
-    import sys
+QUEUE_CLI_HELP = """
+Bolt post queue — ready clips, peak-hour approval, and posting.
 
-    args = sys.argv[1:]
+Queue state lives in Data/ready_to_post.json (not a folder).
+Video files are usually under media/vertical_clips/.
 
+Usage:
+  bolt queue                         Summary + peak window (default)
+  bolt queue status                  Same as summary
+  bolt queue list                    Per-clip dashboard
+  bolt queue approve [clip_id]       Approve for next peak auto-post
+  bolt queue reject [clip_id] <why>  Hold a clip and record the reason
+  bolt queue post-now [clip_id]      Publish immediately (TikTok)
+  bolt queue mark-posted [clip_id]   Mark as posted (after manual upload)
+  bolt queue check                   Peak-window check + Discord alert if due
+  bolt queue tick                    Run one auto-post scheduler tick
+  bolt queue review-window           Send the 30-min pre-peak review alert
+  bolt queue help                    This message
+
+Short aliases (same module):
+  bolt approve [clip_id]
+  bolt postnow [clip_id]
+  bolt dontpost [clip_id] <reason>
+
+Legacy flags still work: --summary --approve --post-now --reject --mark-posted
+"""
+
+
+def _print_summary() -> None:
+    s = queue_summary()
+    print(
+        f"\n  📋  Post Queue: {s['ready']} alertable  |  "
+        f"{s['ready_total']} ready rows  |  {s['posted']} posted  |  {s['total']} total\n"
+    )
+    print(
+        f"      auto-post: {s['awaiting_approval']} awaiting approval, "
+        f"{s['approved']} approved, {s['held']} held, {s['publish_failed']} failed\n"
+    )
+    if s["missing"] or s["below_floor"]:
+        print(
+            f"      ignored: {s['missing']} missing file(s), "
+            f"{s['below_floor']} below score floor\n"
+        )
+    print(f"      file: {READY_FILE}")
+    print("      videos: media/vertical_clips/  (paths also in each queue row)\n")
+
+
+def _looks_like_clip_id(token: str) -> bool:
+    """Heuristic: short hex-ish ids from queue_clip (e.g. 55a802e8)."""
+    if not token or token.startswith("-"):
+        return False
+    if len(token) > 16:
+        return False
+    return all(c.isalnum() or c in "-_" for c in token)
+
+
+def _parse_reject_args(tokens: list[str]) -> tuple[str, str | None]:
+    """Return (reason, clip_id|None) from reject/dontpost argv tokens."""
+    if not tokens:
+        return "", None
+    if _looks_like_clip_id(tokens[0]) and len(tokens) >= 2:
+        return " ".join(tokens[1:]).strip(), tokens[0]
+    if _looks_like_clip_id(tokens[0]) and len(tokens) == 1:
+        return "", tokens[0]
+    return " ".join(tokens).strip(), None
+
+
+def run_queue_cli(argv: list[str] | None = None) -> int:
+    """CLI entry for ``bolt queue …`` / ``python -m modules.Peak_Hour_Notifier``."""
+    args = list(argv if argv is not None else [])
+
+    # ── Legacy flag forms (kept for scripts / docs) ──────────────────────────
+    if "--help" in args or "-h" in args:
+        print(QUEUE_CLI_HELP.strip())
+        return 0
     if "--mark-posted" in args:
-        mark_posted()
-    elif "--review-window" in args:
-        alert_review_window()
-    elif "--auto-post-tick" in args:
-        result = process_auto_post_queue()
-        print(json.dumps(result, indent=2))
-    elif "--post-now" in args:
-        clip_id = (
-            args[args.index("--post-now") + 1]
-            if args.index("--post-now") + 1 < len(args)
-            else None
-        )
-        print(json.dumps(post_now(clip_id), indent=2, default=str))
-    elif "--approve" in args:
-        clip_id = (
-            args[args.index("--approve") + 1]
-            if args.index("--approve") + 1 < len(args)
-            else None
-        )
-        print(json.dumps(approve_next_clip(clip_id), indent=2, default=str))
-    elif "--reject" in args:
-        idx = args.index("--reject")
+        idx = args.index("--mark-posted")
         clip_id = (
             args[idx + 1]
             if idx + 1 < len(args) and not args[idx + 1].startswith("--")
             else None
         )
-        reason = " ".join(args[idx + 2 :] if clip_id else args[idx + 1 :])
-        print(json.dumps(reject_next_clip(reason, clip_id), indent=2, default=str))
-    elif "--reset-queue" in args:
-        reset_queue()
-    elif "--summary" in args:
-        s = queue_summary()
-        print(
-            f"\n  📋  Post Queue: {s['ready']} alertable  |  "
-            f"{s['ready_total']} ready rows  |  {s['posted']} posted  |  {s['total']} total\n"
+        mark_posted(clip_id)
+        return 0
+    if "--review-window" in args:
+        n = alert_review_window()
+        print(f"review alerts sent: {n}")
+        return 0
+    if "--auto-post-tick" in args:
+        print(json.dumps(process_auto_post_queue(), indent=2))
+        return 0
+    if "--post-now" in args:
+        idx = args.index("--post-now")
+        clip_id = (
+            args[idx + 1]
+            if idx + 1 < len(args) and not args[idx + 1].startswith("--")
+            else None
         )
-        print(
-            f"      auto-post: {s['awaiting_approval']} awaiting approval, "
-            f"{s['approved']} approved, {s['held']} held, {s['publish_failed']} failed\n"
+        print(json.dumps(post_now(clip_id), indent=2, default=str))
+        return 0
+    if "--approve" in args:
+        idx = args.index("--approve")
+        clip_id = (
+            args[idx + 1]
+            if idx + 1 < len(args) and not args[idx + 1].startswith("--")
+            else None
         )
-        if s["missing"] or s["below_floor"]:
-            print(
-                f"      ignored: {s['missing']} missing file(s), {s['below_floor']} below score floor\n"
-            )
+        clip = approve_next_clip(clip_id)
+        if not clip:
+            print("no ready clip found to approve", file=sys.stderr)
+            return 1
+        print(json.dumps(clip, indent=2, default=str))
+        return 0
+    if "--reject" in args:
+        idx = args.index("--reject")
+        rest = args[idx + 1 :]
+        reason, clip_id = _parse_reject_args(rest)
+        clip = reject_next_clip(reason, clip_id)
+        if not clip:
+            print("no ready clip found to hold", file=sys.stderr)
+            return 1
+        print(json.dumps(clip, indent=2, default=str))
+        return 0
+    if "--reset-queue" in args:
+        path = reset_queue()
+        print(f"queue reset → {path}")
+        return 0
+    if "--summary" in args:
+        _print_summary()
+        return 0
+    if "--dashboard" in args or "--list" in args:
+        print(render_dashboard(max_clips=20, max_chars=4000))
+        return 0
+
+    # ── Friendly subcommand forms ────────────────────────────────────────────
+    if not args:
+        action = "status"
+        rest: list[str] = []
     else:
-        # Default: check peak hours and alert if applicable
+        action, *rest = args
+
+    action = action.lower().replace("_", "-")
+
+    if action in ("help",):
+        print(QUEUE_CLI_HELP.strip())
+        return 0
+
+    if action in ("status", "summary", "queue"):
         is_peak, info = _is_peak_now()
         print(f"\n  🕐  Current time zone: {POSTING_TIMEZONE}")
         print(f"  {'🔥 PEAK TIME' if is_peak else '💤 Off-peak'}  —  {info}")
-        s = queue_summary()
+        _print_summary()
+        return 0
+
+    if action in ("list", "dashboard", "qstatus"):
+        print(render_dashboard(max_clips=20, max_chars=4000))
+        return 0
+
+    if action in ("approve",):
+        clip_id = rest[0] if rest else None
+        clip = approve_next_clip(clip_id)
+        if not clip:
+            print("no ready clip found to approve", file=sys.stderr)
+            return 1
         print(
-            f"  📋  Post Queue: {s['ready']} alertable / {s['ready_total']} ready row(s)\n"
+            f"approved clip {clip.get('id')} for the next peak post"
+            f"  ({clip.get('title', '')[:60]})"
         )
+        return 0
+
+    if action in ("reject", "hold", "dontpost", "dont-post", "skip", "stopclip"):
+        reason, clip_id = _parse_reject_args(rest)
+        clip = reject_next_clip(reason, clip_id)
+        if not clip:
+            print("no ready clip found to hold", file=sys.stderr)
+            return 1
+        print(f"held clip {clip.get('id')}: {clip.get('hold_reason', reason)}")
+        return 0
+
+    if action in ("post-now", "postnow", "post"):
+        clip_id = rest[0] if rest else None
+        result = post_now(clip_id)
+        clip = result.get("clip") or {}
+        publish = result.get("result") or {}
+        if not clip:
+            print(publish.get("error", "no ready clip found"), file=sys.stderr)
+            return 1
+        if publish.get("success"):
+            print(f"posted clip {clip.get('id')}")
+            return 0
+        print(
+            f"tried to post clip {clip.get('id')}, but: "
+            f"{publish.get('error', 'unknown error')}",
+            file=sys.stderr,
+        )
+        return 1
+
+    if action in ("mark-posted", "markposted", "posted"):
+        clip_id = rest[0] if rest else None
+        mark_posted(clip_id)
+        return 0
+
+    if action in ("check", "alert", "peak"):
+        is_peak, info = _is_peak_now()
+        print(f"\n  🕐  Current time zone: {POSTING_TIMEZONE}")
+        print(f"  {'🔥 PEAK TIME' if is_peak else '💤 Off-peak'}  —  {info}")
+        _print_summary()
         alert_peak_window()
+        return 0
+
+    if action in ("tick", "auto-post-tick", "process"):
+        print(json.dumps(process_auto_post_queue(), indent=2))
+        return 0
+
+    if action in ("review-window", "review"):
+        n = alert_review_window()
+        print(f"review alerts sent: {n}")
+        return 0
+
+    if action in ("reset", "reset-queue"):
+        path = reset_queue()
+        print(f"queue reset → {path}")
+        return 0
+
+    print(f"unknown queue action: {action}", file=sys.stderr)
+    print("Run: bolt queue help", file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    import sys
+
+    raise SystemExit(run_queue_cli(sys.argv[1:]))
