@@ -7,13 +7,13 @@ The current user-facing command list for Bolt. It contains every command the liv
 From any directory, use:
 
 ```bash
-uv run --directory /Users/carter/developer/Bolt python bin/bolt <command> [options]
+bolt <command> [options]
 ```
 
-For the shorter `bolt <command>` form, add this alias to `~/.zshrc`:
+One-time shell setup (`~/.zshrc`) so `bolt` always hits the uv-managed venv:
 
 ```bash
-alias bolt='/Users/carter/developer/Bolt/bin/bolt'
+alias bolt='/Users/carter/developer/Bolt/.venv/bin/bolt'
 ```
 
 Then reload the shell:
@@ -24,10 +24,13 @@ type bolt
 bolt help
 ```
 
-When working inside `/Users/carter/developer/Bolt`, this also works without an alias:
+Equivalents without the alias:
 
 ```bash
-python3 bin/bolt <command> [options]
+uv run --directory /Users/carter/developer/Bolt bolt <command> [options]
+# or, from the repo:
+uv run bolt <command> [options]
+uv run python bin/bolt <command> [options]
 ```
 
 Run `bolt help` to show the built-in summary. Commands that expose their own help accept `--help`.
@@ -231,6 +234,67 @@ Running `bolt social` with no action is the same as `bolt social status`.
 | `bolt social status` | Show queue counts and the next posting window status |
 | `bolt social package "Name" --platforms …` | Build ready-to-publish packages for the listed platforms |
 | `bolt social queue` | Print the full posting queue (status, clip path, scheduled time) |
+
+## Ready-to-post clip queue (peak hours)
+
+This is the **clip** ready queue used for peak-hour posting — **not a folder**.
+
+| What | Where |
+|------|--------|
+| Queue state | `Data/ready_to_post.json` |
+| Vertical videos | `media/vertical_clips/` |
+| Intermediate cuts | `media/clips/` (not the approval list) |
+
+Approve for the next peak window, or publish immediately. Same safeguards as Twitch `!postnow` / `!dontpost`.
+
+```bash
+bolt queue                            # Peak window + summary counts
+bolt queue status                     # Same as above
+bolt queue list                       # Per-clip dashboard
+bolt queue help                       # Full queue CLI help
+
+bolt queue approve                    # Approve next ready clip for peak auto-post
+bolt queue approve 55a802e8           # Approve a specific clip id
+bolt approve                          # Short alias for queue approve
+bolt approve 55a802e8
+
+bolt queue reject "weak moment"       # Hold next clip + reason
+bolt queue reject 55a802e8 "bad title"
+bolt dontpost "weak moment"           # Short alias for queue reject
+
+bolt queue post-now                   # Publish next approved/ready clip now
+bolt queue post-now 55a802e8
+bolt postnow                          # Short alias for queue post-now
+
+bolt queue mark-posted                # After you uploaded manually
+bolt queue mark-posted 55a802e8
+bolt queue check                      # Peak check + Discord alert if due
+bolt queue tick                       # One auto-post scheduler pass
+bolt queue review-window              # Force the 30-min pre-peak review ping
+```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt queue` / `bolt queue status` | Show peak window + ready/alertable/approved counts |
+| `bolt queue list` | Per-clip dashboard (id, score, plan status) |
+| `bolt queue approve [clip_id]` | Mark clip approved for peak auto-post (does **not** force publish now) |
+| `bolt approve [clip_id]` | Alias for `bolt queue approve` |
+| `bolt queue reject [clip_id] <reason>` | Hold a clip and log why (Bolt learns) |
+| `bolt dontpost [clip_id] <reason>` | Alias for `bolt queue reject` |
+| `bolt queue post-now [clip_id]` | Publish to TikTok **immediately** |
+| `bolt postnow [clip_id]` | Alias for `bolt queue post-now` |
+| `bolt queue mark-posted [clip_id]` | Clear from ready after a manual upload |
+| `bolt queue check` | Peak-window check; alert if clips are waiting |
+| `bolt queue tick` | Run one auto-post / review-window processing pass |
+| `bolt queue review-window` | Send the pre-peak “awaiting approval” alert now |
+
+Typical night-before / peak flow:
+
+1. `bolt queue` — see what’s ready  
+2. Preview files under `media/vertical_clips/`  
+3. `bolt approve` (or `bolt approve <id>`) before the window  
+4. At peak, auto-post runs if enabled — or use `bolt postnow` to force it  
+5. To block one: `bolt dontpost <id> "reason"`
 
 ## Sponsors
 
@@ -547,6 +611,10 @@ These names perform the same actions as their primary commands:
 | `nexus` | `advice` |
 | `weekly` | `monthly` |
 | `log_perf` | `log_performance` |
+| `queue` | `postqueue`, `post-queue`, `ready-queue` |
+| `queue approve` | `approve` |
+| `queue post-now` | `postnow`, `post-now` |
+| `queue reject` | `dontpost`, `dont-post`, `hold-clip` |
 | `vods` | `vod_download` |
 | `send` | `notify` |
 | `layout` | `check_layout` |

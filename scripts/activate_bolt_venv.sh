@@ -3,9 +3,10 @@
 #
 # Two ways to invoke Bolt's Python:
 #
-#   1. PREFERRED — `uv run python <script>` or `uv run bolt <subcommand>`
+#   1. PREFERRED — `uv run bolt <subcommand>` or `uv run python <script>`
 #      Always uses the uv-managed Python pinned in .python-version and the
 #      fully-resolved deps in uv.lock. This is the canonical path.
+#      (Shell alias `bolt` → .venv/bin/bolt is the shortest form of the same.)
 #
 #   2. FALLBACK — Source this script, then call python normally:
 #         source ./scripts/activate_bolt_venv.sh

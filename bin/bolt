@@ -2,43 +2,44 @@
 """
 Bolt CLI — single entry point for every Bolt script and command.
 
-Run with no args to see the available subcommands:
+Preferred (shortest) usage — after one-time `uv sync` + shell alias:
 
-    uv run python bin/bolt
-    # or, with the venv activated:
-    python3 bin/bolt
+    bolt                          # list subcommands
+    bolt verify                   # check the install
+    bolt recordings               # process latest recordings
+    bolt thumbnails --dry-run
+    bolt nexus "How do I title my clips?"
+    bolt briefing --send
+    bolt launch                   # start the bot (Core/launch.py)
+    bolt test
+    bolt reindex                  # rebuild the Vector DB
 
-Run a subcommand:
+From the repo (no alias needed):
 
-    uv run python bin/bolt verify                # check the install
-    uv run python bin/bolt recordings            # process latest recordings
-    uv run python bin/bolt thumbnails --dry-run  # generate thumbnails
-    uv run python bin/bolt nexus "How do I title my clips?"
-    uv run python bin/bolt briefing --send       # generate + send daily briefing
-    uv run python bin/bolt launch                # start the bot (Core/launch.py)
-    uv run python bin/bolt test                  # run the full test suite
-    uv run python bin/bolt test test_title_generator  # run a specific test module
-    uv run python bin/bolt reindex               # rebuild the Vector DB
+    uv run bolt verify
+    uv run bolt launch
 
-Setup:
-  Add to your shell rc (so you can just type 'bolt <thing>'):
-    # in ~/.zshrc or ~/.bashrc
-    alias bolt='python3 /Users/carter/developer/Bolt/bin/bolt'
+Fallbacks (always work without the installable entry point):
 
-  Source it (or restart your shell) once, then from anywhere:
-    bolt verify
-    bolt recordings
-    bolt launch
-    bolt reindex                # rebuild the Vector DB (alias for refresh_vector_db)
+    uv run python bin/bolt verify
+    python3 bin/bolt verify       # uses shebang / current interpreter
+
+One-time shell setup (~/.zshrc) so `bolt` works from anywhere:
+
+    alias bolt='/Users/carter/developer/Bolt/.venv/bin/bolt'
+
+Then `source ~/.zshrc`. The alias hits the console script installed by
+`uv sync` (package bolt_cli → project.scripts), which always uses the
+project lockfile Python + deps.
 
 Setup wizard (first-time use):
 
-    uv run python bin/bolt setup
+    bolt setup
+    # or: uv run bolt setup
 
-> `uv run` automatically uses the lockfile (uv.lock) and the pinned
-> interpreter (.python-version), so you don't need to activate the venv
-> manually. If you don't have `uv` installed yet, get it from
-> https://docs.astral.sh/uv/ then run `uv sync` once to populate .venv.
+> `uv sync` creates .venv from uv.lock + .python-version. You do not need
+> to `source .venv/bin/activate` for normal CLI use. Install uv from
+> https://docs.astral.sh/uv/ if needed.
 
 Subcommands map 1:1 onto the scripts in `scripts/`
 (their hyphenated names match the script basenames). The wrapper does
@@ -47,7 +48,8 @@ remaining args passed through. This is faster and easier to remember
 than typing the full path to every script.
 
 The wrapper itself is intentionally tiny (no imports of Bolt's source
-code) so it works even if the source tree is broken.
+code) so it works even if the source tree is broken. The installable
+shim is bolt_cli/ (see pyproject.toml [project.scripts]).
 """
 from __future__ import annotations
 
@@ -178,6 +180,14 @@ Creator Command Center (Core/modules/Command_Center.py):
   command-center …        Alias for mission
   ccc …                   Short alias for mission
 
+Post queue / peak posting (Core/modules/Peak_Hour_Notifier.py):
+  queue [status|list|approve|reject|post-now|…]
+                          Ready-to-post queue (Data/ready_to_post.json)
+  approve [clip_id]       Approve next (or named) clip for peak auto-post
+  postnow [clip_id]       Publish immediately (alias: post-now)
+  dontpost [clip_id] <why>
+                          Hold a clip and record the reason
+
 Built-in subcommands (not script passthroughs):
   setup                   Finite setup check (config + keys); exits when done
   launch                  Start live mode (folder watch + optional OBS)
@@ -187,7 +197,7 @@ Built-in subcommands (not script passthroughs):
 
 Setup:
   Add to your shell rc (so you can just type 'bolt <thing>'):
-    alias bolt='python3 /Users/carter/developer/Bolt/bin/bolt'
+    alias bolt='/Users/carter/developer/Bolt/.venv/bin/bolt'
 """
 
 
@@ -329,6 +339,40 @@ def main() -> int:
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
         cmd = [py, "-m", "modules.Command_Center"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: ready-to-post queue / peak-hour approval
+    # State: Data/ready_to_post.json  |  videos: media/vertical_clips/
+    QUEUE_COMMANDS = {
+        "queue",
+        "postqueue",
+        "post-queue",
+        "ready-queue",
+        "approve",
+        "postnow",
+        "post-now",
+        "dontpost",
+        "dont-post",
+        "hold-clip",
+    }
+    if subcommand in QUEUE_COMMANDS:
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        # Map short top-level verbs onto Peak_Hour_Notifier actions.
+        if subcommand in ("queue", "postqueue", "post-queue", "ready-queue"):
+            q_args = rest if rest else ["status"]
+        elif subcommand == "approve":
+            q_args = ["approve"] + rest
+        elif subcommand in ("postnow", "post-now"):
+            q_args = ["post-now"] + rest
+        elif subcommand in ("dontpost", "dont-post", "hold-clip"):
+            q_args = ["reject"] + rest
+        else:
+            q_args = [subcommand] + rest
+        cmd = [py, "-m", "modules.Peak_Hour_Notifier"] + q_args
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
