@@ -1,12 +1,12 @@
 # Bolt Daily Briefing
 
-**Tuesday, August 04, 2026**
+**Wednesday, August 05, 2026**
 
 ## Queue Status
 
-**Clips ready to post:** 230
+**Clips ready to post:** 88
 
-- Total tracked: 265 (ready 230 · posted 1 · scrapped 34)
+- Total tracked: 96 (ready 88 · posted 1 · scrapped 7)
 
 ---
 
@@ -14,13 +14,13 @@
 
 | Directory | Size |
 |-----------|------|
-| Recordings | 110.7GB |
+| Recordings | 113.8GB |
 
 ---
 
 ## Memory Notes
 
-- [decision_event] Follow up on recent decision: queue_clip (source: unified_memory)
+- [decision_event] Follow up on recent decision: nexus_enrichment (source: unified_memory)
 - [decision_event] Follow up on recent decision: queue_clip (source: unified_memory)
 - [decision_event] Follow up on recent decision: queue_clip (source: unified_memory)
 - [constraint] Reminder: No content that sells the next gimmick. If a product is hyped but doesn't deliver, Bolt flags it as 'don't cover,' not 'cover this.' (source: user_profile)
@@ -30,23 +30,83 @@
 
 ## Research Notes
 
-- Log: **43** findings · **4** pending C5 · **8** kept · **11** dropped · **0** blocked (C7)
-- Cleared candidates awaiting your C5 call (`bolt research c5 keep|drop "Name"`):
-  - **Unbox Therapy (generalist mode)** (YouTube) — Single-product deep-dive format works across categories, not just tech. Demonstrates the generalist pattern.
-  - **Unbox Therapy** (YouTube) — High production value on a single-product format. Demonstrates product-focused content.
-  - **Linus Tech Tips (Linus Sebastian)** (YouTube) — Has toured actual factories (Intel, AMD, etc.) and built an empire on tech content. Demonstrates the company-visit model.
+- Log: **47** findings · **0** pending C5 · **12** kept · **11** dropped · **0** blocked (C7)
+- Next: All gated candidates have a C5 decision. Add new candidates or dig into open research questions (`bolt research questions`).
 
 ---
 🎯 NEXUS STRATEGY INSIGHT:
-Pulling your latest queue, performance notes, and M-tier progress so we can set today's priorities. enting...
+# Good Morning, William
+
+**Tuesday, August 4, 2026**
+
+---
+
+## The One Thing That Matters Today
+
+You have **230 clips ready to post** and **1 posted**. The bottleneck isn’t creation — it’s shipping. Today is a post day, not a produce-more day.
+
+**Why:** At your stage, consistency beats perfection. One real post teaches you more than another 50 clips in the queue.
+
+---
+
+## Priority Stack
+
+| Priority | What | Why |
+|----------|------|-----|
+| 1 | **Post 1 clip** (TikTok + YouTube Shorts) | Break the freeze; start the feedback loop |
+| 2 | **Approve caption + packaging** | Nothing goes out without you; keep that gate |
+| 3 | **Leave the rest of the queue alone** | More sorting = more paralysis |
+
+---
+
+## Content Plan (Today)
+
+**Format:** 1 short clip → TikTok (@itssimplybilly) + YouTube Shorts (@SimplyBilly)
+
+**Pick criteria (use this, don’t overthink):**
+- Games or tech only
+- Feels honest, not hype
+- You wouldn’t be embarrassed if it got 10 views or 10K
+- Not gimmick-y product bait
+
+**If you’re stuck choosing:** Pick the most recent clip you’d actually watch yourself. That’s the one.
+
+**Caption angle:** Learning-in-public / real take — not “THIS CHANGED EVERYTHING.” Something closer to: what you noticed, what surprised you, or what you’d tell a friend.
+
+I can draft the caption once you name the clip — still needs your approval before anything publishes.
+
+---
+
+## Action Items
+
+1. **Now:** Choose 1 clip from the ready queue  
+2. **Next:** Say the word and I’ll draft caption + hashtags for TikTok and YT Shorts  
+3. **Then:** You approve → post (or I package for you to hit publish)  
+4. **Not today:** Expanding the queue, deep storefront work, sponsor pitches, storage cleanup  
+
+---
+
+## Quick Status (so you don’t have to dig)
+
+- **Queue:** 230 ready · 1 posted · 34 scrapped  
+- **Recordings storage:** ~110.7GB (fine for now; not today’s problem)  
+- **Manager systems:** Catalog, reviews, morning brief, storefront, social packaging — all live  
+- **Amazon tag:** `billycarter-20` ready when a product clip earns it  
+
+---
+
+## Headspace Check
+
+No views yet is normal at the start. It doesn’t mean the content is bad — it means the algorithm hasn’t seen enough signal. Your job isn’t to predict the winner. It’s to put one honest post out so there *is* a signal.
+
+**Next step for you:** Tell me which clip you’re leaning toward (or say “pick for me” and I’ll suggest from the ready logic above). We package one, you approve, it ships.
 
 ---
 
 ## Action Items For Today
 
-1. C5 review: 4 candidate creator(s) need keep/drop (`bolt research pending` → `bolt research c5 keep|drop "Name"`)
-2. Review last clip performance and log outcomes
-3. Follow up on recent decision: Follow up on recent decision
+1. Review last clip performance and log outcomes
+2. Follow up on recent decision: Follow up on recent decision
 
 ---
 
@@ -59,4 +119,4 @@ Pulling your latest queue, performance notes, and M-tier progress so we can set 
 - `bolt status` — intelligence stack health
 
 
-*Generated by Bolt at 07:37 AM*
+*Generated by Bolt at 07:00 AM*

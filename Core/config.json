@@ -1,9 +1,10 @@
 {
   "game": "Gaming",
-  "highlight_sensitivity": 0.7,
+  "highlight_sensitivity": 0.45,
   "max_clips_per_session": 5,
-  "min_clip_score": 5,
-  "min_post_score": 5,
+  "max_highlight_candidates": 12,
+  "min_clip_score": 25,
+  "min_post_score": 25,
   "recordings_folder": "media/Recordings",
   "clips_folder": "media/clips",
   "vertical_clips_folder": "media/vertical_clips",
@@ -19,13 +20,6 @@
     "fyp"
   ],
   "use_twitch": false,
-  "quality_tiers": {
-      "discard_below": 5.0,
-       "queue_at": 15.0
-    },
-  "nexus": {
-  "preferred": "ollama",
-  "grok_for_high": true,
   "use_obs_integration": true,
   "obs_host": "localhost",
   "obs_port": 4455,
@@ -34,31 +28,33 @@
   "auto_format_tiktok": true,
   "min_clip_duration": 15,
   "max_clip_duration": 60,
-  "min_clip_score": 5,
-  "highlight_sensitivity": 0.05,
+  "pad_before": 8,
+  "pad_after": 12,
+  "auto_rank": true,
+  "use_ai_titles": true,
   "quality_tiers": {
-    "discard_below": 5.0,
-    "queue_at": 15.0,
-    "use_ai_titles": true,
+    "discard_below": 15.0,
+    "queue_at": 30.0,
     "_comment": "score < discard_below = discard; discard_below <= score < min_post_score = mid; score >= min_post_score and < queue_at = queue without Discord ping; score >= queue_at = auto-queue + Discord alert"
   },
   "highlight": {
-    "energy_multiplier": 1.5,
-    "min_gap_seconds": 30,
-    "sensitivity": 0.05,
-    "min_confidence": 0.02,
+    "energy_multiplier": 3.2,
+    "min_gap_seconds": 45,
+    "sensitivity": 0.45,
+    "min_confidence": 0.35,
+    "min_prominence": 0.20,
+    "max_candidates": 12,
+    "baseline_percentile": 60,
+    "peak_neighborhood_sec": 3.0,
+    "local_window_sec": 20.0,
     "pad_before": 8,
     "pad_after": 12
   },
-  "use_voice_checklist": true,
-  "whisper_model": "base",
-  "hashtags": [
-    "gaming",
-    "clips",
-    "viral",
-    "trending",
-    "fyp"
-  ],
+  "nexus": {
+    "preferred": "ollama",
+    "grok_for_high": true
+  },
+  "nexus_enrich_decisions": true,
   "peak_notifications": {
     "enabled": true,
     "windows": [
@@ -88,12 +84,8 @@
     "require_rejection_reason": true,
     "privacy": "PUBLIC_TO_EVERYONE"
   },
-  "notes": "Auto-posting has safeguards: Bolt asks for review 30 minutes before peak time, posts if approved or if the deadline is missed, and holds rejected clips with a required reason.",
-  "auto_rank": true,
-  "min_post_score": 5,
-  "use_ai_titles": true,
   "title_generation": {
     "enabled": true
-  }
-}
+  },
+  "notes": "Auto-posting has safeguards: Bolt asks for review 30 minutes before peak time, posts if approved or if the deadline is missed, and holds rejected clips with a required reason. max_highlight_candidates caps how many spikes get cut per recording before ranking (prevents multi-hour runs on long VODs)."
 }

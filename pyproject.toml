@@ -48,6 +48,7 @@ dependencies = [
     # VOICE/SPEECH
     "edge-tts",           # Microsoft TTS for voice output
     "SpeechRecognition",  # Speech-to-text (optional)
+    "pyaudio",            # Mic capture for SpeechRecognition (needs PortAudio: brew install portaudio)
 
     # WEB/QUEUE
     "flask",              # Local web server for callbacks

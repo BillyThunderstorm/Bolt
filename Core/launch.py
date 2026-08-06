@@ -7,11 +7,13 @@ Run this instead of bot.py. It will:
   2. Check .env for critical keys and print a todo-checklist
   3. Launch OBS if integration is enabled
   4. Wait for OBS to be ready (with timeout)
-  5. Hand off to bot.py
+  5. Hand off to bot.py  (skipped in setup-only mode)
 
 Usage:  python3 launch.py
         python3 launch.py live      # start in live streaming mode
         python3 launch.py process   # process latest recording
+        python3 launch.py setup     # finite setup only — does NOT start live watch
+        python3 launch.py --setup-only
 """
 
 import subprocess
@@ -65,13 +67,37 @@ OPTIONAL_KEYS = [
 ]
 
 
+def _is_setup_only(argv: list[str]) -> bool:
+    """True when the user asked for a finite setup pass (must exit, no live watch)."""
+    flags = {"setup", "--setup-only", "--setup", "wizard", "configure"}
+    return any(a in flags for a in argv)
+
+
 def main():
-    notify(
-        "Bolt — Streaming AI Assistant",
-        level="startup",
-        reason="Starting up. Bolt will check your config, launch OBS if needed, "
-        "and then begin monitoring your stream.",
-    )
+    raw_args = [a for a in sys.argv[1:] if a]
+    setup_only = _is_setup_only(raw_args)
+    # Strip setup flags so bot.py (if we hand off) never sees "setup" and
+    # mistakenly treats it as a mode name.
+    bot_args = [
+        a
+        for a in raw_args
+        if a not in {"setup", "--setup-only", "--setup", "wizard", "configure"}
+    ]
+
+    if setup_only:
+        notify(
+            "Bolt — setup only",
+            level="startup",
+            reason="Checking config, keys, and environment, then exiting. "
+            "This will NOT start live watch. Use `bolt launch` when you're ready to stream.",
+        )
+    else:
+        notify(
+            "Bolt — Streaming AI Assistant",
+            level="startup",
+            reason="Starting up. Bolt will check your config, launch OBS if needed, "
+            "and then begin monitoring your stream.",
+        )
 
     # ── Step 1: First-run config wizard ──────────────────────────────────────
     if not Path(CONFIG_FILE).exists():
@@ -84,6 +110,9 @@ def main():
         _run_setup_wizard()
     else:
         notify("Config found ✓", level="success")
+        if setup_only and "--reconfigure" in raw_args:
+            notify("Re-running setup wizard (--reconfigure)…", level="info")
+            _run_setup_wizard()
 
     config = load_config()
 
@@ -92,6 +121,32 @@ def main():
 
     # ── Step 3: Twitch stats ──────────────────────────────────────────────────
     _show_twitch_stats()
+
+    # Setup-only: skip voice checklist, OBS launch, chat warm-up, and bot handoff.
+    # Those belong to `bolt launch` / live streaming, not a one-shot setup pass.
+    if setup_only:
+        _print_checklist(config)
+        try:
+            from modules.Checkup_Writer import update_checkup
+
+            update_checkup()
+        except Exception as exc:
+            notify(f"Checkup data skipped: {exc}", level="info")
+
+        notify(
+            "Setup complete ✓ — Bolt is ready.",
+            level="success",
+            reason=(
+                "Next steps:\n"
+                "  bolt verify              # install / path checks\n"
+                "  bolt intelligence        # decision engine + vector DB + Nexus\n"
+                "  bolt recordings list     # see your recordings\n"
+                "  bolt recordings latest   # process the newest one\n"
+                "  bolt launch              # go live (folder watch + optional OBS)\n"
+                "  bolt launch --no-checklist   # live without the pre-stream checklist"
+            ),
+        )
+        return
 
     # ── Step 4: Voice pre-stream checklist ───────────────────────────────────
     _run_voice_checklist(config)
@@ -131,16 +186,18 @@ def main():
     _start_personality_layer()
 
     # ── Step 10: Hand off to bot.py ───────────────────────────────────────────
-    mode = sys.argv[1] if len(sys.argv) > 1 else "live"
+    mode = bot_args[0] if bot_args else "live"
     notify(
         f"Handing off to bot.py (mode={mode})…",
         level="info",
-        reason="launch.py's job is done. bot.py takes over and runs the full pipeline.",
+        reason="launch.py's job is done. bot.py takes over and runs the full pipeline. "
+        "This keeps running until you press Ctrl+C. "
+        "For a one-shot setup only, use: bolt setup",
     )
 
     try:
         # Post-reorg: bot.py moved to Core/bot.py.
-        args = [sys.executable, "Core/bot.py"] + sys.argv[1:]
+        args = [sys.executable, "Core/bot.py"] + bot_args
         os.execv(sys.executable, args)
     except Exception as exc:
         notify(f"Failed to start bot.py: {exc}", level="error")

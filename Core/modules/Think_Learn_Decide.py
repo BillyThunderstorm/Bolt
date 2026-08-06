@@ -245,7 +245,7 @@ class ThinkLearnDecideEngine:
         result: str,
         confidence: float,
         reason: str,
-        feedback: Optional[str],
+        feedback: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         _append_jsonl(
@@ -408,7 +408,13 @@ class ThinkLearnDecideEngine:
         return out
 
     def _get_nexus_insight(self, context: str, task_type: str = "decision") -> str:
-        """Get strategic insight from Nexus (Ollama heavy + Grok when needed)."""
+        """Get strategic insight from Nexus (Ollama heavy + Grok when needed).
+
+        Opt out with config ``nexus_enrich_decisions: false`` so long batch
+        runs (``bolt recordings``) are not blocked on model latency.
+        """
+        if self.config.get("nexus_enrich_decisions", True) is False:
+            return ""
         try:
             from modules.Nexus_Creator import NexusCreator
             nexus = NexusCreator()
@@ -418,7 +424,7 @@ class ThinkLearnDecideEngine:
                 task_type=task_type,
                 complexity="high" if "high" in task_type or "strategy" in task_type else "medium"
             )
-            return result.get("advice", "")
+            return result.get("advice", "") or ""
         except Exception as e:
             print(f"Nexus insight skipped: {e}")
             return ""

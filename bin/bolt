@@ -130,7 +130,7 @@ Usage:  bolt <subcommand> [args...]
 
 Script subcommands (each maps to scripts/X.py):
   verify                  Run the install/setup verifier
-  recordings [mode]       Process existing recordings
+  recordings [mode]       Process existing recordings (default: latest)
   auto_clip_twitch        Auto-clip highlights from Twitch VODs
   highlights              Compile top clips into a Twitch highlight reel
   briefing                Generate (and optionally send) the daily briefing
@@ -179,9 +179,9 @@ Creator Command Center (Core/modules/Command_Center.py):
   ccc …                   Short alias for mission
 
 Built-in subcommands (not script passthroughs):
-  launch                  Start the bot (Core/launch.py)
+  setup                   Finite setup check (config + keys); exits when done
+  launch                  Start live mode (folder watch + optional OBS)
   test [testmodule]       Run the full test suite (or a specific test module)
-  setup                   Run the first-time setup wizard (Core/bot.py setup)
   help                    Show this message
   version                 Show Bolt's repo path and Python version
 
@@ -238,9 +238,10 @@ def main() -> int:
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: setup
+    # Built-in: setup — finite wizard/check pass. Does NOT start live watch.
+    # (Historically this handed off to bot.py and looked like a hang forever.)
     if subcommand == "setup":
-        cmd = [py, "Core/bot.py", "setup"] + rest
+        cmd = [py, "Core/launch.py", "setup"] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT))
 
@@ -389,4 +390,10 @@ print('System is fully upgraded.')
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        # Ctrl+C during a long setup/watch/recordings run — exit cleanly
+        # instead of dumping a multi-frame subprocess.wait traceback.
+        print("\nbolt: stopped by user.", file=sys.stderr)
+        sys.exit(130)

@@ -16,8 +16,10 @@ import subprocess
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
+REPO_ROOT = SCRIPT_DIR.parent
 PYTHON = sys.executable
-LAUNCH_SCRIPT = SCRIPT_DIR / "launch.py"
+# Post-reorg: launch lives at Core/launch.py (not scripts/launch.py).
+LAUNCH_SCRIPT = REPO_ROOT / "Core" / "launch.py"
 
 
 def main():

@@ -118,7 +118,7 @@ class BrainController:
         result: str,
         confidence: float,
         reason: str,
-        feedback: Optional[str],
+        feedback: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         if not self._intelligence:

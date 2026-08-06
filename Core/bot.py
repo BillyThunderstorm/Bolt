@@ -112,24 +112,25 @@ def process_recording(
     style = config.get("tiktok_style", "letterbox")
     min_score = config.get("min_post_score", config.get("min_clip_score", 50))
 
-    # === Decision Engine + Nexus enrichment ===
+    # === Decision Engine + Nexus enrichment (best-effort, non-blocking) ===
+    # Do NOT replace a caller-provided intelligence (e.g. BrainController).
     try:
-        from modules.Think_Learn_Decide import ThinkLearnDecideEngine
-        intelligence = ThinkLearnDecideEngine(config)
+        if intelligence is None:
+            intelligence = ThinkLearnDecideEngine(config)
 
         # Build candidates for this recording
         candidates = [
             {"action": "process_and_queue", "score": 70, "reason": "default"},
-            {"action": "hold_for_review", "score": 40, "reason": "low confidence"}
+            {"action": "hold_for_review", "score": 40, "reason": "low confidence"},
         ]
 
         thought, proposals = intelligence.think_and_propose(
             input_data={
                 "recording": recording_path,
                 "game": config.get("game", "Unknown"),
-                "filename": Path(recording_path).name
+                "filename": Path(recording_path).name,
             },
-            candidates=candidates
+            candidates=candidates,
         )
 
         # Log the insight
@@ -148,7 +149,8 @@ def process_recording(
                     result="completed",
                     confidence=0.85,
                     reason=thought["nexus_insight"][:300],
-                    metadata={"recording": recording_path}
+                    feedback=None,
+                    metadata={"recording": recording_path},
                 )
     except Exception as e:
         notify(f"Decision Engine enrichment skipped: {e}", level="warning")
@@ -169,6 +171,25 @@ def process_recording(
             return
 
         notify(f"Found {len(highlights)} highlight(s) ✓", level="success")
+
+        # Cap BEFORE cutting — generating every weak spike on a multi-hour
+        # VOD can take hours and fill disk. Keep a modest oversample so the
+        # ranker still has room to pick winners, then cut only those.
+        max_clips = int(config.get("max_clips_per_session", 5) or 5)
+        candidate_cap = int(config.get("max_highlight_candidates", max(max_clips * 4, 20)))
+        if len(highlights) > candidate_cap:
+            highlights = sorted(
+                highlights,
+                key=lambda h: float(getattr(h, "score", 0) or 0),
+                reverse=True,
+            )[:candidate_cap]
+            notify(
+                f"Keeping top {len(highlights)} highlights for cutting "
+                f"(of many more; max_highlight_candidates={candidate_cap})",
+                level="info",
+                reason="Raise max_highlight_candidates / max_clips_per_session "
+                "in Core/config.json if you want more clips per recording.",
+            )
 
     except Exception as e:
         notify_error("Highlight_Detector", e)
@@ -289,6 +310,27 @@ def _start_chat_bot(creator_brain: str):
         return None
 
 def main():
+    mode = sys.argv[1] if len(sys.argv) > 1 else "live"
+
+    # `bolt setup` used to land here with no handler and fall into live
+    # watch mode (which looks like a hang). Route setup to the launcher wizard.
+    if mode in ("setup", "wizard", "configure"):
+        launch = _REPO / "Core" / "launch.py"
+        if not launch.exists():
+            notify(
+                "Setup wizard not found (Core/launch.py missing).",
+                level="error",
+            )
+            return
+        notify(
+            "Handing off to the setup / launch wizard…",
+            level="info",
+            reason="bolt setup runs Core/launch.py (config checks + first-run wizard).",
+        )
+        venv_py = _REPO / ".venv" / "bin" / "python3"
+        py = str(venv_py if venv_py.exists() else sys.executable)
+        os.execv(py, [py, str(launch)] + sys.argv[2:])
+
     try:
         write_site_data(push=False)
     except Exception:
@@ -299,7 +341,6 @@ def main():
     intelligence = ThinkLearnDecideEngine(config)
     
     chat_bot = _start_chat_bot(creator_brain)
-    mode = sys.argv[1] if len(sys.argv) > 1 else "live"
 
     if mode == "process":
         recordings = []
@@ -315,6 +356,13 @@ def main():
             return
         process_recording(str(recordings[-1]), config, creator_brain, chat_bot=chat_bot, intelligence=intelligence)
         return
+
+    if mode not in ("live", "watch"):
+        notify(
+            f"Unknown bot mode '{mode}' — starting live watch. "
+            f"Valid modes: live, process, setup.",
+            level="warning",
+        )
 
     notify(f"Live mode — watching {RECORDINGS_DIR} for new clips", level="startup")
     try:

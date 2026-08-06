@@ -182,7 +182,7 @@ or let the deadline pass. Failed publishes get retried up to
 `max_publish_attempts` times with `min_retry_gap_minutes` between
 attempts, then auto-held. After 3 consecutive ignored reviews the
 next Discord ping is prefixed with a `🚨 URGENT` banner. See
-`Docs/BOLT_COMMANDS.md` for the full state machine.
+`Core/modules/BOLT_COMMANDS.md` for the full state machine.
 
 ## Memory And Learning
 

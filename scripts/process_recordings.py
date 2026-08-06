@@ -95,12 +95,30 @@ def find_recordings_folder() -> Path:
     return folder
 
 
-def find_recordings(folder: Path) -> list:
-    """Find all video files in the recordings folder, newest first."""
+def find_recordings(folder: Path, dedupe_stems: bool = True) -> list:
+    """Find all video files in the recordings folder, newest first.
+
+    When the same stream was exported in multiple containers (e.g. both
+    `.mp4` and `.mov` with the same stem), keep a single preferred file so
+    `bolt recordings all` does not process the same footage twice.
+    Preference order: .mp4 > .mkv > .mov > .avi.
+    """
     extensions = [".mp4", ".mkv", ".mov", ".avi"]
+    prefer = {".mp4": 0, ".mkv": 1, ".mov": 2, ".avi": 3}
     files = []
     for ext in extensions:
         files.extend(folder.glob(f"*{ext}"))
+
+    if dedupe_stems:
+        best: dict[str, Path] = {}
+        for f in files:
+            prev = best.get(f.stem)
+            if prev is None or prefer.get(f.suffix.lower(), 9) < prefer.get(
+                prev.suffix.lower(), 9
+            ):
+                best[f.stem] = f
+        files = list(best.values())
+
     return sorted(files, key=lambda f: f.stat().st_mtime, reverse=True)
 
 
@@ -161,14 +179,19 @@ def main():
     parser.add_argument(
         "mode",
         nargs="?",
-        default="all",
-        help="all | latest | list | 1..N (default: all)",
+        default="latest",
+        help="latest | all | list | 1..N (default: latest — safer than reprocessing everything)",
     )
     parser.add_argument(
         "--content-type", "-t",
         default="gaming",
         choices=["gaming", "review", "skincare", "tech"],
         help="Content type: gaming (default), review, skincare, tech — controls title style and caption strategy",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Reprocess even if the filename is already in processed_recordings.json",
     )
     args = parser.parse_args()
     mode = args.mode
@@ -197,7 +220,7 @@ def main():
         print(f"  Processing latest:  {recordings[0].name}")
     elif mode == "all":
         to_process = recordings
-        print(f"  Processing all {len(recordings)} recording(s)…")
+        print(f"  Processing all {len(recordings)} unique recording(s)…")
     else:
         # Try treating mode as a number (index)
         try:
@@ -207,8 +230,46 @@ def main():
         except (ValueError, IndexError):
             print(f"  ✗  Unknown mode: {mode}")
             print(
-                "     Usage: python3 process_recordings.py [all | latest | list | 1..N] [--content-type gaming|review|skincare|tech]"
+                "     Usage: bolt recordings [latest | all | list | 1..N] "
+                "[--content-type gaming|review|skincare|tech] [--force]"
             )
+            return
+
+    # Skip filenames already marked processed (unless --force).
+    # Live watcher persists to Core/data/processed_recordings.json; also honor
+    # the top-level Data/ copy if present (both have been used historically).
+    processed_log = REPO_ROOT / "Core" / "data" / "processed_recordings.json"
+    alt_processed = REPO_ROOT / "Data" / "processed_recordings.json"
+    def _load_processed_names(*paths: Path) -> set[str]:
+        names: set[str] = set()
+        for path in paths:
+            if not path.exists():
+                continue
+            try:
+                raw = json.loads(path.read_text(encoding="utf-8"))
+                if isinstance(raw, list):
+                    names.update(str(x) for x in raw)
+                elif isinstance(raw, dict):
+                    names.update(
+                        str(x) for x in raw.get("processed", raw.get("files", []))
+                    )
+            except Exception:
+                continue
+        return names
+
+    already = set() if args.force else _load_processed_names(processed_log, alt_processed)
+    if already:
+        before = len(to_process)
+        to_process = [r for r in to_process if r.name not in already]
+        skipped = before - len(to_process)
+        if skipped:
+            print(
+                f"  ○  Skipping {skipped} already-processed recording(s) "
+                f"(use --force to reprocess)"
+            )
+        if not to_process:
+            print("  ✓  Nothing new to process.")
+            print_output_paths()
             return
 
     print()
@@ -242,6 +303,25 @@ def main():
             process_recording(
                 str(recording), config, brain, intelligence=brain_controller
             )
+            # Mark done so the next `bolt recordings all` skips it.
+            # Write both historical log locations so live-watcher and batch agree.
+            for log_path in (processed_log, alt_processed):
+                try:
+                    done = []
+                    if log_path.exists():
+                        raw = json.loads(log_path.read_text(encoding="utf-8"))
+                        if isinstance(raw, list):
+                            done = list(raw)
+                        elif isinstance(raw, dict):
+                            done = list(raw.get("processed", []))
+                    if recording.name not in done:
+                        done.append(recording.name)
+                        log_path.parent.mkdir(parents=True, exist_ok=True)
+                        log_path.write_text(
+                            json.dumps(done, indent=2), encoding="utf-8"
+                        )
+                except Exception:
+                    pass
         except KeyboardInterrupt:
             print("\n  Stopped by user. Partial results may have been saved.")
             break
