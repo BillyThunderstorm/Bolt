@@ -131,5 +131,19 @@
     "timestamp": 729.0,
     "phash": "97994c6626d85979",
     "added": 1786068222.991263
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-06_22-06-56_clip01_audio_spike_5.mp4",
+    "size": 20394884,
+    "timestamp": 5.0,
+    "phash": "f5a56b744b5a16c0",
+    "added": 1786072766.294045
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-06_22-06-56_clip03_audio_spike_140.mp4",
+    "size": 25836242,
+    "timestamp": 140.0,
+    "phash": "b90f68de92b55642",
+    "added": 1786072766.429424
   }
 ]
