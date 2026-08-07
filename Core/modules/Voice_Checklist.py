@@ -9,10 +9,9 @@ How it works:
   1. Mic picks up your voice continuously in a background thread
   2. Google Speech Recognition converts it to text (free, needs internet)
   3. Each spoken phrase is compared to every unchecked task using keyword matching
-  4. If enough keywords match, Bolt runs that task's "verify" function
-  5. If the verify function returns True, the task gets marked ✅ and a sound plays
-  6. If the verify function can FIX the item (e.g., set the game on Twitch), it does so
-  7. When all tasks are done, Bolt congratulates you and exits
+  4. On a match, Bolt runs that task's "verify" function for status feedback
+  5. The task is marked ✅ either way (verify is feedback, not a hard gate)
+  6. When all tasks are done, Bolt congratulates you and exits
 
 Run standalone:
   python3 -m modules.Voice_Checklist
@@ -41,19 +40,34 @@ BOLD = "\033[1m"
 RESET = "\033[0m"
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
-ROOT = Path(__file__).parent.parent
-TASKS_FILE = ROOT / "session_tasks.json"
-PROGRESS_FILE = ROOT / "logs" / "checklist_progress.json"
+# Voice_Checklist.py lives at Core/modules/ → Core is parent, repo root is grandparent.
+CORE = Path(__file__).resolve().parent.parent
+REPO = CORE.parent
+ROOT = CORE  # kept for callers / progress paths under Core/
+TASKS_FILE = CORE / "session_tasks.json"
+PROGRESS_FILE = CORE / "logs" / "checklist_progress.json"
+DATA_DIR = REPO / "Data"
+
+
+def _load_env() -> None:
+    """Load secrets the same way launch.py does: .env.local then .env at repo root."""
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        return
+    if not load_dotenv(REPO / ".env.local"):
+        load_dotenv(REPO / ".env")
 
 
 # ── Verify functions ───────────────────────────────────────────────────────────
-# Each returns (success: bool, message: str). If success=False, the task stays
-# unchecked. Bolt can also take action (e.g., fetch and set the game) and report
-# what it did.
+# Each returns (success: bool, message: str).
+# On voice/keyboard match we still check the item off even if verify fails —
+# verification is feedback, not a hard gate (see _verify_task).
 
 
 def _verify_obs() -> tuple:
     """Check that OBS is running and WebSocket is reachable."""
+    _load_env()
     try:
         import subprocess
 
@@ -72,34 +86,35 @@ def _verify_obs() -> tuple:
     try:
         import websocket
 
-        ws = websocket.create_connection("ws://localhost:4455", timeout=3)
+        host = os.getenv("OBS_HOST", "localhost")
+        port = os.getenv("OBS_PORT", "4455")
+        ws = websocket.create_connection(f"ws://{host}:{port}", timeout=3)
         ws.close()
         return True, "OBS is running and WebSocket is reachable"
     except ImportError:
         return True, "OBS is running (WebSocket check skipped — websocket-client not installed)"
     except Exception as e:
-        return False, f"OBS is running but WebSocket on port 4455 is not reachable: {e}"
+        return False, f"OBS is running but WebSocket is not reachable: {e}"
 
 
 def _verify_twitch_title_game() -> tuple:
     """Check that the Twitch channel has a title and game set. Bolt can also
     sync the game from Twitch to config.json."""
     try:
-        from modules.twitch_api import get_current_game, get_last_stream_info
-        from dotenv import load_dotenv
+        from modules.Twitch_API import get_current_game, get_last_stream_info
 
-        load_dotenv(ROOT / ".env")
+        _load_env()
         game = get_current_game()
         info = get_last_stream_info()
         title = info.get("title", "")
 
         if game == "Unknown" or not game:
             return False, "No game set on your Twitch channel — set it before going live"
-        if not title or title == "No recent streams":
+        if not title or title in ("No recent streams", "Error fetching stream data"):
             return False, f"Game is '{game}' but no stream title found — set a title on Twitch"
 
         # Sync to config.json
-        config_path = ROOT / "config.json"
+        config_path = CORE / "config.json"
         if config_path.exists():
             config = json.loads(config_path.read_text())
             config["game"] = game
@@ -112,10 +127,8 @@ def _verify_twitch_title_game() -> tuple:
 
 def _verify_streamlabs() -> tuple:
     """Check that Streamlabs socket token is configured."""
-    from dotenv import load_dotenv
-
-    load_dotenv(ROOT / ".env")
-    token = os.getenv("STREAMLABS_SOCKET_TOKEN", "")
+    _load_env()
+    token = os.getenv("STREAMLABS_SOCKET_TOKEN", "").strip()
     if token:
         return True, "Streamlabs token is configured"
     return False, "Streamlabs socket token not set in .env — alerts won't fire"
@@ -123,11 +136,11 @@ def _verify_streamlabs() -> tuple:
 
 def _verify_content_plan() -> tuple:
     """Check that there's recent performance data or a content plan."""
-    perf_file = ROOT / "data" / "performance_outcomes.jsonl"
-    queue_file = ROOT / "data" / "multi_platform_queue.json"
+    perf_file = DATA_DIR / "performance_outcomes.jsonl"
+    queue_file = DATA_DIR / "multi_platform_queue.json"
 
     has_perf = perf_file.exists() and perf_file.stat().st_size > 0
-    has_queue = queue_file.exists()
+    has_queue = queue_file.exists() and queue_file.stat().st_size > 0
 
     if has_perf and has_queue:
         return True, "Performance data and clip queue are available for review"
@@ -139,12 +152,10 @@ def _verify_content_plan() -> tuple:
 
 def _verify_tiktok_idea() -> tuple:
     """Check if TikTok integration is set up or if there are clips ready to post."""
-    from dotenv import load_dotenv
+    _load_env()
+    tiktok_key = os.getenv("TIKTOK_CLIENT_KEY", "").strip()
 
-    load_dotenv(ROOT / ".env")
-    tiktok_key = os.getenv("TIKTOK_CLIENT_KEY", "")
-
-    queue_file = ROOT / "data" / "multi_platform_queue.json"
+    queue_file = DATA_DIR / "multi_platform_queue.json"
     queue_count = 0
     if queue_file.exists():
         try:
@@ -166,11 +177,9 @@ def _verify_tiktok_idea() -> tuple:
 
 def _verify_socials() -> tuple:
     """Check if Discord webhooks are configured for social announcements."""
-    from dotenv import load_dotenv
-
-    load_dotenv(ROOT / ".env")
-    webhook = os.getenv("DISCORD_WEBHOOK_URL", "")
-    captain = os.getenv("CAPTAIN_HOOK_WEBHOOK_URL", "")
+    _load_env()
+    webhook = os.getenv("DISCORD_WEBHOOK_URL", "").strip()
+    captain = os.getenv("CAPTAIN_HOOK_WEBHOOK_URL", "").strip()
     if webhook or captain:
         return True, "Discord webhooks are configured for stream announcements"
     return False, "No Discord webhook set in .env — won't auto-announce on socials"
@@ -180,15 +189,20 @@ def _verify_test_stream() -> tuple:
     """Check that OBS is actually outputting (recording or streaming)."""
     try:
         import websocket
-        from dotenv import load_dotenv
         import hashlib
         import base64
 
-        load_dotenv(ROOT / ".env")
+        _load_env()
         pw = os.getenv("OBS_PASSWORD", "")
-        ws = websocket.create_connection("ws://localhost:4455", timeout=3)
-        hello = json.loads(ws.recv())
-        challenge = hello["d"].get("authentication")
+        host = os.getenv("OBS_HOST", "localhost")
+        port = os.getenv("OBS_PORT", "4455")
+        ws = websocket.create_connection(f"ws://{host}:{port}", timeout=3)
+        raw = ws.recv()
+        if not raw:
+            ws.close()
+            return False, "OBS WebSocket connected but sent an empty hello"
+        hello = json.loads(raw)
+        challenge = hello.get("d", {}).get("authentication")
         if challenge:
             secret = base64.b64encode(
                 hashlib.sha256((pw + challenge["salt"]).encode()).digest()
@@ -208,20 +222,22 @@ def _verify_test_stream() -> tuple:
                     }
                 )
             )
-            json.loads(ws.recv())
+            raw = ws.recv()
+            if raw:
+                json.loads(raw)
 
         # Check streaming and recording status
         ws.send(json.dumps({"op": 6, "d": {"requestType": "GetStreamStatus", "requestId": "r1"}}))
         r = json.loads(ws.recv())
         while r.get("op") != 7:
             r = json.loads(ws.recv())
-        streaming = r["d"]["responseData"].get("outputActive", False)
+        streaming = (r.get("d") or {}).get("responseData", {}).get("outputActive", False)
 
         ws.send(json.dumps({"op": 6, "d": {"requestType": "GetRecordStatus", "requestId": "r2"}}))
         r = json.loads(ws.recv())
         while r.get("op") != 7:
             r = json.loads(ws.recv())
-        recording = r["d"]["responseData"].get("outputActive", False)
+        recording = (r.get("d") or {}).get("responseData", {}).get("outputActive", False)
 
         ws.close()
 
@@ -241,35 +257,35 @@ DEFAULT_TASKS = [
     {
         "id": "obs_setup",
         "task": "Set up OBS — scenes, sources, audio levels",
-        "keywords": ["obs", "scene", "audio", "levels", "setup", "set up", "ready"],
+        "keywords": ["obs", "scene", "audio", "levels", "setup", "set up", "obs ready", "obs done"],
         "done": False,
         "verify": _verify_obs,
     },
     {
         "id": "twitch_title",
         "task": "Set Twitch title and game category",
-        "keywords": ["title", "twitch", "game", "category", "set", "stream title"],
+        "keywords": ["title", "twitch", "game", "category", "stream title", "title set"],
         "done": False,
         "verify": _verify_twitch_title_game,
     },
     {
         "id": "streamlabs",
         "task": "Check Streamlabs alerts are on",
-        "keywords": ["streamlabs", "alerts", "donations", "alert", "on"],
+        "keywords": ["streamlabs", "stream labs", "alerts", "donations", "alert"],
         "done": False,
         "verify": _verify_streamlabs,
     },
     {
         "id": "content_plan",
         "task": "Review content plan for this session",
-        "keywords": ["content", "plan", "review", "ideas", "session", "queue"],
+        "keywords": ["content", "plan", "review", "ideas", "session", "queue", "content plan"],
         "done": False,
         "verify": _verify_content_plan,
     },
     {
         "id": "tiktok_idea",
         "task": "Pick a TikTok clip idea to aim for",
-        "keywords": ["tiktok", "clip", "idea", "moment", "viral", "post"],
+        "keywords": ["tiktok", "tick tock", "clip idea", "viral", "tik tok"],
         "done": False,
         "verify": _verify_tiktok_idea,
     },
@@ -278,13 +294,13 @@ DEFAULT_TASKS = [
         "task": "Announce the stream on socials",
         "keywords": [
             "tweet",
-            "post",
             "announced",
             "social",
+            "socials",
             "twitter",
-            "x",
             "instagram",
             "discord",
+            "announce",
         ],
         "done": False,
         "verify": _verify_socials,
@@ -292,7 +308,7 @@ DEFAULT_TASKS = [
     {
         "id": "test_stream",
         "task": "Do a quick test stream check",
-        "keywords": ["test", "check", "delay", "stream check", "quality", "recording"],
+        "keywords": ["test stream", "stream check", "delay", "quality", "recording", "test check"],
         "done": False,
         "verify": _verify_test_stream,
     },
@@ -384,7 +400,7 @@ class VoiceChecklist:
                 print(f"  {GRAY}○   {t['task']}{RESET}")
 
         print(
-            f"\n  {GRAY}🎤 Say a task out loud — Bolt will verify it  │  Ctrl+C to skip{RESET}\n"
+            f"\n  {GRAY}🎤 Say a task keyword (e.g. 'OBS ready', 'title set')  │  Ctrl+C to skip{RESET}\n"
         )
 
     def _print_initial(self):
@@ -405,7 +421,7 @@ class VoiceChecklist:
                 print(f"  {GRAY}○   {t['task']}{RESET}")
 
         print(
-            f"\n  {GRAY}🎤 Say a task out loud — Bolt will verify it  │  Ctrl+C to skip{RESET}\n"
+            f"\n  {GRAY}🎤 Say a task keyword (e.g. 'OBS ready', 'title set')  │  Ctrl+C to skip{RESET}\n"
         )
 
     # ── Voice matching ─────────────────────────────────────────────────────────
@@ -414,22 +430,54 @@ class VoiceChecklist:
         """
         Compare spoken text to all unchecked tasks.
         Returns the task ID if a match is found, else None.
+
+        Short/generic keywords (e.g. "on", "set", "x") only count when paired
+        with another hit, so casual speech does not latch onto the wrong row.
         """
-        spoken_lower = spoken.lower()
+        spoken_lower = spoken.lower().strip()
+        if not spoken_lower:
+            return None
 
         best_id = None
         best_score = 0
+
+        # Weak tokens need a second hit (or a strong keyword) to count as a match.
+        weak_keywords = {
+            "on",
+            "set",
+            "x",
+            "check",
+            "post",
+            "ready",
+            "done",
+            "good",
+            "ok",
+            "okay",
+        }
 
         for task in self.tasks:
             if task["done"]:
                 continue
 
             keywords = [kw.lower() for kw in task.get("keywords", [])]
-            score = 0
+            strong_hits = 0
+            weak_hits = 0
 
             for kw in keywords:
-                if kw in spoken_lower:
-                    score += 1
+                if kw not in spoken_lower:
+                    continue
+                if kw in weak_keywords or len(kw) <= 2:
+                    weak_hits += 1
+                else:
+                    strong_hits += 1
+
+            # Prefer distinctive keywords; allow 2+ weak-only hits as a last resort.
+            if strong_hits:
+                score = strong_hits * 2 + weak_hits
+            elif weak_hits >= 2:
+                score = weak_hits
+            else:
+                score = 0
 
             if score > best_score:
                 best_score = score
@@ -438,7 +486,12 @@ class VoiceChecklist:
         return best_id if best_score >= 1 else None
 
     def _verify_task(self, task_id: str) -> bool:
-        """Run the task's verify function. If it passes, mark done. Returns True if verified."""
+        """Run the task's verify function for feedback, then mark it done.
+
+        Verify is advisory: if the user named the task, we check it off even when
+        the automated check fails (missing API keys, OBS not streaming yet, etc.).
+        Returns True if the task was marked done.
+        """
         with self._lock:
             task = None
             for t in self.tasks:
@@ -451,12 +504,11 @@ class VoiceChecklist:
 
         verify_fn = task.get("verify")
         if not verify_fn:
-            # No verify function — just mark done
             self.mark_done(task_id)
             return True
 
         # Run the verify function outside the lock (it may take time)
-        print(f"  {CYAN}⚡ Verifying: {task['task']}...{RESET}")
+        print(f"  {CYAN}⚡ Checking: {task['task']}...{RESET}")
         try:
             success, message = verify_fn()
         except Exception as e:
@@ -464,13 +516,13 @@ class VoiceChecklist:
 
         if success:
             print(f"  {GREEN}✓ {message}{RESET}")
-            self.mark_done(task_id)
-            return True
         else:
-            print(f"  {YELLOW}✗ {message}{RESET}")
-            # Reprint the checklist so the user sees the task is still unchecked
-            self._print_checklist()
-            return False
+            # Still mark done — user claimed the task by voice/keyboard.
+            print(f"  {YELLOW}⚠ {message}{RESET}")
+            print(f"  {GRAY}  (marking done anyway — you said this one){RESET}")
+
+        self.mark_done(task_id)
+        return True
 
     def mark_done(self, task_id: str):
         """Mark a task as complete and refresh the display."""
@@ -556,6 +608,11 @@ class VoiceChecklist:
                         task_id = self._match_task(text)
                         if task_id:
                             self._verify_task(task_id)
+                        else:
+                            print(
+                                f'  {YELLOW}No matching task — try a keyword '
+                                f'(e.g. "OBS ready", "title set", "Streamlabs", "TikTok"){RESET}'
+                            )
 
                     except sr.WaitTimeoutError:
                         pass
