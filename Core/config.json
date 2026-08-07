@@ -1,5 +1,5 @@
 {
-  "game": "Gaming",
+  "game": "Marvel Rivals",
   "highlight_sensitivity": 0.45,
   "max_clips_per_session": 5,
   "max_highlight_candidates": 12,
@@ -42,7 +42,7 @@
     "min_gap_seconds": 45,
     "sensitivity": 0.45,
     "min_confidence": 0.35,
-    "min_prominence": 0.20,
+    "min_prominence": 0.2,
     "max_candidates": 12,
     "baseline_percentile": 60,
     "peak_neighborhood_sec": 3.0,

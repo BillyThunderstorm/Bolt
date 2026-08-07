@@ -39,7 +39,13 @@ def main() -> int:
     # Nicer argv0 in help / error text ("bolt: ..." instead of a long path).
     if sys.argv:
         sys.argv[0] = "bolt"
-    return int(_load_bolt_module().main())
+    try:
+        return int(_load_bolt_module().main())
+    except KeyboardInterrupt:
+        # Ctrl+C during launch/watch/recordings — exit cleanly instead of
+        # dumping a multi-frame subprocess.wait traceback.
+        print("\nbolt: stopped by user.", file=sys.stderr)
+        return 130
 
 
 if __name__ == "__main__":
