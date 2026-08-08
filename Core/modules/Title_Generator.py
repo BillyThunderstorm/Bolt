@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Generate TikTok titles and hashtags.
 
-The default path stays local and free. When config enables AI titles and an
-OpenAI key is present, Bolt asks the LLM for Billy-styled options, caches the
-answer, and falls back to templates if anything goes sideways.
+Preference order (Google sparingly):
+  1. Grok (xAI) or ChatGPT (OpenAI) via ``BOLT_LLM_PROVIDER``
+  2. Local templates (free, always available)
+  3. Gemini only if ``USE_GEMINI_TITLES=true`` (off by default)
 """
 
 import hashlib
@@ -14,10 +15,12 @@ import re
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-# ── LLM Backend: Gemini (via Nexus) or OpenAI fallback ───────────────────────
-# Bolt now uses Gemini by default for title generation since it's free.
-# Set USE_GEMINI_TITLES=false in .env to fall back to OpenAI.
-USE_GEMINI = os.getenv("USE_GEMINI_TITLES", "true").lower() not in ("false", "0", "no")
+# Gemini is last-resort and off unless explicitly enabled.
+USE_GEMINI = os.getenv("USE_GEMINI_TITLES", "false").lower() in (
+    "true",
+    "1",
+    "yes",
+)
 
 try:
     from modules.notifier import notify
@@ -35,8 +38,11 @@ except ImportError:
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 TITLE_CACHE = PROJECT_ROOT / "data" / "title_cache.json"
 BRAIN_FILES = (PROJECT_ROOT / "bolt_brain.md", PROJECT_ROOT / "Bolt_brain.md")
-AI_MODEL = "gpt-4o-mini"  # OpenAI fallback (requires credits)
-GEMINI_MODEL = "gemini-2.5-flash"  # Free tier
+OPENAI_TITLE_MODEL = os.getenv("BOLT_OPENAI_MODEL", "gpt-4o-mini")
+XAI_TITLE_MODEL = os.getenv("BOLT_XAI_MODEL") or os.getenv("GROK_MODEL", "grok-4.5")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+# Back-compat alias used in older tests/docs
+AI_MODEL = OPENAI_TITLE_MODEL
 
 # ── Template library ───────────────────────────────────────────────────────────
 
@@ -196,23 +202,45 @@ def _llm_titles(
         reason="Using Billy's creator profile plus clip context, with template fallback.",
     )
 
-    # ── Try Gemini first (free), fall back to OpenAI ──────────────────────
+    # ── Grok/ChatGPT first → optional Gemini → templates ──────────────────
     raw = None
     try:
-        if USE_GEMINI and _has_gemini_key():
-            raw = _ask_gemini(prompt)
-        elif _has_openai_key():
-            from modules.LLM_Handler import ask_llm
-            raw = ask_llm(prompt, model=AI_MODEL)
-        else:
+        raw, used = _ask_preferred_title_llm(prompt)
+        if raw and not str(raw).startswith("LLM unavailable"):
             notify(
-                "AI titles enabled, but no API key configured (GEMINI_API_KEY or OPENAI_API_KEY)",
+                f"Using {used} for AI titles",
+                level="info",
+                reason="Prefers Grok/ChatGPT over Gemini. Templates if this fails.",
+            )
+        else:
+            raw = None
+
+        # Gemini only when explicitly enabled — last resort before templates.
+        if not raw and USE_GEMINI and _has_gemini_key():
+            raw = _ask_gemini(prompt)
+            if raw and not raw.startswith("LLM unavailable"):
+                notify(
+                    "Using Gemini for AI titles (explicit opt-in)",
+                    level="info",
+                    reason=f"USE_GEMINI_TITLES=true · model {GEMINI_MODEL}",
+                )
+            else:
+                raw = None
+
+        if not raw:
+            notify(
+                "AI titles enabled, but Grok/ChatGPT unavailable "
+                "(check XAI_API_KEY / OPENAI_API_KEY / BOLT_LLM_PROVIDER)",
                 level="warning",
                 reason="Bolt will keep working with local template titles.",
             )
             return None
 
-        if not raw or raw.startswith("Nexus unavailable") or raw.startswith("LLM unavailable"):
+        if (
+            not raw
+            or raw.startswith("Nexus unavailable")
+            or raw.startswith("LLM unavailable")
+        ):
             raise ValueError("LLM returned empty or error response")
         result = _parse_title_response(raw)
         titles = _clean_titles(result.get("titles", []), count)
@@ -321,23 +349,81 @@ def _has_openai_key() -> bool:
     return bool(key and key != "sk_your_key_here")
 
 
+def _has_xai_key() -> bool:
+    return bool(os.getenv("XAI_API_KEY", "").strip())
+
+
 def _has_gemini_key() -> bool:
-    key = os.getenv("GEMINI_API_KEY", "").strip()
-    return bool(key)
+    try:
+        from modules.Gemini_Client import has_gemini_key
+
+        return has_gemini_key()
+    except Exception:
+        return bool(os.getenv("GEMINI_API_KEY", "").strip())
+
+
+def _ask_preferred_title_llm(prompt: str) -> Tuple[Optional[str], str]:
+    """
+    Call Grok or ChatGPT based on BOLT_LLM_PROVIDER.
+
+    Returns (response_text_or_None, provider_label).
+    Never sends an OpenAI model name to the xAI endpoint (or vice versa).
+    """
+    preferred = os.getenv("BOLT_LLM_PROVIDER", "openai").lower().strip()
+    fallback = os.getenv("BOLT_LLM_FALLBACK", "openai").lower().strip()
+
+    order: List[str] = []
+    for name in (preferred, fallback):
+        if name and name != "none" and name not in order:
+            order.append(name)
+    # If preferred is unset/odd, still try whichever keys exist.
+    if not order:
+        order = ["xai", "openai"]
+    for name in ("xai", "openai"):
+        if name not in order:
+            order.append(name)
+
+    try:
+        from modules.LLM_Handler import ask_llm
+    except Exception as exc:
+        return f"LLM unavailable: {exc}", "none"
+
+    last = None
+    for prov in order:
+        if prov == "xai" and not _has_xai_key():
+            continue
+        if prov == "openai" and not _has_openai_key():
+            continue
+        if prov not in ("xai", "openai"):
+            continue
+        model = XAI_TITLE_MODEL if prov == "xai" else OPENAI_TITLE_MODEL
+        label = f"Grok/{model}" if prov == "xai" else f"ChatGPT/{model}"
+        raw = ask_llm(
+            prompt,
+            provider=prov,
+            model=model,
+            max_tokens=600,
+            temperature=0.7,
+        )
+        last = raw
+        if raw and not str(raw).startswith("LLM unavailable"):
+            return raw, label
+    return last, preferred or "none"
 
 
 def _ask_gemini(prompt: str) -> str:
-    """Ask Gemini for titles using the google-genai SDK directly."""
+    """Ask Gemini for titles only when USE_GEMINI_TITLES is enabled."""
     try:
-        from google import genai
-        import os as _os
+        from modules.Gemini_Client import ask_gemini
 
-        client = genai.Client(api_key=_os.getenv("GEMINI_API_KEY"))
-        response = client.models.generate_content(
+        return ask_gemini(
+            prompt,
             model=GEMINI_MODEL,
-            contents=prompt,
+            temperature=0.7,
+            max_output_tokens=600,
+            json_mode=True,
+            timeout=30.0,
         )
-        return response.text or ""
     except Exception as e:
         return f"LLM unavailable: {str(e)[:120]}"
 

@@ -42,7 +42,9 @@ from modules.TikTok_Auth import (
 )
 
 AUTH_URL = "https://www.tiktok.com/v2/auth/authorize/"
-DEFAULT_SCOPES = "user.info.basic,video.publish,video.upload"
+# video.list is required for stats sync (Performance_Sync / sync_tiktok_stats.py).
+# video.publish + video.upload are for Content Posting API (optional if you post manually).
+DEFAULT_SCOPES = "user.info.basic,video.list,video.publish,video.upload"
 
 
 def make_code_verifier(length: int = 64) -> str:
@@ -151,7 +153,17 @@ def main() -> int:
     scopes = data.get("scope", "")
     print("\nSaved TikTok tokens to .env.")
     print(f"Authorized scopes: {scopes or '(none returned)'}")
-    if "video.publish" not in scopes:
+    if "video.list" not in (scopes or ""):
+        print(
+            "Note: video.list was not granted — stats sync will fail until you "
+            "re-run with that scope and it is approved on your TikTok developer app."
+        )
+    else:
+        print(
+            "video.list granted — you can pull views/likes with:\n"
+            "  python3 scripts/sync_tiktok_stats.py --dry-run"
+        )
+    if "video.publish" not in (scopes or ""):
         print(
             "Note: direct auto-posting needs the video.publish scope approved by TikTok."
         )

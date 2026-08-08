@@ -1,5 +1,5 @@
 {
-  "game": "Marvel Rivals",
+  "game": "007 First Light",
   "highlight_sensitivity": 0.45,
   "max_clips_per_session": 5,
   "max_highlight_candidates": 12,
@@ -52,7 +52,8 @@
   },
   "nexus": {
     "preferred": "ollama",
-    "grok_for_high": true
+    "grok_for_high": false,
+    "_comment": "Prefer Ollama (free) then Grok when NEXUS_ALLOW_PAID/bolt nexus --paid. Gemini only if NEXUS_USE_GEMINI=true. SuperGrok app sub \u2260 free API."
   },
   "nexus_enrich_decisions": true,
   "peak_notifications": {

@@ -14,9 +14,12 @@ This is the "continuous learning" piece of the Tier 2 spec — Bolt can
 now see which trigger types and posting times actually perform, and
 Clip_Ranker can later consume the output to boost winners.
 
-No external API calls. The data is local JSONL that log_clip_performance.py
-appends to. API pulls (TikTok Analytics, YouTube Analytics) are a future
-add-on when those tokens are wired up.
+Reads local JSONL written by:
+  - scripts/log_clip_performance.py (manual entry)
+  - scripts/sync_tiktok_stats.py / modules.Performance_Sync (TikTok API pull)
+
+TikTok API pulls require a token with the video.list scope. YouTube analytics
+are still a future add-on.
 
 Usage:
     from modules.Analytics_Tracker import summarize, print_summary
@@ -42,12 +45,27 @@ from typing import Any, Dict, Iterable, List, Optional
 # Memory_Index and other modules so this works whether you import it
 # from Core/, the repo root, or a test.
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = PROJECT_ROOT / "Data" / "data"
-PERFORMANCE_OUTCOMES_FILE = DATA_DIR / "performance_outcomes.jsonl"
+# Prefer the canonical Data/ path; fall back to legacy nested locations.
+_OUTCOME_CANDIDATES = (
+    PROJECT_ROOT / "Data" / "performance_outcomes.jsonl",
+    PROJECT_ROOT / "Data" / "data" / "performance_outcomes.jsonl",
+    PROJECT_ROOT / "data" / "performance_outcomes.jsonl",
+)
+PERFORMANCE_OUTCOMES_FILE = _OUTCOME_CANDIDATES[0]
 
 
-def _load_outcomes(path: Path = PERFORMANCE_OUTCOMES_FILE) -> List[Dict[str, Any]]:
+def _resolve_outcomes_path(path: Optional[Path] = None) -> Path:
+    if path is not None:
+        return path
+    for candidate in _OUTCOME_CANDIDATES:
+        if candidate.exists():
+            return candidate
+    return PERFORMANCE_OUTCOMES_FILE
+
+
+def _load_outcomes(path: Optional[Path] = None) -> List[Dict[str, Any]]:
     """Load all performance outcomes from the JSONL file. Skips blank/bad lines."""
+    path = _resolve_outcomes_path(path)
     if not path.exists():
         return []
     rows: List[Dict[str, Any]] = []
@@ -147,11 +165,12 @@ def _best_posting_times(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 
 def summarize(
-    path: Path = PERFORMANCE_OUTCOMES_FILE,
+    path: Optional[Path] = None,
     days: Optional[int] = None,
 ) -> Dict[str, Any]:
     """Build the full analytics summary. Returns a dict ready for printing or JSON dump."""
-    rows = _load_outcomes(path)
+    resolved = _resolve_outcomes_path(path)
+    rows = _load_outcomes(resolved)
     rows = _within_days(rows, days)
 
     total_views = sum(r.get("views", 0) or 0 for r in rows)
@@ -159,7 +178,7 @@ def summarize(
     successes = sum(1 for r in rows if r.get("success"))
 
     return {
-        "source_file": str(path),
+        "source_file": str(resolved),
         "row_count": len(rows),
         "total_views": total_views,
         "total_likes": total_likes,

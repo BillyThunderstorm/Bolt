@@ -45,8 +45,13 @@ sys.path.insert(0, str(ROOT))
 
 from modules.Clip_Ranker import update_historical_performance
 
-DATA_DIR = ROOT / "data"
-PERFORMANCE_OUTCOMES_FILE = DATA_DIR / "performance_outcomes.jsonl"
+# Canonical post-reorg path (also read by Checkup_Writer + Performance_Sync).
+PERFORMANCE_OUTCOMES_FILE = REPO_ROOT / "Data" / "performance_outcomes.jsonl"
+# Legacy locations some older code wrote to.
+_LEGACY_OUTCOMES = (
+    REPO_ROOT / "Data" / "data" / "performance_outcomes.jsonl",
+    REPO_ROOT / "data" / "performance_outcomes.jsonl",
+)
 
 # Back-compat alias for any external caller still using the old name.
 OUTCOMES_FILE = PERFORMANCE_OUTCOMES_FILE
@@ -307,7 +312,15 @@ def main():
     game = args.game or _load_config_game()
 
     if args.trigger and args.views is not None:
-        entry = log_performance(game, args.trigger, args.views, args.likes)
+        entry = _record_learning_outcome(
+            game=game,
+            trigger=args.trigger,
+            views=args.views,
+            likes=args.likes,
+            clip_path=args.clip,
+            platform=args.platform,
+            note=args.note,
+        )
         print(
             f"\n✓ Logged: {entry['trigger']} in {entry['game']} — "
             f"{entry['views']:,} views, {entry['likes']:,} likes "

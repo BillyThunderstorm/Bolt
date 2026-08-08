@@ -554,7 +554,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-20T08:44:41.267758-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -606,13 +606,15 @@
       ],
       "auto_post": {
         "enabled": true,
-        "status": "approved",
+        "status": "scrapped_missing_file",
         "scheduled_for": "2026-08-06T07:00:00-04:00",
         "review_starts_at": "2026-08-06T06:30:00-04:00",
         "approval_deadline": "2026-08-06T07:00:00-04:00",
         "auto_post_if_deadline_missed": true,
         "approved_at": "2026-08-06T02:49:23.948564-04:00"
-      }
+      },
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "adc6ee16",
@@ -630,7 +632,7 @@
       ],
       "score": 32.2,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-20T08:44:48.184188-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -679,7 +681,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "78fb6eb9",
@@ -697,7 +701,7 @@
       ],
       "score": 20.5,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-20T08:44:53.482217-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -746,7 +750,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "c0f60b1b",
@@ -764,7 +770,7 @@
       ],
       "score": 18.8,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-20T08:44:59.808996-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -813,7 +819,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "0f2302ac",
@@ -831,7 +839,7 @@
       ],
       "score": 40.3,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-20T08:52:52.795154-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -880,7 +888,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "04b2f9d4",
@@ -898,7 +908,7 @@
       ],
       "score": 35.5,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-20T08:53:00.669422-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -947,7 +957,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "f212a1c8",
@@ -965,7 +977,7 @@
       ],
       "score": 33.9,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-20T08:53:09.004671-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1014,7 +1026,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "c718c3b9",
@@ -1032,7 +1046,7 @@
       ],
       "score": 33.8,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-20T08:53:23.997073-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1081,7 +1095,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "9b81376b",
@@ -1099,7 +1115,7 @@
       ],
       "score": 32.8,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-20T08:53:41.663592-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1148,7 +1164,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "3e91293b",
@@ -1166,7 +1184,7 @@
       ],
       "score": 12.9,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-20T16:48:05.498229-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1215,7 +1233,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "6185024f",
@@ -1233,7 +1253,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-23T19:28:15.370676-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1282,7 +1302,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "204107a1",
@@ -1300,7 +1322,7 @@
       ],
       "score": 32.2,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-23T19:28:22.258733-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1349,7 +1371,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "e2670761",
@@ -1367,7 +1391,7 @@
       ],
       "score": 20.5,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-23T19:28:27.560518-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1416,7 +1440,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "798ad247",
@@ -1434,7 +1460,7 @@
       ],
       "score": 18.8,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-23T19:28:33.870264-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1483,7 +1509,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "a55bdf70",
@@ -1501,7 +1529,7 @@
       ],
       "score": 40.3,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-23T19:36:23.973157-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1550,7 +1578,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "2b074e2b",
@@ -1568,7 +1598,7 @@
       ],
       "score": 35.5,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-23T19:36:31.869060-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1617,7 +1647,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "5f95f319",
@@ -1635,7 +1667,7 @@
       ],
       "score": 33.9,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-23T19:36:40.202963-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1684,7 +1716,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "ce39e5e5",
@@ -1702,7 +1736,7 @@
       ],
       "score": 33.8,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-23T19:36:55.288326-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1751,7 +1785,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "c40902c7",
@@ -1769,7 +1805,7 @@
       ],
       "score": 32.8,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-23T19:37:12.936752-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1818,7 +1854,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "6790b957",
@@ -1836,7 +1874,7 @@
       ],
       "score": 12.9,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-24T03:47:21.360361-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1885,7 +1923,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "1bc8a5f9",
@@ -1903,7 +1943,7 @@
       ],
       "score": 14.3,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-25T16:09:40.982383-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -1952,7 +1992,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "2bbb328d",
@@ -1970,7 +2012,7 @@
       ],
       "score": 13.0,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T14:25:56.531001-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2019,7 +2061,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "0f9bd203",
@@ -2037,7 +2081,7 @@
       ],
       "score": 13.1,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T14:26:14.368303-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2086,7 +2130,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "f4a7c037",
@@ -2104,7 +2150,7 @@
       ],
       "score": 12.8,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T14:26:27.522637-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2153,7 +2199,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "bbf585bc",
@@ -2171,7 +2219,7 @@
       ],
       "score": 32.2,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T14:28:36.856253-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2220,7 +2268,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "1e5f2866",
@@ -2238,7 +2288,7 @@
       ],
       "score": 20.5,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T14:28:42.848148-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2287,7 +2337,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "1385e592",
@@ -2305,7 +2357,7 @@
       ],
       "score": 18.8,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T14:28:49.890560-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2354,7 +2406,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "681702cf",
@@ -2372,7 +2426,7 @@
       ],
       "score": 40.3,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T14:37:17.805586-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2421,7 +2475,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "c81456bd",
@@ -2439,7 +2495,7 @@
       ],
       "score": 35.5,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T14:37:26.089433-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2488,7 +2544,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "0cdeae86",
@@ -2506,7 +2564,7 @@
       ],
       "score": 33.9,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T14:37:35.221983-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2555,7 +2613,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "1aaffb23",
@@ -2573,7 +2633,7 @@
       ],
       "score": 33.8,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T14:37:51.258402-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2622,7 +2682,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "1772f0ea",
@@ -2640,7 +2702,7 @@
       ],
       "score": 32.8,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T14:38:09.875113-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2689,7 +2751,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "f4a2f6cb",
@@ -2707,7 +2771,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T16:24:59.757119-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2756,7 +2820,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "7b4faef5",
@@ -2774,7 +2840,7 @@
       ],
       "score": 49.8,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T16:25:04.799235-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2823,7 +2889,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "9c38a9fb",
@@ -2841,7 +2909,7 @@
       ],
       "score": 40.5,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T16:25:10.993180-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2890,7 +2958,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "d12733be",
@@ -2908,7 +2978,7 @@
       ],
       "score": 38.4,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T16:25:17.988844-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -2957,7 +3027,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "dd4b166a",
@@ -2975,7 +3047,7 @@
       ],
       "score": 33.6,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T16:25:29.328075-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3024,7 +3096,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "8378b0e6",
@@ -3042,7 +3116,7 @@
       ],
       "score": 12.9,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T23:46:24.303389-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3091,7 +3165,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "16a521bd",
@@ -3109,7 +3185,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T23:54:49.610918-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3158,7 +3234,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "7663ec32",
@@ -3176,7 +3254,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T23:54:55.701935-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3225,7 +3303,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "fe0a52db",
@@ -3243,7 +3323,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T23:55:03.655241-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3292,7 +3372,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "64eaeb78",
@@ -3310,7 +3392,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T23:55:12.617195-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3359,7 +3441,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "93a437f5",
@@ -3377,7 +3461,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-28T23:55:21.507454-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3426,7 +3510,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "46855414",
@@ -3444,7 +3530,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:02:14.136630-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3493,7 +3579,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "8867c0ba",
@@ -3511,7 +3599,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:02:21.176856-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3560,7 +3648,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "0e5f1be1",
@@ -3578,7 +3668,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:02:30.669094-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3627,7 +3717,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "e09573ea",
@@ -3645,7 +3737,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:02:40.200853-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3694,7 +3786,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "19cf7942",
@@ -3712,7 +3806,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:02:49.514116-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3761,7 +3855,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "65f8a8c8",
@@ -3779,7 +3875,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:04:25.045128-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3828,7 +3924,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "ffda233c",
@@ -3846,7 +3944,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:04:32.240776-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3895,7 +3993,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "7f947b93",
@@ -3913,7 +4013,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:04:40.665148-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -3962,7 +4062,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "db3ed19e",
@@ -3980,7 +4082,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:04:45.564671-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4029,7 +4131,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "07361836",
@@ -4047,7 +4151,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:04:50.887251-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4096,7 +4200,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "7f967217",
@@ -4114,7 +4220,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:10:15.937226-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4163,7 +4269,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "e275e116",
@@ -4181,7 +4289,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:10:25.978483-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4230,7 +4338,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "010a2724",
@@ -4248,7 +4358,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:10:35.151570-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4297,7 +4407,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "092199c6",
@@ -4315,7 +4427,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:10:40.980476-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4364,7 +4476,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "dc0528bb",
@@ -4382,7 +4496,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:10:45.672507-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4431,7 +4545,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "211b20a1",
@@ -4449,7 +4565,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:20:59.062815-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4498,7 +4614,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "a6f5ddc2",
@@ -4516,7 +4634,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:21:08.042746-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4565,7 +4683,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "a241fb1c",
@@ -4583,7 +4703,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:21:16.775919-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4632,7 +4752,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "5a8c7d8c",
@@ -4650,7 +4772,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:21:26.412839-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4699,7 +4821,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "24b679ba",
@@ -4717,7 +4841,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:21:36.108397-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4766,7 +4890,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "5911f468",
@@ -4784,7 +4910,7 @@
       ],
       "score": 20.9,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:22:36.058354-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4833,7 +4959,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "4c4a1fc8",
@@ -4851,7 +4979,7 @@
       ],
       "score": 17.6,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:22:41.750158-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4900,7 +5028,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "ad4b425c",
@@ -4918,7 +5048,7 @@
       ],
       "score": 16.9,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:22:47.175413-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -4967,7 +5097,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "9fb9a4ae",
@@ -4985,7 +5117,7 @@
       ],
       "score": 16.6,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T00:22:56.468993-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -5034,7 +5166,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "d24b61c6",
@@ -5052,7 +5186,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T03:55:03.461199-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -5101,7 +5235,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "7ef8f884",
@@ -5119,7 +5255,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T03:55:13.396376-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -5168,7 +5304,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "696c48ce",
@@ -5186,7 +5324,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T03:55:20.019526-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -5235,7 +5373,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "26c14284",
@@ -5253,7 +5393,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T03:55:31.120426-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -5302,7 +5442,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "c7d76ddc",
@@ -5320,7 +5462,7 @@
       ],
       "score": 55.0,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T03:55:42.354217-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -5369,7 +5511,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "b5405318",
@@ -5387,7 +5531,7 @@
       ],
       "score": 43.6,
       "tier": "auto_queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T03:56:41.904663-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -5436,7 +5580,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "d995cbd0",
@@ -5454,7 +5600,7 @@
       ],
       "score": 13.1,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-29T03:56:51.577447-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -5503,7 +5649,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "fb40b20d",
@@ -5521,7 +5669,7 @@
       ],
       "score": 13.0,
       "tier": "mid",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-31T13:53:32.241770-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -5570,7 +5718,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "f15172e2",
@@ -5588,7 +5738,7 @@
       ],
       "score": 13.1,
       "tier": "mid",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-31T13:53:48.948204-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -5637,7 +5787,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "7608c7c6",
@@ -5655,7 +5807,7 @@
       ],
       "score": 12.8,
       "tier": "mid",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-31T13:54:00.939320-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -5704,7 +5856,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "21f1d8ca",
@@ -5722,12 +5876,12 @@
       ],
       "score": 32.2,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-31T13:55:40.930114-04:00",
       "posted_at": null,
       "auto_post": {
         "enabled": false,
-        "status": "scheduled",
+        "status": "scrapped_missing_file",
         "scheduled_for": "2026-07-31T19:00:00-04:00",
         "review_starts_at": "2026-07-31T18:30:00-04:00",
         "approval_deadline": "2026-07-31T19:00:00-04:00",
@@ -5779,7 +5933,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "5b067375",
@@ -5797,12 +5953,12 @@
       ],
       "score": 20.5,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-31T13:55:46.324149-04:00",
       "posted_at": null,
       "auto_post": {
         "enabled": false,
-        "status": "scheduled",
+        "status": "scrapped_missing_file",
         "scheduled_for": "2026-07-31T19:00:00-04:00",
         "review_starts_at": "2026-07-31T18:30:00-04:00",
         "approval_deadline": "2026-07-31T19:00:00-04:00",
@@ -5854,7 +6010,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "54fe91df",
@@ -5872,12 +6030,12 @@
       ],
       "score": 18.8,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-07-31T13:55:52.882065-04:00",
       "posted_at": null,
       "auto_post": {
         "enabled": false,
-        "status": "scheduled",
+        "status": "scrapped_missing_file",
         "scheduled_for": "2026-07-31T19:00:00-04:00",
         "review_starts_at": "2026-07-31T18:30:00-04:00",
         "approval_deadline": "2026-07-31T19:00:00-04:00",
@@ -5929,7 +6087,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "0eaade55",
@@ -5947,7 +6107,7 @@
       ],
       "score": 14.9,
       "tier": "mid",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-02T01:11:07.588410-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -5996,7 +6156,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "14b0336d",
@@ -6014,7 +6176,7 @@
       ],
       "score": 12.9,
       "tier": "mid",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-02T01:19:25.424049-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -6063,7 +6225,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "be78f37b",
@@ -6081,7 +6245,7 @@
       ],
       "score": 13.0,
       "tier": "mid",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-04T18:49:46.311593-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -6130,7 +6294,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "23d9fd2e",
@@ -6148,7 +6314,7 @@
       ],
       "score": 13.1,
       "tier": "mid",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-04T18:50:21.730809-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -6197,7 +6363,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "3e95d82f",
@@ -6215,7 +6383,7 @@
       ],
       "score": 12.8,
       "tier": "mid",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-04T18:50:35.290432-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -6264,7 +6432,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "1bc915d0",
@@ -6282,12 +6452,12 @@
       ],
       "score": 32.2,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-04T18:54:13.511902-04:00",
       "posted_at": null,
       "auto_post": {
         "enabled": false,
-        "status": "scheduled",
+        "status": "scrapped_missing_file",
         "scheduled_for": "2026-08-04T19:00:00-04:00",
         "review_starts_at": "2026-08-04T18:30:00-04:00",
         "approval_deadline": "2026-08-04T19:00:00-04:00",
@@ -6339,7 +6509,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "90bdae24",
@@ -6357,12 +6529,12 @@
       ],
       "score": 20.5,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-04T18:54:19.895808-04:00",
       "posted_at": null,
       "auto_post": {
         "enabled": false,
-        "status": "scheduled",
+        "status": "scrapped_missing_file",
         "scheduled_for": "2026-08-04T19:00:00-04:00",
         "review_starts_at": "2026-08-04T18:30:00-04:00",
         "approval_deadline": "2026-08-04T19:00:00-04:00",
@@ -6414,7 +6586,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "e1a62e8e",
@@ -6432,12 +6606,12 @@
       ],
       "score": 18.8,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-04T18:54:44.306303-04:00",
       "posted_at": null,
       "auto_post": {
         "enabled": false,
-        "status": "scheduled",
+        "status": "scrapped_missing_file",
         "scheduled_for": "2026-08-04T19:00:00-04:00",
         "review_starts_at": "2026-08-04T18:30:00-04:00",
         "approval_deadline": "2026-08-04T19:00:00-04:00",
@@ -6489,7 +6663,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "a7a1cf5b",
@@ -6507,12 +6683,12 @@
       ],
       "score": 55.0,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-06T22:04:02.852939-04:00",
       "posted_at": null,
       "auto_post": {
         "enabled": true,
-        "status": "scheduled",
+        "status": "scrapped_missing_file",
         "scheduled_for": "2026-08-07T07:00:00-04:00",
         "review_starts_at": "2026-08-07T06:30:00-04:00",
         "approval_deadline": "2026-08-07T07:00:00-04:00",
@@ -6564,7 +6740,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "46c723be",
@@ -6582,12 +6760,12 @@
       ],
       "score": 55.0,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-06T22:04:20.911531-04:00",
       "posted_at": null,
       "auto_post": {
         "enabled": true,
-        "status": "scheduled",
+        "status": "scrapped_missing_file",
         "scheduled_for": "2026-08-07T07:00:00-04:00",
         "review_starts_at": "2026-08-07T06:30:00-04:00",
         "approval_deadline": "2026-08-07T07:00:00-04:00",
@@ -6639,7 +6817,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "a2d84daf",
@@ -6657,12 +6837,12 @@
       ],
       "score": 55.0,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-06T22:04:40.930418-04:00",
       "posted_at": null,
       "auto_post": {
         "enabled": true,
-        "status": "scheduled",
+        "status": "scrapped_missing_file",
         "scheduled_for": "2026-08-07T07:00:00-04:00",
         "review_starts_at": "2026-08-07T06:30:00-04:00",
         "approval_deadline": "2026-08-07T07:00:00-04:00",
@@ -6714,7 +6894,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "8470e8ae",
@@ -6732,12 +6914,12 @@
       ],
       "score": 55.0,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-06T22:05:03.396260-04:00",
       "posted_at": null,
       "auto_post": {
         "enabled": true,
-        "status": "scheduled",
+        "status": "scrapped_missing_file",
         "scheduled_for": "2026-08-07T07:00:00-04:00",
         "review_starts_at": "2026-08-07T06:30:00-04:00",
         "approval_deadline": "2026-08-07T07:00:00-04:00",
@@ -6789,7 +6971,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "c249682f",
@@ -6807,12 +6991,12 @@
       ],
       "score": 55.0,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-06T22:05:24.487654-04:00",
       "posted_at": null,
       "auto_post": {
         "enabled": true,
-        "status": "scheduled",
+        "status": "scrapped_missing_file",
         "scheduled_for": "2026-08-07T07:00:00-04:00",
         "review_starts_at": "2026-08-07T06:30:00-04:00",
         "approval_deadline": "2026-08-07T07:00:00-04:00",
@@ -6864,7 +7048,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "4fdd567a",
@@ -6882,12 +7068,12 @@
       ],
       "score": 36.5,
       "tier": "queue",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-06T23:19:39.999101-04:00",
       "posted_at": null,
       "auto_post": {
         "enabled": true,
-        "status": "scheduled",
+        "status": "scrapped_missing_file",
         "scheduled_for": "2026-08-07T07:00:00-04:00",
         "review_starts_at": "2026-08-07T06:30:00-04:00",
         "approval_deadline": "2026-08-07T07:00:00-04:00",
@@ -6939,7 +7125,9 @@
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }
-      ]
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
     },
     {
       "id": "96589c24",
@@ -6957,7 +7145,7 @@
       ],
       "score": 25.9,
       "tier": "mid",
-      "status": "ready",
+      "status": "scrapped",
       "queued_at": "2026-08-06T23:19:56.904821-04:00",
       "posted_at": null,
       "platform_plan": [
@@ -7003,6 +7191,967 @@
           "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-06_22-06-56_clip03_audio_spike_140_tiktok.mp4",
           "title": "The moment of the stream #Marvel Rivals #gaming #clips",
           "description": "Highlight from the stream: 2026-08-06_22-06-56_clip03_audio_spike_140_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ],
+      "scrapped_at": "2026-08-07T15:03:55.691966-04:00",
+      "scrap_reason": "missing_video_file"
+    },
+    {
+      "id": "d8c1a8db",
+      "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip11_audio_spike_3606_tiktok.mp4",
+      "title": "You have to see this #007 First Light clip \ud83c\udfae",
+      "hashtags": [
+        "#007FirstLight",
+        "#highlight",
+        "#gaming",
+        "#clips",
+        "#viral",
+        "#trending",
+        "#streamer",
+        "#twitch"
+      ],
+      "score": 55.0,
+      "tier": "queue",
+      "status": "held",
+      "queued_at": "2026-08-07T06:19:47.473502-04:00",
+      "posted_at": null,
+      "auto_post": {
+        "enabled": true,
+        "status": "rejected",
+        "scheduled_for": "2026-08-07T19:00:00-04:00",
+        "review_starts_at": "2026-08-07T18:30:00-04:00",
+        "approval_deadline": "2026-08-07T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "rejected_at": "2026-08-07T15:16:37.239146-04:00",
+        "rejection_reason": "nothing exciting is happening in this clip and it isnt a moment that explains whats going on in the game"
+      },
+      "platform_plan": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip11_audio_spike_3606_tiktok.mp4",
+          "caption": "You have to see this #007 First Light clip \ud83c\udfae\n\n#007FirstLight #highlight #gaming #clips #viral",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip11_audio_spike_3606_tiktok.mp4",
+          "title": "You have to see this #007 First Light clip \ud83c\udfae",
+          "description": "You have to see this #007 First Light clip \ud83c\udfae\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip11_audio_spike_3606_tiktok.mp4",
+          "caption": "You have to see this #007 First Light clip \ud83c\udfae\n\n#007FirstLight #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip11_audio_spike_3606_tiktok.mp4",
+          "title": "You have to see this #007 First Light clip \ud83c\udfae",
+          "description": "Highlight from the stream: 2026-08-07_04-06-28_clip11_audio_spike_3606_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ],
+      "held_at": "2026-08-07T15:16:37.239146-04:00",
+      "hold_reason": "nothing exciting is happening in this clip and it isnt a moment that explains whats going on in the game"
+    },
+    {
+      "id": "c9437042",
+      "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip01_audio_spike_636_tiktok.mp4",
+      "title": "The moment of the stream #007 First Light #gaming #clips",
+      "hashtags": [
+        "#007FirstLight",
+        "#highlight",
+        "#gaming",
+        "#clips",
+        "#viral",
+        "#trending",
+        "#streamer",
+        "#twitch"
+      ],
+      "score": 42.2,
+      "tier": "queue",
+      "status": "held",
+      "queued_at": "2026-08-07T06:20:12.521055-04:00",
+      "posted_at": null,
+      "auto_post": {
+        "enabled": true,
+        "status": "rejected",
+        "scheduled_for": "2026-08-07T19:00:00-04:00",
+        "review_starts_at": "2026-08-07T18:30:00-04:00",
+        "approval_deadline": "2026-08-07T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "rejected_at": "2026-08-07T15:21:46.835760-04:00",
+        "rejection_reason": "there isnt anything climatic at the end. If I clicked on this, I would feel like I watched it and nothing happened"
+      },
+      "platform_plan": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip01_audio_spike_636_tiktok.mp4",
+          "caption": "The moment of the stream #007 First Light #gaming #clips\n\n#007FirstLight #highlight #gaming #clips #viral",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip01_audio_spike_636_tiktok.mp4",
+          "title": "The moment of the stream #007 First Light #gaming #clips",
+          "description": "The moment of the stream #007 First Light #gaming #clips\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip01_audio_spike_636_tiktok.mp4",
+          "caption": "The moment of the stream #007 First Light #gaming #clips\n\n#007FirstLight #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip01_audio_spike_636_tiktok.mp4",
+          "title": "The moment of the stream #007 First Light #gaming #clips",
+          "description": "Highlight from the stream: 2026-08-07_04-06-28_clip01_audio_spike_636_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ],
+      "held_at": "2026-08-07T15:21:46.835760-04:00",
+      "hold_reason": "there isnt anything climatic at the end. If I clicked on this, I would feel like I watched it and nothing happened"
+    },
+    {
+      "id": "f49a0da0",
+      "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip12_audio_spike_3969_tiktok.mp4",
+      "title": "This is why I stream #007 First Light \ud83d\udd25",
+      "hashtags": [
+        "#007FirstLight",
+        "#highlight",
+        "#gaming",
+        "#clips",
+        "#viral",
+        "#trending",
+        "#streamer",
+        "#twitch"
+      ],
+      "score": 35.1,
+      "tier": "queue",
+      "status": "ready",
+      "queued_at": "2026-08-07T06:20:36.482025-04:00",
+      "posted_at": null,
+      "auto_post": {
+        "enabled": true,
+        "status": "scheduled",
+        "scheduled_for": "2026-08-07T19:00:00-04:00",
+        "review_starts_at": "2026-08-07T18:30:00-04:00",
+        "approval_deadline": "2026-08-07T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true
+      },
+      "platform_plan": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip12_audio_spike_3969_tiktok.mp4",
+          "caption": "This is why I stream #007 First Light \ud83d\udd25\n\n#007FirstLight #highlight #gaming #clips #viral",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip12_audio_spike_3969_tiktok.mp4",
+          "title": "This is why I stream #007 First Light \ud83d\udd25",
+          "description": "This is why I stream #007 First Light \ud83d\udd25\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip12_audio_spike_3969_tiktok.mp4",
+          "caption": "This is why I stream #007 First Light \ud83d\udd25\n\n#007FirstLight #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip12_audio_spike_3969_tiktok.mp4",
+          "title": "This is why I stream #007 First Light \ud83d\udd25",
+          "description": "Highlight from the stream: 2026-08-07_04-06-28_clip12_audio_spike_3969_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "id": "6a771612",
+      "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip07_audio_spike_1860_tiktok.mp4",
+      "title": "You have to see this #007 First Light clip \ud83c\udfae",
+      "hashtags": [
+        "#007FirstLight",
+        "#highlight",
+        "#gaming",
+        "#clips",
+        "#viral",
+        "#trending",
+        "#streamer",
+        "#twitch"
+      ],
+      "score": 33.2,
+      "tier": "queue",
+      "status": "held",
+      "queued_at": "2026-08-07T06:21:02.411628-04:00",
+      "posted_at": null,
+      "auto_post": {
+        "enabled": true,
+        "status": "rejected",
+        "scheduled_for": "2026-08-07T19:00:00-04:00",
+        "review_starts_at": "2026-08-07T18:30:00-04:00",
+        "approval_deadline": "2026-08-07T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "rejected_at": "2026-08-07T15:24:56.937172-04:00",
+        "rejection_reason": "unless youre watching the full gameplay, this wouldn't be interesting to watch"
+      },
+      "platform_plan": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip07_audio_spike_1860_tiktok.mp4",
+          "caption": "You have to see this #007 First Light clip \ud83c\udfae\n\n#007FirstLight #highlight #gaming #clips #viral",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip07_audio_spike_1860_tiktok.mp4",
+          "title": "You have to see this #007 First Light clip \ud83c\udfae",
+          "description": "You have to see this #007 First Light clip \ud83c\udfae\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip07_audio_spike_1860_tiktok.mp4",
+          "caption": "You have to see this #007 First Light clip \ud83c\udfae\n\n#007FirstLight #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip07_audio_spike_1860_tiktok.mp4",
+          "title": "You have to see this #007 First Light clip \ud83c\udfae",
+          "description": "Highlight from the stream: 2026-08-07_04-06-28_clip07_audio_spike_1860_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ],
+      "held_at": "2026-08-07T15:24:56.937172-04:00",
+      "hold_reason": "unless youre watching the full gameplay, this wouldn't be interesting to watch"
+    },
+    {
+      "id": "ca5431bb",
+      "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip03_audio_spike_1059_tiktok.mp4",
+      "title": "You have to see this #007 First Light clip \ud83c\udfae",
+      "hashtags": [
+        "#007FirstLight",
+        "#highlight",
+        "#gaming",
+        "#clips",
+        "#viral",
+        "#trending",
+        "#streamer",
+        "#twitch"
+      ],
+      "score": 31.5,
+      "tier": "queue",
+      "status": "held",
+      "queued_at": "2026-08-07T06:21:28.724240-04:00",
+      "posted_at": null,
+      "auto_post": {
+        "enabled": true,
+        "status": "rejected",
+        "scheduled_for": "2026-08-07T19:00:00-04:00",
+        "review_starts_at": "2026-08-07T18:30:00-04:00",
+        "approval_deadline": "2026-08-07T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "rejected_at": "2026-08-07T15:47:21.955772-04:00",
+        "rejection_reason": "I edited it and replaced this"
+      },
+      "platform_plan": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip03_audio_spike_1059_tiktok.mp4",
+          "caption": "You have to see this #007 First Light clip \ud83c\udfae\n\n#007FirstLight #highlight #gaming #clips #viral",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip03_audio_spike_1059_tiktok.mp4",
+          "title": "You have to see this #007 First Light clip \ud83c\udfae",
+          "description": "You have to see this #007 First Light clip \ud83c\udfae\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip03_audio_spike_1059_tiktok.mp4",
+          "caption": "You have to see this #007 First Light clip \ud83c\udfae\n\n#007FirstLight #highlight #gaming #clips #viral #trending #streamer #twitch",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-07_04-06-28_clip03_audio_spike_1059_tiktok.mp4",
+          "title": "You have to see this #007 First Light clip \ud83c\udfae",
+          "description": "Highlight from the stream: 2026-08-07_04-06-28_clip03_audio_spike_1059_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ],
+      "held_at": "2026-08-07T15:47:21.955772-04:00",
+      "hold_reason": "I edited it and replaced this"
+    },
+    {
+      "id": "512bdfa4",
+      "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Stress.mp4",
+      "title": "Stress \ud83d\udd25 #Gaming",
+      "hashtags": [
+        "#Gaming",
+        "#clips",
+        "#fyp"
+      ],
+      "score": 90.0,
+      "tier": "queue",
+      "status": "ready",
+      "queued_at": "2026-08-07T15:39:04.125738-04:00",
+      "posted_at": null,
+      "auto_post": {
+        "enabled": true,
+        "status": "approved",
+        "scheduled_for": "2026-08-07T19:00:00-04:00",
+        "review_starts_at": "2026-08-07T18:30:00-04:00",
+        "approval_deadline": "2026-08-07T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "approved_at": "2026-08-07T15:39:04.260151-04:00"
+      },
+      "platform_plan": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Stress.mp4",
+          "caption": "Stress \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-08T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Stress.mp4",
+          "title": "Stress \ud83d\udd25 #Gaming",
+          "description": "Stress \ud83d\udd25 #Gaming\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Stress.mp4",
+          "caption": "Stress \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Stress.mp4",
+          "title": "Stress \ud83d\udd25 #Gaming",
+          "description": "Highlight from the stream: Stress.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "id": "9b7aa5f8",
+      "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Hands.mp4",
+      "title": "Hands \ud83d\udd25 #Gaming",
+      "hashtags": [
+        "#Gaming",
+        "#clips",
+        "#fyp"
+      ],
+      "score": 90.0,
+      "tier": "queue",
+      "status": "ready",
+      "queued_at": "2026-08-07T15:39:04.264975-04:00",
+      "posted_at": null,
+      "auto_post": {
+        "enabled": true,
+        "status": "approved",
+        "scheduled_for": "2026-08-07T19:00:00-04:00",
+        "review_starts_at": "2026-08-07T18:30:00-04:00",
+        "approval_deadline": "2026-08-07T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "approved_at": "2026-08-07T15:39:04.395551-04:00"
+      },
+      "platform_plan": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Hands.mp4",
+          "caption": "Hands \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-08T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Hands.mp4",
+          "title": "Hands \ud83d\udd25 #Gaming",
+          "description": "Hands \ud83d\udd25 #Gaming\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Hands.mp4",
+          "caption": "Hands \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Hands.mp4",
+          "title": "Hands \ud83d\udd25 #Gaming",
+          "description": "Highlight from the stream: Hands.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "id": "cff57ff7",
+      "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Leaving.mp4",
+      "title": "Leaving \ud83d\udd25 #Gaming",
+      "hashtags": [
+        "#Gaming",
+        "#clips",
+        "#fyp"
+      ],
+      "score": 90.0,
+      "tier": "queue",
+      "status": "ready",
+      "queued_at": "2026-08-07T15:39:04.400507-04:00",
+      "posted_at": null,
+      "auto_post": {
+        "enabled": true,
+        "status": "approved",
+        "scheduled_for": "2026-08-07T19:00:00-04:00",
+        "review_starts_at": "2026-08-07T18:30:00-04:00",
+        "approval_deadline": "2026-08-07T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "approved_at": "2026-08-07T15:39:04.528043-04:00"
+      },
+      "platform_plan": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Leaving.mp4",
+          "caption": "Leaving \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-08T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Leaving.mp4",
+          "title": "Leaving \ud83d\udd25 #Gaming",
+          "description": "Leaving \ud83d\udd25 #Gaming\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Leaving.mp4",
+          "caption": "Leaving \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Leaving.mp4",
+          "title": "Leaving \ud83d\udd25 #Gaming",
+          "description": "Highlight from the stream: Leaving.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "id": "5b67380c",
+      "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Ate.mp4",
+      "title": "Ate \ud83d\udd25 #Gaming",
+      "hashtags": [
+        "#Gaming",
+        "#clips",
+        "#fyp"
+      ],
+      "score": 90.0,
+      "tier": "queue",
+      "status": "ready",
+      "queued_at": "2026-08-07T15:39:04.532736-04:00",
+      "posted_at": null,
+      "auto_post": {
+        "enabled": true,
+        "status": "approved",
+        "scheduled_for": "2026-08-07T19:00:00-04:00",
+        "review_starts_at": "2026-08-07T18:30:00-04:00",
+        "approval_deadline": "2026-08-07T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "approved_at": "2026-08-07T15:39:04.657796-04:00"
+      },
+      "platform_plan": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Ate.mp4",
+          "caption": "Ate \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-08T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Ate.mp4",
+          "title": "Ate \ud83d\udd25 #Gaming",
+          "description": "Ate \ud83d\udd25 #Gaming\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Ate.mp4",
+          "caption": "Ate \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Ate.mp4",
+          "title": "Ate \ud83d\udd25 #Gaming",
+          "description": "Highlight from the stream: Ate.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "id": "0bc69ffa",
+      "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/close.mp4",
+      "title": "close \ud83d\udd25 #Gaming",
+      "hashtags": [
+        "#Gaming",
+        "#clips",
+        "#fyp"
+      ],
+      "score": 90.0,
+      "tier": "queue",
+      "status": "ready",
+      "queued_at": "2026-08-07T15:39:04.662440-04:00",
+      "posted_at": null,
+      "auto_post": {
+        "enabled": true,
+        "status": "approved",
+        "scheduled_for": "2026-08-07T19:00:00-04:00",
+        "review_starts_at": "2026-08-07T18:30:00-04:00",
+        "approval_deadline": "2026-08-07T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "approved_at": "2026-08-07T15:39:04.787992-04:00"
+      },
+      "platform_plan": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/close.mp4",
+          "caption": "close \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-08T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/close.mp4",
+          "title": "close \ud83d\udd25 #Gaming",
+          "description": "close \ud83d\udd25 #Gaming\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/close.mp4",
+          "caption": "close \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/close.mp4",
+          "title": "close \ud83d\udd25 #Gaming",
+          "description": "Highlight from the stream: close.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "id": "5a905345",
+      "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/almost.mp4",
+      "title": "almost \ud83d\udd25 #Gaming",
+      "hashtags": [
+        "#Gaming",
+        "#clips",
+        "#fyp"
+      ],
+      "score": 90.0,
+      "tier": "queue",
+      "status": "ready",
+      "queued_at": "2026-08-07T15:39:04.792574-04:00",
+      "posted_at": null,
+      "auto_post": {
+        "enabled": true,
+        "status": "approved",
+        "scheduled_for": "2026-08-07T19:00:00-04:00",
+        "review_starts_at": "2026-08-07T18:30:00-04:00",
+        "approval_deadline": "2026-08-07T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "approved_at": "2026-08-07T15:39:04.918440-04:00"
+      },
+      "platform_plan": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/almost.mp4",
+          "caption": "almost \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-08T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/almost.mp4",
+          "title": "almost \ud83d\udd25 #Gaming",
+          "description": "almost \ud83d\udd25 #Gaming\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/almost.mp4",
+          "caption": "almost \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/almost.mp4",
+          "title": "almost \ud83d\udd25 #Gaming",
+          "description": "Highlight from the stream: almost.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "id": "0ad12e21",
+      "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/yes.mp4",
+      "title": "yes \ud83d\udd25 #Gaming",
+      "hashtags": [
+        "#Gaming",
+        "#clips",
+        "#fyp"
+      ],
+      "score": 90.0,
+      "tier": "queue",
+      "status": "ready",
+      "queued_at": "2026-08-07T15:39:04.923090-04:00",
+      "posted_at": null,
+      "auto_post": {
+        "enabled": true,
+        "status": "approved",
+        "scheduled_for": "2026-08-07T19:00:00-04:00",
+        "review_starts_at": "2026-08-07T18:30:00-04:00",
+        "approval_deadline": "2026-08-07T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "approved_at": "2026-08-07T15:39:05.050556-04:00"
+      },
+      "platform_plan": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/yes.mp4",
+          "caption": "yes \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-08T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/yes.mp4",
+          "title": "yes \ud83d\udd25 #Gaming",
+          "description": "yes \ud83d\udd25 #Gaming\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/yes.mp4",
+          "caption": "yes \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/yes.mp4",
+          "title": "yes \ud83d\udd25 #Gaming",
+          "description": "Highlight from the stream: yes.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "id": "4a41b28a",
+      "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/ragebait.mp4",
+      "title": "ragebait \ud83d\udd25 #Gaming",
+      "hashtags": [
+        "#Gaming",
+        "#clips",
+        "#fyp"
+      ],
+      "score": 90.0,
+      "tier": "queue",
+      "status": "ready",
+      "queued_at": "2026-08-07T15:39:05.055453-04:00",
+      "posted_at": null,
+      "auto_post": {
+        "enabled": true,
+        "status": "approved",
+        "scheduled_for": "2026-08-07T19:00:00-04:00",
+        "review_starts_at": "2026-08-07T18:30:00-04:00",
+        "approval_deadline": "2026-08-07T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "approved_at": "2026-08-07T15:39:05.181355-04:00"
+      },
+      "platform_plan": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/ragebait.mp4",
+          "caption": "ragebait \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-08T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/ragebait.mp4",
+          "title": "ragebait \ud83d\udd25 #Gaming",
+          "description": "ragebait \ud83d\udd25 #Gaming\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/ragebait.mp4",
+          "caption": "ragebait \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-07T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/ragebait.mp4",
+          "title": "ragebait \ud83d\udd25 #Gaming",
+          "description": "Highlight from the stream: ragebait.mp4",
           "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
           "aspect_ratio": "9:16"
         }

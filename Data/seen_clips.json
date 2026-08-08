@@ -145,5 +145,89 @@
     "timestamp": 140.0,
     "phash": "b90f68de92b55642",
     "added": 1786072766.429424
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip01_audio_spike_636.mp4",
+    "size": 30349043,
+    "timestamp": 636.0,
+    "phash": "b5324d142769ab97",
+    "added": 1786097962.5388181
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip02_audio_spike_984.mp4",
+    "size": 29253785,
+    "timestamp": 984.0,
+    "phash": "9342b7719793a2c3",
+    "added": 1786097962.607884
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip03_audio_spike_1059.mp4",
+    "size": 29975554,
+    "timestamp": 1059.5,
+    "phash": "9d426da5c67a2c56",
+    "added": 1786097962.702118
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip04_audio_spike_1145.mp4",
+    "size": 30104852,
+    "timestamp": 1145.0,
+    "phash": "cc031dec0376a9f9",
+    "added": 1786097962.799934
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip05_audio_spike_1384.mp4",
+    "size": 32145354,
+    "timestamp": 1384.0,
+    "phash": "b92e762324d299d5",
+    "added": 1786097962.873054
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip06_audio_spike_1444.mp4",
+    "size": 31468743,
+    "timestamp": 1444.0,
+    "phash": "d4fc68332bf784c0",
+    "added": 1786097962.97889
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip07_audio_spike_1860.mp4",
+    "size": 31149944,
+    "timestamp": 1860.5,
+    "phash": "c819722676738f99",
+    "added": 1786097963.067838
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip08_audio_spike_1939.mp4",
+    "size": 31699159,
+    "timestamp": 1939.5,
+    "phash": "a84a3770cb0e99dd",
+    "added": 1786097963.1398919
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip09_audio_spike_3186.mp4",
+    "size": 29885338,
+    "timestamp": 3186.5,
+    "phash": "b449ba2545fea495",
+    "added": 1786097963.2266428
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip10_audio_spike_3515.mp4",
+    "size": 32356525,
+    "timestamp": 3515.5,
+    "phash": "ceb1e4c61871c49f",
+    "added": 1786097963.304234
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip11_audio_spike_3606.mp4",
+    "size": 31070317,
+    "timestamp": 3606.5,
+    "phash": "8778b4934bbc06ce",
+    "added": 1786097963.402165
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip12_audio_spike_3969.mp4",
+    "size": 30168018,
+    "timestamp": 3969.5,
+    "phash": "fc0f7a1f7001cacc",
+    "added": 1786097963.466919
   }
 ]

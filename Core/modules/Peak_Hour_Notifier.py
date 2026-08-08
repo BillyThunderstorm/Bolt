@@ -149,6 +149,12 @@ def _score_clears_floor(clip: dict) -> bool:
         return False
 
 
+def _is_queue_tier(clip: dict) -> bool:
+    """True for tiers that should compete for auto-post / peak alerts."""
+    tier = str(clip.get("tier", "queue") or "queue").lower()
+    return tier in {"queue", "auto_queue"}
+
+
 def _is_alertable_clip(clip: dict) -> bool:
     """
     Return True when a queue row is safe to include in peak-hour alerts.
@@ -159,10 +165,143 @@ def _is_alertable_clip(clip: dict) -> bool:
     """
     return (
         clip.get("status") == "ready"
-        and clip.get("tier", "queue") == "queue"
+        and _is_queue_tier(clip)
         and _clip_file_exists(clip)
         and _score_clears_floor(clip)
     )
+
+
+def _plan_status(clip: dict) -> str:
+    plan = clip.get("auto_post") or {}
+    return str(plan.get("status") or "")
+
+
+def _actionable_clips(clips: list[dict] | None = None) -> list[dict]:
+    """
+    Ready rows whose video file still exists — the only ones worth reviewing.
+
+    Sorted so the thing Billy should act on first is at index 0:
+      1. awaiting_approval
+      2. approved (waiting for peak / post-now)
+      3. publish_failed (retry)
+      4. scheduled / other ready
+    Within each bucket, higher score first.
+    """
+    if clips is None:
+        clips = _load_ready().get("clips") or []
+    ready_with_file = [
+        c
+        for c in clips
+        if c.get("status") == "ready" and _clip_file_exists(c)
+    ]
+
+    priority = {
+        "awaiting_approval": 0,
+        "approved": 1,
+        "publish_failed": 2,
+        "publishing": 3,
+        "scheduled": 4,
+    }
+
+    def sort_key(clip: dict):
+        status = _plan_status(clip) or "scheduled"
+        return (
+            priority.get(status, 9),
+            -float(clip.get("score") or 0),
+            str(clip.get("queued_at") or ""),
+        )
+
+    return sorted(ready_with_file, key=sort_key)
+
+
+def _find_ready_clip(
+    data: dict,
+    clip_id: str | None = None,
+    *,
+    require_file: bool = True,
+    allowed_plan_statuses: set[str] | None = None,
+) -> dict | None:
+    """
+    Pick one ready clip for approve / reject / post-now.
+
+    When clip_id is omitted, prefers actionable (file-present) clips in
+    review priority order so ghost rows never become "the next clip".
+    """
+    clips = data.get("clips") or []
+    if clip_id:
+        for clip in clips:
+            if clip.get("id") != clip_id:
+                continue
+            if clip.get("status") != "ready":
+                return None
+            if require_file and not _clip_file_exists(clip):
+                return None
+            if allowed_plan_statuses is not None:
+                plan = _ensure_auto_post_plan(clip)
+                if plan.get("status") not in allowed_plan_statuses:
+                    return None
+            return clip
+        return None
+
+    candidates = _actionable_clips(clips) if require_file else [
+        c for c in clips if c.get("status") == "ready"
+    ]
+    for clip in candidates:
+        if allowed_plan_statuses is not None:
+            plan = _ensure_auto_post_plan(clip)
+            if plan.get("status") not in allowed_plan_statuses:
+                continue
+        return clip
+    return None
+
+
+def _clip_display_name(clip: dict) -> str:
+    path = clip.get("clip_path") or ""
+    return Path(path).name if path else "(no file)"
+
+
+def _format_clip_card(clip: dict, index: int | None = None, total: int | None = None) -> str:
+    """Human-readable card for one queue row (no JSON digging required)."""
+    plan = clip.get("auto_post") or {}
+    path = clip.get("clip_path") or ""
+    header = "── Next clip ──"
+    if index is not None and total is not None:
+        header = f"── Clip {index} of {total} ──"
+    lines = [
+        header,
+        f"  id:     {clip.get('id', '?')}",
+        f"  score:  {clip.get('score', '?')}  tier={clip.get('tier', '?')}",
+        f"  title:  {clip.get('title') or '(untitled)'}",
+        f"  file:   {_clip_display_name(clip)}",
+        f"  path:   {path or '(missing)'}",
+        f"  plan:   {plan.get('status') or '—'}  "
+        f"peak={plan.get('scheduled_for') or '—'}",
+    ]
+    if not _clip_file_exists(clip):
+        lines.append("  ⚠  video file is MISSING on this Mac (ghost queue row)")
+    return "\n".join(lines)
+
+
+def _open_clip_video(clip: dict) -> bool:
+    """Open the clip's video in the OS default player (macOS `open`, else xdg-open)."""
+    path = clip.get("clip_path") or ""
+    if not path or not Path(path).exists():
+        print("  cannot open: video file missing", file=sys.stderr)
+        return False
+    import subprocess
+
+    try:
+        if sys.platform == "darwin":
+            subprocess.run(["open", path], check=False)
+        elif sys.platform.startswith("linux"):
+            subprocess.run(["xdg-open", path], check=False)
+        else:
+            subprocess.run(["cmd", "/c", "start", "", path], check=False)
+        print(f"  opened: {path}")
+        return True
+    except Exception as exc:
+        print(f"  open failed: {exc}", file=sys.stderr)
+        return False
 
 
 def _parse_dt(value: str):
@@ -603,28 +742,45 @@ def _reset_ignored_reviews(data: dict) -> None:
 
 
 def approve_next_clip(clip_id: str = None) -> dict:
-    """Approve one waiting clip, or the first waiting/ready clip."""
+    """Approve one waiting clip, or the next actionable ready clip (file must exist)."""
     data = _load_ready()
     now = _now()
-    for clip in data["clips"]:
-        if clip.get("status") != "ready":
-            continue
-        if clip_id and clip.get("id") != clip_id:
-            continue
-        plan = _ensure_auto_post_plan(clip, now)
-        if plan.get("status") in {"scheduled", "awaiting_approval", "publish_failed"}:
-            plan["status"] = "approved"
-            plan["approved_at"] = now.isoformat()
-            # Audit #2: Billy responded, clear the escalation counter.
-            _reset_ignored_reviews(data)
-            _save_ready(data)
-            notify(
-                f"Approved clip {clip.get('id')} for auto-post",
-                level="success",
-                reason="Bolt will post at the scheduled peak time, or you can use !postnow to publish immediately.",
-            )
-            return clip
-    return {}
+    clip = _find_ready_clip(
+        data,
+        clip_id,
+        require_file=True,
+        allowed_plan_statuses={"scheduled", "awaiting_approval", "publish_failed"},
+    )
+    if not clip:
+        # Explicit id may be approved already or missing a plan status match —
+        # still allow re-approving a ready clip with file if id was given.
+        if clip_id:
+            clip = _find_ready_clip(data, clip_id, require_file=True)
+            if not clip:
+                return {}
+            plan = _ensure_auto_post_plan(clip, now)
+            if plan.get("status") not in {
+                "scheduled",
+                "awaiting_approval",
+                "publish_failed",
+                "approved",
+            }:
+                return {}
+        else:
+            return {}
+
+    plan = _ensure_auto_post_plan(clip, now)
+    plan["status"] = "approved"
+    plan["approved_at"] = now.isoformat()
+    # Audit #2: Billy responded, clear the escalation counter.
+    _reset_ignored_reviews(data)
+    _save_ready(data)
+    notify(
+        f"Approved clip {clip.get('id')} for auto-post",
+        level="success",
+        reason="Bolt will post at the scheduled peak time, or you can use !postnow / bolt postnow to publish immediately.",
+    )
+    return clip
 
 
 def reject_next_clip(reason: str = "", clip_id: str = None) -> dict:
@@ -635,39 +791,45 @@ def reject_next_clip(reason: str = "", clip_id: str = None) -> dict:
     if not reason:
         reason = "No rejection reason provided yet"
 
-    for clip in data["clips"]:
-        if clip.get("status") != "ready":
-            continue
-        if clip_id and clip.get("id") != clip_id:
-            continue
-        plan = _ensure_auto_post_plan(clip, now)
-        if plan.get("status") in {
+    clip = _find_ready_clip(
+        data,
+        clip_id,
+        require_file=True,
+        allowed_plan_statuses={
             "scheduled",
             "awaiting_approval",
             "approved",
             "publish_failed",
-        }:
-            clip["status"] = "held"
-            clip["held_at"] = now.isoformat()
-            clip["hold_reason"] = reason
-            plan["status"] = "rejected"
-            plan["rejected_at"] = now.isoformat()
-            plan["rejection_reason"] = reason
-            _record_rejection(clip, reason)
-            # Audit #2: Billy responded, clear the escalation counter.
-            _reset_ignored_reviews(data)
-            _save_ready(data)
-            notify(
-                f"Held clip {clip.get('id')}",
-                level="warning",
-                reason=f"Reason recorded: {reason}",
-            )
-            if reason == "No rejection reason provided yet":
-                _send_discord(
-                    f"⚠️ Clip `{clip.get('id')}` was held. Please add a reason with `!dontpost {clip.get('id')} <reason>` so Bolt learns."
-                )
-            return clip
-    return {}
+        },
+    )
+    # Holding by id should still work for ghost rows (file already gone).
+    if not clip and clip_id:
+        clip = _find_ready_clip(data, clip_id, require_file=False)
+
+    if not clip:
+        return {}
+
+    plan = _ensure_auto_post_plan(clip, now)
+    clip["status"] = "held"
+    clip["held_at"] = now.isoformat()
+    clip["hold_reason"] = reason
+    plan["status"] = "rejected"
+    plan["rejected_at"] = now.isoformat()
+    plan["rejection_reason"] = reason
+    _record_rejection(clip, reason)
+    # Audit #2: Billy responded, clear the escalation counter.
+    _reset_ignored_reviews(data)
+    _save_ready(data)
+    notify(
+        f"Held clip {clip.get('id')}",
+        level="warning",
+        reason=f"Reason recorded: {reason}",
+    )
+    if reason == "No rejection reason provided yet":
+        _send_discord(
+            f"⚠️ Clip `{clip.get('id')}` was held. Please add a reason with `!dontpost {clip.get('id')} <reason>` so Bolt learns."
+        )
+    return clip
 
 
 def override_clip_score(score: float, clip_id: str = None) -> dict:
@@ -712,19 +874,34 @@ def post_now(clip_id: str = None, force: bool = True) -> dict:
     """Publish one ready clip immediately via the TikTok publisher."""
     data = _load_ready()
     now = _now()
-    for clip in data["clips"]:
-        if clip.get("status") != "ready":
-            continue
-        if clip_id and clip.get("id") != clip_id:
-            continue
-        if not force and not _is_alertable_clip(clip):
-            continue
-        result = _publish_clip(clip, now, reason="manual override")
-        # Audit #2: Billy responded, clear the escalation counter.
-        _reset_ignored_reviews(data)
-        _save_ready(data)
-        return {"clip": clip, "result": result}
-    return {"clip": None, "result": {"success": False, "error": "No ready clip found"}}
+    # Always require a local file — publishing a ghost path cannot succeed.
+    if force:
+        clip = _find_ready_clip(data, clip_id, require_file=True)
+    else:
+        # Non-force: only alertable (queue-tier + score floor + file).
+        candidates = _actionable_clips(data.get("clips") or [])
+        clip = None
+        for c in candidates:
+            if clip_id and c.get("id") != clip_id:
+                continue
+            if _is_alertable_clip(c):
+                clip = c
+                break
+            if clip_id:
+                break
+    if not clip:
+        return {
+            "clip": None,
+            "result": {
+                "success": False,
+                "error": "No ready clip with a local video file found",
+            },
+        }
+    result = _publish_clip(clip, now, reason="manual override")
+    # Audit #2: Billy responded, clear the escalation counter.
+    _reset_ignored_reviews(data)
+    _save_ready(data)
+    return {"clip": clip, "result": result}
 
 
 def process_auto_post_queue(now: datetime = None) -> dict:
@@ -961,6 +1138,249 @@ def reset_queue() -> Path:
     return archive_path
 
 
+def _vertical_clips_dir() -> Path:
+    """Preferred on-disk folder for postable 9:16 exports."""
+    media = _PROJECT_ROOT / "media" / "vertical_clips"
+    if media.is_dir():
+        return media
+    legacy = _PROJECT_ROOT / "vertical_clips"
+    return legacy if legacy.is_dir() else media
+
+
+def resolve_clip_path(token: str) -> Path | None:
+    """
+    Resolve a user-supplied path or bare filename to an existing video file.
+
+    Accepts absolute paths, paths relative to cwd, or just `Stress.mp4`
+    (looked up under media/vertical_clips/).
+    """
+    if not token:
+        return None
+    raw = Path(token).expanduser()
+    candidates = []
+    if raw.is_absolute():
+        candidates.append(raw)
+    else:
+        candidates.append(Path.cwd() / raw)
+        candidates.append(_PROJECT_ROOT / raw)
+        candidates.append(_vertical_clips_dir() / raw.name)
+        # Also allow stem without extension
+        if not raw.suffix:
+            for ext in (".mp4", ".mov", ".m4v"):
+                candidates.append(_vertical_clips_dir() / f"{raw.name}{ext}")
+    for path in candidates:
+        try:
+            resolved = path.resolve()
+        except Exception:
+            continue
+        if resolved.is_file():
+            return resolved
+    return None
+
+
+def _suggest_titles_for_clip(
+    clip: dict | None = None,
+    *,
+    filename: str = "",
+    trigger: str = "reaction",
+    game: str = "Gaming",
+    score: float = 90.0,
+    count: int = 3,
+) -> tuple[list[str], list[str]]:
+    """Return (titles, hashtags) for a queue row or bare filename."""
+    stem = ""
+    if clip:
+        stem = Path(clip.get("clip_path") or "").stem
+        score = float(clip.get("score") or score)
+        tags = clip.get("hashtags") or []
+        if tags and isinstance(tags[0], str) and tags[0].startswith("#"):
+            # Prefer game-ish first hashtag without the hash when possible.
+            game = tags[0].lstrip("#") or game
+    if filename:
+        stem = Path(filename).stem or stem
+    context = {
+        "clip_name": stem,
+        "filename": filename or (Path(clip.get("clip_path") or "").name if clip else ""),
+        "note": f"Hand-edited vertical clip named {stem}" if stem else "",
+        "use_ai_titles": True,
+    }
+    try:
+        from modules.Title_Generator import generate_titles
+
+        titles, hashtags = generate_titles(
+            trigger, game=game, score=score, context=context, count=count
+        )
+        if titles:
+            return list(titles), list(hashtags or [])
+    except Exception:
+        pass
+    # Filename-aware fallback when AI/templates are generic.
+    label = (stem or "this clip").replace("_", " ").strip()
+    fallback = [
+        f"{label} 🔥 #{game}",
+        f"You have to see this — {label} 💀 #{game}",
+        f"POV: {label} 😂 #{game} #clips",
+    ]
+    return fallback[:count], [f"#{game}", "#gaming", "#clips", "#viral", "#fyp"]
+
+
+def set_clip_title(
+    title: str,
+    clip_id: str | None = None,
+    hashtags: list | None = None,
+) -> dict:
+    """Update the caption title (and optional hashtags) on a ready queue row."""
+    title = (title or "").strip()
+    if not title:
+        return {}
+    data = _load_ready()
+    clip = _find_ready_clip(data, clip_id, require_file=False)
+    if not clip:
+        # Allow retitling held/approved-but-not-posted rows by id.
+        if clip_id:
+            for c in data.get("clips") or []:
+                if c.get("id") == clip_id and c.get("status") in {
+                    "ready",
+                    "held",
+                    "awaiting_approval",
+                }:
+                    clip = c
+                    break
+        if not clip:
+            return {}
+    clip["title"] = title
+    if hashtags is not None:
+        clip["hashtags"] = list(hashtags)
+    # Keep platform plan captions roughly in sync when present.
+    for plan in clip.get("platform_plan") or []:
+        if not isinstance(plan, dict):
+            continue
+        if "title" in plan:
+            plan["title"] = title
+        if "caption" in plan:
+            tags = " ".join(clip.get("hashtags") or [])
+            plan["caption"] = f"{title}\n\n{tags}".strip() if tags else title
+        if "description" in plan and plan.get("platform") in {
+            "youtube_shorts",
+            "kick",
+        }:
+            plan["description"] = title
+    _save_ready(data)
+    notify(
+        f"Title updated on clip {clip.get('id')}",
+        level="success",
+        reason=title[:80],
+    )
+    return clip
+
+
+def add_manual_clip(
+    clip_path: str | Path,
+    title: str | None = None,
+    hashtags: list | None = None,
+    score: float = 90.0,
+    *,
+    approve: bool = False,
+    suggest_title: bool = False,
+) -> dict:
+    """
+    Register a hand-edited video (usually under media/vertical_clips/) into
+    the ready-to-post queue.
+
+    Editing a file on disk does NOT put it in the queue — call this (or
+    `bolt queue add`) so Bolt knows to schedule / approve / post it.
+    """
+    path = resolve_clip_path(str(clip_path))
+    if not path:
+        raise FileNotFoundError(
+            f"Video not found: {clip_path}\n"
+            f"  Looked in cwd and {_vertical_clips_dir()}"
+        )
+
+    # Avoid duplicate ready rows for the same file.
+    data = _load_ready()
+    for existing in data.get("clips") or []:
+        if existing.get("status") != "ready":
+            continue
+        try:
+            if Path(existing.get("clip_path") or "").resolve() == path:
+                if approve:
+                    plan = _ensure_auto_post_plan(existing)
+                    plan["status"] = "approved"
+                    plan["approved_at"] = _now().isoformat()
+                    _save_ready(data)
+                return existing
+        except Exception:
+            continue
+
+    stem = path.stem.replace("_", " ").strip() or path.name
+    tags = hashtags
+    if suggest_title and not title:
+        titles, gen_tags = _suggest_titles_for_clip(
+            filename=path.name, score=float(score)
+        )
+        title = titles[0] if titles else stem
+        if not tags:
+            tags = gen_tags
+    # Prefer a readable title from the filename when the user named it on purpose
+    # (Stress.mp4 → "Stress …") unless they passed --title or --suggest-title.
+    if not title:
+        title = f"{stem} 🔥 #Gaming"
+
+    item = queue_clip(
+        str(path),
+        title,
+        hashtags=tags or ["#Gaming", "#clips", "#fyp"],
+        score=float(score),
+        tier="queue",
+    )
+    if approve:
+        approved = approve_next_clip(item.get("id"))
+        return approved or item
+    return item
+
+
+def clean_missing_clips(*, dry_run: bool = False) -> dict:
+    """
+    Mark ready rows whose video file is gone as scrapped (ghost cleanup).
+
+    Does not delete any media. Clears the confusing "100 ready" count so
+    `bolt queue` only reflects clips you can actually open and post.
+    """
+    data = _load_ready()
+    now = _now()
+    cleaned = []
+    for clip in data.get("clips") or []:
+        if clip.get("status") != "ready":
+            continue
+        if _clip_file_exists(clip):
+            continue
+        cleaned.append(
+            {
+                "id": clip.get("id"),
+                "title": clip.get("title"),
+                "clip_path": clip.get("clip_path"),
+            }
+        )
+        if dry_run:
+            continue
+        clip["status"] = "scrapped"
+        clip["scrapped_at"] = now.isoformat()
+        clip["scrap_reason"] = "missing_video_file"
+        plan = clip.get("auto_post")
+        if isinstance(plan, dict):
+            plan["status"] = "scrapped_missing_file"
+
+    if not dry_run and cleaned:
+        _save_ready(data)
+        notify(
+            f"Cleaned {len(cleaned)} ghost queue row(s)",
+            level="success",
+            reason="Marked ready rows with missing video files as scrapped. Media was not deleted.",
+        )
+    return {"cleaned": len(cleaned), "dry_run": dry_run, "clips": cleaned}
+
+
 def queue_summary() -> dict:
     """Return counts for each status in the ready-to-post list."""
     data = _load_ready()
@@ -993,71 +1413,102 @@ def queue_summary() -> dict:
     }
 
 
-def render_dashboard(max_clips: int = 8, max_chars: int = 480) -> str:
+def render_dashboard(
+    max_clips: int = 8,
+    max_chars: int = 480,
+    *,
+    actionable_only: bool = True,
+) -> str:
     """
     Build a Twitch-chat-friendly dashboard of the current posting queue.
 
+    By default only shows **actionable** clips (ready + video file exists),
+    sorted by what to decide first. Pass actionable_only=False for the old
+    full dump (including ghost rows with missing files).
+
     Designed to fit in 1-2 Twitch messages (~480 chars each) and show
     enough detail to make an informed !postnow / !dontpost decision
-    without leaving chat. Shows:
-
-      - Header line with the ignored-reviews counter and total counts
-      - One line per clip: id, score, status, plan status, attempts
-      - Tail line with the held-clip count and held-reason snippets
-
-    If there are more than `max_clips` clips, the tail line says
-    "...and N more" rather than truncating. Callers can use the
-    underlying dict (queue_summary()) for full data.
-
-    The output is designed for terminal-style display (monospace
-    friendly) but works in any context.
+    without leaving chat.
     """
     summary = queue_summary()
     data = _load_ready()
     clips = data["clips"]
     ignored = summary.get("consecutive_ignored_reviews", 0)
+    actionable = _actionable_clips(clips)
     header = (
         f"📋 Queue: {summary['ready']} alertable / "
-        f"{summary['ready_total']} ready / "
+        f"{len(actionable)} with file / "
+        f"{summary['ready_total']} ready rows / "
         f"{summary['awaiting_approval']} awaiting / "
         f"{summary['approved']} approved / "
         f"{summary['held']} held / "
         f"{summary['publish_failed']} retrying"
     )
+    if summary.get("missing"):
+        header += f"  👻{summary['missing']} ghost"
     if ignored > 0:
         header += f"  ⚠️ ignored×{ignored}"
 
     lines = [header, "─" * 40]
-    shown = 0
-    for clip in clips:
-        if shown >= max_clips:
-            break
-        if clip.get("status") in ("posted",):
-            continue  # Don't bother showing the history
-        plan = clip.get("auto_post", {}) or {}
-        plan_status = plan.get("status", "—")
-        attempts = plan.get("attempt_count", 0)
-        title = (clip.get("title", "?") or "?")[:24]
-        score = clip.get("score", 0)
-        clip_id = clip.get("id", "????")
-        # Compose a compact status indicator.
-        bits = []
-        if plan_status != "—":
-            bits.append(plan_status)
-        if attempts:
-            bits.append(f"try{attempts}")
-        if clip.get("hold_reason"):
-            reason = (clip.get("hold_reason", "") or "")[:30]
-            bits.append(f"reason={reason}")
-        status_text = "/".join(bits) if bits else "—"
-        lines.append(f"  {clip_id} ⭐{score:>3} | {title:<24} | {status_text}")
-        shown += 1
+    if actionable_only:
+        display = actionable
+        if not display:
+            lines.append("  (no clips with a local video file)")
+            if summary.get("missing"):
+                lines.append(
+                    f"  tip: {summary['missing']} ready rows point at missing files — "
+                    f"run `bolt queue clean`"
+                )
+        for clip in display[:max_clips]:
+            plan = clip.get("auto_post", {}) or {}
+            plan_status = plan.get("status", "—")
+            attempts = plan.get("attempt_count", 0)
+            title = (clip.get("title", "?") or "?")[:22]
+            score = clip.get("score", 0)
+            clip_id = clip.get("id", "????")
+            fname = _clip_display_name(clip)[:28]
+            bits = []
+            if plan_status and plan_status != "—":
+                bits.append(plan_status)
+            if attempts:
+                bits.append(f"try{attempts}")
+            status_text = "/".join(bits) if bits else "—"
+            lines.append(
+                f"  {clip_id} ⭐{score:>3} | {title:<22} | {status_text}"
+            )
+            lines.append(f"           📁 {fname}")
+        if len(display) > max_clips:
+            lines.append(f"  …and {len(display) - max_clips} more with files")
+    else:
+        shown = 0
+        for clip in clips:
+            if shown >= max_clips:
+                break
+            if clip.get("status") in ("posted", "scrapped"):
+                continue
+            plan = clip.get("auto_post", {}) or {}
+            plan_status = plan.get("status", "—")
+            attempts = plan.get("attempt_count", 0)
+            title = (clip.get("title", "?") or "?")[:24]
+            score = clip.get("score", 0)
+            clip_id = clip.get("id", "????")
+            bits = []
+            if plan_status != "—":
+                bits.append(plan_status)
+            if attempts:
+                bits.append(f"try{attempts}")
+            if not _clip_file_exists(clip) and clip.get("status") == "ready":
+                bits.append("MISSING")
+            if clip.get("hold_reason"):
+                reason = (clip.get("hold_reason", "") or "")[:30]
+                bits.append(f"reason={reason}")
+            status_text = "/".join(bits) if bits else "—"
+            lines.append(f"  {clip_id} ⭐{score:>3} | {title:<24} | {status_text}")
+            shown += 1
+        if len(clips) > max_clips:
+            lines.append(f"  …and {len(clips) - max_clips} more")
 
-    if len(clips) > max_clips:
-        lines.append(f"  …and {len(clips) - max_clips} more")
     if summary["held"]:
-        # Show a tiny held-reason digest so Billy doesn't have to dig
-        # through the queue file to see why clips are stuck.
         reasons = []
         for c in clips:
             if c.get("status") == "held" and c.get("hold_reason"):
@@ -1070,11 +1521,149 @@ def render_dashboard(max_clips: int = 8, max_chars: int = 480) -> str:
             if len(reasons) > 3:
                 lines.append(f"  …and {len(reasons) - 3} more")
 
+    if actionable and actionable_only:
+        lines.append("─" * 40)
+        lines.append(
+            "Decide:  bolt queue next  |  bolt approve  |  bolt dontpost <why>  |  bolt postnow"
+        )
+
     out = "\n".join(lines)
-    # Trim if we somehow blew past the limit.
     if len(out) > max_chars:
         out = out[: max_chars - 3] + "…"
     return out
+
+
+def show_next_clip(*, open_video: bool = False) -> dict | None:
+    """Print a full card for the next actionable clip. Optionally open the video."""
+    clips = _actionable_clips()
+    if not clips:
+        print("\n  No postable clips right now.")
+        print("  (ready rows with missing video files do not count)\n")
+        s = queue_summary()
+        if s.get("missing"):
+            print(
+                f"  {s['missing']} ghost row(s) still say ready — run: bolt queue clean\n"
+            )
+        return None
+    clip = clips[0]
+    print()
+    print(_format_clip_card(clip, index=1, total=len(clips)))
+    print()
+    print("  No need to open ready_to_post.json.")
+    print("  Commands for THIS clip (id optional — defaults to next):")
+    print(f"    bolt approve {clip.get('id')}")
+    print(f"    bolt dontpost {clip.get('id')} <reason>")
+    print(f"    bolt postnow {clip.get('id')}")
+    print("    bolt queue decide     # walk through all with prompts")
+    print()
+    if open_video:
+        _open_clip_video(clip)
+    return clip
+
+
+def interactive_decide(*, open_first: bool = True) -> int:
+    """
+    Walk through every actionable clip with a simple prompt.
+
+    No JSON, no remembering ids — open / approve / hold / post-now / skip.
+    Returns number of decisions made (approve/hold/post).
+    """
+    decisions = 0
+    skipped_ids: set[str] = set()
+    opened_once = False
+
+    while True:
+        clips = [
+            c
+            for c in _actionable_clips()
+            if c.get("id") not in skipped_ids
+        ]
+        if not clips:
+            # If we only skipped, offer to loop again from the top.
+            remaining = _actionable_clips()
+            if remaining and skipped_ids:
+                print(
+                    f"\n  Looped all {len(skipped_ids)} clip(s) without a decision."
+                )
+                try:
+                    again = input("  review skipped again? [y/N]> ").strip().lower()
+                except (EOFError, KeyboardInterrupt):
+                    print("\n  quit")
+                    break
+                if again in {"y", "yes"}:
+                    skipped_ids.clear()
+                    continue
+            print("\n  Queue clear of postable clips. Done.\n")
+            break
+
+        clip = clips[0]
+        total = len(clips)
+        print()
+        print(_format_clip_card(clip, index=1, total=total))
+        print()
+        print("  [o] open video")
+        print("  [a] approve for next peak")
+        print("  [p] post now (TikTok)")
+        print("  [h] hold / don't post (asks for reason)")
+        print("  [s] skip to next (leave as ready)")
+        print("  [q] quit")
+        if open_first and not opened_once:
+            _open_clip_video(clip)
+            opened_once = True
+
+        try:
+            choice = input("\n  choice> ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            print("\n  quit")
+            break
+
+        if not choice or choice in {"q", "quit", "exit"}:
+            break
+        if choice in {"o", "open"}:
+            _open_clip_video(clip)
+            continue
+        if choice in {"a", "approve", "y", "yes"}:
+            approved = approve_next_clip(clip.get("id"))
+            if approved:
+                print(f"  ✓ approved {approved.get('id')} for peak auto-post")
+                decisions += 1
+            else:
+                print("  could not approve that clip", file=sys.stderr)
+            continue
+        if choice in {"p", "post", "postnow", "post-now"}:
+            result = post_now(clip.get("id"))
+            publish = result.get("result") or {}
+            if publish.get("success"):
+                print(f"  ✓ posted {clip.get('id')}")
+                decisions += 1
+            else:
+                print(
+                    f"  post failed: {publish.get('error', 'unknown')}",
+                    file=sys.stderr,
+                )
+            continue
+        if choice in {"h", "hold", "n", "no", "reject", "dontpost"}:
+            try:
+                reason = input("  reason (helps Bolt learn)> ").strip()
+            except (EOFError, KeyboardInterrupt):
+                print("\n  cancelled hold")
+                continue
+            if not reason:
+                reason = "held during interactive review"
+            held = reject_next_clip(reason, clip.get("id"))
+            if held:
+                print(f"  ✓ held {held.get('id')}: {reason}")
+                decisions += 1
+            else:
+                print("  could not hold that clip", file=sys.stderr)
+            continue
+        if choice in {"s", "skip", "next"}:
+            skipped_ids.add(str(clip.get("id")))
+            print(f"  skipped {clip.get('id')} for now")
+            continue
+        print("  unknown choice — use o/a/p/h/s/q")
+
+    return decisions
 
 
 # ── CLI ────────────────────────────────────────────────────────────────────────
@@ -1082,17 +1671,48 @@ def render_dashboard(max_clips: int = 8, max_chars: int = 480) -> str:
 QUEUE_CLI_HELP = """
 Bolt post queue — ready clips, peak-hour approval, and posting.
 
-Queue state lives in Data/ready_to_post.json (not a folder).
-Video files are usually under media/vertical_clips/.
+IMPORTANT:
+  Approval is NOT done in media/vertical_clips/.
+  Queue *state* lives in Data/ready_to_post.json (ids, scores, approve/hold).
+  Video *files* live under media/vertical_clips/ (watch them; don't "approve" there).
+
+Simplest flow (no JSON, no remembering ids):
+  bolt queue clean                   # drop ghost rows (missing video files)
+  bolt queue list                    # only clips with a real local file
+  bolt queue next                    # show the next clip + path (+ open with --open)
+  bolt queue decide                  # interactive: open / approve / hold / post / skip
+  bolt approve                       # approve that next clip for peak
+  bolt dontpost "weak hook"          # hold next clip + reason
+  bolt postnow                       # publish next clip now
+
+Already edited files in media/vertical_clips/ (your final cuts):
+  bolt queue add Stress.mp4 Hands.mp4 Leaving.mp4
+  bolt queue add Stress.mp4 --approve          # queue + mark approved for peak
+  bolt queue add Stress.mp4 --title "My hook"  # custom caption title
+  bolt queue add Stress.mp4 --suggest-title    # AI/template title options applied
+  # Editing a file does NOT register it — you must `queue add` once.
+
+Titles / captions:
+  bolt queue title                   # Suggest titles for the next postable clip
+  bolt queue title <clip_id>         # Suggest titles for a specific clip
+  bolt queue title <clip_id> 1       # Apply suggestion #1
+  bolt queue title <clip_id> "Hook"  # Set a custom title
+  bolt monitor_titles                # How past titles performed (learning)
 
 Usage:
   bolt queue                         Summary + peak window (default)
   bolt queue status                  Same as summary
-  bolt queue list                    Per-clip dashboard
+  bolt queue list                    Actionable clips only (id, score, file)
+  bolt queue list --all              Include ghost / non-file rows
+  bolt queue next [--open]           Show next postable clip card
+  bolt queue decide                  Interactive review (recommended)
+  bolt queue add <file> [file…]      Register hand-edited vertical clips
+  bolt queue title [clip_id] [N|text] Suggest or set a caption title
   bolt queue approve [clip_id]       Approve for next peak auto-post
   bolt queue reject [clip_id] <why>  Hold a clip and record the reason
   bolt queue post-now [clip_id]      Publish immediately (TikTok)
   bolt queue mark-posted [clip_id]   Mark as posted (after manual upload)
+  bolt queue clean [--dry-run]       Scrap ready rows whose video is missing
   bolt queue check                   Peak-window check + Discord alert if due
   bolt queue tick                    Run one auto-post scheduler tick
   bolt queue review-window           Send the 30-min pre-peak review alert
@@ -1109,8 +1729,10 @@ Legacy flags still work: --summary --approve --post-now --reject --mark-posted
 
 def _print_summary() -> None:
     s = queue_summary()
+    with_file = len(_actionable_clips())
     print(
-        f"\n  📋  Post Queue: {s['ready']} alertable  |  "
+        f"\n  📋  Post Queue: {with_file} you can post  |  "
+        f"{s['ready']} alertable  |  "
         f"{s['ready_total']} ready rows  |  {s['posted']} posted  |  {s['total']} total\n"
     )
     print(
@@ -1119,11 +1741,17 @@ def _print_summary() -> None:
     )
     if s["missing"] or s["below_floor"]:
         print(
-            f"      ignored: {s['missing']} missing file(s), "
-            f"{s['below_floor']} below score floor\n"
+            f"      ignored: {s['missing']} ghost (missing file), "
+            f"{s['below_floor']} below score floor"
         )
-    print(f"      file: {READY_FILE}")
-    print("      videos: media/vertical_clips/  (paths also in each queue row)\n")
+        if s["missing"]:
+            print("               → run `bolt queue clean` to clear ghosts from the count\n")
+        else:
+            print()
+    print("      Approve here (CLI / Twitch), not in the media folder.")
+    print(f"      state:  {READY_FILE}")
+    print("      videos: media/vertical_clips/\n")
+    print("      quick:  bolt queue next  |  bolt queue decide  |  bolt approve\n")
 
 
 def _looks_like_clip_id(token: str) -> bool:
@@ -1150,68 +1778,77 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
     """CLI entry for ``bolt queue …`` / ``python -m modules.Peak_Hour_Notifier``."""
     args = list(argv if argv is not None else [])
 
-    # ── Legacy flag forms (kept for scripts / docs) ──────────────────────────
-    if "--help" in args or "-h" in args:
+    # Help always wins.
+    if "--help" in args or "-h" in args or (args and args[0] in ("help",)):
         print(QUEUE_CLI_HELP.strip())
         return 0
-    if "--mark-posted" in args:
-        idx = args.index("--mark-posted")
-        clip_id = (
-            args[idx + 1]
-            if idx + 1 < len(args) and not args[idx + 1].startswith("--")
-            else None
-        )
-        mark_posted(clip_id)
-        return 0
-    if "--review-window" in args:
-        n = alert_review_window()
-        print(f"review alerts sent: {n}")
-        return 0
-    if "--auto-post-tick" in args:
-        print(json.dumps(process_auto_post_queue(), indent=2))
-        return 0
-    if "--post-now" in args:
-        idx = args.index("--post-now")
-        clip_id = (
-            args[idx + 1]
-            if idx + 1 < len(args) and not args[idx + 1].startswith("--")
-            else None
-        )
-        print(json.dumps(post_now(clip_id), indent=2, default=str))
-        return 0
-    if "--approve" in args:
-        idx = args.index("--approve")
-        clip_id = (
-            args[idx + 1]
-            if idx + 1 < len(args) and not args[idx + 1].startswith("--")
-            else None
-        )
-        clip = approve_next_clip(clip_id)
-        if not clip:
-            print("no ready clip found to approve", file=sys.stderr)
-            return 1
-        print(json.dumps(clip, indent=2, default=str))
-        return 0
-    if "--reject" in args:
-        idx = args.index("--reject")
-        rest = args[idx + 1 :]
-        reason, clip_id = _parse_reject_args(rest)
-        clip = reject_next_clip(reason, clip_id)
-        if not clip:
-            print("no ready clip found to hold", file=sys.stderr)
-            return 1
-        print(json.dumps(clip, indent=2, default=str))
-        return 0
-    if "--reset-queue" in args:
-        path = reset_queue()
-        print(f"queue reset → {path}")
-        return 0
-    if "--summary" in args:
-        _print_summary()
-        return 0
-    if "--dashboard" in args or "--list" in args:
-        print(render_dashboard(max_clips=20, max_chars=4000))
-        return 0
+
+    # ── Legacy flag forms (kept for scripts / docs) ──────────────────────────
+    # Only when the *first* token is a flag (or bare flags with no subcommand).
+    # Otherwise `bolt queue add X --approve` would be stolen by legacy --approve
+    # and never register the file.
+    first = args[0] if args else ""
+    legacy_mode = (not args) or first.startswith("-")
+
+    if legacy_mode:
+        if "--mark-posted" in args:
+            idx = args.index("--mark-posted")
+            clip_id = (
+                args[idx + 1]
+                if idx + 1 < len(args) and not args[idx + 1].startswith("--")
+                else None
+            )
+            mark_posted(clip_id)
+            return 0
+        if "--review-window" in args:
+            n = alert_review_window()
+            print(f"review alerts sent: {n}")
+            return 0
+        if "--auto-post-tick" in args:
+            print(json.dumps(process_auto_post_queue(), indent=2))
+            return 0
+        if "--post-now" in args:
+            idx = args.index("--post-now")
+            clip_id = (
+                args[idx + 1]
+                if idx + 1 < len(args) and not args[idx + 1].startswith("--")
+                else None
+            )
+            print(json.dumps(post_now(clip_id), indent=2, default=str))
+            return 0
+        if "--approve" in args:
+            idx = args.index("--approve")
+            clip_id = (
+                args[idx + 1]
+                if idx + 1 < len(args) and not args[idx + 1].startswith("--")
+                else None
+            )
+            clip = approve_next_clip(clip_id)
+            if not clip:
+                print("no ready clip found to approve", file=sys.stderr)
+                return 1
+            print(json.dumps(clip, indent=2, default=str))
+            return 0
+        if "--reject" in args:
+            idx = args.index("--reject")
+            rest = args[idx + 1 :]
+            reason, clip_id = _parse_reject_args(rest)
+            clip = reject_next_clip(reason, clip_id)
+            if not clip:
+                print("no ready clip found to hold", file=sys.stderr)
+                return 1
+            print(json.dumps(clip, indent=2, default=str))
+            return 0
+        if "--reset-queue" in args:
+            path = reset_queue()
+            print(f"queue reset → {path}")
+            return 0
+        if "--summary" in args:
+            _print_summary()
+            return 0
+        if "--dashboard" in args or "--list" in args:
+            print(render_dashboard(max_clips=20, max_chars=4000))
+            return 0
 
     # ── Friendly subcommand forms ────────────────────────────────────────────
     if not args:
@@ -1234,22 +1871,181 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
         return 0
 
     if action in ("list", "dashboard", "qstatus"):
-        print(render_dashboard(max_clips=20, max_chars=4000))
+        show_all = "--all" in rest or "-a" in rest
+        print(
+            render_dashboard(
+                max_clips=20,
+                max_chars=8000,
+                actionable_only=not show_all,
+            )
+        )
+        return 0
+
+    if action in ("next", "show", "show-next"):
+        open_video = "--open" in rest or "-o" in rest
+        clip = show_next_clip(open_video=open_video)
+        return 0 if clip else 1
+
+    if action in ("decide", "review", "triage", "pick"):
+        # Interactive walkthrough. `review-window` remains the Discord ping.
+        n = interactive_decide(open_first="--no-open" not in rest)
+        print(f"decisions made: {n}")
+        return 0
+
+    if action in ("add", "add-clip", "register", "import"):
+        # bolt queue add Stress.mp4 Hands.mp4 [--approve] [--title "..."] [--score 90]
+        flags = set()
+        title = None
+        score = 90.0
+        paths: list[str] = []
+        i = 0
+        while i < len(rest):
+            tok = rest[i]
+            if tok in ("--approve", "-a"):
+                flags.add("approve")
+                i += 1
+                continue
+            if tok in ("--suggest-title", "--ai-title", "--gen-title"):
+                flags.add("suggest_title")
+                i += 1
+                continue
+            if tok == "--title" and i + 1 < len(rest):
+                title = rest[i + 1]
+                i += 2
+                continue
+            if tok == "--score" and i + 1 < len(rest):
+                try:
+                    score = float(rest[i + 1])
+                except ValueError:
+                    print(f"invalid --score: {rest[i + 1]}", file=sys.stderr)
+                    return 2
+                i += 2
+                continue
+            if tok.startswith("-"):
+                print(f"unknown flag for queue add: {tok}", file=sys.stderr)
+                return 2
+            paths.append(tok)
+            i += 1
+        if not paths:
+            print(
+                "usage: bolt queue add <file> [file…] [--approve] [--suggest-title] "
+                "[--title TEXT] [--score N]",
+                file=sys.stderr,
+            )
+            print(
+                f"  files usually live in {_vertical_clips_dir()}",
+                file=sys.stderr,
+            )
+            return 2
+        if title is not None and len(paths) > 1:
+            print(
+                "note: --title applies only to the first file; others use filename",
+                file=sys.stderr,
+            )
+        added = 0
+        for idx, path_tok in enumerate(paths):
+            use_title = title if idx == 0 else None
+            try:
+                item = add_manual_clip(
+                    path_tok,
+                    title=use_title,
+                    score=score,
+                    approve="approve" in flags,
+                    suggest_title="suggest_title" in flags and use_title is None,
+                )
+            except FileNotFoundError as exc:
+                print(str(exc), file=sys.stderr)
+                continue
+            added += 1
+            state = (item.get("auto_post") or {}).get("status") or item.get("status")
+            print(
+                f"  + {item.get('id')}  {state}  "
+                f"⭐{item.get('score')}  {_clip_display_name(item)}"
+            )
+            if item.get("title"):
+                print(f"      title: {item.get('title')}")
+        if not added:
+            return 1
+        print(
+            f"\nadded {added} clip(s). Next: bolt queue list  |  bolt queue title  |  bolt postnow"
+        )
+        return 0
+
+    if action in ("title", "titles", "retitle", "caption"):
+        # bolt queue title [clip_id]           → suggest
+        # bolt queue title [clip_id] 1         → apply suggestion N
+        # bolt queue title [clip_id] "My hook" → set custom
+        clip_id = None
+        apply_token = None
+        if rest:
+            if _looks_like_clip_id(rest[0]):
+                clip_id = rest[0]
+                apply_token = " ".join(rest[1:]).strip() if len(rest) > 1 else None
+            else:
+                apply_token = " ".join(rest).strip()
+
+        data = _load_ready()
+        clip = _find_ready_clip(data, clip_id, require_file=True)
+        if not clip and clip_id:
+            for c in data.get("clips") or []:
+                if c.get("id") == clip_id:
+                    clip = c
+                    break
+        if not clip:
+            print("no postable clip found for title tools", file=sys.stderr)
+            return 1
+
+        print(_format_clip_card(clip))
+        titles, tags = _suggest_titles_for_clip(clip)
+        print("\n  Suggested titles:")
+        for i, t in enumerate(titles, 1):
+            print(f"    {i}. {t}")
+        if tags:
+            print(f"  tags: {' '.join(tags[:10])}")
+
+        if not apply_token:
+            print(
+                f"\n  Apply one:  bolt queue title {clip.get('id')} 1"
+            )
+            print(
+                f"  Or custom:  bolt queue title {clip.get('id')} \"Your hook here\""
+            )
+            return 0
+
+        # Numeric → pick suggestion; otherwise treat as custom title.
+        if apply_token.isdigit():
+            idx = int(apply_token)
+            if idx < 1 or idx > len(titles):
+                print(f"pick 1–{len(titles)}", file=sys.stderr)
+                return 2
+            chosen = titles[idx - 1]
+            updated = set_clip_title(chosen, clip.get("id"), hashtags=tags or None)
+        else:
+            updated = set_clip_title(apply_token, clip.get("id"))
+        if not updated:
+            print("could not update title", file=sys.stderr)
+            return 1
+        print(f"\n  ✓ title set on {updated.get('id')}: {updated.get('title')}")
         return 0
 
     if action in ("approve",):
         clip_id = rest[0] if rest else None
         clip = approve_next_clip(clip_id)
         if not clip:
-            print("no ready clip found to approve", file=sys.stderr)
+            print(
+                "no postable clip found to approve "
+                "(need status=ready + local video file)",
+                file=sys.stderr,
+            )
             return 1
         print(
             f"approved clip {clip.get('id')} for the next peak post"
             f"  ({clip.get('title', '')[:60]})"
         )
+        print(f"  file: {_clip_display_name(clip)}")
         return 0
 
-    if action in ("reject", "hold", "dontpost", "dont-post", "skip", "stopclip"):
+    if action in ("reject", "hold", "dontpost", "dont-post", "stopclip"):
         reason, clip_id = _parse_reject_args(rest)
         clip = reject_next_clip(reason, clip_id)
         if not clip:
@@ -1281,6 +2077,17 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
         mark_posted(clip_id)
         return 0
 
+    if action in ("clean", "clean-missing", "prune", "prune-missing"):
+        dry = "--dry-run" in rest or "--dry" in rest
+        result = clean_missing_clips(dry_run=dry)
+        label = "would scrap" if dry else "scrapped"
+        print(f"{label} {result['cleaned']} ghost ready row(s) (missing video file)")
+        for row in result.get("clips") or []:
+            print(f"  - {row.get('id')}  {row.get('title', '')[:50]}")
+        if dry and result["cleaned"]:
+            print("re-run without --dry-run to apply")
+        return 0
+
     if action in ("check", "alert", "peak"):
         is_peak, info = _is_peak_now()
         print(f"\n  🕐  Current time zone: {POSTING_TIMEZONE}")
@@ -1293,7 +2100,7 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
         print(json.dumps(process_auto_post_queue(), indent=2))
         return 0
 
-    if action in ("review-window", "review"):
+    if action in ("review-window",):
         n = alert_review_window()
         print(f"review alerts sent: {n}")
         return 0

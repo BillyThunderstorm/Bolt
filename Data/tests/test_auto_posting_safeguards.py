@@ -717,11 +717,81 @@ class QueueDashboardTests(unittest.TestCase):
                 score=80,
             )
             out = notifier.render_dashboard()
-        # 24-char truncation; the long string is sliced to its first 24 chars.
-        self.assertIn("This is a very long tit", out)
-        # The full long title should NOT be present (i.e., truncation happened).
+        # Actionable list truncates titles for terminal width (~22 chars).
+        self.assertIn("This is a very long ti", out)
         full = "This is a very long title that should be cut off in the dashboard"
         self.assertNotIn(full, out)
+
+    def test_dashboard_hides_missing_file_rows_by_default(self):
+        with self._patch_files():
+            notifier.queue_clip(str(self.clip), "Has file", ["#Gaming"], score=90)
+            data = notifier._load_ready()
+            data["clips"].append(
+                {
+                    "id": "ghost001",
+                    "clip_path": str(self.root / "does_not_exist.mp4"),
+                    "title": "Ghost clip missing",
+                    "score": 99,
+                    "tier": "queue",
+                    "status": "ready",
+                }
+            )
+            notifier._save_ready(data)
+            out = notifier.render_dashboard()
+            out_all = notifier.render_dashboard(actionable_only=False)
+        self.assertIn("Has file", out)
+        self.assertNotIn("Ghost clip missing", out)
+        self.assertIn("ghost", out.lower())
+        self.assertIn("Ghost clip missing", out_all)
+
+    def test_approve_skips_missing_file_without_id(self):
+        with self._patch_files():
+            data = notifier._load_ready()
+            data["clips"] = [
+                {
+                    "id": "ghost001",
+                    "clip_path": str(self.root / "gone.mp4"),
+                    "title": "Ghost",
+                    "score": 99,
+                    "tier": "queue",
+                    "status": "ready",
+                    "auto_post": {"status": "awaiting_approval", "enabled": True},
+                }
+            ]
+            notifier._save_ready(data)
+            approved = notifier.approve_next_clip()
+            self.assertEqual(approved, {})
+            notifier.queue_clip(str(self.clip), "Real clip", ["#Gaming"], score=90)
+            approved = notifier.approve_next_clip()
+            self.assertEqual(approved.get("title"), "Real clip")
+
+    def test_clean_missing_scraps_ghost_rows(self):
+        with self._patch_files():
+            notifier.queue_clip(str(self.clip), "Keep me", ["#Gaming"], score=90)
+            data = notifier._load_ready()
+            data["clips"].append(
+                {
+                    "id": "ghost001",
+                    "clip_path": str(self.root / "gone.mp4"),
+                    "title": "Ghost",
+                    "score": 50,
+                    "tier": "queue",
+                    "status": "ready",
+                }
+            )
+            notifier._save_ready(data)
+            dry = notifier.clean_missing_clips(dry_run=True)
+            self.assertEqual(dry["cleaned"], 1)
+            self.assertEqual(notifier._load_ready()["clips"][1]["status"], "ready")
+            result = notifier.clean_missing_clips(dry_run=False)
+            self.assertEqual(result["cleaned"], 1)
+            data = notifier._load_ready()
+            by_id = {c["id"]: c for c in data["clips"]}
+            self.assertEqual(by_id["ghost001"]["status"], "scrapped")
+            self.assertEqual(
+                [c for c in data["clips"] if c.get("status") == "ready"][0]["title"],
+                "Keep me",
+            )
 
     def test_dashboard_shows_attempt_count(self):
         with self._patch_files():

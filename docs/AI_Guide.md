@@ -152,7 +152,7 @@ python3 launch.py            # go
 | Phase 3 | Voice + personality layer | 🔄 Almost there (Apr 28 2026) - env verified via `--check`, TWITCH_BOT_TOKEN active, Codex reachable. Still needs live `!Bolt hi` test in chat to confirm twitchio connection works. |
 | Phase 4 | Self-improving memory | 🔄 Started - Bolt_Memory.py / Bolt_Search.py / Brain_Controller.py / Think_Learn_Decide.py scaffolded, NOT yet integrated |
 | Quality Gating | Hard confidence + tier system | ✅ Done Apr 28 2026 |
-| Performance Loop | log_clip_performance.py CLI | ✅ Done Apr 28 2026 (Billy must run it after each posting session for Bolt to learn) |
+| Performance Loop | log_clip_performance.py CLI + sync_tiktok_stats.py (TikTok API) | ✅ Manual log Apr 28 2026; auto TikTok pull Aug 2026 (needs video.list token) |
 
 **Phase 2 progress:**
 - ✅ Twitch API connected (Client ID + Secret in .env, channel: BillyandRandy)
@@ -205,9 +205,16 @@ python3 -m modules.Peak_Hour_Notifier --summary    # How many clips are queued
 python3 -m modules.Peak_Hour_Notifier --mark-posted  # Mark all ready clips as posted (run after posting)
 
 # Performance feedback loop (Apr 28 2026):
-python3 scripts/log_clip_performance.py                                # interactive
+python3 scripts/log_clip_performance.py                                # interactive (manual)
 python3 scripts/log_clip_performance.py --trigger kill --views 12500   # direct
 python3 scripts/log_clip_performance.py --list                         # show learned data
+python3 scripts/sync_tiktok_stats.py --dry-run                         # pull TikTok views/likes
+python3 scripts/sync_tiktok_stats.py --min-age-hours 24                # live sync + learning
+python3 scripts/sync_youtube_stats.py --dry-run                        # pull YouTube/Shorts stats
+python3 scripts/sync_youtube_stats.py --shorts-only --min-age-hours 24
+# One-time OAuth:
+#   TikTok:  python3 scripts/get_tiktok_token.py --scopes "user.info.basic,video.list"
+#   YouTube: python3 scripts/get_youtube_token.py   # Google Cloud + YouTube Data API v3
 
 # Phase 3 commands:
 python3 -m modules.Bolt_Chat                          # Test chat bot connection directly
