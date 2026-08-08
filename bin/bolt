@@ -97,6 +97,13 @@ SUBCOMMANDS: dict[str, str] = {
     "twitch_token": "get_twitch_token.py",
     "twitch_bot_token": "get_twitch_bot_token.py",
     "tiktok_token": "get_tiktok_token.py",
+    "youtube_token": "get_youtube_token.py",
+    "sync_tiktok_stats": "sync_tiktok_stats.py",
+    "sync_tiktok": "sync_tiktok_stats.py",
+    "tiktok_stats": "sync_tiktok_stats.py",
+    "sync_youtube_stats": "sync_youtube_stats.py",
+    "sync_youtube": "sync_youtube_stats.py",
+    "youtube_stats": "sync_youtube_stats.py",
     "send": "send_notification.py",
     "notify": "send_notification.py",
     "refresh_memory": "refresh_memory_index.py",
@@ -148,7 +155,10 @@ Script subcommands (each maps to scripts/X.py):
   vods                    Download Twitch VOD samples
   twitch_token            Get a Twitch chat token
   twitch_bot_token        Get a Twitch bot chat token
-  tiktok_token            Get a TikTok OAuth token
+  tiktok_token            Get a TikTok OAuth token (needs video.list for stats)
+  youtube_token           Get a YouTube OAuth token (Data API readonly)
+  sync_tiktok_stats       Pull TikTok views/likes into performance log
+  sync_youtube_stats      Pull YouTube/Shorts views/likes into performance log
   send "<msg>"            Send an SMS / email notification
   refresh_memory          Rebuild the clip memory index (Data/memory_index.json)
   refresh_vector_db        Rebuild the Vector DB for Nexus
@@ -181,8 +191,12 @@ Creator Command Center (Core/modules/Command_Center.py):
   ccc …                   Short alias for mission
 
 Post queue / peak posting (Core/modules/Peak_Hour_Notifier.py):
-  queue [status|list|approve|reject|post-now|…]
+  queue [status|list|next|decide|clean|approve|…]
                           Ready-to-post queue (Data/ready_to_post.json)
+                          NOT media/vertical_clips/ — that folder is videos only
+  queue decide            Interactive: open / approve / hold / post (easiest)
+  queue next [--open]     Show next postable clip card
+  queue clean             Clear ghost rows (ready but file missing)
   approve [clip_id]       Approve next (or named) clip for peak auto-post
   postnow [clip_id]       Publish immediately (alias: post-now)
   dontpost [clip_id] <why>

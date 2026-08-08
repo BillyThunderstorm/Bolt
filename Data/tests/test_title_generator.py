@@ -80,12 +80,12 @@ class TitleGeneratorTests(unittest.TestCase):
 
         with (
             patch.object(titles, "TITLE_CACHE", self.cache_path),
-            # Force OpenAI path so the ask_llm mock is actually reached.
-            # Without this, the live GEMINI_API_KEY in .env makes the
-            # real Gemini call fire first and the mock is bypassed.
             patch.object(titles, "USE_GEMINI", False),
-            patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test"}, clear=False),
-            patch("modules.LLM_Handler.ask_llm", return_value=response) as ask_llm,
+            patch.object(
+                titles,
+                "_ask_preferred_title_llm",
+                return_value=(response, "Grok/grok-4.5"),
+            ) as preferred,
         ):
             generated, hashtags = titles.generate_titles(
                 trigger="multi_kill",
@@ -109,13 +109,17 @@ class TitleGeneratorTests(unittest.TestCase):
         self.assertEqual(generated[0], "Billy just erased the lobby.")
         self.assertIn("#MarvelRivals", hashtags)
         self.assertEqual(generated_again, generated)
-        ask_llm.assert_called_once()
+        preferred.assert_called_once()
 
     def test_ai_failure_falls_back_to_templates(self):
         with (
             patch.object(titles, "TITLE_CACHE", self.cache_path),
-            patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test"}, clear=False),
-            patch("modules.LLM_Handler.ask_llm", return_value="not json"),
+            patch.object(titles, "USE_GEMINI", False),
+            patch.object(
+                titles,
+                "_ask_preferred_title_llm",
+                return_value=("not json", "ChatGPT/gpt-4o-mini"),
+            ),
         ):
             generated, hashtags = titles.generate_titles(
                 trigger="ace",
@@ -123,6 +127,51 @@ class TitleGeneratorTests(unittest.TestCase):
                 context={"config": {"quality_tiers": {"use_ai_titles": True}}},
             )
 
+        self.assertEqual(len(generated), 3)
+        self.assertIn("#MarvelRivals", hashtags)
+
+    def test_gemini_only_when_explicitly_enabled(self):
+        response = json.dumps(
+            {
+                "titles": ["Gemini last resort title."],
+                "hashtags": ["#MarvelRivals", "#gaming"],
+            }
+        )
+        with (
+            patch.object(titles, "TITLE_CACHE", self.cache_path),
+            patch.object(titles, "USE_GEMINI", True),
+            patch.object(
+                titles, "_ask_preferred_title_llm", return_value=(None, "none")
+            ),
+            patch.object(titles, "_has_gemini_key", return_value=True),
+            patch.object(titles, "_ask_gemini", return_value=response) as gemini,
+        ):
+            generated, _ = titles.generate_titles(
+                trigger="kill",
+                game="Marvel Rivals",
+                context={"config": {"quality_tiers": {"use_ai_titles": True}}},
+            )
+
+        self.assertEqual(generated[0], "Gemini last resort title.")
+        gemini.assert_called_once()
+
+    def test_gemini_skipped_when_disabled_even_if_key_present(self):
+        with (
+            patch.object(titles, "TITLE_CACHE", self.cache_path),
+            patch.object(titles, "USE_GEMINI", False),
+            patch.object(
+                titles, "_ask_preferred_title_llm", return_value=(None, "none")
+            ),
+            patch.object(titles, "_has_gemini_key", return_value=True),
+            patch.object(titles, "_ask_gemini") as gemini,
+        ):
+            generated, hashtags = titles.generate_titles(
+                trigger="kill",
+                game="Marvel Rivals",
+                context={"config": {"quality_tiers": {"use_ai_titles": True}}},
+            )
+
+        gemini.assert_not_called()
         self.assertEqual(len(generated), 3)
         self.assertIn("#MarvelRivals", hashtags)
 

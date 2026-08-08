@@ -14,7 +14,8 @@ import urllib.request
 from pathlib import Path
 from typing import Optional
 
-ROOT = Path(__file__).resolve().parents[1]
+# Core/modules/ → parents[2] is the repo root (where .env lives).
+ROOT = Path(__file__).resolve().parents[2]
 ENV_FILE = ROOT / ".env"
 TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/"
 

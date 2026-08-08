@@ -3,11 +3,15 @@
 Daily Briefing with Nexus + Vector DB + Memory
 """
 
+import sys; sys.path.insert(0, '..')
+from Core.modules.Bolt_Voice import speak
 import os
-import sys
 from pathlib import Path
 from datetime import datetime
-
+print("Reached the speak line")
+speak("This is a direct test.")
+print("Finished speak call")
+os.system('say "Direct say test"')
 # Ensure paths
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "Core"))
@@ -383,7 +387,7 @@ def generate_briefing():
     return text, sms
 
 
-def main(print_only=False):
+def main(speak_only=False):
     """CLI entry point."""
     OUTPUT_DIR = Path("Docs/briefings/daily")
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -393,15 +397,16 @@ def main(print_only=False):
     output_file = OUTPUT_DIR / "latest_morning.md"
     output_file.write_text(briefing_text, encoding="utf-8")
 
-    if print_only:
-        print(briefing_text)
-        print()
-        print("─── SMS SUMMARY ───")
-        print(sms_summary)
+    if speak_only:
+        speak(briefing_text)
+        speak()
+        speak("─── SMS SUMMARY ───")
+        speak(sms_summary)
     else:
-        print("Briefing saved to", output_file)
+        speak("Briefing saved to", output_file)
 
-
-if __name__ == "__main__":
-    print_only = "--print" in sys.argv
-    main(print_only=print_only)
+    speak("Daily briefing test.")
+    if __name__ == "__main__":
+        speak_only = "--speak" in sys.argv
+        main
+("Testing daily briefing voice output.")

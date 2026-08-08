@@ -1,3 +1,4 @@
+import pyttsx3
 import os
 import sys
 import asyncio
@@ -5,6 +6,9 @@ from pathlib import Path
 from google import genai
 from google.genai import types
 
+def speak(text):
+    os.system(f'say "{text}"')
+    
 def load_bolt_context() -> str:
     """Assembles Bolt's identity and core instructions."""
     try:
@@ -77,3 +81,6 @@ async def run_bolt_multimodal():
 
 if __name__ == "__main__":
     asyncio.run(run_bolt_multimodal())
+    
+    print("About to speak...")
+    speak("Bolt is now speaking through the voice.")

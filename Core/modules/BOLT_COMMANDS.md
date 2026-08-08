@@ -239,21 +239,63 @@ Running `bolt social` with no action is the same as `bolt social status`.
 
 This is the **clip** ready queue used for peak-hour posting — **not a folder**.
 
-| What | Where |
-|------|--------|
-| Queue state | `Data/ready_to_post.json` |
-| Vertical videos | `media/vertical_clips/` |
-| Intermediate cuts | `media/clips/` (not the approval list) |
+| What | Where | Role |
+|------|--------|------|
+| Queue state | `Data/ready_to_post.json` | IDs, scores, approve/hold/schedule (**this is the queue**) |
+| Vertical videos | `media/vertical_clips/` | Watch/export files only — **not** where you approve |
+| Intermediate cuts | `media/clips/` | Raw cuts — not the posting list |
 
-Approve for the next peak window, or publish immediately. Same safeguards as Twitch `!postnow` / `!dontpost`.
+You do **not** need to open the JSON or remember ids for the normal path.
+
+### Simplest path (recommended)
+
+```bash
+bolt queue clean                      # Clear ghost rows (ready but video file gone)
+bolt queue list                       # Only clips with a real local file
+bolt queue decide                     # Opens video, then: approve / hold / post / skip
+#  — or one-liners without ids —
+bolt queue next --open                # Show next clip card + open the video
+bolt approve                          # Approve that next clip for peak auto-post
+bolt dontpost "weak hook"             # Hold next + reason (Bolt learns)
+bolt postnow                          # Publish next clip to TikTok now
+```
+
+### Hand-edited files already in `media/vertical_clips/`
+
+Editing/renaming a video (e.g. `Stress.mp4`) does **not** put it in the post queue. Register it once, then approve/post:
+
+```bash
+# Register your final cuts (looks up bare names under media/vertical_clips/)
+bolt queue add Stress.mp4 Hands.mp4 Leaving.mp4 Ate.mp4 close.mp4 almost.mp4 yes.mp4
+
+# Or register + approve for peak in one step
+bolt queue add Stress.mp4 --approve --title "When the stress hits"
+
+# Titles
+bolt queue title                      # Suggest captions for the next clip
+bolt queue title 512bdfa4 1           # Apply suggestion #1
+bolt queue title 512bdfa4 "My hook"   # Set a custom title
+bolt queue add Hands.mp4 --suggest-title --approve   # generate title while adding
+bolt monitor_titles                   # How past titles performed (learning)
+
+# Then post when ready
+bolt postnow                          # next approved/ready clip now
+# or wait for peak after: bolt approve
+bolt queue mark-posted                # only if you uploaded manually outside Bolt
+```
+
+### Full command list
 
 ```bash
 bolt queue                            # Peak window + summary counts
 bolt queue status                     # Same as above
-bolt queue list                       # Per-clip dashboard
+bolt queue list                       # Actionable clips (id, score, filename)
+bolt queue list --all                 # Include ghost / missing-file rows
+bolt queue next [--open]              # Next postable clip card
+bolt queue decide                     # Interactive review (no JSON)
 bolt queue help                       # Full queue CLI help
 
-bolt queue approve                    # Approve next ready clip for peak auto-post
+bolt queue approve                    # Approve next postable clip for peak auto-post
 bolt queue approve 55a802e8           # Approve a specific clip id
 bolt approve                          # Short alias for queue approve
 bolt approve 55a802e8
@@ -262,22 +304,27 @@ bolt queue reject "weak moment"       # Hold next clip + reason
 bolt queue reject 55a802e8 "bad title"
 bolt dontpost "weak moment"           # Short alias for queue reject
 
-bolt queue post-now                   # Publish next approved/ready clip now
+bolt queue post-now                   # Publish next postable clip now
 bolt queue post-now 55a802e8
 bolt postnow                          # Short alias for queue post-now
 
+bolt queue clean                      # Scrap ready rows whose video file is missing
+bolt queue clean --dry-run            # Preview ghost cleanup
 bolt queue mark-posted                # After you uploaded manually
 bolt queue mark-posted 55a802e8
 bolt queue check                      # Peak check + Discord alert if due
 bolt queue tick                       # One auto-post scheduler pass
-bolt queue review-window              # Force the 30-min pre-peak review ping
+bolt queue review-window              # Force the 30-min pre-peak Discord ping
 ```
 
 | Command | What it does |
 |---------|--------------|
-| `bolt queue` / `bolt queue status` | Show peak window + ready/alertable/approved counts |
-| `bolt queue list` | Per-clip dashboard (id, score, plan status) |
-| `bolt queue approve [clip_id]` | Mark clip approved for peak auto-post (does **not** force publish now) |
+| `bolt queue` / `bolt queue status` | Peak window + how many you can actually post vs ghost rows |
+| `bolt queue list` | Actionable clips only (id, score, plan, filename) |
+| `bolt queue next [--open]` | Show the next postable clip; optional OS open |
+| `bolt queue decide` | Interactive open → approve / hold / post / skip |
+| `bolt queue clean` | Mark missing-file ready rows as scrapped (no media deleted) |
+| `bolt queue approve [clip_id]` | Approve for peak auto-post (does **not** force publish now) |
 | `bolt approve [clip_id]` | Alias for `bolt queue approve` |
 | `bolt queue reject [clip_id] <reason>` | Hold a clip and log why (Bolt learns) |
 | `bolt dontpost [clip_id] <reason>` | Alias for `bolt queue reject` |
@@ -286,15 +333,13 @@ bolt queue review-window              # Force the 30-min pre-peak review ping
 | `bolt queue mark-posted [clip_id]` | Clear from ready after a manual upload |
 | `bolt queue check` | Peak-window check; alert if clips are waiting |
 | `bolt queue tick` | Run one auto-post / review-window processing pass |
-| `bolt queue review-window` | Send the pre-peak “awaiting approval” alert now |
+| `bolt queue review-window` | Send the pre-peak “awaiting approval” Discord alert now |
 
-Typical night-before / peak flow:
+Typical flow:
 
-1. `bolt queue` — see what’s ready  
-2. Preview files under `media/vertical_clips/`  
-3. `bolt approve` (or `bolt approve <id>`) before the window  
-4. At peak, auto-post runs if enabled — or use `bolt postnow` to force it  
-5. To block one: `bolt dontpost <id> "reason"`
+1. `bolt queue clean` once if the count looks insanely high (ghosts)  
+2. `bolt queue decide` — watch + approve/hold without touching JSON  
+3. At peak, auto-post runs if enabled — or `bolt postnow` to force it
 
 ## Sponsors
 
@@ -416,7 +461,9 @@ bolt vods [--channel <channel>] [--type archive|highlight|upload] [--limit 10] [
           [--user-token <token>]
 bolt twitch_token
 bolt twitch_bot_token
-bolt tiktok_token [--client-key <key>] [--client-secret <secret>] [--redirect-uri <uri>] [--scopes <scopes>]
+bolt tiktok_token [--client-key <key>] [--client-secret <secret>] [--redirect-uri <uri>]
+                  [--scopes "user.info.basic,video.list,video.publish,video.upload"]
+bolt youtube_token [--client-id <id>] [--client-secret <secret>] [--redirect-uri <uri>]
 ```
 
 Token commands are interactive and may open a browser or prompt for credentials.
@@ -426,12 +473,42 @@ Token commands are interactive and may open a browser or prompt for credentials.
 | `bolt vods` | Download Twitch VOD samples for a channel with type/limit/sample filters |
 | `bolt twitch_token` | Get an OAuth token for the Twitch chat account (interactive) |
 | `bolt twitch_bot_token` | Get an OAuth token for the Bolt bot account (interactive) |
-| `bolt tiktok_token` | Get a TikTok OAuth token with optional client overrides |
+| `bolt tiktok_token` | Get a TikTok OAuth token; include `video.list` scope for stats sync |
+| `bolt youtube_token` | Get a Google/YouTube OAuth token (`youtube.readonly`) for stats sync |
+
+## Platform stats sync (auto learning loop)
+
+Pull real views/likes from TikTok or YouTube into `Data/performance_outcomes.jsonl`
+(and clip history on first sight of each video). Requires the matching token command first.
+
+```bash
+# TikTok (app must be approved; scope video.list)
+bolt sync_tiktok_stats --dry-run
+bolt sync_tiktok_stats --min-age-hours 24
+bolt sync_tiktok_stats --limit 50 --json
+
+# YouTube / Shorts
+bolt sync_youtube_stats --dry-run
+bolt sync_youtube_stats --min-age-hours 24
+bolt sync_youtube_stats --shorts-only --min-age-hours 24
+bolt sync_youtube_stats --limit 50 --json
+```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt sync_tiktok_stats` | Fetch public TikTok video metrics and upsert performance outcomes |
+| `bolt sync_tiktok_stats --dry-run` | Fetch + match only; write nothing |
+| `bolt sync_tiktok_stats --min-age-hours 24` | Skip videos younger than 24h (more stable metrics) |
+| `bolt sync_youtube_stats` | Fetch channel uploads/Shorts metrics and upsert performance outcomes |
+| `bolt sync_youtube_stats --shorts-only` | Only videos ≤60s (typical Shorts) |
+| `bolt sync_youtube_stats --dry-run` | Fetch + match only; write nothing |
 
 ## Advice, reporting, and learning
 
 ```bash
-bolt nexus "question" [--task-type <type>] [--complexity high|medium]
+bolt nexus "question" [--task-type <type>] [--complexity high|medium] [--paid]
+# Free by default (Ollama). --paid allows xAI Grok API for that call.
+# Gemini only if NEXUS_USE_GEMINI=true (off by default). SuperGrok app sub ≠ free API.
 bolt performance
 bolt log_perf --trigger <trigger> --views <count> [--likes <count>] [--clip <file>]
               [--game "Game Name"] [--platform TikTok] [--note "text"]
@@ -442,12 +519,14 @@ bolt weekly [--print] [--send] [--days <number>]
 ```
 
 Running `bolt log_perf` without performance values starts its interactive prompt.
+Prefer `bolt sync_tiktok_stats` / `bolt sync_youtube_stats` when tokens are configured;
+use `log_perf` for manual entry or platforms without API pull (e.g. X).
 
 | Command | What it does |
 |---------|--------------|
-| `bolt nexus "question"` | Ask Nexus (an outside LLM wrapped by Bolt) for content-strategy advice |
+| `bolt nexus "question"` | Ask Nexus for advice (free: Ollama; `--paid` = Grok API; Gemini opt-in only) |
 | `bolt performance` | Run a performance baseline / snapshot of recent clip outcomes |
-| `bolt log_perf …` | Log a clip's actual views/likes back to the ranker so it learns |
+| `bolt log_perf …` | Manually log a clip's views/likes back to the ranker so it learns |
 | `bolt log_perf --list` | Show recent performance-log entries (most recent first) |
 | `bolt monitor_titles` | Summarize how generated titles are performing |
 | `bolt test_titles` | Run the 10-clip title-upgrade smoke test |
@@ -611,7 +690,12 @@ These names perform the same actions as their primary commands:
 | `nexus` | `advice` |
 | `weekly` | `monthly` |
 | `log_perf` | `log_performance` |
+| `sync_tiktok_stats` | `sync_tiktok`, `tiktok_stats` |
+| `sync_youtube_stats` | `sync_youtube`, `youtube_stats` |
 | `queue` | `postqueue`, `post-queue`, `ready-queue` |
+| `queue decide` | `queue review`, `queue triage`, `queue pick` |
+| `queue next` | `queue show` |
+| `queue clean` | `queue prune` |
 | `queue approve` | `approve` |
 | `queue post-now` | `postnow`, `post-now` |
 | `queue reject` | `dontpost`, `dont-post`, `hold-clip` |
