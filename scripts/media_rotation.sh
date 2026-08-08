@@ -1,13 +1,14 @@
 #!/bin/bash
 # Media Rotation Script for Bolt
 # Automatically rotates and archives old media files to maintain storage limits
+# Paths aligned with scripts/_paths.py (post-reorg layout)
 
-# Configuration
-RECORDINGS_DIR="recordings"
-CLIPS_DIR="clips"
+# Configuration — matches _paths.py
+RECORDINGS_DIR="media/Recordings"
+CLIPS_DIR="media/clips"
 MAX_RECORDINGS_GB=50
 MAX_CLIPS_GB=1
-ARCHIVE_DIR="archive"
+ARCHIVE_DIR="Data/archive"
 DRY_RUN=false
 
 # Colors for output
@@ -16,21 +17,39 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Function to get directory size in GB
+# Ensure we run from repo root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+cd "$REPO_ROOT" || exit 1
+
+# Function to get directory size in GB (cross-platform)
 get_dir_size_gb() {
     local dir="$1"
     if [[ -d "$dir" ]]; then
-        du -sb "$dir" | awk '{print $1/1024/1024/1024}'
+        local size_kb
+        size_kb=$(du -sk "$dir" 2>/dev/null | cut -f1)
+        if [[ -n "$size_kb" && "$size_kb" -gt 0 ]]; then
+            echo "$size_kb" | awk '{printf "%.2f", $1/1024/1024}'
+        else
+            echo "0"
+        fi
     else
         echo "0"
     fi
 }
 
-# Function to get oldest files in a directory
+# Function to get oldest files (macOS + Linux compatible)
 get_oldest_files() {
     local dir="$1"
-    if [[ -d "$dir" ]]; then
-        find "$dir" -type f \( -name "*.mp4" -o -name "*.mov" -o -name "*.mkv" -o -name "*.jpg" -o -name "*.png" \) -printf '%T@ %p\n' | sort -n | cut -d' ' -f2-
+    if [[ ! -d "$dir" ]]; then
+        return
+    fi
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        find "$dir" -type f \( -name "*.mp4" -o -name "*.mov" -o -name "*.mkv" -o -name "*.jpg" -o -name "*.png" -o -name "*.jpeg" \) -exec stat -f '%m %N' {} \; 2>/dev/null | sort -n | cut -d' ' -f2-
+    else
+        # Linux
+        find "$dir" -type f \( -name "*.mp4" -o -name "*.mov" -o -name "*.mkv" -o -name "*.jpg" -o -name "*.png" -o -name "*.jpeg" \) -printf '%T@ %p\n' 2>/dev/null | sort -n | cut -d' ' -f2-
     fi
 }
 
@@ -39,70 +58,74 @@ archive_files() {
     local dir="$1"
     local max_size_gb="$2"
     local type="$3"
-    
+
     if [[ ! -d "$dir" ]]; then
         echo -e "${YELLOW}Directory $dir does not exist, skipping...${NC}"
         return 0
     fi
-    
-    local current_size=$(get_dir_size_gb "$dir")
-    
+
+    local current_size
+    current_size=$(get_dir_size_gb "$dir")
+
     if (( $(echo "$current_size <= $max_size_gb" | bc -l) )); then
         echo -e "${GREEN}$type directory is within limit: ${current_size}GB <= ${max_size_gb}GB${NC}"
         return 0
     fi
-    
+
     echo -e "${YELLOW}$type directory exceeds limit: ${current_size}GB > ${max_size_gb}GB${NC}"
     echo -e "${YELLOW}Starting archival process for $type...${NC}"
-    
-    # Create archive directory if it doesn't exist
+
     mkdir -p "$ARCHIVE_DIR/$dir"
-    
-    # Get list of files sorted by oldest first
-    local files=$(get_oldest_files "$dir")
+
+    local files
+    files=$(get_oldest_files "$dir")
     local to_archive_size=0
     local archived_count=0
-    
+
     while IFS= read -r file; do
         if [[ -z "$file" ]]; then
             continue
         fi
-        
-        local file_size=$(du -b "$file" | awk '{print $1}')
-        local file_size_gb=$(echo "$file_size/1024/1024/1024" | bc -l)
-        
-        # Check if we need to archive more files
-        local projected_size=$(echo "$current_size - $to_archive_size" | bc -l)
+
+        local file_size_bytes
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            file_size_bytes=$(stat -f%z "$file" 2>/dev/null || echo 0)
+        else
+            file_size_bytes=$(stat -c%s "$file" 2>/dev/null || echo 0)
+        fi
+        local file_size_gb
+        file_size_gb=$(echo "$file_size_bytes" | awk '{printf "%.4f", $1/1024/1024/1024}')
+
+        local projected_size
+        projected_size=$(echo "$current_size - $to_archive_size" | bc -l)
         if (( $(echo "$projected_size <= $max_size_gb" | bc -l) )); then
             break
         fi
-        
-        # Archive the file
+
         if [[ "$DRY_RUN" = true ]]; then
             echo -e "${YELLOW}[DRY RUN] Would archive: $file (${file_size_gb}GB)${NC}"
         else
             mkdir -p "$(dirname "$ARCHIVE_DIR/$file")"
-            mv "$file" "$ARCHIVE_DIR/$file/"
+            mv "$file" "$ARCHIVE_DIR/$file"
             echo -e "${GREEN}Archived: $file (${file_size_gb}GB)${NC}"
         fi
-        
+
         to_archive_size=$(echo "$to_archive_size + $file_size_gb" | bc -l)
         ((archived_count++))
-        
-        # Progress update every 10 files
+
         if (( archived_count % 10 == 0 )); then
-            echo -e "${YELLOW}Progress: Archived $archived_count files, freed $(echo "$to_archive_size" | bc -l)GB${NC}"
+            echo -e "${YELLOW}Progress: Archived $archived_count files, freed ${to_archive_size}GB${NC}"
         fi
     done <<< "$files"
-    
+
     if [[ "$DRY_RUN" = true ]]; then
-        echo -e "${YELLOW}[DRY RUN] Would archive $archived_count files, freeing $(echo "$to_archive_size" | bc -l)GB${NC}"
+        echo -e "${YELLOW}[DRY RUN] Would archive $archived_count files, freeing ${to_archive_size}GB${NC}"
     else
-        echo -e "${GREEN}Archived $archived_count files, freed $(echo "$to_archive_size" | bc -l)GB${NC}"
+        echo -e "${GREEN}Archived $archived_count files, freed ${to_archive_size}GB${NC}"
     fi
-    
-    # Verify new size
-    local new_size=$(get_dir_size_gb "$dir")
+
+    local new_size
+    new_size=$(get_dir_size_gb "$dir")
     echo -e "${GREEN}New $type directory size: ${new_size}GB${NC}"
 }
 
@@ -110,8 +133,8 @@ archive_files() {
 main() {
     echo -e "${GREEN}Starting Bolt Media Rotation Script${NC}"
     echo "========================================"
-    
-    # Parse arguments
+    echo "Repo root: $REPO_ROOT"
+
     while [[ $# -gt 0 ]]; do
         case $1 in
             --dry-run)
@@ -137,24 +160,20 @@ main() {
                 ;;
         esac
     done
-    
+
     echo "Configuration:"
-    echo "  Recordings limit: ${MAX_RECORDINGS_GB}GB"
-    echo "  Clips limit: ${MAX_CLIPS_GB}GB"
-    echo "  Archive directory: $ARCHIVE_DIR"
-    echo "  Dry run: $DRY_RUN"
+    echo "  Recordings: $RECORDINGS_DIR (limit ${MAX_RECORDINGS_GB}GB)"
+    echo "  Clips:      $CLIPS_DIR (limit ${MAX_CLIPS_GB}GB)"
+    echo "  Archive:    $ARCHIVE_DIR"
+    echo "  Dry run:    $DRY_RUN"
     echo ""
-    
-    # Process recordings
+
     archive_files "$RECORDINGS_DIR" "$MAX_RECORDINGS_GB" "Recordings"
     echo ""
-    
-    # Process clips
     archive_files "$CLIPS_DIR" "$MAX_CLIPS_GB" "Clips"
     echo ""
-    
+
     echo -e "${GREEN}Media rotation completed!${NC}"
 }
 
-# Run main function with all arguments
 main "$@"
