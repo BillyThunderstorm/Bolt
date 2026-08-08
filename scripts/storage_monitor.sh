@@ -2,6 +2,7 @@
 # Storage Monitoring Script for Bolt
 # Monitors disk usage and sends alerts when thresholds are exceeded
 # Supports email, SMS (via email-to-SMS), and webhook notifications
+# Paths aligned with scripts/_paths.py (post-reorg layout)
 
 # =============================================================================
 # CONFIGURATION - Edit these values or set via environment variables
@@ -64,7 +65,6 @@ send_email() {
 
     log_message "INFO" "Sending email to $recipient: $subject"
 
-    # Try different mail commands
     if command -v mail &> /dev/null; then
         echo "$body" | mail -s "$subject" "$recipient"
     elif command -v sendmail &> /dev/null; then
@@ -75,12 +75,10 @@ send_email() {
             echo "$body"
         } | sendmail -t
     elif command -v python3 &> /dev/null; then
-        # Fallback to Python if mail utilities not available
         python3 -c "
 import subprocess
 import sys
 try:
-    # Try using macOS mail app if available
     subprocess.run(['osascript', '-e', '''
         tell application \"Mail\"
             set newMessage to make new outgoing message with properties {subject:\"$subject\", content:\"$body\", visible:true}
@@ -158,7 +156,6 @@ send_discord() {
 
     log_message "INFO" "Sending Discord notification"
 
-    # Set color based on level
     local color="3447003"  # Blue for info
     case "$level" in
         WARNING) color="15158332" ;;  # Yellow
@@ -186,24 +183,19 @@ send_notifications() {
     local subject="$2"
     local body="$3"
 
-    # Email
     if [[ -n "$ALERT_EMAIL" ]]; then
         send_email "$subject" "$body" "$ALERT_EMAIL"
     fi
 
-    # SMS
     if [[ -n "$ALERT_PHONE" ]] && [[ -n "$CARRIER" ]]; then
-        # Truncate message for SMS (160 char limit)
         local sms_message="${subject}: ${body:0:100}"
         send_sms "$sms_message" "$ALERT_PHONE" "$CARRIER"
     fi
 
-    # Generic webhook
     if [[ -n "$WEBHOOK_URL" ]]; then
         send_webhook "$subject" "$body" "$level" "$WEBHOOK_URL"
     fi
 
-    # Discord webhook
     if [[ -n "$DISCORD_WEBHOOK" ]]; then
         send_discord "$subject" "$body" "$level" "$DISCORD_WEBHOOK"
     fi
@@ -234,10 +226,11 @@ check_disk_usage() {
     fi
 }
 
-# Check specific directory sizes
+# Check specific directory sizes (paths match _paths.py)
 check_directory_sizes() {
-    local dirs=("recordings" "clips" "logs" "data")
-    local limits=(50 1 2 5) # GB limits for each directory
+    # dir path | soft limit GB | trigger rotation when over 2x
+    local dirs=("media/Recordings" "media/clips" "logs" "Data/data")
+    local limits=(50 1 2 5) # GB limits
 
     for i in "${!dirs[@]}"; do
         local dir="${dirs[$i]}"
@@ -245,7 +238,7 @@ check_directory_sizes() {
 
         if [ -d "$dir" ]; then
             local size_gb
-            size_gb=$(du -sb "$dir" 2>/dev/null | awk '{print $1/1024/1024/1024}' | cut -d. -f1)
+            size_gb=$(du -sk "$dir" 2>/dev/null | awk '{printf "%d", $1/1024/1024}')
             size_gb=${size_gb:-0}
 
             log_message "INFO" "Directory $dir: ${size_gb}GB (limit: ${limit}GB)"
@@ -256,12 +249,19 @@ check_directory_sizes() {
                 # Trigger cleanup if significantly over limit
                 if [ "$size_gb" -gt $((limit * 2)) ]; then
                     log_message "INFO" "Triggering cleanup for $dir"
-                    ./scripts/maintenance/media_rotation.sh --${dir}-gb "$limit"
+                    # Call the main media_rotation script (not the old symlink path)
+                    if [[ "$dir" == "media/Recordings" ]]; then
+                        ./scripts/media_rotation.sh --recordings-gb "$limit"
+                    elif [[ "$dir" == "media/clips" ]]; then
+                        ./scripts/media_rotation.sh --clips-gb "$limit"
+                    fi
                     send_notifications "WARNING" \
                         "Bolt Cleanup Triggered" \
                         "Directory $dir was at ${size_gb}GB (limit: ${limit}GB). Auto-cleanup initiated."
                 fi
             fi
+        else
+            log_message "INFO" "Directory $dir does not exist (skipped)"
         fi
     done
 }
@@ -281,9 +281,18 @@ print_config() {
 # Load Configuration
 # =============================================================================
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../" && pwd)"
-CONFIG_FILE="${REPO_ROOT}/configs/storage_alerts.env"
-if [[ -f "$CONFIG_FILE" ]]; then
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+cd "$REPO_ROOT" || exit 1
+
+# Prefer Data/configs or configs/ for the alerts env file
+CONFIG_FILE=""
+if [[ -f "${REPO_ROOT}/Data/data/configs/storage_alerts.env" ]]; then
+    CONFIG_FILE="${REPO_ROOT}/Data/data/configs/storage_alerts.env"
+elif [[ -f "${REPO_ROOT}/configs/storage_alerts.env" ]]; then
+    CONFIG_FILE="${REPO_ROOT}/configs/storage_alerts.env"
+fi
+
+if [[ -n "$CONFIG_FILE" && -f "$CONFIG_FILE" ]]; then
     # shellcheck disable=SC1090
     source "$CONFIG_FILE"
 fi
@@ -293,28 +302,22 @@ fi
 # =============================================================================
 
 main() {
-    # Ensure log directory exists
     mkdir -p "$LOG_DIR"
 
     log_message "INFO" "Storage monitor started"
-    log_message "INFO" "Loaded configuration from: $CONFIG_FILE"
+    log_message "INFO" "Repo root: $REPO_ROOT"
+    log_message "INFO" "Loaded configuration from: ${CONFIG_FILE:-none}"
 
-    # Print configuration
     print_config
 
-    # Check disk usage
     check_disk_usage
     local disk_status=$?
 
-    # Check directory sizes
     check_directory_sizes
 
-    # Log completion
     log_message "INFO" "Storage monitor completed"
 
-    # Exit with worst status
     exit $disk_status
 }
 
-# Run main function
 main "$@"
