@@ -1561,16 +1561,44 @@ def show_next_clip(*, open_video: bool = False) -> dict | None:
     return clip
 
 
-def interactive_decide(*, open_first: bool = True) -> int:
+def interactive_decide(
+    *,
+    open_first: bool = True,
+    open_each: bool = False,
+) -> int:
     """
     Walk through every actionable clip with a simple prompt.
 
-    No JSON, no remembering ids — open / approve / hold / post-now / skip.
-    Returns number of decisions made (approve/hold/post).
+    No JSON, no remembering ids — open / approve / hold / post-now / skip / title.
+    Type a number to jump to that clip in the current list.
+    Returns number of decisions made (approve/hold/post/title).
     """
     decisions = 0
     skipped_ids: set[str] = set()
+    focus_id: str | None = None  # jump target (not permanent skip)
     opened_once = False
+
+    # Ghost cleanup offer once at start
+    summary = queue_summary()
+    if summary.get("missing"):
+        print(
+            f"\n  ⚠  {summary['missing']} ghost ready row(s) point at missing files."
+        )
+        try:
+            ans = input("  clean ghosts now? [Y/n]> ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            ans = "n"
+        if ans in {"", "y", "yes"}:
+            result = clean_missing_clips(dry_run=False)
+            print(f"  cleaned {result['cleaned']} ghost row(s)")
+
+    def _speak(msg: str) -> None:
+        try:
+            from modules.Bolt_Voice import speak_result
+
+            speak_result(msg)
+        except Exception:
+            pass
 
     while True:
         clips = [
@@ -1579,7 +1607,6 @@ def interactive_decide(*, open_first: bool = True) -> int:
             if c.get("id") not in skipped_ids
         ]
         if not clips:
-            # If we only skipped, offer to loop again from the top.
             remaining = _actionable_clips()
             if remaining and skipped_ids:
                 print(
@@ -1592,22 +1619,40 @@ def interactive_decide(*, open_first: bool = True) -> int:
                     break
                 if again in {"y", "yes"}:
                     skipped_ids.clear()
+                    focus_id = None
                     continue
             print("\n  Queue clear of postable clips. Done.\n")
+            _speak(f"Queue review done. {decisions} decisions made.")
             break
 
+        # Numbered roster every time so Billy can jump with "3"
+        print("\n  ── Queue review (postable only) ──")
+        _print_actionable_table(limit=20)
+        # Prefer focus_id if still in list; else first
         clip = clips[0]
+        if focus_id:
+            for c in clips:
+                if str(c.get("id")) == focus_id:
+                    clip = c
+                    break
+            else:
+                focus_id = None
+        # Index in current list for card display
+        try:
+            display_idx = next(
+                i for i, c in enumerate(clips, 1) if c.get("id") == clip.get("id")
+            )
+        except StopIteration:
+            display_idx = 1
         total = len(clips)
         print()
-        print(_format_clip_card(clip, index=1, total=total))
+        print(_format_clip_card(clip, index=display_idx, total=total))
         print()
-        print("  [o] open video")
-        print("  [a] approve for next peak")
-        print("  [p] post now (TikTok)")
-        print("  [h] hold / don't post (asks for reason)")
-        print("  [s] skip to next (leave as ready)")
-        print("  [q] quit")
-        if open_first and not opened_once:
+        print("  [o] open video     [a] approve for peak")
+        print("  [p] post now       [h] hold / don't post")
+        print("  [t] retitle        [s] skip")
+        print("  [1-9] jump to #    [q] quit")
+        if (open_first and not opened_once) or open_each:
             _open_clip_video(clip)
             opened_once = True
 
@@ -1619,6 +1664,20 @@ def interactive_decide(*, open_first: bool = True) -> int:
 
         if not choice or choice in {"q", "quit", "exit"}:
             break
+
+        # Jump by number in current actionable list (does not permanently skip)
+        if choice.isdigit():
+            idx = int(choice)
+            if 1 <= idx <= len(clips):
+                target = clips[idx - 1]
+                focus_id = str(target.get("id"))
+                print(f"  jumped to #{idx} {target.get('id')}")
+                if open_each or open_first:
+                    _open_clip_video(target)
+                continue
+            print(f"  pick 1–{len(clips)}")
+            continue
+
         if choice in {"o", "open"}:
             _open_clip_video(clip)
             continue
@@ -1626,7 +1685,9 @@ def interactive_decide(*, open_first: bool = True) -> int:
             approved = approve_next_clip(clip.get("id"))
             if approved:
                 print(f"  ✓ approved {approved.get('id')} for peak auto-post")
+                _speak(f"Approved {approved.get('title') or approved.get('id')}")
                 decisions += 1
+                focus_id = None
             else:
                 print("  could not approve that clip", file=sys.stderr)
             continue
@@ -1635,7 +1696,9 @@ def interactive_decide(*, open_first: bool = True) -> int:
             publish = result.get("result") or {}
             if publish.get("success"):
                 print(f"  ✓ posted {clip.get('id')}")
+                _speak(f"Posted {clip.get('title') or clip.get('id')}")
                 decisions += 1
+                focus_id = None
             else:
                 print(
                     f"  post failed: {publish.get('error', 'unknown')}",
@@ -1653,15 +1716,44 @@ def interactive_decide(*, open_first: bool = True) -> int:
             held = reject_next_clip(reason, clip.get("id"))
             if held:
                 print(f"  ✓ held {held.get('id')}: {reason}")
+                _speak(f"Held clip. {reason}")
                 decisions += 1
+                focus_id = None
             else:
                 print("  could not hold that clip", file=sys.stderr)
             continue
+        if choice in {"t", "title", "retitle", "caption"}:
+            titles, tags = _suggest_titles_for_clip(clip)
+            print("\n  Suggested titles:")
+            for i, t in enumerate(titles, 1):
+                print(f"    {i}. {t}")
+            try:
+                pick = input(
+                    "  pick 1–{n}, or type a custom title (Enter=skip)> ".format(
+                        n=len(titles)
+                    )
+                ).strip()
+            except (EOFError, KeyboardInterrupt):
+                print("\n  cancelled title")
+                continue
+            if not pick:
+                continue
+            if pick.isdigit() and 1 <= int(pick) <= len(titles):
+                chosen = titles[int(pick) - 1]
+                updated = set_clip_title(chosen, clip.get("id"), hashtags=tags or None)
+            else:
+                updated = set_clip_title(pick, clip.get("id"))
+            if updated:
+                print(f"  ✓ title → {updated.get('title')}")
+                _speak(f"Title set: {updated.get('title')}")
+                decisions += 1
+            continue
         if choice in {"s", "skip", "next"}:
             skipped_ids.add(str(clip.get("id")))
+            focus_id = None
             print(f"  skipped {clip.get('id')} for now")
             continue
-        print("  unknown choice — use o/a/p/h/s/q")
+        print("  unknown choice — use o/a/p/h/t/s/q or a number")
 
     return decisions
 
@@ -1677,13 +1769,18 @@ IMPORTANT:
   Video *files* live under media/vertical_clips/ (watch them; don't "approve" there).
 
 Simplest flow (no JSON, no remembering ids):
+  bolt queue                         # status + numbered postable list
   bolt queue clean                   # drop ghost rows (missing video files)
-  bolt queue list                    # only clips with a real local file
-  bolt queue next                    # show the next clip + path (+ open with --open)
-  bolt queue decide                  # interactive: open / approve / hold / post / skip
+  bolt queue list                    # numbered table (real files only)
+  bolt queue next --open             # card for #1 + open video
+  bolt queue decide                  # interactive review (recommended)
+  bolt queue decide --open-each      # open every clip as you go
   bolt approve                       # approve that next clip for peak
   bolt dontpost "weak hook"          # hold next clip + reason
   bolt postnow                       # publish next clip now
+
+In decide mode keys:
+  o=open  a=approve  p=post now  h=hold  t=retitle  s=skip  1-9=jump  q=quit
 
 Already edited files in media/vertical_clips/ (your final cuts):
   bolt queue add Stress.mp4 Hands.mp4 Leaving.mp4
@@ -1727,9 +1824,30 @@ Legacy flags still work: --summary --approve --post-now --reject --mark-posted
 """
 
 
+def _print_actionable_table(limit: int = 8) -> list[dict]:
+    """Print a numbered table of postable clips. Returns the list shown."""
+    clips = _actionable_clips()
+    if not clips:
+        print("  (no postable clips — files must exist under media/vertical_clips/)")
+        return []
+    print("  #   id        score  plan              title / file")
+    print("  ──  ────────  ─────  ────────────────  ─────────────────────────────")
+    for i, c in enumerate(clips[:limit], 1):
+        plan = (_plan_status(c) or "ready")[:16]
+        title = (c.get("title") or _clip_display_name(c) or "")[:36]
+        print(
+            f"  {i:<3} {str(c.get('id') or '')[:8]:<8}  "
+            f"{float(c.get('score') or 0):5.1f}  {plan:<16}  {title}"
+        )
+    if len(clips) > limit:
+        print(f"  …and {len(clips) - limit} more (bolt queue list)")
+    return clips
+
+
 def _print_summary() -> None:
     s = queue_summary()
-    with_file = len(_actionable_clips())
+    actionable = _actionable_clips()
+    with_file = len(actionable)
     print(
         f"\n  📋  Post Queue: {with_file} you can post  |  "
         f"{s['ready']} alertable  |  "
@@ -1745,13 +1863,43 @@ def _print_summary() -> None:
             f"{s['below_floor']} below score floor"
         )
         if s["missing"]:
-            print("               → run `bolt queue clean` to clear ghosts from the count\n")
+            print(
+                "               → bolt queue clean   "
+                "(or bolt queue status will offer to clean)\n"
+            )
         else:
             print()
-    print("      Approve here (CLI / Twitch), not in the media folder.")
+
+    if with_file:
+        print("  Postable now (real files only):")
+        _print_actionable_table(limit=8)
+        print()
+
+    print("      Approve here (CLI), not in the media folder.")
     print(f"      state:  {READY_FILE}")
     print("      videos: media/vertical_clips/\n")
-    print("      quick:  bolt queue next  |  bolt queue decide  |  bolt approve\n")
+    print(
+        "      quick:  bolt queue decide  ← easiest review  |  "
+        "bolt queue next --open  |  bolt approve\n"
+    )
+
+    # Auto-speak a short queue summary (disable with BOLT_SPEAK=0)
+    try:
+        from modules.Bolt_Voice import speak_result
+
+        spoken = (
+            f"Queue status: {with_file} clips you can post, "
+            f"{s['ready']} alertable, {s['posted']} posted, "
+            f"{s['awaiting_approval']} awaiting approval."
+        )
+        if s.get("missing"):
+            spoken += f" {s['missing']} ghost rows still need cleaning."
+        if with_file:
+            top = actionable[0]
+            spoken += f" Next up: {top.get('title') or _clip_display_name(top)}."
+        speak_result(spoken)
+    except Exception:
+        pass
 
 
 def _looks_like_clip_id(token: str) -> bool:
@@ -1868,17 +2016,45 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
         print(f"\n  🕐  Current time zone: {POSTING_TIMEZONE}")
         print(f"  {'🔥 PEAK TIME' if is_peak else '💤 Off-peak'}  —  {info}")
         _print_summary()
+        # Interactive ghost cleanup when TTY and ghosts exist
+        s = queue_summary()
+        if s.get("missing") and sys.stdin.isatty() and "--no-clean" not in rest:
+            try:
+                ans = input(
+                    f"  clean {s['missing']} ghost row(s) now? [Y/n]> "
+                ).strip().lower()
+            except (EOFError, KeyboardInterrupt):
+                ans = "n"
+            if ans in {"", "y", "yes"}:
+                result = clean_missing_clips(dry_run=False)
+                print(f"  cleaned {result['cleaned']} ghost(s)")
+                _print_summary()
         return 0
 
     if action in ("list", "dashboard", "qstatus"):
         show_all = "--all" in rest or "-a" in rest
-        print(
-            render_dashboard(
-                max_clips=20,
-                max_chars=8000,
-                actionable_only=not show_all,
+        if show_all:
+            print(
+                render_dashboard(
+                    max_clips=20,
+                    max_chars=8000,
+                    actionable_only=False,
+                )
             )
-        )
+        else:
+            # Default list = numbered postable table (clearest UX)
+            print()
+            clips = _print_actionable_table(limit=30)
+            print()
+            if clips:
+                print("  Review:  bolt queue decide")
+                print(f"  Open #1: bolt queue next --open")
+                print(f"  Approve: bolt approve {clips[0].get('id')}")
+            else:
+                s = queue_summary()
+                if s.get("missing"):
+                    print(f"  {s['missing']} ghosts → bolt queue clean")
+            print()
         return 0
 
     if action in ("next", "show", "show-next"):
@@ -1887,8 +2063,10 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
         return 0 if clip else 1
 
     if action in ("decide", "review", "triage", "pick"):
-        # Interactive walkthrough. `review-window` remains the Discord ping.
-        n = interactive_decide(open_first="--no-open" not in rest)
+        # Interactive walkthrough. No Discord required.
+        open_first = "--no-open" not in rest
+        open_each = "--open-each" in rest or "--open-all" in rest
+        n = interactive_decide(open_first=open_first, open_each=open_each)
         print(f"decisions made: {n}")
         return 0
 

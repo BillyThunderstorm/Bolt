@@ -14,9 +14,10 @@ from pathlib import Path
 from types import ModuleType
 
 _BOLT_SCRIPT = Path(__file__).resolve().parents[1] / "bin" / "bolt"
-    
+
+
 def _load_bolt_module() -> ModuleType:
-    """Load ''bin/bolt'' even though it has no ''.py'' suffix."""
+    """Load ``bin/bolt`` even though it has no ``.py`` suffix."""
     if not _BOLT_SCRIPT.is_file():
         raise FileNotFoundError(
             f"Bolt CLI script not found at {_BOLT_SCRIPT}. "

@@ -8,7 +8,8 @@ retention_policy:
     max_days: 30
     priority: high
     file_types: [".mp4", ".mov", ".mkv", ".avi"]
-    archive_location: "archive/recordings"
+    archive_location: "media/archive/recordings"
+    live_path: "media/Recordings"
     compression_enabled: true
     delete_after_archive: true  # Set to true when you want to delete instead of archive
 
@@ -18,7 +19,8 @@ retention_policy:
     max_days: 7
     priority: medium
     file_types: [".mp4", ".mov", ".mkv"]
-    archive_location: "archive/clips"
+    archive_location: "media/archive/clips"
+    live_path: "media/clips"
     compression_enabled: true
     delete_after_archive: true
 

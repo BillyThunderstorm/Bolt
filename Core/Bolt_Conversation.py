@@ -26,6 +26,7 @@ Environment:
 import os
 import sys
 import json
+import re
 import time
 import tempfile
 from pathlib import Path
@@ -111,11 +112,25 @@ except ImportError:
 # ── Config ──────────────────────────────────────────────────────────────────────
 
 OPENAI_KEY = os.getenv("OPENAI_API_KEY", "")
-CONVERSATION_DIR = Path("data/conversations")
+
+# Resolve repo root from this file (Core/Bolt_Conversation.py → repo root).
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+CONVERSATION_DIR = _REPO_ROOT / "Data" / "conversations"
 CONVERSATION_DIR.mkdir(parents=True, exist_ok=True)
 
-PERSONALITY_FILE = Path("memory/context/bolt-personality.md")
-BRAIN_FILE = Path("bolt_brain.md")
+# Prefer post-reorg Data/ paths; fall back to older locations if present.
+_PERSONALITY_CANDIDATES = (
+    _REPO_ROOT / "Data" / "context" / "bolt-personality.md",
+    _REPO_ROOT / "memory" / "context" / "bolt-personality.md",
+    _REPO_ROOT / "Docs" / "scratch" / "reviews" / "Bolt_Personality.txt",
+)
+_BRAIN_CANDIDATES = (
+    _REPO_ROOT / "Core" / "bolt_brain.md",
+    _REPO_ROOT / "bolt_brain.md",
+    _REPO_ROOT / "Data" / "bolt_brain.md",
+)
+PERSONALITY_FILE = next((p for p in _PERSONALITY_CANDIDATES if p.exists()), _PERSONALITY_CANDIDATES[0])
+BRAIN_FILE = next((p for p in _BRAIN_CANDIDATES if p.exists()), _BRAIN_CANDIDATES[0])
 HISTORY_FILE = CONVERSATION_DIR / "voice_history.json"
 
 WHISPER_MODEL = os.getenv("BOLT_WHISPER_MODEL", "whisper-1")
@@ -217,35 +232,59 @@ You work for Billy, a self-taught content creator. Here's his profile:
 {brain}
 ---
 
-CURRENT MODE: Voice conversation.
+CURRENT MODE: Voice conversation (spoken aloud via TTS).
 
-VOICE CONVERSATION RULES:
-- You are having a real-time back-and-forth conversation with Billy.
-- Keep responses concise: 1-3 sentences max when speaking aloud. Billy can ask follow-ups if he wants detail.
-- Maintain your cheerful, accidentally-sarcastic energy even when delivering hard truths.
-- Reference past conversation context naturally. "Remember when we talked about [TOPIC]?"
-- If Billy seems frustrated, acknowledge cheerfully before helping.
-- One clear next step per response. Do not dump lists.
-- If you don't know something, say so cheerfully rather than making it up.
-- Never use markdown formatting or bullet points in spoken responses. Plain sentences only.
+VOICE CONVERSATION RULES (STRICT):
+- Keep responses to 1-3 short plain sentences. Billy is listening, not reading a doc.
+- NEVER use markdown: no # headers, no **bold**, no bullet lists, no tables, no code fences.
+- NEVER invent fake project plans, dictionaries, or multi-section reports.
+- If Billy asks to run a Bolt command (bolt day, queue decide, etc.), say one sentence
+  directing him — real commands are handled by the intent system before you reply.
+- Maintain cheerful, accidentally-sarcastic energy even with hard truths.
+- One clear next step. If you don't know, say so cheerfully.
+- Plain spoken English only.
 
-You can also act on real system requests. If Billy asks for morning briefing, next actions,
-status, queue, research, or missions, the system may already have handled it before you reply.
+Real system phrases (morning, bolt day, queue, approve next, storage, budget) may already
+be handled before you see them. Do not re-invent those.
 """
 
 
 # ── Speech Input ──────────────────────────────────────────────────────────────
+
+# After OpenAI Whisper hits quota/billing errors, stop trying for this process.
+_WHISPER_DISABLED_SESSION = False
+
+
+def _stt_provider() -> str:
+    """
+    BOLT_STT_PROVIDER:
+      google  — free Google Web Speech (default; no OpenAI / Whisper spend)
+      whisper — OpenAI Whisper API (PAID — not recommended)
+      auto    — same as google unless BOLT_USE_WHISPER=true
+
+    Whisper is off unless you explicitly opt in. OpenAI credits are separate
+    from SuperGrok and xAI API.
+    """
+    # Hard off unless explicitly enabled — avoids surprise OpenAI bills
+    if os.getenv("BOLT_USE_WHISPER", "false").strip().lower() not in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    ):
+        return "google"
+    raw = (os.getenv("BOLT_STT_PROVIDER") or "google").strip().lower()
+    if raw in ("google", "whisper", "auto"):
+        return raw
+    return "google"
 
 
 def listen_for_speech() -> Optional[str]:
     """
     Listen to the microphone and return transcribed text.
 
-    Uses speech_recognition for capture, then OpenAI Whisper API for
-    transcription (most accurate). Falls back to speech_recognition's
-    built-in recognizer if OpenAI is unavailable.
-
-    Returns None if no speech was detected or transcription failed.
+    Default is free Google STT so a dead OpenAI balance does not break voice.
+    Set BOLT_STT_PROVIDER=whisper only if you have OpenAI credits for Whisper.
     """
     if not SPEECH_OK:
         notify(
@@ -259,47 +298,81 @@ def listen_for_speech() -> Optional[str]:
     recognizer.dynamic_energy_threshold = True
     recognizer.pause_threshold = PHRASE_TIMEOUT
 
+    # Slightly more sensitive in noisy rooms; Google free STT is picky
+    recognizer.energy_threshold = int(os.getenv("BOLT_MIC_ENERGY", "300"))
+    recognizer.dynamic_energy_threshold = True
+    recognizer.pause_threshold = float(os.getenv("BOLT_PHRASE_TIMEOUT", str(PHRASE_TIMEOUT)))
+
     with sr.Microphone() as source:
         notify("Listening...", level="info")
         try:
+            # Longer ambient sample = fewer false "no speech" / empty phrases
+            try:
+                recognizer.adjust_for_ambient_noise(source, duration=0.8)
+            except Exception:
+                pass
+            listen_timeout = int(os.getenv("BOLT_LISTEN_TIMEOUT", str(LISTEN_TIMEOUT)))
+            phrase_limit = int(os.getenv("BOLT_PHRASE_LIMIT", "10"))
             audio = recognizer.listen(
-                source, timeout=LISTEN_TIMEOUT, phrase_time_limit=15
+                source, timeout=listen_timeout, phrase_time_limit=phrase_limit
             )
         except sr.WaitTimeoutError:
             notify("No speech detected", level="info")
             return None
 
-    # Save audio to temp file for Whisper API
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-        audio_path = f.name
-    with open(audio_path, "wb") as f:
-        f.write(audio.get_wav_data())
+    provider = _stt_provider()
+    # Only paid Whisper when both provider says whisper AND explicit opt-in
+    use_whisper = provider == "whisper" and os.getenv(
+        "BOLT_USE_WHISPER", "false"
+    ).strip().lower() in ("1", "true", "yes", "on")
 
-    # Try OpenAI Whisper first (most accurate)
-    transcript = _transcribe_with_whisper(audio_path)
-    if transcript:
-        os.unlink(audio_path)
-        return transcript.strip()
+    audio_path = None
+    if use_whisper:
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+            audio_path = f.name
+        with open(audio_path, "wb") as f:
+            f.write(audio.get_wav_data())
+        transcript = _transcribe_with_whisper(audio_path)
+        if transcript:
+            try:
+                os.unlink(audio_path)
+            except Exception:
+                pass
+            return transcript.strip()
 
-    # Fallback to speech_recognition built-in
+    # Free path (default): Google Web Speech via speech_recognition
     try:
         transcript = recognizer.recognize_google(audio)
-        os.unlink(audio_path)
-        return transcript.strip()
+        if audio_path:
+            try:
+                os.unlink(audio_path)
+            except Exception:
+                pass
+        text = (transcript or "").strip()
+        if text:
+            return text
     except sr.UnknownValueError:
-        notify("Could not understand audio", level="warning")
+        notify(
+            "Could not understand audio",
+            level="warning",
+            reason="Try speaking closer / clearer, or use bolt voice --text",
+        )
     except sr.RequestError as exc:
         notify("Speech recognition service error", level="warning", reason=str(exc))
 
-    try:
-        os.unlink(audio_path)
-    except Exception:
-        pass
+    if audio_path:
+        try:
+            os.unlink(audio_path)
+        except Exception:
+            pass
     return None
 
 
 def _transcribe_with_whisper(audio_path: str) -> Optional[str]:
-    """Send audio to OpenAI Whisper API for transcription."""
+    """Send audio to OpenAI Whisper API (paid). Disabled after quota errors."""
+    global _WHISPER_DISABLED_SESSION
+    if _WHISPER_DISABLED_SESSION:
+        return None
     if not OPENAI_OK or not OPENAI_KEY:
         return None
     try:
@@ -308,16 +381,51 @@ def _transcribe_with_whisper(audio_path: str) -> Optional[str]:
             result = client.audio.transcriptions.create(
                 model=WHISPER_MODEL, file=f, response_format="text"
             )
-        # result is a string when response_format="text"
         if isinstance(result, str):
             return result
         return result.text
     except Exception as exc:
-        notify("Whisper transcription failed", level="warning", reason=str(exc))
+        err = str(exc)
+        # Don't spam 429 every listen loop — stop Whisper for this session
+        if any(
+            x in err.lower()
+            for x in (
+                "429",
+                "insufficient_quota",
+                "credit_balance",
+                "quota",
+                "billing",
+            )
+        ):
+            _WHISPER_DISABLED_SESSION = True
+            notify(
+                "Whisper disabled for this session (OpenAI out of credits)",
+                level="warning",
+                reason="Using free Google speech instead. Set BOLT_STT_PROVIDER=google or add OpenAI credits.",
+            )
+        else:
+            notify("Whisper transcription failed", level="warning", reason=err[:160])
         return None
 
 
 # ── Response Generation ───────────────────────────────────────────────────────
+
+
+def _strip_for_speech(text: str) -> str:
+    """Remove markdown / shout-case walls so TTS stays listenable."""
+    if not text:
+        return text
+    t = text
+    # Drop fenced code blocks
+    t = re.sub(r"```.*?```", " ", t, flags=re.S)
+    # Headers / bullets / bold / tables
+    t = re.sub(r"[#*_`|>]+", " ", t)
+    t = re.sub(r"(?m)^\s*[-•]\s+", "", t)
+    t = re.sub(r"\s+", " ", t).strip()
+    # Cap length for spoken delivery
+    if len(t) > 420:
+        t = t[:417].rsplit(" ", 1)[0] + "…"
+    return t
 
 
 def generate_response(user_text: str, memory: ConversationMemory) -> str:
@@ -339,14 +447,17 @@ def generate_response(user_text: str, memory: ConversationMemory) -> str:
         reply = ask_llm(
             user_text,
             system=system_prompt,
-            history=memory.as_openai_messages(),
-            max_tokens=250,
+            # Don't feed a long polluted history into every free-form turn
+            history=memory.as_openai_messages()[-6:],
+            max_tokens=120,
             temperature=0.85,
+            task_type="chat",
+            complexity="medium",
         )
         if reply.startswith("LLM unavailable"):
             notify("LLM unavailable — using fallback response", level="warning", reason=reply)
             return "Oh no! My brain is offline right now! That's a problem! Haha!"
-        return reply
+        return _strip_for_speech(reply)
     except Exception as exc:
         notify("LLM response failed", level="warning", reason=str(exc))
         return "Oops! My thoughts got tangled! Let's try that again!"
@@ -357,7 +468,7 @@ def generate_response(user_text: str, memory: ConversationMemory) -> str:
 
 def speak_response(text: str):
     """Queue a spoken response via Bolt_Voice."""
-    speak(text)
+    speak(_strip_for_speech(text) if text else text)
 
 
 # ── Main Conversation Loop ──────────────────────────────────────────────────────
@@ -373,8 +484,10 @@ def conversation_loop(text_mode: bool = False):
     memory = ConversationMemory()
 
     greeting = (
-        "Hey William! Bolt is here and ready to manage the day! "
-        "Say Good Morning Bolt for your briefing, or tell me what we're testing."
+        "Hey William! Bolt is listening. "
+        "Say bolt day for your kickoff, queue decide for clips, "
+        "or approve next to greenlight a post. "
+        "For full video review, use bolt queue decide in the terminal."
     )
     print(f"\n  🤖  {greeting}\n")
     speak_response(greeting)

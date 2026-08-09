@@ -142,7 +142,8 @@ Script subcommands (each maps to scripts/X.py):
   recordings [mode]       Process existing recordings (default: latest)
   auto_clip_twitch        Auto-clip highlights from Twitch VODs
   highlights              Compile top clips into a Twitch highlight reel
-  briefing                Generate (and optionally send) the daily briefing
+  briefing [--print|--speak]
+                          Generate daily briefing (optional speak summary)
   thumbnails [args]       Generate JPG thumbnails for clips
   calendar                Generate ICS calendar feeds
   nexus "<question>"      Ask Nexus for content strategy advice
@@ -177,6 +178,19 @@ Content manager / creator business (Core/modules/Content_Manager.py):
   business lesson|next
   advance next
   morning [--quiet]       Good Morning Bolt spoken daily briefing
+
+Voice (listen → interpret → speak via Core/bolt_live_voice.py):
+  voice [--text|--status|--clear|--once "…"]
+                          Hands-free conversation (mic + TTS)
+  talk ["prompt"]         Alias for voice (optional one-shot prompt)
+  say "message"           Speak a line out loud via Bolt_Voice
+  briefing --speak        Generate daily briefing and speak a short summary
+  storage [monitor|rotate|optimize|status]
+                          Disk + media folder health (fixed paths under media/)
+                          status=sizes only; monitor=alerts; rotate/optimize=cleanup
+  budget | api-usage      xAI spend this month, soft cap, budget mode
+  day [--quiet|--open|--process]
+                          Daily kickoff: peak + queue + storage + next steps
 
 Direction-finding researcher (Core/modules/Researcher.py):
   research [status|questions|candidates|pending|log|add|note|c5]
@@ -268,6 +282,134 @@ def main() -> int:
         cmd = [py, "Core/launch.py", "setup"] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT))
+
+    # Built-in: daily content kickoff
+    if subcommand in ("day", "today", "kickoff", "start-day"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, str(CORE_DIR / "bolt_day.py")] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: API budget / usage (soft cap + xai_usage.jsonl)
+    if subcommand in ("budget", "api-usage", "api_usage", "xai-usage", "llm-budget"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        do_test = "--test-alert" in rest or "--test" in rest
+        # Pass flag into -c script via env (inner python argv is only -c)
+        env["BOLT_BUDGET_TEST_ALERT"] = "1" if do_test else "0"
+        script = r'''
+from modules.LLM_Budget import describe_policy, llm_mode, briefing_provider_preference
+from modules.XAI_Usage import status_dict, monthly_cap_usd
+from modules.Bolt_Alerts import channels_status
+import json, os
+print("Bolt LLM / xAI budget")
+print("─" * 40)
+print(describe_policy())
+print(f"mode:              {llm_mode()}")
+print(f"briefing provider: {briefing_provider_preference()}")
+print(f"monthly cap USD:   {monthly_cap_usd() or 'unlimited'}")
+print()
+print(json.dumps(status_dict(), indent=2))
+print()
+print("Alert channels (no Discord):")
+print(json.dumps(channels_status(), indent=2))
+if os.getenv("BOLT_BUDGET_TEST_ALERT") == "1":
+    from modules.Bolt_Alerts import notify
+    print()
+    print("Sending test alert (Mac + SMS + email)…")
+    result = notify(
+        "Bolt budget alert test — if you got this, SMS/email/Mac are working.",
+        title="Bolt test",
+        subject="Bolt alert test",
+        email_body=(
+            "Bolt budget alert test.\n\n"
+            "If you see this email, SMTP is working.\n"
+            "SMS uses the same path via your carrier gateway.\n"
+        ),
+    )
+    print("Results:", result)
+    if not result.get("email") or not result.get("sms"):
+        print(
+            "Tip: check Gmail → Sent and Spam. "
+            "For SMS, AT&T can delay 1–5 min; ensure SMTP App Password is correct."
+        )
+'''
+        cmd = [py, "-c", script]
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: voice / talk / say — hands-free listen → interpret → speak
+    if subcommand in ("voice", "talk", "live-voice", "live_voice", "say"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand == "say":
+            voice_args = ["--say"] + rest
+        else:
+            voice_args = list(rest)
+        cmd = [py, str(CORE_DIR / "bolt_live_voice.py")] + voice_args
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: storage monitor / rotation / optimization (canonical media/ paths)
+    if subcommand in ("storage", "disk", "media-rotation", "storage-monitor"):
+        action = rest[0] if rest else "status"
+        extra = rest[1:] if rest else []
+        os.chdir(REPO_ROOT)
+        if action in ("status", "report", "sizes"):
+            # Quick sizes-only report (no auto-clean, no notifications)
+            script = f'''
+from pathlib import Path
+import shutil
+root = Path({str(REPO_ROOT)!r})
+media = root / "media"
+for name in ("Recordings", "clips", "vertical_clips", "output"):
+    p = media / name
+    if not p.exists():
+        print(f"  {{name}}: missing ({{p}})")
+        continue
+    total = sum(f.stat().st_size for f in p.rglob("*") if f.is_file())
+    print(f"  {{name}}: {{total/1024**3:.2f}}GB  ({{p}})")
+u = shutil.disk_usage(root)
+print(f"  Disk: {{100*u.used/u.total:.0f}}% used, {{u.free/1024**3:.1f}}GB free")
+'''
+            cmd = [py, "-c", script]
+            rc = subprocess.call(cmd, cwd=str(REPO_ROOT))
+            # Speak a short storage line when auto-speak is on
+            env = os.environ.copy()
+            env["PYTHONPATH"] = f"{CORE_DIR}" + (
+                f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+            )
+            speak_script = '''
+try:
+    from modules.Intent_Router import _action_storage
+    from modules.Bolt_Voice import speak_result
+    speak_result(_action_storage())
+except Exception:
+    pass
+'''
+            subprocess.call([py, "-c", speak_script], cwd=str(REPO_ROOT), env=env)
+            return rc
+        if action in ("monitor", "check"):
+            cmd = ["bash", str(SCRIPTS_DIR / "storage_monitor.sh")] + extra
+            return subprocess.call(cmd, cwd=str(REPO_ROOT))
+        if action in ("rotate", "rotation"):
+            cmd = ["bash", str(SCRIPTS_DIR / "media_rotation.sh")] + (extra or ["--dry-run"])
+            return subprocess.call(cmd, cwd=str(REPO_ROOT))
+        if action in ("optimize", "optimisation", "cleanup"):
+            cmd = ["bash", str(SCRIPTS_DIR / "storage_optimization.sh")] + (
+                extra or ["--dry-run", "--skip-dedup", "--skip-compress"]
+            )
+            return subprocess.call(cmd, cwd=str(REPO_ROOT))
+        print(f"bolt storage: unknown action '{action}'", file=sys.stderr)
+        print("  Use: status | monitor | rotate | optimize", file=sys.stderr)
+        return 2
 
     # Content manager / Good Morning Bolt
     if subcommand in MANAGER_COMMANDS or subcommand.startswith("manage"):

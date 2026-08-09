@@ -696,6 +696,19 @@ def _print_summary() -> None:
     print(f"\nNext action: {s['next_action']}")
     print("═" * 70)
 
+    try:
+        from modules.Bolt_Voice import speak_result
+
+        spoken = (
+            f"Research status: {s['candidates_total']} candidates, "
+            f"{s['candidates_pending_c5']} pending C5, "
+            f"{s['candidates_kept']} kept. "
+            f"Next: {s['next_action']}"
+        )
+        speak_result(spoken)
+    except Exception:
+        pass
+
 
 def _print_questions() -> None:
     profile = load_profile()

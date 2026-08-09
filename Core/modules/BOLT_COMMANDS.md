@@ -584,40 +584,35 @@ bolt send "message" [--subject "subject"] [--sms-only|--email-only]
 
 ## Starting conversation mode
 
-The CLI exposes flags on `Bolt_Conversation` for three modes: persistent text chat, persistent voice chat, and one-shot prompts.
-
-Text conversation:
+Preferred entry points (listen → interpret → speak via `Bolt_Voice`):
 
 ```bash
-PYTHONPATH=Core python3 -m Bolt_Conversation --text
+bolt voice                 # mic in, spoken replies out
+bolt voice --text          # type in, still speaks replies
+bolt talk "what's next?"   # one-shot spoken Q&A
+bolt say "Clips are ready" # TTS only
+bolt briefing --speak      # write briefing + speak short summary
+bolt morning               # Good Morning Bolt spoken briefing
 ```
 
-Voice conversation:
+Same engine under the hood (`Core/bolt_live_voice.py` → `Bolt_Conversation`):
 
 ```bash
 PYTHONPATH=Core python3 -m Bolt_Conversation
-```
-
-One-shot:
-
-```bash
-PYTHONPATH=Core python3 -m Bolt_Conversation --once "What should I do next?"
-```
-
-Status / clear history:
-
-```bash
+PYTHONPATH=Core python3 -m Bolt_Conversation --text
+PYTHONPATH=Core python3 Core/bolt_live_voice.py --once "What should I do next?"
 PYTHONPATH=Core python3 -m Bolt_Conversation --status
 PYTHONPATH=Core python3 -m Bolt_Conversation --clear
 ```
 
-| Flag | What it does |
-|------|--------------|
-| `-m Bolt_Conversation` | Run the voice-mode conversation loop (uses configured TTS/STT) |
-| `--text` | Run the same loop in text-only mode (no mic/speaker needed) |
-| `--once "question"` | Ask Bolt a single question, get one answer, exit |
-| `--status` | Print conversation-history state without sending a message |
-| `--clear` | Wipe conversation history |
+| Command / flag | What it does |
+|----------------|--------------|
+| `bolt voice` | Voice-mode conversation loop (mic + TTS) |
+| `bolt voice --text` | Text input, spoken replies |
+| `bolt talk "…"` / `--once "…"` | One question, one spoken answer, exit |
+| `bolt say "…"` | Speak a line only (no LLM) |
+| `bolt voice --status` | Print conversation / STT / TTS / LLM status |
+| `bolt voice --clear` | Wipe conversation history |
 
 ### Natural language intents (no exact CLI required)
 

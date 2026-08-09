@@ -52,8 +52,16 @@
   },
   "nexus": {
     "preferred": "ollama",
-    "grok_for_high": false,
-    "_comment": "Prefer Ollama (free) then Grok when NEXUS_ALLOW_PAID/bolt nexus --paid. Gemini only if NEXUS_USE_GEMINI=true. SuperGrok app sub \u2260 free API."
+    "grok_for_high": true,
+    "budget_mode": "light",
+    "_comment": "SuperGrok+light API: BOLT_LLM_MODE=light, NEXUS_ALLOW_PAID=true, NEXUS_PREFERRED=ollama. Grok only for strategy/research/decisions. SuperGrok app sub \u2260 free API."
+  },
+  "llm": {
+    "mode": "light",
+    "preferred": "ollama",
+    "xai_flagship": "grok-4.5",
+    "xai_light": "grok-4.3",
+    "_comment": "light = Ollama day-to-day, Grok API for high-value only. Set in .env: BOLT_LLM_MODE, NEXUS_ALLOW_PAID, XAI_API_KEY."
   },
   "nexus_enrich_decisions": true,
   "peak_notifications": {

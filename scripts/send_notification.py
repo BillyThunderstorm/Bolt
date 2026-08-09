@@ -43,24 +43,34 @@ PROJECT_ROOT = REPO_ROOT
 ROOT = REPO_ROOT
 
 ROOT = Path(__file__).parent.parent
-CONFIG_DIR = ROOT / "configs"
-ENV_FILE = CONFIG_DIR / "storage_alerts.env"
+# Prefer post-reorg Data/configs/, then legacy configs/
+_ENV_CANDIDATES = (
+    ROOT / "Data" / "configs" / "storage_alerts.env",
+    ROOT / "configs" / "storage_alerts.env",
+)
+ENV_FILE = next((p for p in _ENV_CANDIDATES if p.exists()), _ENV_CANDIDATES[0])
+CONFIG_DIR = ENV_FILE.parent
 
 # Load storage_alerts.env explicitly if it exists, fall back to .env
 if ENV_FILE.exists():
     load_dotenv(ENV_FILE)
-else:
-    load_dotenv(ROOT / ".env")
+load_dotenv(ROOT / ".env", override=False)
 
-# Email-to-SMS gateways
+# Email-to-SMS gateways (many carriers retired these in 2025).
+# AT&T shut down txt.att.net / mms.att.net on 2025-06-17 — do not use.
+# For AT&T, Bolt uses iMessage (Mac Messages) or email instead.
 SMS_GATEWAYS = {
-    "att": "@txt.att.net",
+    "att": None,  # discontinued — see send_sms / iMessage path
+    "att-sms": None,
     "verizon": "@vtext.com",
     "tmobile": "@tmomail.net",
     "sprint": "@messaging.sprintpcs.com",
     "boost": "@myboostmobile.com",
     "virgin": "@vmobl.com",
 }
+
+# Carriers whose free email-to-SMS gateways are known dead
+SMS_GATEWAY_DEAD = frozenset({"att", "att-sms", "cricket", "firstnet"})
 
 
 def _configured() -> tuple:
@@ -137,27 +147,126 @@ def _send_mail(
 
 
 def get_sms_email() -> str:
-    """Return the email-to-SMS address for the configured phone + carrier."""
+    """Return the email-to-SMS address for the configured phone + carrier.
+
+    Returns empty string when the carrier gateway is discontinued (e.g. AT&T).
+    """
     phone = os.getenv("ALERT_PHONE", "").strip()
     carrier = os.getenv("CARRIER", "att").lower().strip()
     if not phone:
         return ""
-    gateway = SMS_GATEWAYS.get(carrier, SMS_GATEWAYS["att"])
+    if carrier in SMS_GATEWAY_DEAD:
+        return ""
+    gateway = SMS_GATEWAYS.get(carrier)
+    if not gateway:
+        return ""
     return f"{phone}{gateway}"
 
 
-def send_sms(message: str) -> bool:
-    """Send a short SMS via the carrier's email-to-SMS gateway."""
-    sms_email = get_sms_email()
-    if not sms_email:
-        print("SMS not configured: add ALERT_PHONE and CARRIER to storage_alerts.env")
+def send_imessage(message: str, phone: str = None) -> bool:
+    """Send via macOS Messages (iMessage/SMS) — free local path.
+
+    Requires Messages signed in on this Mac. Best free option after AT&T
+    shut down email-to-text (June 2025).
+    """
+    phone = (phone or os.getenv("ALERT_PHONE", "")).strip()
+    if not phone:
+        print("iMessage: ALERT_PHONE not set")
+        return False
+    # Normalize to +1… for US numbers
+    digits = "".join(c for c in phone if c.isdigit())
+    if len(digits) == 10:
+        buddy = f"+1{digits}"
+    elif len(digits) == 11 and digits.startswith("1"):
+        buddy = f"+{digits}"
+    else:
+        buddy = phone if phone.startswith("+") else f"+{digits}"
+
+    text = (message or "")[:500].replace("\\", "\\\\").replace('"', '\\"')
+    # Prefer iMessage service; fall back to first SMS-capable service
+    script = f'''
+    on run
+      set targetBuddy to "{buddy}"
+      set msg to "{text}"
+      tell application "Messages"
+        set sentOk to false
+        try
+          set iServ to 1st service whose service type is iMessage
+          set theBuddy to buddy targetBuddy of iServ
+          send msg to theBuddy
+          set sentOk to true
+        end try
+        if sentOk is false then
+          try
+            set sServ to 1st service whose service type is SMS
+            set theBuddy to buddy targetBuddy of sServ
+            send msg to theBuddy
+            set sentOk to true
+          end try
+        end if
+        return sentOk
+      end tell
+    end run
+    '''
+    try:
+        import subprocess
+
+        r = subprocess.run(
+            ["osascript", "-e", script],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        ok = r.returncode == 0 and "true" in (r.stdout or "").lower()
+        if ok:
+            print(f"iMessage/SMS sent via Messages to {buddy}")
+        else:
+            err = (r.stderr or r.stdout or "").strip()[:200]
+            print(f"iMessage send failed ({buddy}): {err or 'Messages not signed in?'}")
+        return ok
+    except Exception as exc:
+        print(f"iMessage error: {exc}")
         return False
 
-    # Hard truncate to 160 chars for SMS reliability
-    text = message[:160]
-    ok = _send_mail(sms_email, "Bolt Alert", text)
+
+def send_sms(message: str) -> bool:
+    """Deliver a phone alert.
+
+    Priority:
+      1. iMessage via macOS Messages (works for AT&T after email-to-text shutdown)
+      2. Carrier email-to-SMS gateway (Verizon/T-Mobile etc., if still alive)
+    """
+    phone = os.getenv("ALERT_PHONE", "").strip()
+    carrier = os.getenv("CARRIER", "att").lower().strip()
+    text = (message or "")[:300]
+
+    if not phone:
+        print("SMS not configured: add ALERT_PHONE to storage_alerts.env")
+        return False
+
+    # Prefer iMessage on Mac (AT&T email gateways are dead as of 2025-06-17)
+    if os.getenv("BOLT_ALERT_IMESSAGE", "true").lower() not in ("0", "false", "no"):
+        if send_imessage(text, phone):
+            return True
+
+    if carrier in SMS_GATEWAY_DEAD:
+        print(
+            f"Carrier '{carrier}' no longer supports email-to-text "
+            f"(AT&T shut this down June 2025). "
+            f"Use iMessage (sign into Messages on this Mac) or email alerts."
+        )
+        return False
+
+    sms_email = get_sms_email()
+    if not sms_email:
+        print("No email-to-SMS gateway for this carrier; use iMessage or email.")
+        return False
+
+    ok = _send_mail(sms_email, "", text)
     if ok:
-        print(f"SMS sent to {sms_email}: {text}")
+        print(f"SMS accepted by SMTP for {sms_email}: {text[:80]}")
+    else:
+        print(f"SMS SMTP send failed for {sms_email}")
     return ok
 
 
