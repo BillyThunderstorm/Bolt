@@ -92,3 +92,4 @@ scripts/launcher_stdout*.log
 
 # Backup files
 *.backup
+Data/vector_db/**
