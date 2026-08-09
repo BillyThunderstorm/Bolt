@@ -17,6 +17,8 @@
 .DS_Store
 .env
 .env.backup
+.env.local
+.env.local.bak
 .idea/
 .venv*/
 .venv-1/
@@ -43,10 +45,32 @@ scripts/launcher_stdout.log
 venv/
 vertical_clips/
 yolov5
-.env.local
-.env.local.bak
+
+# ── Secrets (never commit) ───────────────────────────────────────────────────
+# Legacy path + post-reorg path
 configs/storage_alerts.env
 configs/*.secrets.env
+Data/configs/storage_alerts.env
+Data/configs/*.secrets.env
+**/token_cache*.json
+**/*_token.json
+**/*credentials*.json
+
+# ── Runtime state (local machine only) ───────────────────────────────────────
+Data/ready_to_post.json
+Data/unified_memory.jsonl
+Data/conversations/
+Data/clip_history.json
+Data/multi_platform_queue.json
+Data/performance_outcomes.jsonl
+Data/post_rejections.jsonl
+Data/seen_clips.json
+Data/processed_recordings.json
+Core/data/title_cache.json
+Core/data/processed_recordings.json
+logs/xai_usage.jsonl
+logs/xai_usage_month.json
+logs/xai_budget_alerts.json
 
 # ── Third-party SDK checkouts, build outputs, and bundled apps — never tracked ─
 google-cloud-sdk/

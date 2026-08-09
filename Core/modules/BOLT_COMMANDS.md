@@ -35,23 +35,31 @@ uv run python bin/bolt <command> [options]
 
 Run `bolt help` to show the built-in summary. Commands that expose their own help accept `--help`.
 
-## LLM provider (Grok / OpenAI)
+## LLM provider (SuperGrok + light API)
 
-All conversation and `!Bolt` replies go through `Core/modules/LLM_Handler.py`.
+Conversation, titles, and Nexus go through `Core/modules/LLM_Handler.py` + `LLM_Budget.py`.
 
 ```bash
 # .env (local only — never commit real keys)
-BOLT_LLM_PROVIDER=xai          # openai | xai
-BOLT_LLM_FALLBACK=none         # openai | xai | none
-XAI_API_KEY=...
-# OPENAI_API_KEY=...           # optional; still used for Whisper if present
-# BOLT_XAI_MODEL=grok-4.5
-# BOLT_OPENAI_MODEL=gpt-4o-mini
+BOLT_LLM_MODE=light              # local | light | full
+BOLT_LLM_PROVIDER=ollama         # ollama | xai | openai  (free-first)
+BOLT_LLM_FALLBACK=none
+OLLAMA_MODEL=llama3.1:8b
+XAI_API_KEY=...                  # paid Grok API (console.x.ai) — not SuperGrok
+# OPENAI_API_KEY=...             # optional; not needed for voice STT or titles
+BOLT_XAI_MODEL=grok-4.5          # high-value strategy only in light mode
+BOLT_XAI_MODEL_LIGHT=grok-4.3
+BOLT_API_MONTHLY_CAP_USD=35      # soft cap → force local when hit
+BOLT_BRIEFING_PROVIDER=auto      # auto | grok | local
+BOLT_STT_PROVIDER=google         # free; never Whisper unless BOLT_USE_WHISPER=true
+Bolt_EDGE_VOICE=en-US-AndrewNeural
+Bolt_VOICE=Nathan (Enhanced)     # macOS say fallback
 ```
 
 Quick health check:
 
 ```bash
+bolt budget                      # mode, soft cap, alert channels
 PYTHONPATH=Core python3 -m modules.LLM_Handler
 ```
 
@@ -64,10 +72,15 @@ bolt help                         # Show the CLI command summary
 bolt version                      # Show the repository and Python in use
 bolt verify                       # Check required files, folders, config, and environment
 bolt setup                        # Finite setup check (config + keys); exits when done
+bolt day [--quiet|--open|--process]  # Daily content kickoff (peak + queue + plan)
 bolt launch                       # Start live mode (folder watch + optional OBS)
 bolt launch --no-checklist        # Live mode without the pre-stream voice checklist
 bolt status                       # Check the decision engine, vector DB, and Nexus
 bolt intelligence                 # Alias for `status`
+bolt budget                       # xAI spend / soft cap / alert channel status
+bolt budget --test-alert          # Test Mac + email + iMessage alerts
+bolt storage status               # media/ sizes + disk free
+bolt storage monitor|rotate|optimize
 bolt test                         # Run the full test suite
 bolt test <unittest-arguments>    # Run selected unittest targets
 bolt layout                       # Report misplaced root files; never moves them
@@ -577,18 +590,21 @@ bolt send "message" [--subject "subject"] [--sms-only|--email-only]
 
 | Command | What it does |
 |---------|--------------|
-| `bolt send "msg"` | Send an SMS / email / Discord notification (chosen by config) |
-| `bolt send "msg" --sms-only` | Force SMS, ignore email |
-| `bolt send "msg" --email-only` | Force email, ignore SMS |
+| `bolt send "msg"` | Send an SMS / email notification (config in `Data/configs/storage_alerts.env`) |
+| `bolt send "msg" --sms-only` | Force phone path (iMessage on Mac for AT&T; email-to-SMS where still alive) |
+| `bolt send "msg" --email-only` | Force email, ignore phone |
 | `bolt send "msg" --subject "…"` | Override the email subject line |
+
+Budget alerts (50% / 90% / 100% of soft cap) use **Mac banner + email + iMessage**, not Discord.
 
 ## Starting conversation mode
 
 Preferred entry points (listen → interpret → speak via `Bolt_Voice`):
 
 ```bash
-bolt voice                 # mic in, spoken replies out
-bolt voice --text          # type in, still speaks replies
+bolt day                   # content kickoff (peak + queue + short real plan)
+bolt voice                 # mic in, spoken replies out (free Google STT)
+bolt voice --text          # type in, still speaks (Andrew edge-tts)
 bolt talk "what's next?"   # one-shot spoken Q&A
 bolt say "Clips are ready" # TTS only
 bolt briefing --speak      # write briefing + speak short summary
@@ -607,6 +623,7 @@ PYTHONPATH=Core python3 -m Bolt_Conversation --clear
 
 | Command / flag | What it does |
 |----------------|--------------|
+| `bolt day` | Daily kickoff: peak window, postable queue, storage, next steps |
 | `bolt voice` | Voice-mode conversation loop (mic + TTS) |
 | `bolt voice --text` | Text input, spoken replies |
 | `bolt talk "…"` / `--once "…"` | One question, one spoken answer, exit |
@@ -616,23 +633,39 @@ PYTHONPATH=Core python3 -m Bolt_Conversation --clear
 
 ### Natural language intents (no exact CLI required)
 
-In conversation mode, these phrases trigger real Bolt actions before free-form Grok chat:
+In conversation mode, these phrases trigger **real** Bolt actions before free-form chat:
 
 | You say | Bolt does |
 |---------|-----------|
-| Good morning Bolt / morning briefing | Daily manager briefing (`morning`) |
-| What should I do next? / what's next | Next actions stack |
-| How are things? / status report | Manager status summary |
-| Show the queue / posting queue | Queue status |
-| Research status / research candidates | Research summary |
-| Mission status / command center | Mission status |
+| bolt day / play bolt day / start my day | Real peak + queue kickoff + short plan |
+| Good morning Bolt / morning briefing | Manager morning briefing |
+| queue decide / bolt cue decide | Next postable clip brief (full review: terminal `bolt queue decide`) |
+| approve next / hold next / post next | Approve, hold, or post the next postable clip |
+| clean queue | Scrap ghost ready rows (missing files) |
+| queue status / what can I post | Postable counts + next title |
+| What should I do next? | Next actions stack |
+| storage / disk space | Disk free + media sizes |
+| api budget / how much have I spent | Soft cap + estimated API spend |
+| Research status / Mission status | Research or mission summary |
 
-Anything else is answered by Grok with personality + conversation history.
+Anything else is short free-form chat (Ollama by default in light mode). Spoken replies stay plain sentences — no markdown dumps.
 
 Inside conversation mode:
 
 - Ask Bolt a normal question or give a normal instruction in plain language.
 - Type or say `exit`, `quit`, `bye`, or `goodbye` to end the conversation.
+
+### Titles and hashtags
+
+```bash
+bolt queue title                      # suggest titles for next postable clip
+bolt queue title <id> 1               # apply suggestion #1 (+ generated hashtags)
+bolt queue title <id> "My hook 🔥"    # custom title (hashtags unchanged)
+# In decide mode: press t to retitle
+bolt queue decide
+```
+
+AI titles prefer **Ollama** when `BOLT_LLM_PROVIDER=ollama` (no OpenAI credits required).
 
 ## Twitch chat commands
 
