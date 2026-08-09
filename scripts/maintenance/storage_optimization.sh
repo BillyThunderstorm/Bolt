@@ -1,1 +1,1 @@
-/Users/carter/developer/Bolt/scripts/storage_optimization.sh
+../storage_optimization.sh

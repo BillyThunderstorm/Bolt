@@ -1,0 +1,39 @@
+# Minimal Jekyll config so GitHub Actions "Jekyll site CI" can run
+# against this monorepo without treating Python/scripts as site content.
+#
+# Bolt is primarily a Python app, not a Jekyll project. This file exists
+# so CI does not crawl broken paths under scripts/ and Core/.
+
+title: Bolt
+exclude:
+  - scripts
+  - Core
+  - Data
+  - media
+  - Media
+  - App
+  - bin
+  - bolt_cli
+  - logs
+  - 3rd_Party
+  - node_modules
+  - .venv
+  - .venv-1
+  - venv
+  - env
+  - llm-env
+  - google-cloud-sdk
+  - dist
+  - build
+  - archive
+  - _Archive
+  - vendor
+  - Gemfile
+  - Gemfile.lock
+  - "*.py"
+  - "*.pyc"
+  - pyproject.toml
+  - uv.lock
+  - .git
+  - .github
+  - .grok
