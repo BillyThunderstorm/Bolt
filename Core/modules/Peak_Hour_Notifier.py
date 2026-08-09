@@ -832,6 +832,63 @@ def reject_next_clip(reason: str = "", clip_id: str = None) -> dict:
     return clip
 
 
+def list_held_clips() -> list[dict]:
+    """Return all held clips (newest held first when held_at present)."""
+    data = _load_ready()
+    held = [c for c in data.get("clips") or [] if c.get("status") == "held"]
+
+    def _key(c: dict) -> str:
+        return str(c.get("held_at") or c.get("created_at") or "")
+
+    held.sort(key=_key, reverse=True)
+    return held
+
+
+def unhold_clip(clip_id: str = None) -> dict:
+    """Return a held clip to status=ready so it shows in the postable queue again.
+
+    Hold is intentional "don't post *yet*" storage — not delete. After a re-edit,
+    prefer ``bolt queue add NewEdit.mp4`` for the new file; use unhold when the
+    same vertical path is still the one you want to post.
+    """
+    data = _load_ready()
+    now = _now()
+    held = [c for c in data.get("clips") or [] if c.get("status") == "held"]
+    if not held:
+        return {}
+
+    clip = None
+    if clip_id:
+        cid = str(clip_id).strip().lower()
+        for c in held:
+            if str(c.get("id") or "").lower().startswith(cid) or str(c.get("id")) == clip_id:
+                clip = c
+                break
+    else:
+        # Most recently held
+        held_sorted = sorted(
+            held,
+            key=lambda c: str(c.get("held_at") or ""),
+            reverse=True,
+        )
+        clip = held_sorted[0] if held_sorted else None
+
+    if not clip:
+        return {}
+
+    plan = _ensure_auto_post_plan(clip, now)
+    clip["status"] = "ready"
+    clip["unheld_at"] = now.isoformat()
+    # Keep hold_reason for history; clear plan rejection so auto-post can run again
+    plan["status"] = "scheduled"
+    plan.pop("rejected_at", None)
+    plan.pop("rejection_reason", None)
+    plan.pop("held_at", None)
+    plan.pop("hold_reason", None)
+    _save_ready(data)
+    return clip
+
+
 def override_clip_score(score: float, clip_id: str = None) -> dict:
     """Override a ready clip's score and promote/demote alertability."""
     data = _load_ready()
@@ -1082,12 +1139,43 @@ def _publish_clip(clip: dict, now: datetime, reason: str) -> dict:
     return result
 
 
+def _match_clip_token(clip: dict, token: str) -> bool:
+    """Match by full id, id prefix, or filename/stem (not loose title substrings).
+
+    Title substring matching is intentionally avoided — e.g. ``hands`` must not
+    match every clip titled "Just got my hands on …".
+    """
+    if not token:
+        return False
+    t = token.strip().lower()
+    if len(t) >= 2 and t[0] == t[-1] and t[0] in "\"'":
+        t = t[1:-1].strip()
+    if not t:
+        return False
+    t_stem = Path(t).stem.lower()
+
+    cid = str(clip.get("id") or "").lower()
+    if cid == t or (len(t) >= 4 and cid.startswith(t)):
+        return True
+
+    path = str(clip.get("clip_path") or "")
+    if not path:
+        return False
+    name = Path(path).name.lower()
+    stem = Path(path).stem.lower()
+    # Hands / Hands.mp4 → Hands.mp4
+    if t in {name, stem} or t_stem in {name, stem}:
+        return True
+    return False
+
+
 def mark_posted(clip_id: str = None):
     """
-    Mark one or all 'ready' clips as posted.
+    Mark clip(s) as posted after a manual upload (or bulk after a session).
 
-    clip_id=None  → marks ALL ready clips as posted (use after a posting session)
-    clip_id='abc' → marks just that specific clip
+    clip_id=None  → marks ALL **ready** clips as posted
+    clip_id='abc' / 'Hands' / 'Hands.mp4' → marks matching clip(s) even if
+        status was ready **or held** (held-then-manual-upload is common)
 
     This keeps the queue clean so you don't get duplicate alerts.
     """
@@ -1095,16 +1183,73 @@ def mark_posted(clip_id: str = None):
     tz = ZoneInfo(POSTING_TIMEZONE)
     now = datetime.now(tz)
     count = 0
+    marked: list[dict] = []
+    token = (clip_id or "").strip() or None
 
     for clip in data["clips"]:
-        if clip["status"] != "ready":
-            continue
-        if clip_id is None or clip["id"] == clip_id:
-            clip["status"] = "posted"
-            clip["posted_at"] = now.isoformat()
-            count += 1
+        status = clip.get("status")
+        # Bulk (no token): only ready — never mass-post held by accident
+        if token is None:
+            if status != "ready":
+                continue
+        else:
+            # Targeted: ready or held (you often hold, re-edit, upload by hand)
+            if status not in ("ready", "held"):
+                continue
+            if not _match_clip_token(clip, token):
+                continue
+        clip["status"] = "posted"
+        clip["posted_at"] = now.isoformat()
+        if status == "held":
+            clip["posted_after_hold"] = True
+        count += 1
+        marked.append(clip)
 
     _save_ready(data)
+    if count == 0:
+        # Do not celebrate a no-op — that confused "hands" → 0 marked
+        print(
+            f"  ✗ Marked 0 clips as posted"
+            + (f' (no ready/held match for "{token}")' if token else " (no ready clips)"),
+            file=sys.stderr,
+        )
+        if token:
+            print(
+                "  mark-posted needs a queue id or exact filename stem "
+                "(e.g. Hands / Hands.mp4) for a ready or held row.",
+                file=sys.stderr,
+            )
+            print("  Try:  bolt queue list   |   bolt queue held", file=sys.stderr)
+            # Hint if the file exists on disk but was never queue-added
+            vert = _vertical_clips_dir()
+            loose = []
+            t = token.lower()
+            t_stem = Path(token).stem.lower()
+            if vert.is_dir():
+                for p in vert.iterdir():
+                    if p.suffix.lower() not in {".mp4", ".mov", ".m4v"}:
+                        continue
+                    if t in p.name.lower() or t_stem == p.stem.lower():
+                        loose.append(p.name)
+            if loose:
+                print(
+                    f"  Found on disk (not in queue): {', '.join(loose[:5])}",
+                    file=sys.stderr,
+                )
+                print(
+                    f'  Log a manual TikTok post:\n'
+                    f'    bolt queue add "{loose[0]}" && bolt queue mark-posted "{Path(loose[0]).stem}"',
+                    file=sys.stderr,
+                )
+        else:
+            print("  Queue has no status=ready clips right now.", file=sys.stderr)
+        return 0
+
+    for clip in marked:
+        print(
+            f"  ✓ posted  {clip.get('id')}  "
+            f"{(clip.get('title') or Path(clip.get('clip_path') or '').name or '')[:50]}"
+        )
     notify(
         f"Marked {count} clip(s) as posted ✓",
         level="success",
@@ -1706,8 +1851,16 @@ def interactive_decide(
                 )
             continue
         if choice in {"h", "hold", "n", "no", "reject", "dontpost"}:
+            print(
+                "  Hold = park it (not delete). Hidden from postable until: "
+                "bolt queue unhold <id>"
+            )
+            print(
+                "  Tip: if you re-edit the video, use  bolt queue add NewFile.mp4  "
+                "instead of unhold."
+            )
             try:
-                reason = input("  reason (helps Bolt learn)> ").strip()
+                reason = input("  reason (why not posting yet)> ").strip()
             except (EOFError, KeyboardInterrupt):
                 print("\n  cancelled hold")
                 continue
@@ -1716,7 +1869,10 @@ def interactive_decide(
             held = reject_next_clip(reason, clip.get("id"))
             if held:
                 print(f"  ✓ held {held.get('id')}: {reason}")
-                _speak(f"Held clip. {reason}")
+                print(
+                    f"     bring back:  bolt queue unhold {held.get('id')}"
+                )
+                _speak(f"Held clip for later. {reason}")
                 decisions += 1
                 focus_id = None
             else:
@@ -1807,6 +1963,8 @@ Usage:
   bolt queue title [clip_id] [N|text] Suggest or set a caption title
   bolt queue approve [clip_id]       Approve for next peak auto-post
   bolt queue reject [clip_id] <why>  Hold a clip and record the reason
+  bolt queue held                    List held clips + reasons (not deleted!)
+  bolt queue unhold [clip_id]        Put a held clip back on the postable list
   bolt queue post-now [clip_id]      Publish immediately (TikTok)
   bolt queue mark-posted [clip_id]   Mark as posted (after manual upload)
   bolt queue clean [--dry-run]       Scrap ready rows whose video is missing
@@ -1873,6 +2031,27 @@ def _print_summary() -> None:
     if with_file:
         print("  Postable now (real files only):")
         _print_actionable_table(limit=8)
+        print()
+
+    held = list_held_clips()
+    if held:
+        print(f"  Held ({len(held)}) — parked, not deleted. Still in the queue:")
+        print("  #   id        reason")
+        print("  ──  ────────  ──────────────────────────────────────────────")
+        for i, c in enumerate(held[:8], 1):
+            reason = (c.get("hold_reason") or "—")[:48]
+            has = "✓ file" if _clip_file_exists(c) else "○ no file"
+            print(
+                f"  {i:<3} {str(c.get('id') or '')[:8]:<8}  "
+                f"{reason}  [{has}]"
+            )
+        if len(held) > 8:
+            print(f"  …and {len(held) - 8} more")
+        print("      → bolt queue held          # full list")
+        print("      → bolt queue unhold <id>   # back to postable (same file)")
+        print(
+            "      → bolt queue add Edit.mp4  # after a re-edit (new file)"
+        )
         print()
 
     print("      Approve here (CLI), not in the media folder.")
@@ -2230,6 +2409,57 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
             print("no ready clip found to hold", file=sys.stderr)
             return 1
         print(f"held clip {clip.get('id')}: {clip.get('hold_reason', reason)}")
+        print(
+            "  (parked — not deleted. Bring back: "
+            f"bolt queue unhold {clip.get('id')})"
+        )
+        return 0
+
+    if action in ("held", "holds", "list-held", "held-list"):
+        held = list_held_clips()
+        if not held:
+            print("  no held clips")
+            return 0
+        print(f"\n  Held clips ({len(held)}) — parked until unhold or re-add:\n")
+        for c in held:
+            cid = c.get("id")
+            reason = c.get("hold_reason") or "—"
+            path = c.get("clip_path") or ""
+            exists = _clip_file_exists(c)
+            print(f"  id:     {cid}")
+            print(f"  title:  {(c.get('title') or Path(path).name or '—')[:70]}")
+            print(f"  reason: {reason}")
+            print(f"  file:   {path or '—'}  ({'exists' if exists else 'MISSING'})")
+            print(f"  unhold: bolt queue unhold {cid}")
+            if not exists:
+                print(
+                    "  re-edit: bolt queue add YourNewVertical.mp4 --title \"…\""
+                )
+            print()
+        return 0
+
+    if action in ("unhold", "release", "restore", "requeue", "un-hold"):
+        clip_id = rest[0] if rest else None
+        clip = unhold_clip(clip_id)
+        if not clip:
+            print(
+                "no held clip found to unhold"
+                + (f" (id={clip_id})" if clip_id else " — list: bolt queue held"),
+                file=sys.stderr,
+            )
+            return 1
+        print(f"unheld {clip.get('id')} → status=ready")
+        if clip.get("hold_reason"):
+            print(f"  prior reason kept for history: {clip.get('hold_reason')}")
+        if not _clip_file_exists(clip):
+            print(
+                "  ⚠ video file missing at clip_path — will not show as postable "
+                "until the file exists (or bolt queue add a re-edit).",
+                file=sys.stderr,
+            )
+        else:
+            print(f"  file: {_clip_display_name(clip)}")
+            print("  next: bolt queue decide  |  bolt queue next --open")
         return 0
 
     if action in ("post-now", "postnow", "post"):

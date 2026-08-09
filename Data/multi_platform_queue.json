@@ -290954,6 +290954,3576 @@
           "aspect_ratio": "9:16"
         }
       ]
+    },
+    {
+      "queue_id": "373bcc60",
+      "created_at": "2026-08-08T22:39:35.292718",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-27T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp637m2vmr/clip.mp4",
+          "caption": "Ready clip\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp637m2vmr/clip.mp4",
+          "title": "Ready clip",
+          "description": "Ready clip\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp637m2vmr/clip.mp4",
+          "caption": "Ready clip\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-27T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp637m2vmr/clip.mp4",
+          "title": "Ready clip",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "2ea65180",
+      "created_at": "2026-08-08T22:39:35.428266",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-27T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpydb2h2zj/clip.mp4",
+          "caption": "Ready clip\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpydb2h2zj/clip.mp4",
+          "title": "Ready clip",
+          "description": "Ready clip\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpydb2h2zj/clip.mp4",
+          "caption": "Ready clip\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-27T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpydb2h2zj/clip.mp4",
+          "title": "Ready clip",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "95a6fe4f",
+      "created_at": "2026-08-08T22:39:35.551197",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-27T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpz8jk26fx/clip.mp4",
+          "caption": "Ready clip\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpz8jk26fx/clip.mp4",
+          "title": "Ready clip",
+          "description": "Ready clip\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpz8jk26fx/clip.mp4",
+          "caption": "Ready clip\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-27T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpz8jk26fx/clip.mp4",
+          "title": "Ready clip",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "88fd0336",
+      "created_at": "2026-08-08T22:39:35.681534",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-27T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpvtvvhym6/clip.mp4",
+          "caption": "Ready clip\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpvtvvhym6/clip.mp4",
+          "title": "Ready clip",
+          "description": "Ready clip\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpvtvvhym6/clip.mp4",
+          "caption": "Ready clip\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-27T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpvtvvhym6/clip.mp4",
+          "title": "Ready clip",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "4bf0768d",
+      "created_at": "2026-08-08T22:39:35.808029",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp3f7me5xc/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp3f7me5xc/clip.mp4",
+          "title": "Test",
+          "description": "Test\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp3f7me5xc/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp3f7me5xc/clip.mp4",
+          "title": "Test",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "80bfdd4f",
+      "created_at": "2026-08-08T22:39:35.935465",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpk8mahqlv/clip.mp4",
+          "caption": "Billy kills 3\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpk8mahqlv/clip.mp4",
+          "title": "Billy kills 3",
+          "description": "Billy kills 3\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpk8mahqlv/clip.mp4",
+          "caption": "Billy kills 3\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpk8mahqlv/clip.mp4",
+          "title": "Billy kills 3",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "cc505c95",
+      "created_at": "2026-08-08T22:39:36.089502",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpc_wxg4d3/clip.mp4",
+          "caption": "Test clip\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpc_wxg4d3/clip.mp4",
+          "title": "Test clip",
+          "description": "Test clip\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpc_wxg4d3/clip.mp4",
+          "caption": "Test clip\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpc_wxg4d3/clip.mp4",
+          "title": "Test clip",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "51bc4b34",
+      "created_at": "2026-08-08T22:39:36.213162",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp7u6zu26n/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp7u6zu26n/clip.mp4",
+          "title": "Test",
+          "description": "Test\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp7u6zu26n/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp7u6zu26n/clip.mp4",
+          "title": "Test",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "0e149ba8",
+      "created_at": "2026-08-08T22:39:36.342381",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpk7phqdbl/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpk7phqdbl/clip.mp4",
+          "title": "Test",
+          "description": "Test\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpk7phqdbl/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpk7phqdbl/clip.mp4",
+          "title": "Test",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "e0ed6dff",
+      "created_at": "2026-08-08T22:39:36.470204",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpev16pb82/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpev16pb82/clip.mp4",
+          "title": "Test",
+          "description": "Test\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpev16pb82/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpev16pb82/clip.mp4",
+          "title": "Test",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "9c5f8631",
+      "created_at": "2026-08-08T22:39:36.594983",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp___zxp2e/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp___zxp2e/clip.mp4",
+          "title": "Test",
+          "description": "Test\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp___zxp2e/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp___zxp2e/clip.mp4",
+          "title": "Test",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "d5763274",
+      "created_at": "2026-08-08T22:39:36.722234",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpf3eauv5c/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpf3eauv5c/clip.mp4",
+          "title": "Test",
+          "description": "Test\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpf3eauv5c/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpf3eauv5c/clip.mp4",
+          "title": "Test",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "ffd828ee",
+      "created_at": "2026-08-08T22:39:36.847116",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpad_z79uf/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpad_z79uf/clip.mp4",
+          "title": "Test",
+          "description": "Test\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpad_z79uf/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpad_z79uf/clip.mp4",
+          "title": "Test",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "3048c385",
+      "created_at": "2026-08-08T22:39:37.570951",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpcgi5omzb/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpcgi5omzb/clip.mp4",
+          "title": "Test",
+          "description": "Test\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpcgi5omzb/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpcgi5omzb/clip.mp4",
+          "title": "Test",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "dd441140",
+      "created_at": "2026-08-08T22:39:37.697744",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpr5mq3c4z/clip.mp4",
+          "caption": "Real clip\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpr5mq3c4z/clip.mp4",
+          "title": "Real clip",
+          "description": "Real clip\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpr5mq3c4z/clip.mp4",
+          "caption": "Real clip\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpr5mq3c4z/clip.mp4",
+          "title": "Real clip",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "309abbc7",
+      "created_at": "2026-08-08T22:39:37.820878",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpacjb3c7r/clip.mp4",
+          "caption": "Keep me\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpacjb3c7r/clip.mp4",
+          "title": "Keep me",
+          "description": "Keep me\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpacjb3c7r/clip.mp4",
+          "caption": "Keep me\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpacjb3c7r/clip.mp4",
+          "title": "Keep me",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "7815072c",
+      "created_at": "2026-08-08T22:39:37.948290",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpbhdhhll3/clip.mp4",
+          "caption": "Has file\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpbhdhhll3/clip.mp4",
+          "title": "Has file",
+          "description": "Has file\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpbhdhhll3/clip.mp4",
+          "caption": "Has file\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpbhdhhll3/clip.mp4",
+          "title": "Has file",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "831d6654",
+      "created_at": "2026-08-08T22:39:38.074054",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpmefkwm4s/clip.mp4",
+          "caption": "Billy kills 3\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpmefkwm4s/clip.mp4",
+          "title": "Billy kills 3",
+          "description": "Billy kills 3\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpmefkwm4s/clip.mp4",
+          "caption": "Billy kills 3\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpmefkwm4s/clip.mp4",
+          "title": "Billy kills 3",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "48fb581b",
+      "created_at": "2026-08-08T22:39:38.197491",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpmefkwm4s/clip.mp4",
+          "caption": "A clutch moment\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpmefkwm4s/clip.mp4",
+          "title": "A clutch moment",
+          "description": "A clutch moment\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpmefkwm4s/clip.mp4",
+          "caption": "A clutch moment\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpmefkwm4s/clip.mp4",
+          "title": "A clutch moment",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "fb69c672",
+      "created_at": "2026-08-08T22:39:38.353902",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 00\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 00",
+          "description": "clip 00\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 00\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 00",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "5603d42e",
+      "created_at": "2026-08-08T22:39:38.480377",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 01\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 01",
+          "description": "clip 01\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 01\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 01",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "b9aea9e9",
+      "created_at": "2026-08-08T22:39:38.603664",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 02\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 02",
+          "description": "clip 02\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 02\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 02",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "8ac1bab7",
+      "created_at": "2026-08-08T22:39:38.726058",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 03\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 03",
+          "description": "clip 03\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 03\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 03",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "6b7178d4",
+      "created_at": "2026-08-08T22:39:38.853214",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 04\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 04",
+          "description": "clip 04\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 04\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 04",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "1cb887f8",
+      "created_at": "2026-08-08T22:39:38.977612",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 05\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 05",
+          "description": "clip 05\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 05\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 05",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "af31485a",
+      "created_at": "2026-08-08T22:39:39.100150",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 06\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 06",
+          "description": "clip 06\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 06\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 06",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "516b4900",
+      "created_at": "2026-08-08T22:39:39.223707",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 07\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 07",
+          "description": "clip 07\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 07\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 07",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "68255b10",
+      "created_at": "2026-08-08T22:39:39.377130",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 08\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 08",
+          "description": "clip 08\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 08\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 08",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "84c783f1",
+      "created_at": "2026-08-08T22:39:39.504923",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 09\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 09",
+          "description": "clip 09\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 09\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 09",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "cd066946",
+      "created_at": "2026-08-08T22:39:39.628719",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 10\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 10",
+          "description": "clip 10\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 10\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 10",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "53264c92",
+      "created_at": "2026-08-08T22:39:39.752251",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 11\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 11",
+          "description": "clip 11\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 11\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 11",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "2e700044",
+      "created_at": "2026-08-08T22:39:39.877279",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 12\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 12",
+          "description": "clip 12\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 12\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 12",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "bf839d58",
+      "created_at": "2026-08-08T22:39:40.001268",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 13\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 13",
+          "description": "clip 13\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 13\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 13",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "8c85e2e9",
+      "created_at": "2026-08-08T22:39:40.128189",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 14\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 14",
+          "description": "clip 14\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 14\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 14",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "e4dec11a",
+      "created_at": "2026-08-08T22:39:40.282668",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 15\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 15",
+          "description": "clip 15\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 15\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 15",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "24844449",
+      "created_at": "2026-08-08T22:39:40.407407",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 16\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 16",
+          "description": "clip 16\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 16\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 16",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "c0a9c2d3",
+      "created_at": "2026-08-08T22:39:40.532000",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 17\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 17",
+          "description": "clip 17\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 17\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 17",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "2b16a167",
+      "created_at": "2026-08-08T22:39:40.660324",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 18\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 18",
+          "description": "clip 18\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 18\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 18",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "7b245cec",
+      "created_at": "2026-08-08T22:39:40.784317",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 19\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 19",
+          "description": "clip 19\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "caption": "clip 19\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmppub_mtj7/clip.mp4",
+          "title": "clip 19",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "52e0889a",
+      "created_at": "2026-08-08T22:39:40.910597",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmptz47fbv9/clip.mp4",
+          "caption": "test\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmptz47fbv9/clip.mp4",
+          "title": "test",
+          "description": "test\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmptz47fbv9/clip.mp4",
+          "caption": "test\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmptz47fbv9/clip.mp4",
+          "title": "test",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "b16ed3a2",
+      "created_at": "2026-08-08T22:39:41.037835",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpkjbaxquc/clip.mp4",
+          "caption": "stuck clip\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpkjbaxquc/clip.mp4",
+          "title": "stuck clip",
+          "description": "stuck clip\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpkjbaxquc/clip.mp4",
+          "caption": "stuck clip\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpkjbaxquc/clip.mp4",
+          "title": "stuck clip",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "3f7ca9ea",
+      "created_at": "2026-08-08T22:39:41.195344",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp17_cet_d/clip.mp4",
+          "caption": "old posted\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp17_cet_d/clip.mp4",
+          "title": "old posted",
+          "description": "old posted\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp17_cet_d/clip.mp4",
+          "caption": "old posted\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmp17_cet_d/clip.mp4",
+          "title": "old posted",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "26f6d319",
+      "created_at": "2026-08-08T22:39:41.322198",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 00\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 00",
+          "description": "clip 00\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 00\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 00",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "ac6921be",
+      "created_at": "2026-08-08T22:39:41.449511",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 01\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 01",
+          "description": "clip 01\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 01\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 01",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "2c520295",
+      "created_at": "2026-08-08T22:39:41.573794",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 02\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 02",
+          "description": "clip 02\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 02\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 02",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "b83f5ad0",
+      "created_at": "2026-08-08T22:39:41.698312",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 03\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 03",
+          "description": "clip 03\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 03\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 03",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "0b7e10d8",
+      "created_at": "2026-08-08T22:39:41.824552",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 04\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 04",
+          "description": "clip 04\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 04\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 04",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "49cc229c",
+      "created_at": "2026-08-08T22:39:41.980272",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 05\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 05",
+          "description": "clip 05\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 05\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 05",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "4c0a62f1",
+      "created_at": "2026-08-08T22:39:42.105919",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 06\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 06",
+          "description": "clip 06\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 06\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 06",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "a1321b3b",
+      "created_at": "2026-08-08T22:39:42.229706",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 07\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 07",
+          "description": "clip 07\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 07\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 07",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "749cc3cd",
+      "created_at": "2026-08-08T22:39:42.355867",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 08\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 08",
+          "description": "clip 08\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 08\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 08",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "94d27ba1",
+      "created_at": "2026-08-08T22:39:42.484070",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 09\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 09",
+          "description": "clip 09\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 09\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 09",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "ffef3af7",
+      "created_at": "2026-08-08T22:39:42.610147",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 10\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 10",
+          "description": "clip 10\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 10\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 10",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "864e6df5",
+      "created_at": "2026-08-08T22:39:42.738639",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 11\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 11",
+          "description": "clip 11\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "caption": "clip 11\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpxde362pj/clip.mp4",
+          "title": "clip 11",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "2de7b301",
+      "created_at": "2026-08-08T22:39:42.868540",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpbwqmmrpm/clip.mp4",
+          "caption": "This is a very long title that should be cut off in the dashboard\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpbwqmmrpm/clip.mp4",
+          "title": "This is a very long title that should be cut off in the dashboard",
+          "description": "This is a very long title that should be cut off in the dashboard\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpbwqmmrpm/clip.mp4",
+          "caption": "This is a very long title that should be cut off in the dashboard\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpbwqmmrpm/clip.mp4",
+          "title": "This is a very long title that should be cut off in the dashboard",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "7c6715cd",
+      "created_at": "2026-08-08T22:39:43.028782",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpap2ka3sx/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpap2ka3sx/clip.mp4",
+          "title": "Test",
+          "description": "Test\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpap2ka3sx/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpap2ka3sx/clip.mp4",
+          "title": "Test",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "2ba3ffcb",
+      "created_at": "2026-08-08T22:39:43.160830",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmplcp92ct_/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmplcp92ct_/clip.mp4",
+          "title": "Test",
+          "description": "Test\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmplcp92ct_/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-05-28T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmplcp92ct_/clip.mp4",
+          "title": "Test",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "5ec1159c",
+      "created_at": "2026-08-08T22:39:43.290258",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpbrphinwl/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpbrphinwl/clip.mp4",
+          "title": "Test",
+          "description": "Test\n\nDaily gaming highlights.\n\n#Shorts #Gaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpbrphinwl/clip.mp4",
+          "caption": "Test\n\n#Gaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-05:00",
+          "clip_path": "/var/folders/4b/qnb7_crs725149z4fzn2k4rc0000gp/T/tmpbrphinwl/clip.mp4",
+          "title": "Test",
+          "description": "Highlight from the stream: clip.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "1cc32df9",
+      "created_at": "2026-08-09T02:08:16.186655",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-08_08-55-07_clip01_audio_spike_416_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-08_08-55-07_clip01_audio_spike_416_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Just got my hands on 007 First Light - Thoughts so far?\n\nDaily gaming highlights.\n\n#Shorts #Gaming #BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-08_08-55-07_clip01_audio_spike_416_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-08_08-55-07_clip01_audio_spike_416_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Highlight from the stream: 2026-08-08_08-55-07_clip01_audio_spike_416_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "ef3cf7ba",
+      "created_at": "2026-08-09T02:26:00.308724",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip02_audio_spike_84_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip02_audio_spike_84_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Just got my hands on 007 First Light - Thoughts so far?\n\nDaily gaming highlights.\n\n#Shorts #Gaming #BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip02_audio_spike_84_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip02_audio_spike_84_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Highlight from the stream: 2026-08-09_01-13-33_clip02_audio_spike_84_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "bffee387",
+      "created_at": "2026-08-09T02:26:24.544814",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip11_audio_spike_3155_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip11_audio_spike_3155_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Just got my hands on 007 First Light - Thoughts so far?\n\nDaily gaming highlights.\n\n#Shorts #Gaming #BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip11_audio_spike_3155_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip11_audio_spike_3155_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Highlight from the stream: 2026-08-09_01-13-33_clip11_audio_spike_3155_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "5e81eeb8",
+      "created_at": "2026-08-09T02:26:42.307345",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip03_audio_spike_142_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip03_audio_spike_142_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Just got my hands on 007 First Light - Thoughts so far?\n\nDaily gaming highlights.\n\n#Shorts #Gaming #BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip03_audio_spike_142_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip03_audio_spike_142_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Highlight from the stream: 2026-08-09_01-13-33_clip03_audio_spike_142_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "c76ea50e",
+      "created_at": "2026-08-09T02:27:06.049030",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip12_audio_spike_3858_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip12_audio_spike_3858_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Just got my hands on 007 First Light - Thoughts so far?\n\nDaily gaming highlights.\n\n#Shorts #Gaming #BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip12_audio_spike_3858_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip12_audio_spike_3858_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Highlight from the stream: 2026-08-09_01-13-33_clip12_audio_spike_3858_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "4b52f39d",
+      "created_at": "2026-08-09T02:27:21.490484",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip09_audio_spike_2545_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip09_audio_spike_2545_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Just got my hands on 007 First Light - Thoughts so far?\n\nDaily gaming highlights.\n\n#Shorts #Gaming #BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip09_audio_spike_2545_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip09_audio_spike_2545_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Highlight from the stream: 2026-08-09_01-13-33_clip09_audio_spike_2545_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "bb6abfa1",
+      "created_at": "2026-08-09T07:59:25.752304",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip07_audio_spike_4794_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip07_audio_spike_4794_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Just got my hands on 007 First Light - Thoughts so far?\n\nDaily gaming highlights.\n\n#Shorts #Gaming #BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip07_audio_spike_4794_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip07_audio_spike_4794_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Highlight from the stream: 2026-08-09_01-13-33_clip07_audio_spike_4794_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "c81d6ce4",
+      "created_at": "2026-08-09T07:59:48.512608",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip08_audio_spike_4984_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip08_audio_spike_4984_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Just got my hands on 007 First Light - Thoughts so far?\n\nDaily gaming highlights.\n\n#Shorts #Gaming #BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip08_audio_spike_4984_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip08_audio_spike_4984_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Highlight from the stream: 2026-08-09_01-13-33_clip08_audio_spike_4984_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "ff4fe0ef",
+      "created_at": "2026-08-09T08:00:10.645152",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip09_audio_spike_5162_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip09_audio_spike_5162_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Just got my hands on 007 First Light - Thoughts so far?\n\nDaily gaming highlights.\n\n#Shorts #Gaming #BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip09_audio_spike_5162_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip09_audio_spike_5162_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Highlight from the stream: 2026-08-09_01-13-33_clip09_audio_spike_5162_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "41842269",
+      "created_at": "2026-08-09T08:00:31.481599",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip10_audio_spike_5333_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip10_audio_spike_5333_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Just got my hands on 007 First Light - Thoughts so far?\n\nDaily gaming highlights.\n\n#Shorts #Gaming #BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip10_audio_spike_5333_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip10_audio_spike_5333_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Highlight from the stream: 2026-08-09_01-13-33_clip10_audio_spike_5333_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "c2f0b946",
+      "created_at": "2026-08-09T08:00:55.791767",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip11_audio_spike_5959_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip11_audio_spike_5959_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Just got my hands on 007 First Light - Thoughts so far?\n\nDaily gaming highlights.\n\n#Shorts #Gaming #BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip11_audio_spike_5959_tiktok.mp4",
+          "caption": "Just got my hands on 007 First Light - Thoughts so far?\n\n#BondGames #007FirstLight #GamingForBeginners #NewGameAlert #GamingBlunders #ShootingRageQuit #GamerLifestory #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-08-09_01-13-33_clip11_audio_spike_5959_tiktok.mp4",
+          "title": "Just got my hands on 007 First Light - Thoughts so far?",
+          "description": "Highlight from the stream: 2026-08-09_01-13-33_clip11_audio_spike_5959_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "929da53e",
+      "created_at": "2026-08-09T08:24:28.358934",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Hands.mp4",
+          "caption": "Hands\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Hands.mp4",
+          "title": "Hands",
+          "description": "Hands\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Hands.mp4",
+          "caption": "Hands\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-09T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Hands.mp4",
+          "title": "Hands",
+          "description": "Highlight from the stream: Hands.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
     }
   ]
 }
