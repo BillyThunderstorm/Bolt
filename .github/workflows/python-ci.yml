@@ -47,8 +47,9 @@ jobs:
 
       - name: Unit tests
         env:
-          # Keep CI free of paid API calls; tests should mock or use templates
-          BOLT_LLM_MODE: local
+          # Light mode + empty real keys: no paid network calls unless a test
+          # patches env with a fake key (routing unit tests).
+          BOLT_LLM_MODE: light
           BOLT_LLM_PROVIDER: ollama
           BOLT_LLM_FALLBACK: none
           BOLT_USE_WHISPER: "false"
@@ -57,7 +58,6 @@ jobs:
           Bolt_VOICE_MUTE: "true"
           NEXUS_ALLOW_PAID: "false"
           USE_GEMINI_TITLES: "false"
-          # Avoid accidental key use even if secrets are present in forks
           XAI_API_KEY: ""
           OPENAI_API_KEY: ""
           GEMINI_API_KEY: ""

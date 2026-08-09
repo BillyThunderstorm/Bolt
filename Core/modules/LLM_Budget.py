@@ -104,10 +104,9 @@ def paid_api_allowed(
     Soft monthly cap (``BOLT_API_MONTHLY_CAP_USD``) forces local when exceeded.
     """
     mode = llm_mode()
-    if mode == "local":
-        return False
 
-    # Soft monthly cap — once exceeded, no more paid calls this month.
+    # Soft monthly cap — once exceeded, no more paid calls this month
+    # (even explicit allow_paid — protects the budget).
     try:
         from modules.XAI_Usage import force_local_due_to_cap
 
@@ -116,11 +115,16 @@ def paid_api_allowed(
     except Exception:
         pass
 
-    # Explicit call-site override wins.
+    # Explicit call-site override wins over mode defaults.
     if allow_paid is False:
         return False
     if allow_paid is True:
-        return is_high_value(task_type, complexity) or mode == "full"
+        # consult(..., allow_paid=True) / bolt nexus --paid opt in for this call
+        return True
+
+    # local = never auto-select paid APIs
+    if mode == "local":
+        return False
 
     # Global gate: light/full need NEXUS_ALLOW_PAID (or mode=full with key later).
     allow_env = _env_bool("NEXUS_ALLOW_PAID", default=False)
