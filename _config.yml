@@ -1,8 +1,10 @@
-# Minimal Jekyll config so GitHub Actions "Jekyll site CI" can run
-# against this monorepo without treating Python/scripts as site content.
+# Minimal Jekyll config for the legacy "Jekyll site CI" workflow only.
 #
-# Bolt is primarily a Python app, not a Jekyll project. This file exists
-# so CI does not crawl broken paths under scripts/ and Core/.
+# Production sites are NOT built here — they live on Cloudflare Pages and
+# pull live JSON from the api.billythunderstorm.us Worker (fed by
+# `bolt site` / scripts/site_data_writer.py → site-data.json on GitHub).
+#
+# This file exists so Jekyll CI does not crawl Python/scripts trees.
 
 title: Bolt
 exclude:
