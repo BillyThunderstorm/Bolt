@@ -9,23 +9,28 @@ deep in a game.
 Uses macOS built-in text-to-speech (the `say` command) by default.
 No API key needed. No extra install. It just works on a Mac.
 
-Voice options (set Bolt_VOICE in .env):
-  Alex      — natural male voice
-  Samantha  — default, natural female voice
-  Victoria  — clear, slightly formal
-  Karen     — Australian accent (fun option)
+Voice options (set Bolt_VOICE in .env for macOS fallback):
+  Nathan (Enhanced)  — clear US male (recommended fallback)
+  Good News          — cheerful novelty
+  Samantha           — natural female
+  Flo                — multi-language; brighter option
 
-To list all voices on your Mac, run in Terminal:
+edge-tts free voices (set Bolt_EDGE_VOICE):
+  en-US-AndrewNeural    — Cartoon/Cute (best free match for Bolt energy)
+  en-US-EmmaNeural   — Cheerful, clear
+  en-US-JennyNeural  — Friendly
+
+To list voices:
   say -v ?
+  edge-tts --list-voices
 
-Upgrade path (optional):
-  Set ELEVENLABS_API_KEY in .env to unlock a more natural voice.
-  ElevenLabs free tier gives ~10,000 chars/month which is plenty
-  for streaming alerts.
+Optional paid upgrade:
+  ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID for character TTS
 
 Volume / speed:
-  Bolt_VOICE_RATE  — words per minute (default: 175, try 160-200)
-  Bolt_VOICE_MUTE  — set to "true" to silence TTS without removing it
+  Bolt_VOICE_RATE  — macOS words per minute (default: 190 for energy)
+  Bolt_EDGE_RATE   — edge-tts rate e.g. +15%
+  Bolt_VOICE_MUTE  — set to "true" to silence TTS
 """
 
 import os
@@ -54,17 +59,24 @@ except ImportError:
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
-VOICE = os.getenv("Bolt_VOICE", "Good News")  # Cheerful-dark, perfect for Bolt
-RATE = int(os.getenv("Bolt_VOICE_RATE", "175"))  # words per minute
-MUTED = os.getenv("Bolt_VOICE_MUTE", "false").lower() == "true"
+# macOS `say` fallback — Nathan (Enhanced) per Billy's preference
+VOICE = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Nathan (Enhanced)"
+RATE = int(os.getenv("Bolt_VOICE_RATE") or os.getenv("BOLT_VOICE_RATE") or "190")
+MUTED = (
+    os.getenv("Bolt_VOICE_MUTE") or os.getenv("BOLT_VOICE_MUTE") or "false"
+).lower() == "true"
 
-# edge-tts (free, neural quality — installed via pip3 install edge-tts)
-# Pick a voice from: en-US-GuyNeural, en-US-ChristopherNeural, en-US-EricNeural, en-US-AndrewNeural
-# Full list: run `edge-tts --list-voices` in Terminal
-EDGE_TTS_VOICE = os.getenv("Bolt_EDGE_VOICE", "en-US-ChristopherNeural")
-EDGE_TTS_RATE = os.getenv("Bolt_EDGE_RATE", "+0%")  # e.g. +10% faster, -10% slower
+# edge-tts primary free path — Ana = Cartoon/Cute (high-energy cheerful)
+# List: edge-tts --list-voices
+EDGE_TTS_VOICE = (
+    os.getenv("Bolt_EDGE_VOICE")
+    or os.getenv("BOLT_EDGE_VOICE")
+    or "en-US-AndrewNeural"
+)
+EDGE_TTS_RATE = os.getenv("Bolt_EDGE_RATE") or os.getenv("BOLT_EDGE_RATE") or "+15%"
+EDGE_TTS_PITCH = os.getenv("Bolt_EDGE_PITCH") or os.getenv("BOLT_EDGE_PITCH") or "+5Hz"
 
-# ElevenLabs (kept for future use, not active)
+# ElevenLabs optional (only if key AND voice id set)
 ELEVENLABS_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "")
 
@@ -127,21 +139,22 @@ def _start_worker():
 def _speak_now(text: str):
     """
     The actual TTS call. Priority order:
-      1. ElevenLabs (primary — most natural voice)
-      2. edge-tts (free, neural quality — second best)
-      3. macOS say command (free, offline, always available)
+      1. edge-tts free neural (Andrew / warm confident male — matches Bolt energy)
+      2. ElevenLabs only if fully configured (optional paid character voice)
+      3. macOS say — Nathan (Enhanced) fallback (offline)
     """
     if MUTED:
         return
 
-    # ElevenLabs first — most natural
-    if _try_elevenlabs(text):
-        return
-
+    # Free character-ish voice first (no surprise ElevenLabs bills)
     if _try_edge_tts(text):
         return
 
-    # macOS say as fallback (works offline)
+    # Optional paid path when both key and voice id are present
+    if ELEVENLABS_KEY and ELEVENLABS_VOICE_ID and _try_elevenlabs(text):
+        return
+
+    # macOS say fallback (Nathan Enhanced by default)
     _try_macos_say(text)
 
 
@@ -166,7 +179,11 @@ def _try_edge_tts(text: str) -> bool:
     try:
 
         async def _generate_audio(tmp_path: str):
-            communicate = edge_tts.Communicate(text, EDGE_TTS_VOICE, rate=EDGE_TTS_RATE)
+            # pitch: e.g. +5Hz for a slightly brighter "cartoon" lift
+            kwargs = {"rate": EDGE_TTS_RATE}
+            if EDGE_TTS_PITCH:
+                kwargs["pitch"] = EDGE_TTS_PITCH
+            communicate = edge_tts.Communicate(text, EDGE_TTS_VOICE, **kwargs)
             await communicate.save(tmp_path)
 
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
@@ -274,8 +291,57 @@ def speak(text: str):
         from modules.Bolt_Voice import speak
         speak("Highlight detected. That one's a clip.")
     """
+    if not text:
+        return
     _start_worker()
-    _speech_queue.put(text)
+    _speech_queue.put(str(text))
+
+
+def speak_enabled(*, force: bool = False) -> bool:
+    """True when CLI/result auto-speak should run.
+
+    On when any of:
+      - force=True
+      - BOLT_SPEAK / BOLT_SPEAK_CLI is 1/true/yes/on
+      - ``--speak`` appears in sys.argv
+    Off when muted (Bolt_VOICE_MUTE) or BOLT_SPEAK is 0/false/no/off.
+    """
+    if MUTED:
+        return False
+    if force:
+        return True
+    import sys
+
+    flag = (os.getenv("BOLT_SPEAK") or os.getenv("BOLT_SPEAK_CLI") or "").strip().lower()
+    if flag in ("0", "false", "no", "off"):
+        return False
+    if flag in ("1", "true", "yes", "on"):
+        return True
+    if "--speak" in sys.argv:
+        return True
+    # Default: auto-speak high-value CLI status results (can disable with BOLT_SPEAK=0)
+    default = (os.getenv("BOLT_SPEAK_DEFAULT") or "1").strip().lower()
+    return default in ("1", "true", "yes", "on")
+
+
+def speak_result(text: str, *, force: bool = False, max_chars: int = 420) -> None:
+    """Speak a short summary of a CLI/terminal result when auto-speak is on.
+
+    Strips markdown noise and truncates so TTS stays listenable.
+    Silent no-op when muted or speak is disabled.
+    """
+    if not speak_enabled(force=force):
+        return
+    if not text:
+        return
+    # Collapse whitespace / light markdown for speech
+    cleaned = str(text)
+    for ch in ("#", "*", "`", "|"):
+        cleaned = cleaned.replace(ch, " ")
+    cleaned = " ".join(cleaned.split())
+    if len(cleaned) > max_chars:
+        cleaned = cleaned[: max_chars - 1].rsplit(" ", 1)[0] + "…"
+    speak(cleaned)
 
 
 def say_event(event: str, **kwargs):
@@ -331,8 +397,9 @@ if __name__ == "__main__":
 
     print(f"\n  🤖  Bolt Voice — TTS Test")
     print(
-        f"  edge-tts:  {'✓ installed — ' + EDGE_TTS_VOICE if edge_available else '✗ not installed (run: pip3 install edge-tts --break-system-packages)'}"
+        f"  edge-tts:  {'✓ ' + EDGE_TTS_VOICE + ' @ ' + EDGE_TTS_RATE if edge_available else '✗ not installed (pip install edge-tts)'}"
     )
+    print(f"  pitch:     {EDGE_TTS_PITCH or 'default'}")
     print(f"  Fallback:  macOS say ({VOICE}, {RATE} wpm)")
     print(f"  Muted:     {MUTED}")
     print(f"  Available: {is_available()}")

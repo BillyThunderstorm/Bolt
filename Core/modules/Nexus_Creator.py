@@ -7,10 +7,16 @@ Preference (Google used sparingly):
   2. Grok (xAI API) when paid is allowed — preferred cloud quality
   3. Gemini only if ``NEXUS_USE_GEMINI=true`` (off by default)
 
-Paid Grok is opt-in via:
-  - env ``NEXUS_ALLOW_PAID=true``, or
+Paid Grok is gated by ``LLM_Budget`` (BOLT_LLM_MODE) plus:
+  - env ``NEXUS_ALLOW_PAID=true`` (or mode=full), or
   - ``consult(..., allow_paid=True)``, or
   - CLI ``bolt nexus "…" --paid``
+
+Recommended "SuperGrok + light API" plan:
+  BOLT_LLM_MODE=light
+  NEXUS_ALLOW_PAID=true
+  NEXUS_PREFERRED=ollama
+  → Grok only for strategy/decision/research; Ollama otherwise.
 
 Note: SuperGrok *subscription* (app/web) ≠ free ``XAI_API_KEY`` usage.
 """
@@ -73,10 +79,37 @@ class NexusCreator:
             )
         raise ValueError(f"Provider {provider} not configured")
 
-    def _paid_allowed(self, allow_paid: Optional[bool] = None) -> bool:
-        if allow_paid is not None:
-            return bool(allow_paid)
-        return self.allow_paid_default
+    def _paid_allowed(
+        self,
+        allow_paid: Optional[bool] = None,
+        task_type: str = "general",
+        complexity: str = "medium",
+    ) -> bool:
+        """Respect BOLT_LLM_MODE light/full/local + NEXUS_ALLOW_PAID."""
+        try:
+            from modules.LLM_Budget import paid_api_allowed, llm_mode
+
+            # full mode: treat as paid allowed unless hard-disabled
+            if llm_mode() == "full" and allow_paid is not False:
+                if allow_paid is True or self.allow_paid_default or _env_bool(
+                    "NEXUS_ALLOW_PAID", default=False
+                ):
+                    return True
+                # full mode still needs a key path open — allow if key present
+                return bool(self.xai_api_key)
+
+            # light: high-value only when NEXUS_ALLOW_PAID is true OR allow_paid=True
+            if allow_paid is True:
+                return paid_api_allowed(task_type, complexity, allow_paid=True)
+            if allow_paid is False:
+                return False
+            if not self.allow_paid_default and llm_mode() != "full":
+                return False
+            return paid_api_allowed(task_type, complexity, allow_paid=None)
+        except Exception:
+            if allow_paid is not None:
+                return bool(allow_paid)
+            return self.allow_paid_default
 
     def _should_use_grok(
         self,
@@ -84,20 +117,31 @@ class NexusCreator:
         complexity: str = "medium",
         allow_paid: Optional[bool] = None,
     ) -> bool:
-        """Grok only when paid path is explicitly allowed AND task is high-value."""
-        if not self._paid_allowed(allow_paid) or not self.xai_api_key:
+        """Grok only when paid path is allowed AND task is high-value (light mode)."""
+        if not self.xai_api_key:
             return False
-        high_value = {
-            "strategy",
-            "product_testing",
-            "sponsor",
-            "decision",
-            "deep_analysis",
-            "career",
-            "review",
-            "m_tier",
-        }
-        return complexity == "high" or task_type in high_value
+        if not self._paid_allowed(allow_paid, task_type, complexity):
+            return False
+        try:
+            from modules.LLM_Budget import is_high_value, llm_mode
+
+            if llm_mode() == "full":
+                return True
+            return is_high_value(task_type, complexity)
+        except Exception:
+            high_value = {
+                "strategy",
+                "product_testing",
+                "sponsor",
+                "decision",
+                "deep_analysis",
+                "career",
+                "review",
+                "m_tier",
+                "research",
+                "morning",
+            }
+            return complexity == "high" or task_type in high_value
 
     def _is_ollama_healthy(self) -> bool:
         try:
@@ -167,7 +211,14 @@ Focus: content creation, product testing, gaming, skincare, AI development, spon
         force_provider: Optional[str],
     ) -> str:
         if force_provider:
-            return force_provider.lower().strip()
+            fp = force_provider.lower().strip()
+            if fp in ("grok", "xai"):
+                # Still honor soft cap + budget mode (never force paid when blocked)
+                if self._paid_allowed(allow_paid, task_type, complexity) and self.xai_api_key:
+                    return "grok"
+                # fall through to free providers
+            elif fp:
+                return fp
 
         # High-value work → Grok when paid path is allowed (preferred over Gemini).
         if self._should_use_grok(task_type, complexity, allow_paid):
@@ -182,7 +233,11 @@ Focus: content creation, product testing, gaming, skincare, AI development, spon
             and self.gemini_key
         ):
             return "gemini"
-        if preferred == "grok" and self._paid_allowed(allow_paid) and self.xai_api_key:
+        if (
+            preferred == "grok"
+            and self._paid_allowed(allow_paid, task_type, complexity)
+            and self.xai_api_key
+        ):
             return "grok"
 
         # Everyday free path: local Ollama
@@ -190,7 +245,7 @@ Focus: content creation, product testing, gaming, skincare, AI development, spon
             return "ollama"
 
         # Paid cloud when allowed (Grok preferred)
-        if self._paid_allowed(allow_paid) and self.xai_api_key:
+        if self._paid_allowed(allow_paid, task_type, complexity) and self.xai_api_key:
             return "grok"
 
         # Gemini only if explicitly enabled — last cloud option
@@ -261,7 +316,15 @@ Focus: content creation, product testing, gaming, skincare, AI development, spon
                 elif provider == "ollama":
                     print("Nexus: using Ollama (local, free)")
                 client = self._get_client(provider)
-                model = self.grok_model if provider == "grok" else self.ollama_model
+                if provider == "grok":
+                    try:
+                        from modules.LLM_Budget import model_for_task
+
+                        model = model_for_task(task_type, complexity, provider="xai")
+                    except Exception:
+                        model = self.grok_model
+                else:
+                    model = self.ollama_model
                 response = client.chat.completions.create(
                     model=model,
                     messages=[
@@ -272,6 +335,26 @@ Focus: content creation, product testing, gaming, skincare, AI development, spon
                     max_tokens=1600 if provider == "grok" else 2800,
                 )
                 advice = (response.choices[0].message.content or "").strip()
+                if provider == "grok":
+                    try:
+                        from modules.XAI_Usage import (
+                            extract_usage_from_response,
+                            record_usage,
+                        )
+
+                        in_tok, out_tok = extract_usage_from_response(response)
+                        record_usage(
+                            model=model,
+                            input_tokens=in_tok,
+                            output_tokens=out_tok,
+                            task_type=task_type or "general",
+                            source="Nexus_Creator.consult",
+                            provider="xai",
+                            success=True,
+                            extra={"topic": (topic or "")[:120]},
+                        )
+                    except Exception:
+                        pass
 
             advice = (advice or "").strip()
             if advice:
@@ -285,6 +368,22 @@ Focus: content creation, product testing, gaming, skincare, AI development, spon
             }
         except Exception as e:
             print(f"{provider} failed: {e}")
+            if provider == "grok":
+                try:
+                    from modules.XAI_Usage import record_usage
+
+                    record_usage(
+                        model=getattr(self, "grok_model", "grok-4.5"),
+                        input_tokens=0,
+                        output_tokens=0,
+                        task_type=task_type or "general",
+                        source="Nexus_Creator.consult",
+                        provider="xai",
+                        success=False,
+                        extra={"error": str(e)[:160], "topic": (topic or "")[:80]},
+                    )
+                except Exception:
+                    pass
             return {
                 "advice": "",
                 "provider": "fallback",

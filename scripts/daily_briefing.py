@@ -3,15 +3,11 @@
 Daily Briefing with Nexus + Vector DB + Memory
 """
 
-import sys; sys.path.insert(0, '..')
-from Core.modules.Bolt_Voice import speak
 import os
+import sys
 from pathlib import Path
 from datetime import datetime
-print("Reached the speak line")
-speak("This is a direct test.")
-print("Finished speak call")
-os.system('say "Direct say test"')
+
 # Ensure paths
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "Core"))
@@ -323,18 +319,33 @@ def generate_briefing():
     # Research notes (direction-finding role)
     text += _research_block()
 
-    # Nexus strategy (best-effort)
+    # Nexus strategy (best-effort). Provider follows BOLT_BRIEFING_PROVIDER:
+    #   auto  = light rules (Grok for strategy when paid allowed + under cap)
+    #   grok  = always prefer Grok API for briefing
+    #   local = always Ollama / never paid
     try:
         from modules.Nexus_Creator import NexusCreator
+        from modules.LLM_Budget import briefing_consult_kwargs
+
+        allow_paid, force_provider = briefing_consult_kwargs()
         nexus = NexusCreator()
         nexus_result = nexus.consult(
             "Morning priorities, content plan, and action items",
             context="Current queue, recent performance, M-tier progress",
             task_type="strategy",
             complexity="high",
+            allow_paid=allow_paid,
+            force_provider=force_provider,
         )
-        strategy_insight = nexus_result["advice"]
-        text += f"🎯 NEXUS STRATEGY INSIGHT:\n{strategy_insight}\n\n---\n\n"
+        strategy_insight = nexus_result.get("advice") or ""
+        if strategy_insight:
+            used = nexus_result.get("provider") or "?"
+            model = nexus_result.get("model") or ""
+            text += (
+                f"🎯 NEXUS STRATEGY INSIGHT: "
+                f"({used}{('/' + model) if model else ''})\n"
+                f"{strategy_insight}\n\n---\n\n"
+            )
     except Exception:
         pass
 
@@ -387,8 +398,50 @@ def generate_briefing():
     return text, sms
 
 
-def main(speak_only=False):
-    """CLI entry point."""
+def _spoken_summary(briefing_text: str, sms_summary: str) -> str:
+    """Build a short, speakable version of the briefing.
+
+    Full markdown is terrible for TTS (headers, bullets, code). Prefer the
+    SMS one-liner plus the top action item when present.
+    """
+    # Prefer SMS summary; strip markdown-ish noise just in case.
+    spoken = (sms_summary or "").strip()
+    if not spoken:
+        # Fall back: first non-empty plain line from the briefing body.
+        for line in (briefing_text or "").splitlines():
+            cleaned = line.strip().lstrip("#*-| ").strip()
+            if cleaned and not cleaned.startswith("|"):
+                spoken = cleaned
+                break
+    if not spoken:
+        spoken = "Your daily briefing is ready."
+    return spoken
+
+
+def _speak(text: str) -> None:
+    """Speak via Bolt_Voice when available; otherwise macOS `say`."""
+    try:
+        from modules.Bolt_Voice import speak
+
+        speak(text)
+        return
+    except Exception:
+        pass
+    try:
+        import subprocess
+
+        subprocess.run(["say", text], check=False, capture_output=True)
+    except Exception:
+        print(f"[voice unavailable] {text}")
+
+
+def main(print_only: bool = False, speak_aloud: bool = False) -> None:
+    """CLI entry point.
+
+    Args:
+        print_only: Print the full briefing + SMS summary to the terminal.
+        speak_aloud: Also speak a short spoken summary via Bolt_Voice.
+    """
     OUTPUT_DIR = Path("Docs/briefings/daily")
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -397,16 +450,21 @@ def main(speak_only=False):
     output_file = OUTPUT_DIR / "latest_morning.md"
     output_file.write_text(briefing_text, encoding="utf-8")
 
-    if speak_only:
-        speak(briefing_text)
-        speak()
-        speak("─── SMS SUMMARY ───")
-        speak(sms_summary)
+    if print_only:
+        print(briefing_text)
+        print()
+        print("─── SMS SUMMARY ───")
+        print(sms_summary)
     else:
-        speak("Briefing saved to", output_file)
+        print("Briefing saved to", output_file)
 
-    speak("Daily briefing test.")
-    if __name__ == "__main__":
-        speak_only = "--speak" in sys.argv
-        main
-("Testing daily briefing voice output.")
+    if speak_aloud:
+        spoken = _spoken_summary(briefing_text, sms_summary)
+        print(f"Speaking: {spoken}")
+        _speak(spoken)
+
+
+if __name__ == "__main__":
+    print_only = "--print" in sys.argv
+    speak_aloud = "--speak" in sys.argv
+    main(print_only=print_only, speak_aloud=speak_aloud)

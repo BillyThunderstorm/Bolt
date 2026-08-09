@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Generate TikTok titles and hashtags.
 
-Preference order (Google sparingly):
-  1. Grok (xAI) or ChatGPT (OpenAI) via ``BOLT_LLM_PROVIDER``
+Preference order (light / free-first):
+  1. Provider from ``BOLT_LLM_PROVIDER`` (ollama | xai | openai)
   2. Local templates (free, always available)
   3. Gemini only if ``USE_GEMINI_TITLES=true`` (off by default)
+
+Never send cloud model names (grok-4.5 / gpt-4o-mini) to Ollama.
 """
 
 import hashlib
@@ -39,7 +41,16 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 TITLE_CACHE = PROJECT_ROOT / "data" / "title_cache.json"
 BRAIN_FILES = (PROJECT_ROOT / "bolt_brain.md", PROJECT_ROOT / "Bolt_brain.md")
 OPENAI_TITLE_MODEL = os.getenv("BOLT_OPENAI_MODEL", "gpt-4o-mini")
-XAI_TITLE_MODEL = os.getenv("BOLT_XAI_MODEL") or os.getenv("GROK_MODEL", "grok-4.5")
+XAI_TITLE_MODEL = (
+    os.getenv("BOLT_XAI_MODEL_FAST")
+    or os.getenv("BOLT_XAI_MODEL_LIGHT")
+    or os.getenv("BOLT_XAI_MODEL")
+    or os.getenv("GROK_MODEL")
+    or "grok-4.3"
+)
+OLLAMA_TITLE_MODEL = os.getenv("OLLAMA_MODEL") or os.getenv(
+    "BOLT_OLLAMA_MODEL", "llama3.1:8b"
+)
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 # Back-compat alias used in older tests/docs
 AI_MODEL = OPENAI_TITLE_MODEL
@@ -230,7 +241,7 @@ def _llm_titles(
         if not raw:
             notify(
                 "AI titles enabled, but Grok/ChatGPT unavailable "
-                "(check XAI_API_KEY / OPENAI_API_KEY / BOLT_LLM_PROVIDER)",
+                "(check Ollama is running, or XAI_API_KEY / OPENAI_API_KEY)",
                 level="warning",
                 reason="Bolt will keep working with local template titles.",
             )
@@ -364,46 +375,61 @@ def _has_gemini_key() -> bool:
 
 def _ask_preferred_title_llm(prompt: str) -> Tuple[Optional[str], str]:
     """
-    Call Grok or ChatGPT based on BOLT_LLM_PROVIDER.
+    Call title LLM based on BOLT_LLM_PROVIDER (ollama | xai | openai).
 
     Returns (response_text_or_None, provider_label).
-    Never sends an OpenAI model name to the xAI endpoint (or vice versa).
+    Never sends cloud model names to Ollama (or vice versa).
     """
-    preferred = os.getenv("BOLT_LLM_PROVIDER", "openai").lower().strip()
-    fallback = os.getenv("BOLT_LLM_FALLBACK", "openai").lower().strip()
+    preferred = os.getenv("BOLT_LLM_PROVIDER", "ollama").lower().strip()
+    if preferred in ("grok",):
+        preferred = "xai"
+    fallback = os.getenv("BOLT_LLM_FALLBACK", "none").lower().strip()
+    if fallback in ("grok",):
+        fallback = "xai"
 
     order: List[str] = []
     for name in (preferred, fallback):
         if name and name != "none" and name not in order:
             order.append(name)
-    # If preferred is unset/odd, still try whichever keys exist.
-    if not order:
-        order = ["xai", "openai"]
-    for name in ("xai", "openai"):
+    # Free-first defaults for light mode: ollama, then optional cloud
+    for name in ("ollama", "xai", "openai"):
         if name not in order:
             order.append(name)
 
     try:
-        from modules.LLM_Handler import ask_llm
+        from modules.LLM_Handler import ask_llm, _ollama_healthy
     except Exception as exc:
         return f"LLM unavailable: {exc}", "none"
 
     last = None
     for prov in order:
+        if prov == "ollama" and not _ollama_healthy():
+            continue
         if prov == "xai" and not _has_xai_key():
             continue
         if prov == "openai" and not _has_openai_key():
             continue
-        if prov not in ("xai", "openai"):
+        if prov not in ("ollama", "xai", "openai"):
             continue
-        model = XAI_TITLE_MODEL if prov == "xai" else OPENAI_TITLE_MODEL
-        label = f"Grok/{model}" if prov == "xai" else f"ChatGPT/{model}"
+
+        if prov == "ollama":
+            model = OLLAMA_TITLE_MODEL
+            label = f"Ollama/{model}"
+        elif prov == "xai":
+            model = XAI_TITLE_MODEL
+            label = f"Grok/{model}"
+        else:
+            model = OPENAI_TITLE_MODEL
+            label = f"ChatGPT/{model}"
+
         raw = ask_llm(
             prompt,
             provider=prov,
             model=model,
             max_tokens=600,
             temperature=0.7,
+            task_type="title",
+            complexity="low",
         )
         last = raw
         if raw and not str(raw).startswith("LLM unavailable"):

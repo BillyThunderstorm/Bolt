@@ -2214,8 +2214,20 @@ def main(argv: Optional[List[str]] = None) -> int:
             else:
                 print("No (game, trigger) pair has enough data yet.")
         elif args.cmd == "next":
-            for a in next_actions():
+            actions = next_actions()
+            for a in actions:
                 print(f"[{a['type']}] {a['title']}\n  why: {a['why']}\n  run: {a['command']}\n")
+            try:
+                from modules.Bolt_Voice import speak_result
+
+                if actions:
+                    speak_result(
+                        "Next up: " + ". ".join(a["title"] for a in actions[:3])
+                    )
+                else:
+                    speak_result("Nothing urgent is queued right now.")
+            except Exception:
+                pass
         elif args.cmd == "status":
             print(f"Creator: {CREATOR_NAME}")
             print(f"Preferred lanes: {PREFERRED_LANES}")
@@ -2266,6 +2278,18 @@ def main(argv: Optional[List[str]] = None) -> int:
                     f"(+{tb['boost']}, {tb['samples']} samples)"
                 )
             print(f"Social queue: {len(social_queue())}")
+            try:
+                from modules.Bolt_Voice import speak_result
+
+                speak_result(
+                    f"Manager status: {len(list_items())} catalog items, "
+                    f"{summary['total']} storefront, "
+                    f"{ship['total']} shipped reviews, "
+                    f"{sp['active']} active sponsors, "
+                    f"{len(social_queue())} in social queue."
+                )
+            except Exception:
+                pass
         elif args.cmd == "store-add":
             item = store_add(args.name, args.asin, args.category, args.notes)
             print(json.dumps(item, indent=2))

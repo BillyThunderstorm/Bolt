@@ -1,179 +1,198 @@
 #!/bin/bash
 # Media Rotation Script for Bolt
-# Automatically rotates and archives old media files to maintain storage limits
-# Paths aligned with scripts/_paths.py (post-reorg layout)
+# Enforces size limits on media/ by removing oldest files first.
+#
+# Paths follow the post-reorg layout (see scripts/_paths.py):
+#   media/Recordings, media/clips, media/vertical_clips
+#
+# macOS-safe (no GNU-only du -sb / find -printf).
+#
+# NOTE: Moving files to an archive on the *same* volume does not free disk
+# space. Size enforcement therefore *deletes* oldest media files once over
+# the limit. Use --dry-run first.
 
-# Configuration — matches _paths.py
-RECORDINGS_DIR="media/Recordings"
-CLIPS_DIR="media/clips"
-MAX_RECORDINGS_GB=50
-MAX_CLIPS_GB=1
-ARCHIVE_DIR="Data/archive"
+set -euo pipefail
+
+# ── Resolve repo root (works when invoked via scripts/maintenance/ symlink) ──
+_SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$_SOURCE" ]; do
+  _DIR="$(cd -P "$(dirname "$_SOURCE")" && pwd)"
+  _LINK="$(readlink "$_SOURCE")"
+  [[ $_LINK != /* ]] && _SOURCE="$_DIR/$_LINK" || _SOURCE="$_LINK"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$_SOURCE")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$REPO_ROOT"
+
+# ── Paths (canonical media layout) ───────────────────────────────────────────
+MEDIA_DIR="${MEDIA_DIR:-$REPO_ROOT/media}"
+RECORDINGS_DIR="${RECORDINGS_DIR:-$MEDIA_DIR/Recordings}"
+CLIPS_DIR="${CLIPS_DIR:-$MEDIA_DIR/clips}"
+VERTICAL_CLIPS_DIR="${VERTICAL_CLIPS_DIR:-$MEDIA_DIR/vertical_clips}"
+OUTPUT_DIR="${OUTPUT_DIR:-$MEDIA_DIR/output}"
+LOG_DIR="${LOG_DIR:-$REPO_ROOT/logs}"
+LOG_FILE="$LOG_DIR/media_rotation.log"
+
+MAX_RECORDINGS_GB="${MAX_RECORDINGS_GB:-50}"
+MAX_CLIPS_GB="${MAX_CLIPS_GB:-5}"
+MAX_VERTICAL_GB="${MAX_VERTICAL_GB:-5}"
+MAX_OUTPUT_GB="${MAX_OUTPUT_GB:-5}"
 DRY_RUN=false
 
-# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Ensure we run from repo root
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-cd "$REPO_ROOT" || exit 1
+mkdir -p "$LOG_DIR"
 
-# Function to get directory size in GB (cross-platform)
+log() {
+  local msg="[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+  echo -e "$msg" | tee -a "$LOG_FILE"
+}
+
+# Directory size in GB (macOS + Linux via du -sk)
 get_dir_size_gb() {
-    local dir="$1"
-    if [[ -d "$dir" ]]; then
-        local size_kb
-        size_kb=$(du -sk "$dir" 2>/dev/null | cut -f1)
-        if [[ -n "$size_kb" && "$size_kb" -gt 0 ]]; then
-            echo "$size_kb" | awk '{printf "%.2f", $1/1024/1024}'
-        else
-            echo "0"
-        fi
-    else
-        echo "0"
-    fi
+  local dir="$1"
+  if [[ -d "$dir" ]]; then
+    local size_kb
+    size_kb=$(du -sk "$dir" 2>/dev/null | cut -f1)
+    size_kb=${size_kb:-0}
+    awk -v kb="$size_kb" 'BEGIN { printf "%.2f", kb/1024/1024 }'
+  else
+    echo "0"
+  fi
 }
 
-# Function to get oldest files (macOS + Linux compatible)
+# Oldest media files first (macOS-safe; no find -printf)
 get_oldest_files() {
-    local dir="$1"
-    if [[ ! -d "$dir" ]]; then
-        return
-    fi
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS
-        find "$dir" -type f \( -name "*.mp4" -o -name "*.mov" -o -name "*.mkv" -o -name "*.jpg" -o -name "*.png" -o -name "*.jpeg" \) -exec stat -f '%m %N' {} \; 2>/dev/null | sort -n | cut -d' ' -f2-
-    else
-        # Linux
-        find "$dir" -type f \( -name "*.mp4" -o -name "*.mov" -o -name "*.mkv" -o -name "*.jpg" -o -name "*.png" -o -name "*.jpeg" \) -printf '%T@ %p\n' 2>/dev/null | sort -n | cut -d' ' -f2-
-    fi
+  local dir="$1"
+  [[ -d "$dir" ]] || return 0
+  # stat -f is macOS; fall back to GNU stat -c
+  if stat -f '%m' "$dir" &>/dev/null; then
+    find "$dir" -type f \( \
+      -name "*.mp4" -o -name "*.mov" -o -name "*.mkv" -o -name "*.avi" -o \
+      -name "*.m4v" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" \
+    \) -print0 2>/dev/null \
+      | while IFS= read -r -d '' f; do
+          mod=$(stat -f '%m' "$f" 2>/dev/null || echo 0)
+          printf '%s\t%s\n' "$mod" "$f"
+        done \
+      | sort -n \
+      | cut -f2-
+  else
+    find "$dir" -type f \( \
+      -name "*.mp4" -o -name "*.mov" -o -name "*.mkv" -o -name "*.avi" -o \
+      -name "*.m4v" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" \
+    \) -printf '%T@\t%p\n' 2>/dev/null \
+      | sort -n \
+      | cut -f2-
+  fi
 }
 
-# Function to archive files
-archive_files() {
-    local dir="$1"
-    local max_size_gb="$2"
-    local type="$3"
-
-    if [[ ! -d "$dir" ]]; then
-        echo -e "${YELLOW}Directory $dir does not exist, skipping...${NC}"
-        return 0
-    fi
-
-    local current_size
-    current_size=$(get_dir_size_gb "$dir")
-
-    if (( $(echo "$current_size <= $max_size_gb" | bc -l) )); then
-        echo -e "${GREEN}$type directory is within limit: ${current_size}GB <= ${max_size_gb}GB${NC}"
-        return 0
-    fi
-
-    echo -e "${YELLOW}$type directory exceeds limit: ${current_size}GB > ${max_size_gb}GB${NC}"
-    echo -e "${YELLOW}Starting archival process for $type...${NC}"
-
-    mkdir -p "$ARCHIVE_DIR/$dir"
-
-    local files
-    files=$(get_oldest_files "$dir")
-    local to_archive_size=0
-    local archived_count=0
-
-    while IFS= read -r file; do
-        if [[ -z "$file" ]]; then
-            continue
-        fi
-
-        local file_size_bytes
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            file_size_bytes=$(stat -f%z "$file" 2>/dev/null || echo 0)
-        else
-            file_size_bytes=$(stat -c%s "$file" 2>/dev/null || echo 0)
-        fi
-        local file_size_gb
-        file_size_gb=$(echo "$file_size_bytes" | awk '{printf "%.4f", $1/1024/1024/1024}')
-
-        local projected_size
-        projected_size=$(echo "$current_size - $to_archive_size" | bc -l)
-        if (( $(echo "$projected_size <= $max_size_gb" | bc -l) )); then
-            break
-        fi
-
-        if [[ "$DRY_RUN" = true ]]; then
-            echo -e "${YELLOW}[DRY RUN] Would archive: $file (${file_size_gb}GB)${NC}"
-        else
-            mkdir -p "$(dirname "$ARCHIVE_DIR/$file")"
-            mv "$file" "$ARCHIVE_DIR/$file"
-            echo -e "${GREEN}Archived: $file (${file_size_gb}GB)${NC}"
-        fi
-
-        to_archive_size=$(echo "$to_archive_size + $file_size_gb" | bc -l)
-        ((archived_count++))
-
-        if (( archived_count % 10 == 0 )); then
-            echo -e "${YELLOW}Progress: Archived $archived_count files, freed ${to_archive_size}GB${NC}"
-        fi
-    done <<< "$files"
-
-    if [[ "$DRY_RUN" = true ]]; then
-        echo -e "${YELLOW}[DRY RUN] Would archive $archived_count files, freeing ${to_archive_size}GB${NC}"
-    else
-        echo -e "${GREEN}Archived $archived_count files, freed ${to_archive_size}GB${NC}"
-    fi
-
-    local new_size
-    new_size=$(get_dir_size_gb "$dir")
-    echo -e "${GREEN}New $type directory size: ${new_size}GB${NC}"
+get_file_bytes() {
+  local file="$1"
+  if [[ ! -f "$file" ]]; then
+    echo 0
+    return
+  fi
+  if stat -f%z "$file" &>/dev/null; then
+    stat -f%z "$file"
+  else
+    stat -c%s "$file" 2>/dev/null || echo 0
+  fi
 }
 
-# Main execution
+# Delete oldest files until dir is under max_size_gb
+enforce_size_limit() {
+  local dir="$1"
+  local max_size_gb="$2"
+  local type="$3"
+
+  if [[ ! -d "$dir" ]]; then
+    log "${YELLOW}$type: directory missing ($dir) — skip${NC}"
+    return 0
+  fi
+
+  local current_size
+  current_size=$(get_dir_size_gb "$dir")
+  log "${GREEN}$type: ${current_size}GB (limit ${max_size_gb}GB) — $dir${NC}"
+
+  if ! command -v bc &>/dev/null; then
+    log "${RED}bc not installed; cannot compare sizes. brew install bc${NC}"
+    return 1
+  fi
+
+  if (( $(echo "$current_size <= $max_size_gb" | bc -l) )); then
+    log "${GREEN}$type within limit${NC}"
+    return 0
+  fi
+
+  log "${YELLOW}$type over limit — removing oldest files…${NC}"
+
+  local freed_gb=0
+  local removed=0
+  local projected="$current_size"
+
+  while IFS= read -r file; do
+    [[ -z "$file" || ! -f "$file" ]] && continue
+    if (( $(echo "$projected <= $max_size_gb" | bc -l) )); then
+      break
+    fi
+
+    local bytes file_gb
+    bytes=$(get_file_bytes "$file")
+    file_gb=$(awk -v b="$bytes" 'BEGIN { printf "%.4f", b/1024/1024/1024 }')
+
+    if [[ "$DRY_RUN" == true ]]; then
+      log "${YELLOW}[DRY RUN] would remove: $file (${file_gb}GB)${NC}"
+    else
+      rm -f "$file"
+      log "${GREEN}removed: $file (${file_gb}GB)${NC}"
+    fi
+
+    projected=$(echo "$projected - $file_gb" | bc -l)
+    freed_gb=$(echo "$freed_gb + $file_gb" | bc -l)
+    removed=$((removed + 1))
+  done < <(get_oldest_files "$dir")
+
+  local new_size
+  new_size=$(get_dir_size_gb "$dir")
+  if [[ "$DRY_RUN" == true ]]; then
+    log "${YELLOW}[DRY RUN] $type: would remove $removed files (~${freed_gb}GB); size now ${new_size}GB (unchanged in dry-run)${NC}"
+  else
+    log "${GREEN}$type: removed $removed files (~${freed_gb}GB); now ${new_size}GB${NC}"
+  fi
+}
+
 main() {
-    echo -e "${GREEN}Starting Bolt Media Rotation Script${NC}"
-    echo "========================================"
-    echo "Repo root: $REPO_ROOT"
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      --dry-run) DRY_RUN=true; shift ;;
+      --recordings-gb) MAX_RECORDINGS_GB="$2"; shift 2 ;;
+      --clips-gb) MAX_CLIPS_GB="$2"; shift 2 ;;
+      --vertical-gb) MAX_VERTICAL_GB="$2"; shift 2 ;;
+      --output-gb) MAX_OUTPUT_GB="$2"; shift 2 ;;
+      -h|--help)
+        echo "Usage: $0 [--dry-run] [--recordings-gb N] [--clips-gb N] [--vertical-gb N] [--output-gb N]"
+        exit 0
+        ;;
+      *)
+        echo "Unknown option: $1"
+        exit 1
+        ;;
+    esac
+  done
 
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --dry-run)
-                DRY_RUN=true
-                shift
-                ;;
-            --recordings-gb)
-                MAX_RECORDINGS_GB="$2"
-                shift 2
-                ;;
-            --clips-gb)
-                MAX_CLIPS_GB="$2"
-                shift 2
-                ;;
-            --archive-dir)
-                ARCHIVE_DIR="$2"
-                shift 2
-                ;;
-            *)
-                echo "Unknown option: $1"
-                echo "Usage: $0 [--dry-run] [--recordings-gb GB] [--clips-gb GB] [--archive-dir PATH]"
-                exit 1
-                ;;
-        esac
-    done
+  log "Starting media rotation (repo=$REPO_ROOT dry_run=$DRY_RUN)"
+  log "Recordings limit=${MAX_RECORDINGS_GB}GB clips=${MAX_CLIPS_GB}GB vertical=${MAX_VERTICAL_GB}GB output=${MAX_OUTPUT_GB}GB"
 
-    echo "Configuration:"
-    echo "  Recordings: $RECORDINGS_DIR (limit ${MAX_RECORDINGS_GB}GB)"
-    echo "  Clips:      $CLIPS_DIR (limit ${MAX_CLIPS_GB}GB)"
-    echo "  Archive:    $ARCHIVE_DIR"
-    echo "  Dry run:    $DRY_RUN"
-    echo ""
+  enforce_size_limit "$RECORDINGS_DIR" "$MAX_RECORDINGS_GB" "Recordings"
+  enforce_size_limit "$CLIPS_DIR" "$MAX_CLIPS_GB" "Clips"
+  enforce_size_limit "$VERTICAL_CLIPS_DIR" "$MAX_VERTICAL_GB" "Vertical clips"
+  enforce_size_limit "$OUTPUT_DIR" "$MAX_OUTPUT_GB" "Output"
 
-    archive_files "$RECORDINGS_DIR" "$MAX_RECORDINGS_GB" "Recordings"
-    echo ""
-    archive_files "$CLIPS_DIR" "$MAX_CLIPS_GB" "Clips"
-    echo ""
-
-    echo -e "${GREEN}Media rotation completed!${NC}"
+  log "${GREEN}Media rotation finished${NC}"
 }
 
 main "$@"

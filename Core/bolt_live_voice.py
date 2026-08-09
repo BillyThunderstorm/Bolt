@@ -1,86 +1,139 @@
-import pyttsx3
+#!/usr/bin/env python3
+"""
+bolt_live_voice.py — Hands-free voice I/O for Bolt
+==================================================
+Billy speaks → Bolt listens → interprets (intents or LLM) → speaks back.
+
+This is a thin, stable entry point over Bolt_Conversation + Bolt_Voice.
+It replaces the earlier Gemini multimodal experiment, which never played
+audio and did not share the rest of Bolt's voice stack.
+
+Usage (from repo root):
+  PYTHONPATH=Core python3 Core/bolt_live_voice.py
+  PYTHONPATH=Core python3 Core/bolt_live_voice.py --text
+  PYTHONPATH=Core python3 Core/bolt_live_voice.py --once "queue status"
+  PYTHONPATH=Core python3 Core/bolt_live_voice.py --status
+
+Or via CLI (preferred):
+  bolt voice
+  bolt voice --text
+  bolt talk "what's next?"
+  bolt say "Clips are ready."
+"""
+
+from __future__ import annotations
+
 import os
 import sys
-import asyncio
 from pathlib import Path
-from google import genai
-from google.genai import types
 
-def speak(text):
-    os.system(f'say "{text}"')
-    
-def load_bolt_context() -> str:
-    """Assembles Bolt's identity and core instructions."""
+# Ensure Core/ is importable when this file is run directly.
+_CORE = Path(__file__).resolve().parent
+_REPO = _CORE.parent
+if str(_CORE) not in sys.path:
+    sys.path.insert(0, str(_CORE))
+os.chdir(_REPO)
+
+
+def _speak_line(text: str) -> int:
+    """One-shot TTS via Bolt_Voice (for `bolt say ...`)."""
     try:
-        project_root = Path(__file__).resolve().parent.parent
-        with open(project_root / "Bolt_Personality.txt", "r", encoding="utf-8") as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        return "You are Bolt, a cheerful and high-energy assistant."
+        from modules.Bolt_Voice import speak, _speech_queue
 
-async def run_bolt_multimodal():
-    # Keep using your local key setup securely
-    my_key = os.environ.get("GEMINI_API_KEY", "")
-    if not my_key:
-        print("❌ Error: Please set the GEMINI_API_KEY environment variable!")
-        return
-
-    client = genai.Client(api_key=my_key)
-    
-    # Using the native fast multimodal model
-    model_id = "gemini-2.5-flash" 
-    
-    # ADJUSTMENT: Request BOTH text and audio modalities back!
-    config = types.GenerateContentConfig(
-        system_instruction=load_bolt_context(),
-        response_modalities=["TEXT", "AUDIO"], 
-        temperature=0.85,
-    )
-
-    print("\n⚡ Bolt Multimodal Core Online!")
-    print("Type your message below. Bolt will print the text and speak aloud simultaneously.")
-    print("Type 'exit' or 'quit' to close the session.\n")
-
-    while True:
+        speak(text)
+        _speech_queue.join()
+        return 0
+    except Exception as exc:
+        print(f"bolt voice: speak failed: {exc}", file=sys.stderr)
         try:
-            user_input = input("Billy: ").strip()
-            if user_input.lower() in ['exit', 'quit']:
-                print("\n⚡ Bolt: Goodbye! Catch you next stream!")
-                break
-            if not user_input:
-                continue
+            import subprocess
 
-            print("\nBolt: ", end="", flush=True)
+            subprocess.run(["say", text], check=False)
+            return 0
+        except Exception:
+            return 1
 
-            # Request content generation asynchronously
-            response = client.aio.models.generate_content(
-                model=model_id,
-                contents=user_input,
-                config=config
-            )
-            
-            # Read and play chunks as they arrive
-            async for chunk in await response:
-                # 1. Print the text on your screen so you can read along
-                if chunk.text:
-                    print(chunk.text, end="", flush=True)
-                
-                # 2. Play the native audio data directly
-                if chunk.inline_data:
-                    audio_bytes = chunk.inline_data.data
-                    # Hand audio_bytes over to your local output device
-                    pass
-            
-            print("\n") # New line after text stream completes
 
-        except KeyboardInterrupt:
-            print("\n⚡ Bolt session closed safely.")
-            break
-        except Exception as e:
-            print(f"\n❌ Error: {e}\n")
+def main(argv: list[str] | None = None) -> int:
+    args = list(sys.argv[1:] if argv is None else argv)
+
+    # `bolt say <text>` / `python bolt_live_voice.py --say <text>`
+    if args and args[0] in ("--say", "say"):
+        text = " ".join(args[1:]).strip()
+        if not text:
+            print("Usage: bolt say \"message to speak\"", file=sys.stderr)
+            return 2
+        print(text)
+        return _speak_line(text)
+
+    # Delegate conversation / status / clear / one-shot to Bolt_Conversation
+    # so listen → intent → LLM → speak stays in one place.
+    try:
+        import Bolt_Conversation as conv
+    except ImportError as exc:
+        print(
+            f"bolt voice: could not import Bolt_Conversation: {exc}\n"
+            "  Try: PYTHONPATH=Core python3 -m Bolt_Conversation",
+            file=sys.stderr,
+        )
+        return 1
+
+    if "--clear" in args:
+        conv.ConversationMemory().clear()
+        print("Conversation history cleared.")
+        return 0
+
+    if "--status" in args:
+        # Reuse conversation status printer
+        sys.argv = ["Bolt_Conversation", "--status"]
+        try:
+            # Run the status branch by invoking the module's CLI path
+            mem = conv.ConversationMemory()
+            status = conv.provider_status()
+            print("\n  Bolt Live Voice Status")
+            print(f"  History turns: {len(mem.history)}")
+            print(f"  History file:  {conv.HISTORY_FILE}")
+            print(f"  Speech input:  {'yes' if conv.SPEECH_OK else 'no'}")
+            print(f"  Voice output:  {'yes' if conv.VOICE_OK else 'no'}")
+            print(f"  Intent router: {'yes' if conv.INTENT_OK else 'no'}")
+            print(f"  LLM provider:  {conv.get_active_provider()}")
+            print(f"  LLM status:    {status}")
+            print(f"\n  Recent context:\n{mem.last_summary()}\n")
+            return 0
+        except Exception as exc:
+            print(f"bolt voice: status failed: {exc}", file=sys.stderr)
+            return 1
+
+    text_mode = "--text" in args
+    # Support both `--once "…"` and bare prompt args (like Bolt_Conversation)
+    once_prompt: str | None = None
+    if "--once" in args:
+        i = args.index("--once")
+        once_prompt = " ".join(args[i + 1 :]).strip() or None
+        if not once_prompt:
+            print('Usage: bolt voice --once "your question"', file=sys.stderr)
+            return 2
+    else:
+        prompt_args = [
+            a
+            for a in args
+            if not a.startswith("--") and a not in ("voice", "talk", "live-voice")
+        ]
+        if prompt_args:
+            once_prompt = " ".join(prompt_args).strip()
+
+    if once_prompt:
+        conv.single_exchange(once_prompt)
+        return 0
+
+    print(
+        "\n  Bolt live voice online.\n"
+        "  Speak a command (or type with --text). Say 'exit' to quit.\n"
+        "  Try: good morning bolt · what's next · queue status · research status\n"
+    )
+    conv.conversation_loop(text_mode=text_mode)
+    return 0
+
 
 if __name__ == "__main__":
-    asyncio.run(run_bolt_multimodal())
-    
-    print("About to speak...")
-    speak("Bolt is now speaking through the voice.")
+    raise SystemExit(main())
