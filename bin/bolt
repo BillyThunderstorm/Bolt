@@ -189,8 +189,10 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
                           Disk + media folder health (fixed paths under media/)
                           status=sizes only; monitor=alerts; rotate/optimize=cleanup
   budget | api-usage      xAI spend this month, soft cap, budget mode
-  day [--quiet|--open|--process]
-                          Daily kickoff: peak + queue + storage + next steps
+  day [--decide|--voice|--quiet|--open|--process]
+                          Morning kickoff; --decide → queue decide (default offer on TTY)
+  stats [status|sync|tiktok|youtube] [--dry-run]
+                          Social performance pull readiness + TikTok/YouTube sync
 
 Direction-finding researcher (Core/modules/Researcher.py):
   research [status|questions|candidates|pending|log|add|note|c5]
@@ -283,13 +285,23 @@ def main() -> int:
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT))
 
-    # Built-in: daily content kickoff
-    if subcommand in ("day", "today", "kickoff", "start-day"):
+    # Built-in: daily content kickoff (optionally → queue decide / voice)
+    if subcommand in ("day", "today", "kickoff", "start-day", "morning-flow"):
         env = os.environ.copy()
         env["PYTHONPATH"] = f"{CORE_DIR}" + (
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
         cmd = [py, str(CORE_DIR / "bolt_day.py")] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: social stats status + TikTok/YouTube performance sync
+    if subcommand in ("stats", "social-stats", "social_stats", "performance-sync"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Social_Stats"] + (rest if rest else ["status"])
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 

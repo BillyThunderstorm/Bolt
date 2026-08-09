@@ -72,7 +72,12 @@ bolt help                         # Show the CLI command summary
 bolt version                      # Show the repository and Python in use
 bolt verify                       # Check required files, folders, config, and environment
 bolt setup                        # Finite setup check (config + keys); exits when done
-bolt day [--quiet|--open|--process]  # Daily content kickoff (peak + queue + plan)
+bolt day [--decide|--voice|--quiet|--open|--process]
+                                      # Default morning flow; --decide → queue review
+bolt day --decide                     # Preferred: brief → queue decide
+bolt day --decide --voice             # Decide, then hands-free voice
+bolt stats [status|sync|tiktok|youtube] [--dry-run]
+                                      # Social readiness + TikTok/YouTube pull
 bolt launch                       # Start live mode (folder watch + optional OBS)
 bolt launch --no-checklist        # Live mode without the pre-stream voice checklist
 bolt status                       # Check the decision engine, vector DB, and Nexus
@@ -492,29 +497,41 @@ Token commands are interactive and may open a browser or prompt for credentials.
 ## Platform stats sync (auto learning loop)
 
 Pull real views/likes from TikTok or YouTube into `Data/performance_outcomes.jsonl`
-(and clip history on first sight of each video). Requires the matching token command first.
+(and clip history on first sight of each video). Preferred surface is **`bolt stats`**
+(wraps the same Performance_Sync path as the older script aliases).
 
 ```bash
-# TikTok (app must be approved; scope video.list)
-bolt sync_tiktok_stats --dry-run
-bolt sync_tiktok_stats --min-age-hours 24
-bolt sync_tiktok_stats --limit 50 --json
+# Readiness + recent outcomes
+bolt stats
 
-# YouTube / Shorts
+# Safe pull (no write) — preferred first try
+bolt stats --dry-run                 # both platforms
+bolt stats youtube --dry-run
+bolt stats tiktok --dry-run
+
+# Live write into learning store
+bolt stats sync                      # both
+bolt stats youtube                   # YouTube only, live
+bolt stats tiktok --min-age-hours 24
+
+# Tokens (once)
+bolt youtube_token                   # Google OAuth, youtube.readonly
+bolt tiktok_token                    # needs video.list (not upload-only)
+
+# Legacy aliases (still work)
 bolt sync_youtube_stats --dry-run
-bolt sync_youtube_stats --min-age-hours 24
-bolt sync_youtube_stats --shorts-only --min-age-hours 24
-bolt sync_youtube_stats --limit 50 --json
+bolt sync_tiktok_stats --dry-run
 ```
 
 | Command | What it does |
 |---------|--------------|
-| `bolt sync_tiktok_stats` | Fetch public TikTok video metrics and upsert performance outcomes |
-| `bolt sync_tiktok_stats --dry-run` | Fetch + match only; write nothing |
-| `bolt sync_tiktok_stats --min-age-hours 24` | Skip videos younger than 24h (more stable metrics) |
-| `bolt sync_youtube_stats` | Fetch channel uploads/Shorts metrics and upsert performance outcomes |
-| `bolt sync_youtube_stats --shorts-only` | Only videos ≤60s (typical Shorts) |
-| `bolt sync_youtube_stats --dry-run` | Fetch + match only; write nothing |
+| `bolt stats` | Token readiness + recent outcomes one-liner |
+| `bolt stats --dry-run` | Both platforms: fetch + match only; write nothing |
+| `bolt stats youtube [--dry-run]` | YouTube/Shorts metrics → performance outcomes |
+| `bolt stats tiktok [--dry-run]` | TikTok metrics (needs `video.list` scope) |
+| `bolt stats sync` | Both platforms, live write |
+| `bolt sync_tiktok_stats` | Legacy alias for TikTok pull |
+| `bolt sync_youtube_stats` | Legacy alias for YouTube pull |
 
 ## Advice, reporting, and learning
 
@@ -597,18 +614,50 @@ bolt send "message" [--subject "subject"] [--sms-only|--email-only]
 
 Budget alerts (50% / 90% / 100% of soft cap) use **Mac banner + email + iMessage**, not Discord.
 
+## Default morning flow (daily driver)
+
+This is the intended start-of-day path — **queue decide + optional voice**, not a
+fictional plan:
+
+```bash
+# Preferred one-liner (brief → interactive queue decide)
+bolt day --decide
+
+# Same brief, TTY offers "Start queue decide now?" (default Yes)
+bolt day
+
+# Decide, then hands-free voice for approve/hold/post
+bolt day --decide --voice
+
+# After posting (or any day): check social pull readiness / dry-run
+bolt stats
+bolt stats youtube --dry-run    # YouTube token ready → safe metrics pull
+```
+
+| Step | Command | Why |
+|------|---------|-----|
+| 1 | `bolt day --decide` | Peak window, postable queue, then review/retitle/approve |
+| 2 | `bolt voice` (or `--voice`) | Hands-free approve next / hold / post next |
+| 3 | `bolt postnow` | Publish #1 when ready |
+| 4 | `bolt stats` / `--dry-run` | Pull views into learning store when tokens ready |
+
+`bolt morning` is the separate **manager business briefing** (lessons / content OS).
+Use `bolt day` for content production.
+
 ## Starting conversation mode
 
 Preferred entry points (listen → interpret → speak via `Bolt_Voice`):
 
 ```bash
-bolt day                   # content kickoff (peak + queue + short real plan)
+bolt day --decide          # content kickoff → queue decide (default morning)
+bolt day                   # same brief; TTY offers decide (default Yes)
 bolt voice                 # mic in, spoken replies out (free Google STT)
 bolt voice --text          # type in, still speaks (Andrew edge-tts)
 bolt talk "what's next?"   # one-shot spoken Q&A
 bolt say "Clips are ready" # TTS only
 bolt briefing --speak      # write briefing + speak short summary
-bolt morning               # Good Morning Bolt spoken briefing
+bolt morning               # Good Morning Bolt spoken *business* briefing
+bolt stats                 # social performance readiness
 ```
 
 Same engine under the hood (`Core/bolt_live_voice.py` → `Bolt_Conversation`):
@@ -623,7 +672,10 @@ PYTHONPATH=Core python3 -m Bolt_Conversation --clear
 
 | Command / flag | What it does |
 |----------------|--------------|
-| `bolt day` | Daily kickoff: peak window, postable queue, storage, next steps |
+| `bolt day` | Daily kickoff: peak, queue, storage, API, social line; TTY offers decide |
+| `bolt day --decide` | Same brief, then `queue decide` (default morning path) |
+| `bolt day --voice` | Same brief, then voice loop |
+| `bolt stats` | TikTok/YouTube token readiness + recent outcomes |
 | `bolt voice` | Voice-mode conversation loop (mic + TTS) |
 | `bolt voice --text` | Text input, spoken replies |
 | `bolt talk "…"` / `--once "…"` | One question, one spoken answer, exit |

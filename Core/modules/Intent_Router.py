@@ -302,6 +302,20 @@ def _action_research() -> str:
             return f"Research status unavailable: {exc}"
 
 
+def _action_stats() -> str:
+    try:
+        from modules.Social_Stats import readiness_summary, tiktok_ready, youtube_ready
+
+        t, y = tiktok_ready(), youtube_ready()
+        return (
+            f"Social stats: {readiness_summary()}. "
+            f"TikTok: {t['next_step']}. YouTube: {y['next_step']}. "
+            f"When ready, run bolt stats --dry-run in the terminal."
+        )
+    except Exception as exc:
+        return f"Social stats status unavailable: {exc}"
+
+
 def _action_budget() -> str:
     try:
         from modules.LLM_Budget import describe_policy, briefing_provider_preference
@@ -549,6 +563,18 @@ _INTENT_TABLE: Tuple[Tuple[Tuple[str, ...], Callable[[], str]], ...] = (
             "api spend",
         ),
         _action_budget,
+    ),
+    (
+        (
+            "social stats",
+            "sync stats",
+            "tiktok stats",
+            "youtube stats",
+            "pull stats",
+            "performance sync",
+            "how did my posts do",
+        ),
+        _action_stats,
     ),
 )
 
