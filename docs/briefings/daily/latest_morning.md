@@ -1,12 +1,12 @@
 # Bolt Daily Briefing
 
-**Friday, August 07, 2026**
+**Sunday, August 09, 2026**
 
 ## Queue Status
 
-**Clips ready to post:** 100
+**Clips ready to post:** 5
 
-- Total tracked: 108 (ready 100 · posted 1 · scrapped 7)
+- Total tracked: 12 (ready 5 · posted 1 · scrapped 0)
 
 ---
 
@@ -14,13 +14,13 @@
 
 | Directory | Size |
 |-----------|------|
-| Recordings | 123.9GB |
+| Recordings | 36.5GB |
 
 ---
 
 ## Memory Notes
 
-- [decision_event] Follow up on recent decision: nexus_enrichment (source: unified_memory)
+- [decision_event] Follow up on recent decision: queue_clip (source: unified_memory)
 - [decision_event] Follow up on recent decision: start_processing (source: unified_memory)
 - [decision_event] Follow up on recent decision: nexus_enrichment (source: unified_memory)
 - [constraint] Reminder: No content that sells the next gimmick. If a product is hyped but doesn't deliver, Bolt flags it as 'don't cover,' not 'cover this.' (source: user_profile)
@@ -34,89 +34,59 @@
 - Next: All gated candidates have a C5 decision. Add new candidates or dig into open research questions (`bolt research questions`).
 
 ---
-🎯 NEXUS STRATEGY INSIGHT:
-# Good Morning, William
+🎯 NEXUS STRATEGY INSIGHT: (grok/grok-4.5)
+**Morning briefing — priorities, content plan, action items**
 
-**Tuesday framing** — clear priorities, one lane at a time.
-
----
-
-## Where Things Stand
-
-| Area | Status |
-|------|--------|
-| Clips ready to post | **230** (265 tracked · 1 posted · 34 scrapped) |
-| Recordings storage | ~110.7GB |
-| Manager systems | Catalog, drafts, storefront, social packaging, sponsors — all live |
-| Posted so far | 1 | 
-| Bottleneck | Not production. **Shipping.** |
-
-You’ve already done the hard part: clip volume is stacked. The gap is approval → post → learn. One live post vs 230 ready means fear of the wrong post is still winning over momentum.
+William — here’s the focused version. Not a dashboard. Just what matters and why.
 
 ---
 
-## Today’s Priorities (in order)
+### Where things stand
+- **Queue:** ~100 clips ready, 1 posted, 7 scrapped. You’re not blocked on *making* content — you’re blocked on *shipping*.
+- **Storage:** Recordings ~124GB. Fine for now; don’t let cleanup steal the morning.
+- **Systems:** Catalog, review drafts, storefront (`billycarter-20`), social packaging, sponsor list — all live. Manager side is ahead of posting consistency.
+- **Open threads:** Follow-ups on `nexus_enrichment` and `start_processing` (decision events). Park those unless they unblock today’s post.
 
-### 1. Ship one clip (non-negotiable)
-**Why:** Queue depth doesn’t build an audience. One post does. At this stage, data > perfection.
-
-**Do this:**
-- Pick **one** clip from ready (don’t browse all 230 — pick the first solid gameplay/tech moment you’d actually stand behind)
-- Package for **TikTok first** (`@itssimplybilly`) — highest short-form leverage right now
-- Caption: honest, plain, no hype machine energy
-- Send to me for approval packaging if you want eyes on it — or approve yourself and post
-- Log it after it goes up
-
-**Rule reminder:** Nothing publishes without your approval. But “approve one” is the whole game today.
+**Constraint still active:** No gimmick-selling. If it doesn’t deliver in real use, flag “don’t cover” — don’t force a clip.
 
 ---
 
-### 2. Light storefront check (15 min max)
-**Why:** Amazon tag `billycarter-20` is live and the mouse has a real ASIN. Affiliate only works if people can find it.
+### Today’s priorities (in order)
+1. **Ship one approved post** — Highest leverage. Audience and motivation both start with output, not another polished draft.
+2. **Pick the post from what’s already Ready** — Don’t open the full 100. Choose 1 clip that feels honest and on-lane (gamesplay moment, gear feel, real reaction).
+3. **Package + get your approval** — Caption, platform, affiliate only if it’s natural. Nothing goes live without you saying yes.
+4. **Light business hygiene (optional, end of day)** — Only if #1 is done: glance at Amazon mouse ASIN / storefront path, or one sponsor-list note. Not before posting.
 
-**Do this:**
-- Confirm the mouse listing still looks right on your storefront
-- No need to add new products today unless one is already tested and noted in the catalog
-
----
-
-### 3. Ignore the rest of the pile
-No new recording marathon. No re-editing 30 clips. No sponsor outreach sprint unless a warm thread is already open.
-
-**Why:** Your systems (catalog, review drafts, M-tier, playbook) are already ahead of your posting cadence. Balance comes from output, not more infrastructure.
+Why this order: analysis paralysis and “no views yet” are the real blockers. One live post beats optimizing the queue.
 
 ---
 
-## Content Plan (simple)
+### Content plan (simple)
+| Slot | What | Why |
+|------|------|-----|
+| **Primary** | 1 short from Ready queue → TikTok + YouTube Shorts (same asset if it fits) | Cross-post without double work; high-priority platforms |
+| **Tone** | Real reaction / “here’s what actually happened” — no hype voice | Matches your differentiator |
+| **Affiliate** | Only if the clip already features a product with a real ASIN (e.g. mouse) and the take is honest | Trust > tag spam |
+| **Hold** | Twitch promo, long-form, skincare, sponsor pitches | Expansion lanes — after consistent shorts rhythm |
+| **Do not** | Re-edit 10 clips or rebuild the queue today | That recreates overwhelm |
 
-| Slot | Plan |
-|------|------|
-| **Today** | 1 TikTok from ready queue |
-| **This week** | 3–5 shorts same lane (games/tech, real reactions) |
-| **Hold** | Long-form YouTube until shorts are habit |
-| **Expansion** | Skincare/product only when a real test is in progress — no forced content |
+If the best Ready clip is weak or gimmicky, scrap it and take the next honest one. Quality bar = “I’d stand by this,” not “perfect.”
 
-**Voice check:** Real opinion over polish. “Here’s what I noticed” beats “THIS CHANGED EVERYTHING.” Learning-in-public is the differentiator.
-
-**Constraint still active:** If something’s hyped and weak, we flag *don’t cover* — not “force a video.”
-
----
-
-## Action Items
-
-1. **Now:** Choose 1 ready clip (2 minutes, gut pick)
-2. **Next:** Caption + post path for TikTok only
-3. **After post:** Note how it felt + any early signal (even 0 views is data)
-4. **Optional today:** Mouse storefront glance
-5. **Not today:** Draining the 230, new tooling, full sponsor push
+---- ### Action items
+- [ ] **You:** Scan top 5 Ready clips → pick **one** you’d actually post.
+- [ ] **You + me:** Lock caption + platform package (I draft, you approve).
+- [ ] **You:** Approve or reject — no soft maybe.
+- [ ] **After approval:** Schedule/post in peak window for that platform (or immediate if you’re already in “just get it out” mode).
+- [ ] **Log it:** Mark posted so the queue reflects reality (ready → posted).
+- [ ] **Parked:** `nexus_enrichment` / `start_processing` follow-up — only if you want those as afternoon deep work.
+- [ ] **Ignore today:** Full storage cleanup, multi-platform blitz, new long-form script.
 
 ---
 
-## One Clear Next Step
+### One clear next step
+**Tell me:** “Use clip #N” or describe the one you want (game, gear, vibe). I’ll draft the caption + packaging for TikTok/Shorts with your voice and the affiliate rule baked in — then you approve or cut.
 
-**Open the ready queue, grab one clip you’d defend in a comment section, and say “this one” — I’ll help package caption/hashtags for TikTok if you want, or you post it straight.**
-
-You don’t need a better plan. You need one clip live before the day gets noisy. I’m here when you’ve picked it.
+You don’t need a bigger plan. You need one post that exists in public. I’m here to remove friction on that single move.
 
 ---
 
@@ -136,4 +106,4 @@ You don’t need a better plan. You need one clip live before the day gets noisy
 - `bolt status` — intelligence stack health
 
 
-*Generated by Bolt at 07:00 AM*
+*Generated by Bolt at 06:22 PM*
