@@ -1,8 +1,12 @@
 name: Jekyll site CI
 
-# Note: Bolt is a Python monorepo. This workflow only validates that a
-# minimal Jekyll build does not crash (see root _config.yml excludes).
-# It is not the Python test suite — use `bolt test` for that.
+# LEGACY / NON-PRODUCTION website check.
+# Billy's real sites are on Cloudflare Pages + Worker (see Docs/PROJECT_STATUS.md):
+#   billythunderstorm.us, bolt.billythunderstorm.us, api.billythunderstorm.us
+# Data path: bolt site → site-data.json on GitHub → Cloudflare Worker → Pages.
+#
+# This workflow only checks that a minimal Jekyll build does not crash
+# (root _config.yml excludes app trees). Real app tests: "Bolt Python CI".
 
 on:
   push:
