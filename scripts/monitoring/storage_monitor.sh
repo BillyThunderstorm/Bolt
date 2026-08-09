@@ -1,1 +1,1 @@
-/Users/carter/developer/Bolt/scripts/storage_monitor.sh
+../storage_monitor.sh

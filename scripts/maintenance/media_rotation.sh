@@ -1,1 +1,1 @@
-/Users/carter/developer/Bolt/scripts/media_rotation.sh
+../media_rotation.sh

@@ -1,5 +1,9 @@
 name: Jekyll site CI
 
+# Note: Bolt is a Python monorepo. This workflow only validates that a
+# minimal Jekyll build does not crash (see root _config.yml excludes).
+# It is not the Python test suite — use `bolt test` for that.
+
 on:
   push:
     branches: ["main"]
@@ -16,6 +20,13 @@ jobs:
       - name: Remove local Python virtualenvs before Jekyll build
         run: |
           rm -rf llm-env .venv .venv-1 venv env
+
+      # Absolute Mac symlinks under scripts/*/ break in Linux CI when Jekyll
+      # tries to open them. Relative links (committed) fix this; also drop
+      # any remaining dangling links before build.
+      - name: Drop dangling script symlinks
+        run: |
+          find scripts -type l ! -exec test -e {} \; -print -delete 2>/dev/null || true
 
       - name: Build the site in the jekyll/builder container
         run: |

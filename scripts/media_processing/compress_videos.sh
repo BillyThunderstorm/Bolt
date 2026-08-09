@@ -1,1 +1,1 @@
-/Users/carter/developer/Bolt/scripts/compress_videos.sh
+../compress_videos.sh
