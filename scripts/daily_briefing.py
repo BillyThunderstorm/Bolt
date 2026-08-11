@@ -24,6 +24,112 @@ sys.path.insert(0, str(REPO_ROOT / "Core"))
 #         "timestamp": str,
 #     }
 
+# Pipeline audit noise — completed/started with no user feedback. These still
+# appear in Memory Notes at low score when recent, but never become action items.
+_PIPELINE_AUDIT_RESULTS = frozenset({"started", "completed", "ok", "success"})
+_ACTIONABLE_RESULTS = frozenset({"rejected", "failed", "held", "error", "blocked"})
+
+
+def _format_unified_decision_hit(evt: dict) -> dict | None:
+    """Turn one unified_memory.jsonl event into a briefing memory hit.
+
+    Surfaces action + result + feedback so notes read like:
+      queue_clip · rejected — crop/quality feedback…
+    instead of bare action names that look like open to-dos.
+    """
+    if not isinstance(evt, dict):
+        return None
+    action = str(evt.get("action") or "?").strip() or "?"
+    result = str(evt.get("result") or "").strip()
+    feedback = str(evt.get("feedback") or "").strip()
+    reason = str(evt.get("reason") or "").strip()
+    # User-facing detail: prefer explicit feedback over long nexus reasons
+    detail = feedback
+    if not detail and result in _ACTIONABLE_RESULTS:
+        detail = reason
+    if detail:
+        # Collapse whitespace / keep notes scannable
+        detail = " ".join(detail.split())
+        if len(detail) > 120:
+            detail = detail[:117].rstrip() + "…"
+
+    if result and detail:
+        title = f"{action} · {result} — {detail}"
+    elif result:
+        title = f"{action} · {result}"
+    elif detail:
+        title = f"{action} — {detail}"
+    else:
+        title = action
+
+    # Score: real follow-ups high; pipeline audit low so they lose the rank war
+    if result in _ACTIONABLE_RESULTS or feedback:
+        score = 0.9
+    elif result in _PIPELINE_AUDIT_RESULTS:
+        score = 0.35
+    else:
+        score = 0.7
+
+    return {
+        "kind": "decision_event",
+        "action": action,
+        "result": result,
+        "feedback": feedback,
+        "title": title,
+        # Keep action as the leading "name:" so action-item parsing still works
+        "text": f"{action}: {title}",
+        "summary": detail or (reason[:120] if reason else title),
+        "score": score,
+        "source": "unified_memory",
+        "timestamp": evt.get("timestamp", ""),
+        "needs_follow_up": bool(
+            result in _ACTIONABLE_RESULTS or feedback
+        ),
+    }
+
+
+def _load_unified_decision_hits(limit: int = 3) -> list:
+    """Load recent decision events; prefer actionable ones over pipeline noise."""
+    unified_path = REPO_ROOT / "Data" / "unified_memory.jsonl"
+    if not unified_path.exists():
+        return []
+
+    import json as _json
+
+    parsed: list = []
+    with unified_path.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                evt = _json.loads(line)
+            except Exception:
+                continue
+            hit = _format_unified_decision_hit(evt)
+            if hit:
+                parsed.append(hit)
+
+    if not parsed:
+        return []
+
+    # Prefer the most recent actionable hits; fill with recent audit if needed
+    actionable = [h for h in parsed if h.get("needs_follow_up")]
+    if actionable:
+        chosen = actionable[-limit:]
+    else:
+        # Nothing needs follow-up — still show last few as context, low score
+        chosen = parsed[-limit:]
+
+    # Dedup by action (keep highest-score / most recent occurrence)
+    by_action: dict = {}
+    for h in chosen:
+        key = h.get("action") or h.get("title")
+        prev = by_action.get(key)
+        if prev is None or float(h.get("score", 0)) >= float(prev.get("score", 0)):
+            by_action[key] = h
+    return list(by_action.values())
+
 
 def _retrieve_briefing_memory(query: str = "", limit: int = 5) -> list:
     """Return ranked memory hits for a briefing query.
@@ -67,31 +173,9 @@ def _retrieve_briefing_memory(query: str = "", limit: int = 5) -> list:
     except Exception:
         pass
 
-    # Source 2: unified_memory.jsonl recent decision events
+    # Source 2: unified_memory.jsonl — actionable decision events preferred
     try:
-        unified_path = REPO_ROOT / "Data" / "unified_memory.jsonl"
-        if unified_path.exists():
-            import json as _json
-            recent_events: list = []
-            with unified_path.open("r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        evt = _json.loads(line)
-                    except Exception:
-                        continue
-                    if not isinstance(evt, dict):
-                        continue
-                    recent_events.append({
-                        "kind": "decision_event",
-                        "text": f"Follow up on recent decision: {evt.get('action', '?')}",
-                        "score": 0.7,
-                        "source": "unified_memory",
-                        "timestamp": evt.get("timestamp", ""),
-                    })
-            hits.extend(recent_events[-3:])
+        hits.extend(_load_unified_decision_hits(limit=3))
     except Exception:
         pass
 
@@ -157,10 +241,24 @@ def _memory_to_action_items(hits: list) -> list:
             cleaned = text.lstrip("#").strip()
             actions.append(f"Creator note active: {cleaned}")
         elif kind == "decision_event":
-            # For decision events, prefer the title's action prefix
-            # (e.g. "queue_clip: No clip actions...") and strip the suffix
-            decision_action = text.split(":", 1)[0].strip() if ":" in text else text
-            actions.append(f"Follow up on recent decision: {decision_action}")
+            action_name = (h.get("action") or "").strip()
+            result = (h.get("result") or "").strip().lower()
+            feedback = (h.get("feedback") or "").strip()
+            # Pipeline audit (started/completed) is context, not a to-do
+            if result in _PIPELINE_AUDIT_RESULTS and not feedback:
+                continue
+            if not action_name:
+                # title like "queue_clip: …" or "queue_clip · rejected — …"
+                head = text.split(":", 1)[0].strip()
+                action_name = head.split("·", 1)[0].strip() if "·" in head else head
+            if result in _ACTIONABLE_RESULTS or feedback:
+                snip = feedback or text
+                snip = " ".join(str(snip).split())
+                if len(snip) > 90:
+                    snip = snip[:87].rstrip() + "…"
+                actions.append(f"Act on {result or 'rejected'} {action_name}: {snip}")
+            else:
+                actions.append(f"Follow up on recent decision: {action_name}")
         else:
             actions.append(text[:120])
     # Dedupe (preserve order)

@@ -212,11 +212,15 @@ Post queue / peak posting (Core/modules/Peak_Hour_Notifier.py):
                           NOT media/vertical_clips/ — that folder is videos only
   queue decide            Interactive: open / approve / hold / post (easiest)
   queue next [--open]     Show next postable clip card
+  queue package [id]      Manual upload package (paste-ready captions)
   queue clean             Clear ghost rows (ready but file missing)
   approve [clip_id]       Approve next (or named) clip for peak auto-post
   postnow [clip_id]       Publish immediately (alias: post-now)
   dontpost [clip_id] <why>
                           Hold a clip and record the reason
+  tiktok-post [--demo|--live]
+                          Compliant Post-to-TikTok web UI (audit demo)
+                          (aliases: post-ui, tiktok_post)
 
 Built-in subcommands (not script passthroughs):
   setup                   Finite setup check (config + keys); exits when done
@@ -507,6 +511,22 @@ except Exception:
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
         cmd = [py, "-m", "modules.Command_Center"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: TikTok Post UI (audit-compliant export screen)
+    if subcommand in (
+        "tiktok-post",
+        "tiktok_post",
+        "post-ui",
+        "post_ui",
+        "tiktok-ui",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.TikTok_Post_UI"] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
