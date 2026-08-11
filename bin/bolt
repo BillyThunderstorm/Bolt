@@ -216,6 +216,7 @@ Post queue / peak posting (Core/modules/Peak_Hour_Notifier.py):
   queue clean             Clear ghost rows (ready but file missing)
   approve [clip_id]       Approve next (or named) clip for peak auto-post
   postnow [clip_id]       Publish immediately (alias: post-now)
+  mark-posted [clip_id]   After manual upload (alias: queue mark-posted)
   dontpost [clip_id] <why>
                           Hold a clip and record the reason
   tiktok-post [--demo|--live]
@@ -543,6 +544,9 @@ except Exception:
         "dontpost",
         "dont-post",
         "hold-clip",
+        "mark-posted",
+        "markposted",
+        "mark_posted",
     }
     if subcommand in QUEUE_COMMANDS:
         env = os.environ.copy()
@@ -558,6 +562,9 @@ except Exception:
             q_args = ["post-now"] + rest
         elif subcommand in ("dontpost", "dont-post", "hold-clip"):
             q_args = ["reject"] + rest
+        elif subcommand in ("mark-posted", "markposted", "mark_posted"):
+            # Top-level alias: bolt mark-posted [id]  →  queue mark-posted
+            q_args = ["mark-posted"] + rest
         else:
             q_args = [subcommand] + rest
         cmd = [py, "-m", "modules.Peak_Hour_Notifier"] + q_args
