@@ -282,6 +282,133 @@ def _format_clip_card(clip: dict, index: int | None = None, total: int | None = 
     return "\n".join(lines)
 
 
+def _platform_label(platform: str) -> str:
+    labels = {
+        "tiktok": "TikTok",
+        "youtube_shorts": "YouTube Shorts",
+        "instagram_reels": "Instagram Reels",
+        "kick": "Kick",
+        "x": "X",
+        "twitter": "X",
+    }
+    return labels.get(str(platform or "").lower(), platform or "platform")
+
+
+def format_manual_package(clip: dict) -> str:
+    """Paste-ready manual upload package for one queue clip.
+
+    This is the clip-queue equivalent of ``bolt manage youtube-pkg`` (which
+    only works on content-manager catalog items, not gameplay clips).
+    """
+    path = clip.get("clip_path") or ""
+    title = (clip.get("title") or "").strip() or _clip_display_name(clip)
+    tags = clip.get("hashtags") or []
+    tag_line = " ".join(
+        t if str(t).startswith("#") else f"#{t}" for t in tags if t
+    )
+    lines = [
+        "── Manual upload package ──",
+        f"  id:     {clip.get('id', '?')}",
+        f"  file:   {_clip_display_name(clip)}",
+        f"  path:   {path or '(missing)'}",
+        "",
+        "  HOW TO POST (API auto-post not required)",
+        "  1. Open the video file above (or: bolt queue next --open)",
+        "  2. Upload in the app / Studio",
+        "  3. Paste the caption for that platform",
+        f"  4. When live:  bolt queue mark-posted {clip.get('id')}",
+        "",
+        "  ── Shared caption (copy/paste) ──",
+        title,
+    ]
+    if tag_line and tag_line not in title:
+        lines.append("")
+        lines.append(tag_line)
+
+    platform_plan = clip.get("platform_plan") or []
+    if platform_plan:
+        lines.append("")
+        lines.append("  ── Per platform ──")
+        for entry in platform_plan:
+            plat = _platform_label(entry.get("platform") or entry.get("label") or "")
+            lines.append(f"\n  [{plat}]")
+            for key, label in (
+                ("title", "title"),
+                ("caption", "caption"),
+                ("description", "description"),
+                ("instructions", "instructions"),
+            ):
+                val = (entry.get(key) or "").strip()
+                if not val:
+                    continue
+                # Indent multi-line bodies so they stay readable
+                body = "\n".join(f"    {ln}" if ln else "" for ln in val.splitlines())
+                lines.append(f"  {label}:")
+                lines.append(body)
+    else:
+        lines.extend(
+            [
+                "",
+                "  ── Platform defaults (no stored plan) ──",
+                "  [TikTok] paste Shared caption above",
+                "  [YouTube Shorts] title + description = Shared caption",
+                "  Keep the vertical file and original audio when possible.",
+            ]
+        )
+
+    lines.extend(
+        [
+            "",
+            "  Other commands:",
+            f"    bolt queue next --open",
+            f"    bolt queue title {clip.get('id')} \"Your hook\"",
+            f"    bolt queue mark-posted {clip.get('id')}",
+            f"    bolt queue package {clip.get('id')}   # this card again",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def show_package(
+    clip_id: str | None = None,
+    *,
+    open_video: bool = False,
+) -> dict | None:
+    """Print the manual upload package for next (or named) postable clip."""
+    data = _load_ready()
+    clip = None
+    if clip_id:
+        clip = _find_ready_clip(data, clip_id, require_file=False)
+        if not clip:
+            for c in data.get("clips") or []:
+                if str(c.get("id")) == str(clip_id):
+                    clip = c
+                    break
+                # Allow matching by filename stem / display name
+                name = _clip_display_name(c).lower()
+                if clip_id.lower() in name or clip_id.lower() in str(
+                    c.get("clip_path") or ""
+                ).lower():
+                    clip = c
+                    break
+    if not clip:
+        clips = _actionable_clips()
+        clip = clips[0] if clips else None
+    if not clip:
+        print("\n  No clip found for package.")
+        print("  Try: bolt queue list")
+        print("  Or:  bolt queue add YourClip.mp4\n")
+        return None
+    print()
+    print(_format_clip_card(clip))
+    print()
+    print(format_manual_package(clip))
+    print()
+    if open_video:
+        _open_clip_video(clip)
+    return clip
+
+
 def _open_clip_video(clip: dict) -> bool:
     """Open the clip's video in the OS default player (macOS `open`, else xdg-open)."""
     path = clip.get("clip_path") or ""
@@ -1694,11 +1821,19 @@ def show_next_clip(*, open_video: bool = False) -> dict | None:
     print()
     print(_format_clip_card(clip, index=1, total=len(clips)))
     print()
+    # Always show a short caption preview so manual upload is obvious
+    title = (clip.get("title") or "").strip()
+    if title:
+        print("  Caption to paste (full package: bolt queue package):")
+        print(f"    {title[:200]}{'…' if len(title) > 200 else ''}")
+        print()
     print("  No need to open ready_to_post.json.")
     print("  Commands for THIS clip (id optional — defaults to next):")
-    print(f"    bolt approve {clip.get('id')}")
+    print(f"    bolt queue package {clip.get('id')}   # full caption + platform text")
+    print(f"    bolt queue next --open               # open the video file")
+    print(f"    bolt queue mark-posted {clip.get('id')}  # after you upload by hand")
+    print(f"    bolt queue title {clip.get('id')} \"Hook\"  # change caption")
     print(f"    bolt dontpost {clip.get('id')} <reason>")
-    print(f"    bolt postnow {clip.get('id')}")
     print("    bolt queue decide     # walk through all with prompts")
     print()
     if open_video:
@@ -1945,12 +2080,18 @@ Already edited files in media/vertical_clips/ (your final cuts):
   bolt queue add Stress.mp4 --suggest-title    # AI/template title options applied
   # Editing a file does NOT register it — you must `queue add` once.
 
-Titles / captions:
+Titles / captions / manual package:
+  bolt queue package                 # Paste-ready TikTok + Shorts package (next clip)
+  bolt queue package <clip_id>       # Same for a specific clip
+  bolt queue package --open          # Package + open the video
   bolt queue title                   # Suggest titles for the next postable clip
   bolt queue title <clip_id>         # Suggest titles for a specific clip
   bolt queue title <clip_id> 1       # Apply suggestion #1
   bolt queue title <clip_id> "Hook"  # Set a custom title
   bolt monitor_titles                # How past titles performed (learning)
+
+  NOTE: `bolt manage youtube-pkg` is for catalog *product reviews* only
+  (Mouse, etc.) — not gameplay clips in this queue. For clips use package.
 
 Usage:
   bolt queue                         Summary + peak window (default)
@@ -1958,6 +2099,7 @@ Usage:
   bolt queue list                    Actionable clips only (id, score, file)
   bolt queue list --all              Include ghost / non-file rows
   bolt queue next [--open]           Show next postable clip card
+  bolt queue package [id] [--open]   Manual upload package (captions to paste)
   bolt queue decide                  Interactive review (recommended)
   bolt queue add <file> [file…]      Register hand-edited vertical clips
   bolt queue title [clip_id] [N|text] Suggest or set a caption title
@@ -1965,7 +2107,7 @@ Usage:
   bolt queue reject [clip_id] <why>  Hold a clip and record the reason
   bolt queue held                    List held clips + reasons (not deleted!)
   bolt queue unhold [clip_id]        Put a held clip back on the postable list
-  bolt queue post-now [clip_id]      Publish immediately (TikTok)
+  bolt queue post-now [clip_id]      Publish immediately (TikTok API — needs token)
   bolt queue mark-posted [clip_id]   Mark as posted (after manual upload)
   bolt queue clean [--dry-run]       Scrap ready rows whose video is missing
   bolt queue check                   Peak-window check + Discord alert if due
@@ -2239,6 +2381,14 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
     if action in ("next", "show", "show-next"):
         open_video = "--open" in rest or "-o" in rest
         clip = show_next_clip(open_video=open_video)
+        return 0 if clip else 1
+
+    if action in ("package", "pkg", "pack", "caption-pack", "manual-package"):
+        # Clip-queue manual upload package (NOT manage youtube-pkg / catalog).
+        open_video = "--open" in rest or "-o" in rest
+        tokens = [t for t in rest if t not in ("--open", "-o")]
+        clip_id = tokens[0] if tokens else None
+        clip = show_package(clip_id, open_video=open_video)
         return 0 if clip else 1
 
     if action in ("decide", "review", "triage", "pick"):

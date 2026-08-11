@@ -375,18 +375,44 @@ def _retrieve_briefing_memory(query: str = "", limit: int = 5) -> list:
                         continue
                     if not isinstance(evt, dict):
                         continue
-                    text = evt.get("reason") or evt.get("feedback") or evt.get("action") or ""
-                    if not text:
-                        continue
+                    action = str(evt.get("action") or "?").strip() or "?"
+                    result = str(evt.get("result") or "").strip()
+                    feedback = str(evt.get("feedback") or "").strip()
+                    reason = str(evt.get("reason") or "").strip()
+                    detail = feedback or (
+                        reason if result in {"rejected", "failed", "held", "error"} else ""
+                    )
+                    if detail:
+                        detail = " ".join(detail.split())
+                        if len(detail) > 120:
+                            detail = detail[:117].rstrip() + "…"
+                    if result and detail:
+                        title = f"{action} · {result} — {detail}"
+                    elif result:
+                        title = f"{action} · {result}"
+                    else:
+                        title = f"{action}: {reason}" if reason else action
+                    actionable = bool(
+                        result in {"rejected", "failed", "held", "error"} or feedback
+                    )
+                    score = 0.9 if actionable else (
+                        0.35 if result in {"started", "completed", "ok", "success"} else 0.7
+                    )
                     recent_events.append({
                         "kind": "decision_event",
-                        "text": f"Follow up on recent decision: {evt.get('action', '?')}",
-                        "score": 0.7,
+                        "action": action,
+                        "result": result,
+                        "feedback": feedback,
+                        "text": title,
+                        "title": title,
+                        "score": score,
                         "source": "unified_memory",
                         "timestamp": evt.get("timestamp", ""),
+                        "needs_follow_up": actionable,
                     })
-            # Take last 3 events (most recent), score already descending
-            hits.extend(recent_events[-3:])
+            # Prefer actionable rejections over pipeline audit noise
+            actionable_hits = [h for h in recent_events if h.get("needs_follow_up")]
+            hits.extend((actionable_hits or recent_events)[-3:])
     except Exception:
         pass
 

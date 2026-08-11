@@ -39,7 +39,28 @@ except ImportError:
 
 TIKTOK_INIT_URL = "https://open.tiktokapis.com/v2/post/publish/video/init/"
 TIKTOK_STATUS_URL = "https://open.tiktokapis.com/v2/post/publish/status/fetch/"
+TIKTOK_CREATOR_INFO_URL = (
+    "https://open.tiktokapis.com/v2/post/publish/creator_info/query/"
+)
 CHUNK_SIZE = 64 * 1024 * 1024  # 64 MB
+
+# Used by the Post UI when no live token is available (demo / film mode).
+MOCK_CREATOR_INFO = {
+    "creator_avatar_url": "",
+    "creator_username": "demo_creator",
+    "creator_nickname": "Demo Creator",
+    "privacy_level_options": [
+        "PUBLIC_TO_EVERYONE",
+        "MUTUAL_FOLLOW_FRIENDS",
+        "SELF_ONLY",
+    ],
+    "comment_disabled": False,
+    "duet_disabled": False,
+    "stitch_disabled": False,
+    "max_video_post_duration_sec": 600,
+    "can_post": True,
+    "demo": True,
+}
 
 
 class TikTokPublisher:
@@ -75,6 +96,69 @@ class TikTokPublisher:
             "Content-Type": "application/json; charset=UTF-8",
         }
 
+    def query_creator_info(self, *, allow_mock: bool = False) -> dict:
+        """Return creator_info for the Post-to-TikTok UI.
+
+        On success: ``{"success": True, "data": {...}}``.
+        Without a token, returns mock data when ``allow_mock`` is True so the
+        compliant UX can still be demoed for the audit video.
+        """
+        try:
+            import requests
+        except ImportError:
+            return {"success": False, "error": "requests library not installed"}
+
+        if not self.token:
+            if allow_mock:
+                return {"success": True, "data": dict(MOCK_CREATOR_INFO), "mock": True}
+            return {"success": False, "error": "TIKTOK_ACCESS_TOKEN not set"}
+
+        try:
+            resp = requests.post(
+                TIKTOK_CREATOR_INFO_URL, headers=self._headers, json={}, timeout=20
+            )
+            data = resp.json()
+        except Exception as exc:
+            if allow_mock:
+                return {
+                    "success": True,
+                    "data": dict(MOCK_CREATOR_INFO),
+                    "mock": True,
+                    "warning": str(exc),
+                }
+            return {"success": False, "error": str(exc)}
+
+        err = data.get("error") or {}
+        if resp.status_code != 200 or err.get("code") not in (None, "ok", ""):
+            code = err.get("code") or f"http_{resp.status_code}"
+            # Creator temporarily cannot post — still surface a structured
+            # payload so the UI can block publish (guideline 1b).
+            if code in (
+                "spam_risk_too_many_posts",
+                "spam_risk_user_banned_from_posting",
+                "reached_active_user_cap",
+            ):
+                payload = dict(data.get("data") or MOCK_CREATOR_INFO)
+                payload["can_post"] = False
+                payload["cannot_post_reason"] = err.get("message") or code
+                return {"success": True, "data": payload, "error_code": code}
+            if allow_mock:
+                return {
+                    "success": True,
+                    "data": dict(MOCK_CREATOR_INFO),
+                    "mock": True,
+                    "warning": err.get("message") or code,
+                }
+            return {
+                "success": False,
+                "error": err.get("message") or code,
+                "error_code": code,
+            }
+
+        payload = dict(data.get("data") or {})
+        payload.setdefault("can_post", True)
+        return {"success": True, "data": payload}
+
     def publish(
         self,
         video_path: str,
@@ -84,6 +168,9 @@ class TikTokPublisher:
         disable_comment: bool = False,
         disable_duet: bool = False,
         disable_stitch: bool = False,
+        brand_content_toggle: bool = False,
+        brand_organic_toggle: bool = False,
+        is_aigc: bool = False,
     ) -> dict:
         """
         Full publish flow: init → chunk upload → poll.
@@ -129,14 +216,19 @@ class TikTokPublisher:
             "an upload_url + publish_id. The publish_id is used to poll "
             "upload status later.",
         )
+        post_info = {
+            "title": caption,
+            "privacy_level": privacy,
+            "disable_comment": disable_comment,
+            "disable_duet": disable_duet,
+            "disable_stitch": disable_stitch,
+            "brand_content_toggle": bool(brand_content_toggle),
+            "brand_organic_toggle": bool(brand_organic_toggle),
+        }
+        if is_aigc:
+            post_info["is_aigc"] = True
         init_payload = {
-            "post_info": {
-                "title": caption,
-                "privacy_level": privacy,
-                "disable_comment": disable_comment,
-                "disable_duet": disable_duet,
-                "disable_stitch": disable_stitch,
-            },
+            "post_info": post_info,
             "source_info": {
                 "source": "FILE_UPLOAD",
                 "video_size": file_size,

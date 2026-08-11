@@ -294524,6 +294524,261 @@
           "aspect_ratio": "9:16"
         }
       ]
+    },
+    {
+      "queue_id": "45ecd234",
+      "created_at": "2026-08-09T19:26:46.593236",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Blasted.mp4",
+          "caption": "Blasted \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Blasted.mp4",
+          "title": "Blasted \ud83d\udd25 #Gaming",
+          "description": "Blasted \ud83d\udd25 #Gaming\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Blasted.mp4",
+          "caption": "Blasted \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Blasted.mp4",
+          "title": "Blasted \ud83d\udd25 #Gaming",
+          "description": "Highlight from the stream: Blasted.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "570877b6",
+      "created_at": "2026-08-09T19:26:47.216248",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Not a scratch .mp4",
+          "caption": "Not a scratch \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Not a scratch .mp4",
+          "title": "Not a scratch \ud83d\udd25 #Gaming",
+          "description": "Not a scratch \ud83d\udd25 #Gaming\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Not a scratch .mp4",
+          "caption": "Not a scratch \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Not a scratch .mp4",
+          "title": "Not a scratch \ud83d\udd25 #Gaming",
+          "description": "Highlight from the stream: Not a scratch .mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "f01b6ff9",
+      "created_at": "2026-08-09T19:26:48.004808",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/I'm replaying soon.mp4",
+          "caption": "I'm replaying soon \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/I'm replaying soon.mp4",
+          "title": "I'm replaying soon \ud83d\udd25 #Gaming",
+          "description": "I'm replaying soon \ud83d\udd25 #Gaming\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/I'm replaying soon.mp4",
+          "caption": "I'm replaying soon \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/I'm replaying soon.mp4",
+          "title": "I'm replaying soon \ud83d\udd25 #Gaming",
+          "description": "Highlight from the stream: I'm replaying soon.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "97ad1824",
+      "created_at": "2026-08-09T19:26:48.766923",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Why yes, I too can dodge machine gun fire in real life.mp4",
+          "caption": "Why yes, I too can dodge machine gun fire in real life \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Why yes, I too can dodge machine gun fire in real life.mp4",
+          "title": "Why yes, I too can dodge machine gun fire in real life \ud83d\udd25 #Gaming",
+          "description": "Why yes, I too can dodge machine gun fire in real life \ud83d\udd25 #Gaming\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Why yes, I too can dodge machine gun fire in real life.mp4",
+          "caption": "Why yes, I too can dodge machine gun fire in real life \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/Why yes, I too can dodge machine gun fire in real life.mp4",
+          "title": "Why yes, I too can dodge machine gun fire in real life \ud83d\udd25 #Gaming",
+          "description": "Highlight from the stream: Why yes, I too can dodge machine gun fire in real life.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "be5926ae",
+      "created_at": "2026-08-09T19:26:49.250059",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/I better play like this online too.mp4",
+          "caption": "I better play like this online too \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/I better play like this online too.mp4",
+          "title": "I better play like this online too \ud83d\udd25 #Gaming",
+          "description": "I better play like this online too \ud83d\udd25 #Gaming\n\nDaily gaming highlights.\n\n#Shorts #Gaming #clips #fyp",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/I better play like this online too.mp4",
+          "caption": "I better play like this online too \ud83d\udd25 #Gaming\n\n#Gaming #clips #fyp",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-08-10T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/I better play like this online too.mp4",
+          "title": "I better play like this online too \ud83d\udd25 #Gaming",
+          "description": "Highlight from the stream: I better play like this online too.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
     }
   ]
 }

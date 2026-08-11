@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>TikTok Audit Demo — Printable Worksheet (Bolt)</title>
+  <style>
+    @page { size: letter; margin: 0.45in; }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      font: 9.5pt/1.28 "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: #111;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    h1 { font-size: 13pt; margin: 0 0 2px; letter-spacing: -0.02em; }
+    .sub { font-size: 8.5pt; color: #333; margin: 0 0 6px; }
+    .bar {
+      display: flex; flex-wrap: wrap; gap: 4px 12px;
+      background: #f0f0f0; border: 1px solid #ccc;
+      padding: 4px 7px; margin-bottom: 6px; font-size: 8.5pt;
+    }
+    h2 {
+      font-size: 9.5pt; margin: 7px 0 3px;
+      border-bottom: 1.5px solid #222; padding-bottom: 1px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    h3 { font-size: 9pt; margin: 5px 0 2px; }
+    p { margin: 0 0 3px; }
+    table { width: 100%; border-collapse: collapse; font-size: 8.5pt; margin: 0 0 4px; }
+    th, td { border: 1px solid #bbb; padding: 2px 4px; vertical-align: top; text-align: left; }
+    th { background: #e8e8e8; font-weight: 700; }
+    ul { margin: 1px 0 3px; padding-left: 1.15em; }
+    li { margin: 0 0 1px; }
+    .cols { display: flex; gap: 8px; }
+    .cols > div { flex: 1; min-width: 0; }
+    .check td:first-child { width: 1.1em; text-align: center; font-family: ui-monospace, Menlo, monospace; }
+    .shot td:first-child { width: 2.4em; font-weight: 700; white-space: nowrap; }
+    .shot td:nth-child(2) { width: 3.2em; white-space: nowrap; }
+    .mono {
+      font-family: ui-monospace, Menlo, monospace; font-size: 8pt;
+      background: #f7f7f7; border: 1px solid #ccc; padding: 4px 6px; margin: 0 0 4px;
+    }
+    .star {
+      font-size: 8.5pt; font-style: italic;
+      border-left: 3px solid #222; padding: 2px 0 2px 7px; margin: 0 0 5px;
+    }
+    .warn {
+      background: #fff3cd; border: 1px solid #c9a227; padding: 4px 6px;
+      font-size: 8pt; margin: 0 0 5px;
+    }
+    .foot { font-size: 7.5pt; color: #666; margin-top: 4px; text-align: center; }
+    .box {
+      border: 1px solid #bbb; min-height: 1.6em; margin: 2px 0 4px; padding: 3px;
+      background: #fafafa;
+    }
+    .page-break { page-break-before: always; }
+    @media screen {
+      body { max-width: 8.5in; margin: 12px auto; padding: 12px 16px; }
+      .print-hint {
+        background: #111; color: #fff; padding: 8px 10px; margin-bottom: 10px;
+        font-size: 10pt; border-radius: 6px;
+      }
+      .print-hint kbd {
+        background: #333; padding: 1px 6px; border-radius: 3px;
+        font-family: ui-monospace, Menlo, monospace;
+      }
+    }
+    @media print {
+      .print-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="print-hint">
+    <strong>Print this:</strong> File → Print (or <kbd>⌘P</kbd> / <kbd>Ctrl+P</kbd>) → Save as PDF or paper.
+    Keep it beside you while filming <code>bolt tiktok-post --demo</code>.
+  </div>
+
+  <h1>TikTok Content Posting Audit — Demo Worksheet</h1>
+  <p class="sub">Bolt · Post-to-TikTok UI · One continuous screen recording (4–6 min)</p>
+
+  <div class="bar">
+    <span><strong>UI:</strong> bolt tiktok-post --demo</span>
+    <span><strong>Live later:</strong> bolt tiktok-post --live</span>
+    <span><strong>Sheet:</strong> Docs/guides/TIKTOK_AUDIT_DEMO_PRINTABLE.html</span>
+  </div>
+
+  <p class="star">Reviewers care about the checklist, not cinematic quality. Label requirements on screen. Do not say “auto-post my personal account.”</p>
+
+  <div class="warn">
+    <strong>Before filming:</strong> Privacy Policy + Terms live on your public website ·
+    App name/icon match portal · Only request scopes you demo ·
+    Sandbox/test TikTok account ready · Domain in video = Website URL in TT4D.
+  </div>
+
+  <div class="cols">
+    <div>
+      <h2>Prep (check off)</h2>
+      <table class="check">
+        <tr><td>☐</td><td>Public site URL has Privacy + Terms (no menu dig)</td></tr>
+        <tr><td>☐</td><td>TT4D app: Content Posting + Direct Post enabled</td></tr>
+        <tr><td>☐</td><td>Scopes match video (drop unused products)</td></tr>
+        <tr><td>☐</td><td>One original clip in media/vertical_clips/</td></tr>
+        <tr><td>☐</td><td><code>bolt tiktok-post --demo</code> loads Post UI</td></tr>
+        <tr><td>☐</td><td>Screen record 1080p (Loom / QuickTime / OBS)</td></tr>
+        <tr><td>☐</td><td>Big text labels ready (Keynote/Notes overlay OK)</td></tr>
+      </table>
+    </div>
+    <div>
+      <h2>Form copy (paste into TT4D)</h2>
+      <p><strong>What the app does</strong></p>
+      <div class="box" style="min-height:2.8em; font-size:8pt">
+        Bolt is a creator tool for original gameplay highlights. Creators review clips, edit captions, and publish to TikTok with full control over privacy, interactions, and commercial content disclosure.
+      </div>
+      <p><strong>How Content Posting is used</strong></p>
+      <div class="box" style="min-height:2.8em; font-size:8pt">
+        After OAuth, creators open Post to TikTok, which loads creator_info, requires manual privacy selection, interactions off by default, commercial disclosure per guidelines, legal consent, then publishes and polls status.
+      </div>
+    </div>
+  </div>
+
+  <h2>Shot list — film in order</h2>
+  <table class="shot">
+    <tr>
+      <th>#</th><th>Time</th><th>What to show</th><th>On-screen label</th><th>Done</th>
+    </tr>
+    <tr>
+      <td>0</td><td>5s</td>
+      <td>Title card: Bolt · original gameplay → review → Post to TikTok</td>
+      <td>Creator tool · user-controlled publish</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>1</td><td>15s</td>
+      <td>Open site/app domain that matches portal Website URL → Post UI</td>
+      <td>App surface = Website URL</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>2</td><td>20s</td>
+      <td>Login / Connect TikTok if Login Kit is in scope (else skip + remove product)</td>
+      <td>Login Kit (if requested)</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>3</td><td>20s</td>
+      <td>Pick original clip from list · show it is your content</td>
+      <td>Original creator content</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>4</td><td>20s</td>
+      <td>Show nickname / @handle loaded from creator_info</td>
+      <td>1a creator nickname</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>5</td><td>25s</td>
+      <td>Play preview · edit title/hashtag</td>
+      <td>5a preview · 5b editable caption</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>6</td><td>30s</td>
+      <td>Privacy dropdown starts blank · user selects an option</td>
+      <td>2b no default privacy</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>7</td><td>25s</td>
+      <td>Comment/Duet/Stitch all unchecked · enable Comment only</td>
+      <td>2c interactions off by default</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>8a</td><td>30s</td>
+      <td>Commercial toggle ON (was off) · Post stays blocked until brand option</td>
+      <td>3a commercial off by default</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>8b</td><td>20s</td>
+      <td>Check Your brand → “Promotional content” prompt</td>
+      <td>3a Your brand label</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>8c</td><td>30s</td>
+      <td>Check Branded content → “Paid partnership” · Only me disabled</td>
+      <td>3b branded ≠ private</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>8d</td><td>15s</td>
+      <td>Hover Only me / show: “Branded content visibility cannot be set to private.”</td>
+      <td>3b hover text</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>9</td><td>30s</td>
+      <td>Consent text (Music; + Branded Policy if branded) · check box · Post</td>
+      <td>5c explicit consent</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>10</td><td>25s</td>
+      <td>“May take a few minutes…” · status Processing → success</td>
+      <td>5d + 5e status</td>
+      <td>☐</td>
+    </tr>
+    <tr>
+      <td>11</td><td>10s</td>
+      <td>Close card: user always reviews · scopes demoed</td>
+      <td>video.publish (+ others if shown)</td>
+      <td>☐</td>
+    </tr>
+  </table>
+
+  <h2>UX requirement matrix (must appear in video)</h2>
+  <table>
+    <tr><th>ID</th><th>Rule</th><th>Where in Bolt UI</th><th>✓</th></tr>
+    <tr><td>1a</td><td>Show creator nickname</td><td>Top of export card</td><td>☐</td></tr>
+    <tr><td>1b</td><td>Block when creator cannot post</td><td>Red banner + disabled Post</td><td>☐</td></tr>
+    <tr><td>1c</td><td>Honor max_video_post_duration_sec</td><td>Hint under privacy</td><td>☐</td></tr>
+    <tr><td>2a</td><td>Editable title</td><td>Caption textarea</td><td>☐</td></tr>
+    <tr><td>2b</td><td>Privacy from creator_info · no default</td><td>Dropdown “Select privacy…”</td><td>☐</td></tr>
+    <tr><td>2c</td><td>Interactions off by default · grey if disabled</td><td>Three checkboxes</td><td>☐</td></tr>
+    <tr><td>3a</td><td>Commercial off by default · Your brand / Branded</td><td>Toggle + options</td><td>☐</td></tr>
+    <tr><td>3b</td><td>Branded content cannot be Only me</td><td>Option disabled + message</td><td>☐</td></tr>
+    <tr><td>4</td><td>Legal text switches for branded</td><td>Consent paragraph</td><td>☐</td></tr>
+    <tr><td>5a–e</td><td>Preview · no watermark · consent · processing notice · status</td><td>Left preview + bottom status</td><td>☐</td></tr>
+  </table>
+
+  <div class="page-break"></div>
+
+  <h1>Page 2 — Film day notes &amp; resubmit checklist</h1>
+  <p class="sub">Write on this. Stick it next to your monitor.</p>
+
+  <h2>Commands</h2>
+  <div class="mono"># Film without token (UX dry-run publish)
+bolt tiktok-post --demo
+
+# After TikTok approves + bolt tiktok_token
+bolt tiktok-post --live
+
+# Manual peak posts until API works
+bolt queue next --open
+bolt queue mark-posted &lt;id&gt;</div>
+
+  <h2>This take — notes</h2>
+  <p>Date: _______________ &nbsp; Take #: _____ &nbsp; Clip used: _______________________</p>
+  <p>Account shown (@): _______________________ &nbsp; Mode: ☐ demo &nbsp; ☐ live</p>
+  <div class="box" style="min-height:3.5em">What looked wrong / redo notes:</div>
+  <div class="box" style="min-height:2.5em">Prior denial reason (if any) — must address in video:</div>
+
+  <h2>Do / Don't (intended use)</h2>
+  <div class="cols">
+    <div>
+      <h3>Do say / show</h3>
+      <ul>
+        <li>Original gameplay highlights</li>
+        <li>Creator reviews before every post</li>
+        <li>Full privacy / commercial control</li>
+        <li>Tool for creators (wide audience framing)</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Don't</h3>
+      <ul>
+        <li>“Posts for my one account automatically”</li>
+        <li>Terminal-only postnow as the whole demo</li>
+        <li>Default privacy pre-selected</li>
+        <li>Watermark / promo branding on the video</li>
+        <li>Request scopes you never show</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>After recording</h2>
+  <table class="check">
+    <tr><td>☐</td><td>Video ≤ 50 MB (TikTok portal limit per file)</td></tr>
+    <tr><td>☐</td><td>Every selected product/scope appears once</td></tr>
+    <tr><td>☐</td><td>Shot 8c–8d branded + private rule is visible</td></tr>
+    <tr><td>☐</td><td>Written answers match what the video shows</td></tr>
+    <tr><td>☐</td><td>Upload demo + (optional) UX PDF mockups</td></tr>
+    <tr><td>☐</td><td>Submit audit · keep manual post + mark-posted meanwhile</td></tr>
+  </table>
+
+  <h2>Voiceover (optional — or use captions only)</h2>
+  <div class="mono" style="white-space: pre-wrap">“Bolt helps creators post original gameplay highlights.
+The creator connects TikTok, previews the clip, edits the caption,
+chooses privacy with no default, enables interactions manually,
+optionally discloses commercial content with branded-content privacy rules,
+agrees to TikTok’s terms, then posts.
+We only call the publish API after that consent.”</div>
+
+  <h2>Minimal UI already in Bolt</h2>
+  <ul>
+    <li><code>Core/modules/TikTok_Post_UI.py</code> — export screen (this demo)</li>
+    <li><code>Core/modules/TikTok_Publisher.py</code> — creator_info + brand toggles + publish</li>
+    <li><code>bolt tiktok-post</code> — local server @ http://127.0.0.1:8787</li>
+  </ul>
+
+  <p class="foot">
+    Source: TikTok Content Sharing Guidelines + App Review Guidelines ·
+    Bolt worksheet · print letter · update when guidelines change
+  </p>
+
+</body>
+</html>
