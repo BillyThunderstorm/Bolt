@@ -299,7 +299,9 @@ bolt monitor_titles                   # How past titles performed (learning)
 # Then post when ready
 bolt postnow                          # next approved/ready clip now
 # or wait for peak after: bolt approve
-bolt queue mark-posted                # only if you uploaded manually outside Bolt
+bolt queue mark-posted <id|filename|#n>  # after manual upload (bare form refuses bulk)
+bolt queue mark-posted --all             # mark every ready row (explicit only)
+bolt mark-posted <id>                    # top-level alias
 ```
 
 ### Full command list
@@ -328,8 +330,10 @@ bolt postnow                          # Short alias for queue post-now
 
 bolt queue clean                      # Scrap ready rows whose video file is missing
 bolt queue clean --dry-run            # Preview ghost cleanup
-bolt queue mark-posted                # After you uploaded manually
-bolt queue mark-posted 55a802e8
+bolt queue mark-posted 55a802e8       # After you uploaded manually
+bolt queue mark-posted 1              # list #1 / next postable
+bolt queue mark-posted Hands.mp4      # exact filename stem
+bolt mark-posted 55a802e8             # same, top-level alias
 bolt queue check                      # Peak check + Discord alert if due
 bolt queue tick                       # One auto-post scheduler pass
 bolt queue review-window              # Force the 30-min pre-peak Discord ping
@@ -348,7 +352,9 @@ bolt queue review-window              # Force the 30-min pre-peak Discord ping
 | `bolt dontpost [clip_id] <reason>` | Alias for `bolt queue reject` |
 | `bolt queue post-now [clip_id]` | Publish to TikTok **immediately** |
 | `bolt postnow [clip_id]` | Alias for `bolt queue post-now` |
-| `bolt queue mark-posted [clip_id]` | Clear from ready after a manual upload |
+| `bolt queue mark-posted [clip_id\|#n\|file]` | Clear from ready after a manual upload |
+| `bolt queue mark-posted --all` | Mark every ready clip (explicit bulk) |
+| `bolt mark-posted …` | Top-level alias for queue mark-posted |
 | `bolt queue check` | Peak-window check; alert if clips are waiting |
 | `bolt queue tick` | Run one auto-post / review-window processing pass |
 | `bolt queue review-window` | Send the pre-peak “awaiting approval” Discord alert now |

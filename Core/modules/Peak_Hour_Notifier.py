@@ -1266,20 +1266,42 @@ def _publish_clip(clip: dict, now: datetime, reason: str) -> dict:
     return result
 
 
+def _norm_clip_name(s: str) -> str:
+    """Normalize a filename/stem for matching (case, whitespace, underscores)."""
+    if not s:
+        return ""
+    # Collapse whitespace; treat underscores like spaces; drop a trailing extension
+    text = str(s).strip().lower().replace("_", " ")
+    # If it looks like a file name with a known video suffix, compare stems
+    p = Path(text)
+    if p.suffix in {".mp4", ".mov", ".m4v", ".webm", ".mkv"}:
+        text = p.stem
+    # Strip again — stems like "Not a scratch " (space before .mp4) are common
+    return " ".join(text.split())
+
+
+def _strip_token_quotes(token: str) -> str:
+    t = (token or "").strip()
+    if len(t) >= 2 and t[0] == t[-1] and t[0] in "\"'":
+        t = t[1:-1].strip()
+    return t
+
+
 def _match_clip_token(clip: dict, token: str) -> bool:
-    """Match by full id, id prefix, or filename/stem (not loose title substrings).
+    """Match by full id, id prefix (≥4), or filename/stem (not loose titles).
 
     Title substring matching is intentionally avoided — e.g. ``hands`` must not
     match every clip titled "Just got my hands on …".
+
+    Filename stems are whitespace-normalized so ``Not a scratch`` matches
+    ``Not a scratch .mp4`` (trailing space before the extension).
     """
     if not token:
         return False
-    t = token.strip().lower()
-    if len(t) >= 2 and t[0] == t[-1] and t[0] in "\"'":
-        t = t[1:-1].strip()
+    t = _strip_token_quotes(token).lower()
     if not t:
         return False
-    t_stem = Path(t).stem.lower()
+    t_norm = _norm_clip_name(t)
 
     cid = str(clip.get("id") or "").lower()
     if cid == t or (len(t) >= 4 and cid.startswith(t)):
@@ -1288,34 +1310,116 @@ def _match_clip_token(clip: dict, token: str) -> bool:
     path = str(clip.get("clip_path") or "")
     if not path:
         return False
-    name = Path(path).name.lower()
-    stem = Path(path).stem.lower()
-    # Hands / Hands.mp4 → Hands.mp4
-    if t in {name, stem} or t_stem in {name, stem}:
+    name = Path(path).name
+    stem = Path(path).stem
+    name_l = name.lower()
+    stem_l = stem.lower()
+    name_n = _norm_clip_name(name)
+    stem_n = _norm_clip_name(stem)
+
+    # Exact (raw) or normalized stem/name
+    if t in {name_l, stem_l} or t_norm in {name_n, stem_n}:
+        return True
+    # Token with extension vs stem, either direction
+    if _norm_clip_name(Path(t).stem) in {name_n, stem_n}:
         return True
     return False
 
 
-def mark_posted(clip_id: str = None):
+def _resolve_mark_posted_token(data: dict, token: str) -> tuple[str | None, dict | None]:
+    """Resolve user token to a clip-id preference.
+
+    Supports:
+      - queue id / id prefix / filename stem (via _match_clip_token)
+      - 1-based index into the *postable* list (``1`` = next clip in ``bolt queue list``)
+
+    Returns (resolved_token_or_None, index_clip_or_None).
+    """
+    raw = _strip_token_quotes(token)
+    if not raw:
+        return None, None
+    # Pure small integer → postable list index (not hex id prefixes; those need ≥4 chars)
+    if raw.isdigit() and 1 <= int(raw) <= 99:
+        actionable = _actionable_clips(data.get("clips") or [])
+        idx = int(raw)
+        if 1 <= idx <= len(actionable):
+            return str(actionable[idx - 1].get("id")), actionable[idx - 1]
+        return raw, None
+    return raw, None
+
+
+def mark_posted(clip_id: str = None, *, force_all: bool = False):
     """
     Mark clip(s) as posted after a manual upload (or bulk after a session).
 
-    clip_id=None  → marks ALL **ready** clips as posted
-    clip_id='abc' / 'Hands' / 'Hands.mp4' → marks matching clip(s) even if
-        status was ready **or held** (held-then-manual-upload is common)
+    clip_id=None
+        With force_all=True  → marks ALL **ready** clips as posted
+        Without force_all    → refuses (too easy to wipe the whole queue by accident)
+    clip_id='abc' / 'Hands' / 'Hands.mp4' / '1'
+        Marks matching clip(s) even if status was ready **or held**
+        (held-then-manual-upload is common). List index ``1`` = next postable.
 
     This keeps the queue clean so you don't get duplicate alerts.
+    Returns number of clips newly marked, or 0 on no-op / refusal.
     """
     data = _load_ready()
     tz = ZoneInfo(POSTING_TIMEZONE)
     now = datetime.now(tz)
     count = 0
     marked: list[dict] = []
-    token = (clip_id or "").strip() or None
+    token = _strip_token_quotes(clip_id or "") or None
+
+    # Bulk with no target: require --all (force_all). Bare mark-posted used to
+    # silently mark every ready row — that looked "broken" and wiped the queue.
+    if token is None:
+        ready_rows = [c for c in data.get("clips") or [] if c.get("status") == "ready"]
+        if not ready_rows:
+            print("  ✗ Marked 0 clips as posted (no ready clips)", file=sys.stderr)
+            print("  Queue has no status=ready clips right now.", file=sys.stderr)
+            print("  Try:  bolt queue list   |   bolt queue held", file=sys.stderr)
+            return 0
+        if not force_all:
+            print(
+                f"  ✗ Refusing to mark all {len(ready_rows)} ready clip(s) at once.",
+                file=sys.stderr,
+            )
+            print(
+                "  Pick one (id, filename, or list #):",
+                file=sys.stderr,
+            )
+            actionable = _actionable_clips(ready_rows)
+            for i, c in enumerate(actionable[:12], 1):
+                print(
+                    f"    {i}.  {c.get('id')}  {_clip_display_name(c)[:48]}",
+                    file=sys.stderr,
+                )
+            if actionable:
+                print(
+                    f"  e.g.  bolt queue mark-posted {actionable[0].get('id')}",
+                    file=sys.stderr,
+                )
+                print(
+                    f"    or  bolt queue mark-posted 1",
+                    file=sys.stderr,
+                )
+            print(
+                "  To really mark every ready row:  bolt queue mark-posted --all",
+                file=sys.stderr,
+            )
+            return 0
+
+    # Resolve list-index tokens ("1") to a concrete id before matching
+    index_clip = None
+    if token is not None:
+        resolved, index_clip = _resolve_mark_posted_token(data, token)
+        if index_clip is not None:
+            token = str(index_clip.get("id"))
+        elif resolved is not None:
+            token = resolved
 
     for clip in data["clips"]:
         status = clip.get("status")
-        # Bulk (no token): only ready — never mass-post held by accident
+        # Bulk (no token + force_all): only ready — never mass-post held by accident
         if token is None:
             if status != "ready":
                 continue
@@ -1332,45 +1436,113 @@ def mark_posted(clip_id: str = None):
         count += 1
         marked.append(clip)
 
-    _save_ready(data)
     if count == 0:
-        # Do not celebrate a no-op — that confused "hands" → 0 marked
+        # Do not celebrate a no-op — and do not rewrite the JSON for nothing
         print(
             f"  ✗ Marked 0 clips as posted"
             + (f' (no ready/held match for "{token}")' if token else " (no ready clips)"),
             file=sys.stderr,
         )
         if token:
+            # 1) Already posted? (most common "isn't working" after a prior success)
+            already = [
+                c
+                for c in data.get("clips") or []
+                if c.get("status") == "posted" and _match_clip_token(c, token)
+            ]
+            if already:
+                for c in already[:5]:
+                    when = c.get("posted_at") or "unknown time"
+                    print(
+                        f"  Already posted:  {c.get('id')}  "
+                        f"{_clip_display_name(c)[:40]}  ({when})",
+                        file=sys.stderr,
+                    )
+                print(
+                    "  Nothing to do — that clip is already cleared from the postable list.",
+                    file=sys.stderr,
+                )
+                print(
+                    "  Log performance later:  bolt log_perf",
+                    file=sys.stderr,
+                )
+                return 0
+
+            # 2) Other statuses in queue (failed, etc.)
+            other = [
+                c
+                for c in data.get("clips") or []
+                if c.get("status") not in ("ready", "held", "posted")
+                and _match_clip_token(c, token)
+            ]
+            if other:
+                for c in other[:5]:
+                    print(
+                        f"  In queue but status={c.get('status')!r}:  {c.get('id')}  "
+                        f"{_clip_display_name(c)[:40]}",
+                        file=sys.stderr,
+                    )
+                print(
+                    "  mark-posted only flips ready/held → posted.",
+                    file=sys.stderr,
+                )
+                return 0
+
             print(
-                "  mark-posted needs a queue id or exact filename stem "
-                "(e.g. Hands / Hands.mp4) for a ready or held row.",
+                "  mark-posted needs a queue id, list #, or exact filename stem",
+                file=sys.stderr,
+            )
+            print(
+                "  (e.g.  bolt queue mark-posted 1  |  Hands  |  f01b6ff9)",
                 file=sys.stderr,
             )
             print("  Try:  bolt queue list   |   bolt queue held", file=sys.stderr)
-            # Hint if the file exists on disk but was never queue-added
+
+            # 3) On disk — only claim "not in queue" if no queue row has that file
             vert = _vertical_clips_dir()
             loose = []
-            t = token.lower()
-            t_stem = Path(token).stem.lower()
+            t_norm = _norm_clip_name(token)
             if vert.is_dir():
                 for p in vert.iterdir():
                     if p.suffix.lower() not in {".mp4", ".mov", ".m4v"}:
                         continue
-                    if t in p.name.lower() or t_stem == p.stem.lower():
+                    if t_norm and t_norm in {
+                        _norm_clip_name(p.name),
+                        _norm_clip_name(p.stem),
+                    }:
                         loose.append(p.name)
-            if loose:
+                    elif t_norm and t_norm in _norm_clip_name(p.name):
+                        # unique-ish partial only if stem starts with token
+                        if _norm_clip_name(p.stem).startswith(t_norm):
+                            loose.append(p.name)
+            # Drop loose names that already appear in the queue under any status
+            queued_names = {
+                _norm_clip_name(Path(str(c.get("clip_path") or "")).name)
+                for c in data.get("clips") or []
+            }
+            truly_loose = [
+                n for n in loose if _norm_clip_name(n) not in queued_names
+            ]
+            if truly_loose:
                 print(
-                    f"  Found on disk (not in queue): {', '.join(loose[:5])}",
+                    f"  Found on disk (not in queue): {', '.join(truly_loose[:5])}",
                     file=sys.stderr,
                 )
+                stem0 = Path(truly_loose[0]).stem.rstrip()
                 print(
                     f'  Log a manual TikTok post:\n'
-                    f'    bolt queue add "{loose[0]}" && bolt queue mark-posted "{Path(loose[0]).stem}"',
+                    f'    bolt queue add "{truly_loose[0]}" && '
+                    f'bolt queue mark-posted "{stem0}"',
                     file=sys.stderr,
                 )
-        else:
-            print("  Queue has no status=ready clips right now.", file=sys.stderr)
+            elif loose and not truly_loose:
+                print(
+                    "  That filename is already a queue row (see statuses above / list).",
+                    file=sys.stderr,
+                )
         return 0
+
+    _save_ready(data)
 
     for clip in marked:
         print(
@@ -1849,9 +2021,10 @@ def interactive_decide(
     """
     Walk through every actionable clip with a simple prompt.
 
-    No JSON, no remembering ids — open / approve / hold / post-now / skip / title.
+    No JSON, no remembering ids — open / approve / hold / post-now /
+    mark-posted (manual) / skip / title.
     Type a number to jump to that clip in the current list.
-    Returns number of decisions made (approve/hold/post/title).
+    Returns number of decisions made (approve/hold/post/mark/title).
     """
     decisions = 0
     skipped_ids: set[str] = set()
@@ -1929,9 +2102,9 @@ def interactive_decide(
         print(_format_clip_card(clip, index=display_idx, total=total))
         print()
         print("  [o] open video     [a] approve for peak")
-        print("  [p] post now       [h] hold / don't post")
-        print("  [t] retitle        [s] skip")
-        print("  [1-9] jump to #    [q] quit")
+        print("  [p] post now (API) [m] mark posted (manual upload)")
+        print("  [h] hold / don't   [t] retitle")
+        print("  [s] skip           [1-9] jump to #    [q] quit")
         if (open_first and not opened_once) or open_each:
             _open_clip_video(clip)
             opened_once = True
@@ -1984,6 +2157,22 @@ def interactive_decide(
                     f"  post failed: {publish.get('error', 'unknown')}",
                     file=sys.stderr,
                 )
+                print(
+                    "  Tip: after a manual TikTok upload, press [m] "
+                    "(mark posted) instead of [p].",
+                    file=sys.stderr,
+                )
+            continue
+        if choice in {"m", "mark", "mark-posted", "markposted", "manual", "did-post"}:
+            # Manual upload already live — clear from postable list without API
+            n = mark_posted(clip.get("id"))
+            if n:
+                print(f"  ✓ marked posted (manual) {clip.get('id')}")
+                _speak(f"Marked posted {clip.get('title') or clip.get('id')}")
+                decisions += 1
+                focus_id = None
+            else:
+                print("  could not mark that clip posted", file=sys.stderr)
             continue
         if choice in {"h", "hold", "n", "no", "reject", "dontpost"}:
             print(
@@ -2044,7 +2233,7 @@ def interactive_decide(
             focus_id = None
             print(f"  skipped {clip.get('id')} for now")
             continue
-        print("  unknown choice — use o/a/p/h/t/s/q or a number")
+        print("  unknown choice — use o/a/p/m/h/t/s/q or a number")
 
     return decisions
 
@@ -2071,7 +2260,8 @@ Simplest flow (no JSON, no remembering ids):
   bolt postnow                       # publish next clip now
 
 In decide mode keys:
-  o=open  a=approve  p=post now  h=hold  t=retitle  s=skip  1-9=jump  q=quit
+  o=open  a=approve  p=post now (API)  m=mark posted (manual)
+  h=hold  t=retitle  s=skip  1-9=jump  q=quit
 
 Already edited files in media/vertical_clips/ (your final cuts):
   bolt queue add Stress.mp4 Hands.mp4 Leaving.mp4
@@ -2109,6 +2299,9 @@ Usage:
   bolt queue unhold [clip_id]        Put a held clip back on the postable list
   bolt queue post-now [clip_id]      Publish immediately (TikTok API — needs token)
   bolt queue mark-posted [clip_id]   Mark as posted (after manual upload)
+  bolt queue mark-posted 1           Same for list #1 (next postable)
+  bolt queue mark-posted --all       Mark EVERY ready clip (dangerous; confirm first)
+  bolt mark-posted [clip_id]         Top-level alias
   bolt queue clean [--dry-run]       Scrap ready rows whose video is missing
   bolt queue check                   Peak-window check + Discord alert if due
   bolt queue tick                    Run one auto-post scheduler tick
@@ -2262,13 +2455,14 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
     if legacy_mode:
         if "--mark-posted" in args:
             idx = args.index("--mark-posted")
+            force_all = "--all" in args
             clip_id = (
                 args[idx + 1]
                 if idx + 1 < len(args) and not args[idx + 1].startswith("--")
                 else None
             )
-            mark_posted(clip_id)
-            return 0
+            n = mark_posted(clip_id, force_all=force_all)
+            return 0 if n else 1
         if "--review-window" in args:
             n = alert_review_window()
             print(f"review alerts sent: {n}")
@@ -2327,6 +2521,15 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
         action, *rest = args
 
     action = action.lower().replace("_", "-")
+
+    # Accept common typos / two-word forms: "mark posted", "markposted"
+    if action == "mark" and rest:
+        nxt = rest[0].lower().replace("_", "-")
+        if nxt in ("posted", "post", "as-posted", "asposted"):
+            action = "mark-posted"
+            rest = rest[1:]
+    if action in ("markposted", "did-post", "didpost", "already-posted"):
+        action = "mark-posted"
 
     if action in ("help",):
         print(QUEUE_CLI_HELP.strip())
@@ -2631,9 +2834,11 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
         return 1
 
     if action in ("mark-posted", "markposted", "posted"):
-        clip_id = rest[0] if rest else None
-        mark_posted(clip_id)
-        return 0
+        force_all = "--all" in rest
+        tokens = [t for t in rest if t not in ("--all",)]
+        clip_id = tokens[0] if tokens else None
+        n = mark_posted(clip_id, force_all=force_all)
+        return 0 if n else 1
 
     if action in ("clean", "clean-missing", "prune", "prune-missing"):
         dry = "--dry-run" in rest or "--dry" in rest
