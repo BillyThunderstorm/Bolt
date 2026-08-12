@@ -517,18 +517,24 @@ def _spoken_summary(briefing_text: str, sms_summary: str) -> str:
 
 
 def _speak(text: str) -> None:
-    """Speak via Bolt_Voice when available; otherwise macOS `say`."""
+    """Speak via Bolt_Voice when available; otherwise macOS `say`.
+
+    Always waits for audio to finish. Briefings are one-shot CLI processes;
+    async queue-only speak() is killed on exit and produces silence.
+    """
+    if not (text or "").strip():
+        return
     try:
         from modules.Bolt_Voice import speak
 
-        speak(text)
+        speak(text, wait=True)
         return
     except Exception:
         pass
     try:
         import subprocess
 
-        subprocess.run(["say", text], check=False, capture_output=True)
+        subprocess.run(["say", text], check=False)
     except Exception:
         print(f"[voice unavailable] {text}")
 

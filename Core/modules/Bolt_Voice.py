@@ -282,19 +282,50 @@ def _try_elevenlabs(text: str) -> bool:
 # ── Public API ─────────────────────────────────────────────────────────────────
 
 
-def speak(text: str):
+def wait_for_speech(timeout: Optional[float] = None) -> None:
+    """Block until every queued speak() has finished playing.
+
+    CLI entry points (briefing, morning, one-shot scripts) must call this
+    before process exit — the speech worker is a daemon thread, so an early
+    exit kills audio mid-queue (or before it starts).
+    """
+    if MUTED:
+        return
+    _start_worker()
+    if timeout is None:
+        _speech_queue.join()
+        return
+    # queue.Queue.join has no timeout; poll unfinished_tasks instead.
+    deadline = time.time() + max(0.0, timeout)
+    while _speech_queue.unfinished_tasks > 0:
+        if time.time() >= deadline:
+            break
+        time.sleep(0.05)
+
+
+def speak(text: str, *, wait: bool = False, timeout: Optional[float] = None):
     """
     Queue a message for Bolt to speak aloud.
-    Non-blocking — returns immediately. Voice plays in background.
 
-    Usage anywhere in Bolt's codebase:
+    By default non-blocking (returns immediately; voice plays in background)
+    so live stream event handlers stay responsive.
+
+    Pass wait=True for CLI / briefing paths that exit right after speaking —
+    otherwise the daemon worker is killed and you hear nothing.
+
+    Usage:
         from modules.Bolt_Voice import speak
-        speak("Highlight detected. That one's a clip.")
+        speak("Highlight detected.")                 # async (live bot)
+        speak("Good morning briefing…", wait=True)   # sync (CLI)
     """
     if not text:
         return
+    if MUTED:
+        return
     _start_worker()
     _speech_queue.put(str(text))
+    if wait:
+        wait_for_speech(timeout=timeout)
 
 
 def speak_enabled(*, force: bool = False) -> bool:
