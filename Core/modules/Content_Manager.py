@@ -2050,14 +2050,17 @@ Bolt manage — daily cheat sheet (short names work)
   bolt manage note "Name" --text "…"
   bolt manage draft "Name"
   bolt manage ready "Name"           (alias: mark-ready)
-  bolt manage posted "Name"          log social ship (alias: mark-posted / ship)
-  bolt manage posted "Name" --tiktok --youtube --x
   bolt manage posted "Name" --amazon --where "https://…"
-  bolt manage shipped                What you've already posted
-  bolt manage morning                Good Morning Bolt (+ voice)
+                                      # Amazon-only is valid (no social required)
+  bolt manage posted "Name" --tiktok --youtube --x
+                                      # only if you actually posted there
+  bolt manage shipped
+  bolt manage morning
 
-Platforms (any casing): --tiktok --youtube/--yt --x/--twitter --amazon
-Or: --platforms tiktok,youtube_shorts,x,amazon
+Platforms (any casing, pick what you really used):
+  --amazon   --tiktok   --youtube/--yt   --x/--twitter
+Or: --platforms amazon   /   --platforms tiktok,youtube_shorts,x
+No default platforms — say where it went or Bolt won't invent socials.
 
 Typos are OK when close — Bolt will suggest the right command.
 Full list: bolt manage help
@@ -2088,12 +2091,8 @@ def _platforms_from_args(args: argparse.Namespace) -> List[str]:
     ):
         if getattr(args, flag, False) and plat not in found:
             found.append(plat)
-    has_explicit = raw is not None or any(
-        getattr(args, f, False) for f in ("tiktok", "youtube", "x", "amazon")
-    )
-    # Default social trio only when the user said nothing about platforms
-    if not found and not has_explicit:
-        found = ["tiktok", "youtube_shorts", "x"]
+    # No silent default — social is optional. Billy often ships Amazon-only
+    # reviews; inventing tiktok/youtube/x made the log lie.
     return found
 
 
@@ -2404,6 +2403,16 @@ def main(argv: Optional[List[str]] = None) -> int:
             print(f"  or: bolt manage posted \"{item['name']}\" --amazon --where <url>")
         elif args.cmd == "mark-posted":
             plats = _platforms_from_args(args)
+            if not plats and not (args.where or args.note):
+                print(
+                    "Where did you post it? Name at least one platform "
+                    "(no silent social default):\n"
+                    f"  bolt manage posted \"{args.name}\" --amazon --where <url>\n"
+                    f"  bolt manage posted \"{args.name}\" --tiktok --youtube --x\n"
+                    f"  bolt manage posted \"{args.name}\" --platforms amazon",
+                    file=sys.stderr,
+                )
+                return 2
             result = mark_posted(
                 args.name, platforms=plats, where=args.where, note=args.note
             )
@@ -2414,6 +2423,13 @@ def main(argv: Optional[List[str]] = None) -> int:
                 f"{final_plats or '(no platforms)'}"
             )
             print(f"Review entry: {result['review_entry']['id']}")
+            if final_plats == ["amazon"] or (
+                len(final_plats) == 1 and final_plats[0] == "amazon"
+            ):
+                print(
+                    "Logged Amazon-only — fine. Social shorts are optional, "
+                    "not required for a real ship."
+                )
         elif args.cmd == "shipped":
             for r in shipped_reviews():
                 plats = ",".join(r.get("platforms", [])) or "-"
