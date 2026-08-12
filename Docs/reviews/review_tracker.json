@@ -1,0 +1,25 @@
+{
+  "reviews": [
+    {
+      "id": "mouse-amazon-2026-08-12t13-07-02",
+      "item_id": "mouse",
+      "name": "Mouse",
+      "lane": "tech",
+      "format": "short",
+      "platforms": [
+        "amazon"
+      ],
+      "where": "https://amazon.com/dp/B085HNRKPX",
+      "verdict": null,
+      "affiliate_link": "https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20",
+      "note": "Amazon Influencer / product review only — no social posts. Corrected after default platforms mis-logged.",
+      "posted_at": "2026-08-12T12:57:11",
+      "posted_by": "William",
+      "kind": "ship"
+    }
+  ],
+  "outreach_log": [],
+  "products_received": [],
+  "settings": {},
+  "updated_at": "2026-08-12T13:07:02"
+}

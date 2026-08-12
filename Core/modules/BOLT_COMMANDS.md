@@ -171,9 +171,10 @@ bolt manage note "Mouse" --text "Lightweight, easy to charge"
 bolt manage draft "Mouse"
 
 bolt manage ready "Mouse"             # alias for mark-ready
-bolt manage posted "Mouse"            # alias for mark-posted (default: tiktok+yt+x)
-bolt manage posted "Mouse" --tiktok --youtube --x
 bolt manage posted "Mouse" --amazon --where "https://…"
+                                      # Amazon-only is a real ship (no social required)
+bolt manage posted "Mouse" --tiktok --youtube --x
+                                      # only if you actually posted there
 bolt manage ship "Mouse" --amazon     # ship == posted
 
 bolt manage shipped

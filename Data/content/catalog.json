@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-07-20T07:27:46",
+  "updated_at": "2026-08-12T13:07:13",
   "preferred_lanes": [
     "game",
     "tech"
@@ -28,7 +28,7 @@
       "id": "mouse",
       "name": "Mouse",
       "lane": "tech",
-      "status": "testing",
+      "status": "posted",
       "asin": "B085HNRKPX",
       "started_at": "2026-07-10",
       "created_at": "2026-07-10T07:36:07",
@@ -37,10 +37,49 @@
           "day": 1,
           "text": "Its cute, lightweight, easy to charge and connect, and very affordable.",
           "at": "2026-07-20T07:27:46"
+        },
+        {
+          "day": null,
+          "text": "Corrected: review was Amazon-only (not social). Silent social default removed from CLI.",
+          "at": "2026-08-12T13:07:02"
+        },
+        {
+          "day": null,
+          "text": "Corrected to Amazon-only ship (no social).",
+          "at": "2026-08-12T13:07:13"
         }
       ],
       "verdict": null,
-      "priority": 10
+      "priority": 10,
+      "last_draft": {
+        "item_id": "mouse",
+        "name": "Mouse",
+        "lane": "tech",
+        "format": "short",
+        "shape": {
+          "what_it_is": "Mouse (tech)",
+          "why_tested": "Real-world game/tech testing for honest creator reviews.",
+          "first_impression": "Its cute, lightweight, easy to charge and connect, and very affordable.",
+          "what_worked": "Its cute, lightweight, easy to charge and connect, and very affordable.",
+          "what_got_in_the_way": "Call out friction honestly when logged.",
+          "who_it_is_for": "Gamers and tech buyers who want practical takes, not hype.",
+          "verdict": "Pending \u2014 keep testing until a clear call."
+        },
+        "script": "Hook: I've been testing the Mouse \u2014 honest take.\nWhat it is: Mouse (tech)\nDemo notes: Its cute, lightweight, easy to charge and connect, and very affordable.\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: Pending \u2014 keep testing until a clear call.\nAffiliate: https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20\nDisclosure: honest opinion; links may earn commission.",
+        "affiliate_link": "https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20",
+        "platforms": [
+          "tiktok",
+          "youtube_shorts",
+          "x"
+        ],
+        "created_at": "2026-08-12T12:54:01"
+      },
+      "marked_ready_at": "2026-08-12T12:56:32",
+      "posted_at": "2026-08-12T12:57:11",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://amazon.com/dp/B085HNRKPX"
     }
   ]
 }
