@@ -8,7 +8,7 @@ Monetize via Amazon Influencer (`billycarter-20`), affiliates, then brand deals.
 | Platform | Handle |
 |---|---|
 | TikTok | @itssimplybilly |
-| Twitch | thunderstormbilly |
+| Twitch | ItsSimplyBilly |
 | YouTube | @SimplyBilly |
 | X | @SimplyBilly_ |
 | Amazon | Influencer + Associates tag `billycarter-20` |
