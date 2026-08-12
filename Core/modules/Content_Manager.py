@@ -1799,6 +1799,22 @@ def build_morning_briefing() -> Dict[str, Any]:
     lines.append("All social posts still need your approval. Let's make something real today.")
 
     spoken = " ".join(lines)
+    # Shorter voice line for TTS (full `spoken` stays in the markdown).
+    # Long paragraphs take minutes to read and feel broken mid-sentence if cut.
+    voice_bits = [
+        f"Good morning, {CREATOR_NAME}. Bolt is online.",
+        f"Focus: games and tech. {len(testing)} item(s) in testing.",
+    ]
+    if testing:
+        voice_bits.append(f"Top item: {testing[0]['name']}.")
+    if actions:
+        voice_bits.append(f"Content: {actions[0]['title']}.")
+    if biz:
+        voice_bits.append(f"Business: {biz['title']}.")
+    voice_bits.append(f"Advance Bolt: {advance['title']}.")
+    voice_bits.append("All posts still need your approval.")
+    spoken_voice = " ".join(voice_bits)
+
     md_lines = [
         f"# Good Morning Bolt — {date.today().isoformat()}",
         "",
@@ -1836,6 +1852,7 @@ def build_morning_briefing() -> Dict[str, Any]:
 
     return {
         "spoken": spoken,
+        "spoken_voice": spoken_voice,
         "actions": actions,
         "path": str(path),
         "lesson": lesson,
@@ -1847,14 +1864,42 @@ def build_morning_briefing() -> Dict[str, Any]:
 
 def morning(speak_aloud: bool = True) -> Dict[str, Any]:
     briefing = build_morning_briefing()
+    # Print the full spoken paragraph so terminal still has the complete brief.
+    print(briefing.get("spoken") or "")
+    if briefing.get("path"):
+        print(f"\nSaved: {briefing['path']}")
     if speak_aloud:
         try:
             from modules.Bolt_Voice import speak
 
-            speak(briefing["spoken"])
+            # wait=True: CLI exits after morning(); async speak would be killed
+            # before the daemon TTS worker plays anything.
+            spoken = (
+                (briefing.get("spoken_voice") or briefing.get("spoken") or "")
+            ).strip()
+            if spoken:
+                print("Speaking morning briefing…")
+                speak(spoken, wait=True)
         except Exception as exc:
             print(f"[voice fallback] {exc}")
-            print(briefing["spoken"])
+            # Last resort: macOS say in-process so voice still works if
+            # Bolt_Voice misconfigures.
+            try:
+                import subprocess
+
+                subprocess.run(
+                    [
+                        "say",
+                        (
+                            briefing.get("spoken_voice")
+                            or briefing.get("spoken")
+                            or "Good morning."
+                        ),
+                    ],
+                    check=False,
+                )
+            except Exception:
+                pass
     return briefing
 
 
@@ -2339,9 +2384,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             step = advance_next()
             print(f"{step['title']}\n{step['why']}\n{step['command']}")
         elif args.cmd == "morning":
-            result = morning(speak_aloud=not args.quiet)
-            print(result["spoken"])
-            print(f"\nSaved: {result['path']}")
+            # morning() prints the brief + speaks (wait=True) when not --quiet
+            morning(speak_aloud=not args.quiet)
         else:
             parser.print_help()
     except Exception as exc:
