@@ -155,19 +155,48 @@ bolt ccc …                                # Short alias for `mission`
 
 ## Creator manager
 
-Names containing spaces should be quoted.
+Names containing spaces should be quoted. **Short aliases work** — you do not
+need the long `mark-*` forms every time.
 
-### Catalog and review workflow
+### Daily cheat sheet
+
+```bash
+bolt manage help                      # this cheat sheet
+bolt manage status                    # snapshot
+bolt manage next                      # top actions
+bolt manage list
+
+bolt manage add "Mouse" --lane tech --asin B0…
+bolt manage note "Mouse" --text "Lightweight, easy to charge"
+bolt manage draft "Mouse"
+
+bolt manage ready "Mouse"             # alias for mark-ready
+bolt manage posted "Mouse"            # alias for mark-posted (default: tiktok+yt+x)
+bolt manage posted "Mouse" --tiktok --youtube --x
+bolt manage posted "Mouse" --amazon --where "https://…"
+bolt manage ship "Mouse" --amazon     # ship == posted
+
+bolt manage shipped
+bolt manage morning                   # Good Morning Bolt (+ voice)
+```
+
+Typos are auto-corrected when obvious (`mark-reade` → `mark-ready`).  
+Platform flags accept any casing: `--Amazon`, `--YouTube`, `--tiktok`.
+
+### Catalog and review workflow (full forms)
 
 ```bash
 bolt manage status
 bolt manage next
-bolt manage add "Headset" [--lane game|tech|product|skincare] [--status idea|queued|testing|drafting|ready|posted|shelved] [--asin <asin>] [--notes "text"]
+bolt manage add "Name" [--lane game|tech|product|skincare] [--status idea|queued|testing|drafting|ready|posted|shelved] [--asin <asin>] [--notes "text"]
 bolt manage list [--lane <lane>] [--status <status>]
-bolt manage note "Headset" --text "Mic is clear" [--day 1]
-bolt manage draft "Headset" [--format short|long]
-bolt manage mark-ready "Headset" [--verdict "verdict"] [--note "text"]
-bolt manage mark-posted "Headset" [--platforms tiktok,youtube_shorts,x] [--where <url-or-id>] [--note "text"]
+bolt manage note "Name" --text "Mic is clear" [--day 1]
+bolt manage draft "Name" [--format short|long]
+bolt manage mark-ready "Name"   # aliases: ready
+bolt manage mark-posted "Name" [--platforms tiktok,youtube_shorts,x,amazon]
+                               [--tiktok] [--youtube] [--x] [--amazon]
+                               [--where <url>] [--note "text"]
+                               # aliases: posted, ship
 bolt manage shipped
 ```
 

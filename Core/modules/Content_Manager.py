@@ -24,12 +24,13 @@ CLI (via bolt or python -m modules.Content_Manager):
 from __future__ import annotations
 
 import argparse
+import difflib
 import json
 import re
 import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 from uuid import uuid4
 
 # Repo root: Core/modules/thisfile -> parents[2]
@@ -631,18 +632,68 @@ def mark_posted(
 
     `platforms` is a list like ['tiktok', 'youtube_shorts']. `where`
     is a free-text field for the post URL or video ID.
+
+    If the item is *already* posted, this merges any new platforms /
+    where / note instead of erroring — common when logging Amazon after
+    social, or fixing a typo on a second pass.
     """
     catalog = load_catalog()
     item = _find_item(catalog, name)
     if not item:
         raise ValueError(f"No catalog item matching '{name}'.")
-    if item.get("status") not in ("ready", "drafting"):
+
+    platforms = list(platforms or [])
+    status = item.get("status")
+
+    # Soft update when already shipped
+    if status == "posted":
+        existing = list(item.get("posted_platforms") or [])
+        merged = list(dict.fromkeys(existing + platforms))  # preserve order, dedupe
+        item["posted_platforms"] = merged
+        if where:
+            item["posted_where"] = where
+        if note:
+            item.setdefault("notes_log", []).append(
+                {"day": None, "text": f"Post update: {note}", "at": _now_iso()}
+            )
+        if platforms or where or note:
+            tracker = load_review_tracker()
+            update_entry = {
+                "id": _slug(f"{item['name']}-update-{_now_iso()}"),
+                "item_id": item.get("id"),
+                "name": item["name"],
+                "lane": item.get("lane", "tech"),
+                "platforms": platforms or merged,
+                "where": where or item.get("posted_where", ""),
+                "note": note or "platforms updated",
+                "posted_at": _now_iso(),
+                "posted_by": CREATOR_NAME,
+                "kind": "update",
+            }
+            tracker.setdefault("reviews", []).append(update_entry)
+            save_review_tracker(tracker)
+            save_catalog(catalog)
+            return {
+                "catalog_item": item,
+                "review_entry": update_entry,
+                "updated": True,
+                "platforms": merged,
+            }
         raise ValueError(
-            f"'{item['name']}' is status='{item.get('status')}'. "
-            f"Mark it ready first with `bolt manage mark-ready \"{item['name']}\"`."
+            f"'{item['name']}' is already posted "
+            f"({', '.join(existing) or 'no platforms logged'}). "
+            f"Add platforms with e.g. "
+            f"`bolt manage posted \"{item['name']}\" --amazon` "
+            f"or `--platforms amazon --where <url>`."
         )
 
-    platforms = platforms or []
+    if status not in ("ready", "drafting"):
+        raise ValueError(
+            f"'{item['name']}' is status='{status}'. "
+            f"Mark it ready first with `bolt manage ready \"{item['name']}\"` "
+            f"(alias for mark-ready)."
+        )
+
     draft = item.get("last_draft") or {}
     review_entry = {
         "id": _slug(f"{item['name']}-{_now_iso()}"),
@@ -668,7 +719,12 @@ def mark_posted(
     item["posted_platforms"] = platforms
     item["posted_where"] = where
     save_catalog(catalog)
-    return {"catalog_item": item, "review_entry": review_entry}
+    return {
+        "catalog_item": item,
+        "review_entry": review_entry,
+        "updated": False,
+        "platforms": platforms,
+    }
 
 
 def shipped_reviews(limit: int = 50) -> List[Dict[str, Any]]:
@@ -1926,9 +1982,234 @@ def _print_item(item: Dict[str, Any]) -> None:
     )
 
 
+# ── Friendly CLI helpers (typos, short names, platform flags) ─────────────────
+
+# Canonical subcommand names accepted by argparse.
+_CANONICAL_CMDS = [
+    "add", "list", "note", "draft", "mark-ready", "mark-posted", "shipped",
+    "post", "post-dry-run", "tiktok-status", "youtube-pkg", "x-pkg",
+    "youtube-status", "x-status", "sponsors-add", "sponsors-enrich",
+    "sponsors-pipeline", "sponsors-research", "model-inspect", "model-status",
+    "next", "status", "store-add", "store-list", "store-feature-next",
+    "social-status", "social-package", "social-queue", "sponsors-find",
+    "sponsors-pitch", "sponsors-log", "sponsors-next", "business-lesson",
+    "business-next", "advance-next", "morning", "help",
+]
+
+# Short / typo aliases → canonical. Keep this list human-friendly.
+_CMD_ALIASES = {
+    # mark-ready
+    "ready": "mark-ready",
+    "markready": "mark-ready",
+    "mark_ready": "mark-ready",
+    "mark-reade": "mark-ready",   # common typo
+    "reade": "mark-ready",
+    "mark-rady": "mark-ready",
+    # mark-posted
+    "posted": "mark-posted",
+    "post-it": "mark-posted",
+    "ship": "mark-posted",
+    "shipped-item": "mark-posted",
+    "markposted": "mark-posted",
+    "mark_posted": "mark-posted",
+    "mark-post": "mark-posted",
+    # common shortenings
+    "ls": "list",
+    "stat": "status",
+    "st": "status",
+    "n": "next",
+    "gm": "morning",
+    "good-morning": "morning",
+    "goodmorning": "morning",
+}
+
+# Platform flag / token → stored platform id
+_PLATFORM_ALIASES = {
+    "tiktok": "tiktok",
+    "tt": "tiktok",
+    "youtube": "youtube_shorts",
+    "yt": "youtube_shorts",
+    "shorts": "youtube_shorts",
+    "youtube_shorts": "youtube_shorts",
+    "youtube-shorts": "youtube_shorts",
+    "x": "x",
+    "twitter": "x",
+    "amazon": "amazon",
+    "amz": "amazon",
+    "store": "amazon",
+    "storefront": "amazon",
+}
+
+_DAILY_CHEATSHEET = """
+Bolt manage — daily cheat sheet (short names work)
+──────────────────────────────────────────────────
+  bolt manage status                 What's next overall
+  bolt manage next                   Top actions
+  bolt manage list                   Catalog items
+  bolt manage add "Name" --lane tech --asin B0…
+  bolt manage note "Name" --text "…"
+  bolt manage draft "Name"
+  bolt manage ready "Name"           (alias: mark-ready)
+  bolt manage posted "Name"          log social ship (alias: mark-posted / ship)
+  bolt manage posted "Name" --tiktok --youtube --x
+  bolt manage posted "Name" --amazon --where "https://…"
+  bolt manage shipped                What you've already posted
+  bolt manage morning                Good Morning Bolt (+ voice)
+
+Platforms (any casing): --tiktok --youtube/--yt --x/--twitter --amazon
+Or: --platforms tiktok,youtube_shorts,x,amazon
+
+Typos are OK when close — Bolt will suggest the right command.
+Full list: bolt manage help
+""".strip()
+
+
+def _normalize_platform_token(token: str) -> Optional[str]:
+    key = (token or "").strip().lower().replace(" ", "_")
+    if not key:
+        return None
+    return _PLATFORM_ALIASES.get(key) or (key if key in _PLATFORM_ALIASES.values() else None)
+
+
+def _platforms_from_args(args: argparse.Namespace) -> List[str]:
+    """Build platform list from --platforms and/or convenience flags."""
+    found: List[str] = []
+    raw = getattr(args, "platforms", None)
+    if raw:
+        for part in str(raw).split(","):
+            p = _normalize_platform_token(part)
+            if p and p not in found:
+                found.append(p)
+    for flag, plat in (
+        ("tiktok", "tiktok"),
+        ("youtube", "youtube_shorts"),
+        ("x", "x"),
+        ("amazon", "amazon"),
+    ):
+        if getattr(args, flag, False) and plat not in found:
+            found.append(plat)
+    has_explicit = raw is not None or any(
+        getattr(args, f, False) for f in ("tiktok", "youtube", "x", "amazon")
+    )
+    # Default social trio only when the user said nothing about platforms
+    if not found and not has_explicit:
+        found = ["tiktok", "youtube_shorts", "x"]
+    return found
+
+
+def _normalize_manage_argv(argv: Sequence[str]) -> Tuple[List[str], Optional[str]]:
+    """Rewrite friendly aliases + case-insensitive platform flags.
+
+    Returns (new_argv, error_message_or_None).
+    On a single close fuzzy match, auto-corrects and prints nothing (caller
+    can mention the rewrite). On multiple/zero matches for typos, returns
+    an error string.
+    """
+    if not argv:
+        return [], None
+    argv = list(argv)
+    raw_cmd = argv[0]
+    cmd = raw_cmd.lower().strip().lstrip("-")
+
+    if cmd in ("help", "h", "?", "commands", "cheatsheet", "cheat"):
+        return ["help"], None
+
+    if cmd in _CMD_ALIASES:
+        argv[0] = _CMD_ALIASES[cmd]
+    elif cmd in _CANONICAL_CMDS:
+        argv[0] = cmd
+    else:
+        pool = list(_CANONICAL_CMDS) + list(_CMD_ALIASES.keys())
+        matches = difflib.get_close_matches(cmd, pool, n=3, cutoff=0.58)
+        display: List[str] = []
+        for m in matches:
+            canon = _CMD_ALIASES.get(m, m)
+            if canon not in display:
+                display.append(canon)
+        if len(display) == 1:
+            # Auto-correct obvious typos like mark-reade → mark-ready
+            print(f"(interpreted '{raw_cmd}' as '{display[0]}')", file=sys.stderr)
+            argv[0] = display[0]
+        elif display:
+            hint = (
+                f"Unknown command '{raw_cmd}'. Did you mean: "
+                + ", ".join(f"`{d}`" for d in display)
+                + "?\n"
+                "Short forms: ready · posted · ship · list · status · next · morning\n"
+                "Cheat sheet: bolt manage help"
+            )
+            return argv, hint
+        else:
+            hint = (
+                f"Unknown command '{raw_cmd}'.\n"
+                "Short forms: ready · posted · ship · list · status · next · morning\n"
+                "Cheat sheet: bolt manage help"
+            )
+            return argv, hint
+
+    # Lowercase known platform flags: --Amazon → --amazon, --YouTube → --youtube
+    known_flags = {
+        "--tiktok", "--tt", "--youtube", "--yt", "--shorts",
+        "--x", "--twitter", "--amazon", "--amz", "--store", "--storefront",
+    }
+    flag_map = {
+        "--tt": "--tiktok",
+        "--yt": "--youtube",
+        "--shorts": "--youtube",
+        "--twitter": "--x",
+        "--amz": "--amazon",
+        "--store": "--amazon",
+        "--storefront": "--amazon",
+    }
+    out: List[str] = []
+    i = 0
+    while i < len(argv):
+        a = argv[i]
+        low = a.lower() if a.startswith("-") else a
+        if low in known_flags or low in flag_map:
+            out.append(flag_map.get(low, low))
+            i += 1
+            continue
+        # --platforms=Amazon,TikTok style
+        if low.startswith("--platforms="):
+            _, _, val = a.partition("=")
+            parts = []
+            for p in val.split(","):
+                n = _normalize_platform_token(p)
+                if n:
+                    parts.append(n)
+            out.append("--platforms=" + ",".join(parts) if parts else "--platforms=")
+            i += 1
+            continue
+        out.append(a)
+        i += 1
+    return out, None
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     _ensure_seed_files()
-    parser = argparse.ArgumentParser(prog="content-manager", description="Bolt Content Manager")
+    raw_argv = list(sys.argv[1:] if argv is None else argv)
+
+    if not raw_argv or raw_argv[0] in ("-h", "--help"):
+        print(_DAILY_CHEATSHEET)
+        print()
+        # fall through to full argparse help below with empty → status-ish
+        if not raw_argv:
+            raw_argv = ["status"]
+
+    normalized, err = _normalize_manage_argv(raw_argv)
+    if err:
+        print(err, file=sys.stderr)
+        return 2
+
+    if normalized and normalized[0] == "help":
+        print(_DAILY_CHEATSHEET)
+        return 0
+
+    parser = argparse.ArgumentParser(
+        prog="bolt manage",
+        description="Bolt Content Manager — use short names: ready, posted, ship, status, next",
+    )
     sub = parser.add_subparsers(dest="cmd")
 
     # manage
@@ -1952,16 +2233,27 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_draft.add_argument("name")
     p_draft.add_argument("--format", default="short", choices=["short", "long"])
 
-    p_ready = sub.add_parser("mark-ready", help="Mark a draft as ready to post")
+    p_ready = sub.add_parser("mark-ready", help="Mark a draft as ready to post (alias: ready)")
     p_ready.add_argument("name")
     p_ready.add_argument("--verdict", default="")
     p_ready.add_argument("--note", default="")
 
-    p_posted = sub.add_parser("mark-posted", help="Record a review as shipped")
+    p_posted = sub.add_parser(
+        "mark-posted",
+        help="Record a review as shipped (alias: posted / ship)",
+    )
     p_posted.add_argument("name")
-    p_posted.add_argument("--platforms", default="tiktok,youtube_shorts,x")
+    p_posted.add_argument(
+        "--platforms",
+        default=None,
+        help="Comma list: tiktok,youtube_shorts,x,amazon (or use flags below)",
+    )
     p_posted.add_argument("--where", default="", help="URL or video ID of the post")
     p_posted.add_argument("--note", default="")
+    p_posted.add_argument("--tiktok", action="store_true", help="Logged on TikTok")
+    p_posted.add_argument("--youtube", action="store_true", help="Logged on YouTube Shorts")
+    p_posted.add_argument("--x", action="store_true", help="Logged on X/Twitter")
+    p_posted.add_argument("--amazon", action="store_true", help="Logged Amazon/storefront link")
 
     sub.add_parser("shipped", help="List shipped reviews")
 
@@ -2078,9 +2370,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_m.add_argument("--speak", action="store_true", default=True)
     p_m.add_argument("--quiet", action="store_true")
 
-    args = parser.parse_args(argv)
+    # Use normalized argv so aliases / platform flags apply
+    try:
+        args = parser.parse_args(normalized)
+    except SystemExit as e:
+        # argparse already printed usage; add cheat sheet pointer on errors
+        code = e.code if isinstance(e.code, int) else 2
+        if code:
+            print("\nTip: bolt manage help   ·   short: ready · posted · ship · status", file=sys.stderr)
+        return code or 0
     if not args.cmd:
-        parser.print_help()
+        print(_DAILY_CHEATSHEET)
         return 0
 
     try:
@@ -2100,10 +2400,19 @@ def main(argv: Optional[List[str]] = None) -> int:
         elif args.cmd == "mark-ready":
             item = mark_ready(args.name, verdict=args.verdict, note=args.note)
             print(f"Marked ready: {item['name']} (status={item['status']})")
+            print(f"Next: bolt manage posted \"{item['name']}\" --tiktok --youtube --x")
+            print(f"  or: bolt manage posted \"{item['name']}\" --amazon --where <url>")
         elif args.cmd == "mark-posted":
-            plats = [p.strip() for p in args.platforms.split(",") if p.strip()]
-            result = mark_posted(args.name, platforms=plats, where=args.where, note=args.note)
-            print(f"Posted: {result['catalog_item']['name']} -> {plats or '(no platforms)'}")
+            plats = _platforms_from_args(args)
+            result = mark_posted(
+                args.name, platforms=plats, where=args.where, note=args.note
+            )
+            final_plats = result.get("platforms") or plats
+            verb = "Updated" if result.get("updated") else "Posted"
+            print(
+                f"{verb}: {result['catalog_item']['name']} -> "
+                f"{final_plats or '(no platforms)'}"
+            )
             print(f"Review entry: {result['review_entry']['id']}")
         elif args.cmd == "shipped":
             for r in shipped_reviews():
