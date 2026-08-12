@@ -20,7 +20,7 @@ William (also Billy / SimplyBilly) is a self-taught content creator learning cod
 | Platform | Handle | Priority | Content Type |
 | ---------- | -------- | ---------- | -------------- |
 | TikTok | @itssimplybilly | High | Short clips, reviews, quick takes |
-| Twitch | thunderstormbilly | High | Live streams, gameplay, personality |
+| Twitch | ItsSimplyBilly | High | Live streams, gameplay, personality |
 | YouTube | @SimplyBilly | High | Shorts now, long-form reviews next |
 | X | @SimplyBilly_ | Medium | Takes, reposts, outreach presence |
 | Amazon Influencer | tag `billycarter-20` | High | Storefront + affiliate conversion |

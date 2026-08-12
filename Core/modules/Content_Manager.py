@@ -253,10 +253,10 @@ def _ensure_seed_files() -> None:
                         "notes": "Primary short-form. Use Content Posting API when token present.",
                     },
                     "twitch": {
-                        "handle": "thunderstormbilly",
+                        "handle": "ItsSimplyBilly",
                         "status": "configured",
                         "upload_mode": "live_source",
-                        "notes": "Live gameplay + highlight source.",
+                        "notes": "Live gameplay + highlight source. Aligned with SimplyBilly brand.",
                     },
                     "youtube": {
                         "handle": "@SimplyBilly",
@@ -1433,6 +1433,36 @@ def sponsors_find(lane: Optional[str] = None, limit: int = 5) -> List[Dict[str, 
     return prospects[:limit]
 
 
+def _social_handles() -> Dict[str, str]:
+    """Live handles for pitch copy — prefers social_connections.json."""
+    social = load_social()
+    plats = social.get("platforms") or {}
+
+    def _h(key: str, fallback: str) -> str:
+        raw = (plats.get(key) or {}).get("handle") or fallback
+        return str(raw).strip()
+
+    twitch = _h("twitch", "ItsSimplyBilly").lstrip("@")
+    tiktok = _h("tiktok", "@itssimplybilly")
+    if not tiktok.startswith("@"):
+        tiktok = f"@{tiktok}"
+    youtube = _h("youtube", "@SimplyBilly")
+    if not youtube.startswith("@"):
+        youtube = f"@{youtube}"
+    x = _h("x", "@SimplyBilly_")
+    if not x.startswith("@"):
+        x = f"@{x}"
+    return {
+        "twitch": twitch,
+        "tiktok": tiktok,
+        "tiktok_bare": tiktok.lstrip("@"),
+        "youtube": youtube,
+        "youtube_bare": youtube.lstrip("@"),
+        "x": x,
+        "x_bare": x.lstrip("@"),
+    }
+
+
 def sponsors_pitch(name: str) -> Dict[str, str]:
     data = load_sponsors()
     match = None
@@ -1443,10 +1473,11 @@ def sponsors_pitch(name: str) -> Dict[str, str]:
             break
     brand = match["name"] if match else name
     lanes = ", ".join((match or {}).get("lanes", PREFERRED_LANES))
+    h = _social_handles()
     subject = f"Review opportunity — SimplyBilly × {brand}"
     body = f"""Hi {brand} team,
 
-I'm William (SimplyBilly) — I create game and tech testing content on TikTok (@itssimplybilly), Twitch (thunderstormbilly), YouTube (@SimplyBilly), and X (@SimplyBilly_).
+I'm William (SimplyBilly) — I create game and tech testing content on TikTok ({h['tiktok']}), Twitch ({h['twitch']}), YouTube ({h['youtube']}), and X ({h['x']}).
 
 I'd like to create an honest review of a {brand} product for my audience. My style is practical: what it is, real-world use, what works, what gets in the way, and who it's actually for.
 
@@ -1460,10 +1491,10 @@ Media kit available on request. Happy to start with a product that fits {lanes}.
 
 Thanks,
 William
-TikTok: tiktok.com/@itssimplybilly
-Twitch: twitch.tv/thunderstormbilly
-YouTube: youtube.com/@SimplyBilly
-X: x.com/SimplyBilly_
+TikTok: tiktok.com/{h['tiktok_bare']}
+Twitch: twitch.tv/{h['twitch']}
+YouTube: youtube.com/{h['youtube_bare']}
+X: x.com/{h['x_bare']}
 """
     if match:
         match.setdefault("outreach", []).append(
