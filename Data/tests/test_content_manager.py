@@ -505,6 +505,116 @@ class ContentManagerTests(unittest.TestCase):
         self.assertGreaterEqual(len(actions), 1)
         self.assertIn(actions[0]["type"], {"content", "business", "advance"})
 
+    def test_parse_review_json_and_text_blocks(self):
+        rows = cm.parse_review_text(
+            json.dumps(
+                [
+                    {
+                        "name": "ORYNA Hydrogen Water Bottle",
+                        "asin": "B0FXVX5T5M",
+                        "rating": 5,
+                        "text": "I use it every day.",
+                    }
+                ]
+            )
+        )
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["asin"], "B0FXVX5T5M")
+        self.assertEqual(rows[0]["rating"], 5.0)
+        self.assertEqual(rows[0]["lane"], "product")
+
+        blocks = cm.parse_review_text(
+            "Name: Budget Lavalier Mic\nASIN: B0H5WXNPZN\nRating: 5\n"
+            "Review: Clear audio, easy to charge.\n"
+        )
+        self.assertEqual(blocks[0]["name"], "Budget Lavalier Mic")
+        self.assertEqual(blocks[0]["lane"], "tech")
+        self.assertEqual(blocks[0]["asin"], "B0H5WXNPZN")
+
+    def test_parse_review_html_marks_purchase_prompts_unposted(self):
+        html = """
+        <html><title>Review Your Purchases</title>
+        <a href="/dp/B0FTWQG28M">K&amp;F CONCEPT Phone Holder</a>
+        <p>Review your purchases</p>
+        </html>
+        """
+        rows = cm.parse_review_html(html)
+        self.assertTrue(rows)
+        self.assertEqual(rows[0]["asin"], "B0FTWQG28M")
+        self.assertFalse(rows[0]["posted"])
+
+    def test_record_existing_review_skips_draft_loop(self):
+        result = cm.record_existing_review(
+            "ORYNA Hydrogen Water Bottle",
+            asin="B0FXVX5T5M",
+            rating=5,
+            text="I use it every day.",
+            url="https://www.amazon.com/dp/B0FXVX5T5M",
+        )
+        item = result["catalog_item"]
+        self.assertEqual(item["status"], "posted")
+        self.assertEqual(item["posted_platforms"], ["amazon"])
+        self.assertEqual(item["verdict"], "5 stars on Amazon")
+        self.assertEqual(result["review_entry"]["kind"], "import")
+        self.assertEqual(cm.shipped_summary()["total"], 1)
+        store = cm.store_list()
+        self.assertEqual(store[0]["asin"], "B0FXVX5T5M")
+
+    def test_record_existing_review_dedupes_by_asin(self):
+        cm.record_existing_review("Mouse", asin="B085HNRKPX", rating=5, text="Cute and light.")
+        again = cm.record_existing_review(
+            "Wireless Mouse", asin="B085HNRKPX", rating=5, text="Still love it."
+        )
+        mice = [
+            i for i in cm.load_catalog()["items"] if (i.get("asin") or "") == "B085HNRKPX"
+        ]
+        self.assertEqual(len(mice), 1)
+        self.assertTrue(again["skipped"])
+        self.assertEqual(cm.shipped_summary()["total"], 1)
+
+    def test_import_inbox_json_moves_file(self):
+        inbox = cm.DOCS_REVIEWS / "inbox"
+        inbox.mkdir(parents=True, exist_ok=True)
+        payload = [
+            {
+                "name": "Zeadio Phone Stabilizer",
+                "asin": "B07939PF1Q",
+                "rating": 5,
+                "text": "Holds the phone steady.",
+            }
+        ]
+        (inbox / "reviews.json").write_text(json.dumps(payload), encoding="utf-8")
+        report = cm.import_inbox()
+        self.assertEqual(report["imported"], 1)
+        self.assertFalse((inbox / "reviews.json").exists())
+        self.assertTrue((cm.DOCS_REVIEWS / "imported" / "reviews.json").exists())
+        item = cm._find_item(cm.load_catalog(), "Zeadio Phone Stabilizer")
+        self.assertIsNotNone(item)
+        self.assertEqual(item["status"], "posted")
+        self.assertEqual(item["asin"], "B07939PF1Q")
+
+    def test_import_inbox_dry_run_leaves_files(self):
+        inbox = cm.DOCS_REVIEWS / "inbox"
+        inbox.mkdir(parents=True, exist_ok=True)
+        (inbox / "one.txt").write_text(
+            "Name: Test Serum\nASIN: B0CNDCKXDX\nRating: 4\nReview: Fine so far.\n",
+            encoding="utf-8",
+        )
+        report = cm.import_inbox(apply=False)
+        self.assertEqual(report["imported"], 1)
+        self.assertTrue((inbox / "one.txt").exists())
+        self.assertEqual(cm.load_catalog().get("items"), [])
+
+    def test_import_inbox_empty(self):
+        report = cm.import_inbox()
+        self.assertEqual(report["files"], 0)
+        self.assertEqual(report["imported"], 0)
+
+    def test_infer_review_lane(self):
+        self.assertEqual(cm.infer_review_lane("Budget Lavalier Mic"), "tech")
+        self.assertEqual(cm.infer_review_lane("Rice Peel Shot"), "skincare")
+        self.assertEqual(cm.infer_review_lane("Incense Sticks"), "product")
+
 
 if __name__ == "__main__":
     unittest.main()

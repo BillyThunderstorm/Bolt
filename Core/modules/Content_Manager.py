@@ -27,6 +27,7 @@ import argparse
 import difflib
 import json
 import re
+import shutil
 import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -183,10 +184,42 @@ def _safe_write(path: Path, payload: Any) -> None:
         fh.write("\n")
 
 
+def _inbox_dir() -> Path:
+    return DOCS_REVIEWS / "inbox"
+
+
+def _imported_dir() -> Path:
+    return DOCS_REVIEWS / "imported"
+
+
+_INBOX_HOWTO = """Drop Amazon review pages here, then run:
+
+  bolt manage import
+
+Accepted: PDF, screenshot (png/jpg/webp), saved HTML, .txt, or reviews.json
+
+JSON example:
+[
+  {"name": "Product", "asin": "B0XXXXXXXX", "rating": 5, "text": "What you wrote", "url": "https://amazon.com/dp/B0XXXXXXXX"}
+]
+
+Print a page to PDF: Cmd+P → Save as PDF → drop it here.
+Open this folder:  bolt manage import --open
+"""
+
+
 def _ensure_seed_files() -> None:
     CONTENT_DIR.mkdir(parents=True, exist_ok=True)
     BUSINESS_DIR.mkdir(parents=True, exist_ok=True)
     BRIEFINGS_DIR.mkdir(parents=True, exist_ok=True)
+    DOCS_REVIEWS.mkdir(parents=True, exist_ok=True)
+    inbox = _inbox_dir()
+    imported = _imported_dir()
+    inbox.mkdir(parents=True, exist_ok=True)
+    imported.mkdir(parents=True, exist_ok=True)
+    howto = inbox / "HOWTO.txt"
+    if not howto.exists():
+        howto.write_text(_INBOX_HOWTO, encoding="utf-8")
 
     if not CATALOG_FILE.exists():
         _safe_write(
@@ -746,6 +779,577 @@ def shipped_summary() -> Dict[str, Any]:
         "by_lane": by_lane,
         "last_posted_at": reviews[0]["posted_at"] if reviews else None,
     }
+
+
+# ---------------------------------------------------------------------------
+# Inbox import — drop Amazon review pages, then `bolt manage import`
+# ---------------------------------------------------------------------------
+
+_INBOX_SKIP = frozenset({".gitkeep", "howto.txt", "readme.md", "readme.txt"})
+_ASIN_IN_URL = re.compile(
+    r"(?:/dp/|/gp/product/|[?&]asin=)([A-Z0-9]{10})", re.IGNORECASE
+)
+_ASIN_STANDALONE = re.compile(r"\b(B0[A-Z0-9]{8})\b")
+_RATING_RE = re.compile(
+    r"(?P<n>\d(?:\.\d)?)\s*(?:out of|/)\s*5(?:\s*stars?)?"
+    r"|(?P<stars>\d)\s*stars?"
+    r"|a-star-(?P<icon>\d)",
+    re.IGNORECASE,
+)
+_TECH_RE = re.compile(
+    r"mic|mouse|keyboard|headset|camera|tripod|light|phone|holder|"
+    r"stabilizer|charger|earbud|webcam|stand|projector|speaker",
+    re.IGNORECASE,
+)
+_SKIN_RE = re.compile(
+    r"serum|cream|mask|peel|toothpaste|facial|skincare|moisturizer|"
+    r"collagen|lotion|cleanser",
+    re.IGNORECASE,
+)
+_GAME_RE = re.compile(r"\b(game|controller|console|fps)\b", re.IGNORECASE)
+
+
+def list_inbox_files() -> List[Path]:
+    """Files waiting in Docs/reviews/inbox (skips HOWTO / gitkeep)."""
+    inbox = _inbox_dir()
+    if not inbox.exists():
+        return []
+    files: List[Path] = []
+    for path in sorted(inbox.iterdir()):
+        if not path.is_file():
+            continue
+        if path.name.startswith("."):
+            continue
+        if path.name.lower() in _INBOX_SKIP:
+            continue
+        files.append(path)
+    return files
+
+
+def infer_review_lane(name: str, text: str = "", explicit: str = "") -> str:
+    if explicit and explicit.lower() in LANES:
+        return explicit.lower()
+    blob = f"{name} {text}"
+    if _GAME_RE.search(blob):
+        return "game"
+    if _SKIN_RE.search(blob):
+        return "skincare"
+    if _TECH_RE.search(blob):
+        return "tech"
+    return "product"
+
+
+def _extract_rating(text: str) -> Optional[float]:
+    match = _RATING_RE.search(text or "")
+    if not match:
+        return None
+    raw = match.group("n") or match.group("stars") or match.group("icon")
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        return None
+    if 1 <= value <= 5:
+        return value
+    return None
+
+
+def _extract_asins(text: str) -> List[str]:
+    found: List[str] = []
+    for match in _ASIN_IN_URL.finditer(text or ""):
+        asin = match.group(1).upper()
+        if asin not in found:
+            found.append(asin)
+    for match in _ASIN_STANDALONE.finditer(text or ""):
+        asin = match.group(1).upper()
+        if asin not in found:
+            found.append(asin)
+    return found
+
+
+def _strip_html(html: str) -> str:
+    text = re.sub(r"(?is)<script[^>]*>.*?</script>", " ", html)
+    text = re.sub(r"(?is)<style[^>]*>.*?</style>", " ", text)
+    text = re.sub(r"(?s)<[^>]+>", " ", text)
+    text = re.sub(r"&nbsp;", " ", text)
+    text = re.sub(r"&amp;", "&", text)
+    text = re.sub(r"&lt;", "<", text)
+    text = re.sub(r"&gt;", ">", text)
+    text = re.sub(r"&#39;|&apos;", "'", text)
+    text = re.sub(r"&quot;", '"', text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _normalize_review_record(raw: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    name = str(raw.get("name") or raw.get("title") or raw.get("product") or "").strip()
+    asin = str(raw.get("asin") or "").strip().upper()
+    text = str(raw.get("text") or raw.get("review") or raw.get("body") or "").strip()
+    url = str(raw.get("url") or raw.get("where") or "").strip()
+    if not asin:
+        asins = _extract_asins(" ".join([url, text, name]))
+        asin = asins[0] if asins else ""
+    if not name and asin:
+        name = f"Product {asin}"
+    if not name:
+        return None
+    rating = raw.get("rating")
+    if rating is None:
+        rating = _extract_rating(text)
+    else:
+        try:
+            rating = float(rating)
+        except (TypeError, ValueError):
+            rating = _extract_rating(str(rating))
+    if not url and asin:
+        url = f"https://www.amazon.com/dp/{asin}"
+    posted = raw.get("posted")
+    if posted is None:
+        posted = bool(text) or rating is not None
+    return {
+        "name": name,
+        "asin": asin,
+        "rating": rating,
+        "text": text,
+        "url": url,
+        "lane": infer_review_lane(name, text, str(raw.get("lane") or "")),
+        "posted": bool(posted),
+    }
+
+
+def parse_review_text(text: str) -> List[Dict[str, Any]]:
+    """Parse JSON, Name:/ASIN: blocks, or loose Amazon page text."""
+    blob = (text or "").strip()
+    if not blob:
+        return []
+
+    if blob[0] in "[{":
+        try:
+            payload = json.loads(blob)
+        except json.JSONDecodeError:
+            payload = None
+        if isinstance(payload, dict):
+            payload = payload.get("reviews") or payload.get("items") or [payload]
+        if isinstance(payload, list):
+            records = []
+            for row in payload:
+                if isinstance(row, dict):
+                    rec = _normalize_review_record(row)
+                    if rec:
+                        records.append(rec)
+            if records:
+                return records
+
+    records: List[Dict[str, Any]] = []
+    chunks = re.split(r"\n\s*---+\s*\n", blob)
+    field_block = re.compile(
+        r"^(?:name|product|title|asin|rating|stars|review|text|body|url|where|lane)\s*:",
+        re.IGNORECASE,
+    )
+    for chunk in chunks:
+        lines = [ln.strip() for ln in chunk.splitlines() if ln.strip()]
+        if not lines:
+            continue
+        if any(field_block.match(ln) for ln in lines):
+            fields: Dict[str, Any] = {}
+            current = None
+            for ln in lines:
+                m = re.match(
+                    r"^(name|product|title|asin|rating|stars|review|text|body|url|where|lane)\s*:\s*(.*)$",
+                    ln,
+                    re.IGNORECASE,
+                )
+                if m:
+                    current = m.group(1).lower()
+                    fields[current] = m.group(2).strip()
+                elif current in ("review", "text", "body"):
+                    fields[current] = (fields.get(current, "") + " " + ln).strip()
+            rec = _normalize_review_record(fields)
+            if rec:
+                records.append(rec)
+            continue
+
+    if records:
+        return records
+
+    asins = _extract_asins(blob)
+    rating = _extract_rating(blob)
+    title_match = re.search(r"Amazon\.com\s*:\s*(.+)", blob)
+    name = (title_match.group(1).strip() if title_match else "").split("|")[0].strip()
+    if asins:
+        for asin in asins:
+            rec = _normalize_review_record(
+                {"name": name or f"Product {asin}", "asin": asin, "rating": rating, "text": blob[:800]}
+            )
+            if rec:
+                records.append(rec)
+        return records
+    rec = _normalize_review_record({"name": name, "rating": rating, "text": blob[:800]})
+    return [rec] if rec else []
+
+
+def parse_review_html(html: str) -> List[Dict[str, Any]]:
+    prompt_page = bool(
+        re.search(r"review-your-purchases|Review your (most recent )?purchases", html, re.I)
+    )
+    asins = _extract_asins(html)
+    text = _strip_html(html)
+    title_match = re.search(r"<title[^>]*>(.*?)</title>", html, re.I | re.S)
+    page_title = ""
+    if title_match:
+        page_title = re.sub(r"\s+", " ", title_match.group(1)).strip()
+        page_title = re.sub(r"\s*[-|]\s*Amazon\.com.*$", "", page_title, flags=re.I)
+    records = parse_review_text(text)
+    if not records:
+        sources = asins or ([""] if page_title else [])
+        for asin in sources:
+            rec = _normalize_review_record(
+                {
+                    "name": page_title or f"Product {asin}",
+                    "asin": asin,
+                    "text": text[:800],
+                }
+            )
+            if rec:
+                records.append(rec)
+    elif asins:
+        used = {r.get("asin") for r in records if r.get("asin")}
+        if len(records) == 1 and not records[0].get("asin"):
+            records[0]["asin"] = asins[0]
+            records[0]["url"] = records[0].get("url") or f"https://www.amazon.com/dp/{asins[0]}"
+            used.add(asins[0])
+        for asin in asins:
+            if asin in used:
+                continue
+            rec = _normalize_review_record(
+                {
+                    "name": page_title or f"Product {asin}",
+                    "asin": asin,
+                    "text": text[:800],
+                }
+            )
+            if rec:
+                records.append(rec)
+    if prompt_page:
+        for rec in records:
+            rec["posted"] = False
+            rec["text"] = rec.get("text") or "Amazon asked for a review — not confirmed posted."
+    return records
+
+
+def _read_pdf_text(path: Path) -> str:
+    try:
+        from pypdf import PdfReader  # type: ignore
+    except ImportError:
+        try:
+            from PyPDF2 import PdfReader  # type: ignore
+        except ImportError:
+            return ""
+    try:
+        reader = PdfReader(str(path))
+        parts = []
+        for page in reader.pages:
+            parts.append(page.extract_text() or "")
+        return "\n".join(parts)
+    except Exception:
+        return ""
+
+
+def _read_image_text(path: Path) -> str:
+    try:
+        import pytesseract  # type: ignore
+        from PIL import Image  # type: ignore
+    except ImportError:
+        return ""
+    try:
+        image = Image.open(path)
+        if image.mode not in ("L", "RGB"):
+            image = image.convert("RGB")
+        return pytesseract.image_to_string(image) or ""
+    except Exception:
+        return ""
+
+
+def parse_review_file(path: Path) -> Dict[str, Any]:
+    """Extract review records from one inbox file."""
+    suffix = path.suffix.lower()
+    result: Dict[str, Any] = {
+        "path": str(path),
+        "name": path.name,
+        "reviews": [],
+        "error": None,
+    }
+    try:
+        if suffix in {".json", ".txt", ".md"}:
+            text = path.read_text(encoding="utf-8", errors="replace")
+            result["reviews"] = parse_review_text(text)
+        elif suffix in {".html", ".htm"}:
+            result["reviews"] = parse_review_html(
+                path.read_text(encoding="utf-8", errors="replace")
+            )
+        elif suffix == ".pdf":
+            text = _read_pdf_text(path)
+            if not text.strip():
+                result["error"] = "pdf_text_empty"
+            else:
+                result["reviews"] = parse_review_text(text)
+        elif suffix in {".png", ".jpg", ".jpeg", ".webp", ".heic"}:
+            text = _read_image_text(path)
+            if not text.strip():
+                result["error"] = "image_ocr_unavailable"
+            else:
+                result["reviews"] = parse_review_text(text)
+        else:
+            result["error"] = f"unsupported_type:{suffix or 'none'}"
+    except Exception as exc:
+        result["error"] = f"{type(exc).__name__}: {exc}"
+    return result
+
+
+def _should_storefront(record: Dict[str, Any]) -> bool:
+    rating = record.get("rating")
+    lane = record.get("lane") or "product"
+    if rating is not None and rating < 4:
+        return False
+    if lane in ("tech", "game", "skincare"):
+        return True
+    return bool(record.get("asin") and (rating is None or rating >= 5))
+
+
+def _archive_inbox_file(path: Path) -> Path:
+    dest_dir = _imported_dir()
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest = dest_dir / path.name
+    if dest.exists():
+        stamp = _now_iso().replace(":", "")
+        dest = dest_dir / f"{path.stem}-{stamp}{path.suffix}"
+    shutil.move(str(path), str(dest))
+    return dest
+
+
+def record_existing_review(
+    name: str,
+    *,
+    asin: str = "",
+    rating: Optional[float] = None,
+    text: str = "",
+    url: str = "",
+    lane: str = "",
+    add_to_storefront: bool = True,
+    source: str = "",
+    posted: bool = True,
+) -> Dict[str, Any]:
+    """Log a review William already wrote on Amazon. No draft/ready required."""
+    lane = infer_review_lane(name, text, lane)
+    asin = (asin or "").strip().upper()
+    url = (url or "").strip()
+    if not url and asin:
+        url = f"https://www.amazon.com/dp/{asin}"
+    affiliate = (
+        f"https://www.amazon.com/dp/{asin}/?tag={AMAZON_TAG}" if asin else ""
+    )
+    verdict = None
+    if rating is not None:
+        stars = int(rating) if float(rating).is_integer() else rating
+        verdict = f"{stars} stars on Amazon"
+
+    catalog = load_catalog()
+    item = _find_item(catalog, name)
+    if not item and asin:
+        for existing in catalog.get("items", []):
+            if (existing.get("asin") or "").upper() == asin:
+                item = existing
+                break
+
+    created = False
+    if not item:
+        item = add_item(
+            name=name,
+            lane=lane,
+            status="posted" if posted else "testing",
+            notes=text,
+            asin=asin,
+        )
+        catalog = load_catalog()
+        item = _find_item(catalog, name) or item
+        created = True
+    else:
+        item["lane"] = lane or item.get("lane") or "product"
+        if asin:
+            item["asin"] = asin
+        if text:
+            item.setdefault("notes_log", []).append(
+                {"day": None, "text": text, "at": _now_iso()}
+            )
+
+    already_amazon = item.get("status") == "posted" and "amazon" in (
+        item.get("posted_platforms") or []
+    )
+    skipped = bool(already_amazon and not created)
+    review_entry = None
+
+    if posted and not already_amazon:
+        if not item.get("last_draft"):
+            item["last_draft"] = {
+                "item_id": item.get("id"),
+                "name": item["name"],
+                "lane": item.get("lane", lane),
+                "format": "short",
+                "shape": {
+                    "what_it_is": f"{item['name']} ({item.get('lane', lane)})",
+                    "why_tested": "Imported from a posted Amazon review.",
+                    "first_impression": text or "Posted on Amazon.",
+                    "what_worked": text or "See Amazon review.",
+                    "what_got_in_the_way": "",
+                    "who_it_is_for": "People deciding whether this is worth buying.",
+                    "verdict": verdict or "Posted on Amazon.",
+                },
+                "script": text,
+                "affiliate_link": affiliate,
+                "platforms": ["amazon"],
+                "created_at": _now_iso(),
+                "source": source or "inbox_import",
+            }
+        if verdict:
+            item["verdict"] = verdict
+        item["status"] = "posted"
+        item["posted_at"] = item.get("posted_at") or _now_iso()
+        plats = list(item.get("posted_platforms") or [])
+        if "amazon" not in plats:
+            plats.append("amazon")
+        item["posted_platforms"] = plats
+        item["posted_where"] = url or item.get("posted_where") or ""
+        review_entry = {
+            "id": _slug(f"{item['name']}-amazon-{_now_iso()}"),
+            "item_id": item.get("id"),
+            "name": item["name"],
+            "lane": item.get("lane", lane),
+            "format": "short",
+            "platforms": ["amazon"],
+            "where": url,
+            "verdict": item.get("verdict"),
+            "rating": rating,
+            "affiliate_link": affiliate,
+            "script": text,
+            "note": source or "Imported from inbox (already posted on Amazon).",
+            "posted_at": item["posted_at"],
+            "posted_by": CREATOR_NAME,
+            "kind": "import",
+        }
+        tracker = load_review_tracker()
+        tracker.setdefault("reviews", []).append(review_entry)
+        save_review_tracker(tracker)
+    elif already_amazon and (text or rating is not None):
+        if verdict and not item.get("verdict"):
+            item["verdict"] = verdict
+
+    save_catalog(catalog)
+
+    store_item = None
+    if add_to_storefront and asin and _should_storefront(
+        {"rating": rating, "lane": item.get("lane"), "asin": asin}
+    ):
+        category = item.get("lane") if item.get("lane") in ("tech", "game") else (
+            "skincare" if item.get("lane") == "skincare" else "product"
+        )
+        store = load_storefront()
+        tag = store.get("affiliate_tag") or AMAZON_TAG
+        store_item = {
+            "id": item.get("id") or _slug(item["name"]),
+            "name": item["name"],
+            "asin": asin,
+            "category": category,
+            "affiliate_link": f"https://www.amazon.com/dp/{asin}/?tag={tag}",
+            "status": "active",
+            "notes": text,
+            "added_at": _now_iso(),
+        }
+        items = store.setdefault("items", [])
+        for existing in items:
+            if existing.get("asin") == asin or existing.get("name", "").lower() == item["name"].lower():
+                existing.update({k: v for k, v in store_item.items() if v})
+                store_item = existing
+                break
+        else:
+            items.append(store_item)
+        save_storefront(store)
+
+    return {
+        "catalog_item": item,
+        "review_entry": review_entry,
+        "storefront_item": store_item,
+        "created": created,
+        "updated": not created,
+        "skipped": skipped,
+        "platforms": item.get("posted_platforms") or [],
+    }
+
+
+def import_inbox(
+    *,
+    apply: bool = True,
+    storefront: bool = True,
+) -> Dict[str, Any]:
+    """Read Docs/reviews/inbox, log reviews, move parsed files to imported/."""
+    _ensure_seed_files()
+    files = list_inbox_files()
+    report: Dict[str, Any] = {
+        "inbox": str(_inbox_dir()),
+        "files": len(files),
+        "imported": 0,
+        "updated": 0,
+        "skipped": 0,
+        "unparsed": [],
+        "items": [],
+    }
+    if not files:
+        return report
+
+    for path in files:
+        parsed = parse_review_file(path)
+        reviews = parsed.get("reviews") or []
+        if not reviews:
+            report["unparsed"].append(
+                {"file": path.name, "error": parsed.get("error") or "no_reviews_found"}
+            )
+            continue
+        if not apply:
+            for rec in reviews:
+                report["items"].append(
+                    {"file": path.name, "name": rec["name"], "asin": rec.get("asin"), "dry_run": True}
+                )
+                report["imported"] += 1
+            continue
+        moved = False
+        for rec in reviews:
+            result = record_existing_review(
+                rec["name"],
+                asin=rec.get("asin") or "",
+                rating=rec.get("rating"),
+                text=rec.get("text") or "",
+                url=rec.get("url") or "",
+                lane=rec.get("lane") or "",
+                add_to_storefront=storefront,
+                source=f"inbox:{path.name}",
+                posted=bool(rec.get("posted", True)),
+            )
+            if result.get("skipped"):
+                report["skipped"] += 1
+            elif result.get("created"):
+                report["imported"] += 1
+            else:
+                report["updated"] += 1
+            report["items"].append(
+                {
+                    "file": path.name,
+                    "name": result["catalog_item"]["name"],
+                    "asin": result["catalog_item"].get("asin"),
+                    "status": result["catalog_item"].get("status"),
+                    "skipped": result.get("skipped"),
+                }
+            )
+            moved = True
+        if moved:
+            _archive_inbox_file(path)
+    return report
 
 
 def load_sponsors() -> Dict[str, Any]:
@@ -2018,6 +2622,7 @@ def _print_item(item: Dict[str, Any]) -> None:
 # Canonical subcommand names accepted by argparse.
 _CANONICAL_CMDS = [
     "add", "list", "note", "draft", "mark-ready", "mark-posted", "shipped",
+    "import",
     "post", "post-dry-run", "tiktok-status", "youtube-pkg", "x-pkg",
     "youtube-status", "x-status", "sponsors-add", "sponsors-enrich",
     "sponsors-pipeline", "sponsors-research", "model-inspect", "model-status",
@@ -2044,6 +2649,11 @@ _CMD_ALIASES = {
     "markposted": "mark-posted",
     "mark_posted": "mark-posted",
     "mark-post": "mark-posted",
+    # inbox import
+    "import-reviews": "import",
+    "import_reviews": "import",
+    "inbox": "import",
+    "reviews-import": "import",
     # common shortenings
     "ls": "list",
     "stat": "status",
@@ -2086,6 +2696,8 @@ Bolt manage — daily cheat sheet (short names work)
   bolt manage posted "Name" --tiktok --youtube --x
                                       # only if you actually posted there
   bolt manage shipped
+  bolt manage import                 Drop pages in Docs/reviews/inbox first
+  bolt manage import --open          Open that folder in Finder
   bolt manage morning
 
 Platforms (any casing, pick what you really used):
@@ -2287,6 +2899,26 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     sub.add_parser("shipped", help="List shipped reviews")
 
+    p_import = sub.add_parser(
+        "import",
+        help="Import Amazon reviews dropped in Docs/reviews/inbox (alias: inbox)",
+    )
+    p_import.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Parse inbox files without writing catalog or moving them",
+    )
+    p_import.add_argument(
+        "--no-storefront",
+        action="store_true",
+        help="Log reviews but do not add affiliate storefront rows",
+    )
+    p_import.add_argument(
+        "--open",
+        action="store_true",
+        help="Open the inbox folder in Finder",
+    )
+
     p_post = sub.add_parser(
         "post", help="Publish a ready catalog item to TikTok (approval-gated)"
     )
@@ -2466,6 +3098,40 @@ def main(argv: Optional[List[str]] = None) -> int:
                 plats = ",".join(r.get("platforms", [])) or "-"
                 where = r.get("where", "") or "-"
                 print(f"  {r['posted_at']} {r['name']} [{r.get('lane')}] {plats} {where}")
+        elif args.cmd == "import":
+            inbox = _inbox_dir()
+            inbox.mkdir(parents=True, exist_ok=True)
+            if args.open:
+                if sys.platform == "darwin":
+                    import subprocess
+
+                    subprocess.run(["open", str(inbox)], check=False)
+                print(f"Inbox: {inbox}")
+            report = import_inbox(
+                apply=not args.dry_run,
+                storefront=not args.no_storefront,
+            )
+            if report["files"] == 0:
+                print(f"Inbox is empty: {inbox}")
+                print("Drop PDFs, screenshots, HTML, or reviews.json there, then run:")
+                print("  bolt manage import")
+                return 0
+            verb = "Would import" if args.dry_run else "Imported"
+            print(
+                f"{verb}: {report['imported']} new, "
+                f"{report['updated']} updated, "
+                f"{report['skipped']} already logged, "
+                f"{len(report['unparsed'])} unparsed "
+                f"({report['files']} file(s))"
+            )
+            for row in report["items"]:
+                flag = " (skipped)" if row.get("skipped") else ""
+                asin = row.get("asin") or "-"
+                print(f"  - {row['name']} [{asin}]{flag}")
+            for miss in report["unparsed"]:
+                print(f"  ? {miss['file']}: {miss['error']}")
+            if report["unparsed"] and not args.dry_run:
+                print("Unparsed files stayed in the inbox — drop a reviews.json or tell Bolt to read them.")
         elif args.cmd == "post":
             result = tiktok_publish_item(
                 args.name, approve=args.approve, video_path=args.video

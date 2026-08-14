@@ -1,0 +1,13 @@
+Drop Amazon review pages here, then run:
+
+  bolt manage import
+
+Accepted: PDF, screenshot (png/jpg/webp), saved HTML, .txt, or reviews.json
+
+JSON example:
+[
+  {"name": "Product", "asin": "B0XXXXXXXX", "rating": 5, "text": "What you wrote", "url": "https://amazon.com/dp/B0XXXXXXXX"}
+]
+
+Print a page to PDF: Cmd+P → Save as PDF → drop it here.
+Open this folder:  bolt manage import --open

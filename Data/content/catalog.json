@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-08-12T13:07:13",
+  "updated_at": "2026-08-13T20:25:45",
   "preferred_lanes": [
     "game",
     "tech"
@@ -47,9 +47,14 @@
           "day": null,
           "text": "Corrected to Amazon-only ship (no social).",
           "at": "2026-08-12T13:07:13"
+        },
+        {
+          "day": null,
+          "text": "Amazon review title: Its nice. Reviewed May 24, 2026. Color: Rose Gold. Verified Purchase. Product: TENMOS Wireless Bluetooth Mouse. Its fine. Not bad. Kind of goes to sleep after about a minute. Battery gets low a little quicker than I expected, but charging it takes maybe an hour or so. Its good enough that if I saw this company [print cut off]",
+          "at": "2026-08-13T20:15:46"
         }
       ],
-      "verdict": null,
+      "verdict": "4 stars on Amazon — Its nice.",
       "priority": 10,
       "last_draft": {
         "item_id": "mouse",
@@ -63,9 +68,9 @@
           "what_worked": "Its cute, lightweight, easy to charge and connect, and very affordable.",
           "what_got_in_the_way": "Call out friction honestly when logged.",
           "who_it_is_for": "Gamers and tech buyers who want practical takes, not hype.",
-          "verdict": "Pending \u2014 keep testing until a clear call."
+          "verdict": "Pending — keep testing until a clear call."
         },
-        "script": "Hook: I've been testing the Mouse \u2014 honest take.\nWhat it is: Mouse (tech)\nDemo notes: Its cute, lightweight, easy to charge and connect, and very affordable.\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: Pending \u2014 keep testing until a clear call.\nAffiliate: https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20\nDisclosure: honest opinion; links may earn commission.",
+        "script": "Hook: I've been testing the Mouse — honest take.\nWhat it is: Mouse (tech)\nDemo notes: Its cute, lightweight, easy to charge and connect, and very affordable.\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: Pending — keep testing until a clear call.\nAffiliate: https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20\nDisclosure: honest opinion; links may earn commission.",
         "affiliate_link": "https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20",
         "platforms": [
           "tiktok",
@@ -79,7 +84,817 @@
       "posted_platforms": [
         "amazon"
       ],
-      "posted_where": "https://amazon.com/dp/B085HNRKPX"
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R35L389Q8APNB4"
+    },
+    {
+      "id": "7keys-retro-typewriter-keyboard",
+      "name": "7KEYS Retro Typewriter Keyboard",
+      "lane": "tech",
+      "status": "posted",
+      "asin": "B0CSVJKYDL",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:15:46",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: Worth every penny. Reviewed May 31, 2026. Style: Blue Switch. Verified Purchase. Yes, yes and yes to everything about it. If I'm splitting hairs, I do wish it could hold a phone as well not just a tablet and the keys are very smooth so I catch myself actually looking at what I'm typing versus trusting my typing skills completely. Easy to assemble and use it is smaller, im at an age where [print cut off]",
+          "at": "2026-08-13T20:15:46"
+        }
+      ],
+      "verdict": "5 stars on Amazon",
+      "priority": 10,
+      "last_draft": {
+        "item_id": "7keys-retro-typewriter-keyboard",
+        "name": "7KEYS Retro Typewriter Keyboard",
+        "lane": "tech",
+        "format": "short",
+        "shape": {
+          "what_it_is": "7KEYS Retro Typewriter Keyboard (tech)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: Worth every penny. Reviewed May 31, 2026. Style: Blue Switch. Verified Purchase. Yes, yes and yes to everything about it. If I'm splitting hairs, I do wish it could hold a phone as well not just a tablet and the keys are very smooth so I catch myself actually looking at what I'm typing versus trusting my typing skills completely. Easy to assemble and use it is smaller, im at an age where [print cut off]",
+          "what_worked": "Title: Worth every penny. Reviewed May 31, 2026. Style: Blue Switch. Verified Purchase. Yes, yes and yes to everything about it. If I'm splitting hairs, I do wish it could hold a phone as well not just a tablet and the keys are very smooth so I catch myself actually looking at what I'm typing versus trusting my typing skills completely. Easy to assemble and use it is smaller, im at an age where [print cut off]",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "5 stars on Amazon"
+        },
+        "script": "Title: Worth every penny. Reviewed May 31, 2026. Style: Blue Switch. Verified Purchase. Yes, yes and yes to everything about it. If I'm splitting hairs, I do wish it could hold a phone as well not just a tablet and the keys are very smooth so I catch myself actually looking at what I'm typing versus trusting my typing skills completely. Easy to assemble and use it is smaller, im at an age where [print cut off]",
+        "affiliate_link": "https://www.amazon.com/dp/B0CSVJKYDL/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:15:46",
+        "source": "inbox:Bluetooth Typewriter.pdf"
+      },
+      "posted_at": "2026-08-13T20:15:46",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R1NWNS5AIEYD01"
+    },
+    {
+      "id": "geenoa-silicone-face-scrubber",
+      "name": "GEENOA Silicone Face Scrubber",
+      "lane": "skincare",
+      "status": "posted",
+      "asin": "B0DM4S1M99",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:15:46",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: Definitely worth it. Reviewed May 31, 2026. Verified Purchase. It does what it's supposed to, but at times it can irritate my skin. That's probably more of a me thing.",
+          "at": "2026-08-13T20:15:46"
+        }
+      ],
+      "verdict": "5 stars on Amazon",
+      "priority": 5,
+      "last_draft": {
+        "item_id": "geenoa-silicone-face-scrubber",
+        "name": "GEENOA Silicone Face Scrubber",
+        "lane": "skincare",
+        "format": "short",
+        "shape": {
+          "what_it_is": "GEENOA Silicone Face Scrubber (skincare)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: Definitely worth it. Reviewed May 31, 2026. Verified Purchase. It does what it's supposed to, but at times it can irritate my skin. That's probably more of a me thing.",
+          "what_worked": "Title: Definitely worth it. Reviewed May 31, 2026. Verified Purchase. It does what it's supposed to, but at times it can irritate my skin. That's probably more of a me thing.",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "5 stars on Amazon"
+        },
+        "script": "Title: Definitely worth it. Reviewed May 31, 2026. Verified Purchase. It does what it's supposed to, but at times it can irritate my skin. That's probably more of a me thing.",
+        "affiliate_link": "https://www.amazon.com/dp/B0DM4S1M99/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:15:46",
+        "source": "inbox:Face Scrubber.pdf"
+      },
+      "posted_at": "2026-08-13T20:15:46",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R115QOMCFBE6H1"
+    },
+    {
+      "id": "hmdmdn-magnetic-auto-face-tracking-tripod",
+      "name": "HMDMDN Magnetic Auto Face Tracking Tripod",
+      "lane": "tech",
+      "status": "posted",
+      "asin": "B0G6JVG11P",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:15:46",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: Worth it. Reviewed May 24, 2026. Set name: X106D-Magnetic Auto Face Tracking Tripod. Verified Purchase. I would recommend this for anyone considering it. It is well worth the price. I wish it were a tiny bit easier to travel with, and traveling with it is by no means difficult. Its has to be the size that it is. Its sturdy and the magnet is the only thing I've had problems with, in a good way. The magnetic stickers you can buy and put on a case to make them \"mag safe\" usually come off when I try to take my phone off of the tripod. That's how strong the magnet is. I stopped using the auto tracking as much because I slowly [print cut off]",
+          "at": "2026-08-13T20:15:46"
+        }
+      ],
+      "verdict": "4 stars on Amazon",
+      "priority": 10,
+      "last_draft": {
+        "item_id": "hmdmdn-magnetic-auto-face-tracking-tripod",
+        "name": "HMDMDN Magnetic Auto Face Tracking Tripod",
+        "lane": "tech",
+        "format": "short",
+        "shape": {
+          "what_it_is": "HMDMDN Magnetic Auto Face Tracking Tripod (tech)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: Worth it. Reviewed May 24, 2026. Set name: X106D-Magnetic Auto Face Tracking Tripod. Verified Purchase. I would recommend this for anyone considering it. It is well worth the price. I wish it were a tiny bit easier to travel with, and traveling with it is by no means difficult. Its has to be the size that it is. Its sturdy and the magnet is the only thing I've had problems with, in a good way. The magnetic stickers you can buy and put on a case to make them \"mag safe\" usually come off when I try to take my phone off of the tripod. That's how strong the magnet is. I stopped using the auto tracking as much because I slowly [print cut off]",
+          "what_worked": "Title: Worth it. Reviewed May 24, 2026. Set name: X106D-Magnetic Auto Face Tracking Tripod. Verified Purchase. I would recommend this for anyone considering it. It is well worth the price. I wish it were a tiny bit easier to travel with, and traveling with it is by no means difficult. Its has to be the size that it is. Its sturdy and the magnet is the only thing I've had problems with, in a good way. The magnetic stickers you can buy and put on a case to make them \"mag safe\" usually come off when I try to take my phone off of the tripod. That's how strong the magnet is. I stopped using the auto tracking as much because I slowly [print cut off]",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "4 stars on Amazon"
+        },
+        "script": "Title: Worth it. Reviewed May 24, 2026. Set name: X106D-Magnetic Auto Face Tracking Tripod. Verified Purchase. I would recommend this for anyone considering it. It is well worth the price. I wish it were a tiny bit easier to travel with, and traveling with it is by no means difficult. Its has to be the size that it is. Its sturdy and the magnet is the only thing I've had problems with, in a good way. The magnetic stickers you can buy and put on a case to make them \"mag safe\" usually come off when I try to take my phone off of the tripod. That's how strong the magnet is. I stopped using the auto tracking as much because I slowly [print cut off]",
+        "affiliate_link": "https://www.amazon.com/dp/B0G6JVG11P/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:15:46",
+        "source": "inbox:Face Tracking Phone Stand.pdf"
+      },
+      "posted_at": "2026-08-13T20:15:46",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R2L5PQ8TG1QRAS"
+    },
+    {
+      "id": "fomito-11-inch-articulating-magic-arm",
+      "name": "FOMITO 11 inch Articulating Magic Arm",
+      "lane": "tech",
+      "status": "posted",
+      "asin": "B016BGVR5I",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:15:46",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: If I could donate this, I wouldn't. Reviewed May 24, 2026. Verified Purchase. It comes with everything it says that it does so by that standard, yes it works. Does it work well together? Would I recommend it? Where do I use it? Should you buy it? No, No, I dont, and maybe for the clamp. The clamp is the only thing that really held up in my opinion. It doesnt have a weight or sturdiness to it, so I wouldn't expect it to hold up anything that weighs more than 2 pounds. Definitely not for an extended period. It would even make it at least manageable if I could attach the [print cut off]",
+          "at": "2026-08-13T20:15:46"
+        }
+      ],
+      "verdict": "2 stars on Amazon",
+      "priority": 10,
+      "last_draft": {
+        "item_id": "fomito-11-inch-articulating-magic-arm",
+        "name": "FOMITO 11 inch Articulating Magic Arm",
+        "lane": "tech",
+        "format": "short",
+        "shape": {
+          "what_it_is": "FOMITO 11 inch Articulating Magic Arm (tech)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: If I could donate this, I wouldn't. Reviewed May 24, 2026. Verified Purchase. It comes with everything it says that it does so by that standard, yes it works. Does it work well together? Would I recommend it? Where do I use it? Should you buy it? No, No, I dont, and maybe for the clamp. The clamp is the only thing that really held up in my opinion. It doesnt have a weight or sturdiness to it, so I wouldn't expect it to hold up anything that weighs more than 2 pounds. Definitely not for an extended period. It would even make it at least manageable if I could attach the [print cut off]",
+          "what_worked": "Title: If I could donate this, I wouldn't. Reviewed May 24, 2026. Verified Purchase. It comes with everything it says that it does so by that standard, yes it works. Does it work well together? Would I recommend it? Where do I use it? Should you buy it? No, No, I dont, and maybe for the clamp. The clamp is the only thing that really held up in my opinion. It doesnt have a weight or sturdiness to it, so I wouldn't expect it to hold up anything that weighs more than 2 pounds. Definitely not for an extended period. It would even make it at least manageable if I could attach the [print cut off]",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "2 stars on Amazon"
+        },
+        "script": "Title: If I could donate this, I wouldn't. Reviewed May 24, 2026. Verified Purchase. It comes with everything it says that it does so by that standard, yes it works. Does it work well together? Would I recommend it? Where do I use it? Should you buy it? No, No, I dont, and maybe for the clamp. The clamp is the only thing that really held up in my opinion. It doesnt have a weight or sturdiness to it, so I wouldn't expect it to hold up anything that weighs more than 2 pounds. Definitely not for an extended period. It would even make it at least manageable if I could attach the [print cut off]",
+        "affiliate_link": "https://www.amazon.com/dp/B016BGVR5I/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:15:46",
+        "source": "inbox:Magic Arm Phone Holder.pdf"
+      },
+      "posted_at": "2026-08-13T20:15:46",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R1G2ECUYJJR1IP"
+    },
+    {
+      "id": "qwork-desk-mic-stand",
+      "name": "QWORK Desk Mic Stand",
+      "lane": "tech",
+      "status": "posted",
+      "asin": "B0F6SSZKHQ",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:15:46",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: I wouldn't. Reviewed May 24, 2026. Verified Purchase. No. Just all around, no. I wasn't completely shocked that it couldn't hold a microphone up. I was [print cut off]",
+          "at": "2026-08-13T20:15:46"
+        }
+      ],
+      "verdict": "1 stars on Amazon",
+      "priority": 10,
+      "last_draft": {
+        "item_id": "qwork-desk-mic-stand",
+        "name": "QWORK Desk Mic Stand",
+        "lane": "tech",
+        "format": "short",
+        "shape": {
+          "what_it_is": "QWORK Desk Mic Stand (tech)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: I wouldn't. Reviewed May 24, 2026. Verified Purchase. No. Just all around, no. I wasn't completely shocked that it couldn't hold a microphone up. I was [print cut off]",
+          "what_worked": "Title: I wouldn't. Reviewed May 24, 2026. Verified Purchase. No. Just all around, no. I wasn't completely shocked that it couldn't hold a microphone up. I was [print cut off]",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "1 stars on Amazon"
+        },
+        "script": "Title: I wouldn't. Reviewed May 24, 2026. Verified Purchase. No. Just all around, no. I wasn't completely shocked that it couldn't hold a microphone up. I was [print cut off]",
+        "affiliate_link": "https://www.amazon.com/dp/B0F6SSZKHQ/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:15:46",
+        "source": "inbox:Mic Stand.pdf"
+      },
+      "posted_at": "2026-08-13T20:15:46",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R3DO8GFWMFJ07E"
+    },
+    {
+      "id": "the-ordinary-saccharomyces-ferment-milk-toner",
+      "name": "The Ordinary Saccharomyces Ferment (Milk Toner)",
+      "lane": "skincare",
+      "status": "posted",
+      "asin": "B0D4K7R9S5",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:15:46",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: Top tier; Get it. Reviewed May 24, 2026. Verified Purchase. Out of all of the Ordinary products I currently have, this is easily top 3. Calming to put on. Surprisingly not a bad smell. Not an intense or unpleasant coating. I have mine stored in the fridge so its cold when I put it on my face... Heaven sent. I actually dont have anything bad to say. I could see it maybe making a mess / spilling if you apply it to the wrong thing before you put it on since its [print cut off]",
+          "at": "2026-08-13T20:15:46"
+        }
+      ],
+      "verdict": "5 stars on Amazon",
+      "priority": 5,
+      "last_draft": {
+        "item_id": "the-ordinary-saccharomyces-ferment-milk-toner",
+        "name": "The Ordinary Saccharomyces Ferment (Milk Toner)",
+        "lane": "skincare",
+        "format": "short",
+        "shape": {
+          "what_it_is": "The Ordinary Saccharomyces Ferment (Milk Toner) (skincare)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: Top tier; Get it. Reviewed May 24, 2026. Verified Purchase. Out of all of the Ordinary products I currently have, this is easily top 3. Calming to put on. Surprisingly not a bad smell. Not an intense or unpleasant coating. I have mine stored in the fridge so its cold when I put it on my face... Heaven sent. I actually dont have anything bad to say. I could see it maybe making a mess / spilling if you apply it to the wrong thing before you put it on since its [print cut off]",
+          "what_worked": "Title: Top tier; Get it. Reviewed May 24, 2026. Verified Purchase. Out of all of the Ordinary products I currently have, this is easily top 3. Calming to put on. Surprisingly not a bad smell. Not an intense or unpleasant coating. I have mine stored in the fridge so its cold when I put it on my face... Heaven sent. I actually dont have anything bad to say. I could see it maybe making a mess / spilling if you apply it to the wrong thing before you put it on since its [print cut off]",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "5 stars on Amazon"
+        },
+        "script": "Title: Top tier; Get it. Reviewed May 24, 2026. Verified Purchase. Out of all of the Ordinary products I currently have, this is easily top 3. Calming to put on. Surprisingly not a bad smell. Not an intense or unpleasant coating. I have mine stored in the fridge so its cold when I put it on my face... Heaven sent. I actually dont have anything bad to say. I could see it maybe making a mess / spilling if you apply it to the wrong thing before you put it on since its [print cut off]",
+        "affiliate_link": "https://www.amazon.com/dp/B0D4K7R9S5/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:15:46",
+        "source": "inbox:Ordinary Milk Toner.pdf"
+      },
+      "posted_at": "2026-08-13T20:15:46",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R3FA7VPW99ZQ16"
+    },
+    {
+      "id": "zunknod-3-hole-ski-mask-4-pack",
+      "name": "ZUNKNOD 3-Hole Ski Mask (4-pack)",
+      "lane": "product",
+      "status": "posted",
+      "asin": "B0F8VRN8ZB",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:15:46",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: Couldn't finish skit recording (irritating fabric), but good for heat. Reviewed May 24, 2026. Verified Purchase. Eh. I wasn't expecting much. Itchy and uncomfortable, but I dont think they are technically made for [print cut off]",
+          "at": "2026-08-13T20:15:46"
+        }
+      ],
+      "verdict": "3 stars on Amazon",
+      "priority": 5,
+      "last_draft": {
+        "item_id": "zunknod-3-hole-ski-mask-4-pack",
+        "name": "ZUNKNOD 3-Hole Ski Mask (4-pack)",
+        "lane": "product",
+        "format": "short",
+        "shape": {
+          "what_it_is": "ZUNKNOD 3-Hole Ski Mask (4-pack) (product)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: Couldn't finish skit recording (irritating fabric), but good for heat. Reviewed May 24, 2026. Verified Purchase. Eh. I wasn't expecting much. Itchy and uncomfortable, but I dont think they are technically made for [print cut off]",
+          "what_worked": "Title: Couldn't finish skit recording (irritating fabric), but good for heat. Reviewed May 24, 2026. Verified Purchase. Eh. I wasn't expecting much. Itchy and uncomfortable, but I dont think they are technically made for [print cut off]",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "3 stars on Amazon"
+        },
+        "script": "Title: Couldn't finish skit recording (irritating fabric), but good for heat. Reviewed May 24, 2026. Verified Purchase. Eh. I wasn't expecting much. Itchy and uncomfortable, but I dont think they are technically made for [print cut off]",
+        "affiliate_link": "https://www.amazon.com/dp/B0F8VRN8ZB/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:15:46",
+        "source": "inbox:Ski Mask.pdf"
+      },
+      "posted_at": "2026-08-13T20:15:46",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/RBLF66Y3UV7HH"
+    },
+    {
+      "id": "turn-on-aloe-based-lube",
+      "name": "Turn On Aloe-Based Lube",
+      "lane": "product",
+      "status": "posted",
+      "asin": "B0F5SSKDVH",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:15:46",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: ouch. Reviewed June 4, 2026. Flavor: Aloe. Size: 8 Fl Oz. Verified Purchase. It definitely isnt \"Non sticky.\" Almost annoyingly sticky. Funny enough, advertising it as \"non sticky\".",
+          "at": "2026-08-13T20:15:46"
+        }
+      ],
+      "verdict": "2 stars on Amazon",
+      "priority": 5,
+      "last_draft": {
+        "item_id": "turn-on-aloe-based-lube",
+        "name": "Turn On Aloe-Based Lube",
+        "lane": "product",
+        "format": "short",
+        "shape": {
+          "what_it_is": "Turn On Aloe-Based Lube (product)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: ouch. Reviewed June 4, 2026. Flavor: Aloe. Size: 8 Fl Oz. Verified Purchase. It definitely isnt \"Non sticky.\" Almost annoyingly sticky. Funny enough, advertising it as \"non sticky\".",
+          "what_worked": "Title: ouch. Reviewed June 4, 2026. Flavor: Aloe. Size: 8 Fl Oz. Verified Purchase. It definitely isnt \"Non sticky.\" Almost annoyingly sticky. Funny enough, advertising it as \"non sticky\".",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "2 stars on Amazon"
+        },
+        "script": "Title: ouch. Reviewed June 4, 2026. Flavor: Aloe. Size: 8 Fl Oz. Verified Purchase. It definitely isnt \"Non sticky.\" Almost annoyingly sticky. Funny enough, advertising it as \"non sticky\".",
+        "affiliate_link": "https://www.amazon.com/dp/B0F5SSKDVH/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:15:46",
+        "source": "inbox:Turn On Lube.pdf"
+      },
+      "posted_at": "2026-08-13T20:15:46",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R3PH0AK4YICGID"
+    },
+    {
+      "id": "ohyeahlady-men-s-thong-underwear",
+      "name": "ohyeahlady Men's Thong Underwear",
+      "lane": "product",
+      "status": "posted",
+      "asin": "B0FR4ML2ZX",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:15:46",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: Cute and durable. Reviewed May 31, 2026. Size: Small. Color: Black. Verified Purchase. I was expecting flimsy or delicate, easy to tear material. I was and still am pleasantly surprised.",
+          "at": "2026-08-13T20:15:46"
+        }
+      ],
+      "verdict": "5 stars on Amazon",
+      "priority": 5,
+      "last_draft": {
+        "item_id": "ohyeahlady-men-s-thong-underwear",
+        "name": "ohyeahlady Men's Thong Underwear",
+        "lane": "product",
+        "format": "short",
+        "shape": {
+          "what_it_is": "ohyeahlady Men's Thong Underwear (product)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: Cute and durable. Reviewed May 31, 2026. Size: Small. Color: Black. Verified Purchase. I was expecting flimsy or delicate, easy to tear material. I was and still am pleasantly surprised.",
+          "what_worked": "Title: Cute and durable. Reviewed May 31, 2026. Size: Small. Color: Black. Verified Purchase. I was expecting flimsy or delicate, easy to tear material. I was and still am pleasantly surprised.",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "5 stars on Amazon"
+        },
+        "script": "Title: Cute and durable. Reviewed May 31, 2026. Size: Small. Color: Black. Verified Purchase. I was expecting flimsy or delicate, easy to tear material. I was and still am pleasantly surprised.",
+        "affiliate_link": "https://www.amazon.com/dp/B0FR4ML2ZX/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:15:46",
+        "source": "inbox:Underwear.pdf"
+      },
+      "posted_at": "2026-08-13T20:15:46",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R19C4M74HPWM6B"
+    },
+    {
+      "id": "converse-men-s-multi-pack-crew-socks",
+      "name": "Converse Men's Multi-pack Crew Socks",
+      "lane": "product",
+      "status": "posted",
+      "asin": "B0FL39Z9M7",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:15:46",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: No notes. Buy them. Reviewed June 4, 2026. Size: One Size. Color: University Red 6-pack. Verified Purchase. Warm, comfortable, and snug. Also very cute. 10/10",
+          "at": "2026-08-13T20:15:46"
+        }
+      ],
+      "verdict": "5 stars on Amazon",
+      "priority": 5,
+      "last_draft": {
+        "item_id": "converse-men-s-multi-pack-crew-socks",
+        "name": "Converse Men's Multi-pack Crew Socks",
+        "lane": "product",
+        "format": "short",
+        "shape": {
+          "what_it_is": "Converse Men's Multi-pack Crew Socks (product)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: No notes. Buy them. Reviewed June 4, 2026. Size: One Size. Color: University Red 6-pack. Verified Purchase. Warm, comfortable, and snug. Also very cute. 10/10",
+          "what_worked": "Title: No notes. Buy them. Reviewed June 4, 2026. Size: One Size. Color: University Red 6-pack. Verified Purchase. Warm, comfortable, and snug. Also very cute. 10/10",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "5 stars on Amazon"
+        },
+        "script": "Title: No notes. Buy them. Reviewed June 4, 2026. Size: One Size. Color: University Red 6-pack. Verified Purchase. Warm, comfortable, and snug. Also very cute. 10/10",
+        "affiliate_link": "https://www.amazon.com/dp/B0FL39Z9M7/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:15:46",
+        "source": "inbox:converse socks.pdf"
+      },
+      "posted_at": "2026-08-13T20:15:46",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/RUX68GU5ECRD5"
+    },
+    {
+      "id": "ohyeahlady-men-s-faux-leather-underwear",
+      "name": "ohyeahlady Men's Faux Leather Underwear",
+      "lane": "product",
+      "status": "posted",
+      "asin": "B0DM1VMWVK",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:16:04",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: Expect to wear them for a photo, not a parade. Reviewed May 24, 2026. Size: Medium. Color: Black. Verified Purchase. Not bad quality, but I wouldn't wear them for an extended period. They are cute though and they do keep everything compact and secure if that's what youre looking for. Definitely more of a \"show\" item. I wouldn't wear them in any situation where I would produce heat and have to keep them on.",
+          "at": "2026-08-13T20:16:04"
+        }
+      ],
+      "verdict": "3 stars on Amazon",
+      "priority": 5,
+      "last_draft": {
+        "item_id": "ohyeahlady-men-s-faux-leather-underwear",
+        "name": "ohyeahlady Men's Faux Leather Underwear",
+        "lane": "product",
+        "format": "short",
+        "shape": {
+          "what_it_is": "ohyeahlady Men's Faux Leather Underwear (product)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: Expect to wear them for a photo, not a parade. Reviewed May 24, 2026. Size: Medium. Color: Black. Verified Purchase. Not bad quality, but I wouldn't wear them for an extended period. They are cute though and they do keep everything compact and secure if that's what youre looking for. Definitely more of a \"show\" item. I wouldn't wear them in any situation where I would produce heat and have to keep them on.",
+          "what_worked": "Title: Expect to wear them for a photo, not a parade. Reviewed May 24, 2026. Size: Medium. Color: Black. Verified Purchase. Not bad quality, but I wouldn't wear them for an extended period. They are cute though and they do keep everything compact and secure if that's what youre looking for. Definitely more of a \"show\" item. I wouldn't wear them in any situation where I would produce heat and have to keep them on.",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "3 stars on Amazon"
+        },
+        "script": "Title: Expect to wear them for a photo, not a parade. Reviewed May 24, 2026. Size: Medium. Color: Black. Verified Purchase. Not bad quality, but I wouldn't wear them for an extended period. They are cute though and they do keep everything compact and secure if that's what youre looking for. Definitely more of a \"show\" item. I wouldn't wear them in any situation where I would produce heat and have to keep them on.",
+        "affiliate_link": "https://www.amazon.com/dp/B0DM1VMWVK/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:16:04",
+        "source": "inbox:Leather underwear.pdf"
+      },
+      "posted_at": "2026-08-13T20:16:04",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/RLLC053RUD5QO"
+    },
+    {
+      "id": "kepwaa-posture-corrector",
+      "name": "Kepwaa Posture Corrector",
+      "lane": "product",
+      "status": "posted",
+      "asin": "B0FPF8732H",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:25:45",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: Would recommend for posture and posture only. Reviewed February 12, 2026. Color: Black Yellow. Item Shape: Large. Verified Purchase. This works surprisingly well. The only criticism that my husband had is that he wanted it to be [print cut off]",
+          "at": "2026-08-13T20:25:45"
+        }
+      ],
+      "verdict": "4 stars on Amazon",
+      "priority": 5,
+      "last_draft": {
+        "item_id": "kepwaa-posture-corrector",
+        "name": "Kepwaa Posture Corrector",
+        "lane": "product",
+        "format": "short",
+        "shape": {
+          "what_it_is": "Kepwaa Posture Corrector (product)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: Would recommend for posture and posture only. Reviewed February 12, 2026. Color: Black Yellow. Item Shape: Large. Verified Purchase. This works surprisingly well. The only criticism that my husband had is that he wanted it to be [print cut off]",
+          "what_worked": "Title: Would recommend for posture and posture only. Reviewed February 12, 2026. Color: Black Yellow. Item Shape: Large. Verified Purchase. This works surprisingly well. The only criticism that my husband had is that he wanted it to be [print cut off]",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "4 stars on Amazon"
+        },
+        "script": "Title: Would recommend for posture and posture only. Reviewed February 12, 2026. Color: Black Yellow. Item Shape: Large. Verified Purchase. This works surprisingly well. The only criticism that my husband had is that he wanted it to be [print cut off]",
+        "affiliate_link": "https://www.amazon.com/dp/B0FPF8732H/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:25:45",
+        "source": "inbox:Black Posture Corrector.pdf"
+      },
+      "posted_at": "2026-08-13T20:25:45",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R1452UQPYD4NB3"
+    },
+    {
+      "id": "comdudu-men-s-pu-leather-chest-harness",
+      "name": "comdudu Men's PU Leather Chest Harness",
+      "lane": "product",
+      "status": "posted",
+      "asin": "B0FFNFC1MZ",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:25:45",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: Wear for the look. Reviewed February 12, 2026. Verified Purchase. I would recommend using it as more of a \"look but don't touch\" scenario. It's more of a cute [print cut off]",
+          "at": "2026-08-13T20:25:45"
+        }
+      ],
+      "verdict": "3 stars on Amazon",
+      "priority": 5,
+      "last_draft": {
+        "item_id": "comdudu-men-s-pu-leather-chest-harness",
+        "name": "comdudu Men's PU Leather Chest Harness",
+        "lane": "product",
+        "format": "short",
+        "shape": {
+          "what_it_is": "comdudu Men's PU Leather Chest Harness (product)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: Wear for the look. Reviewed February 12, 2026. Verified Purchase. I would recommend using it as more of a \"look but don't touch\" scenario. It's more of a cute [print cut off]",
+          "what_worked": "Title: Wear for the look. Reviewed February 12, 2026. Verified Purchase. I would recommend using it as more of a \"look but don't touch\" scenario. It's more of a cute [print cut off]",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "3 stars on Amazon"
+        },
+        "script": "Title: Wear for the look. Reviewed February 12, 2026. Verified Purchase. I would recommend using it as more of a \"look but don't touch\" scenario. It's more of a cute [print cut off]",
+        "affiliate_link": "https://www.amazon.com/dp/B0FFNFC1MZ/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:25:45",
+        "source": "inbox:Chest Harness.pdf"
+      },
+      "posted_at": "2026-08-13T20:25:45",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/RJANDTVSQI2DK"
+    },
+    {
+      "id": "tansuo-chest-mount-strap-harness",
+      "name": "TANSUO Chest Mount Strap Harness",
+      "lane": "tech",
+      "status": "posted",
+      "asin": "B0D72MBH7R",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:25:45",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: Not worth the anxiety. Reviewed February 12, 2026. I plan on sending it back because I still haven't been able to use it. There aren't any instructions for assembly and it gives me the consistent fear that I'm going to set it up wrong and the en it's going to [print cut off]",
+          "at": "2026-08-13T20:25:45"
+        }
+      ],
+      "verdict": "2 stars on Amazon",
+      "priority": 10,
+      "last_draft": {
+        "item_id": "tansuo-chest-mount-strap-harness",
+        "name": "TANSUO Chest Mount Strap Harness",
+        "lane": "tech",
+        "format": "short",
+        "shape": {
+          "what_it_is": "TANSUO Chest Mount Strap Harness (tech)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: Not worth the anxiety. Reviewed February 12, 2026. I plan on sending it back because I still haven't been able to use it. There aren't any instructions for assembly and it gives me the consistent fear that I'm going to set it up wrong and the en it's going to [print cut off]",
+          "what_worked": "Title: Not worth the anxiety. Reviewed February 12, 2026. I plan on sending it back because I still haven't been able to use it. There aren't any instructions for assembly and it gives me the consistent fear that I'm going to set it up wrong and the en it's going to [print cut off]",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "2 stars on Amazon"
+        },
+        "script": "Title: Not worth the anxiety. Reviewed February 12, 2026. I plan on sending it back because I still haven't been able to use it. There aren't any instructions for assembly and it gives me the consistent fear that I'm going to set it up wrong and the en it's going to [print cut off]",
+        "affiliate_link": "https://www.amazon.com/dp/B0D72MBH7R/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:25:45",
+        "source": "inbox:Chest Mount.pdf"
+      },
+      "posted_at": "2026-08-13T20:25:45",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/RE6D63VNJ5KJO"
+    },
+    {
+      "id": "ugreen-revodok-6-in-1-usb-c-hub",
+      "name": "UGREEN Revodok 6-in-1 USB-C Hub",
+      "lane": "tech",
+      "status": "posted",
+      "asin": "B0BW2TLQ8S",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:25:45",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: I mean, if you dont need the USB-C slot then... sure? Reviewed May 24, 2026. Verified Purchase. As a Macbook user, this is slightly more inconvenient than expected, but certainly still helpful. I have noticed that when certain plugs are in use, others wont work so the more you utilize the 6 in 1 feature, the less reliable it gets. Thats kind of expected though. Lastly, I'd say its more 5-1 since the USB-c slot is supposed to be used to give it power, and it doesnt charge my Macbook when [print cut off]",
+          "at": "2026-08-13T20:25:45"
+        }
+      ],
+      "verdict": "3 stars on Amazon",
+      "priority": 10,
+      "last_draft": {
+        "item_id": "ugreen-revodok-6-in-1-usb-c-hub",
+        "name": "UGREEN Revodok 6-in-1 USB-C Hub",
+        "lane": "tech",
+        "format": "short",
+        "shape": {
+          "what_it_is": "UGREEN Revodok 6-in-1 USB-C Hub (tech)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: I mean, if you dont need the USB-C slot then... sure? Reviewed May 24, 2026. Verified Purchase. As a Macbook user, this is slightly more inconvenient than expected, but certainly still helpful. I have noticed that when certain plugs are in use, others wont work so the more you utilize the 6 in 1 feature, the less reliable it gets. Thats kind of expected though. Lastly, I'd say its more 5-1 since the USB-c slot is supposed to be used to give it power, and it doesnt charge my Macbook when [print cut off]",
+          "what_worked": "Title: I mean, if you dont need the USB-C slot then... sure? Reviewed May 24, 2026. Verified Purchase. As a Macbook user, this is slightly more inconvenient than expected, but certainly still helpful. I have noticed that when certain plugs are in use, others wont work so the more you utilize the 6 in 1 feature, the less reliable it gets. Thats kind of expected though. Lastly, I'd say its more 5-1 since the USB-c slot is supposed to be used to give it power, and it doesnt charge my Macbook when [print cut off]",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "3 stars on Amazon"
+        },
+        "script": "Title: I mean, if you dont need the USB-C slot then... sure? Reviewed May 24, 2026. Verified Purchase. As a Macbook user, this is slightly more inconvenient than expected, but certainly still helpful. I have noticed that when certain plugs are in use, others wont work so the more you utilize the 6 in 1 feature, the less reliable it gets. Thats kind of expected though. Lastly, I'd say its more 5-1 since the USB-c slot is supposed to be used to give it power, and it doesnt charge my Macbook when [print cut off]",
+        "affiliate_link": "https://www.amazon.com/dp/B0BW2TLQ8S/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:25:45",
+        "source": "inbox:extended usb.pdf"
+      },
+      "posted_at": "2026-08-13T20:25:45",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R2RCJ4K1ZE4GDB"
+    },
+    {
+      "id": "ultraloq-bolt-se-smart-lock",
+      "name": "ULTRALOQ Bolt SE Smart Lock",
+      "lane": "tech",
+      "status": "posted",
+      "asin": "B0FQC6VCDW",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:25:45",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: New age tech that I surprisingly dont hate. Reviewed May 24, 2026. Color: Black. Size: Deadbolt. Verified Purchase. Yeah.. This does what needs to be done. Everything that aggravated me initially was simply because I'm not a fan of using apps to setup things that pertain to safety, and even that was simple to do. Also, for it to be as easy to install as it is, by no means does it feel cheap or low tech. I guess if I'm splitting hairs, I thought that having to choose between wifi and your preferred home app (Alexa, Google, Apple) was kind of weird. Also something feels backwards about how to enter your code to [print cut off]",
+          "at": "2026-08-13T20:25:45"
+        }
+      ],
+      "verdict": "4 stars on Amazon",
+      "priority": 10,
+      "last_draft": {
+        "item_id": "ultraloq-bolt-se-smart-lock",
+        "name": "ULTRALOQ Bolt SE Smart Lock",
+        "lane": "tech",
+        "format": "short",
+        "shape": {
+          "what_it_is": "ULTRALOQ Bolt SE Smart Lock (tech)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: New age tech that I surprisingly dont hate. Reviewed May 24, 2026. Color: Black. Size: Deadbolt. Verified Purchase. Yeah.. This does what needs to be done. Everything that aggravated me initially was simply because I'm not a fan of using apps to setup things that pertain to safety, and even that was simple to do. Also, for it to be as easy to install as it is, by no means does it feel cheap or low tech. I guess if I'm splitting hairs, I thought that having to choose between wifi and your preferred home app (Alexa, Google, Apple) was kind of weird. Also something feels backwards about how to enter your code to [print cut off]",
+          "what_worked": "Title: New age tech that I surprisingly dont hate. Reviewed May 24, 2026. Color: Black. Size: Deadbolt. Verified Purchase. Yeah.. This does what needs to be done. Everything that aggravated me initially was simply because I'm not a fan of using apps to setup things that pertain to safety, and even that was simple to do. Also, for it to be as easy to install as it is, by no means does it feel cheap or low tech. I guess if I'm splitting hairs, I thought that having to choose between wifi and your preferred home app (Alexa, Google, Apple) was kind of weird. Also something feels backwards about how to enter your code to [print cut off]",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "4 stars on Amazon"
+        },
+        "script": "Title: New age tech that I surprisingly dont hate. Reviewed May 24, 2026. Color: Black. Size: Deadbolt. Verified Purchase. Yeah.. This does what needs to be done. Everything that aggravated me initially was simply because I'm not a fan of using apps to setup things that pertain to safety, and even that was simple to do. Also, for it to be as easy to install as it is, by no means does it feel cheap or low tech. I guess if I'm splitting hairs, I thought that having to choose between wifi and your preferred home app (Alexa, Google, Apple) was kind of weird. Also something feels backwards about how to enter your code to [print cut off]",
+        "affiliate_link": "https://www.amazon.com/dp/B0FQC6VCDW/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:25:45",
+        "source": "inbox:Fingerprint Lock.pdf"
+      },
+      "posted_at": "2026-08-13T20:25:45",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R3D6O9IFPWRCXG"
+    },
+    {
+      "id": "jockmail-men-s-thong-g-string",
+      "name": "JOCKMAIL Men's Thong G-string",
+      "lane": "product",
+      "status": "posted",
+      "asin": "B0D3TRMJPV",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:25:45",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: Didn't stop bloodflow. Reviewed February 12, 2026. Size: Medium. Color: White. Verified Purchase. These are surprisingly comfortable. I forgot it was on and i didnt feel that discomfort that comes [print cut off]",
+          "at": "2026-08-13T20:25:45"
+        }
+      ],
+      "verdict": "4 stars on Amazon",
+      "priority": 5,
+      "last_draft": {
+        "item_id": "jockmail-men-s-thong-g-string",
+        "name": "JOCKMAIL Men's Thong G-string",
+        "lane": "product",
+        "format": "short",
+        "shape": {
+          "what_it_is": "JOCKMAIL Men's Thong G-string (product)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: Didn't stop bloodflow. Reviewed February 12, 2026. Size: Medium. Color: White. Verified Purchase. These are surprisingly comfortable. I forgot it was on and i didnt feel that discomfort that comes [print cut off]",
+          "what_worked": "Title: Didn't stop bloodflow. Reviewed February 12, 2026. Size: Medium. Color: White. Verified Purchase. These are surprisingly comfortable. I forgot it was on and i didnt feel that discomfort that comes [print cut off]",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "4 stars on Amazon"
+        },
+        "script": "Title: Didn't stop bloodflow. Reviewed February 12, 2026. Size: Medium. Color: White. Verified Purchase. These are surprisingly comfortable. I forgot it was on and i didnt feel that discomfort that comes [print cut off]",
+        "affiliate_link": "https://www.amazon.com/dp/B0D3TRMJPV/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:25:45",
+        "source": "inbox:Jockmail Ring.pdf"
+      },
+      "posted_at": "2026-08-13T20:25:45",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R17EVTPN1L8TI7"
+    },
+    {
+      "id": "heliora-magnetic-ring-light-for-iphone",
+      "name": "Heliora Magnetic Ring Light for iPhone",
+      "lane": "tech",
+      "status": "posted",
+      "asin": "B0FX4PGLW4",
+      "started_at": "2026-08-13",
+      "created_at": "2026-08-13T20:25:45",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "Title: Learn which setting you want. Reviewed February 12, 2026. Verified Purchase. The fitting of it is a little weird, I do get afraid that I'm going to break it when I try to take my phone [print cut off]",
+          "at": "2026-08-13T20:25:45"
+        }
+      ],
+      "verdict": "3 stars on Amazon",
+      "priority": 10,
+      "last_draft": {
+        "item_id": "heliora-magnetic-ring-light-for-iphone",
+        "name": "Heliora Magnetic Ring Light for iPhone",
+        "lane": "tech",
+        "format": "short",
+        "shape": {
+          "what_it_is": "Heliora Magnetic Ring Light for iPhone (tech)",
+          "why_tested": "Imported from a posted Amazon review.",
+          "first_impression": "Title: Learn which setting you want. Reviewed February 12, 2026. Verified Purchase. The fitting of it is a little weird, I do get afraid that I'm going to break it when I try to take my phone [print cut off]",
+          "what_worked": "Title: Learn which setting you want. Reviewed February 12, 2026. Verified Purchase. The fitting of it is a little weird, I do get afraid that I'm going to break it when I try to take my phone [print cut off]",
+          "what_got_in_the_way": "",
+          "who_it_is_for": "People deciding whether this is worth buying.",
+          "verdict": "3 stars on Amazon"
+        },
+        "script": "Title: Learn which setting you want. Reviewed February 12, 2026. Verified Purchase. The fitting of it is a little weird, I do get afraid that I'm going to break it when I try to take my phone [print cut off]",
+        "affiliate_link": "https://www.amazon.com/dp/B0FX4PGLW4/?tag=billycarter-20",
+        "platforms": [
+          "amazon"
+        ],
+        "created_at": "2026-08-13T20:25:45",
+        "source": "inbox:RGB Phone Light.pdf"
+      },
+      "posted_at": "2026-08-13T20:25:45",
+      "posted_platforms": [
+        "amazon"
+      ],
+      "posted_where": "https://www.amazon.com/gp/customer-reviews/R1VTLP0M5M8F80"
     }
   ]
 }
