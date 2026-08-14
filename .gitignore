@@ -93,3 +93,10 @@ scripts/launcher_stdout*.log
 # Backup files
 *.backup
 Data/vector_db/**
+
+# Review inbox drops (PDFs/screenshots) — keep the HOWTO only
+Docs/reviews/inbox/*
+!Docs/reviews/inbox/HOWTO.txt
+!Docs/reviews/inbox/.gitkeep
+Docs/reviews/imported/*
+!Docs/reviews/imported/.gitkeep

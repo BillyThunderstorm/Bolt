@@ -178,6 +178,8 @@ bolt manage posted "Mouse" --tiktok --youtube --x
 bolt manage ship "Mouse" --amazon     # ship == posted
 
 bolt manage shipped
+bolt manage import                    # read Docs/reviews/inbox
+bolt manage import --open             # open that folder in Finder
 bolt manage morning                   # Good Morning Bolt (+ voice)
 ```
 
@@ -199,6 +201,7 @@ bolt manage mark-posted "Name" [--platforms tiktok,youtube_shorts,x,amazon]
                                [--where <url>] [--note "text"]
                                # aliases: posted, ship
 bolt manage shipped
+bolt manage import [--dry-run] [--no-storefront] [--open]
 ```
 
 | Command | What it does |
@@ -212,6 +215,7 @@ bolt manage shipped
 | `bolt manage mark-ready "Name" [--verdict …]` | Mark an item as ready to post (requires a draft) |
 | `bolt manage mark-posted "Name" --platforms … --where …` | Mark an item as posted, recording publish URLs |
 | `bolt manage shipped` | List every item that has been marked posted |
+| `bolt manage import` | Import Amazon reviews dropped in `Docs/reviews/inbox/` (alias: `inbox`) |
 
 ### Publishing and platform readiness
 

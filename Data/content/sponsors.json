@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-07-20T07:37:16",
+  "updated_at": "2026-08-12T14:03:31",
   "prospects": [
     {
       "id": "razer",
@@ -39,8 +39,13 @@
       "why": "Mice, keyboards, headsets — easy first reviews from gear William already uses.",
       "affiliate_hint": "Logitech affiliate / creator program",
       "contact_hint": "influencer marketing / press kit",
-      "status": "prospect",
-      "outreach": [],
+      "status": "pitch_ready",
+      "outreach": [
+        {
+          "status": "pitch_drafted",
+          "at": "2026-08-12T13:19:24"
+        }
+      ],
       "added_at": "2026-07-09T22:44:07"
     },
     {
@@ -71,9 +76,31 @@
       "why": "Accessible price tiers; good for honest mid-range gear content.",
       "affiliate_hint": "HP/HyperX affiliate portals",
       "contact_hint": "creator outreach form",
-      "status": "prospect",
-      "outreach": [],
-      "added_at": "2026-07-09T22:44:07"
+      "status": "shelved",
+      "outreach": [
+        {
+          "status": "pitch_drafted",
+          "at": "2026-08-12T13:17:34"
+        },
+        {
+          "status": "pitch_drafted",
+          "at": "2026-08-12T13:20:26"
+        },
+        {
+          "status": "shelved",
+          "note": "No open general creator contact; only women program visible. Parked.",
+          "at": "2026-08-12T14:01:11"
+        }
+      ],
+      "added_at": "2026-07-09T22:44:07",
+      "research_log": [
+        {
+          "at": "2026-08-12T13:13:55",
+          "query": "tech",
+          "results": [],
+          "result_count": 0
+        }
+      ]
     },
     {
       "id": "elgato",
@@ -87,8 +114,13 @@
       "why": "Stream setup gear (lights, capture, mic arms) pairs with Twitch growth story.",
       "affiliate_hint": "Corsair/Elgato creator",
       "contact_hint": "creator@elgato.com",
-      "status": "prospect",
-      "outreach": [],
+      "status": "pitch_ready",
+      "outreach": [
+        {
+          "status": "pitch_drafted",
+          "at": "2026-08-12T14:03:31"
+        }
+      ],
       "added_at": "2026-07-09T22:44:07"
     },
     {

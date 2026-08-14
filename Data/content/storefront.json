@@ -2,7 +2,7 @@
   "version": 1,
   "affiliate_tag": "billycarter-20",
   "storefront_status": "influencer_active",
-  "updated_at": "2026-07-10T07:36:07",
+  "updated_at": "2026-08-13T20:25:45",
   "items": [
     {
       "id": "mouse",
@@ -11,8 +11,58 @@
       "category": "tech",
       "affiliate_link": "https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20",
       "status": "active",
-      "notes": "",
-      "added_at": "2026-07-10T07:36:07"
+      "notes": "Amazon review title: Its nice. Reviewed May 24, 2026. Color: Rose Gold. Verified Purchase. Product: TENMOS Wireless Bluetooth Mouse. Its fine. Not bad. Kind of goes to sleep after about a minute. Battery gets low a little quicker than I expected, but charging it takes maybe an hour or so. Its good enough that if I saw this company [print cut off]",
+      "added_at": "2026-08-13T20:15:46"
+    },
+    {
+      "id": "7keys-retro-typewriter-keyboard",
+      "name": "7KEYS Retro Typewriter Keyboard",
+      "asin": "B0CSVJKYDL",
+      "category": "tech",
+      "affiliate_link": "https://www.amazon.com/dp/B0CSVJKYDL/?tag=billycarter-20",
+      "status": "active",
+      "notes": "Title: Worth every penny. Reviewed May 31, 2026. Style: Blue Switch. Verified Purchase. Yes, yes and yes to everything about it. If I'm splitting hairs, I do wish it could hold a phone as well not just a tablet and the keys are very smooth so I catch myself actually looking at what I'm typing versus trusting my typing skills completely. Easy to assemble and use it is smaller, im at an age where [print cut off]",
+      "added_at": "2026-08-13T20:15:46"
+    },
+    {
+      "id": "geenoa-silicone-face-scrubber",
+      "name": "GEENOA Silicone Face Scrubber",
+      "asin": "B0DM4S1M99",
+      "category": "skincare",
+      "affiliate_link": "https://www.amazon.com/dp/B0DM4S1M99/?tag=billycarter-20",
+      "status": "active",
+      "notes": "Title: Definitely worth it. Reviewed May 31, 2026. Verified Purchase. It does what it's supposed to, but at times it can irritate my skin. That's probably more of a me thing.",
+      "added_at": "2026-08-13T20:15:46"
+    },
+    {
+      "id": "hmdmdn-magnetic-auto-face-tracking-tripod",
+      "name": "HMDMDN Magnetic Auto Face Tracking Tripod",
+      "asin": "B0G6JVG11P",
+      "category": "tech",
+      "affiliate_link": "https://www.amazon.com/dp/B0G6JVG11P/?tag=billycarter-20",
+      "status": "active",
+      "notes": "Title: Worth it. Reviewed May 24, 2026. Set name: X106D-Magnetic Auto Face Tracking Tripod. Verified Purchase. I would recommend this for anyone considering it. It is well worth the price. I wish it were a tiny bit easier to travel with, and traveling with it is by no means difficult. Its has to be the size that it is. Its sturdy and the magnet is the only thing I've had problems with, in a good way. The magnetic stickers you can buy and put on a case to make them \"mag safe\" usually come off when I try to take my phone off of the tripod. That's how strong the magnet is. I stopped using the auto tracking as much because I slowly [print cut off]",
+      "added_at": "2026-08-13T20:15:46"
+    },
+    {
+      "id": "the-ordinary-saccharomyces-ferment-milk-toner",
+      "name": "The Ordinary Saccharomyces Ferment (Milk Toner)",
+      "asin": "B0D4K7R9S5",
+      "category": "skincare",
+      "affiliate_link": "https://www.amazon.com/dp/B0D4K7R9S5/?tag=billycarter-20",
+      "status": "active",
+      "notes": "Title: Top tier; Get it. Reviewed May 24, 2026. Verified Purchase. Out of all of the Ordinary products I currently have, this is easily top 3. Calming to put on. Surprisingly not a bad smell. Not an intense or unpleasant coating. I have mine stored in the fridge so its cold when I put it on my face... Heaven sent. I actually dont have anything bad to say. I could see it maybe making a mess / spilling if you apply it to the wrong thing before you put it on since its [print cut off]",
+      "added_at": "2026-08-13T20:15:46"
+    },
+    {
+      "id": "ultraloq-bolt-se-smart-lock",
+      "name": "ULTRALOQ Bolt SE Smart Lock",
+      "asin": "B0FQC6VCDW",
+      "category": "tech",
+      "affiliate_link": "https://www.amazon.com/dp/B0FQC6VCDW/?tag=billycarter-20",
+      "status": "active",
+      "notes": "Title: New age tech that I surprisingly dont hate. Reviewed May 24, 2026. Color: Black. Size: Deadbolt. Verified Purchase. Yeah.. This does what needs to be done. Everything that aggravated me initially was simply because I'm not a fan of using apps to setup things that pertain to safety, and even that was simple to do. Also, for it to be as easy to install as it is, by no means does it feel cheap or low tech. I guess if I'm splitting hairs, I thought that having to choose between wifi and your preferred home app (Alexa, Google, Apple) was kind of weird. Also something feels backwards about how to enter your code to [print cut off]",
+      "added_at": "2026-08-13T20:25:45"
     }
   ]
 }
