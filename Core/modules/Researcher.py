@@ -628,7 +628,20 @@ def summary(profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     candidates_kept = sum(1 for r in candidates if r.get("c5_verdict") == "fits")
     candidates_dropped = sum(1 for r in candidates if r.get("c5_verdict") == "no")
 
-    if candidates_pending_c5 > 0:
+    week_topic = ""
+    try:
+        from modules.Week_Card import load as load_week
+
+        week_topic = (load_week()["this_week"].get("topic") or "").strip()
+    except Exception:
+        week_topic = ""
+
+    if week_topic:
+        next_action = (
+            f"This week is already set: {week_topic}. "
+            "Do not open a new research project. Continue that topic."
+        )
+    elif candidates_pending_c5 > 0:
         next_action = (
             f"{candidates_pending_c5} candidate(s) need your C5 call. "
             "Run `bolt research pending`, then "
@@ -693,6 +706,13 @@ def _print_summary() -> None:
     print(f"    Dropped:      {s['candidates_dropped']}")
     print(f"    Blocked (C7): {s['candidates_blocked_c7']}")
     print(f"    Flagged (C6): {s['candidates_flagged_c6']}")
+    try:
+        from modules.Week_Card import format_card
+
+        print()
+        print(format_card())
+    except Exception:
+        pass
     print(f"\nNext action: {s['next_action']}")
     print("═" * 70)
 
@@ -943,6 +963,17 @@ def main(argv: Optional[List[str]] = None) -> int:
         if not add_args.name.strip():
             print("error: name is required", flush=True)
             return 2
+        try:
+            from modules.Week_Card import is_blocked
+
+            hit = is_blocked(add_args.name)
+            if hit:
+                print(
+                    f"  ⚠  Week card says do not suggest: {hit}. "
+                    "Logging anyway only if you insist — this is already a C5 no / ban."
+                )
+        except Exception:
+            pass
         entry = add_candidate(
             add_args.name,
             platform=add_args.platform,

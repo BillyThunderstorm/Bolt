@@ -6,19 +6,20 @@ Bolt speaks out loud for key stream moments — highlights, raids,
 subs — so Billy never misses something important even when he's
 deep in a game.
 
-Uses macOS built-in text-to-speech (the `say` command) by default.
-No API key needed. No extra install. It just works on a Mac.
+macOS `say` and free edge-tts are both available. Pick the path with
+Bolt_TTS_PROVIDER in .env:
 
-Voice options (set Bolt_VOICE in .env for macOS fallback):
-  Nathan (Enhanced)  — clear US male (recommended fallback)
-  Good News          — cheerful novelty
+  macos / say / siri  — use macOS `say` first (Siri Voice 3 = "Voice 3")
+  edge / auto         — edge-tts first, then `say`
+
+Voice options (set Bolt_VOICE for macOS `say`):
+  Voice 3            — Siri Voice 3 (current pick; `say -v ?`)
+  Nathan (Enhanced)  — clear US male
   Samantha           — natural female
-  Flo                — multi-language; brighter option
 
-edge-tts free voices (set Bolt_EDGE_VOICE):
-  en-US-AndrewNeural    — Cartoon/Cute (best free match for Bolt energy)
-  en-US-EmmaNeural   — Cheerful, clear
-  en-US-JennyNeural  — Friendly
+edge-tts voices (set Bolt_EDGE_VOICE; used when provider is edge/auto):
+  en-US-AndrewNeural — warm US male
+  en-US-BrianNeural  — casual US male
 
 To list voices:
   say -v ?
@@ -28,8 +29,8 @@ Optional paid upgrade:
   ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID for character TTS
 
 Volume / speed:
-  Bolt_VOICE_RATE  — macOS words per minute (default: 190 for energy)
-  Bolt_EDGE_RATE   — edge-tts rate e.g. +15%
+  Bolt_VOICE_RATE  — macOS words per minute (default: 190)
+  Bolt_EDGE_RATE   — edge-tts rate e.g. +12%
   Bolt_VOICE_MUTE  — set to "true" to silence TTS
 """
 
@@ -44,8 +45,13 @@ from typing import Optional
 
 try:
     from dotenv import load_dotenv
+    from pathlib import Path
 
-    load_dotenv()
+    _repo_env = Path(__file__).resolve().parents[2] / ".env"
+    if _repo_env.is_file():
+        load_dotenv(_repo_env)
+    else:
+        load_dotenv()
 except ImportError:
     pass
 
@@ -59,12 +65,15 @@ except ImportError:
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
-# macOS `say` fallback — Nathan (Enhanced) per Billy's preference
-VOICE = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Nathan (Enhanced)"
+# macOS `say` voice — "Voice 3" is Siri Voice 3 on current macOS
+VOICE = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Voice 3"
 RATE = int(os.getenv("Bolt_VOICE_RATE") or os.getenv("BOLT_VOICE_RATE") or "190")
 MUTED = (
     os.getenv("Bolt_VOICE_MUTE") or os.getenv("BOLT_VOICE_MUTE") or "false"
 ).lower() == "true"
+TTS_PROVIDER = (
+    os.getenv("Bolt_TTS_PROVIDER") or os.getenv("BOLT_TTS_PROVIDER") or "macos"
+).strip().lower()
 
 # edge-tts primary free path — Ana = Cartoon/Cute (high-energy cheerful)
 # List: edge-tts --list-voices
@@ -138,23 +147,31 @@ def _start_worker():
 
 def _speak_now(text: str):
     """
-    The actual TTS call. Priority order:
-      1. edge-tts free neural (Andrew / warm confident male — matches Bolt energy)
-      2. ElevenLabs only if fully configured (optional paid character voice)
-      3. macOS say — Nathan (Enhanced) fallback (offline)
+    The actual TTS call.
+
+    Bolt_TTS_PROVIDER:
+      macos / say / siri — macOS `say` first (Siri Voice 3)
+      edge / auto        — edge-tts first, then `say`
+    ElevenLabs only if both key and voice id are set, after the primary path fails.
     """
     if MUTED:
         return
 
-    # Free character-ish voice first (no surprise ElevenLabs bills)
+    prefer_macos = TTS_PROVIDER in ("macos", "say", "siri")
+
+    if prefer_macos:
+        if _try_macos_say(text):
+            return
+        if _try_edge_tts(text):
+            return
+        if ELEVENLABS_KEY and ELEVENLABS_VOICE_ID:
+            _try_elevenlabs(text)
+        return
+
     if _try_edge_tts(text):
         return
-
-    # Optional paid path when both key and voice id are present
     if ELEVENLABS_KEY and ELEVENLABS_VOICE_ID and _try_elevenlabs(text):
         return
-
-    # macOS say fallback (Nathan Enhanced by default)
     _try_macos_say(text)
 
 
@@ -427,11 +444,12 @@ if __name__ == "__main__":
         edge_available = False
 
     print(f"\n  🤖  Bolt Voice — TTS Test")
+    print(f"  Provider:  {TTS_PROVIDER}")
+    print(f"  macOS say: {VOICE} @ {RATE} wpm")
     print(
         f"  edge-tts:  {'✓ ' + EDGE_TTS_VOICE + ' @ ' + EDGE_TTS_RATE if edge_available else '✗ not installed (pip install edge-tts)'}"
     )
     print(f"  pitch:     {EDGE_TTS_PITCH or 'default'}")
-    print(f"  Fallback:  macOS say ({VOICE}, {RATE} wpm)")
     print(f"  Muted:     {MUTED}")
     print(f"  Available: {is_available()}")
     print()
@@ -455,7 +473,8 @@ if __name__ == "__main__":
         print("  Done. If you heard Bolt, TTS is working ✓")
         print()
         print("  Tips:")
-        print("    • Change voice:  add Bolt_VOICE=Alex to .env")
+        print("    • Change voice:  add Bolt_VOICE='Voice 3' to .env  (Siri Voice 3)")
+        print("    • Use macOS:     add Bolt_TTS_PROVIDER=macos to .env")
         print("    • Change speed:  add Bolt_VOICE_RATE=160 to .env")
         print("    • Mute Bolt:     add Bolt_VOICE_MUTE=true to .env")
         print("    • Speak custom:  python -m modules.Bolt_Voice 'your text here'")

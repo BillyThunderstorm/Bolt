@@ -395,13 +395,17 @@ class SummaryTests(unittest.TestCase):
             {"name": "Pending Creator", "summary": "clean", "public_signal": "good"},
             finding_type="candidate_creator", profile=SAMPLE_PROFILE,
         )
-        s = rs.summary()
+        empty_week = {"this_week": {"topic": ""}}
+        with patch("modules.Week_Card.load", return_value=empty_week):
+            s = rs.summary()
         self.assertIn("C5", s["next_action"])
         self.assertIn("Bolt cannot answer", s["next_action"])
         self.assertEqual(s["candidates_pending_c5"], 1)
 
     def test_next_action_when_empty_log_suggests_add(self):
-        s = rs.summary()
+        empty_week = {"this_week": {"topic": ""}}
+        with patch("modules.Week_Card.load", return_value=empty_week):
+            s = rs.summary()
         self.assertIn("No candidates", s["next_action"])
 
     def test_summary_no_profile_does_not_crash(self):

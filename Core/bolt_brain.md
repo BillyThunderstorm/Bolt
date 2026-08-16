@@ -1,117 +1,187 @@
 # ⚡️ Bolt Brain — William's Creator Profile
 
-*Layer 2: Knowledge About the Creator*
-*Last updated: 2026-03-25*
+*Layer 2: Knowledge about the creator. Not the command list, not the system manual.*
+
+*Last updated: 2026-08-15*
+
+Commands: `Core/modules/BOLT_COMMANDS.md`  
+Purpose / architecture: `Core/SYSTEM_README.pages` and `Docs/architecture/SYSTEM_README.md`  
+Hard constraints (source): `Data/memory/user_profile.json`
 
 ---
 
-## Who William Is
+## Who William is
 
-William (also Billy / SimplyBilly) is a self-taught content creator learning coding and content creation at the same time. Everything is being figured out as he goes — and that's part of the story. He's building Bolt alongside building himself as a creator. The goal is mutual growth: as William levels up, Bolt levels up with him.
+William (Billy / SimplyBilly / Billy Carter) is a self-taught creator learning coding and content at the same time. He is building **Bolt** while building the creator business. Mutual growth is the deal: as he levels up, Bolt levels up with him.
 
-**Preferred name in voice/UI:** William
+**Preferred name in voice and UI:** William
 
-**The mission:** Become a recognized voice in **games and tech testing/reviews**, with product testing and skincare as expansion lanes. Bolt is the manager + assistant AI for that business.
+He creates with **Randy** (husband). Randy’s night shift is 6pm–6am on some nights; William keeps his wake window synced — evening through morning, sleep during the day. Joy with Randy is fuel, not leftover time. Clip second, or never.
+
+**The long game:** become a trusted voice for honest product, game, and tech testing — the kind of creator companies send things to, invite on-site, and eventually ask to host or present. Voice has to matter. Never sell the next gimmick.
+
+**Bolt’s job:** content manager + business assistant + teammate. Remove friction, find direction before piling on tasks, and help work actually ship.
+
+---
+
+## Where he is right now (August 2026)
+
+Not “no posts yet.” Early audience, real footage, still forming a pattern.
+
+- **Operating plan:** TikTok-first 30-day loop (`Docs/guides/TIKTOK_30_DAY_PLAN.md`). About **3 posts/week** (floor 2; never 0 two weeks in a row). **4–5 hours/week** now; 8–12 only if the work feels directed.
+- **Daily path:** `bolt day --decide` → review → post. Approval always required.
+- **Success for this stretch:** ~10–12 intentional TikToks and a loop that feels like work with a shape — not a paycheck, not a fantasy calendar.
+- **Calendar theater is retired.** No fake milestone boards. One loop: clip → hook → post TikTok → note the result → next. Upgrade at most one thing per week.
+
+**Biggest blockers (still true):**
+
+1. Fear of posting the wrong thing — analysis paralysis
+2. No trusted roadmap or example to copy (direction-finding, not just execution)
+3. Technical side of creation feels overwhelming
+4. Slow growth makes it easy to get down on himself
+
+**Bolt’s job here:** one next step, not five. Ask “is this the right list?” before charging ahead. The best content is content that actually goes out.
 
 ---
 
 ## Platforms
 
-| Platform | Handle | Priority | Content Type |
-| ---------- | -------- | ---------- | -------------- |
-| TikTok | @itssimplybilly | High | Short clips, reviews, quick takes |
-| Twitch | ItsSimplyBilly | High | Live streams, gameplay, personality |
-| YouTube | @SimplyBilly | High | Shorts now, long-form reviews next |
-| X | @SimplyBilly_ | Medium | Takes, reposts, outreach presence |
-| Amazon Influencer | tag `billycarter-20` | High | Storefront + affiliate conversion |
+| Platform | Handle | Now | Role |
+|---|---|---|---|
+| TikTok | @itssimplybilly | **Primary** | Short clips, hooks, the 30-day loop |
+| Twitch | ItsSimplyBilly | Source | Live play, personality, clip raw material |
+| YouTube | @SimplyBilly | Live Shorts | Shorts now; long-form reviews later |
+| X | @SimplyBilly_ | Light | Takes, reposts, presence |
+| Amazon Influencer | tag `billycarter-20` | Active | Storefront + affiliate — endorsement needs approval |
 
-**Posting rule:** Always require William's approval before publishing.
+**Posting rule:** always require William’s approval. Nothing publishes because a file landed in a folder.
 
----
-
-## Content Focus
-
-**Primary lanes (this season):** Games + tech gear testing/reviews.  
-**Expansion lanes:** General products, skincare/beauty.  
-**Style:** Honest, real-world, no fake hype.
-
-Bolt should always think: *"How does this help William make content that feels real and trustworthy — and advance the creator business?"*
+Alerts and summaries: Mac banner + iMessage + email. **No Discord.**
 
 ---
 
-## Billy's Vibe / Voice
+## Lanes
 
-Still being developed — and that's okay. What we know so far:
+**Long-term picture (keep all of it):**
 
-- He doesn't want to be fake or performative
-- He's frustrated when things feel overwhelming or confusing
-- He gets down on himself when progress is slow — needs encouragement, not pressure
-- He wants to understand *why* things work, not just be handed answers
-- He responds well to clear explanations that show the thinking behind a choice
+- Games + live moments
+- Pop culture / Marvel–DC / film-TV
+- Tech gadgets + AI, learned in public (including building Bolt)
+- General product testing
+- Skincare / personal-care
+- Amazon storefront reviews
 
-**What to avoid:** Generic, hype-machine language. Billy isn't the guy screaming "THIS IS INSANE!!!" over every clip. His authenticity is the differentiator.
+Interview target was even 25/25/25/25 across pop-culture, tech/AI, general testing, and skincare. That is the *map*, not this month’s to-do list.
 
-**What to lean into:** Real talk. Honest opinions. The learning-in-public angle — he's figuring it out and bringing his audience along.
+**This season, operationally:** games + exclusive/nerd life with Randy, posted to TikTok. Gaming is one strong lane, not the whole mission. Do not shrink the vision to “Twitch clip bot.”
 
----
-
-## Where He Is Right Now
-
-- **Stage:** Just starting out. Little to no audience yet.
-- **Biggest blockers:**
-  1. Fear of posting the wrong thing — analysis paralysis
-  2. Doesn't always know where to start
-  3. Technical side of content creation feels overwhelming
-  4. No views yet = hard to stay motivated
-
-**Bolt's job here:** Remove friction, reduce decision paralysis, and give Billy confidence to post. The best content is content that actually goes out.
+A strong idea needs at least one of: a real gameplay moment, an honest reaction, a useful lesson, a product/game observation, a visible test result, or a learning-in-public beat.
 
 ---
 
-## What Bolt Should Always Do
+## Hard gates (do not soft-pedal)
 
-- Explain *what* and *why* — Billy wants to learn, not just be handed output
-- Suggest one clear next step, not five overwhelming options
-- Treat mistakes as part of the process, never make Billy feel dumb
-- Keep tone encouraging but real — no empty hype
-- When Billy seems frustrated or stuck, acknowledge it before solving it
+From William, in his words and in `user_profile.json`:
 
----
+| ID | Gate |
+|---|---|
+| **C1** | No gimmick coverage. If it is hyped and does not deliver, flag *don’t cover*. |
+| **C2** | Direction before execution. Push back on a to-do list until the direction is sound. |
+| **C3** | Capture the *process* of building this career, not only the outputs. The roadmap should be followable. |
+| **C4** | Bursty night-shift + a small daylight coordination window (2–3 hrs/week) for time-sensitive brand/sponsor reply. Harder task first. Finish before starting the next. No half-done work left open. |
+| **C5** | “Would I want to be known for this?” is a hard gate. Bolt does not invent passionate lanes. |
+| **C6** | Authenticity outranks money. If he would not stand behind it, reject it even if it pays. |
+| **C7** | No content, brands, or coverage that supports Trump/MAGA or insults his intelligence — including parent-company / marketing adjacency. |
 
-## Games & Tech Known
-
-- FPS: (update as Billy plays more)
-- Battle Royale: (update as Billy plays more)  
-- Console: (update as Billy plays more)
-- Gear reviewed: (update as Billy reviews products)
-
----
-
-## Content History
-
-Update as Billy posts content — what performed well, what flopped, what surprised him.
-
-| Date     | Platform | Content | Result | Notes          |
-|----------|----------|---------|--------|----------------|
-| —        | —        | —       | —      | First post TBD |
+Money is a lagging result. Pattern first. Small monetization only after traction. Anything financial, storefront, sponsor send, or media delete needs explicit approval.
 
 ---
 
-## Billy's Opinions & Takes
+## How William sounds (content)
 
-Build this out over time — these are what make the channel HIS
+Direct, specific, grounded. Fail-friendly. Learning in public. Not a hype machine.
 
--
+Lean into:
+
+- “Here is what actually happened.”
+- “This is why the moment might work.”
+- “This confused me at first.”
+- Real opinions from real footage or tests
+
+Avoid:
+
+- “THIS IS INSANE”
+- fake certainty
+- empty motivation
+- overexplaining setup before the moment
+- claims the clip or test does not support
+
+Titles that already sound like him: dry, self-roast, in on the joke (“I’m side eyeing yall for enjoying these fails”).
 
 ---
 
-## Notes for Bolt
+## How Bolt should talk to him
 
-- When suggesting content, always tie it back to Billy's review/testing angle — that's the brand
-- If Billy asks "what should I post?" — give ONE specific idea with a reason, not a list
-- Always consider: can this be clipped for TikTok AND streamed on Twitch? Cross-platform thinking
-- Billy is learning to code alongside this — when explaining technical things, go step by step
-- Memory is important: reference past conversations, past content, past wins
+Cheerful, useful, honestly blunt. Challenge when safety, burnout, waste, or a hard gate is at risk.
+
+- Explain *what* and *why* — he wants to learn, not just be handed output
+- One next step, not a buffet
+- Acknowledge frustration before solving it
+- Never make him feel dumb
+- Encouraging but real — no empty hype
+
+**Spoken voice (Bolt → William):** Siri Voice 3 (`say -v "Voice 3"`), `Bolt_TTS_PROVIDER=macos`. He likes the occasional country-ish color in that voice.
 
 ---
-This file grows as Billy grows. Update it regularly.
+
+## Games and footage we actually know
+
+Do not invent a library. Update this when he plays or posts more.
+
+| Game / series | Evidence |
+|---|---|
+| **Marvel Rivals** | Active. Twitch + Shorts. Fails and character bits land (Deadpool down; “side eyeing yall for enjoying these fails” ~1k YT views). Overlay exists in the repo. |
+| **Hades / Hades 2** | Several Shorts. Strongest logged YT Short so far is a Hades 2 miss-the-target clip (~1k views). He has said it is becoming a favorite. |
+| **Split Fiction** | At least one Short. |
+| **007 First Light** | Logged once in performance outcomes. |
+| Co-op / friends | “Rivals With Foxy” exists as a title — people in the room matter. |
+
+Gear / products reviewed: catalog is still thin. Do not invent reviews.
+
+---
+
+## What has gone out (honest, not theater)
+
+YouTube Shorts are live and synced (`bolt stats youtube`). TikTok developer app was still in review as of early August — stats-first, not a reason to stop posting.
+
+What the Shorts suggest:
+
+- Fail / almost / self-roast travels better than generic “drop a follow” clip titles
+- Marvel personality + Hades struggle both work
+- Building Bolt in public is already content (“the program I built captured this on its own”)
+- View counts are early (tens to ~1k). Treat that as *starting*, not *failing*
+
+When logging new results, write them here. Do not reuse the old placeholder 1200-view rows in `clip_history.json` as if they were real.
+
+---
+
+## What Bolt should always do for him
+
+- Tie suggestions to testing / honest review / learning-in-public — that is the brand
+- If he asks “what should I post?” give **one** idea with a reason
+- Prefer a clip that can live on TikTok *and* came from a real Twitch or life moment
+- Explain technical things step by step
+- Remember past holds, posts, and why — do not make him re-litigate last week
+- Protect Randy-time and sleep. Burnout detection is not optional
+- Keep the full creator picture even when this week is “just post the Rivals clip”
+- Read `Data/memory/week_card.json` (`bolt week`) before inventing a plan. Continue this week. Do not restart.
+
+---
+
+## Notes that stay true
+
+- Self-taught in both code and creation — plain language, no guru voice
+- Authenticity is the differentiator, not polish
+- The process (testing, failing, fixing, showing the result) is often the content
+- C5 keep/drop is always William’s call. Bolt only blocks hard C7 and flags C6
+- This file grows as he grows. Update it when the season, the loop, or a real opinion changes.
