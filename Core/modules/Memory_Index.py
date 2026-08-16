@@ -513,6 +513,11 @@ def build_memory_entries(project_root: Path = PROJECT_ROOT) -> List[MemoryEntry]
             for md_file in sorted(candidate.rglob("*.md")):
                 entries.extend(_split_markdown_sections(md_file, project_root))
 
+    # Hot cache written by remember() lives next to Data/memory/, not inside it.
+    hot_cache = MEMORY_DIR.parent / "MEMORY.md"
+    if hot_cache.is_file():
+        entries.extend(_split_markdown_sections(hot_cache, project_root))
+
     entries.extend(_entries_from_unified_memory(project_root))
     entries.extend(_entries_from_clip_history(project_root))
     entries.extend(_entries_from_decision_audit(project_root))

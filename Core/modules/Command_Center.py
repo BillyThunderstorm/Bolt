@@ -581,6 +581,13 @@ def _print_status() -> None:
     if s.get("career_goal"):
         print(f"\nCareer goal: {s['career_goal'][:200]}…")
     print(f"Research pending C5: {s.get('research_pending_c5', 0)}")
+    try:
+        from modules.Week_Card import format_card
+
+        print()
+        print(format_card())
+    except Exception:
+        pass
     print(
         "\nCommands:\n"
         "  bolt mission checkin\n"

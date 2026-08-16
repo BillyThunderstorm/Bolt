@@ -213,12 +213,38 @@ def _load_file(path: Path, fallback: str = "") -> str:
     return fallback
 
 
+def _retrieved_memory_block(query: str, limit: int = 4) -> str:
+    """Pull a few index hits so chat can use what remember() just wrote."""
+    if not query or not query.strip():
+        return ""
+    try:
+        from modules.Memory_Index import retrieve_memory
+
+        hits = retrieve_memory(query, limit=limit, auto_refresh=False) or []
+    except Exception:
+        return ""
+    lines = []
+    for hit in hits:
+        text = str(hit.get("summary") or hit.get("text") or hit.get("title") or "").strip()
+        if text:
+            lines.append(f"- {text[:220]}")
+    if not lines:
+        return ""
+    return "Retrieved memory for this question:\n" + "\n".join(lines)
+
+
 def build_system_prompt() -> str:
     """
     Assemble the full system prompt from personality guide + brain + identity.
     """
     personality = _load_file(PERSONALITY_FILE, "Use cheerful, innocent energy.")
     brain = _load_file(BRAIN_FILE, "Billy is a content creator.")
+    try:
+        from modules.Week_Card import format_prompt
+
+        week = format_prompt()
+    except Exception:
+        week = ""
 
     return f"""You are Bolt — Billy's AI teammate and voice companion.
 
@@ -231,6 +257,8 @@ You work for Billy, a self-taught content creator. Here's his profile:
 ---
 {brain}
 ---
+
+{week}
 
 CURRENT MODE: Voice conversation (spoken aloud via TTS).
 
@@ -442,6 +470,9 @@ def generate_response(user_text: str, memory: ConversationMemory) -> str:
             return handled
 
     system_prompt = build_system_prompt()
+    retrieved = _retrieved_memory_block(user_text)
+    if retrieved:
+        system_prompt = f"{system_prompt}\n\n{retrieved}\n"
 
     try:
         reply = ask_llm(

@@ -69,12 +69,19 @@ def _action_day() -> str:
 
         # Cheerful mini-plan grounded in real queue (Billy liked the "plan" energy)
         if not clips:
+            week_bit = ""
+            try:
+                from modules.Week_Card import spoken_line
+
+                week_bit = spoken_line() + " "
+            except Exception:
+                week_bit = ""
             plan = (
                 "Today's plan: process a recording or add a hand-edited vertical, "
                 "then review and post when peak opens."
             )
             return (
-                f"It's Bolt day! {peak_bit} "
+                f"It's Bolt day! {peak_bit} {week_bit}"
                 f"No postable clips yet. {plan} "
                 f"Try bolt recordings, or bolt queue add in the terminal."
             )
@@ -82,6 +89,13 @@ def _action_day() -> str:
         top = clips[0]
         title = top.get("title") or _clip_display_name(top) or "untitled"
         approved = int(s.get("approved") or 0)
+        week_bit = ""
+        try:
+            from modules.Week_Card import spoken_line
+
+            week_bit = spoken_line() + " "
+        except Exception:
+            week_bit = ""
         # Build a 3-step plan from reality
         if is_peak and approved > 0:
             plan = (
@@ -103,7 +117,7 @@ def _action_day() -> str:
             )
 
         return (
-            f"It's Bolt day! {peak_bit} "
+            f"It's Bolt day! {peak_bit} {week_bit}"
             f"You have {n} postable clips, {approved} already approved. "
             f"{plan} "
             f"Say approve next, hold next, post next, or queue decide."
@@ -114,17 +128,33 @@ def _action_day() -> str:
 
 def _action_next() -> str:
     try:
+        from modules.Week_Card import spoken_line
+
+        week = spoken_line()
+    except Exception:
+        week = ""
+    try:
         from modules.Content_Manager import next_actions
 
         actions = next_actions(limit=3)
         if not actions:
-            return "Nothing urgent is queued right now. Want me to suggest a content item?"
+            return (week + " Nothing urgent in the manager queue.").strip()
         lines = []
         for a in actions:
             lines.append(f"{a['title']}.")
-        return "Here's what I'd focus on next: " + " ".join(lines)
+        prefix = (week + " ") if week else ""
+        return prefix + "Here's what I'd focus on next: " + " ".join(lines)
     except Exception as exc:
         return f"I couldn't load next actions: {exc}"
+
+
+def _action_week() -> str:
+    try:
+        from modules.Week_Card import spoken_line
+
+        return spoken_line()
+    except Exception as exc:
+        return f"Week card is unavailable: {exc}"
 
 
 def _action_status() -> str:
@@ -520,6 +550,18 @@ _INTENT_TABLE: Tuple[Tuple[Tuple[str, ...], Callable[[], str]], ...] = (
             "what can i post",
         ),
         _action_queue,
+    ),
+    (
+        (
+            "this week",
+            "what's this week",
+            "whats this week",
+            "week card",
+            "what are we doing this week",
+            "current week",
+            "weekly topic",
+        ),
+        _action_week,
     ),
     (
         (

@@ -193,9 +193,17 @@ class NexusCreator:
             if brain_path.exists()
             else ""
         )
+        week = ""
+        try:
+            from modules.Week_Card import format_prompt
+
+            week = format_prompt()
+        except Exception:
+            week = ""
         return f"""You are Nexus, Billy's strategic AI teammate.
 Creator profile: {brain}
-Focus: content creation, product testing, gaming, skincare, AI development, sponsorships."""
+{week}
+Focus: continue this week's topic. Do not invent a new career plan or rotate lanes unless asked."""
 
     def _build_user_prompt(self, topic: str, full_context: str) -> str:
         return (

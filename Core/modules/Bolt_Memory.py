@@ -239,7 +239,7 @@ RELEVANT RETRIEVED MEMORY:
 # ── Remember — save a new fact to MEMORY.md ───────────────────────────────────
 
 
-def remember(fact: str, section: str = "Session Notes") -> bool:
+def remember(fact: str, section: str = "Recent Notes") -> bool:
     """
     Save a new fact to MEMORY.md so it persists across sessions.
 
@@ -274,10 +274,15 @@ def remember(fact: str, section: str = "Session Notes") -> bool:
             updated = existing + f"\n\n## {section}{entry}\n"
 
         MEMORY_FILE.write_text(updated, encoding="utf-8")
+        if refresh_memory_index is not None:
+            try:
+                refresh_memory_index()
+            except Exception:
+                pass
         notify(
             f"Memory saved: {fact[:80]}{'...' if len(fact) > 80 else ''}",
             level="success",
-            reason="Added to memory/MEMORY.md — Bolt will remember this next session.",
+            reason="Added to Data/MEMORY.md — next retrieve will see it.",
         )
         return True
 

@@ -191,6 +191,8 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
   budget | api-usage      xAI spend this month, soft cap, budget mode
   day [--decide|--voice|--quiet|--open|--process]
                           Morning kickoff; --decide → queue decide (default offer on TTY)
+  week [show|set|done|rotate|ban]
+                          This week / last week / do not suggest (read before any plan)
   stats [status|sync|tiktok|youtube] [--dry-run]
                           Social performance pull readiness + TikTok/YouTube sync
 
@@ -291,6 +293,15 @@ def main() -> int:
         return subprocess.call(cmd, cwd=str(REPO_ROOT))
 
     # Built-in: daily content kickoff (optionally → queue decide / voice)
+    if subcommand in ("week", "this-week", "this_week", "week-card"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Week_Card"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
     if subcommand in ("day", "today", "kickoff", "start-day", "morning-flow"):
         env = os.environ.copy()
         env["PYTHONPATH"] = f"{CORE_DIR}" + (

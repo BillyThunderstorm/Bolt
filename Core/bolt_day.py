@@ -83,6 +83,14 @@ def run_day(
     print(f"  {now.strftime('%A, %b %d · %I:%M %p')}  ({tz_name})")
     print("═" * 56)
 
+    try:
+        from modules.Week_Card import format_card
+
+        print()
+        print(format_card())
+    except Exception as exc:
+        print(f"\n  (week card unavailable: {exc})")
+
     is_peak = False
     peak_info = ""
     try:

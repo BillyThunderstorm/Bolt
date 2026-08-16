@@ -163,6 +163,41 @@ class MemoryIndexTests(unittest.TestCase):
         self.assertIn("signal", results[0])
         self.assertIn("matched_terms", results[0])
 
+    def test_indexes_hot_cache_beside_memory_dir(self):
+        (self.root / "MEMORY.md").write_text(
+            "# Memory\n\n## Recent Notes\n- [2026-08-15] Held clip abc (Hands): weak hook\n",
+            encoding="utf-8",
+        )
+        with (
+            patch.object(mi, "MEMORY_DIR", self.root / "memory"),
+            patch.object(mi, "DATA_DIR", self.root / "data"),
+            patch.object(mi, "LOGS_DIR", self.root / "logs"),
+            patch.object(
+                mi, "UNIFIED_MEMORY_FILE", self.root / "data" / "unified_memory.jsonl"
+            ),
+            patch.object(
+                mi,
+                "PROCESSED_RECORDINGS_FILE",
+                self.root / "data" / "processed_recordings.json",
+            ),
+            patch.object(mi, "SEEN_CLIPS_FILE", self.root / "seen_clips.json"),
+            patch.object(
+                mi, "DECISION_AUDIT_FILE", self.root / "logs" / "decision_audit.log"
+            ),
+            patch.object(
+                mi,
+                "PERFORMANCE_OUTCOMES_FILE",
+                self.root / "data" / "performance_outcomes.jsonl",
+            ),
+        ):
+            payload = mi.refresh_memory_index(
+                project_root=self.root, out_file=self.index_file
+            )
+        sources = {entry["source"] for entry in payload["entries"]}
+        self.assertTrue(any(str(src).endswith("MEMORY.md") for src in sources))
+        texts = " ".join(str(entry.get("text") or "") for entry in payload["entries"])
+        self.assertIn("weak hook", texts)
+
     def test_vector_retrieval_finds_decision_language(self):
         with (
             patch.object(mi, "MEMORY_DIR", self.root / "memory"),

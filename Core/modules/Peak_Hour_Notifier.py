@@ -947,6 +947,17 @@ def reject_next_clip(reason: str = "", clip_id: str = None) -> dict:
     # Audit #2: Billy responded, clear the escalation counter.
     _reset_ignored_reviews(data)
     _save_ready(data)
+    if reason and reason != "No rejection reason provided yet":
+        try:
+            from modules.Bolt_Memory import remember
+
+            title = clip.get("title") or Path(str(clip.get("clip_path") or "")).name
+            remember(
+                f"Held clip {clip.get('id')} ({title}): {reason}",
+                section="Recent Notes",
+            )
+        except Exception:
+            pass
     notify(
         f"Held clip {clip.get('id')}",
         level="warning",
@@ -1543,6 +1554,18 @@ def mark_posted(clip_id: str = None, *, force_all: bool = False):
         return 0
 
     _save_ready(data)
+
+    try:
+        from modules.Bolt_Memory import remember
+
+        for clip in marked:
+            title = clip.get("title") or Path(str(clip.get("clip_path") or "")).name
+            remember(
+                f"Posted clip {clip.get('id')} ({title})",
+                section="Recent Notes",
+            )
+    except Exception:
+        pass
 
     for clip in marked:
         print(

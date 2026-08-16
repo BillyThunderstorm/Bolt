@@ -52,8 +52,9 @@ BOLT_XAI_MODEL_LIGHT=grok-4.3
 BOLT_API_MONTHLY_CAP_USD=35      # soft cap → force local when hit
 BOLT_BRIEFING_PROVIDER=auto      # auto | grok | local
 BOLT_STT_PROVIDER=google         # free; never Whisper unless BOLT_USE_WHISPER=true
+Bolt_TTS_PROVIDER=macos          # macos = Siri Voice 3; edge = Andrew
+Bolt_VOICE=Voice 3               # Siri Voice 3 (`say -v ?`)
 Bolt_EDGE_VOICE=en-US-AndrewNeural
-Bolt_VOICE=Nathan (Enhanced)     # macOS say fallback
 ```
 
 Quick health check:
@@ -76,6 +77,11 @@ bolt day [--decide|--voice|--quiet|--open|--process]
                                       # Default morning flow; --decide → queue review
 bolt day --decide                     # Preferred: brief → queue decide
 bolt day --decide --voice             # Decide, then hands-free voice
+bolt week                             # This week / last week / do not suggest
+bolt week set "topic" [--note "…"]    # William picks; Bolt stays on it
+bolt week done "what shipped"         # Mark progress so next week isn't day one
+bolt week rotate                      # Archive this week → last week
+bolt week ban "idea" [--why "C5 no"]  # Never suggest this again
 bolt stats [status|sync|tiktok|youtube] [--dry-run]
                                       # Social readiness + TikTok/YouTube pull
 bolt launch                       # Start live mode (folder watch + optional OBS)
@@ -692,7 +698,7 @@ Preferred entry points (listen → interpret → speak via `Bolt_Voice`):
 bolt day --decide          # content kickoff → queue decide (default morning)
 bolt day                   # same brief; TTY offers decide (default Yes)
 bolt voice                 # mic in, spoken replies out (free Google STT)
-bolt voice --text          # type in, still speaks (Andrew edge-tts)
+bolt voice --text          # type in, still speaks (Siri Voice 3)
 bolt talk "what's next?"   # one-shot spoken Q&A
 bolt say "Clips are ready" # TTS only
 bolt briefing --speak      # write briefing + speak short summary
@@ -739,6 +745,7 @@ In conversation mode, these phrases trigger **real** Bolt actions before free-fo
 | storage / disk space | Disk free + media sizes |
 | api budget / how much have I spent | Soft cap + estimated API spend |
 | Research status / Mission status | Research or mission summary |
+| This week / current week | Week card (topic + do not suggest) |
 
 Anything else is short free-form chat (Ollama by default in light mode). Spoken replies stay plain sentences — no markdown dumps.
 
@@ -826,6 +833,7 @@ These names perform the same actions as their primary commands:
 | `status` | `intelligence` |
 | `morning` | `good-morning`, `goodmorning` |
 | `mission` | `command-center`, `ccc` |
+| `week` | `this-week`, `week-card` |
 | `setup` | (routes to `Core/launch.py`) |
 
 ---

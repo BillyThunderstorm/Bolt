@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "updated_at": "",
+  "this_week": {
+    "topic": "",
+    "note": "",
+    "started": "",
+    "done": []
+  },
+  "last_week": {
+    "topic": "",
+    "note": "",
+    "started": "",
+    "done": []
+  },
+  "do_not_suggest": []
+}
