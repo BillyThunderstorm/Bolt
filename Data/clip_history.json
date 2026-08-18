@@ -625,6 +625,39 @@
           "likes": 1
         }
       ]
+    },
+    "unknown": {
+      "total_clips": 5,
+      "total_views": 2990,
+      "total_likes": 3,
+      "avg_views": 598,
+      "observations": [
+        {
+          "at": "2026-08-16T13:06:57",
+          "views": 1,
+          "likes": 0
+        },
+        {
+          "at": "2026-08-16T13:06:57",
+          "views": 0,
+          "likes": 0
+        },
+        {
+          "at": "2026-08-16T13:06:57",
+          "views": 0,
+          "likes": 0
+        },
+        {
+          "at": "2026-08-16T13:24:29",
+          "views": 2011,
+          "likes": 0
+        },
+        {
+          "at": "2026-08-18T01:36:03",
+          "views": 978,
+          "likes": 3
+        }
+      ]
     }
   }
 }

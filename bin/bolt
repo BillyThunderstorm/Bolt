@@ -142,8 +142,8 @@ Script subcommands (each maps to scripts/X.py):
   recordings [mode]       Process existing recordings (default: latest)
   auto_clip_twitch        Auto-clip highlights from Twitch VODs
   highlights              Compile top clips into a Twitch highlight reel
-  briefing [--print|--speak]
-                          Generate daily briefing (optional speak summary)
+  briefing [--print|--speak|--send]
+                          Generate daily briefing; --send writes Reminders + alert
   thumbnails [args]       Generate JPG thumbnails for clips
   calendar                Generate ICS calendar feeds
   nexus "<question>"      Ask Nexus for content strategy advice

@@ -8,7 +8,7 @@ Fantastical, Outlook, Thunderbird).
 
 Four feeds are produced:
 
-  1. daily_briefing.ics    — recurring daily 7:00am event with a preview
+  1. daily_briefing.ics    — recurring daily 5:00pm event with a preview
                               of the day's briefing. Description includes
                               the SMS summary line.
   2. weekly_insights.ics   — recurring Sunday 9:00am event with weekly
@@ -85,7 +85,7 @@ CONFIG_FILE = ROOT / "config.json"
 
 CALENDAR_NAME = "Bolt"
 PRODID = "-//Bolt//Calendar Feeds//EN"
-DAILY_BRIEFING_HOUR = 7   # 7am local
+DAILY_BRIEFING_HOUR = 17  # 5pm local (evening wake window)
 WEEKLY_INSIGHTS_DOW = 6   # Sunday (Mon=0 .. Sun=6)
 WEEKLY_INSIGHTS_HOUR = 9  # 9am
 PEAK_HOUR_START = 19      # 7pm
@@ -165,10 +165,10 @@ def render_calendar(name: str, events: Iterable[CalendarEvent]) -> str:
 
 
 def build_daily_briefing_event(today: Optional[datetime] = None) -> CalendarEvent:
-    """Recurring daily 7am event with a placeholder briefing preview."""
+    """Recurring daily 5pm event with a placeholder briefing preview."""
     now = today or datetime.now()
     start = now.replace(hour=DAILY_BRIEFING_HOUR, minute=0, second=0, microsecond=0)
-    # If today's 7am already passed, advance to tomorrow so the first
+    # If today's 5pm already passed, advance to tomorrow so the first
     # occurrence is the next upcoming one.
     if start <= now:
         start = start + timedelta(days=1)

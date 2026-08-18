@@ -12,7 +12,7 @@ Priority order for making Bolt a better manager for William:
 8. Stream companion intents (manage/next during voice chat)
 9. Performance feedback loop into next-content suggestions (log_perf exists; needs real posts)
 10. ~~Creator Command Center in `bin/bolt`~~ ✅ (`bolt mission` / `ccc`, Aug 1, 2026)
-11. Apple Reminders as default delivery channel (profile priority #1 — not wired yet)
+11. ~~Apple Reminders as default delivery channel~~ ✅ (Aug 17, 2026 — `bolt briefing --send`)
 
 ## How William advances Bolt
 - **Direction before production** — clear C5 queue before inventing new to-dos

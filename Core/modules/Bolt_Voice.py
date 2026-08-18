@@ -35,6 +35,7 @@ Volume / speed:
 """
 
 import os
+import shutil
 import subprocess
 import threading
 import queue
@@ -223,6 +224,24 @@ def _try_edge_tts(text: str) -> bool:
         return False
 
 
+def macos_say(text: str, *, wait: bool = True) -> bool:
+    """Speak with Siri Voice 3 (`Bolt_VOICE`, default 'Voice 3').
+
+    Always pass `-v` so alerts never fall back to Samantha/Alex/Damon.
+    """
+    if not (text or "").strip() or MUTED:
+        return False
+    try:
+        subprocess.run(
+            ["say", "-v", VOICE, "-r", str(RATE), text],
+            check=True,
+            capture_output=True,
+        )
+        return True
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return False
+
+
 def _try_macos_say(text: str) -> bool:
     """
     Speak using macOS built-in TTS.
@@ -232,22 +251,16 @@ def _try_macos_say(text: str) -> bool:
 
     Returns True if successful.
     """
-    try:
-        subprocess.run(
-            ["say", "-v", VOICE, "-r", str(RATE), text], check=True, capture_output=True
-        )
+    if macos_say(text):
         return True
-    except FileNotFoundError:
-        # `say` not available (non-macOS system)
+    if not shutil.which("say"):
         notify(
             "TTS unavailable — `say` command not found",
             level="warning",
             reason="Bolt's voice requires macOS. On Windows/Linux, set ELEVENLABS_API_KEY "
             "in .env as an alternative.",
         )
-        return False
-    except subprocess.CalledProcessError:
-        return False
+    return False
 
 
 def _try_elevenlabs(text: str) -> bool:

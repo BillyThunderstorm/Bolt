@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WFWorkflowActions</key>
+	<array>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.ask</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>UUID</key>
+				<string>FE07252F-16C3-4434-8AB7-03CD5E757A1C</string>
+				<key>WFAskActionPrompt</key>
+				<string>What shipped today? (Cancel to only show the week card.)</string>
+				<key>WFInputType</key>
+				<string>Text</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.runshellscript</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>InputMode</key>
+				<string>as arguments</string>
+				<key>Script</key>
+				<string>set -euo pipefail
+cd "/Users/carter/developer/Bolt"
+BOLT="/Users/carter/developer/Bolt/.venv/bin/bolt"
+if [[ ! -x "$BOLT" ]]; then
+  BOLT="/Users/carter/developer/Bolt/.venv/bin/python3 /Users/carter/developer/Bolt/bin/bolt"
+fi
+SHIPPED="$*"
+if [[ -n "${SHIPPED// /}" ]]; then
+  $BOLT week done "$SHIPPED"
+else
+  $BOLT week
+fi
+</string>
+				<key>Shell</key>
+				<string>/bin/zsh</string>
+				<key>UUID</key>
+				<string>601241EF-8A99-492F-AB07-5F9CB68E286B</string>
+			</dict>
+		</dict>
+	</array>
+	<key>WFWorkflowClientRelease</key>
+	<string>3.0</string>
+	<key>WFWorkflowClientVersion</key>
+	<string>900</string>
+	<key>WFWorkflowHasOutputFallback</key>
+	<false/>
+	<key>WFWorkflowHasShortcutInputVariables</key>
+	<false/>
+	<key>WFWorkflowIcon</key>
+	<dict>
+		<key>WFWorkflowIconGlyphNumber</key>
+		<integer>59511</integer>
+		<key>WFWorkflowIconStartColor</key>
+		<integer>431817727</integer>
+	</dict>
+	<key>WFWorkflowImportQuestions</key>
+	<array/>
+	<key>WFWorkflowInputContentItemClasses</key>
+	<array>
+		<string>WFStringContentItem</string>
+	</array>
+	<key>WFWorkflowMinimumClientVersion</key>
+	<integer>900</integer>
+	<key>WFWorkflowMinimumClientVersionString</key>
+	<string>900</string>
+	<key>WFWorkflowName</key>
+	<string>Bolt Wrap-Up</string>
+	<key>WFWorkflowTypes</key>
+	<array>
+		<string>WatchKit</string>
+		<string>NCWidget</string>
+	</array>
+</dict>
+</plist>

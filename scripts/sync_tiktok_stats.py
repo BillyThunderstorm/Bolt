@@ -76,7 +76,26 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    from modules.TikTok_Auth import TIKTOK_API_PAUSE_MESSAGE, tiktok_api_enabled
     from modules.Performance_Sync import print_sync_report, sync_tiktok_stats
+
+    if not tiktok_api_enabled():
+        if args.json:
+            print(
+                json.dumps(
+                    {
+                        "ok": True,
+                        "paused": True,
+                        "skipped": True,
+                        "platform": "TikTok",
+                        "error": TIKTOK_API_PAUSE_MESSAGE,
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            print(f"\n  {TIKTOK_API_PAUSE_MESSAGE}\n")
+        return 0
 
     result = sync_tiktok_stats(
         limit=args.limit,

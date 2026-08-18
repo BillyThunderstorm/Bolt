@@ -11,6 +11,7 @@ from datetime import datetime
 # Ensure paths
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "Core"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 
 # ── Memory retrieval (module-level for tests to patch) ───────────────────────
@@ -532,19 +533,118 @@ def _speak(text: str) -> None:
     except Exception:
         pass
     try:
+        from modules.Bolt_Voice import macos_say
+
+        if macos_say(text):
+            return
+    except Exception:
+        pass
+    try:
         import subprocess
 
-        subprocess.run(["say", text], check=False)
+        voice = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Voice 3"
+        subprocess.run(["say", "-v", voice, text], check=False)
     except Exception:
         print(f"[voice unavailable] {text}")
 
 
-def main(print_only: bool = False, speak_aloud: bool = False) -> None:
+def _dated_briefing_copy(output_dir: Path, briefing_text: str) -> Path:
+    stamped = output_dir / f"morning_{datetime.now().strftime('%Y-%m-%d')}.md"
+    try:
+        stamped.write_text(briefing_text, encoding="utf-8")
+    except Exception:
+        pass
+    return stamped
+
+
+def _refresh_calendar_feeds() -> list:
+    """Best-effort ICS refresh so --send can attach current feeds."""
+    try:
+        from scripts.generate_calendar import build_all_feeds
+
+        return list(build_all_feeds() or [])
+    except Exception:
+        try:
+            import generate_calendar as gc  # type: ignore
+
+            return list(gc.build_all_feeds() or [])
+        except Exception:
+            return []
+
+
+def _deliver_briefing(
+    briefing_text: str,
+    sms_summary: str,
+    output_file: Path,
+) -> dict:
+    """Reminders first, then Mac banner, then email. SMS is fallback only."""
+    from modules.Apple_Reminders import parse_action_items, replace_today_briefing
+
+    actions = parse_action_items(briefing_text)
+    delivery = {
+        "reminders": {},
+        "banner": False,
+        "email": False,
+        "sms": False,
+        "calendar_files": [],
+    }
+
+    try:
+        delivery["reminders"] = replace_today_briefing(
+            actions,
+            briefing_path=output_file,
+            summary=sms_summary,
+        )
+    except Exception as exc:
+        delivery["reminders"] = {"ok": False, "error": str(exc)}
+
+    try:
+        from modules.Bolt_Alerts import mac_banner
+
+        n = len(actions)
+        delivery["banner"] = mac_banner(
+            "Bolt briefing ready",
+            f"{n} action{'s' if n != 1 else ''} in Reminders · {output_file.name}",
+            subtitle="Open Reminders to review",
+        )
+    except Exception:
+        delivery["banner"] = False
+
+    calendar_files = _refresh_calendar_feeds()
+    delivery["calendar_files"] = [str(p) for p in calendar_files]
+    attachments = []
+    for p in calendar_files:
+        path = Path(p)
+        if path.is_file():
+            attachments.append((path.name, path))
+
+    try:
+        from send_notification import send_briefing
+
+        delivery["email"] = bool(
+            send_briefing(
+                briefing_text,
+                sms_summary=sms_summary,
+                attachments=attachments or None,
+            )
+        )
+    except Exception as exc:
+        print(f"Briefing email/SMS skipped: {exc}")
+
+    return delivery
+
+
+def main(
+    print_only: bool = False,
+    speak_aloud: bool = False,
+    send: bool = False,
+) -> None:
     """CLI entry point.
 
     Args:
         print_only: Print the full briefing + SMS summary to the terminal.
         speak_aloud: Also speak a short spoken summary via Bolt_Voice.
+        send: Write Reminders + notify + email the briefing.
     """
     OUTPUT_DIR = Path("Docs/briefings/daily")
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -553,6 +653,7 @@ def main(print_only: bool = False, speak_aloud: bool = False) -> None:
 
     output_file = OUTPUT_DIR / "latest_morning.md"
     output_file.write_text(briefing_text, encoding="utf-8")
+    _dated_briefing_copy(OUTPUT_DIR, briefing_text)
 
     if print_only:
         print(briefing_text)
@@ -561,6 +662,19 @@ def main(print_only: bool = False, speak_aloud: bool = False) -> None:
         print(sms_summary)
     else:
         print("Briefing saved to", output_file)
+
+    if send:
+        delivery = _deliver_briefing(briefing_text, sms_summary, output_file)
+        rem = delivery.get("reminders") or {}
+        if rem.get("ok"):
+            print(
+                f"Reminders: {rem.get('actions_created', 0)} actions "
+                f"on list '{rem.get('list', 'Bolt')}'"
+            )
+        else:
+            print(f"Reminders not written: {rem.get('error') or 'unknown error'}")
+        print(f"Mac banner: {'yes' if delivery.get('banner') else 'no'}")
+        print(f"Email/SMS: {'yes' if delivery.get('email') else 'no'}")
 
     if speak_aloud:
         spoken = _spoken_summary(briefing_text, sms_summary)
@@ -571,4 +685,5 @@ def main(print_only: bool = False, speak_aloud: bool = False) -> None:
 if __name__ == "__main__":
     print_only = "--print" in sys.argv
     speak_aloud = "--speak" in sys.argv
-    main(print_only=print_only, speak_aloud=speak_aloud)
+    send = "--send" in sys.argv
+    main(print_only=print_only, speak_aloud=speak_aloud, send=send)

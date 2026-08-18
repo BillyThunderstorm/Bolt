@@ -124,18 +124,19 @@ class RenderCalendarTests(unittest.TestCase):
 
 
 class DailyBriefingEventTests(unittest.TestCase):
-    def test_event_is_at_7am_and_recurs_daily(self):
-        today = datetime(2026, 6, 22, 6, 0)  # 6am, so 7am is still ahead
+    def test_event_is_at_briefing_hour_and_recurs_daily(self):
+        hour = gc.DAILY_BRIEFING_HOUR
+        today = datetime(2026, 6, 22, max(hour - 1, 0), 0)
         event = gc.build_daily_briefing_event(today=today)
         self.assertEqual(event.start.hour, gc.DAILY_BRIEFING_HOUR)
         self.assertEqual(event.start.minute, 0)
         self.assertEqual(event.rrule, "FREQ=DAILY")
         self.assertEqual(event.end - event.start, timedelta(minutes=15))
 
-    def test_event_advances_to_tomorrow_if_7am_passed(self):
-        today = datetime(2026, 6, 22, 8, 0)  # 8am, 7am already passed
+    def test_event_advances_to_tomorrow_if_briefing_hour_passed(self):
+        hour = gc.DAILY_BRIEFING_HOUR
+        today = datetime(2026, 6, 22, hour, 1)
         event = gc.build_daily_briefing_event(today=today)
-        # The first occurrence should be tomorrow at 7am.
         expected_date = today.date() + timedelta(days=1)
         self.assertEqual(event.start.date(), expected_date)
         self.assertEqual(event.start.hour, gc.DAILY_BRIEFING_HOUR)

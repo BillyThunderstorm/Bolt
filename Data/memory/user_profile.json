@@ -117,43 +117,43 @@
   },
   "risk_tolerance": {
     "status": "approved",
-    "approved_at": "2026-07-29T05:30:00",
-    "approval_note": "User confirmed seeded defaults are 'perfect at the moment'. Each entry below is now authoritative; future changes require explicit user review.",
+    "approved_at": "2026-08-17T20:00:00",
+    "approval_note": "2026-08-17: only financial work stays fully manual. Everything else is do-and-notify — Bolt acts, then surfaces an alert or a link so William can review or revise.",
     "default_seed": {
       "posting_clips_to_social": {
-        "level": "never_without_explicit_approval",
-        "rationale": "C6: authenticity is the moat. Auto-posting can never substitute for 'I stand behind this.'"
+        "level": "do_and_notify",
+        "rationale": "Prepare and queue the post, then alert with a link to the package so it can be revised. Not silent posting."
       },
       "replying_to_comments_dms": {
-        "level": "never_without_explicit_approval",
-        "rationale": "Voice is the brand. Even short replies are on-the-record statements."
+        "level": "do_and_notify",
+        "rationale": "Draft the reply and notify with the text. Revise if the voice is off."
       },
       "sending_sponsor_outreach": {
-        "level": "do_with_review_flag",
-        "rationale": "Drafts and contact-list updates are Bolt's job. Sending the actual message requires user approval per C6."
+        "level": "do_and_notify",
+        "rationale": "Draft and stage the message, then alert with a link so it can be edited before it goes out."
       },
       "modifying_bolt_config_or_catalog": {
-        "level": "never_without_explicit_approval",
-        "rationale": "Catalog = strategic record. Modifying it = changing the user's stated direction."
+        "level": "do_and_notify",
+        "rationale": "Apply the change and notify with what changed plus a path to the file."
       },
       "deleting_or_moving_media_files": {
-        "level": "never_without_explicit_approval",
-        "rationale": "User memory: 'data safety over persistence.' Previous reorg incident caused data loss."
+        "level": "do_and_notify",
+        "rationale": "Pipeline moves/archives are allowed; notify with what moved and where. Destructive wipes still get a review link first."
       },
       "adding_products_to_amazon_storefront": {
-        "level": "never_without_explicit_approval",
-        "rationale": "Storefront listings imply endorsement. C6 gate."
+        "level": "do_and_notify",
+        "rationale": "Stage the listing and notify with the draft. Live storefront publish still gets a glance because it implies endorsement."
       },
       "changing_posting_schedule_or_queue": {
-        "level": "do_with_review_flag",
-        "rationale": "Reordering pending review is fine. Final-deadline auto-post is the existing escalation in Peak_Hour_Notifier — user can override that."
+        "level": "do_and_notify",
+        "rationale": "Reorder, schedule, and notify. Open the queue link to revise."
       },
       "anything_financial": {
         "level": "never_without_explicit_approval",
-        "rationale": "Hard rule. Affiliate links, codes, deal terms, payments — all require user."
+        "rationale": "The only fully manual gate. Affiliate links, codes, deal terms, payments — William operates these."
       }
     },
-    "note": "Defaults seeded from C1/C6 + user memory. Each entry needs user review before being treated as authoritative."
+    "note": "do_and_notify means: Bolt does the work, then delivers an Apple Reminder / Mac banner / file link. Collaboration is review-and-revise, not wait-for-permission-to-start."
   },
   "cadence": {
     "status": "answered",
@@ -179,7 +179,7 @@
           "priority": "summary_only_by_default"
         },
         "rationale": "User explicit Q8: 'Change from sms to summarized apple reminder / todo list if possible with an alert'. Each Bolt briefing surfaces as a Reminders.app entry with an alert, synced to iPhone/iPad via iCloud. No SMS cost; lives in your task system where you'll actually action it.",
-        "note": "Implementation deferred to Phase 2 (assistant role). Requires: macOS Reminders permission for the Bolt process, EventKit access. Each daily briefing → one summary reminder with action items. Weekly briefing → one summary reminder with the week's priorities."
+        "note": "Wired 2026-08-17 via Core/modules/Apple_Reminders.py. `bolt briefing --send` (cron 17:00) writes list 'Bolt': one summary reminder plus one item per action, with a file link to Docs/briefings/daily/latest_morning.md."
       },
       "sms": {
         "level": "fallback_only",

@@ -337,6 +337,12 @@ def _action_stats() -> str:
         from modules.Social_Stats import readiness_summary, tiktok_ready, youtube_ready
 
         t, y = tiktok_ready(), youtube_ready()
+        if t.get("paused"):
+            return (
+                f"Social stats: {readiness_summary()}. "
+                f"YouTube: {y['next_step']}. "
+                f"TikTok API is paused — post in the app, then bolt log_perf."
+            )
         return (
             f"Social stats: {readiness_summary()}. "
             f"TikTok: {t['next_step']}. YouTube: {y['next_step']}. "

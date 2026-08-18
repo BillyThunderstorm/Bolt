@@ -69,17 +69,26 @@ class TikTokPublisher:
     def __init__(self, access_token: Optional[str] = None):
         self.token = access_token or self._load_access_token()
         if not self.token:
-            notify(
-                "TikTok access token not configured",
-                level="warning",
-                reason="Run python3 scripts/get_tiktok_token.py after your TikTok app "
-                "has Content Posting API scopes approved.",
-            )
+            try:
+                from modules.TikTok_Auth import tiktok_api_enabled
+
+                paused = not tiktok_api_enabled()
+            except Exception:
+                paused = False
+            if not paused:
+                notify(
+                    "TikTok access token not configured",
+                    level="warning",
+                    reason="Run python3 scripts/get_tiktok_token.py after your TikTok app "
+                    "has Content Posting API scopes approved.",
+                )
 
     def _load_access_token(self) -> str:
         try:
-            from modules.TikTok_Auth import ensure_access_token
+            from modules.TikTok_Auth import ensure_access_token, tiktok_api_enabled
 
+            if not tiktok_api_enabled():
+                return ""
             return ensure_access_token() or ""
         except Exception as exc:
             notify(
@@ -188,6 +197,20 @@ class TikTokPublisher:
                 "error": "requests library not installed — pip install requests",
             }
         if not self.token:
+            try:
+                from modules.TikTok_Auth import (
+                    TIKTOK_API_PAUSE_MESSAGE,
+                    tiktok_api_enabled,
+                )
+
+                if not tiktok_api_enabled():
+                    return {
+                        "success": False,
+                        "paused": True,
+                        "error": TIKTOK_API_PAUSE_MESSAGE,
+                    }
+            except Exception:
+                pass
             return {"success": False, "error": "TIKTOK_ACCESS_TOKEN not set"}
 
         path = Path(video_path)

@@ -49,8 +49,40 @@ def _load_alert_env() -> None:
             load_dotenv(candidate, override=False)
 
 
-def mac_banner(title: str, message: str, subtitle: str = "Bolt") -> bool:
-    """Show a native macOS Notification Center banner."""
+def _speak_alert(text: str) -> bool:
+    """Speak an alert with Siri Voice 3 — same voice as bolt say / briefings."""
+    if not _env_bool("BOLT_ALERT_SPEAK", True):
+        return False
+    spoken = " ".join((text or "").split())
+    if not spoken:
+        return False
+    try:
+        from modules.Bolt_Voice import macos_say
+
+        return macos_say(spoken[:280])
+    except Exception:
+        pass
+    voice = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Voice 3"
+    try:
+        r = subprocess.run(
+            ["say", "-v", voice, spoken[:280]],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        return r.returncode == 0
+    except Exception:
+        return False
+
+
+def mac_banner(
+    title: str,
+    message: str,
+    subtitle: str = "Bolt",
+    *,
+    speak: bool = True,
+) -> bool:
+    """Show a native macOS Notification Center banner, spoken in Voice 3."""
     if not _env_bool("BOLT_ALERT_MAC", True):
         return False
     # Escape for AppleScript string
@@ -68,6 +100,7 @@ def mac_banner(title: str, message: str, subtitle: str = "Bolt") -> bool:
         f'with title "{esc(title)}" '
         f'subtitle "{esc(subtitle)}"'
     )
+    shown = False
     try:
         r = subprocess.run(
             ["osascript", "-e", script],
@@ -75,9 +108,13 @@ def mac_banner(title: str, message: str, subtitle: str = "Bolt") -> bool:
             text=True,
             timeout=10,
         )
-        return r.returncode == 0
+        shown = r.returncode == 0
     except Exception:
-        return False
+        shown = False
+    if speak:
+        spoken = f"{title}. {message}" if title else message
+        _speak_alert(spoken)
+    return shown
 
 
 def _import_send_notification():

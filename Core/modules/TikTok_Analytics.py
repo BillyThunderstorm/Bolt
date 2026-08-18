@@ -96,10 +96,9 @@ class TikTokAnalytics:
             from modules.TikTok_Auth import ensure_access_token
 
             return ensure_access_token()
-        except Exception:
-            import os
-
-            return os.getenv("TIKTOK_ACCESS_TOKEN") or None
+        except Exception as exc:
+            # Surface refresh failures instead of silently using a dead token.
+            raise TikTokAnalyticsError(f"TikTok auth failed: {exc}") from exc
 
     def _headers(self) -> Dict[str, str]:
         return {

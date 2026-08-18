@@ -8,6 +8,7 @@ access tokens with the long-lived refresh token.
 from __future__ import annotations
 
 import json
+import os
 import time
 import urllib.parse
 import urllib.request
@@ -18,6 +19,34 @@ from typing import Optional
 ROOT = Path(__file__).resolve().parents[2]
 ENV_FILE = ROOT / ".env"
 TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/"
+
+# Developer-app denials keep stats + Content Posting API unusable.
+# Default off so Bolt does not hunt for tokens. Flip with TIKTOK_API_ENABLED=true.
+_TRUTHY = {"1", "true", "on", "yes", "enabled"}
+_FALSEY = {"0", "false", "off", "no", "disabled", "paused"}
+TIKTOK_API_PAUSE_MESSAGE = (
+    "TikTok API is paused (developer app denied). "
+    "Post in the TikTok app, then: bolt queue mark-posted. "
+    "Log views with: bolt log_perf --platform TikTok --views N --likes N"
+)
+
+
+def tiktok_api_enabled(env: Optional[dict] = None) -> bool:
+    """Whether Bolt should call TikTok Open API (stats or publish).
+
+    ``TIKTOK_API_ENABLED`` in the process env wins (tests use this).
+    Otherwise the repo ``.env`` value is used. Unset defaults to off.
+    """
+    if "TIKTOK_API_ENABLED" in os.environ:
+        raw = (os.environ.get("TIKTOK_API_ENABLED") or "").strip().lower()
+        return raw in _TRUTHY
+    file_env = env if env is not None else load_env()
+    raw = (file_env.get("TIKTOK_API_ENABLED") or "").strip().lower()
+    if raw in _TRUTHY:
+        return True
+    if raw in _FALSEY:
+        return False
+    return False
 
 
 def load_env(path: Path = ENV_FILE) -> dict:
@@ -33,10 +62,19 @@ def load_env(path: Path = ENV_FILE) -> dict:
 
 
 def write_env_values(values: dict, path: Path = ENV_FILE) -> None:
+    """Update KEY=value lines in ``path`` without clobbering other keys.
+
+    Always terminates the file with a newline before appending. A missing
+    trailing newline used to glue the next key onto the last value
+    (``SECRET=abcTIKTOK_REDIRECT_URI=``), which broke later token setup.
+    """
     lines = []
     seen = set()
     if path.exists():
-        for line in path.read_text(encoding="utf-8").splitlines(keepends=True):
+        text = path.read_text(encoding="utf-8")
+        if text and not text.endswith("\n"):
+            text += "\n"
+        for line in text.splitlines(keepends=True):
             key = line.split("=", 1)[0].strip() if "=" in line else ""
             if key in values:
                 lines.append(f"{key}={values[key]}\n")

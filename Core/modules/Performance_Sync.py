@@ -364,7 +364,7 @@ def _feed_learning(entry: Dict[str, Any], is_new: bool) -> None:
     try:
         from modules.Think_Learn_Decide import ThinkLearnDecideEngine
 
-        engine = ThinkLearnDecideEngine()
+        engine = ThinkLearnDecideEngine({})
         engine.learn_from_outcome(
             "clip_performance",
             bool(entry.get("success")),
@@ -422,6 +422,7 @@ def sync_tiktok_stats(
         return {
             "ok": False,
             "error": str(exc),
+            "platform": "TikTok",
             "fetched": 0,
             "logged_new": 0,
             "updated": 0,

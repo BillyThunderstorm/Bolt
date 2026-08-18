@@ -178,7 +178,7 @@ crontab -l
 ### Core system follow-ups (engineering, lower priority)
 1. Keep `Think_Learn_Decide` canonical — no parallel decision engines
 2. Deepen memory → decision influence beyond briefing text
-3. Apple Reminders delivery channel (profile priority #1) — not wired yet
+3. ~~Apple Reminders delivery channel~~ ✅ (2026-08-17 — `bolt briefing --send`, list "Bolt")
 4. Prefer `bolt` wrapper over raw script paths
 5. Optional: live web research inside missions (scaffold + Nexus exist; deep source verification is still manual / agent-assisted)
 

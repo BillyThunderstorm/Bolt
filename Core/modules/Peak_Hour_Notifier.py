@@ -1092,6 +1092,21 @@ def post_now(clip_id: str = None, force: bool = True) -> dict:
                 "error": "No ready clip with a local video file found",
             },
         }
+    try:
+        from modules.TikTok_Auth import TIKTOK_API_PAUSE_MESSAGE, tiktok_api_enabled
+
+        if not tiktok_api_enabled():
+            return {
+                "clip": clip,
+                "result": {
+                    "success": False,
+                    "skipped": True,
+                    "paused": True,
+                    "error": TIKTOK_API_PAUSE_MESSAGE,
+                },
+            }
+    except Exception:
+        pass
     result = _publish_clip(clip, now, reason="manual override")
     # Audit #2: Billy responded, clear the escalation counter.
     _reset_ignored_reviews(data)
@@ -1104,6 +1119,13 @@ def process_auto_post_queue(now: datetime = None) -> dict:
     data = _load_ready()
     now = now or _now()
     stats = {"review_alerted": 0, "posted": 0, "failed": 0, "held": 0}
+
+    try:
+        from modules.TikTok_Auth import tiktok_api_enabled
+
+        _tiktok_api_on = tiktok_api_enabled()
+    except Exception:
+        _tiktok_api_on = True
 
     for clip in data["clips"]:
         if not _is_alertable_clip(clip):
@@ -1146,6 +1168,9 @@ def process_auto_post_queue(now: datetime = None) -> dict:
                 # chance immediately rather than spinning forever.
                 retry_eligible = True
         if deadline_missed or approved_due or retry_eligible:
+            if not _tiktok_api_on:
+                # Review/approve still works; upload is manual until the app is approved.
+                continue
             if deadline_missed:
                 publish_reason = "deadline missed"
                 # Audit #2: a deadline-driven publish means Billy

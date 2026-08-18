@@ -154,22 +154,31 @@ class ContentManagerTests(unittest.TestCase):
             cm.mark_posted("NotReady", platforms=["tiktok"])
         self.assertIn("mark it ready", str(ctx.exception).lower())
 
-    def test_tiktok_publish_status_reports_missing_creds(self):
-        # With no real creds in .env, the status report should flag
-        # exactly what's missing and give actionable next steps.
-        st = cm.tiktok_publish_status()
+    def test_tiktok_publish_status_reports_paused_by_default(self):
+        from modules import TikTok_Auth as auth
+
+        with mock.patch.object(auth, "tiktok_api_enabled", return_value=False):
+            st = cm.tiktok_publish_status()
         self.assertIn("checks", st)
         self.assertIn("next_steps", st)
-        # ready=False unless someone has filled in real values
         self.assertFalse(st["ready"])
-        # At least one of the next_steps should mention the OAuth flow
+        self.assertTrue(st.get("paused"))
+        self.assertTrue(any("log_perf" in s or "mark-posted" in s for s in st["next_steps"]))
+        self.assertFalse(any("tiktok_token" in s for s in st["next_steps"]))
+
+    def test_tiktok_publish_status_reports_missing_creds_when_api_on(self):
+        from modules import TikTok_Auth as auth
+
+        with mock.patch.object(auth, "tiktok_api_enabled", return_value=True), mock.patch.object(
+            auth, "load_env", return_value={}
+        ):
+            st = cm.tiktok_publish_status()
+        self.assertFalse(st["ready"])
         self.assertTrue(any("tiktok_token" in s for s in st["next_steps"]))
 
     def test_tiktok_publish_status_with_fake_full_env(self):
-        # Pretend .env is fully populated. Use a temp env file via
-        # monkey-patching load_env.
+        # Pretend .env is fully populated and the API is re-enabled.
         from modules import TikTok_Auth as auth
-        real_load = auth.load_env
 
         def fake_load():
             return {
@@ -179,12 +188,12 @@ class ContentManagerTests(unittest.TestCase):
                 "TIKTOK_SCOPE": "user.info.basic,video.publish",
             }
 
-        with mock.patch.object(auth, "load_env", fake_load):
+        with mock.patch.object(auth, "load_env", fake_load), mock.patch.object(
+            auth, "tiktok_api_enabled", return_value=True
+        ):
             st = cm.tiktok_publish_status()
             self.assertTrue(st["ready"])
             self.assertTrue(all(c["ok"] for c in st["checks"]))
-        # restore
-        auth.load_env = real_load
 
     def test_tiktok_publish_item_refuses_without_approve(self):
         # The approval gate must be enforced — even with valid creds.

@@ -613,6 +613,8 @@ use `log_perf` for manual entry or platforms without API pull (e.g. X).
 ```bash
 bolt briefing                    # Generate and save the current daily briefing
 bolt briefing --print            # Print it in the terminal
+bolt briefing --send             # Reminders list "Bolt" + Voice 3 alert + email
+                                  # Cron: every day at 17:00
 bolt calendar [--output-dir <directory>] [--days 30] [--dry-run]
 bolt refresh_memory              # Rebuild Data/memory_index.json
 bolt refresh_vector_db           # Rebuild Data/vector_db/ for Nexus (needs Ollama)
@@ -635,6 +637,7 @@ bolt reindex
 |---------|--------------|
 | `bolt briefing` | Generate (and save) the current daily briefing under `Docs/briefings/` |
 | `bolt briefing --print` | Generate the briefing and print it to the terminal instead of saving |
+| `bolt briefing --send` | Same, then write the **Bolt** Reminders list, speak Voice 3, Mac banner, email |
 | `bolt calendar` | Generate ICS calendar feeds for scheduled posts |
 | `bolt refresh_memory` | Rebuild the clip memory index (`Data/memory_index.json`) |
 | `bolt refresh_vector_db` | Rebuild the vector DB used by Nexus for retrieval (`Data/vector_db/`) |
@@ -658,7 +661,39 @@ bolt send "message" [--subject "subject"] [--sms-only|--email-only]
 | `bolt send "msg" --email-only` | Force email, ignore phone |
 | `bolt send "msg" --subject "…"` | Override the email subject line |
 
-Budget alerts (50% / 90% / 100% of soft cap) use **Mac banner + email + iMessage**, not Discord.
+Budget alerts (50% / 90% / 100% of soft cap) use **Mac banner + Voice 3 + email + iMessage**, not Discord.
+
+Spoken alerts always use Siri **Voice 3** (`say -v "Voice 3"`, `Bolt_VOICE`). The same voice is used for `bolt say`, briefings, and Mac banners.
+
+## Mac automation (launchd, Reminders, Shortcuts)
+
+Evening inbox is Apple Reminders, not SMS. Only financial work stays fully manual; everything else is do-and-notify (Bolt acts, then leaves an alert or a file link to review/revise).
+
+```bash
+# Reinstall login watcher + 17:00 briefing cron + Shortcuts
+python3 scripts/install_mac_automation.py            # all
+python3 scripts/install_mac_automation.py launchd    # Core/launch.py live --no-checklist
+python3 scripts/install_mac_automation.py cron       # 17:00 bolt briefing --send
+python3 scripts/install_mac_automation.py shortcuts  # import dialogs
+
+bolt briefing --send                                 # Reminders + Voice 3 + banner + email
+```
+
+| Piece | What it does |
+|---|---|
+| launchd `com.streamer.ai-assistant` | Starts folder watch at login (`Core/launch.py live --no-checklist`) |
+| cron `0 17 * * *` | Evening briefing → Reminders list **Bolt** |
+| Shortcut **Bolt_Morning** | Terminal: `bolt day` |
+| Shortcut **Bolt_Review_Queue** | Terminal: `bolt day --decide` |
+| Shortcut **Bolt_Stats** | `bolt stats sync` |
+| Shortcut **Bolt_Wrap-Up** | Asks what shipped → `bolt week done "…"` |
+| Shortcut **Extract_Text_from_Photos** | OCR photos (print + handwriting) → editable `.txt` in `~/Documents/Bolt OCR/` |
+
+Siri: open a shortcut → ⓘ → Add to Siri. Re-import signed files from `scripts/macos_shortcuts/signed/` if a shortcut is missing.
+
+```bash
+python3 scripts/ocr_to_editable.py photo.jpg --open
+```
 
 ## Default morning flow (daily driver)
 
