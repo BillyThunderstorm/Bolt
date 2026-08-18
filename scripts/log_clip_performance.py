@@ -205,7 +205,7 @@ def _record_learning_outcome(
     try:
         from modules.Think_Learn_Decide import ThinkLearnDecideEngine
 
-        engine = ThinkLearnDecideEngine()
+        engine = ThinkLearnDecideEngine({})
         engine.learn_from_outcome(
             "clip_performance",
             success,

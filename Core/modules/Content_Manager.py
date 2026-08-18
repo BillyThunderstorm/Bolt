@@ -448,6 +448,22 @@ def tiktok_publish_status() -> Dict[str, Any]:
         status["checks"].append({"name": "load_env", "ok": False, "detail": str(exc)})
         return status
 
+    if not auth.tiktok_api_enabled(env):
+        status["paused"] = True
+        status["checks"].append(
+            {
+                "name": "tiktok_api",
+                "ok": True,
+                "detail": "paused — post in the TikTok app, then mark-posted",
+            }
+        )
+        status["next_steps"].append(
+            "TikTok API is paused (developer app denied). "
+            "Upload in the TikTok app, then `bolt queue mark-posted`. "
+            "Log views with `bolt log_perf --platform TikTok`."
+        )
+        return status
+
     has_key = bool(env.get("TIKTOK_CLIENT_KEY"))
     has_secret = bool(env.get("TIKTOK_CLIENT_SECRET")) and not env.get(
         "TIKTOK_CLIENT_SECRET", ""

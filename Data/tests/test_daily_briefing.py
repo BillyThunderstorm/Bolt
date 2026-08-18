@@ -134,6 +134,31 @@ class MemoryToActionItemsTests(unittest.TestCase):
         self.assertLessEqual(len(actions), 3)
 
 
+class SendDeliveryTests(unittest.TestCase):
+    def test_send_writes_reminders_before_email(self):
+        calls = []
+
+        def fake_replace(actions, **kwargs):
+            calls.append(("reminders", list(actions), kwargs.get("summary")))
+            return {"ok": True, "actions_created": len(actions), "list": "Bolt"}
+
+        with patch.object(db, "_retrieve_briefing_memory", return_value=[]), patch(
+            "modules.Apple_Reminders.replace_today_briefing", fake_replace
+        ), patch("modules.Bolt_Alerts.mac_banner", return_value=True), patch.object(
+            db, "_refresh_calendar_feeds", return_value=[]
+        ), patch(
+            "send_notification.send_briefing", return_value=True
+        ):
+            briefing, sms = db.generate_briefing()
+            out = db._deliver_briefing(
+                briefing, sms, Path("Docs/briefings/daily/latest_morning.md")
+            )
+        self.assertTrue(out["reminders"]["ok"])
+        self.assertTrue(out["banner"])
+        self.assertTrue(calls)
+        self.assertGreaterEqual(len(calls[0][1]), 1)
+
+
 class RetrieveBriefingMemoryTests(unittest.TestCase):
     def test_returns_empty_when_memory_module_missing(self):
         # Force the inner import to fail by patching builtins.__import__ for

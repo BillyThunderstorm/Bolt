@@ -9,6 +9,7 @@ for _p in [_repo_root / 'Core']:
         sys.path.insert(0, _sp)
 
 import json
+import os
 import tempfile
 import time
 import unittest
@@ -16,6 +17,21 @@ from pathlib import Path
 from unittest.mock import patch
 
 from modules import TikTok_Auth as auth
+
+
+class TikTokApiGateTests(unittest.TestCase):
+    def test_default_off_when_unset(self):
+        with patch.dict("os.environ"):
+            os.environ.pop("TIKTOK_API_ENABLED", None)
+            self.assertFalse(auth.tiktok_api_enabled({}))
+
+    def test_process_env_true_overrides_file(self):
+        with patch.dict("os.environ", {"TIKTOK_API_ENABLED": "true"}):
+            self.assertTrue(auth.tiktok_api_enabled({"TIKTOK_API_ENABLED": "false"}))
+
+    def test_process_env_false_overrides_file(self):
+        with patch.dict("os.environ", {"TIKTOK_API_ENABLED": "false"}):
+            self.assertFalse(auth.tiktok_api_enabled({"TIKTOK_API_ENABLED": "true"}))
 
 
 class TikTokAuthTests(unittest.TestCase):
@@ -33,6 +49,18 @@ class TikTokAuthTests(unittest.TestCase):
             self.assertIn("A=1", text)
             self.assertIn("TIKTOK_ACCESS_TOKEN=new", text)
             self.assertIn("TIKTOK_REFRESH_TOKEN=refresh", text)
+
+    def test_write_env_values_does_not_concat_when_file_lacks_newline(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / ".env"
+            path.write_text("TIKTOK_CLIENT_SECRET=abc", encoding="utf-8")
+
+            auth.write_env_values({"TIKTOK_REDIRECT_URI": "https://example/cb"}, path=path)
+
+            text = path.read_text(encoding="utf-8")
+            self.assertIn("TIKTOK_CLIENT_SECRET=abc\n", text)
+            self.assertIn("TIKTOK_REDIRECT_URI=https://example/cb\n", text)
+            self.assertNotIn("abcTIKTOK_REDIRECT_URI", text)
 
     def test_access_token_fresh_uses_expiry(self):
         env = {

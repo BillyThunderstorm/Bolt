@@ -20,6 +20,7 @@ This module does NOT write performance logs — see Performance_Sync.
 from __future__ import annotations
 
 import json
+import os
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -106,34 +107,69 @@ class YouTubeAnalyticsError(RuntimeError):
 class YouTubeAnalytics:
     """Thin client for listing channel uploads with engagement metrics."""
 
-    def __init__(self, access_token: Optional[str] = None):
-        self.token = (access_token or self._load_token() or "").strip()
-        if not self.token:
+    def __init__(
+        self,
+        access_token: Optional[str] = None,
+        api_key: Optional[str] = None,
+    ):
+        self.auth_error: Optional[Exception] = None
+        # None = load from .env; explicit "" skips OAuth (API-key-only tests).
+        if access_token is not None:
+            self.token = access_token.strip()
+        else:
+            try:
+                loaded = self._load_token()
+                self.token = (loaded or "").strip()
+            except Exception as exc:
+                # Expired / revoked OAuth should fall through to API key
+                # instead of becoming a cryptic 401 on the first list call.
+                self.auth_error = exc
+                self.token = ""
+        if api_key is not None:
+            self.api_key = api_key.strip()
+        else:
+            self.api_key = (self._load_api_key() or "").strip()
+        if not self.token and not self.api_key:
+            extra = f" OAuth failed: {self.auth_error}." if self.auth_error else ""
             raise YouTubeAnalyticsError(
-                "No YouTube access token. Run:\n"
-                "  python3 scripts/get_youtube_token.py\n"
-                "after creating a Google Cloud OAuth client and enabling "
-                "YouTube Data API v3."
+                "No YouTube credentials."
+                + extra
+                + "\n  Re-authorize: bolt youtube_token"
+                "\n  Or set YOUTUBE_API_KEY for public @handle stats."
             )
 
     @staticmethod
     def _load_token() -> Optional[str]:
+        from modules.YouTube_Auth import ensure_access_token
+
+        return ensure_access_token()
+
+    @staticmethod
+    def _load_api_key() -> Optional[str]:
         try:
-            from modules.YouTube_Auth import ensure_access_token
+            from modules.YouTube_Auth import load_api_key
 
-            return ensure_access_token()
+            key = load_api_key()
+            if key:
+                return key
         except Exception:
-            import os
+            pass
+        return (os.getenv("YOUTUBE_API_KEY") or "").strip() or None
 
-            return os.getenv("YOUTUBE_ACCESS_TOKEN") or None
-
-    def _headers(self) -> Dict[str, str]:
-        return {"Authorization": f"Bearer {self.token}", "Accept": "application/json"}
+    def _headers(self, params: Dict[str, Any]) -> Dict[str, str]:
+        headers = {"Accept": "application/json"}
+        if self.token:
+            headers["Authorization"] = f"Bearer {self.token}"
+        elif self.api_key:
+            params.setdefault("key", self.api_key)
+        return headers
 
     def _get(self, endpoint: str, params: Dict[str, Any], timeout: int = 30) -> Dict[str, Any]:
-        qs = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
+        clean = {k: v for k, v in params.items() if v is not None}
+        headers = self._headers(clean)
+        qs = urllib.parse.urlencode(clean)
         url = f"{API_BASE}/{endpoint}?{qs}"
-        req = urllib.request.Request(url, headers=self._headers(), method="GET")
+        req = urllib.request.Request(url, headers=headers, method="GET")
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 return json.loads(resp.read().decode("utf-8"))
@@ -146,15 +182,41 @@ class YouTubeAnalytics:
             raise YouTubeAnalyticsError(f"YouTube API network error: {exc}") from exc
 
     def get_uploads_playlist_id(self) -> str:
-        data = self._get(
-            "channels",
-            {"part": "contentDetails", "mine": "true"},
-        )
+        params: Dict[str, Any] = {"part": "contentDetails"}
+        if self.token:
+            params["mine"] = "true"
+        else:
+            lookup = {}
+            try:
+                from modules.YouTube_Auth import channel_lookup
+
+                lookup = channel_lookup()
+            except Exception:
+                lookup = {}
+            channel_id = (
+                lookup.get("channel_id")
+                or (os.getenv("YOUTUBE_CHANNEL_ID") or "").strip()
+            )
+            handle = (
+                lookup.get("handle")
+                or (os.getenv("YOUTUBE_HANDLE") or "").strip().lstrip("@")
+            )
+            if channel_id:
+                params["id"] = channel_id
+            elif handle:
+                params["forHandle"] = handle
+            else:
+                raise YouTubeAnalyticsError(
+                    "No YouTube OAuth token and no channel handle. "
+                    "Set YOUTUBE_HANDLE=@SimplyBilly or run bolt youtube_token."
+                )
+        data = self._get("channels", params)
         items = data.get("items") or []
         if not items:
             raise YouTubeAnalyticsError(
-                "No channel returned for this Google account. "
-                "Sign in with the account that owns @SimplyBilly."
+                "No channel returned. "
+                "Sign in with the account that owns @SimplyBilly, "
+                "or check YOUTUBE_HANDLE / YOUTUBE_CHANNEL_ID."
             )
         uploads = (
             (items[0].get("contentDetails") or {})

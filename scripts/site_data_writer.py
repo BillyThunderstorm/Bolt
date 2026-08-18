@@ -37,6 +37,17 @@ from _paths import (  # noqa: E402
     REPO_ROOT, DATA_DIR, CLIPS_DIR, DAILY_BRIEFINGS_DIR, CONFIG_FILE,
 )
 
+
+def _tiktok_key_ok() -> bool:
+    try:
+        from modules.TikTok_Auth import tiktok_api_enabled
+
+        if not tiktok_api_enabled():
+            return True
+    except Exception:
+        pass
+    return bool(os.getenv("TIKTOK_ACCESS_TOKEN"))
+
 # Backward-compatible aliases for code that uses `ROOT` / `PROJECT_ROOT`.
 PROJECT_ROOT = REPO_ROOT
 ROOT = REPO_ROOT
@@ -164,7 +175,7 @@ def _system_status():
             "twitch": bool(os.getenv("TWITCH_CLIENT_ID")),
             "obs": bool(os.getenv("OBS_PASSWORD")),
             "discord": bool(os.getenv("DISCORD_WEBHOOK_URL")),
-            "tiktok": bool(os.getenv("TIKTOK_ACCESS_TOKEN")),
+            "tiktok": _tiktok_key_ok(),
         },
     }
 

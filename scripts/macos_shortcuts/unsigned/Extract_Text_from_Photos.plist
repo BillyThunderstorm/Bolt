@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WFWorkflowActions</key>
+	<array>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.selectphoto</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>UUID</key>
+				<string>9CB127B4-3751-4DA3-BD13-15819AC8A1F2</string>
+				<key>WFSelectMultiplePhotos</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>WFWorkflowActionIdentifier</key>
+			<string>is.workflow.actions.runshellscript</string>
+			<key>WFWorkflowActionParameters</key>
+			<dict>
+				<key>InputMode</key>
+				<string>as arguments</string>
+				<key>Script</key>
+				<string>set -euo pipefail
+FILES=("$@")
+if [[ ${#FILES[@]} -eq 0 ]]; then
+  echo "No images received" &gt;&amp;2
+  exit 2
+fi
+"/Users/carter/developer/Bolt/.venv/bin/python3" "/Users/carter/developer/Bolt/scripts/ocr_to_editable.py" --open "${FILES[@]}"
+</string>
+				<key>Shell</key>
+				<string>/bin/zsh</string>
+				<key>UUID</key>
+				<string>73BA9489-C655-4C4D-8FE0-F63AB6C823CD</string>
+			</dict>
+		</dict>
+	</array>
+	<key>WFWorkflowClientRelease</key>
+	<string>3.0</string>
+	<key>WFWorkflowClientVersion</key>
+	<string>900</string>
+	<key>WFWorkflowHasOutputFallback</key>
+	<false/>
+	<key>WFWorkflowHasShortcutInputVariables</key>
+	<false/>
+	<key>WFWorkflowIcon</key>
+	<dict>
+		<key>WFWorkflowIconGlyphNumber</key>
+		<integer>59511</integer>
+		<key>WFWorkflowIconStartColor</key>
+		<integer>431817727</integer>
+	</dict>
+	<key>WFWorkflowImportQuestions</key>
+	<array/>
+	<key>WFWorkflowInputContentItemClasses</key>
+	<array>
+		<string>WFImageContentItem</string>
+		<string>WFPhotoMediaContentItem</string>
+		<string>WFGenericFileContentItem</string>
+	</array>
+	<key>WFWorkflowMinimumClientVersion</key>
+	<integer>900</integer>
+	<key>WFWorkflowMinimumClientVersionString</key>
+	<string>900</string>
+	<key>WFWorkflowName</key>
+	<string>Extract Text from Photos</string>
+	<key>WFWorkflowTypes</key>
+	<array>
+		<string>WatchKit</string>
+		<string>NCWidget</string>
+	</array>
+</dict>
+</plist>

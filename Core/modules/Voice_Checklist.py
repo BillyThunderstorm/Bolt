@@ -165,14 +165,24 @@ def _verify_tiktok_idea() -> tuple:
         except Exception:
             pass
 
+    try:
+        from modules.TikTok_Auth import tiktok_api_enabled
+
+        api_on = tiktok_api_enabled()
+    except Exception:
+        api_on = bool(tiktok_key)
+
+    if not api_on:
+        if queue_count > 0:
+            return True, f"{queue_count} clips in queue — TikTok is manual (API paused)"
+        return True, "TikTok is manual — post in the app, then mark-posted"
     if tiktok_key:
         if queue_count > 0:
             return True, f"TikTok connected — {queue_count} clips in queue to post"
         return True, "TikTok is configured — clips will be queued as you stream"
-    else:
-        if queue_count > 0:
-            return True, f"{queue_count} clips in queue — set up TikTok API to auto-post"
-        return False, "TikTok not configured (TIKTOK_CLIENT_KEY missing in .env) — you'll post manually"
+    if queue_count > 0:
+        return True, f"{queue_count} clips in queue — set up TikTok API to auto-post"
+    return False, "TikTok not configured (TIKTOK_CLIENT_KEY missing in .env) — you'll post manually"
 
 
 def _verify_socials() -> tuple:

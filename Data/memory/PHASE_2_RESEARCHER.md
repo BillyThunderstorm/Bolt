@@ -30,7 +30,7 @@ bolt briefing --print
 
 ## Not in this phase
 
-- Apple Reminders delivery (profile channel #1) — still unwired
+- Apple Reminders delivery (profile channel #1) — wired 2026-08-17 (`bolt briefing --send`)
 - Auto web-search for new candidates (M13 sponsors-research is separate)
 - External `bolt-creator-command-center` skill (not part of `bin/bolt`)
 

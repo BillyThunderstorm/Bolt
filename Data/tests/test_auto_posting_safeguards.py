@@ -18,6 +18,19 @@ from modules import Bolt_Chat as chat
 from modules import Peak_Hour_Notifier as notifier
 
 
+def setUpModule():
+    # Publisher tests exercise the TikTok API path; production default is paused.
+    import os
+
+    os.environ["TIKTOK_API_ENABLED"] = "true"
+
+
+def tearDownModule():
+    import os
+
+    os.environ.pop("TIKTOK_API_ENABLED", None)
+
+
 class AutoPostingSafeguardTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

@@ -90,6 +90,18 @@ def _load_queue() -> list:
         return []
 
 
+def _tiktok_key_ok() -> bool:
+    """Token is only required while the TikTok Open API is enabled."""
+    try:
+        from modules.TikTok_Auth import tiktok_api_enabled
+
+        if not tiktok_api_enabled():
+            return True
+    except Exception:
+        pass
+    return bool(os.getenv("TIKTOK_ACCESS_TOKEN"))
+
+
 def _check_env_keys() -> dict:
     """
     Check which API keys are present in .env.
@@ -109,7 +121,7 @@ def _check_env_keys() -> dict:
         "discord": bool(os.getenv("DISCORD_WEBHOOK_URL")),
         "openai": bool(os.getenv("OPENAI_API_KEY")),
         "xai": bool(os.getenv("XAI_API_KEY")),
-        "tiktok": bool(os.getenv("TIKTOK_ACCESS_TOKEN")),
+        "tiktok": _tiktok_key_ok(),
         "bot_token": bool(os.getenv("TWITCH_BOT_TOKEN")),
     }
 

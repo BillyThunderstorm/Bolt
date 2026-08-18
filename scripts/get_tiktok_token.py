@@ -83,8 +83,16 @@ def main() -> int:
     client_secret = args.client_secret or env.get("TIKTOK_CLIENT_SECRET", "").strip()
     redirect_uri = args.redirect_uri or env.get("TIKTOK_REDIRECT_URI", "").strip()
 
+    from modules.TikTok_Auth import tiktok_api_enabled
+
     print("\nBolt TikTok Token Setup")
     print("=" * 58)
+    if not tiktok_api_enabled():
+        print(
+            "Note: TikTok API is paused (TIKTOK_API_ENABLED=false).\n"
+            "Tokens will save, but stats/auto-post stay off until you set\n"
+            "TIKTOK_API_ENABLED=true after the developer app is approved.\n"
+        )
     print(
         "You need the Client Key, Client Secret, and Redirect URI from your TikTok Developer app."
     )

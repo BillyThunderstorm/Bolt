@@ -112,6 +112,13 @@ Use `memory/content/` for broad creator growth:
 The best memory entry is specific: date, platform, content idea, result, and lesson.
 
 ## Recent Notes
+- [2026-08-17] Held clip f01b6ff9 (I love this for me #007FirstLight #JamesBond #fyp #IOInteractive #DelphiInteractiveLLC): same issue with the video quality. I will work on making something worth posting first, then come back to both of these videos
+- [2026-08-17] Held clip 97ad1824 (Its a very dapper night #fyp #JamesBond #DelphiInteractiveLLC #IOInteractive #FirstLightGameplay): the video quality isn't good enough to post. Plus, the post this week should be focused on skin care, not gaming. Ill work on that now"
+- [2026-08-17] Mac automation: launchd fixed (Core/launch.py live --no-checklist). Evening briefing at 17:00 writes Apple Reminders list "Bolt" plus a Mac banner. Only financial work stays fully manual; everything else is do-and-notify. Shortcuts: Bolt Morning / Review Queue / Stats / Wrap-Up. OCR shortcut writes an editable .txt via Vision.
+- [2026-08-17] This week is: beauty / skin care. Lets post a video or two, with a full product review on the snail care facial products or the facial steamer and the products that came with it. If bwe do both, The next skin care review would already be done and prepared for the next beauty / skin care run.
+- [2026-08-16] Held clip 357a75a9 (Test): not ready
+- [2026-08-16] Held clip 7fe9e6be (Ready clip): bad hook
+- [2026-08-16] Posted clip be5926ae (I better play like this online too #FirstLightGameplay #fyp #IOInteractive #DelphiInteractiveLLC)
 
 - [2026-08-04] Anchored `seen_clips.json` to `Data/seen_clips.json` (was drifting to the repo root each run). Patched `Clip_Deduplicator.SEEN_FILE`, fixed `Think_Learn_Decide.DATA_DIR` depth (was the pre-2026-07-19 flatten bug), updated `Core/data/source_registry.json`. Added `bolt vector_db` / `bolt reindex` aliases for `refresh_vector_db`; reconciled `bin/bolt` docstring with the actual `~/.zshrc` alias.
 - [2026-08-02] Twitch channel renamed to ItsSimplyBilly to align with other social handles (TikTok, YouTube, X).

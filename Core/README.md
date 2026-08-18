@@ -8,7 +8,7 @@ If uncertain, Bolt asks: *Will this help William grow, create, learn, or succeed
 
 **Decision priority:** Safety → Truth → Long-Term Benefit → Helpfulness → Efficiency → Entertainment.
 
-**Posting always requires William’s approval.** Nothing publishes because a file landed in a folder.
+**Financial work stays fully manual.** Everything else is do-and-notify: Bolt acts, then leaves an Apple Reminder, Voice 3 alert, or file link so William can review or revise. Nothing financial (affiliate codes, deal terms, payments) goes out on its own.
 
 **Commands live in one place:** [`modules/BOLT_COMMANDS.md`](modules/BOLT_COMMANDS.md)
 
@@ -42,6 +42,7 @@ alias bolt='/Users/carter/developer/Bolt/.venv/bin/bolt'
 
 bolt setup              # one-shot readiness check; exits
 bolt day --decide       # daily production path
+bolt briefing --send    # evening inbox: Reminders + Voice 3 + email
 bolt launch             # live folder-watch
 bolt queue              # what you can post
 bolt help               # command summary
@@ -59,7 +60,7 @@ Without the alias: `uv run bolt <command>`.
 | `bolt week` | This week / last week / do not suggest. Read before any new plan. |
 | `bolt queue decide` | Interactive review: open / approve / post now / hold / retitle / skip |
 
-Preferred day-to-day path: `bolt day --decide` → review → post. If you posted outside Bolt, `bolt queue mark-posted`.
+Preferred day-to-day path: `bolt day --decide` → review → post. Evening inbox is `bolt briefing --send` (cron 17:00 → Reminders list **Bolt**). If you posted outside Bolt, `bolt queue mark-posted`.
 
 ## Creator lanes
 
@@ -142,7 +143,9 @@ Around the pipeline:
 | Interface | How |
 |---|---|
 | CLI | `bolt …` |
-| Voice | `bolt voice` / `bolt talk` / `bolt say` — Siri Voice 3 (`say -v "Voice 3"`) |
+| Voice | `bolt voice` / `bolt talk` / `bolt say` — Siri Voice 3 (`say -v "Voice 3"`). Alerts use the same voice. |
+| Reminders | List **Bolt** — daily 17:00 briefing + action items with a link to `Docs/briefings/daily/latest_morning.md` |
+| Shortcuts | Bolt Morning / Review Queue / Stats / Wrap-Up, plus Extract Text from Photos |
 | Twitch chat | `!queue` `!qstatus` `!postnow` `!dontpost` `!skip` |
 | Dashboard | `Checkup_Writer` → `Data/Bolt_data.js` |
 | Sites | bolt.billythunderstorm.us · billythunderstorm.us · billythunderstorm.live |
@@ -159,7 +162,7 @@ Light mode by default (`BOLT_LLM_MODE=light`).
 - **Grok API** only for high-value strategy / research / decisions
 - SuperGrok subscription is app/web chat only — it does **not** cover the API
 - Soft cap **$35/month** → force local when hit (`bolt budget`)
-- Alerts via Mac banner + iMessage + email. **No Discord.**
+- Alerts via Mac banner + **Voice 3** + iMessage + email. **No Discord.**
 
 STT is free Google by default. Whisper/OpenAI speech-in stays off unless both flags are set on purpose.
 
@@ -176,6 +179,8 @@ Tunable in `config.json`:
 Alerts: `Data/configs/storage_alerts.env` (email + iMessage). Template: `Data/configs/storage_alerts.example.env`.
 
 Storage: `bolt storage status` / `monitor` / `rotate` / `optimize`.
+
+Mac automation installer: `python3 scripts/install_mac_automation.py` (launchd watcher, 17:00 briefing cron, Shortcuts). Photo OCR: `python3 scripts/ocr_to_editable.py photo.jpg --open`.
 
 ## Documentation
 
@@ -205,4 +210,4 @@ Storage: `bolt storage status` / `monitor` / `rotate` / `optimize`.
 | Storage alerts silent | Uncommented lines in `Data/configs/storage_alerts.env`; iMessage, not AT&T email-to-SMS |
 | Tests / verify | `bolt verify` then `bolt test` |
 
-*Last updated: August 15, 2026 — aligned with current purpose, `bolt` CLI, and light LLM stack.*
+*Last updated: August 17, 2026 — evening Reminders briefing, Voice 3 alerts, Shortcuts, do-and-notify except financial.*

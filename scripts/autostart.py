@@ -17,9 +17,11 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
 REPO_ROOT = SCRIPT_DIR.parent
-PYTHON = sys.executable
+VENV_PYTHON = REPO_ROOT / ".venv" / "bin" / "python3"
+PYTHON = str(VENV_PYTHON if VENV_PYTHON.exists() else Path(sys.executable))
 # Post-reorg: launch lives at Core/launch.py (not scripts/launch.py).
 LAUNCH_SCRIPT = REPO_ROOT / "Core" / "launch.py"
+LOGS_DIR = REPO_ROOT / "logs"
 
 
 def main():
@@ -70,10 +72,20 @@ PLIST_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
     <array>
         <string>{python}</string>
         <string>{script}</string>
+        <string>live</string>
+        <string>--no-checklist</string>
     </array>
 
     <key>WorkingDirectory</key>
     <string>{workdir}</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>{path}</string>
+        <key>PYTHONUNBUFFERED</key>
+        <string>1</string>
+    </dict>
 
     <key>RunAtLoad</key>
     <true/>
@@ -84,14 +96,50 @@ PLIST_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
         <false/>
     </dict>
 
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+
+    <key>ProcessType</key>
+    <string>Interactive</string>
+
+    <key>LimitLoadToSessionType</key>
+    <string>Aqua</string>
+
     <key>StandardOutPath</key>
-    <string>{workdir}/launcher_stdout.log</string>
+    <string>{stdout}</string>
 
     <key>StandardErrorPath</key>
-    <string>{workdir}/launcher_stderr.log</string>
+    <string>{stderr}</string>
 </dict>
 </plist>
 """
+
+
+def _macos_path() -> str:
+    homebrew = "/opt/homebrew/bin:/usr/local/bin"
+    venv_bin = str((REPO_ROOT / ".venv" / "bin"))
+    return f"{venv_bin}:{homebrew}:/usr/bin:/bin:/usr/sbin:/sbin"
+
+
+def _macos_domain() -> str:
+    return f"gui/{os.getuid()}"
+
+
+def _write_macos_plist() -> None:
+    PLIST_PATH.parent.mkdir(parents=True, exist_ok=True)
+    LOGS_DIR.mkdir(parents=True, exist_ok=True)
+    PLIST_PATH.write_text(
+        PLIST_TEMPLATE.format(
+            label=PLIST_LABEL,
+            python=PYTHON,
+            script=str(LAUNCH_SCRIPT),
+            workdir=str(REPO_ROOT),
+            path=_macos_path(),
+            stdout=str(LOGS_DIR / "launcher_stdout.log"),
+            stderr=str(LOGS_DIR / "launcher_stderr.log"),
+        ),
+        encoding="utf-8",
+    )
 
 
 def _install_macos():
@@ -101,42 +149,62 @@ def _install_macos():
     What this does:
     - Creates a .plist file in ~/Library/LaunchAgents/
     - Registers it with launchd (macOS's process manager)
-    - launchd will run launch.py when you log in
-    - If the process crashes, launchd restarts it automatically
+    - launchd will run Core/launch.py when you log in
+    - If the process crashes, launchd restarts it (throttled)
     """
-    PLIST_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if not LAUNCH_SCRIPT.is_file():
+        print(f"Missing launch script: {LAUNCH_SCRIPT}")
+        return
 
-    plist_content = PLIST_TEMPLATE.format(
-        label=PLIST_LABEL,
-        python=PYTHON,
-        script=str(LAUNCH_SCRIPT),
-        workdir=str(SCRIPT_DIR),
-    )
-
-    PLIST_PATH.write_text(plist_content)
+    _write_macos_plist()
     print(f"Written: {PLIST_PATH}")
+    print(f"Python:  {PYTHON}")
+    print(f"Launch:  {LAUNCH_SCRIPT} live --no-checklist")
 
-    # Load it immediately
-    result = subprocess.run(
-        ["launchctl", "load", str(PLIST_PATH)], capture_output=True, text=True
+    domain = _macos_domain()
+    target = f"{domain}/{PLIST_LABEL}"
+    # bootout is fine if the job is not loaded
+    subprocess.run(
+        ["launchctl", "bootout", domain, str(PLIST_PATH)],
+        capture_output=True,
+        text=True,
+    )
+    loaded = subprocess.run(
+        ["launchctl", "bootstrap", domain, str(PLIST_PATH)],
+        capture_output=True,
+        text=True,
+    )
+    subprocess.run(
+        ["launchctl", "enable", target],
+        capture_output=True,
+        text=True,
+    )
+    kicked = subprocess.run(
+        ["launchctl", "kickstart", "-k", target],
+        capture_output=True,
+        text=True,
     )
 
-    if result.returncode == 0:
+    if loaded.returncode == 0 or "already bootstrapped" in (loaded.stderr or "").lower():
         print("\nAutostart installed successfully.")
-        print("The assistant will now start automatically when you log in.")
-        print("\nTo start it right now without rebooting:")
-        print(f"  launchctl start {PLIST_LABEL}")
-        print("\nTo check if it's running:")
-        print(f"  launchctl list | grep {PLIST_LABEL}")
+        print("Folder watch starts at login (no pre-stream checklist).")
+        print(f"\nStatus: launchctl print {target}")
+        if kicked.returncode != 0 and kicked.stderr:
+            print(f"kickstart note: {kicked.stderr.strip()}")
     else:
-        print(f"launchctl load failed: {result.stderr}")
-        print("Try running: launchctl load", str(PLIST_PATH))
+        print(f"launchctl bootstrap failed: {loaded.stderr.strip() or loaded.stdout}")
+        print("Try: launchctl bootstrap", domain, str(PLIST_PATH))
 
 
 def _uninstall_macos():
     if not PLIST_PATH.exists():
         print("No autostart entry found.")
         return
+    subprocess.run(
+        ["launchctl", "bootout", _macos_domain(), str(PLIST_PATH)],
+        capture_output=True,
+    )
+    # Legacy unload in case an old load(1) registration is still around
     subprocess.run(["launchctl", "unload", str(PLIST_PATH)], capture_output=True)
     PLIST_PATH.unlink()
     print("Autostart removed.")

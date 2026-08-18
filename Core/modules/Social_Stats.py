@@ -9,8 +9,9 @@ Does not invent APIs — uses:
   - modules.Performance_Sync.sync_tiktok_stats / sync_youtube_stats
   - tokens in .env via TikTok_Auth / YouTube_Auth
 
-Scopes note:
-  TikTok needs ``video.list`` approved for stats (not only upload).
+TikTok Open API is paused by default (``TIKTOK_API_ENABLED=false``) after
+repeat developer-app denials. YouTube stays on. TikTok views go in via
+``bolt log_perf``. Re-enable later with ``TIKTOK_API_ENABLED=true``.
 """
 
 from __future__ import annotations
@@ -70,25 +71,54 @@ def _env_set(*keys: str) -> bool:
 
 
 def tiktok_ready() -> Dict[str, Any]:
+    from modules.TikTok_Auth import TIKTOK_API_PAUSE_MESSAGE, tiktok_api_enabled
+
+    if not tiktok_api_enabled():
+        return {
+            "platform": "tiktok",
+            "ready": False,
+            "paused": True,
+            "next_step": (
+                "paused — YouTube auto-syncs; TikTok: bolt log_perf after you post"
+            ),
+            "pause_reason": TIKTOK_API_PAUSE_MESSAGE,
+        }
+
     has_client = _env_set("TIKTOK_CLIENT_KEY", "TIKTOK_CLIENT_ID")
     has_secret = _env_set("TIKTOK_CLIENT_SECRET")
     has_token = _env_set("TIKTOK_ACCESS_TOKEN")
     has_refresh = _env_set("TIKTOK_REFRESH_TOKEN")
     scope = (os.getenv("TIKTOK_SCOPE") or "").lower()
-    has_list = "video.list" in scope or not scope  # unknown scope → try later
-    ok = has_token or (has_client and has_secret and has_refresh)
+    secret = os.getenv("TIKTOK_CLIENT_SECRET") or ""
+    secret_looks_concat = "TIKTOK_" in secret and "=" in secret
+    token_fresh = False
+    if has_token:
+        try:
+            from modules.TikTok_Auth import access_token_is_fresh
+
+            token_fresh = bool(access_token_is_fresh())
+        except Exception:
+            token_fresh = False
+    ok = token_fresh or (has_client and has_secret and has_refresh and not secret_looks_concat)
+    if ok:
+        next_step = "ok — try: bolt stats tiktok --dry-run"
+    elif secret_looks_concat:
+        next_step = (
+            "TIKTOK_CLIENT_SECRET looks concatenated with another key — "
+            "fix .env then run bolt tiktok_token"
+        )
+    else:
+        next_step = "bolt tiktok_token  # scopes: user.info.basic,video.list,…"
     return {
         "platform": "tiktok",
         "ready": bool(ok),
+        "paused": False,
         "has_access_token": has_token,
         "has_refresh_token": has_refresh,
-        "has_client": has_client and has_secret,
+        "has_client": has_client and has_secret and not secret_looks_concat,
+        "access_token_fresh": token_fresh if has_token else False,
         "scope_mentions_video_list": "video.list" in scope if scope else None,
-        "next_step": (
-            "ok — try: bolt stats tiktok --dry-run"
-            if ok
-            else 'bolt tiktok_token  # scopes: user.info.basic,video.list,…'
-        ),
+        "next_step": next_step,
     }
 
 
@@ -96,18 +126,43 @@ def youtube_ready() -> Dict[str, Any]:
     has_token = _env_set("YOUTUBE_ACCESS_TOKEN")
     has_refresh = _env_set("YOUTUBE_REFRESH_TOKEN")
     has_client = _env_set("YOUTUBE_CLIENT_ID", "GOOGLE_CLIENT_ID")
-    ok = has_token or has_refresh
+    has_api_key = _env_set("YOUTUBE_API_KEY")
+    has_handle = _env_set("YOUTUBE_HANDLE", "YOUTUBE_CHANNEL_ID")
+    token_fresh = False
+    if has_token:
+        try:
+            from modules.YouTube_Auth import access_token_is_fresh
+
+            token_fresh = bool(access_token_is_fresh())
+        except Exception:
+            token_fresh = False
+    public_ok = has_api_key and has_handle
+    oauth_ok = token_fresh
+    # A refresh token used to count as "ready", but Testing-app tokens
+    # die after 7 days and then every sync 401s. Only call ready when
+    # we can actually fetch (fresh OAuth or public API key).
+    ok = oauth_ok or public_ok
+    if oauth_ok:
+        next_step = "ok — try: bolt stats youtube --dry-run"
+    elif public_ok:
+        next_step = "ok (public API key) — try: bolt stats youtube --dry-run"
+    elif has_refresh or has_token:
+        next_step = (
+            "OAuth expired — bolt youtube_token  "
+            "(or set YOUTUBE_API_KEY for public stats)"
+        )
+    else:
+        next_step = "bolt youtube_token  # Google OAuth desktop client + YouTube Data API"
     return {
         "platform": "youtube",
         "ready": bool(ok),
         "has_access_token": has_token,
         "has_refresh_token": has_refresh,
+        "access_token_fresh": token_fresh if has_token else False,
+        "has_api_key": has_api_key,
+        "has_handle": has_handle,
         "has_client_hint": has_client,
-        "next_step": (
-            "ok — try: bolt stats youtube --dry-run"
-            if ok
-            else "bolt youtube_token  # Google OAuth desktop client + YouTube Data API"
-        ),
+        "next_step": next_step,
     }
 
 
@@ -115,7 +170,10 @@ def readiness_summary() -> str:
     t = tiktok_ready()
     y = youtube_ready()
     parts = []
-    parts.append("TikTok " + ("ready" if t["ready"] else "needs token"))
+    if t.get("paused"):
+        parts.append("TikTok paused (manual)")
+    else:
+        parts.append("TikTok " + ("ready" if t["ready"] else "needs token"))
     parts.append("YouTube " + ("ready" if y["ready"] else "needs token"))
     return " · ".join(parts)
 
@@ -157,10 +215,13 @@ def print_status() -> None:
     print("\n  Social stats readiness")
     print("  " + "─" * 40)
     for block in (tiktok_ready(), youtube_ready()):
-        flag = "✓" if block["ready"] else "○"
+        if block.get("paused"):
+            flag = "–"
+        else:
+            flag = "✓" if block["ready"] else "○"
         print(f"  {flag}  {block['platform'].title()}")
         for k, v in block.items():
-            if k in ("platform", "ready", "next_step"):
+            if k in ("platform", "ready", "next_step", "pause_reason"):
                 continue
             print(f"      {k}: {v}")
         print(f"      → {block['next_step']}")
@@ -168,14 +229,13 @@ def print_status() -> None:
     print(f"  Outcomes: {recent_outcomes_summary(3)}")
     print()
     print("  Pull into learning store (Data/performance_outcomes.jsonl):")
-    print("    bolt stats --dry-run          # both platforms, no write")
-    print("    bolt stats youtube --dry-run")
-    print("    bolt stats tiktok --dry-run")
-    print("    bolt stats sync               # both, live write")
+    print("    bolt stats youtube --dry-run  # YouTube (automatic)")
+    print("    bolt stats sync               # live write (skips paused TikTok)")
+    print("    bolt log_perf                 # TikTok / X views after you post")
     print()
-    print("  Tokens (when not ready):")
+    print("  Tokens:")
     print("    bolt youtube_token            # YouTube Data API readonly")
-    print("    bolt tiktok_token             # needs video.list scope")
+    print("    TikTok API paused             # TIKTOK_API_ENABLED=true to resume")
     print()
 
 
@@ -201,7 +261,24 @@ def run_sync(
     plat = (platform or "both").lower().strip()
     ok_all = True
 
-    if plat in ("tiktok", "both", "all"):
+    from modules.TikTok_Auth import TIKTOK_API_PAUSE_MESSAGE, tiktok_api_enabled
+
+    if plat in ("tiktok", "both", "all") and not tiktok_api_enabled():
+        print("\n  ── TikTok sync ──")
+        print(f"  {TIKTOK_API_PAUSE_MESSAGE}")
+        results.append(
+            {
+                "platform": "tiktok",
+                "ok": True,
+                "paused": True,
+                "skipped": True,
+                "fetched": 0,
+            }
+        )
+        if plat in ("tiktok", "tt"):
+            return 0
+
+    elif plat in ("tiktok", "both", "all"):
         print("\n  ── TikTok sync ──")
         r = sync_tiktok_stats(
             limit=limit,
@@ -247,16 +324,14 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(
             """bolt stats — social performance pull
 
-  bolt stats                 # readiness (tokens) + recent outcomes
-  bolt stats --dry-run       # both platforms, fetch only (no write)
-  bolt stats tiktok [--dry-run] [--limit N] [--min-age-hours H]
+  bolt stats                 # readiness + recent outcomes
+  bolt stats --dry-run       # YouTube (TikTok API paused)
   bolt stats youtube [--dry-run] [--shorts-only] …
-  bolt stats sync            # both platforms, live write
-  bolt stats sync --dry-run  # both, no write
+  bolt stats sync            # live write (skips paused TikTok)
+  bolt log_perf              # manual TikTok / X views
 
-Requires TikTok video.list scope and/or YouTube OAuth:
-  bolt tiktok_token
-  bolt youtube_token
+YouTube: bolt youtube_token   (or YOUTUBE_API_KEY)
+TikTok API is paused. Set TIKTOK_API_ENABLED=true to resume.
 """
         )
         return 0

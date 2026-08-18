@@ -34,6 +34,10 @@ DEFAULT_SCOPE = "https://www.googleapis.com/auth/youtube.readonly"
 DEFAULT_REDIRECT_URI = "http://127.0.0.1:8765/callback"
 
 
+class YouTubeAuthError(RuntimeError):
+    """Raised when YouTube OAuth token refresh or exchange fails."""
+
+
 def access_token_is_fresh(
     env: Optional[dict] = None, leeway_seconds: int = 120
 ) -> bool:
@@ -60,7 +64,7 @@ def post_token_request(payload: dict) -> dict:
             error = json.loads(body)
         except Exception:
             error = {"error": body}
-        raise RuntimeError(f"YouTube token request failed: {error}") from exc
+        raise YouTubeAuthError(f"YouTube token request failed: {error}") from exc
 
 
 def save_token_bundle(data: dict, path: Path = ENV_FILE) -> dict:
@@ -137,16 +141,29 @@ def refresh_access_token(path: Path = ENV_FILE) -> Optional[str]:
     client_secret = env.get("YOUTUBE_CLIENT_SECRET", "").strip()
     refresh_token = env.get("YOUTUBE_REFRESH_TOKEN", "").strip()
     if not client_id or not client_secret or not refresh_token:
-        return env.get("YOUTUBE_ACCESS_TOKEN", "") or None
+        # Never hand back a known-stale access token — callers fall back
+        # to YOUTUBE_API_KEY public stats instead of a guaranteed 401.
+        return None
 
-    data = post_token_request(
-        {
-            "client_id": client_id,
-            "client_secret": client_secret,
-            "refresh_token": refresh_token,
-            "grant_type": "refresh_token",
-        }
-    )
+    try:
+        data = post_token_request(
+            {
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "refresh_token": refresh_token,
+                "grant_type": "refresh_token",
+            }
+        )
+    except YouTubeAuthError as exc:
+        msg = str(exc)
+        if "invalid_grant" in msg.lower():
+            raise YouTubeAuthError(
+                "YouTube refresh token expired or revoked "
+                "(Google apps in Testing expire refresh tokens after 7 days). "
+                "Re-run: bolt youtube_token"
+            ) from exc
+        raise
+
     # Preserve existing refresh_token if Google omits it on refresh.
     if not data.get("refresh_token"):
         data["refresh_token"] = refresh_token
@@ -158,4 +175,25 @@ def ensure_access_token(path: Path = ENV_FILE) -> Optional[str]:
     env = load_env(path)
     if access_token_is_fresh(env):
         return env.get("YOUTUBE_ACCESS_TOKEN")
-    return refresh_access_token(path=path)
+    token = refresh_access_token(path=path)
+    if token:
+        return token
+    return None
+
+
+def load_api_key(path: Path = ENV_FILE) -> Optional[str]:
+    """Optional public-stats key (YouTube Data API v3, no OAuth)."""
+    env = load_env(path)
+    key = (env.get("YOUTUBE_API_KEY") or "").strip()
+    return key or None
+
+
+def channel_lookup(path: Path = ENV_FILE) -> dict:
+    """Handle / channel id used when OAuth ``mine=true`` is unavailable."""
+    env = load_env(path)
+    handle = (env.get("YOUTUBE_HANDLE") or "").strip()
+    channel_id = (env.get("YOUTUBE_CHANNEL_ID") or "").strip()
+    return {
+        "handle": handle.lstrip("@") if handle else "",
+        "channel_id": channel_id,
+    }

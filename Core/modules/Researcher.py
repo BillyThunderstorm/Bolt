@@ -32,7 +32,7 @@ Read-only access to:
 
 Designed for night-shift work: research runs async, surfaces in evening
 briefings, never blocks Billy's other work. Apple Reminders delivery is
-still a future channel (profile priority #1) — not wired in this phase.
+wired via `bolt briefing --send` (list "Bolt").
 """
 
 from __future__ import annotations

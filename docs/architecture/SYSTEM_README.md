@@ -179,7 +179,9 @@ Twitch chat: `!queue`, `!qstatus`, `!postnow [id]`, `!dontpost [id] <reason>`, `
 | Interface | How |
 |---|---|
 | CLI | `bolt …` (`uv run bolt` or the `.venv` alias) |
-| Voice | `bolt voice` / `bolt talk` / `bolt say` — Andrew via edge-tts, curated intents |
+| Voice | `bolt voice` / `bolt talk` / `bolt say` — Siri Voice 3 (`say -v "Voice 3"`). Mac alerts use the same voice. |
+| Reminders | List **Bolt** — `bolt briefing --send` at 17:00 writes action items + a link to the briefing file |
+| Shortcuts | Bolt Morning, Review Queue, Stats, Wrap-Up; Extract Text from Photos (editable `.txt`) |
 | Twitch chat | Queue and post controls on the live bot |
 | Dashboard | `Checkup_Writer` → `Data/Bolt_data.js` |
 | Sites | bolt.billythunderstorm.us · billythunderstorm.us · billythunderstorm.live |
@@ -198,7 +200,8 @@ Light mode by default (`BOLT_LLM_MODE=light`).
 - **Grok API** only for high-value strategy / research / decisions
 - SuperGrok subscription is app/web chat only — it does **not** cover the API
 - Soft cap **$35/month** → force local when hit
-- Alerts via Mac banner + iMessage + email. **No Discord.**
+- Alerts via Mac banner + Voice 3 + iMessage + email. **No Discord.**
+- Only financial work is fully manual. Everything else is do-and-notify (alert or file link to review/revise).
 
 ---
 
