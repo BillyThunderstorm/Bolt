@@ -94,6 +94,117 @@ class PerformanceSyncHelpersTests(unittest.TestCase):
         path = "media/vertical_clips/2026-07-09_clip03_audio_spike_988_tiktok.mp4"
         self.assertEqual(ps.infer_trigger_from_path(path), "audio_spike")
         self.assertEqual(ps.infer_trigger_from_path("nope.mp4"), "unknown")
+        self.assertEqual(
+            ps.infer_trigger_from_text("My Video - highlighter"), "unknown"
+        )
+        self.assertEqual(
+            ps.infer_trigger_from_text("Hades 2 highlight #Hades2"), "highlight"
+        )
+
+    def test_infer_game_from_text(self):
+        self.assertEqual(ps.infer_game_from_text("#Hades2 clutch"), "Hades 2")
+        self.assertEqual(ps.infer_game_from_text("Hades Highlight 🔥 #Hades"), "Hades 2")
+        self.assertEqual(
+            ps.infer_game_from_text("Deadpool down #MarvelRival"), "Marvel Rivals"
+        )
+        self.assertEqual(
+            ps.infer_game_from_text("#SplitFiction #HazelightStudios"),
+            "Split Fiction",
+        )
+        self.assertEqual(
+            ps.infer_game_from_text("Just got my hands on 007 First Light"),
+            "007 First Light",
+        )
+        self.assertEqual(
+            ps.infer_game_from_text("Escaping Hell #DeadByDaylight"),
+            "Dead by Daylight",
+        )
+        self.assertIsNone(ps.infer_game_from_text("June 30, 2026"))
+        self.assertIsNone(ps.infer_game_from_text(""))
+
+    def test_unmatched_video_does_not_inherit_config_game(self):
+        game, trigger = ps.resolve_video_metadata(
+            title="Fighting for my life #Hades2",
+            clip_path="",
+            match=None,
+        )
+        self.assertEqual(game, "Hades 2")
+        self.assertEqual(trigger, "unknown")
+        unknown_game, _ = ps.resolve_video_metadata(
+            title="Wins", clip_path="", match=None
+        )
+        self.assertEqual(unknown_game, "Unknown")
+
+    def test_retag_and_rebuild_history_drops_seed_and_wrong_game(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            outcomes = tmp_path / "performance_outcomes.jsonl"
+            yt_state = tmp_path / "youtube_stats_state.json"
+            tk_state = tmp_path / "tiktok_stats_state.json"
+            history = tmp_path / "clip_history.json"
+            outcomes.write_text(
+                json.dumps(
+                    {
+                        "game": "007 First Light",
+                        "trigger": "unknown",
+                        "views": 100,
+                        "likes": 2,
+                        "title": "Deadpool down #MarvelRivals",
+                        "note": "synced from YouTube API (unmatched to queue)",
+                        "timestamp": "2026-08-01T00:00:00",
+                    }
+                )
+                + "\n"
+                + json.dumps(
+                    {
+                        "game": "007 First Light",
+                        "trigger": "unknown",
+                        "views": 50,
+                        "likes": 0,
+                        "title": "Hades 2 highlight #Hades2",
+                        "note": "synced from YouTube API (unmatched to queue)",
+                        "timestamp": "2026-08-02T00:00:00",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            yt_state.write_text(
+                json.dumps(
+                    {
+                        "videos": {
+                            "abc": {
+                                "title": "Deadpool down #MarvelRivals",
+                                "game": "007 First Light",
+                                "trigger": "unknown",
+                                "clip_path": "",
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            tk_state.write_text("{}", encoding="utf-8")
+            result = ps.retag_outcomes_from_titles(
+                outcomes_path=outcomes,
+                youtube_state_path=yt_state,
+                tiktok_state_path=tk_state,
+            )
+            self.assertEqual(result["outcomes_updated"], 2)
+            rows = [
+                json.loads(line)
+                for line in outcomes.read_text(encoding="utf-8").splitlines()
+            ]
+            self.assertEqual(rows[0]["game"], "Marvel Rivals")
+            self.assertEqual(rows[1]["game"], "Hades 2")
+            self.assertEqual(rows[1]["trigger"], "highlight")
+            rebuilt = ps.rebuild_clip_history_from_outcomes(
+                outcomes_path=outcomes, history_path=history
+            )
+            self.assertIn("Marvel Rivals", rebuilt)
+            self.assertIn("Hades 2", rebuilt)
+            self.assertNotIn("007 First Light", rebuilt)
+            self.assertNotIn("multi_kill", rebuilt.get("Marvel Rivals", {}))
 
     def test_title_similarity(self):
         self.assertGreater(

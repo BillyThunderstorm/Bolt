@@ -8,6 +8,7 @@ to produce a final score (0-100) for each clip. Higher = better.
 
 import json
 import os
+import re
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 
@@ -83,7 +84,14 @@ TRIGGER_BONUS: Dict[str, float] = {
     "bits": 12,
     "chat_hype": 10,
     "highlight": 5,
+    "audio_spike": 5,  # same event as highlight; filename uses this name
     "manual": 20,  # Stream Deck button press
+}
+
+# Filenames say audio_spike; some history rows were stored as highlight.
+TRIGGER_ALIASES = {
+    "audio_spike": ("audio_spike", "highlight"),
+    "highlight": ("highlight", "audio_spike"),
 }
 
 
@@ -220,7 +228,15 @@ def rank_clips(
     for clip in scoreable:
         score, breakdown = _score_clip(clip, history)
         clip.score = score  # attach dynamically
+        clip.breakdown = breakdown
         clip.tier = _classify_tier(score)  # 'discard' / 'mid' / 'queue'
+        _update_sidecar(
+            getattr(clip, "output_file", ""),
+            ranked_score=score,
+            tier=clip.tier,
+            game=game,
+            breakdown=breakdown,
+        )
 
         notify_score(
             Path(clip.output_file).name, score, f"{breakdown} → tier={clip.tier}"
@@ -270,7 +286,7 @@ def _score_clip(clip, history: dict) -> tuple:
     """Return (final_score, breakdown_string)."""
     # 1. Audio energy component (from highlight score, max 50)
     hl = clip.highlight
-    audio_component = min(50.0, getattr(hl, "score", 50.0) * 0.5)
+    audio_component = min(50.0, float(getattr(hl, "score", 0.0) or 0.0) * 0.5)
 
     # 2. Trigger bonus
     trigger = getattr(hl, "trigger", "highlight")
@@ -283,7 +299,7 @@ def _score_clip(clip, history: dict) -> tuple:
     # 4. Learned boost (the ML step). Combines recency-weighted
     #    views + like_rate per (game, trigger) and caps at
     #    LEARNED_MAX_BOOST. Returns 0 until we have enough samples.
-    game_history = history.get(trigger, {}) if history else {}
+    game_history = _history_for_trigger(trigger, history)
     learn_component = learned_boost(trigger, game_history)
 
     # Total: keep the same 0-100 envelope as before. The two
@@ -304,6 +320,17 @@ def _score_clip(clip, history: dict) -> tuple:
     return total, breakdown
 
 
+def _history_for_trigger(trigger: str, history: dict) -> dict:
+    """Return the history row for trigger, trying filename/history aliases."""
+    if not history:
+        return {}
+    for key in TRIGGER_ALIASES.get(trigger, (trigger,)):
+        data = history.get(key)
+        if data:
+            return data
+    return history.get(trigger, {}) or {}
+
+
 def _history_boost(trigger: str, history: dict) -> float:
     """
     Give a small boost to trigger types that have historically performed well
@@ -311,7 +338,7 @@ def _history_boost(trigger: str, history: dict) -> float:
     """
     if not history:
         return 0.0
-    data = history.get(trigger, {})
+    data = _history_for_trigger(trigger, history)
     avg_views = data.get("avg_views", 0)
     # Scale: 0 views → 0 boost, 10k views → +15 boost (capped)
     boost = min(15.0, (avg_views / 10_000) * 15.0)
@@ -522,3 +549,199 @@ def _now_iso() -> str:
     clock."""
     from datetime import datetime, timezone
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+
+
+# ── Reconstruct a scoreable clip from a file on disk ─────────────────────────
+# Clip_Generator only bakes trigger + timestamp into the filename. The live
+# highlight score used to live only in memory. Sidecar JSON (written at cut
+# time) plus daily logs let us recover it; audio analysis is the last resort.
+
+_CLIP_NAME_RE = re.compile(
+    r"^(?P<stem>.+)_clip(?P<index>\d+)_(?P<trigger>[a-z0-9_]+)_(?P<timestamp>\d+)$",
+    re.IGNORECASE,
+)
+_LOG_CLIP_SCORE_RE = re.compile(
+    r"Clip \d+/\d+\s+[—-]\s+(?P<trigger>[\w]+) @ (?P<ts>[\d.]+)s \(score (?P<score>[\d.]+)\)"
+)
+_LOG_SAVED_RE = re.compile(r"Saved:\s+(?P<name>[\w.\-]+\.mp4)")
+
+_LOG_SCORE_CACHE: Optional[Dict[str, float]] = None
+
+
+def parse_clip_filename(path) -> Dict[str, Any]:
+    """Pull stem / trigger / timestamp out of a Bolt clip filename."""
+    stem = Path(path).stem
+    match = _CLIP_NAME_RE.match(stem)
+    if not match:
+        return {}
+    return {
+        "stem": match.group("stem"),
+        "index": int(match.group("index")),
+        "trigger": match.group("trigger").lower(),
+        "timestamp": float(match.group("timestamp")),
+    }
+
+
+def sidecar_path(path) -> Path:
+    return Path(path).with_suffix(".json")
+
+
+def read_clip_sidecar(path) -> Dict[str, Any]:
+    meta = sidecar_path(path)
+    if not meta.exists():
+        return {}
+    try:
+        data = json.loads(meta.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def write_clip_sidecar(path, **fields) -> None:
+    """Merge fields into the sidecar next to a clip. No-op if the clip is gone."""
+    clip = Path(path)
+    if not clip.exists():
+        return
+    data = read_clip_sidecar(clip)
+    data.update({key: value for key, value in fields.items() if value is not None})
+    try:
+        sidecar_path(clip).write_text(
+            json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+    except OSError:
+        pass
+
+
+def _update_sidecar(output_file: str, **fields) -> None:
+    if output_file:
+        write_clip_sidecar(output_file, **fields)
+
+
+def load_logged_highlight_scores(
+    logs_dir: Optional[Path] = None,
+    *,
+    refresh: bool = False,
+) -> Dict[str, float]:
+    """Recover original detector scores from Bolt_*.log ('Saved:' + score line)."""
+    global _LOG_SCORE_CACHE
+    if _LOG_SCORE_CACHE is not None and not refresh:
+        return _LOG_SCORE_CACHE
+
+    logs_dir = Path(logs_dir) if logs_dir else PROJECT_ROOT / "logs"
+    scores: Dict[str, float] = {}
+    if not logs_dir.is_dir():
+        _LOG_SCORE_CACHE = scores
+        return scores
+
+    pending: Optional[float] = None
+    for log in sorted(logs_dir.glob("Bolt_*.log")):
+        try:
+            text = log.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        for line in text.splitlines():
+            msg = line
+            try:
+                parsed = json.loads(line)
+            except json.JSONDecodeError:
+                parsed = None
+            if isinstance(parsed, dict):
+                msg = str(parsed.get("msg") or line)
+            scored = _LOG_CLIP_SCORE_RE.search(msg)
+            if scored:
+                pending = float(scored.group("score"))
+                continue
+            saved = _LOG_SAVED_RE.search(msg)
+            if saved and pending is not None:
+                scores[saved.group("name")] = pending
+                pending = None
+    _LOG_SCORE_CACHE = scores
+    return scores
+
+
+class FileBackedClip:
+    """Minimal GeneratedClip stand-in built from a file + recovered metadata."""
+
+    def __init__(self, path, trigger: str, highlight_score: float, timestamp: float = 0.0):
+        self.output_file = str(path)
+        self.success = True
+        self.score_source = "unknown"
+        self.highlight = type("Highlight", (), {})()
+        self.highlight.trigger = trigger
+        self.highlight.score = float(highlight_score)
+        self.highlight.timestamp = float(timestamp)
+
+
+def clip_from_path(
+    path,
+    game: Optional[str] = None,
+    *,
+    analyze_audio: bool = True,
+    logged_scores: Optional[Dict[str, float]] = None,
+) -> FileBackedClip:
+    """Build a scoreable clip from an on-disk mp4 using real signals only.
+
+    Priority for highlight.score:
+      1. sidecar written at cut / previous rank
+      2. original detector score recovered from daily logs
+      3. re-analyze the clip's own audio
+      4. 0.0 — never a hardcoded 50
+    """
+    path = Path(path)
+    parsed = parse_clip_filename(path)
+    sidecar = read_clip_sidecar(path)
+    trigger = (
+        sidecar.get("trigger")
+        or parsed.get("trigger")
+        or "audio_spike"
+    )
+    timestamp = sidecar.get("timestamp", parsed.get("timestamp", 0.0))
+
+    score = None
+    source = "none"
+    raw = sidecar.get("highlight_score")
+    sidecar_source = str(sidecar.get("score_source") or "sidecar")
+    # Detector/log sidecars are the original live score. Audio-only
+    # sidecars are a reconstruction and lose to a recovered log value.
+    if raw is not None and sidecar_source in {"detector", "log", "sidecar"}:
+        try:
+            score = float(raw)
+            source = sidecar_source
+        except (TypeError, ValueError):
+            score = None
+    if score is None:
+        logged = logged_scores if logged_scores is not None else load_logged_highlight_scores()
+        if path.name in logged:
+            score = float(logged[path.name])
+            source = "log"
+    if score is None and raw is not None:
+        try:
+            score = float(raw)
+            source = sidecar_source or "sidecar"
+        except (TypeError, ValueError):
+            score = None
+    if score is None and analyze_audio:
+        try:
+            from modules.Highlight_Detector import score_clip_audio
+
+            score = float(score_clip_audio(str(path)))
+            source = "audio"
+        except Exception:
+            score = 0.0
+            source = "none"
+    if score is None:
+        score = 0.0
+        source = "none"
+
+    clip = FileBackedClip(path, trigger, score, timestamp=float(timestamp or 0.0))
+    clip.score_source = source
+    write_clip_sidecar(
+        path,
+        trigger=trigger,
+        highlight_score=score,
+        timestamp=float(timestamp or 0.0),
+        score_source=source,
+        game=game,
+    )
+    return clip

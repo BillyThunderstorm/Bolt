@@ -2,11 +2,11 @@
   "_meta": {
     "schema_version": 1,
     "created_at": "2026-07-29T04:25:00",
-    "last_updated": "2026-07-29T05:42:00",
+    "last_updated": "2026-08-18T21:00:00",
     "interview_status": "complete",
-    "questions_answered": ["q1", "q2", "q3_partial", "q4", "q5", "q6", "q7", "q8", "schedule_decision"],
-    "questions_open": ["q3_allocation"],
-    "note": "Interview complete (Q3 allocation open by user choice — 'not sure how to allocate'). Schedule decision: keep night-shift, sync with husband. Profile now reflects full vision, 7 hard constraints, parallel-trial lane mix, channel priority order, night-shift work pattern, revenue scenario with 4 tiers. Ready for Phase 1.2 (memory consolidation) and Phase 2 (researcher role)."
+    "questions_answered": ["q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "schedule_decision"],
+    "questions_open": [],
+    "note": "Interview complete. Q3 allocation adopted 2026-08-18 from the pending 40-hour default (user asked to close what we can). C1 wording updated the same day: honest review of a hyped dud you own + a working alternative is allowed. Standing research questions (through-line, creator examples) stay open on purpose — those are research, not missing policy."
   },
   "vision": {
     "career_goal": "Build a content-career reviewing products that companies send. Travel to company sites to test products firsthand. Being chosen by gaming companies to test their newest releases and asked to present or host at game awards and events like Dream Con. Creating with Marvel. Voice must matter and be valuable; never sell the next gimmick.",
@@ -41,21 +41,22 @@
     "schedule_decision_rationale": "Relationship-sync preference (keep schedule aligned with husband) is the primary constraint. User confirmed willingness to add focused daylight hours for career coordination. Bolt's role: shift cron jobs to evening wake-hours, use Apple Reminders as async inbox, surface daylight-coordination items so user can batch-process them in 2-3 focused hours/week.",
     "schedule_mode": "hybrid_mostly_night",
     "schedule_mode_note": "Mostly night (≈37 hrs/week evening-through-morning) + small daylight coordination window (2-3 hrs/week). Daylight is for time-sensitive coordination only, not regular creator work.",
-    "allocation": null,
-    "allocation_default_pending_review": {
+    "allocation": {
       "filming_editing": 15,
       "posting_community": 5,
       "brand_sponsor_work": 8,
       "learning_research": 8,
-      "business_admin": 4
+      "business_admin": 4,
+      "_total": 40
     },
-    "allocation_note": "User explicitly asked to revisit allocation. Default listed for Bolt's use only until user confirms or overrides. Brand/sponsor work allocation includes the daylight coordination window."
+    "allocation_adopted_at": "2026-08-18",
+    "allocation_note": "Working default from the 40-hour week the user already described. Brand/sponsor hours include the 2–3h daylight coordination window. Numbers can move later; this unblocks planning."
   },
   "hard_constraints": [
     {
       "id": "C1",
-      "text": "No content that sells the next gimmick. If a product is hyped but doesn't deliver, Bolt flags it as 'don't cover,' not 'cover this.'",
-      "rationale": "Honest-take brand promise is the moat. Compromising it loses the audience and the brand deals."
+      "text": "No content that sells a hyped product as if it works. If Billy already has something that's hyped but doesn't deliver, cover it as an honest review — and pair it with a similar product that actually works. Never skip the dud just because it's trendy, and never recommend the dud.",
+      "rationale": "Authenticity includes reviewing the hype you actually own. The moat is the honest verdict plus a working alternative, not silence and not fake praise."
     },
     {
       "id": "C2",
@@ -224,12 +225,12 @@
       "tier_1_0_to_500": {
         "duration": "0-6 months typical",
         "what_it_looks_like": "First sponsor deals, learning what to charge, building relationships. Twitch audience conversion starts here.",
-        "life_change": "Side income, doesn't change the day-to-day yet."
+        "life_change": "User: even $1k/mo means breathing fuller and smiling more. Proof this is not a made-up failure. Attitude and motivation shift first; the calendar may not."
       },
       "tier_2_500_to_3000": {
         "duration": "6-18 months typical for honest-product creators who actually do the work",
         "what_it_looks_like": "Consistent sponsor deals, Amazon affiliate starts compounding, some product seeding (free products = cost-of-living offset).",
-        "life_change": "Replaces a part-time job's worth of income. Day-to-day starts to bend toward creator work."
+        "life_change": "User: $3k/mo is confidence that this is an actual career they built and wouldn't be embarrassed behind. $1k already changes the feeling; $3k names it as the job."
       },
       "tier_3_3000_to_8000": {
         "duration": "12-24 months",
@@ -260,6 +261,14 @@
       "Whether tech-AI or skincare lane monetizes faster than gaming",
       "Whether 'creating with Marvel' is realistic at all"
     ],
-    "user_target_question": "What changes in your life at $1,000/mo vs $3,000/mo? If the answer is 'not much', $1k is fine. If the answer is 'everything changes at $3k', that's the real target."
+    "user_target_question": "answered",
+    "user_target": {
+      "answered_at": "2026-08-18",
+      "first_real_win": 1000,
+      "career_confidence": 3000,
+      "what_changes": "Attitude, motivation, and confidence — not a different lifestyle calendar. $1k/mo is enough to start breathing fuller and smiling more. $3k/mo is being able to say this is an actual career they built and wouldn't be embarrassed behind.",
+      "user_words": "Would probably be my attitude, motivation and confidence in saying this is an actual career that I built and wouldn't be embarrassed behind. I haven't been not doing anything, I just don't have any wind behind me or a push to keep myself motivated because I'm making everything up so I've had the expectation of failing. Even at $1k a month, I'd start breathing fuller and smiling more.",
+      "implication_for_bolt": "Do not treat the work as 'nothing happening until $3k.' The motivation gap is missing proof and a real roadmap, not missing effort. Celebrate and track the path to $1k/mo as the first emotional win. Never frame the current work as expected failure."
+    }
   }
 }

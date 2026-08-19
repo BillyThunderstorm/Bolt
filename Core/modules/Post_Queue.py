@@ -73,7 +73,7 @@ def add_to_queue(
     clip_path: str,
     title: str,
     hashtags: list = None,
-    score: float = 50,
+    score: float = 0,
     tier: str = "queue",
 ):
     """

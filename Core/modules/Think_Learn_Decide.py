@@ -667,7 +667,7 @@ class ThinkLearnDecideEngine:
                 continue
 
             action = str(candidate.get("action") or "queue_clip")
-            score = candidate.get("score", 50)
+            score = candidate.get("score", 0)
             confidence = self._base_confidence_from_score(score)
             base_reason = f"score {score} → confidence {confidence:.2f}"
 
@@ -795,7 +795,7 @@ class ThinkLearnDecideEngine:
             vertical = _format_for_tiktok(clip_path, style=style)
             title = payload.get("title") or Path(clip_path).stem.replace("_", " ")
             hashtags = payload.get("hashtags") or []
-            score = float(payload.get("score", 50))
+            score = float(payload.get("score") or 0)
             _add_to_queue(
                 clip_path=vertical, title=title, hashtags=hashtags, score=score
             )

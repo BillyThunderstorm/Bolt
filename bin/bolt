@@ -166,7 +166,7 @@ Script subcommands (each maps to scripts/X.py):
                           (alias: vector_db, reindex) — lives in Core/modules/
   vector_db                Short alias for refresh_vector_db
   reindex                  Short alias for refresh_vector_db
-  filter_backlog          Move low-scoring clips to clips/_low_score/
+  filter_backlog          Move low-scoring clips to media/clips/_low_score/
   watch                   Watch the recordings folder for new files
   layout [--quiet|--json] Report any files misplaced at the repo root (no moves)
 

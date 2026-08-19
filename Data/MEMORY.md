@@ -112,6 +112,10 @@ Use `memory/content/` for broad creator growth:
 The best memory entry is specific: date, platform, content idea, result, and lesson.
 
 ## Recent Notes
+- [2026-08-18] Held clip 1976be1d (Test): not ready
+- [2026-08-18] Held clip 59eb0958 (Ready clip): bad hook
+- [2026-08-18] Held clip 872c1b19 (Test): not ready
+- [2026-08-18] Held clip 65e497eb (Ready clip): bad hook
 - [2026-08-17] Held clip f01b6ff9 (I love this for me #007FirstLight #JamesBond #fyp #IOInteractive #DelphiInteractiveLLC): same issue with the video quality. I will work on making something worth posting first, then come back to both of these videos
 - [2026-08-17] Held clip 97ad1824 (Its a very dapper night #fyp #JamesBond #DelphiInteractiveLLC #IOInteractive #FirstLightGameplay): the video quality isn't good enough to post. Plus, the post this week should be focused on skin care, not gaming. Ill work on that now"
 - [2026-08-17] Mac automation: launchd fixed (Core/launch.py live --no-checklist). Evening briefing at 17:00 writes Apple Reminders list "Bolt" plus a Mac banner. Only financial work stays fully manual; everything else is do-and-notify. Shortcuts: Bolt Morning / Review Queue / Stats / Wrap-Up. OCR shortcut writes an editable .txt via Vision.

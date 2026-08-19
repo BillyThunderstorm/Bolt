@@ -430,7 +430,13 @@ def _run_setup_wizard():
     print("STEP 1 — What game are you streaming?")
     print("  Bolt has built-in profiles for Marvel Rivals, Valorant, Apex,")
     print("  Fortnite, Warzone, Overwatch 2, CS2, and more.\n")
-    game = input("  Game name [Marvel Rivals]: ").strip() or "Marvel Rivals"
+    existing_game = "Gaming"
+    try:
+        if Path(CONFIG_FILE).exists():
+            existing_game = json.load(open(CONFIG_FILE)).get("game") or existing_game
+    except Exception:
+        pass
+    game = input(f"  Game name [{existing_game}]: ").strip() or existing_game
 
     # ── Step 2: Sensitivity ───────────────────────────────────────────────────
     print("\nSTEP 2 — Highlight sensitivity")

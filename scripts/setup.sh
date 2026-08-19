@@ -78,11 +78,14 @@ else
 fi
 
 # ── Verify config.json ────────────────────────────────────────────────────────
-if [ ! -f "config.json" ]; then
-    echo "  Creating config.json..."
-    cat > config.json << 'CFGEOF'
+# Canonical config lives at Core/config.json. Never write a second copy
+# at the repo root — it drifts (Marvel Rivals vs whatever you're playing).
+if [ ! -f "Core/config.json" ] && [ ! -f "config.json" ]; then
+    echo "  Creating Core/config.json..."
+    mkdir -p Core
+    cat > Core/config.json << 'CFGEOF'
 {
-  "game": "Marvel Rivals",
+  "game": "Gaming",
   "recordings_folder": "recordings",
   "clips_folder": "clips",
   "vertical_clips_folder": "vertical_clips",
@@ -126,7 +129,7 @@ if [ ! -f "config.json" ]; then
   "hashtags": ["gaming", "clips", "viral", "trending"]
 }
 CFGEOF
-    echo "  ✓ config.json created"
+    echo "  ✓ Core/config.json created"
 else
     echo "  ✓ config.json already exists"
 fi

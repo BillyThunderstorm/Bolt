@@ -118,7 +118,6 @@ def detect_highlights(video_path: str, sensitivity: float = SENSITIVITY) -> List
       6. Enforce min-gap, keeping the strongest peak in each conflict
       7. Cap to max_candidates by score
     """
-    import librosa
     import numpy as np
 
     settings = _load_highlight_settings()
@@ -131,59 +130,8 @@ def detect_highlights(video_path: str, sensitivity: float = SENSITIVITY) -> List
     peak_neighborhood_sec = settings["peak_neighborhood_sec"]
     local_window_sec = settings["local_window_sec"]
 
-    # librosa can't read .mkv/.mp4 containers directly —
-    # so we use ffmpeg to extract a clean mono WAV first,
-    # then load that. The temp file is deleted automatically.
-    tmp_path: Optional[str] = None
-    try:
-        tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
-        tmp_path = tmp.name
-        tmp.close()
-
-        result = subprocess.run(
-            [
-                "ffmpeg",
-                "-y",  # overwrite if exists
-                "-i",
-                video_path,  # input video
-                "-map",
-                "0:a:0",
-                "-vn",  # no video — audio only
-                "-ac",
-                "1",  # mono
-                "-ar",
-                "22050",  # match librosa default
-                "-f",
-                "wav",  # output format
-                tmp_path,
-            ],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,  # suppress opus timestamp spam
-        )
-
-        if result.returncode != 0:
-            print(
-                f"[HighlightDetector] ffmpeg failed to extract audio from: {video_path}"
-            )
-            return []
-
-        y, sr = librosa.load(tmp_path, sr=22050, mono=True)
-    except Exception as exc:
-        print(f"[HighlightDetector] Could not load audio: {exc}")
-        return []
-    finally:
-        if tmp_path:
-            try:
-                os.remove(tmp_path)
-            except Exception:
-                pass
-
-    hop = int(HOP_SEC * sr)
-    win = int(WINDOW_SEC * sr)
-    rms = librosa.feature.rms(y=y, frame_length=win, hop_length=hop)[0]
-    times = librosa.frames_to_time(np.arange(len(rms)), sr=sr, hop_length=hop)
-
-    if len(rms) == 0:
+    rms, times = _load_rms(video_path)
+    if rms is None or times is None or len(rms) == 0:
         return []
 
     # Robust baseline: percentile of RMS (not median-of-quiet which can be too
@@ -294,3 +242,105 @@ def detect_highlights(video_path: str, sensitivity: float = SENSITIVITY) -> List
     )
 
     return events
+
+
+def _load_rms(video_path: str):
+    """Extract mono audio and return (rms, times), or (None, None) on failure."""
+    import librosa
+    import numpy as np
+
+    tmp_path: Optional[str] = None
+    try:
+        tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
+        tmp_path = tmp.name
+        tmp.close()
+
+        result = subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                video_path,
+                "-map",
+                "0:a:0",
+                "-vn",
+                "-ac",
+                "1",
+                "-ar",
+                "22050",
+                "-f",
+                "wav",
+                tmp_path,
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+        if result.returncode != 0:
+            print(
+                f"[HighlightDetector] ffmpeg failed to extract audio from: {video_path}"
+            )
+            return None, None
+
+        y, sr = librosa.load(tmp_path, sr=22050, mono=True)
+    except Exception as exc:
+        print(f"[HighlightDetector] Could not load audio: {exc}")
+        return None, None
+    finally:
+        if tmp_path:
+            try:
+                os.remove(tmp_path)
+            except Exception:
+                pass
+
+    hop = int(HOP_SEC * sr)
+    win = int(WINDOW_SEC * sr)
+    rms = librosa.feature.rms(y=y, frame_length=win, hop_length=hop)[0]
+    times = librosa.frames_to_time(np.arange(len(rms)), sr=sr, hop_length=hop)
+    return rms, times
+
+
+def score_clip_audio(video_path: str, sensitivity: float = SENSITIVITY) -> float:
+    """Return a 0–100 audio-energy score for an already-cut clip.
+
+    Already-cut highlights are short and often sit inside the spike window,
+    so the full VOD peak-search can return nothing. This uses the same RMS
+    math but scores the file's own peak vs its quiet floor — never a
+    hardcoded default.
+    """
+    import numpy as np
+
+    settings = _load_highlight_settings()
+    rms, _times = _load_rms(video_path)
+    if rms is None or len(rms) == 0:
+        return 0.0
+
+    peak = float(np.max(rms))
+    quiet = float(np.percentile(rms, 20.0))
+    median = float(np.median(rms))
+    if peak <= 0:
+        return 0.0
+
+    # Prominence vs the quietest stretch (intro padding) and vs median.
+    if quiet > 0:
+        punch = (peak / quiet) - 1.0
+    else:
+        punch = 1.0 if peak > 0 else 0.0
+    if median > 0:
+        prominence = (peak / median) - 1.0
+    else:
+        prominence = punch
+
+    # Same envelope as detect_highlights confidence (0 at 1×, 1 at 2×+).
+    confidence = min(1.0, 0.55 * min(1.0, max(0.0, punch / 2.0))
+                     + 0.45 * min(1.0, max(0.0, prominence)))
+
+    # Blend in the VOD-style threshold score when the clip still has range.
+    baseline = float(np.percentile(rms, settings["baseline_percentile"]))
+    sens = max(0.0, min(1.0, float(sensitivity)))
+    threshold = baseline * (settings["spike_mult"] * (1.0 - sens + 0.5))
+    if threshold > 0 and peak > threshold:
+        vod_conf = min(1.0, float(peak / threshold) - 1.0)
+        confidence = min(1.0, max(confidence, vod_conf))
+
+    return round(confidence * 100, 1)

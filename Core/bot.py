@@ -234,9 +234,11 @@ def process_recording(
         from modules.Title_Generator import generate_titles
         for clip in successful_clips:
             trigger = _guess_trigger(clip.output_file, highlights)
+            hl_score = float(getattr(getattr(clip, "highlight", None), "score", 0.0) or 0.0)
             titles, hashtags = generate_titles(
                 trigger=trigger,
                 game=game,
+                score=hl_score,
                 context={"creator_brain": creator_brain, "config": config},
             )
             clip_titles[clip.output_file] = {"titles": titles, "hashtags": hashtags}
@@ -256,7 +258,7 @@ def process_recording(
     notify("Step 5/6 — Ranking clips…", level="info")
     try:
         from modules.Clip_Ranker import rank_clips
-        ranked_clips = rank_clips(successful_clips)[:max_clips]
+        ranked_clips = rank_clips(successful_clips, game=game)[:max_clips]
     except Exception as e:
         notify_error("Clip_Ranker", e, recoverable=True)
         ranked_clips = successful_clips[:max_clips]
@@ -278,7 +280,11 @@ def process_recording(
                 clip_path=vertical or clip_path,
                 title=best_title,
                 hashtags=hashtags,
-                score=float(getattr(clip, "score", 50.0)),
+                score=float(
+                    getattr(clip, "score", None)
+                    or getattr(getattr(clip, "highlight", None), "score", 0.0)
+                    or 0.0
+                ),
                 tier=getattr(clip, "tier", "queue"),
             )
             
@@ -289,15 +295,27 @@ def process_recording(
         notify_error("TikTok formatting / post queue", e)
 
 def _guess_trigger(clip_path: str, highlights: list) -> str:
+    try:
+        from modules.Clip_Ranker import parse_clip_filename
+
+        parsed = parse_clip_filename(clip_path)
+        if parsed.get("trigger"):
+            return parsed["trigger"]
+    except Exception:
+        pass
     name = Path(clip_path).stem.lower()
     trigger_keywords = {
         "kill": ["kill", "elim", "downed"],
         "multi_kill": ["multi", "double", "triple"],
         "ace": ["ace", "wipe", "clutch"],
+        "audio_spike": ["audio_spike"],
     }
     for trigger, keywords in trigger_keywords.items():
         if any(k in name for k in keywords):
             return trigger
+    if highlights:
+        first = highlights[0]
+        return getattr(first, "trigger", None) or getattr(first, "type", "highlight")
     return "highlight"
 
 def _start_chat_bot(creator_brain: str):

@@ -602,7 +602,7 @@ def queue_clip(
     clip_path: str,
     title: str,
     hashtags: list = None,
-    score: float = 50,
+    score: float = 0,
     tier: str = "queue",
 ) -> dict:
     """
@@ -1676,7 +1676,7 @@ def _suggest_titles_for_clip(
     filename: str = "",
     trigger: str = "reaction",
     game: str = "Gaming",
-    score: float = 90.0,
+    score: float = 0.0,
     count: int = 3,
 ) -> tuple[list[str], list[str]]:
     """Return (titles, hashtags) for a queue row or bare filename."""
@@ -1766,11 +1766,40 @@ def set_clip_title(
     return clip
 
 
+def _resolve_manual_clip_score(path: Path, score: float | None) -> float:
+    """Use an explicit --score, then sidecar / recovered rank, never a fake 90."""
+    if score is not None:
+        return float(score)
+    try:
+        from modules.Clip_Ranker import clip_from_path, read_clip_sidecar
+
+        sidecar = read_clip_sidecar(path)
+        for key in ("ranked_score", "highlight_score"):
+            raw = sidecar.get(key)
+            if raw is not None:
+                return float(raw)
+        # Horizontal original sitting in media/clips/ with the same stem.
+        stem = path.stem.replace("_tiktok", "")
+        sibling = _PROJECT_ROOT / "media" / "clips" / f"{stem}.mp4"
+        if sibling.exists():
+            sib = read_clip_sidecar(sibling)
+            if sib.get("ranked_score") is not None:
+                return float(sib["ranked_score"])
+            recovered = clip_from_path(
+                sibling, analyze_audio=False, logged_scores={}
+            )
+            if getattr(recovered.highlight, "score", 0):
+                return float(recovered.highlight.score)
+    except Exception:
+        pass
+    return 0.0
+
+
 def add_manual_clip(
     clip_path: str | Path,
     title: str | None = None,
     hashtags: list | None = None,
-    score: float = 90.0,
+    score: float | None = None,
     *,
     approve: bool = False,
     suggest_title: bool = False,
@@ -1807,9 +1836,10 @@ def add_manual_clip(
 
     stem = path.stem.replace("_", " ").strip() or path.name
     tags = hashtags
+    resolved_score = _resolve_manual_clip_score(path, score)
     if suggest_title and not title:
         titles, gen_tags = _suggest_titles_for_clip(
-            filename=path.name, score=float(score)
+            filename=path.name, score=float(resolved_score)
         )
         title = titles[0] if titles else stem
         if not tags:
@@ -1823,7 +1853,7 @@ def add_manual_clip(
         str(path),
         title,
         hashtags=tags or ["#Gaming", "#clips", "#fyp"],
-        score=float(score),
+        score=float(resolved_score),
         tier="queue",
     )
     if approve:
@@ -2651,10 +2681,10 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
         return 0
 
     if action in ("add", "add-clip", "register", "import"):
-        # bolt queue add Stress.mp4 Hands.mp4 [--approve] [--title "..."] [--score 90]
+        # bolt queue add Stress.mp4 Hands.mp4 [--approve] [--title "..."] [--score N]
         flags = set()
         title = None
-        score = 90.0
+        score = None
         paths: list[str] = []
         i = 0
         while i < len(rest):

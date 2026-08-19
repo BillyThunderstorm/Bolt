@@ -279,6 +279,78 @@ class ClipRankerTests(unittest.TestCase):
         for c in ranked:
             self.assertIn(c.tier, {cr.TIER_DISCARD, cr.TIER_MID, cr.TIER_QUEUE})
 
+    def test_parse_clip_filename_audio_spike(self):
+        parsed = cr.parse_clip_filename(
+            "2026-08-09_01-13-33_clip01_audio_spike_84.mp4"
+        )
+        self.assertEqual(parsed["trigger"], "audio_spike")
+        self.assertEqual(parsed["timestamp"], 84.0)
+        self.assertEqual(parsed["index"], 1)
+        self.assertEqual(parsed["stem"], "2026-08-09_01-13-33")
+
+    def test_parse_clip_filename_unknown(self):
+        self.assertEqual(cr.parse_clip_filename("random_export.mp4"), {})
+
+    def test_history_alias_audio_spike_uses_highlight_row(self):
+        history = {"highlight": {"avg_views": 10_000}}
+        boost = cr._history_boost("audio_spike", history)
+        self.assertGreater(boost, 0)
+
+    def test_load_logged_highlight_scores_pairs_saved_line(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "Bolt_2026-08-09.log"
+            log.write_text(
+                '{"msg": "  Clip 1/12 — audio_spike @ 84.0s (score 100)"}\n'
+                '{"msg": "  ✓ Saved: 2026-08-09_01-13-33_clip01_audio_spike_84.mp4"}\n'
+                '{"msg": "  Clip 2/12 — audio_spike @ 416.0s (score 42)"}\n'
+                '{"msg": "  \\u2713 Saved: 2026-08-08_08-55-07_clip01_audio_spike_416.mp4"}\n',
+                encoding="utf-8",
+            )
+            scores = cr.load_logged_highlight_scores(Path(tmp), refresh=True)
+            self.assertEqual(
+                scores["2026-08-09_01-13-33_clip01_audio_spike_84.mp4"], 100.0
+            )
+            self.assertEqual(
+                scores["2026-08-08_08-55-07_clip01_audio_spike_416.mp4"], 42.0
+            )
+        cr._LOG_SCORE_CACHE = None
+
+    def test_clip_from_path_prefers_sidecar_over_fake_default(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            clip_path = Path(tmp) / "2026-08-09_01-13-33_clip01_audio_spike_84.mp4"
+            clip_path.write_bytes(b"not-a-real-video")
+            cr.write_clip_sidecar(
+                clip_path, trigger="audio_spike", highlight_score=87.0
+            )
+            clip = cr.clip_from_path(
+                clip_path, analyze_audio=False, logged_scores={}
+            )
+            self.assertEqual(clip.highlight.score, 87.0)
+            self.assertEqual(clip.highlight.trigger, "audio_spike")
+            self.assertEqual(clip.score_source, "sidecar")
+
+    def test_clip_from_path_uses_log_then_zero_not_fifty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            clip_path = Path(tmp) / "session_clip02_kill_12.mp4"
+            clip_path.write_bytes(b"not-a-real-video")
+            clip = cr.clip_from_path(
+                clip_path,
+                analyze_audio=False,
+                logged_scores={"session_clip02_kill_12.mp4": 71.0},
+            )
+            self.assertEqual(clip.highlight.score, 71.0)
+            self.assertEqual(clip.highlight.trigger, "kill")
+            self.assertEqual(clip.score_source, "log")
+
+            orphan = Path(tmp) / "unknown_export.mp4"
+            orphan.write_bytes(b"x")
+            empty = cr.clip_from_path(
+                orphan, analyze_audio=False, logged_scores={}
+            )
+            self.assertEqual(empty.highlight.score, 0.0)
+            self.assertNotEqual(empty.highlight.score, 50.0)
+            self.assertEqual(empty.score_source, "none")
+
 
 if __name__ == "__main__":
     unittest.main()
