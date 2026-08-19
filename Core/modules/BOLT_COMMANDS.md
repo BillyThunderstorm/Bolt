@@ -514,7 +514,7 @@ floor, min gap, candidate cap). Tune in `Core/config.json` under `highlight` and
 | `bolt highlights` | Compile the top clips into a Twitch highlight reel |
 | `bolt thumbnails [dir…]` | Generate JPG thumbnails for clips in the given directories |
 | `bolt clip_dedupe` | Run duplicate detection across the clips folder (writes to `Data/seen_clips.json`) |
-| `bolt filter_backlog` | Move low-scoring clips to `clips/_low_score/` |
+| `bolt filter_backlog` | Move low-scoring clips to `media/clips/_low_score/` |
 | `bolt watch` | Watch the recordings folder for new files and trigger the pipeline |
 
 ## Twitch VOD downloads and authentication

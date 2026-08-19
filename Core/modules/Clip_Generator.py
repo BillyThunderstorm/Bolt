@@ -7,6 +7,7 @@ cuts each highlight into its own clip file using MoviePy or ffmpeg,
 with configurable padding before/after each highlight.
 """
 
+import json
 import os
 import sys
 import subprocess
@@ -214,6 +215,7 @@ def generate_clips(
             success, error = _cut_clip_ffmpeg(str(source), out_path, start, duration)
 
             if success:
+                _write_highlight_sidecar(out_path, event, start, duration)
                 notify(
                     f"  ✓ Saved: {out_name}",
                     level="success",
@@ -273,6 +275,27 @@ def generate_clips(
         "Failed clips are logged above — they will NOT enter the ranking pipeline.",
     )
     return results
+
+
+def _write_highlight_sidecar(out_path: str, event, start: float, duration: float) -> None:
+    """Persist the in-memory highlight so later tools don't have to fake it."""
+    meta = {
+        "output_file": out_path,
+        "trigger": getattr(event, "trigger", None) or getattr(event, "type", "audio_spike"),
+        "highlight_score": float(getattr(event, "score", 0.0) or 0.0),
+        "confidence": float(getattr(event, "confidence", 0.0) or 0.0),
+        "timestamp": float(getattr(event, "timestamp", 0.0) or 0.0),
+        "start_time": start,
+        "duration": duration,
+        "score_source": "detector",
+    }
+    try:
+        Path(out_path).with_suffix(".json").write_text(
+            json.dumps(meta, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+    except OSError:
+        pass
 
 
 # ── ffmpeg helpers ─────────────────────────────────────────────────────────────

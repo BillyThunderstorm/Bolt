@@ -1,7 +1,7 @@
 ═══════════════════════════════════════════════════════════════════════════
   BOLT — WHAT BOLT NEEDS TO REMEMBER ABOUT ME
   Print this. Tape it where you work. Update when something changes.
-  Last updated: 2026-07-29
+  Last updated: 2026-08-18
 ═══════════════════════════════════════════════════════════════════════════
 
 ───────────────────────────────────────────────────────────────────────────
@@ -18,12 +18,17 @@ Voice must matter and be valuable. Never sell the next gimmick.
 Income target: brand sponsorships + event hosting + Amazon affiliate.
 NOT ad revenue.
 
+First real win: $1k/mo — breathing, smiling, proof it's not made-up failure.
+Career confidence: $3k/mo — can say this is a career I built, not embarrassed.
+What changes at those numbers is attitude and motivation, not the calendar.
+
 ───────────────────────────────────────────────────────────────────────────
   BOTTLENECK — what's actually in my way
 ───────────────────────────────────────────────────────────────────────────
 
 Not time. Not a list of things to do. The bottleneck is no roadmap — no
-one to model after, no example of where I want to be.
+one to model after, no example of where I want to be. Work is happening;
+what's missing is wind — a push that this isn't expected to fail.
 
 IMPLICATION FOR BOLT: This is a direction-finding problem, not an
 execution problem. Research comes before production. When given a to-do
@@ -38,6 +43,9 @@ charging ahead.
   •  Bursty: max ~8 hours in a day, NOT consecutive
   •  Within a session: harder tasks FIRST, finish each completely
      before moving on. No half-done tasks left open.
+  •  Split (working default, adopted 2026-08-18):
+       filming/editing 15 · posting/community 5 · brand/sponsor 8
+       learning/research 8 · business admin 4
 
 ───────────────────────────────────────────────────────────────────────────
   LANES — what I make content about (parallel trials, 25% each)
@@ -56,8 +64,8 @@ stand behind, trust it."
   HARD CONSTRAINTS — never cross these (C1-C7)
 ───────────────────────────────────────────────────────────────────────────
 
-  C1  No content that sells the next gimmick. Hyped-but-broken product
-      = "don't cover," not "cover this."
+  C1  Don't sell a hyped dud as if it works. If Billy has it, review it
+      honestly and pair it with a similar product that actually works.
 
   C2  Direction over execution. When given a list, push back before
       charging ahead.
@@ -79,20 +87,20 @@ stand behind, trust it."
       intelligence. No indirect associations either.
 
 ───────────────────────────────────────────────────────────────────────────
-  RISK TOLERANCE — what Bolt does on its own (approved 2026-07-29)
+  RISK TOLERANCE — what Bolt does on its own (updated 2026-08-17)
 ───────────────────────────────────────────────────────────────────────────
 
   NEVER without explicit approval:
-    □ Posting clips to TikTok / YouTube / X
-    □ Replying to comments / DMs
-    □ Modifying Bolt config or catalog
-    □ Deleting or moving media files
-    □ Adding products to Amazon storefront
-    □ Anything financial (links, codes, deal terms)
+    □ Anything financial (links, codes, deal terms, payments)
 
-  DO IT but flag for review:
-    □ Sending sponsor outreach messages (drafts OK, sends need approval)
-    □ Changing posting schedule or queue (reorder is fine; auto-post needs review)
+  DO IT, then notify (Apple Reminder / banner / file link):
+    □ Prepare and queue posts (you revise via the package link)
+    □ Draft comment/DM replies
+    □ Draft sponsor outreach
+    □ Change Bolt config or catalog
+    □ Pipeline media moves/archives
+    □ Stage Amazon listings
+    □ Reorder / schedule the queue
 
 ───────────────────────────────────────────────────────────────────────────
   CHANNELS — how Bolt reaches me (priority order)

@@ -102,15 +102,18 @@ def get_clip_score(clip_name: str) -> float:
         except (OSError, json.JSONDecodeError):
             pass
 
-    # Extract audio spike score from filename — use as tiebreaker only,
-    # not primary score (it's a timestamp, not a quality metric)
-    if "audio_spike_" in clip_name:
-        try:
-            spike_part = clip_name.split("audio_spike_")[-1]
-            spike_val = int(spike_part.split("_")[0].split(".")[0])
-            score += min(spike_val, 100) / 100  # Cap at 1 point — tiebreaker only
-        except (ValueError, IndexError):
-            pass
+    # Prefer the real ranker sidecar over anything baked into the filename.
+    # (audio_spike_NNNN is a timestamp, not a quality metric.)
+    try:
+        from modules.Clip_Ranker import read_clip_sidecar
+
+        sidecar = read_clip_sidecar(CLIPS_DIR / clip_name)
+        if sidecar.get("ranked_score") is not None:
+            score += float(sidecar["ranked_score"])
+        elif sidecar.get("highlight_score") is not None:
+            score += float(sidecar["highlight_score"]) * 0.5
+    except Exception:
+        pass
 
     return score
 

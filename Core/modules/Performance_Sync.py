@@ -31,9 +31,10 @@ PERFORMANCE_OUTCOMES_FILE = DATA_DIR / "performance_outcomes.jsonl"
 STATE_FILE = DATA_DIR / "tiktok_stats_state.json"  # TikTok default (back-compat)
 YOUTUBE_STATE_FILE = DATA_DIR / "youtube_stats_state.json"
 READY_TO_POST_FILE = DATA_DIR / "ready_to_post.json"
+# Core/config.json is canonical. Data/config.json is a leftover and must
+# not override the live game (it still says Marvel Rivals).
 CONFIG_CANDIDATES = (
     PROJECT_ROOT / "Core" / "config.json",
-    PROJECT_ROOT / "Data" / "config.json",
     PROJECT_ROOT / "config.json",
 )
 
@@ -54,10 +55,67 @@ KNOWN_TRIGGERS = (
 )
 
 _TRIGGER_IN_NAME = re.compile(
-    r"(?:"
+    r"(?<![a-z0-9])(?:"
     + r"|".join(re.escape(t) for t in sorted(KNOWN_TRIGGERS, key=len, reverse=True))
-    + r")",
+    + r")(?![a-z0-9])",
     re.IGNORECASE,
+)
+
+# (canonical name, lowercase needles). Longer / more specific first.
+# Used when a synced video is not matched to a queue row — never assume
+# "whatever game is in config.json right now".
+GAME_ALIASES: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
+    (
+        "007 First Light",
+        (
+            "007 first light",
+            "007firstlight",
+            "first light",
+            "bondgames",
+            "bond game",
+        ),
+    ),
+    (
+        "Split Fiction",
+        ("split fiction", "splitfiction", "hazelight"),
+    ),
+    (
+        "Hades 2",
+        (
+            "hades 2",
+            "hades2",
+            "hades2game",
+            "hadesgame",
+            "hades game",
+            "#hades",
+            " hades ",
+            "scylla",
+        ),
+    ),
+    (
+        "Dead by Daylight",
+        (
+            "dead by daylight",
+            "deadbydaylight",
+            "#dbd",
+            " dbd ",
+        ),
+    ),
+    (
+        "Marvel Rivals",
+        (
+            "marvel rivals",
+            "marvelrivals",
+            "marvelrival",
+            "marvel rival",
+            "rivals gaming",
+            "rivals with",
+            "deadpool",
+            "ironman",
+            "iron man",
+            " rivals",
+        ),
+    ),
 )
 
 
@@ -107,6 +165,64 @@ def infer_trigger_from_path(clip_path: str) -> str:
     if match:
         return match.group(0).lower()
     return "unknown"
+
+
+def infer_game_from_text(*parts: Optional[str]) -> Optional[str]:
+    """Guess a game from title / description / hashtags.
+
+    Returns None when nothing matches — callers should store "Unknown"
+    rather than today's config game.
+    """
+    blob = " ".join(p for p in parts if p).lower()
+    if not blob:
+        return None
+    # Pad so needles like " hades " can match a title that starts/ends
+    # with the word.
+    padded = f" {blob} "
+    hits: List[Tuple[int, str]] = []
+    for canonical, needles in GAME_ALIASES:
+        for needle in needles:
+            if needle in padded or needle in blob:
+                hits.append((len(needle), canonical))
+                break
+    if not hits:
+        return None
+    hits.sort(reverse=True)
+    return hits[0][1]
+
+
+def infer_trigger_from_text(*parts: Optional[str]) -> str:
+    blob = " ".join(p for p in parts if p)
+    if not blob:
+        return "unknown"
+    hit = _TRIGGER_IN_NAME.search(blob)
+    return hit.group(0).lower() if hit else "unknown"
+
+
+def resolve_video_metadata(
+    *,
+    title: str = "",
+    description: str = "",
+    clip_path: str = "",
+    match: Optional[Dict[str, Any]] = None,
+) -> Tuple[str, str]:
+    """Return (game, trigger) for a synced video.
+
+    Matched queue rows can carry a game. Unmatched rows are inferred
+    from the title — never from config.json.
+    """
+    trigger = infer_trigger_from_path(clip_path)
+    if trigger == "unknown" and match:
+        trigger = str(match.get("trigger") or "unknown")
+    if trigger == "unknown":
+        trigger = infer_trigger_from_text(title, description, clip_path)
+
+    game = None
+    if match:
+        game = match.get("game") or None
+    if not game:
+        game = infer_game_from_text(title, description, clip_path)
+    return (str(game) if game else "Unknown", trigger)
 
 
 def _normalize_title(text: str) -> str:
@@ -455,24 +571,20 @@ def sync_tiktok_stats(
 
         match = match_video_to_clip(video, posted, platform_preference="tiktok")
         clip_path = ""
-        trigger = "unknown"
-        game = game_default
         note = "synced from TikTok API (unmatched to queue)"
 
         if match:
             clip_path = str(match.get("clip_path") or "")
-            trigger = infer_trigger_from_path(clip_path)
-            if trigger == "unknown":
-                # Fall back to any trigger field on the queue item
-                trigger = str(match.get("trigger") or "unknown")
-            game = str(match.get("game") or game_default)
             note = f"synced from TikTok API (matched queue id={match.get('id', '?')})"
 
-        # Infer trigger from video title when still unknown
-        if trigger == "unknown":
-            title_hit = _TRIGGER_IN_NAME.search(video.title or video.video_description or "")
-            if title_hit:
-                trigger = title_hit.group(0).lower()
+        game, trigger = resolve_video_metadata(
+            title=video.title or "",
+            description=getattr(video, "video_description", "") or "",
+            clip_path=clip_path,
+            match=match,
+        )
+        if game == "Unknown" and match and game_default:
+            game = str(game_default)
 
         entry = _build_outcome_entry(
             video_id=video.id,
@@ -642,26 +754,22 @@ def sync_youtube_stats(
             video, posted, platform_preference="youtube"
         )
         clip_path = ""
-        trigger = "unknown"
-        game = game_default
         note = "synced from YouTube API (unmatched to queue)"
 
         if match:
             clip_path = str(match.get("clip_path") or "")
-            trigger = infer_trigger_from_path(clip_path)
-            if trigger == "unknown":
-                trigger = str(match.get("trigger") or "unknown")
-            game = str(match.get("game") or game_default)
             note = (
                 f"synced from YouTube API (matched queue id={match.get('id', '?')})"
             )
 
-        if trigger == "unknown":
-            title_hit = _TRIGGER_IN_NAME.search(
-                video.title or video.description or ""
-            )
-            if title_hit:
-                trigger = title_hit.group(0).lower()
+        game, trigger = resolve_video_metadata(
+            title=video.title or "",
+            description=getattr(video, "description", "") or "",
+            clip_path=clip_path,
+            match=match,
+        )
+        if game == "Unknown" and match and game_default:
+            game = str(game_default)
 
         entry = _build_outcome_entry(
             video_id=video.id,
@@ -804,3 +912,122 @@ def print_sync_report(result: Dict[str, Any]) -> None:
     if len(rows) > 30:
         print(f"  … and {len(rows) - 30} more")
     print()
+
+
+def retag_outcomes_from_titles(
+    outcomes_path: Path = PERFORMANCE_OUTCOMES_FILE,
+    youtube_state_path: Path = YOUTUBE_STATE_FILE,
+    tiktok_state_path: Path = STATE_FILE,
+) -> Dict[str, int]:
+    """Rewrite stored game/trigger from titles instead of the current config game."""
+    rows = _load_outcomes(outcomes_path)
+    changed = 0
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        match = None
+        if row.get("clip_path") and "unmatched" not in str(row.get("note") or ""):
+            match = {
+                "game": row.get("game"),
+                "trigger": row.get("trigger"),
+                "clip_path": row.get("clip_path"),
+            }
+        # Unmatched rows must be re-inferred from the title, ignoring
+        # whatever config game was stamped on them at sync time.
+        if "unmatched" in str(row.get("note") or ""):
+            match = None
+        game, trigger = resolve_video_metadata(
+            title=str(row.get("title") or ""),
+            description="",
+            clip_path=str(row.get("clip_path") or ""),
+            match=match,
+        )
+        if row.get("game") != game or row.get("trigger") != trigger:
+            row["game"] = game
+            row["trigger"] = trigger
+            row["game_source"] = "title" if game != "Unknown" else "unknown"
+            changed += 1
+
+    if changed:
+        _write_outcomes(rows, outcomes_path)
+
+    state_changed = 0
+    for state_path in (youtube_state_path, tiktok_state_path):
+        state = _load_json(state_path, {})
+        videos = state.get("videos")
+        if not isinstance(videos, dict):
+            continue
+        file_changed = 0
+        for rec in videos.values():
+            if not isinstance(rec, dict):
+                continue
+            game, trigger = resolve_video_metadata(
+                title=str(rec.get("title") or ""),
+                description="",
+                clip_path=str(rec.get("clip_path") or ""),
+                match=None,
+            )
+            if rec.get("game") != game or rec.get("trigger") != trigger:
+                rec["game"] = game
+                rec["trigger"] = trigger
+                file_changed += 1
+        if file_changed:
+            _save_json(state_path, state)
+            state_changed += file_changed
+
+    return {"outcomes_updated": changed, "state_updated": state_changed}
+
+
+def rebuild_clip_history_from_outcomes(
+    outcomes_path: Path = PERFORMANCE_OUTCOMES_FILE,
+    history_path: Optional[Path] = None,
+) -> Dict[str, Any]:
+    """Rebuild clip_history.json from current outcome rows.
+
+    Drops synthetic seed observations (identical 1200/80 copies) and
+    malformed trigger keys by not copying them forward.
+    """
+    if history_path is None:
+        history_path = DATA_DIR / "clip_history.json"
+
+    buckets: Dict[Tuple[str, str], Dict[str, Any]] = {}
+    for row in _load_outcomes(outcomes_path):
+        if not isinstance(row, dict):
+            continue
+        game = str(row.get("game") or "Unknown")
+        trigger = str(row.get("trigger") or "unknown")
+        if "," in trigger:
+            continue
+        views = int(row.get("views") or 0)
+        likes = int(row.get("likes") or 0)
+        bucket = buckets.setdefault(
+            (game, trigger),
+            {"observations": [], "total_views": 0, "total_likes": 0},
+        )
+        bucket["observations"].append(
+            {
+                "at": str(row.get("first_logged_at") or row.get("timestamp") or "")[:19],
+                "views": views,
+                "likes": likes,
+            }
+        )
+        bucket["total_views"] += views
+        bucket["total_likes"] += likes
+
+    history: Dict[str, Any] = {}
+    for (game, trigger), data in sorted(buckets.items()):
+        n = len(data["observations"])
+        history.setdefault(game, {})[trigger] = {
+            "total_clips": n,
+            "total_views": data["total_views"],
+            "total_likes": data["total_likes"],
+            "avg_views": round(data["total_views"] / n, 1) if n else 0,
+            "observations": data["observations"],
+        }
+
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    history_path.write_text(
+        json.dumps(history, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    return history

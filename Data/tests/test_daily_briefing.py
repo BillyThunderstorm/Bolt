@@ -127,6 +127,35 @@ class MemoryToActionItemsTests(unittest.TestCase):
     def test_empty_memory_yields_empty_actions(self):
         self.assertEqual(db._memory_to_action_items([]), [])
 
+    def test_logged_rejections_and_constraints_are_not_commands(self):
+        hits = [
+            {
+                "kind": "decision_event",
+                "action": "queue_clip",
+                "result": "rejected",
+                "feedback": "same issue with the video quality",
+                "title": "queue_clip · rejected — quality",
+                "text": "queue_clip: rejected",
+            },
+            {
+                "kind": "decision_event",
+                "action": "clip_performance",
+                "result": "failed",
+                "title": "clip_performance · failed — Outcome captured",
+                "text": "clip_performance: failed",
+            },
+            {
+                "kind": "constraint",
+                "text": "Reminder: No content that sells the next gimmick.",
+                "source": "user_profile",
+            },
+        ]
+        actions = db._memory_to_action_items(hits)
+        joined = " || ".join(actions)
+        self.assertNotIn("Act on rejected queue_clip", joined)
+        self.assertNotIn("Act on failed clip_performance", joined)
+        self.assertNotIn("No content that sells", joined)
+
     def test_caps_at_three_memory_actions(self):
         long_hits = SAMPLE_HITS * 3  # 9 hits
         actions = db._memory_to_action_items(long_hits)

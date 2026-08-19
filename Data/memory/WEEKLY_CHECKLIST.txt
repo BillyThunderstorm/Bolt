@@ -48,7 +48,8 @@ WEEK OF: _____________   LANE FOCUS THIS WEEK: _______________________
   Before posting anything, asking for any sponsor deal, or committing
   to any lane direction, run it through these tests:
 
-  □  C1: Is this selling the next gimmick?           → if yes, don't
+  □  C1: Would this sell a hyped dud as if it works? → if yes, don't
+      (honest review of a dud you own + a working alternative is OK)
   □  C2: Do I know this is the right direction?       → if no, pause
   □  C3: Does this add to my roadmap for someone else? → if no, skip
   □  C5: Would I want to be known for this?            → if no, don't
