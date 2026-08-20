@@ -36,7 +36,7 @@ except ImportError:
 PROJECT_ROOT = Path(__file__).resolve().parents[2]  # Bolt/ (repo root)
 DATA_DIR = PROJECT_ROOT / "Data"
 LOGS_DIR = PROJECT_ROOT / "logs"
-MEMORY_DIR = PROJECT_ROOT / "memory"
+MEMORY_DIR = DATA_DIR / "memory"
 
 UNIFIED_MEMORY_FILE = DATA_DIR / "unified_memory.jsonl"
 SOURCE_REGISTRY_FILE = DATA_DIR / "source_registry.json"
@@ -113,7 +113,7 @@ class ThinkLearnDecideEngine:
             import json
             from datetime import datetime
 
-            log_path = Path("Data/data/decision_history.jsonl")
+            log_path = DATA_DIR / "decision_history.jsonl"
             log_path.parent.mkdir(parents=True, exist_ok=True)
 
             entry = {
@@ -157,15 +157,16 @@ class ThinkLearnDecideEngine:
     def _build_source_registry(self) -> Dict[str, Any]:
         candidates = [
             ("daily_log", LOGS_DIR / "daily_log.txt", "log"),
-            ("memory_hot", MEMORY_DIR / "MEMORY.md", "markdown"),
-            ("memory_people", MEMORY_DIR / "people", "markdown_dir"),
-            ("memory_projects", MEMORY_DIR / "projects", "markdown_dir"),
-            ("memory_context", MEMORY_DIR / "context", "markdown_dir"),
-            ("memory_content", MEMORY_DIR / "content", "markdown_dir"),
-            ("memory_glossary", MEMORY_DIR / "glossary.md", "markdown"),
+            ("memory_hot", DATA_DIR / "MEMORY.md", "markdown"),
+            ("memory_people", DATA_DIR / "people", "markdown_dir"),
+            ("memory_projects", DATA_DIR / "projects", "markdown_dir"),
+            ("memory_context", DATA_DIR / "context", "markdown_dir"),
+            ("memory_content", DATA_DIR / "content", "markdown_dir"),
+            ("memory_glossary", DATA_DIR / "glossary.md", "markdown"),
+            ("memory_missions", MEMORY_DIR, "markdown_dir"),
             ("ready_to_post", DATA_DIR / "ready_to_post.json", "json"),
             ("rankings", DATA_DIR / "rankings.json", "json"),
-            ("seen_clips", PROJECT_ROOT / "Data" / "seen_clips.json", "json"),
+            ("seen_clips", DATA_DIR / "seen_clips.json", "json"),
         ]
         return {
             "generated_at": _now_iso(),

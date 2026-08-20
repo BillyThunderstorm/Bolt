@@ -27,7 +27,6 @@ from pathlib import Path
 
 # Post-reorg layout: this file lives at Core/modules/ → repo root is parents[2]
 _REPO = Path(__file__).resolve().parents[2]
-_CORE = _REPO / "Core"
 
 # Prefer post-reorg paths; fall back to legacy names if someone still uses them.
 DATA_DIR = _REPO / "Data"
@@ -44,7 +43,6 @@ if not VERTICAL_DIR.exists():
 
 RANKINGS_FILE = DATA_DIR / "rankings.json"
 QUEUE_FILE = DATA_DIR / "ready_to_post.json"
-# Dashboard JS: keep under Data/ (and a legacy Core/data copy if present).
 OUTPUT_FILE = DATA_DIR / "Bolt_data.js"
 
 
@@ -130,8 +128,6 @@ def _load_performance_totals() -> tuple[int, int, int]:
     """Return (clips_posted, total_views, total_likes) from performance log."""
     candidates = [
         DATA_DIR / "performance_outcomes.jsonl",
-        DATA_DIR / "data" / "performance_outcomes.jsonl",
-        _CORE / "data" / "performance_outcomes.jsonl",
     ]
     total_views = 0
     total_likes = 0
@@ -160,7 +156,6 @@ def _load_performance_totals() -> tuple[int, int, int]:
 def _count_processed_recordings() -> int:
     candidates = [
         DATA_DIR / "processed_recordings.json",
-        _CORE / "data" / "processed_recordings.json",
     ]
     for processed_file in candidates:
         if not processed_file.exists():

@@ -43,9 +43,9 @@ RESET = "\033[0m"
 # Voice_Checklist.py lives at Core/modules/ → Core is parent, repo root is grandparent.
 CORE = Path(__file__).resolve().parent.parent
 REPO = CORE.parent
-ROOT = CORE  # kept for callers / progress paths under Core/
+ROOT = REPO
 TASKS_FILE = CORE / "session_tasks.json"
-PROGRESS_FILE = CORE / "logs" / "checklist_progress.json"
+PROGRESS_FILE = REPO / "logs" / "checklist_progress.json"
 DATA_DIR = REPO / "Data"
 
 

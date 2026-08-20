@@ -25,13 +25,18 @@ bolt research pending
 bolt research c5 keep "Name" --why "Would want to be known for this because…"
 bolt research c5 drop "Name" --why "Not my voice"
 bolt research add "Name" --platform YouTube --summary "…" --why "…"
+bolt research find --dry-run
 bolt briefing --print
 ```
 
 ## Not in this phase
 
 - Apple Reminders delivery (profile channel #1) — wired 2026-08-17 (`bolt briefing --send`)
-- Auto web-search for new candidates (M13 sponsors-research is separate)
+- Auto web-search for new candidates — Phase 2 kept this off so Bolt would
+  not *pick* creators (C5 is Billy's). Shipped 2026-08-20 as opt-in
+  `bolt research find`: search + C7/C6 gate, then pending C5. Does not
+  auto-keep and does not run inside chat. Sponsor search stays
+  `bolt manage sponsors-research` (M13).
 - External `bolt-creator-command-center` skill (not part of `bin/bolt`)
 
 ## Verification

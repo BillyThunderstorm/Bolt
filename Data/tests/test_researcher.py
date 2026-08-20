@@ -482,6 +482,49 @@ class C5AndAddTests(unittest.TestCase):
         result = rs.set_c5_verdict("Susan Yara", "keep")
         self.assertEqual(result["matches"], 1)
 
+    def test_c5_from_vs_for_still_matches(self):
+        rs.add_candidate(
+            "YouTube Channels for Video Game Reviews You Can Trust",
+            summary="listicle",
+            public_signal="clean",
+        )
+        result = rs.set_c5_verdict(
+            "youtube channels from video game reviews you can trust",
+            "drop",
+        )
+        self.assertEqual(result["verdict"], "no")
+        self.assertEqual(result["matches"], 1)
+
+    def test_c5_unknown_lists_pending_names(self):
+        rs.add_candidate("Tino Reviews", summary="x", public_signal="clean")
+        with self.assertRaises(ValueError) as err:
+            rs.set_c5_verdict("nobody in particular", "drop")
+        self.assertIn("Tino Reviews", str(err.exception))
+
+    def test_cli_c5_drop_unquoted_long_name(self):
+        rs.add_candidate(
+            "YouTube Channels for Video Game Reviews You Can Trust",
+            summary="listicle",
+            public_signal="clean",
+        )
+        code = rs.main(
+            [
+                "c5",
+                "drop",
+                "youtube",
+                "channels",
+                "from",
+                "video",
+                "game",
+                "reviews",
+                "you",
+                "can",
+                "trust",
+            ]
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(rs.pending_c5_count(), 0)
+
     def test_c5_ambiguous_raises(self):
         rs.add_candidate("Alex One", summary="x", public_signal="clean")
         rs.add_candidate("Alex Two", summary="x", public_signal="clean")
@@ -519,6 +562,135 @@ class C5AndAddTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(rs.pending_c5_count(), 0)
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Web-search find (injected results — no network)
+# ──────────────────────────────────────────────────────────────────────────────
+
+FAKE_SEARCH = [
+    {
+        "url": "https://www.youtube.com/@iJustine",
+        "title": "iJustine - YouTube",
+        "description": "Tech and lifestyle reviews; attends industry events",
+    },
+    {
+        "url": "https://en.wikipedia.org/wiki/Reviewers",
+        "title": "Best product reviewers of 2024",
+        "description": "A roundup list",
+    },
+    {
+        "url": "https://www.youtube.com/@magatech",
+        "title": "MAGA Tech Reviews - YouTube",
+        "description": "trump fan reviewing phones",
+    },
+]
+
+
+class FindCandidatesTests(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.tmp_path = Path(self._tmp.name)
+        self._log_patcher = patch.object(
+            rs, "RESEARCH_LOG", self.tmp_path / "research_log.jsonl"
+        )
+        self._profile_patcher = patch.object(
+            rs, "USER_PROFILE", self.tmp_path / "user_profile.json"
+        )
+        self._log_patcher.start()
+        self._profile_patcher.start()
+        (self.tmp_path / "user_profile.json").write_text(json.dumps(SAMPLE_PROFILE))
+
+    def tearDown(self):
+        self._log_patcher.stop()
+        self._profile_patcher.stop()
+        self._tmp.cleanup()
+
+    def test_default_query_is_short(self):
+        q = rs.default_find_query(SAMPLE_PROFILE)
+        self.assertLess(len(q), 80)
+        self.assertIn("YouTube", q)
+        self.assertIn("honest product reviewer", q)
+
+    def test_find_logs_cleared_and_leaves_c5_open(self):
+        report = rs.find_candidates(
+            query="honest reviewer",
+            search_fn=lambda q, n: FAKE_SEARCH,
+            profile=SAMPLE_PROFILE,
+        )
+        names = [e["name"] for e in report["added"]]
+        self.assertIn("iJustine", names)
+        self.assertTrue(any(b["name"] == "MAGA Tech Reviews" for b in report["blocked"]))
+        self.assertTrue(any("Best product" in s["name"] for s in report["skipped"]))
+        justine = next(e for e in rs.list_candidates() if e["name"] == "iJustine")
+        self.assertNotIn("c5_verdict", justine)
+        self.assertTrue(justine["gate"]["c5_user_decision_required"])
+        self.assertEqual(justine.get("source"), "web_search")
+
+    def test_find_skips_youtube_channels_listicle(self):
+        results = [
+            {
+                "url": "https://www.youtube.com/playlist?list=x",
+                "title": "YouTube Channels for Video Game Reviews You Can Trust",
+                "description": "A roundup of review channels",
+            }
+        ]
+        report = rs.find_candidates(
+            query="honest reviewer",
+            search_fn=lambda q, n: results,
+            profile=SAMPLE_PROFILE,
+        )
+        self.assertEqual(report["added"], [])
+        self.assertTrue(
+            any("YouTube Channels" in s["name"] for s in report["skipped"])
+        )
+
+    def test_dry_run_does_not_write(self):
+        rs.find_candidates(
+            query="honest reviewer",
+            dry_run=True,
+            search_fn=lambda q, n: FAKE_SEARCH,
+            profile=SAMPLE_PROFILE,
+        )
+        self.assertEqual(rs.list_candidates(), [])
+
+    def test_dedup_skips_names_already_logged(self):
+        rs.add_candidate(
+            "iJustine",
+            platform="YouTube",
+            summary="already here",
+            public_signal="honest takes",
+        )
+        report = rs.find_candidates(
+            query="honest reviewer",
+            search_fn=lambda q, n: FAKE_SEARCH,
+            profile=SAMPLE_PROFILE,
+        )
+        self.assertTrue(
+            any(s["name"] == "iJustine" and s["reason"] == "already logged" for s in report["skipped"])
+        )
+        self.assertEqual(sum(1 for e in rs.list_candidates() if e["name"] == "iJustine"), 1)
+
+    def test_cli_find_dry_run(self):
+        with patch.object(rs, "_web_search_results", return_value=FAKE_SEARCH):
+            code = rs.main(["find", "honest reviewer", "--dry-run"])
+        self.assertEqual(code, 0)
+        self.assertEqual(rs.list_candidates(), [])
+
+
+class DdgHtmlParseTests(unittest.TestCase):
+    def test_parse_unwraps_uddg_and_pairs_snippet(self):
+        sys.path.insert(0, str(_repo_root / "scripts"))
+        from _research import parse_ddg_html  # noqa: WPS433
+
+        html = """
+        <a class="result__a" href="https://duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.youtube.com%2F%40justine">iJustine - YouTube</a>
+        <a class="result__snippet">Tech reviews at events</a>
+        """
+        items = parse_ddg_html(html, limit=5)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["url"], "https://www.youtube.com/@justine")
+        self.assertEqual(items[0]["title"], "iJustine - YouTube")
+        self.assertIn("Tech reviews", items[0]["description"])
 
 
 if __name__ == "__main__":

@@ -30,7 +30,7 @@ from typing import Any, Dict, Iterable, List, Optional
 PROJECT_ROOT = Path(__file__).resolve().parents[2]  # Bolt/ (repo root)
 MEMORY_DIR = PROJECT_ROOT / "Data" / "memory"
 DATA_DIR = PROJECT_ROOT / "Data"
-LOGS_DIR = PROJECT_ROOT / "Data" / "logs"
+LOGS_DIR = PROJECT_ROOT / "logs"
 
 MEMORY_INDEX_FILE = DATA_DIR / "memory_index.json"
 UNIFIED_MEMORY_FILE = DATA_DIR / "unified_memory.jsonl"
@@ -504,8 +504,8 @@ def _entries_from_performance_outcomes(root: Path) -> List[MemoryEntry]:
 def build_memory_entries(project_root: Path = PROJECT_ROOT) -> List[MemoryEntry]:
     entries: List[MemoryEntry] = []
 
-    # Walk the canonical memory/ dir (e.g., Data/data/memory/) AND the
-    # content/ dir (e.g., Data/data/content/) which holds the lane docs the
+    # Walk the canonical memory/ dir (e.g., Data/memory/) AND the
+    # content/ dir (e.g., Data/content/) which holds the lane docs the
     # creator-vision regression test depends on. After the directory
     # reorganization, the content md files live alongside memory/.
     for candidate in (MEMORY_DIR, MEMORY_DIR.parent / "content"):

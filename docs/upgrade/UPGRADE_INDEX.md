@@ -201,9 +201,9 @@ Compare: Potential revenue increase $300-800/mo
 
 Evidence:
 - `modules/Title_Generator.py` now has opt-in AI titles, title caching, JSON parsing, hashtag cleanup, and template fallback.
-- `scripts/test_title_upgrade_10_clips.py` runs 10 representative title scenarios and writes `data/title_upgrade_10_clip_test.json`.
 - `config.json` enables `quality_tiers.use_ai_titles`.
-- `scripts/monitor_title_results.py` summarizes production readiness, title cache entries, the 10-clip report, and logged performance outcomes.
+- Title review is `bolt queue title`. Connectivity audit is `bolt doctor`.
+- Title generator behavior is covered by `Data/tests/test_title_generator.py`.
 
 **Week 2: Multi-Platform**
 - [ ] Build Multi_Publisher.py

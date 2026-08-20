@@ -1,18 +1,103 @@
 {
-  "generated_at": "2026-07-14 20:37:55",
+  "generated_at": "2026-08-20 12:18:25",
   "status": {
-    "clips_made": 887,
-    "vertical_clips": 17,
-    "ready_to_post": 0,
-    "recordings_processed": 0,
+    "clips_made": 15,
+    "vertical_clips": 12,
+    "ready_to_post": 5954,
+    "recordings_processed": 100,
     "api_keys": {
       "twitch": true,
-      "obs": false,
+      "obs": true,
       "discord": true,
-      "tiktok": false
+      "tiktok": true
     }
   },
-  "queue": [],
+  "queue": [
+    {
+      "id": "04a51757",
+      "created": "2026-07-07T02:01:05.469158",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "67def313",
+      "created": "2026-07-07T02:01:05.470379",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "ce65f808",
+      "created": "2026-07-07T02:01:05.471439",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "faa9b6c0",
+      "created": "2026-07-07T02:01:05.473306",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "14e26413",
+      "created": "2026-07-07T02:01:14.132815",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "edbfe8bc",
+      "created": "2026-07-07T02:01:14.134220",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "510ae450",
+      "created": "2026-07-07T02:01:14.135289",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "1d44f9f5",
+      "created": "2026-07-07T02:01:14.137277",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "ccd0ba63",
+      "created": "2026-07-07T02:01:32.893170",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "0a2a66e6",
+      "created": "2026-07-07T02:01:32.894639",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "52380dce",
+      "created": "2026-07-07T02:01:32.895717",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "78ef31cd",
+      "created": "2026-07-07T02:01:32.897550",
+      "title": "Ready clip",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    }
+  ],
   "briefing": {
     "date": "Saturday, July 04, 2026",
     "action_items": [
@@ -23,5 +108,30 @@
       "Check for new recordings to process"
     ]
   },
-  "peaks": []
+  "peaks": [
+    {
+      "label": "Morning",
+      "start_hour": 7,
+      "end_hour": 9,
+      "start_display": "7 AM",
+      "end_display": "9 AM",
+      "active": false
+    },
+    {
+      "label": "Lunch",
+      "start_hour": 12,
+      "end_hour": 14,
+      "start_display": "12 PM",
+      "end_display": "2 PM",
+      "active": true
+    },
+    {
+      "label": "Prime Time",
+      "start_hour": 19,
+      "end_hour": 22,
+      "start_display": "7 PM",
+      "end_display": "10 PM",
+      "active": false
+    }
+  ]
 }

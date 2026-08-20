@@ -6,7 +6,7 @@ Owns one job: always return a valid Helix App Access Token.
 
 Twitch's Helix API requires a Bearer token on every call, and tokens expire.
 We fetch one via the OAuth 2.0 "client_credentials" grant and cache it on disk
-at Core/data/twitch_token_cache.json so we don't re-auth on every request.
+at Data/twitch_token_cache.json so we don't re-auth on every request.
 
 Required .env values (repo-root .env):
     TWITCH_CLIENT_ID=<client id from https://dev.twitch.tv/console/apps>
@@ -71,8 +71,7 @@ OAUTH_TOKEN_URL = "https://id.twitch.tv/oauth2/token"
 
 # Cached token location. Disk (not memory) so it survives process restarts
 # and is shared if Bolt is ever split into multiple processes.
-# Kept under Core/data to match the existing cache path that already has a token.
-CACHE_PATH = _CORE_DIR / "data" / "twitch_token_cache.json"
+CACHE_PATH = _REPO_ROOT / "Data" / "twitch_token_cache.json"
 
 # Refresh this many seconds BEFORE actual expiry — safety margin for clock
 # skew and slow requests.

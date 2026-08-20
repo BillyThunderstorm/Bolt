@@ -77,9 +77,8 @@ DATA_DIR
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-OUTPUT_DIR = ROOT / "data" / "calendar"
-QUEUE_FILE = ROOT / "data" / "multi_platform_queue.json"
-CONFIG_FILE = ROOT / "config.json"
+OUTPUT_DIR = DATA_DIR / "calendar"
+QUEUE_FILE = DATA_DIR / "multi_platform_queue.json"
 
 # --- Calendar constants ---------------------------------------------------
 

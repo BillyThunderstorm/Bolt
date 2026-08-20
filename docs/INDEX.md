@@ -7,7 +7,7 @@ Use this page as the central map for Bolt.
 | Label | Path root | Use for |
 |-------|-----------|---------|
 | 🟡 CORE | `Core/` | Code, modules, brain, config |
-| 🔵 DATA | `Data/data/` | Catalog, storefront, sponsors, memory |
+| 🔵 DATA | `Data/` | Catalog, storefront, sponsors, memory |
 | 🟢 DOCS | `Docs/` | Commands, status, briefings, reviews |
 | 🟣 APP | `App/` | UI / brand |
 | 🟠 MEDIA | `media/` | Clips / recordings |
@@ -69,6 +69,7 @@ PYTHONPATH=Core python3 -m Bolt_Conversation --text
 | `docs/guides/STREAM_DECK_SETUP.md` | Stream Deck setup notes |
 | `scripts/setup.sh` | First-time setup and dependency install |
 | `scripts/verify.py` | Project verification checks |
+| `scripts/doctor.py` | Live vs mocked vs stale-path / missing-key audit (`bolt doctor`) |
 
 ## Runtime Modules (high-signal)
 

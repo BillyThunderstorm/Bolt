@@ -34,14 +34,14 @@ class ThinkLearnDecideTests(unittest.TestCase):
         tld.DATA_DIR.mkdir(parents=True, exist_ok=True)
         tld.LOGS_DIR.mkdir(parents=True, exist_ok=True)
         tld.MEMORY_DIR.mkdir(parents=True, exist_ok=True)
-        (tld.MEMORY_DIR / "MEMORY.md").write_text(
+        (tld.DATA_DIR / "MEMORY.md").write_text(
             "# Notes\n- test fact", encoding="utf-8"
         )
         # Add a memory_content/ directory with a couple of .md files so
         # ingest_all_sources() finds at least 2 source paths (memory_hot
         # + memory_content) and the test_ingestion_writes_unified_memory
         # assertion `count >= 2` holds.
-        content_dir = tld.MEMORY_DIR / "content"
+        content_dir = tld.DATA_DIR / "content"
         content_dir.mkdir(exist_ok=True)
         (content_dir / "creator-vision.md").write_text(
             "# Creator Vision\n- test content", encoding="utf-8"
@@ -261,7 +261,7 @@ class ThinkAndProposeTests(unittest.TestCase):
         tld.DATA_DIR.mkdir(parents=True, exist_ok=True)
         tld.LOGS_DIR.mkdir(parents=True, exist_ok=True)
         tld.MEMORY_DIR.mkdir(parents=True, exist_ok=True)
-        (tld.MEMORY_DIR / "MEMORY.md").write_text(
+        (tld.DATA_DIR / "MEMORY.md").write_text(
             "# Notes\n- test fact", encoding="utf-8"
         )
 

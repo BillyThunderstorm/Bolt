@@ -72,6 +72,8 @@ Inspect, launch, and maintain Bolt itself.
 bolt help                         # Show the CLI command summary
 bolt version                      # Show the repository and Python in use
 bolt verify                       # Check required files, folders, config, and environment
+bolt doctor [--json]              # Live vs mocked vs stale path / missing key
+bolt audit                        # Alias for doctor
 bolt setup                        # Finite setup check (config + keys); exits when done
 bolt day [--decide|--voice|--quiet|--open|--process]
                                       # Default morning flow; --decide → queue review
@@ -89,6 +91,7 @@ bolt launch --no-checklist        # Live mode without the pre-stream voice check
 bolt status                       # Check the decision engine, vector DB, and Nexus
 bolt intelligence                 # Alias for `status`
 bolt budget                       # xAI spend / soft cap / alert channel status
+bolt api-usage                    # Alias for budget
 bolt budget --test-alert          # Test Mac + email + iMessage alerts
 bolt storage status               # media/ sizes + disk free
 bolt storage monitor|rotate|optimize
@@ -98,6 +101,12 @@ bolt layout                       # Report misplaced root files; never moves the
 bolt layout --quiet               # Print only the layout summary
 bolt layout --json                # Return the layout report as JSON
 ```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt verify` | Files, folders, config keys, `.env`, module imports |
+| `bolt doctor` | Live vs mocked vs stale path / missing key (alias: `audit`) |
+| `bolt layout` | Misplaced files at the repo root only |
 
 ## Direction-finding researcher
 
@@ -111,6 +120,9 @@ bolt research questions               # Standing research questions from profile
 bolt research candidates              # All gated candidates (newest first)
 bolt research candidates --limit 10
 bolt research pending                 # Only candidates still needing your C5 call
+bolt research find                    # Web search from the profile career goal
+bolt research find --dry-run          # Preview gated names; write nothing
+bolt research find "honest tech reviewer YouTube" --limit 5
 bolt research log                     # Recent findings
 bolt research log --limit 15
 
@@ -311,8 +323,10 @@ You do **not** need to open the JSON or remember ids for the normal path.
 bolt queue clean                      # Clear ghost rows (ready but video file gone)
 bolt queue list                       # Only clips with a real local file
 bolt queue decide                     # Opens video, then: approve / hold / post / skip
+bolt queue decide --open-each         # Same, and open every clip as you go
 #  — or one-liners without ids —
 bolt queue next --open                # Show next clip card + open the video
+bolt queue package                    # Paste-ready TikTok + Shorts captions (next clip)
 bolt approve                          # Approve that next clip for peak auto-post
 bolt dontpost "weak hook"             # Hold next + reason (Bolt learns)
 bolt postnow                          # Publish next clip to TikTok now
@@ -334,7 +348,7 @@ bolt queue title                      # Suggest captions for the next clip
 bolt queue title 512bdfa4 1           # Apply suggestion #1
 bolt queue title 512bdfa4 "My hook"   # Set a custom title
 bolt queue add Hands.mp4 --suggest-title --approve   # generate title while adding
-bolt monitor_titles                   # How past titles performed (learning)
+bolt doctor                           # What's live, mocked, or on a stale path
 
 # Then post when ready
 bolt postnow                          # next approved/ready clip now
@@ -352,8 +366,13 @@ bolt queue status                     # Same as above
 bolt queue list                       # Actionable clips (id, score, filename)
 bolt queue list --all                 # Include ghost / missing-file rows
 bolt queue next [--open]              # Next postable clip card
+bolt queue package [id] [--open]      # Paste-ready TikTok + Shorts package
 bolt queue decide                     # Interactive review (no JSON)
+bolt queue decide --open-each         # Interactive review; open each clip
 bolt queue help                       # Full queue CLI help
+
+# In decide mode: o=open  a=approve  p=post now  m=mark posted
+#                 h=hold  t=retitle  s=skip  1-9=jump  q=quit
 
 bolt queue approve                    # Approve next postable clip for peak auto-post
 bolt queue approve 55a802e8           # Approve a specific clip id
@@ -368,6 +387,8 @@ bolt queue post-now                   # Publish next postable clip now
 bolt queue post-now 55a802e8
 bolt postnow                          # Short alias for queue post-now
 
+bolt queue held                       # List held clips + reasons (not deleted)
+bolt queue unhold 55a802e8            # Put a held clip back on the postable list
 bolt queue clean                      # Scrap ready rows whose video file is missing
 bolt queue clean --dry-run            # Preview ghost cleanup
 bolt queue mark-posted 55a802e8       # After you uploaded manually
@@ -384,7 +405,10 @@ bolt queue review-window              # Force the 30-min pre-peak Discord ping
 | `bolt queue` / `bolt queue status` | Peak window + how many you can actually post vs ghost rows |
 | `bolt queue list` | Actionable clips only (id, score, plan, filename) |
 | `bolt queue next [--open]` | Show the next postable clip; optional OS open |
-| `bolt queue decide` | Interactive open → approve / hold / post / skip |
+| `bolt queue package [id] [--open]` | Paste-ready TikTok + Shorts captions for a clip (manual upload) |
+| `bolt queue decide [--open-each]` | Interactive open → approve / hold / post / skip |
+| `bolt queue held` | List held clips and why they were held |
+| `bolt queue unhold [clip_id]` | Restore a held clip to the postable list |
 | `bolt queue clean` | Mark missing-file ready rows as scrapped (no media deleted) |
 | `bolt queue approve [clip_id]` | Approve for peak auto-post (does **not** force publish now) |
 | `bolt approve [clip_id]` | Alias for `bolt queue approve` |
@@ -404,6 +428,28 @@ Typical flow:
 1. `bolt queue clean` once if the count looks insanely high (ghosts)  
 2. `bolt queue decide` — watch + approve/hold without touching JSON  
 3. At peak, auto-post runs if enabled — or `bolt postnow` to force it
+
+`bolt manage youtube-pkg` is for catalog **product reviews** only (Mouse, etc.). For gameplay clips, use `bolt queue package`.
+
+## Post-to-TikTok web UI
+
+Local browser screen for a compliant TikTok export. Demo mode is safe without a token.
+
+```bash
+bolt tiktok-post                  # Demo UI (mock creator; publish is dry-run)
+bolt tiktok-post --demo           # Force demo
+bolt tiktok-post --live           # Require a real TikTok token
+bolt tiktok-post --no-open        # Print the URL only; do not open a tab
+bolt tiktok-post --port 8080
+```
+
+Aliases: `post-ui`, `tiktok_post`, `tiktok-ui`.
+
+| Command | What it does |
+|---------|--------------|
+| `bolt tiktok-post` | Open the local Post-to-TikTok UI (demo unless `--live`) |
+| `bolt tiktok-post --live` | Same UI, but a real token is required and publish is live |
+| `bolt tiktok-post --no-open` | Start the server and print the URL only |
 
 ## Sponsors
 
@@ -488,7 +534,7 @@ bolt watch
 
 `recordings` defaults to **`latest`** (not `all`) and gaming content. Same-stem
 duplicates (`.mp4` / `.mov` / `.mkv`) are collapsed to one file. Already-processed
-names in `Core/data/processed_recordings.json` and `Data/processed_recordings.json`
+names in `Data/processed_recordings.json`
 are skipped unless you pass `--force`.
 
 Highlight detection is intentionally strict (local peaks, prominence, confidence
@@ -589,8 +635,7 @@ bolt performance
 bolt log_perf --trigger <trigger> --views <count> [--likes <count>] [--clip <file>]
               [--game "Game Name"] [--platform TikTok] [--note "text"]
 bolt log_perf --list
-bolt monitor_titles
-bolt test_titles
+bolt doctor [--json]
 bolt weekly [--print] [--send] [--days <number>]
 ```
 
@@ -604,8 +649,7 @@ use `log_perf` for manual entry or platforms without API pull (e.g. X).
 | `bolt performance` | Run a performance baseline / snapshot of recent clip outcomes |
 | `bolt log_perf …` | Manually log a clip's views/likes back to the ranker so it learns |
 | `bolt log_perf --list` | Show recent performance-log entries (most recent first) |
-| `bolt monitor_titles` | Summarize how generated titles are performing |
-| `bolt test_titles` | Run the 10-clip title-upgrade smoke test |
+| `bolt doctor` | Audit live vs mocked vs stale paths / missing keys |
 | `bolt weekly` | Generate (and optionally send) the weekly performance insights |
 
 ## Briefings, calendars, memory, and site data
@@ -777,8 +821,10 @@ In conversation mode, these phrases trigger **real** Bolt actions before free-fo
 | clean queue | Scrap ghost ready rows (missing files) |
 | queue status / what can I post | Postable counts + next title |
 | What should I do next? | Next actions stack |
+| status report / manager status | Catalog / manager status snapshot |
 | storage / disk space | Disk free + media sizes |
 | api budget / how much have I spent | Soft cap + estimated API spend |
+| social stats / how did my posts do | Token readiness + recent TikTok/YouTube outcomes |
 | Research status / Mission status | Research or mission summary |
 | This week / current week | Week card (topic + do not suggest) |
 
@@ -795,6 +841,7 @@ Inside conversation mode:
 bolt queue title                      # suggest titles for next postable clip
 bolt queue title <id> 1               # apply suggestion #1 (+ generated hashtags)
 bolt queue title <id> "My hook 🔥"    # custom title (hashtags unchanged)
+bolt queue package                    # paste-ready TikTok + Shorts package
 # In decide mode: press t to retitle
 bolt queue decide
 ```
@@ -854,18 +901,30 @@ These names perform the same actions as their primary commands:
 | `log_perf` | `log_performance` |
 | `sync_tiktok_stats` | `sync_tiktok`, `tiktok_stats` |
 | `sync_youtube_stats` | `sync_youtube`, `youtube_stats` |
+| `stats` | `social-stats`, `performance-sync` |
+| `budget` | `api-usage`, `api_usage`, `xai-usage`, `llm-budget` |
+| `day` | `today`, `kickoff`, `start-day`, `morning-flow` |
+| `storage` | `disk`, `media-rotation`, `storage-monitor` |
+| `voice` | `talk`, `live-voice` |
+| `research` | `researcher` |
 | `queue` | `postqueue`, `post-queue`, `ready-queue` |
 | `queue decide` | `queue review`, `queue triage`, `queue pick` |
 | `queue next` | `queue show` |
+| `queue package` | `queue pkg`, `queue pack` |
+| `queue held` | `queue holds`, `queue list-held` |
+| `queue unhold` | `queue release`, `queue restore`, `queue requeue` |
 | `queue clean` | `queue prune` |
 | `queue approve` | `approve` |
 | `queue post-now` | `postnow`, `post-now` |
 | `queue reject` | `dontpost`, `dont-post`, `hold-clip` |
+| `queue mark-posted` | `mark-posted`, `markposted` |
+| `tiktok-post` | `post-ui`, `tiktok_post`, `tiktok-ui` |
 | `vods` | `vod_download` |
 | `send` | `notify` |
 | `layout` | `check_layout` |
 | `refresh_vector_db` | `vector_db`, `reindex` |
 | `status` | `intelligence` |
+| `doctor` | `audit` |
 | `morning` | `good-morning`, `goodmorning` |
 | `mission` | `command-center`, `ccc` |
 | `week` | `this-week`, `week-card` |

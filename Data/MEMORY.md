@@ -1,5 +1,5 @@
 # Bolt Memory
-*Hot cache for Bolt's own working memory. Detailed notes live in `Data/data/`. Last updated: 2026-08-04.*
+*Hot cache for Bolt's own working memory. Detailed notes live in `Data/`. Last updated: 2026-08-20.*
 
 ## Identity
 
@@ -12,12 +12,12 @@ Bolt's job is to help turn recordings, stream moments, product tests, creator id
 | Label | Path |
 |-------|------|
 | 🔴 MANAGER | `Core/modules/Content_Manager.py` + `bin/bolt` |
-| 🔵 Catalog | `Data/data/content/catalog.json` |
-| 🔵 Storefront | `Data/data/content/storefront.json` |
-| 🔵 Sponsors | `Data/data/content/sponsors.json` |
-| 🔵 Social | `Data/data/content/social_connections.json` |
-| 🔵 Progress | `Data/data/content/manager-progress.md` |
-| 🔵 Business | `Data/data/business/` |
+| 🔵 Catalog | `Data/content/catalog.json` |
+| 🔵 Storefront | `Data/content/storefront.json` |
+| 🔵 Sponsors | `Data/content/sponsors.json` |
+| 🔵 Social | `Data/content/social_connections.json` |
+| 🔵 Progress | `Data/content/manager-progress.md` |
+| 🔵 Business | `Data/business/` |
 | 🟢 Commands | `Core/modules/BOLT_COMMANDS.md` |
 | 🟢 Status | `Docs/PROJECT_STATUS.md` |
 

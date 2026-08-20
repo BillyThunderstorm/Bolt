@@ -37,9 +37,10 @@ except ImportError:
             print(f"     → {reason}")
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-TITLE_CACHE = PROJECT_ROOT / "data" / "title_cache.json"
-BRAIN_FILES = (PROJECT_ROOT / "bolt_brain.md", PROJECT_ROOT / "Bolt_brain.md")
+CORE_DIR = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+TITLE_CACHE = PROJECT_ROOT / "Data" / "title_cache.json"
+BRAIN_FILES = (CORE_DIR / "bolt_brain.md", CORE_DIR / "Bolt_brain.md")
 OPENAI_TITLE_MODEL = os.getenv("BOLT_OPENAI_MODEL", "gpt-4o-mini")
 XAI_TITLE_MODEL = (
     os.getenv("BOLT_XAI_MODEL_FAST")

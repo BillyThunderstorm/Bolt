@@ -236,10 +236,8 @@ def main():
             return
 
     # Skip filenames already marked processed (unless --force).
-    # Live watcher persists to Core/data/processed_recordings.json; also honor
-    # the top-level Data/ copy if present (both have been used historically).
-    processed_log = REPO_ROOT / "Core" / "data" / "processed_recordings.json"
-    alt_processed = REPO_ROOT / "Data" / "processed_recordings.json"
+    processed_log = REPO_ROOT / "Data" / "processed_recordings.json"
+    alt_processed = processed_log
     def _load_processed_names(*paths: Path) -> set[str]:
         names: set[str] = set()
         for path in paths:
@@ -339,7 +337,6 @@ def main():
 
     # ── Show post queue summary ───────────────────────────────────────────────
     try:
-        # Post-reorg: queue file lives under Data/data/.
         queue_file = DATA_DIR / "ready_to_post.json"
         if queue_file.exists():
             with open(queue_file) as f:
