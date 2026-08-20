@@ -422,6 +422,28 @@ def _ask_preferred_title_llm(prompt: str) -> Tuple[Optional[str], str]:
             model = OPENAI_TITLE_MODEL
             label = f"ChatGPT/{model}"
 
+        # Fast-path for local Ollama: schema-locked JSON via Outlines.
+    last = None
+    for prov in order:
+        if prov == "ollama" and not _ollama_healthy():
+            continue
+        if prov == "xai" and not _has_xai_key():
+            continue
+        if prov == "openai" and not _has_openai_key():
+            continue
+        if prov not in ("ollama", "xai", "openai"):
+            continue
+
+        if prov == "ollama":
+            model = OLLAMA_TITLE_MODEL
+            label = f"Ollama/{model}"
+        elif prov == "xai":
+            model = XAI_TITLE_MODEL
+            label = f"Grok/{model}"
+        else:
+            model = OPENAI_TITLE_MODEL
+            label = f"ChatGPT/{model}"
+
         raw = ask_llm(
             prompt,
             provider=prov,
@@ -454,8 +476,13 @@ def _ask_gemini(prompt: str) -> str:
         return f"LLM unavailable: {str(e)[:120]}"
 
 
-def _parse_title_response(raw: str) -> dict:
-    text = raw.strip()
+def _parse_title_response(raw) -> dict:
+    # Outlines path: raw is already a dict (Pydantic model_dump output).
+    if isinstance(raw, dict):
+        return raw
+    # Legacy string-from-cloud path: keep the regex ladder for back-compat
+    # so xAI/OpenAI providers don't need to change.
+    text = str(raw).strip()
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?\s*", "", text)
         text = re.sub(r"\s*```$", "", text)
@@ -466,6 +493,40 @@ def _parse_title_response(raw: str) -> dict:
         if not match:
             raise
         return json.loads(match.group(0))
+
+
+def _ask_outlines_titles(prompt: str) -> dict:
+    """
+    Schema-locked title generation via Outlines.
+
+    Only used when the active provider is ollama. Outlines compiles the
+    Pydantic schema into a context-free grammar that filters logits at each
+    step, so the model cannot emit anything that isn't a valid TitleSet
+    instance. Eliminates the regex-fallback ladder for the local path.
+
+    Falls back to RuntimeError on any failure so the caller can route to
+    the legacy ask_llm() string path.
+    """
+    try:
+        import outlines
+        from pydantic import BaseModel
+        from typing import List as _List
+
+        class TitleSet(BaseModel):
+            titles: _List[str]   # 3–5 short titles for the clip
+            hashtags: _List[str] # 3–8 hashtags, without the # symbol
+
+        model = outlines.models.ollama(
+            OLLAMA_TITLE_MODEL,
+            base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
+        )
+        gen = outlines.generate.json(model, TitleSet)
+        result = gen(prompt)
+        return result.model_dump()
+    except ImportError as exc:
+        raise RuntimeError(f"outlines not installed: {exc}") from exc
+    except Exception as exc:
+        raise RuntimeError(f"outlines path failed: {exc}") from exc
 
 
 def _clean_titles(titles: list, count: int) -> List[str]:
