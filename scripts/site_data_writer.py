@@ -57,9 +57,8 @@ DATA_DIR = DATA_DIR  # alias kept for backwards compat with downstream code
 CLIPS_DIR = CLIPS_DIR
 VERTICAL_DIR = REPO_ROOT / "media" / "vertical_clips"
 BRIEFINGS_DIR = DAILY_BRIEFINGS_DIR
-# Post-reorg: queue and site-data files now live under Data/data/.
 QUEUE_FILE = DATA_DIR / "multi_platform_queue.json"
-CONFIG_FILE = CONFIG_FILE  # now Core/config.json
+CONFIG_FILE = CONFIG_FILE  # Core/config.json
 SITE_DATA_FILE = DATA_DIR / "site-data.json"
 
 CT = timezone(timedelta(hours=-5))
@@ -210,7 +209,7 @@ def write_site_data(push=False, output_path=None):
 
     Args:
         push: If True, git add + commit + push after writing.
-        output_path: Override output path (default: Data/data/site-data.json)
+        output_path: Override output path (default: Data/site-data.json)
 
     Returns:
         Path to the written file.

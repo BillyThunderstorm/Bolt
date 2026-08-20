@@ -134,6 +134,24 @@ class WeeklyAnalysisRetrievalTests(unittest.TestCase):
         self.assertEqual(result, [])
 
 
+class WeeklyAnalysisSendDelegationTests(unittest.TestCase):
+    def test_send_sms_uses_bolt_alerts(self):
+        with patch("modules.Bolt_Alerts.send_sms", return_value=True) as sms:
+            self.assertTrue(wa.send_sms("Bolt Weekly: test"))
+        sms.assert_called_once_with("Bolt Weekly: test")
+
+    def test_send_email_uses_bolt_alerts(self):
+        with patch("modules.Bolt_Alerts.send_email", return_value=True) as email:
+            self.assertTrue(wa.send_email("body text", subject="Bolt weekly"))
+        email.assert_called_once_with("Bolt weekly", "body text")
+
+    def test_send_helpers_return_false_when_alerts_fail(self):
+        with patch("modules.Bolt_Alerts.send_sms", side_effect=RuntimeError("no smtp")):
+            self.assertFalse(wa.send_sms("x"))
+        with patch("modules.Bolt_Alerts.send_email", side_effect=RuntimeError("no smtp")):
+            self.assertFalse(wa.send_email("x"))
+
+
 class WeeklyAnalysisMainFlowTests(unittest.TestCase):
     def test_sms_summary_includes_memory_hit_count(self):
         # Simulate --send path without actually sending.

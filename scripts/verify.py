@@ -87,15 +87,15 @@ def check_files():
 def check_directories():
     print("\nChecking directories...")
     all_ok = True
-    # Post-reorg: media/ is the live tree (clips/vertical_clips), Data/archive
-    # holds the (archived) recordings, Data/data holds persistent state.
+    # Post-reorg: media/ is the live tree (clips/vertical_clips), Data/
+    # holds persistent state, Data/archive holds superseded copies.
     for rel in [
         "media/recordings",
         "media/clips",
         "media/vertical_clips",
         "Core/modules",
         "App/assets",
-        "Data/data",
+        "Data",
         "logs",
         "Data/content",
     ]:

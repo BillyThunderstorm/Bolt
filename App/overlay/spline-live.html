@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SimplyBilly — Live Bezel</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent !important;
+    }
+    spline-viewer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent !important;
+    }
+    .hint {
+      position: absolute;
+      left: 24px;
+      bottom: 24px;
+      color: rgba(244, 234, 212, 0.55);
+      font: 14px/1.4 "Avenir Next", sans-serif;
+      letter-spacing: 0.08em;
+    }
+  </style>
+</head>
+<body>
+  <p id="hint" class="hint">Live overlay — add a Spline URL in spline-config.js</p>
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.48/build/spline-viewer.js"></script>
+  <script src="spline-config.js"></script>
+  <script>
+    const url = window.BOLT_SPLINE && window.BOLT_SPLINE.live;
+    if (url) {
+      document.getElementById("hint").remove();
+      const viewer = document.createElement("spline-viewer");
+      viewer.setAttribute("url", url);
+      viewer.setAttribute("hint", "false");
+      viewer.style.background = "transparent";
+      document.body.appendChild(viewer);
+    }
+  </script>
+</body>
+</html>

@@ -2356,7 +2356,7 @@ Titles / captions / manual package:
   bolt queue title <clip_id>         # Suggest titles for a specific clip
   bolt queue title <clip_id> 1       # Apply suggestion #1
   bolt queue title <clip_id> "Hook"  # Set a custom title
-  bolt monitor_titles                # How past titles performed (learning)
+  bolt doctor                        # What's live, mocked, or on a stale path
 
   NOTE: `bolt manage youtube-pkg` is for catalog *product reviews* only
   (Mouse, etc.) — not gameplay clips in this queue. For clips use package.

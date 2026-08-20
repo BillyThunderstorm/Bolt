@@ -19,8 +19,8 @@ provides a single place to:
 Usage from a script in `scripts/`:
 
     from _paths import (
-        REPO_ROOT, CORE_DIR, DATA_DIR, MEDIA_DIR, DOCS_DIR, LOGS_DIR,
-        ARCHIVE_DIR, SCRIPTS_DIR,
+        REPO_ROOT, CORE_DIR, DATA_ROOT, DATA_DIR, MEDIA_DIR, DOCS_DIR,
+        LOGS_DIR, ARCHIVE_DIR, SCRIPTS_DIR, MEMORY_DIR, MEMORY_HOT_FILE,
         CLIPS_DIR, VERTICAL_CLIPS_DIR, RECORDINGS_DIR, OUTPUT_DIR,
         BRIEFINGS_DIR, CONFIG_FILE, BOT_FILE, REQUIREMENTS_FILE,
     )
@@ -47,12 +47,15 @@ CONFIG_FILE: Path = CORE_DIR / "config.json"
 BOT_FILE: Path = CORE_DIR / "bot.py"
 BOLT_BRAIN_FILE: Path = CORE_DIR / "bolt_brain.md"
 
-# Data tree
-DATA_DIR: Path = REPO_ROOT / "Data" / "data"
-CONFIG_DIR: Path = DATA_DIR / "configs"
-CONTENT_DIR: Path = DATA_DIR / "content"
-MEMORY_HOT_FILE: Path = DATA_DIR / "MEMORY.md"
-ARCHIVE_DIR: Path = REPO_ROOT / "Data" / "archive"
+# Data tree — live state lives directly under Data/.
+# DATA_DIR and DATA_ROOT are the same path (Data/data/ was a leftover nest).
+DATA_ROOT: Path = REPO_ROOT / "Data"
+DATA_DIR: Path = DATA_ROOT
+CONFIG_DIR: Path = DATA_ROOT / "configs"
+CONTENT_DIR: Path = DATA_ROOT / "content"
+MEMORY_DIR: Path = DATA_ROOT / "memory"
+MEMORY_HOT_FILE: Path = DATA_ROOT / "MEMORY.md"
+ARCHIVE_DIR: Path = DATA_ROOT / "archive"
 
 # Media tree — active recordings live here in the new layout.
 MEDIA_DIR: Path = REPO_ROOT / "media"

@@ -26,6 +26,7 @@ Output goes to:
 CLI (`bolt research`):
 - status | questions | candidates | pending | log
 - add | note | c5 keep|drop|maybe
+- find [query] [--dry-run]  (web search → gated candidates; C5 still yours)
 
 Read-only access to:
 - Data/memory/user_profile.json
@@ -40,9 +41,11 @@ from __future__ import annotations
 import json
 import os
 import re
+import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
+from urllib.parse import urlparse
 
 try:
     from modules.notifier import notify
@@ -384,15 +387,57 @@ def _candidate_name(entry: Dict[str, Any]) -> str:
     return (entry.get("name") or entry.get("creator") or "").strip()
 
 
+_NAME_STOPWORDS = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "of",
+        "for",
+        "from",
+        "to",
+        "in",
+        "on",
+        "at",
+        "by",
+        "with",
+        "you",
+        "can",
+        "your",
+    }
+)
+
+
+def _name_tokens(text: str) -> List[str]:
+    """Lowercased content words, ignoring punctuation and from/for/the/…"""
+    cleaned = re.sub(r"[^a-z0-9]+", " ", (text or "").lower())
+    return [t for t in cleaned.split() if t and t not in _NAME_STOPWORDS and len(t) > 1]
+
+
 def _name_matches(entry: Dict[str, Any], query: str) -> bool:
-    """Case-insensitive exact or substring match on name/creator."""
+    """Match a candidate name: exact, substring, or same content words.
+
+    'from' vs 'for' (and other small function words) should not miss a drop.
+    """
     q = (query or "").strip().lower()
     if not q:
         return False
     name = _candidate_name(entry).lower()
     if not name:
         return False
-    return name == q or q in name or name in q
+    if name == q or q in name or name in q:
+        return True
+    q_tokens = _name_tokens(query)
+    n_tokens = set(_name_tokens(name))
+    if len(q_tokens) >= 3 and n_tokens and all(t in n_tokens for t in q_tokens):
+        return True
+    if len(q_tokens) >= 4 and n_tokens:
+        overlap = sum(1 for t in q_tokens if t in n_tokens)
+        if overlap / len(q_tokens) >= 0.8:
+            return True
+    return False
 
 
 def list_candidates(
@@ -435,6 +480,201 @@ def add_candidate(
         "public_signal": (public_signal or summary or "").strip(),
     }
     return log_finding(finding, finding_type="candidate_creator", profile=profile or None)
+
+
+_SKIP_TITLE_HINTS = (
+    "best ",
+    "top 10",
+    "top ten",
+    "how to",
+    "wikipedia",
+    "reddit",
+    "list of",
+    "versus",
+    " vs ",
+    "jobs",
+    "hiring",
+    "career guide",
+    "join our",
+    "we're hiring",
+    "who are your",
+    "most trusted",
+    "real talk",
+    "you can trust",
+    "youtube channels",
+    "channels for",
+    "channels from",
+)
+
+_SKIP_HOSTS = (
+    "indeed.com",
+    "linkedin.com",
+    "glassdoor.com",
+    "ziprecruiter.com",
+    "wikipedia.org",
+)
+
+_PLATFORM_HOSTS = (
+    ("youtube.com", "YouTube"),
+    ("youtu.be", "YouTube"),
+    ("tiktok.com", "TikTok"),
+    ("twitch.tv", "Twitch"),
+    ("instagram.com", "Instagram"),
+    ("x.com", "X"),
+    ("twitter.com", "X"),
+)
+
+
+def default_find_query(profile: Optional[Dict[str, Any]] = None) -> str:
+    """Short creator-examples query. Never dump the full career_goal paragraph."""
+    profile = profile if profile is not None else load_profile()
+    bits = ["honest product reviewer", "YouTube creator"]
+    text = " ".join(get_named_aspirations(profile)).lower()
+    if "gaming" in text or "game" in text:
+        bits.insert(1, "gaming")
+    return " ".join(bits)
+
+
+def _platform_from_url(url: str) -> str:
+    host = (url or "").lower()
+    for needle, label in _PLATFORM_HOSTS:
+        if needle in host:
+            return label
+    return "unknown"
+
+
+def _name_from_title(title: str) -> str:
+    text = (title or "").strip()
+    for sep in (
+        " - YouTube",
+        " | YouTube",
+        " on TikTok",
+        " | TikTok",
+        " - Twitch",
+        " | Twitch",
+        " – YouTube",
+    ):
+        if sep.lower() in text.lower():
+            text = re.split(re.escape(sep), text, flags=re.I)[0]
+            break
+    else:
+        text = re.split(r"\s+[|\-–:]\s+", text)[0]
+    return text.strip()[:80]
+
+
+def _is_noise_name(name: str) -> bool:
+    low = name.lower()
+    if len(name) < 3:
+        return True
+    return any(hint in low for hint in _SKIP_TITLE_HINTS)
+
+
+def _is_noise_result(name: str, url: str) -> bool:
+    if _is_noise_name(name):
+        return True
+    host = (urlparse(url or "").netloc or "").lower()
+    if any(skip in host for skip in _SKIP_HOSTS):
+        return True
+    path = (url or "").lower()
+    return "/jobs" in path or "/career" in path
+
+
+def _web_search_results(query: str, limit: int) -> List[Dict[str, str]]:
+    scripts = PROJECT_ROOT / "scripts"
+    for path in (str(PROJECT_ROOT), str(scripts)):
+        if path not in sys.path:
+            sys.path.insert(0, path)
+    try:
+        from scripts._research import web_search_results  # type: ignore
+    except Exception:
+        try:
+            from _research import web_search_results  # type: ignore
+        except Exception:
+            return []
+    try:
+        return list(web_search_results(query, limit=limit) or [])
+    except Exception:
+        return []
+
+
+def find_candidates(
+    *,
+    query: Optional[str] = None,
+    limit: int = 5,
+    dry_run: bool = False,
+    search_fn: Optional[Callable[[str, int], List[Dict[str, str]]]] = None,
+    profile: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Search the web for creator-example candidates, gate C7/C6, leave C5 open.
+
+    Does not pick for Billy. Cleared names are logged as pending C5 unless
+    ``dry_run`` is True. C7 blocks are skipped. Existing names are not re-logged.
+    """
+    if profile is None:
+        profile = load_profile()
+    query = (query or "").strip() or default_find_query(profile)
+    limit = max(1, min(int(limit), 10))
+    search = search_fn or _web_search_results
+    results = search(query, limit)
+    known = {
+        _candidate_name(entry).lower()
+        for entry in list_candidates(limit=1000)
+        if _candidate_name(entry)
+    }
+
+    added: List[Dict[str, Any]] = []
+    skipped: List[Dict[str, str]] = []
+    blocked: List[Dict[str, str]] = []
+    preview: List[Dict[str, Any]] = []
+
+    seen_names = set(known)
+    for row in results:
+        title = (row.get("title") or "").strip()
+        url = (row.get("url") or "").strip()
+        description = (row.get("description") or "").strip()
+        name = _name_from_title(title)
+        if _is_noise_result(name, url):
+            skipped.append({"name": name or title, "reason": "noise title"})
+            continue
+        key = name.lower()
+        if key in seen_names:
+            skipped.append({"name": name, "reason": "already logged"})
+            continue
+        seen_names.add(key)
+        candidate = {
+            "name": name,
+            "platform": _platform_from_url(url),
+            "summary": description or title,
+            "why_match": f"Web search for creator examples ({query[:80]})",
+            "public_signal": f"{title} {description}".strip(),
+            "source": "web_search",
+            "url": url,
+        }
+        gated = gate_candidate(dict(candidate), profile)
+        verdict = (gated.get("gate") or {}).get("verdict", "cleared")
+        preview.append(gated)
+        if verdict == "blocked_c7":
+            blocked.append({"name": name, "reason": "C7"})
+            continue
+        if dry_run:
+            added.append(gated)
+            continue
+        entry = log_finding(
+            gated,
+            finding_type="candidate_creator",
+            profile=profile,
+        )
+        added.append(entry)
+
+    return {
+        "query": query,
+        "result_count": len(results),
+        "dry_run": dry_run,
+        "added": added,
+        "skipped": skipped,
+        "blocked": blocked,
+        "preview": preview,
+    }
 
 
 def add_note(
@@ -525,10 +765,19 @@ def set_c5_verdict(
         matched_names.append(_candidate_name(e) or f"entry-{i}")
 
     if not matches_idx:
+        pending = [
+            _candidate_name(e)
+            for e in list_candidates(pending_c5_only=True, limit=12)
+            if _candidate_name(e)
+        ]
+        hint = ""
+        if pending:
+            hint = " Pending: " + "; ".join(pending)
         raise ValueError(
             f"No matching candidate for '{name}'"
             + (" that still needs a C5 decision" if only_pending else "")
             + ". Try: bolt research pending"
+            + hint
         )
 
     # Disambiguation: prefer exact (case-insensitive) matches over substring
@@ -878,13 +1127,15 @@ def main(argv: Optional[List[str]] = None) -> int:
             "  bolt research c5 keep \"iJustine\" --why \"Want that event path\"\n"
             "  bolt research c5 drop \"Someone\" --why \"Not my voice\"\n"
             "  bolt research note \"Through-line idea: honest tangent reviews\"\n"
+            "  bolt research find --dry-run\n"
+            "  bolt research find \"honest tech reviewer YouTube\" --limit 5\n"
         ),
     )
     parser.add_argument(
         "command",
         nargs="?",
         default="status",
-        help="status|questions|candidates|pending|log|add|note|c5|help",
+        help="status|questions|candidates|pending|log|add|note|c5|find|help",
     )
     parser.add_argument("rest", nargs=argparse.REMAINDER, help=argparse.SUPPRESS)
     parser.add_argument("--limit", type=int, default=20, help="Max entries for list commands")
@@ -942,6 +1193,47 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if cmd == "log":
         _print_log(limit=limit)
+        return 0
+
+    if cmd in ("find", "search", "suggest"):
+        find_parser = argparse.ArgumentParser(prog="bolt research find")
+        find_parser.add_argument(
+            "query",
+            nargs="*",
+            default=[],
+            help="Search query (default: profile career goal + YouTube creator)",
+        )
+        find_parser.add_argument("--limit", type=int, default=5)
+        find_parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="Preview gated names without writing the research log",
+        )
+        try:
+            find_args = find_parser.parse_args(rest)
+        except SystemExit:
+            return 2
+        query = " ".join(find_args.query).strip()
+        report = find_candidates(
+            query=query or None,
+            limit=find_args.limit,
+            dry_run=find_args.dry_run,
+        )
+        mode = "dry-run" if report["dry_run"] else "logged"
+        print(f"Search ({mode}): {report['query']}")
+        print(f"  web hits: {report['result_count']}")
+        if not report["result_count"]:
+            print("  No results. Check the network, or pass a more specific query.")
+            return 1
+        for entry in report["added"]:
+            gate = (entry.get("gate") or {}).get("verdict", "ungated")
+            print(f"  + {entry.get('name')}  [{entry.get('platform')}]  gate={gate}")
+        for row in report["blocked"]:
+            print(f"  × {row['name']}  skipped ({row['reason']})")
+        for row in report["skipped"]:
+            print(f"  · {row['name']}  {row['reason']}")
+        if report["added"] and not report["dry_run"]:
+            print("  C5 still yours: bolt research pending")
         return 0
 
     if cmd == "add":
@@ -1012,7 +1304,11 @@ def main(argv: Optional[List[str]] = None) -> int:
             "verdict",
             help="keep|drop|fits|no|maybe",
         )
-        c5_parser.add_argument("name", help="Creator name (substring OK if unique)")
+        c5_parser.add_argument(
+            "name",
+            nargs="+",
+            help="Creator name (quotes optional; unique substring OK)",
+        )
         c5_parser.add_argument("--why", default="", help="Your words — why keep or drop")
         c5_parser.add_argument(
             "--all",
@@ -1025,7 +1321,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             return 2
         try:
             result = set_c5_verdict(
-                c5_args.name,
+                " ".join(c5_args.name),
                 c5_args.verdict,
                 why=c5_args.why,
                 only_pending=not c5_args.all,
@@ -1041,7 +1337,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
 
     print(f"bolt research: unknown command '{cmd}'", flush=True)
-    print("  Try: status | questions | candidates | pending | log | add | note | c5 | help")
+    print("  Try: status | questions | candidates | pending | log | add | note | c5 | find | help")
     return 2
 
 

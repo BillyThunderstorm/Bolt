@@ -52,7 +52,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 # Repo-root-relative data location. Same convention as Analytics_Tracker.
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = PROJECT_ROOT / "Data" / "data"
+DATA_DIR = PROJECT_ROOT / "Data"
 PERFORMANCE_OUTCOMES_FILE = DATA_DIR / "performance_outcomes.jsonl"
 
 # Default viral threshold: 90th percentile of historical view counts.

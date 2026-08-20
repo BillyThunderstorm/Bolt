@@ -73,6 +73,8 @@ SUBCOMMANDS: dict[str, str] = {
     # Script passthroughs (script name with no .py and lowercase).
     # The wrapper looks up the actual file by lowercased name.
     "verify": "verify.py",
+    "doctor": "doctor.py",
+    "audit": "doctor.py",
     "recordings": "process_recordings.py",
     "auto_clip_twitch": "auto_clip_twitch.py",
     "auto-clip-twitch": "auto_clip_twitch.py",
@@ -90,8 +92,7 @@ SUBCOMMANDS: dict[str, str] = {
     "monthly": "weekly_analysis.py",
     "log_perf": "log_clip_performance.py",
     "log_performance": "log_clip_performance.py",
-    "monitor_titles": "monitor_title_results.py",
-    "test_titles": "test_title_upgrade_10_clips.py",
+
     "vods": "twitch_vod_downloader.py",
     "vod_download": "twitch_vod_downloader.py",
     "twitch_token": "get_twitch_token.py",
@@ -139,6 +140,8 @@ Usage:  bolt <subcommand> [args...]
 
 Script subcommands (each maps to scripts/X.py):
   verify                  Run the install/setup verifier
+  doctor [--json]         Audit live vs mocked vs stale paths / missing keys
+  audit                   Alias for doctor
   recordings [mode]       Process existing recordings (default: latest)
   auto_clip_twitch        Auto-clip highlights from Twitch VODs
   highlights              Compile top clips into a Twitch highlight reel
@@ -151,8 +154,6 @@ Script subcommands (each maps to scripts/X.py):
   site [--push]           Write site-data.json
   weekly                  Generate weekly performance insights
   log_perf [args]         Log a clip's performance
-  monitor_titles          Summarize title-generation signals
-  test_titles             Run the 10-clip title-upgrade smoke test
   vods                    Download Twitch VOD samples
   twitch_token            Get a Twitch chat token
   twitch_bot_token        Get a Twitch bot chat token
@@ -197,10 +198,11 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
                           Social performance pull readiness + TikTok/YouTube sync
 
 Direction-finding researcher (Core/modules/Researcher.py):
-  research [status|questions|candidates|pending|log|add|note|c5]
+  research [status|questions|candidates|pending|log|add|note|c5|find]
                           Profile-aware research role (C5/C6/C7 gates + log)
                           c5 keep|drop "Name"  — record your C5 decision
                           add "Name" --platform … --summary … --why …
+                          find [query] [--dry-run]  — web search → pending C5
 
 Creator Command Center (Core/modules/Command_Center.py):
   mission [status|checkin|playbook|list|show|start|next]

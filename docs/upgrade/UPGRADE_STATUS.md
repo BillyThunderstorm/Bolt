@@ -87,15 +87,14 @@ XAI_API_KEY=...
 
 - `modules/Title_Generator.py` supports AI title generation when enabled, caches responses, cleans hashtags, and falls back to templates.
 - `config.json` has `quality_tiers.use_ai_titles` enabled.
-- `scripts/test_title_upgrade_10_clips.py` validates 10 representative clip scenarios without spending API credits.
-- `scripts/monitor_title_results.py` gives a quick readiness/results summary.
+- Title review is `bolt queue title`. Connectivity is `bolt doctor`.
+- Title generator behavior is covered by `Data/tests/test_title_generator.py`.
 
 ## Commands
 
 ```bash
 python3 -m unittest tests.test_title_generator tests.test_multi_publisher tests.test_log_clip_performance
-python3 scripts/test_title_upgrade_10_clips.py
-python3 scripts/monitor_title_results.py
+python3 bin/bolt doctor
 python3 scripts/log_clip_performance.py --list
 ```
 

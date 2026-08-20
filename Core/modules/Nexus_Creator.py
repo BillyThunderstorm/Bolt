@@ -402,7 +402,7 @@ Focus: continue this week's topic. Do not invent a new career plan or rotate lan
     def _log_advice(
         self, topic: str, advice: str, provider: str, model: str, task_type: str
     ):
-        log_path = Path("Data/data/nexus_advice.jsonl")
+        log_path = Path(__file__).resolve().parents[2] / "Data" / "nexus_advice.jsonl"
         log_path.parent.mkdir(parents=True, exist_ok=True)
         entry = {
             "timestamp": datetime.now().isoformat(),

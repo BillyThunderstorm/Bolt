@@ -54,7 +54,7 @@ STABLE_WAIT_SEC = 3.0  # seconds to wait before declaring the file stable
 
 # Where we persist the list of already-processed filenames across restarts.
 # Without this file, every launch re-runs the full pipeline on every recording.
-PROCESSED_LOG = Path(__file__).parent.parent / "data" / "processed_recordings.json"
+PROCESSED_LOG = Path(__file__).resolve().parents[2] / "Data" / "processed_recordings.json"
 
 
 def _load_processed() -> set:

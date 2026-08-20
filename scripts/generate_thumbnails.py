@@ -63,7 +63,6 @@ DEFAULT_WIDTH = 1280
 JPEG_QUALITY = 2  # ffmpeg q:v scale (lower = better, 2 is visually lossless)
 LUMA_MIN = 24  # 0-255; below this we treat the frame as "mostly black"
 SEEK_FRACTIONS = (1 / 3, 1 / 2, 2 / 3)  # tried in order for the smart strategy
-# Post-reorg: state file now under Data/data/.
 STATE_FILE = DATA_DIR / "thumbnail_state.json"
 
 # External tools

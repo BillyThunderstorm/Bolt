@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SimplyBilly — Starting Soon</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #070b16;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: #f4ead4;
+    }
+    spline-viewer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background:
+        radial-gradient(ellipse at 50% 30%, #1a2744 0%, #070b16 70%);
+    }
+    .fallback h1 {
+      margin: 0;
+      font-size: 72px;
+      letter-spacing: 0.18em;
+      font-weight: 700;
+    }
+    .fallback p {
+      margin: 0;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: #f0c75e;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div id="fallback" class="fallback">
+    <p>SimplyBilly</p>
+    <h1>STARTING SOON</h1>
+    <p>paste your Spline URL in spline-config.js</p>
+  </div>
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.48/build/spline-viewer.js"></script>
+  <script src="spline-config.js"></script>
+  <script>
+    const url = window.BOLT_SPLINE && window.BOLT_SPLINE.startingSoon;
+    if (url) {
+      document.getElementById("fallback").classList.add("hidden");
+      const viewer = document.createElement("spline-viewer");
+      viewer.setAttribute("url", url);
+      viewer.setAttribute("hint", "false");
+      viewer.style.background = "transparent";
+      document.body.appendChild(viewer);
+    }
+  </script>
+</body>
+</html>

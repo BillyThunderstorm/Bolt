@@ -2,8 +2,12 @@
 """
 BOLT SYSTEM VERIFICATION & HEALTH CHECK
 ========================================
-Run this script to verify Bolt is ready to operate.
-Usage: python3 health_check.py
+Pre-reorg leftover. Prefer:
+
+    bolt doctor
+
+This file still looks for CWD-relative paths from before the Core/Data/media
+split and is not wired into the CLI.
 """
 
 import sys

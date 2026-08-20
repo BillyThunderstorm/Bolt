@@ -290,20 +290,29 @@ def load_queue_stats():
     return stats
 
 
-# ── Sending (stubs — safe to patch in tests) ──────────────────────────────────
+# ── Sending (Bolt_Alerts; patch these names in tests) ─────────────────────────
 
 
 def send_sms(text: str, *args, **kwargs) -> bool:
-    """Best-effort SMS send. Returns True on success, False otherwise.
+    """Best-effort SMS via Bolt_Alerts. Returns True on success."""
+    try:
+        from modules.Bolt_Alerts import send_sms as _alert_sms
 
-    Stubbed by default; replaced via config in production. Always test-safe.
-    """
-    return False
+        return bool(_alert_sms(text))
+    except Exception:
+        return False
 
 
 def send_email(text: str, *args, **kwargs) -> bool:
-    """Best-effort email send. Returns True on success, False otherwise."""
-    return False
+    """Best-effort email via Bolt_Alerts. Returns True on success."""
+    try:
+        from modules.Bolt_Alerts import send_email as _alert_email
+
+        subject = str(kwargs.get("subject") or "Bolt weekly")
+        body = text if text else (args[0] if args else "")
+        return bool(_alert_email(subject, body))
+    except Exception:
+        return False
 
 
 # ── Report generation ──────────────────────────────────────────────────────────
@@ -408,8 +417,8 @@ def main(print_only=False, send=False, days=7):
         --send   : attempt to send via sms/email (best-effort)
         --days N : look back N days for outcomes (default 7)
 
-    The `--send` path uses `send_sms` / `send_email` (both module-level and
-    safe to patch in tests).
+    The `--send` path uses `send_sms` / `send_email` (module-level,
+    patchable; they delegate to Bolt_Alerts).
     """
     outcomes = load_outcomes(days=days)
     queue_data = load_queue_stats()
@@ -424,7 +433,7 @@ def main(print_only=False, send=False, days=7):
         summary_lines.append(f"{len(memory_hits)} memory hits")
         sms_text = "Bolt Weekly: " + " | ".join(summary_lines)
         send_sms(sms_text)
-        send_email(sms_text)
+        send_email(sms_text, subject="Bolt weekly")
 
     # Nexus enrichment (best-effort)
     try:

@@ -1,4 +1,0 @@
-{
-  "_comment": "Stale leftover. Bolt reads Core/config.json only. Do not put game, paths, or scoring thresholds here.",
-  "canonical": "Core/config.json"
-}

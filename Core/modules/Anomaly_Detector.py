@@ -14,7 +14,7 @@ Pipeline:
      to compute a small dict of features (duration, mean_rms, std_rms,
      max_rms, num_high_spikes, silence_ratio, etc.) and returns it.
   2. load_profiles(game) — loads all previously-saved profiles for
-     a given game from Data/data/anomaly_profiles.jsonl.
+     a given game from Data/anomaly_profiles.jsonl.
   3. fit_baseline(profiles) — computes mean/std for each numeric
      feature across the loaded set. Returns a Baseline dataclass.
   4. score(profile, baseline) — returns an AnomalyReport listing any
@@ -54,7 +54,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 # Repo-root-relative data location. Same convention as Memory_Index.
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = PROJECT_ROOT / "Data" / "data"
+DATA_DIR = PROJECT_ROOT / "Data"
 PROFILES_FILE = DATA_DIR / "anomaly_profiles.jsonl"
 
 # Default Z-score threshold: any feature more than this many standard

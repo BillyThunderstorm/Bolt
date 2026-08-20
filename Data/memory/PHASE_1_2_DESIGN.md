@@ -202,8 +202,9 @@ in the original).
 
 - Added `load_outcomes(days)` and `load_queue_stats()` to
   `weekly_analysis.py` (the `--send` flow uses them).
-- Added `send_sms(text)` and `send_email(text)` as safe no-op stubs
-  (module-level, patchable; production replaces via config).
+- Added `send_sms(text)` and `send_email(text)` as module-level helpers
+  (patchable in tests). Wired to `Bolt_Alerts` on 2026-08-20 so
+  `bolt weekly --send` uses the same SMS/email path as `bolt send`.
 - Added a `risk` field on every `ProposedAction` ("high" for
   `delete_clip` / `publish_now`; "low" otherwise) so
   `enforce_action_policy` and `confirm_action` correctly gate
