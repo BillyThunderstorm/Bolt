@@ -337,10 +337,10 @@
   },
   "Unknown": {
     "unknown": {
-      "total_clips": 2,
-      "total_views": 0,
-      "total_likes": 0,
-      "avg_views": 0.0,
+      "total_clips": 3,
+      "total_views": 713,
+      "total_likes": 5,
+      "avg_views": 237,
       "observations": [
         {
           "at": "2026-08-07T03:21:26",
@@ -351,6 +351,11 @@
           "at": "2026-08-07T03:21:26",
           "views": 0,
           "likes": 0
+        },
+        {
+          "at": "2026-08-21T23:01:19",
+          "views": 713,
+          "likes": 5
         }
       ]
     }

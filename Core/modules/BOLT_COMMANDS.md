@@ -86,6 +86,7 @@ bolt week rotate                      # Archive this week → last week
 bolt week ban "idea" [--why "C5 no"]  # Never suggest this again
 bolt stats [status|sync|tiktok|youtube] [--dry-run]
                                       # Social readiness + TikTok/YouTube pull
+bolt overlay [--port 8766]            # OBS overlay server (Stream Deck kill/win + cam frame)
 bolt launch                       # Start live mode (folder watch + optional OBS)
 bolt launch --no-checklist        # Live mode without the pre-stream voice checklist
 bolt status                       # Check the decision engine, vector DB, and Nexus

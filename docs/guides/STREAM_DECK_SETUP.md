@@ -189,6 +189,38 @@ and leaves your Discord/headphone audio untouched.
 
 ---
 
+## Overlay folder — Kill / Win / Reset (Thunder Diamond)
+
+The main 15-key page stays as above. Add a **Folder** named `Overlay` (drag **System → Create Folder** onto a key, or use a second Stream Deck page).
+
+Do **not** Open the `.sh` files — macOS treats those as text, so Stream Deck opens them in an editor. Do **not** paste `http://127.0.0.1:8766/…` as a Website action either; that URL is dead until the overlay server is running.
+
+Use the **apps** in Finder:
+
+`/Users/carter/developer/Bolt/App/overlay/streamdeck/`
+
+Drag **System → Open** onto a key, then browse to the app (or drag the app onto the Open action).
+
+| Button | App/File | Icon |
+|--------|----------|------|
+| Kill +1 | `App/overlay/streamdeck/Overlay Kill.app` | `App/overlay/assets/streamdeck/kill.png` |
+| Win +1 | `App/overlay/streamdeck/Overlay Win.app` | `…/win.png` |
+| Reset | `App/overlay/streamdeck/Overlay Reset.app` | `…/reset.png` |
+| Start Overlay (once) | `App/overlay/streamdeck/Start Overlay.app` | — |
+| Kill −1 (optional) | `…/Overlay Kill Minus.app` | `…/kill-minus.png` |
+| Win −1 (optional) | `…/Overlay Win Minus.app` | `…/win-minus.png` |
+
+The first press starts the overlay server in the background if it is not already running. After that, Kill/Win/Reset only bump the numbers.
+
+OBS Browser Sources still need the **http** URLs (not Local File):
+
+- `http://127.0.0.1:8766/thunder-diamond-counter.html`
+- `http://127.0.0.1:8766/thunder-diamond-cam.html`
+
+Custom CSS: `body { background-color: rgba(0,0,0,0) !important; }`
+
+---
+
 ## Important: Allow Scripts to Run
 
 The first time you press any Bolt button, macOS will block the script.
