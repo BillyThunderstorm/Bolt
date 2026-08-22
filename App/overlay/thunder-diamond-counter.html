@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thunder Diamond Counter</title>
+<!--
+  OBS Browser Source (use the URL from `bolt overlay`, not Local File)
+  -------------------------------------------------------------------
+  URL:    http://127.0.0.1:8766/thunder-diamond-counter.html
+  Width 560   Height 300
+  Custom CSS: body { background-color: rgba(0,0,0,0) !important; }
+  Shutdown source when not visible: OFF
+
+  Stream Deck: System → Open → scripts/streamdeck/overlay_kill.sh
+               overlay_win.sh / overlay_reset.sh
+               Icons: App/overlay/assets/streamdeck/
+
+  Keys still work if this source is focused (Interact):
+    1 / F1 kill+1   2 / F2 win+1   R / F3 reset
+
+  Preview: ?edit=1   Checkerboard: ?bg=check   Demo: ?demo=1
+-->
+<style>
+  :root {
+    --kills: #5ee7ff;
+    --wins: #f0c75e;
+    --text: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: fit-content;
+    min-width: 1px;
+    min-height: 1px;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  body {
+    font-family: "Avenir Next Condensed", "Arial Black", Impact, sans-serif;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 8px 12px 10px;
+    color: var(--text);
+  }
+
+  body.bg-check {
+    background:
+      repeating-conic-gradient(#2a2a2a 0% 25%, #1a1a1a 0% 50%)
+      0 0 / 28px 28px;
+  }
+
+  body.bg-dark { background: #070b16; }
+
+  .badge {
+    position: relative;
+    width: 260px;
+    height: 268px;
+    cursor: pointer;
+    user-select: none;
+    transform: translateZ(0);
+  }
+
+  .gem-wrap {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    transform-origin: 50% 58%;
+  }
+
+  .gem {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    filter:
+      drop-shadow(0 8px 16px rgba(0, 0, 0, 0.55))
+      drop-shadow(0 0 14px rgba(90, 160, 255, 0.35));
+    animation: idle-glow 3.6s ease-in-out infinite;
+  }
+
+  .wins .gem {
+    filter:
+      drop-shadow(0 8px 16px rgba(0, 0, 0, 0.55))
+      drop-shadow(0 0 14px rgba(240, 199, 94, 0.4));
+  }
+
+  .label {
+    position: absolute;
+    z-index: 2;
+    top: 22%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.9),
+      0 0 10px rgba(0, 0, 0, 0.7);
+  }
+
+  .kills .label { color: var(--kills); }
+  .wins .label { color: var(--wins); }
+
+  .number {
+    position: absolute;
+    z-index: 2;
+    top: 44%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 64px;
+    font-weight: 900;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    text-shadow:
+      0 2px 0 rgba(0, 0, 0, 0.55),
+      0 4px 14px rgba(0, 0, 0, 0.85),
+      0 0 22px var(--flash, rgba(94, 231, 255, 0.55));
+  }
+
+  .kills { --flash: rgba(94, 231, 255, 0.7); }
+  .wins { --flash: rgba(240, 199, 94, 0.75); }
+
+  .burst {
+    position: absolute;
+    z-index: 3;
+    left: 50%;
+    top: 30%;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    pointer-events: none;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85);
+    transform: translate(-50%, 8px) scale(0.9);
+  }
+
+  .strike {
+    position: absolute;
+    inset: 8% 12% 10%;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    background:
+      radial-gradient(circle at 50% 48%, rgba(255, 255, 255, 0.55), transparent 42%),
+      linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.5), transparent 48%);
+    mix-blend-mode: screen;
+  }
+
+  .controls {
+    position: absolute;
+    z-index: 4;
+    left: 0;
+    right: 0;
+    bottom: 22px;
+    display: none;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  body.edit .controls { display: flex; }
+
+  .btn {
+    width: 34px;
+    height: 26px;
+    border: 0;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    background: rgba(8, 10, 18, 0.72);
+  }
+
+  .kills .btn { box-shadow: 0 0 0 1px var(--kills); }
+  .wins .btn { box-shadow: 0 0 0 1px var(--wins); }
+
+  .reset {
+    display: none;
+    position: absolute;
+    z-index: 4;
+    left: 50%;
+    bottom: 4px;
+    transform: translateX(-50%);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    cursor: pointer;
+  }
+
+  body.edit .reset { display: block; }
+  body.edit .badge { height: 318px; }
+  body.edit .gem-wrap { bottom: 52px; }
+
+  .badge.react .gem-wrap { animation: gem-kick 420ms cubic-bezier(.18, .9, .22, 1.2); }
+  .badge.react .gem { animation: gem-strike 520ms ease-out; }
+  .badge.react .number { animation: number-pop 280ms cubic-bezier(.18, .9, .24, 1.35); }
+  .badge.react .burst { animation: burst-up 620ms ease-out; }
+  .badge.react .strike { animation: strike-flash 480ms ease-out; }
+  .badge.down .number { animation-name: number-dip; }
+
+  @keyframes idle-glow {
+    0%, 100% { opacity: 0.96; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes gem-kick {
+    0% { transform: scale(1) rotate(0deg); }
+    35% { transform: scale(1.1) rotate(-1.4deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  @keyframes gem-strike {
+    0% {
+      filter:
+        brightness(1)
+        drop-shadow(0 8px 16px rgba(0, 0, 0, 0.55))
+        drop-shadow(0 0 14px rgba(90, 160, 255, 0.35));
+    }
+    22% {
+      filter:
+        brightness(1.85) saturate(1.45)
+        drop-shadow(0 0 18px rgba(255, 255, 255, 0.85))
+        drop-shadow(0 0 36px var(--flash));
+    }
+    100% {
+      filter:
+        brightness(1)
+        drop-shadow(0 8px 16px rgba(0, 0, 0, 0.55))
+        drop-shadow(0 0 14px rgba(90, 160, 255, 0.35));
+    }
+  }
+
+  @keyframes number-pop {
+    0% { transform: scale(0.86); filter: brightness(1.7); }
+    55% { transform: scale(1.16); }
+    100% { transform: scale(1); filter: brightness(1); }
+  }
+
+  @keyframes number-dip {
+    0% { transform: scale(1.1); filter: saturate(0.7); }
+    100% { transform: scale(1); filter: saturate(1); }
+  }
+
+  @keyframes burst-up {
+    0% { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }
+    18% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -28px) scale(1.08); }
+  }
+
+  @keyframes strike-flash {
+    0% { opacity: 0; transform: translateX(-30%); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(30%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gem { animation: none; }
+    .badge.react .gem-wrap,
+    .badge.react .gem,
+    .badge.react .number,
+    .badge.react .burst,
+    .badge.react .strike,
+    .badge.down .number {
+      animation-duration: 1ms;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="badge kills" data-counter="kills" title="Click or press 1 / F1">
+    <div class="gem-wrap">
+      <img class="gem" src="assets/thunder-diamond-640.png" alt="">
+      <div class="strike"></div>
+    </div>
+    <div class="label">Kills</div>
+    <div class="number" id="kills-num">0</div>
+    <div class="burst" id="kills-burst">+1</div>
+    <div class="controls">
+      <button class="btn" type="button" data-action="kills:-1" aria-label="Subtract one kill">−</button>
+      <button class="btn" type="button" data-action="kills:1" aria-label="Add one kill">+</button>
+    </div>
+    <span class="reset" data-reset="kills">reset</span>
+  </div>
+
+  <div class="badge wins" data-counter="wins" title="Click or press 2 / F2">
+    <div class="gem-wrap">
+      <img class="gem" src="assets/thunder-diamond-640.png" alt="">
+      <div class="strike"></div>
+    </div>
+    <div class="label">Wins</div>
+    <div class="number" id="wins-num">0</div>
+    <div class="burst" id="wins-burst">+1</div>
+    <div class="controls">
+      <button class="btn" type="button" data-action="wins:-1" aria-label="Subtract one win">−</button>
+      <button class="btn" type="button" data-action="wins:1" aria-label="Add one win">+</button>
+    </div>
+    <span class="reset" data-reset="wins">reset</span>
+  </div>
+
+<script>
+  var STORAGE_KEY = "thunder-diamond-counter-state";
+  var counts = { kills: 0, wins: 0 };
+  var params = new URLSearchParams(location.search);
+  var editMode = params.get("edit") === "1" || params.get("overlay") === "0";
+  var serverMode = location.protocol.indexOf("http") === 0 && params.get("local") !== "1";
+
+  if (editMode) document.body.classList.add("edit");
+  if (params.get("bg") === "check") document.body.classList.add("bg-check");
+  if (params.get("bg") === "dark") document.body.classList.add("bg-dark");
+
+  function saveLocal() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(counts)); } catch (err) {}
+  }
+
+  function loadLocal() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      counts.kills = Number(saved.kills) || 0;
+      counts.wins = Number(saved.wins) || 0;
+    } catch (err) {}
+  }
+
+  function render(type, delta) {
+    var el = document.getElementById(type + "-num");
+    var badge = document.querySelector('[data-counter="' + type + '"]');
+    var burst = document.getElementById(type + "-burst");
+
+    el.textContent = counts[type];
+    burst.textContent = delta < 0 ? String(delta) : "+" + (delta || 1);
+
+    badge.classList.remove("react", "down");
+    void badge.offsetWidth;
+    if (delta) {
+      if (delta < 0) badge.classList.add("down");
+      badge.classList.add("react");
+    }
+  }
+
+  function applyPayload(payload, animate) {
+    var next = (payload && payload.counts) || counts;
+    var delta = (payload && payload.delta) || {};
+    ["kills", "wins"].forEach(function (type) {
+      var before = counts[type];
+      counts[type] = Math.max(0, Number(next[type]) || 0);
+      var d = Object.prototype.hasOwnProperty.call(delta, type)
+        ? Number(delta[type]) || 0
+        : counts[type] - before;
+      render(type, animate ? d : 0);
+    });
+    if (!serverMode) saveLocal();
+  }
+
+  function changeLocal(type, delta) {
+    var before = counts[type];
+    counts[type] = Math.max(0, counts[type] + delta);
+    render(type, counts[type] - before);
+    saveLocal();
+  }
+
+  function change(type, delta) {
+    if (serverMode) {
+      fetch("/api/change?type=" + encodeURIComponent(type) + "&delta=" + encodeURIComponent(delta), { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (payload) { applyPayload(payload, true); })
+        .catch(function () { serverMode = false; changeLocal(type, delta); });
+      return;
+    }
+    changeLocal(type, delta);
+  }
+
+  function resetOne(type) {
+    if (serverMode) {
+      fetch("/api/reset?type=" + encodeURIComponent(type), { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (payload) { applyPayload(payload, true); })
+        .catch(function () {
+          serverMode = false;
+          if (type === "all") {
+            render("kills", -counts.kills);
+            render("wins", -counts.wins);
+            counts.kills = 0;
+            counts.wins = 0;
+          } else {
+            render(type, -counts[type]);
+            counts[type] = 0;
+          }
+          saveLocal();
+        });
+      return;
+    }
+    if (type === "all") {
+      var dk = -counts.kills;
+      var dw = -counts.wins;
+      counts.kills = 0;
+      counts.wins = 0;
+      render("kills", dk);
+      render("wins", dw);
+      saveLocal();
+      return;
+    }
+    var before = counts[type];
+    counts[type] = 0;
+    render(type, -before);
+    saveLocal();
+  }
+
+  document.addEventListener("click", function (e) {
+    var action = e.target.getAttribute("data-action");
+    var reset = e.target.getAttribute("data-reset");
+    if (action) {
+      var parts = action.split(":");
+      change(parts[0], Number(parts[1]));
+      e.stopPropagation();
+      return;
+    }
+    if (reset) {
+      resetOne(reset);
+      e.stopPropagation();
+      return;
+    }
+    var badge = e.target.closest("[data-counter]");
+    if (badge) change(badge.getAttribute("data-counter"), 1);
+  });
+
+  document.addEventListener("keydown", function (e) {
+    var killUp = (e.key === "1" || e.key === "F1") && !e.shiftKey;
+    var killDown = e.key === "!" || ((e.key === "1" || e.key === "F1") && e.shiftKey);
+    var winUp = (e.key === "2" || e.key === "F2") && !e.shiftKey;
+    var winDown = e.key === "@" || ((e.key === "2" || e.key === "F2") && e.shiftKey);
+    if (killUp) { e.preventDefault(); change("kills", 1); }
+    if (killDown) { e.preventDefault(); change("kills", -1); }
+    if (winUp) { e.preventDefault(); change("wins", 1); }
+    if (winDown) { e.preventDefault(); change("wins", -1); }
+    if (e.key === "R" || e.key === "r" || e.key === "F3") {
+      e.preventDefault();
+      resetOne("all");
+    }
+  });
+
+  if (serverMode) {
+    fetch("/api/state", { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (payload) { applyPayload(payload, false); })
+      .catch(function () {
+        serverMode = false;
+        loadLocal();
+        render("kills", 0);
+        render("wins", 0);
+      });
+    setInterval(function () {
+      if (!serverMode) return;
+      fetch("/api/state", { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (payload) { applyPayload(payload, true); })
+        .catch(function () {});
+    }, 280);
+  } else {
+    loadLocal();
+    render("kills", 0);
+    render("wins", 0);
+  }
+
+  if (params.get("demo") === "1") {
+    counts.kills = 0;
+    counts.wins = 0;
+    render("kills", 0);
+    render("wins", 0);
+    setTimeout(function () { change("kills", 1); }, 280);
+    setTimeout(function () { change("wins", 1); }, 900);
+  }
+</script>
+</body>
+</html>

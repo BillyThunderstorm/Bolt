@@ -105,6 +105,8 @@ SUBCOMMANDS: dict[str, str] = {
     "sync_youtube_stats": "sync_youtube_stats.py",
     "sync_youtube": "sync_youtube_stats.py",
     "youtube_stats": "sync_youtube_stats.py",
+    "overlay": "overlay_server.py",
+    "overlays": "overlay_server.py",
     "send": "send_notification.py",
     "notify": "send_notification.py",
     "refresh_memory": "refresh_memory_index.py",
@@ -196,6 +198,7 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
                           This week / last week / do not suggest (read before any plan)
   stats [status|sync|tiktok|youtube] [--dry-run]
                           Social performance pull readiness + TikTok/YouTube sync
+  overlay [--port 8766]   OBS overlay server (Stream Deck kill/win + cam frame)
 
 Direction-finding researcher (Core/modules/Researcher.py):
   research [status|questions|candidates|pending|log|add|note|c5|find]
