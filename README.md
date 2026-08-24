@@ -1,67 +1,112 @@
-Bolt is a local-first AI content manager, producer, and business assistant built for creators who live on stream, short-form platforms, and product testing.
-It handles the technical and operational side of content creation so you can stay focused on the actual work. Think of it as a personal Jarvis tailored for Twitch/TikTok/YouTube pipelines, product reviews, skincare/beauty expansion, Amazon Influencer storefront management, sponsor research, and day-to-day creator operations.
-Core Capabilities
-Automated Clip Pipeline
+# Bolt
 
-Watches local recordings and Twitch VODs
-Detects highlights via audio spikes with hard confidence gating and deduplication
-Generates clips, AI-powered titles (profile-aware), subtitles, and vertical (TikTok-style) formats
-Ranks clips with tiered scoring + recency-weighted learned boost
-Compiles highlight reels
-Auto-generates thumbnails with smart frame selection
-Queues high-quality clips and notifies at peak hours (Discord/voice)
+**Local-first AI content manager, producer, and business assistant for creators.**
 
-Content Manager OS
+Bolt handles the technical and operational side of content creation so you can stay focused on creating. It is built for real workflows around streaming, short-form video, product testing, and multi-platform publishing.
 
-Full product/catalog tracking across lanes (tech/gaming, skincare/beauty, Amazon Influencer, etc.)
-Status tracking (testing → drafting → ready → posted)
-Notes, drafts, shipping logs, and multi-platform performance logging
-Storefront feature prioritization and sponsor/affiliate prospecting
-Social packaging with explicit human approval gates
+Think of it as a personal producer that runs locally on your machine.
 
-Direction-Finding Researcher
+## What Bolt Does
 
-Profile-driven research loop (C5/C6/C7 decision framework)
-Answers “what should I be known for?” before ramping production
-Keeps a research log that surfaces in daily briefings
-Supports keep/drop/maybe decisions with rationale
+- **Automated Clip Pipeline** — Watches recordings and Twitch VODs, detects highlights, generates clips, titles, subtitles, vertical formats, thumbnails, and ranked queues.
+- **Content Manager OS** — Tracks products across testing lanes, manages notes/drafts/status, and supports social packaging with human approval gates.
+- **Direction-Finding Researcher** — Profile-driven research loop that helps answer “what should I be known for?” before production ramps.
+- **Creator Command Center** — Turns goals into printable mission briefings with real constraints (time, budget, assets).
+- **Voice & Conversation** — Hands-free voice engine, daily spoken briefings, Twitch chat personality with memory, and natural-language command routing.
+- **Integrations** — OBS, Twitch, Streamlabs, Discord, Google Calendar/Gmail, local memory index, storage optimization, and multi-provider LLM support (xAI/Grok preferred, OpenAI, local Ollama).
 
-Creator Command Center
+Bolt is intentionally personal and opinionated. It is designed around an actual creator’s constraints, night-owl schedule, and long-term brand direction rather than generic automation.
 
-Turns high-level goals into printable mission briefings (check-ins → options → checklists)
-Respects real constraints (time, budget, assets, restrictions)
-Planning only — nothing posts or purchases without approval
+## Core Features
 
-Voice & Conversation Layer
+### Clip & Media Pipeline
+- Recording and VOD watching
+- Audio-spike highlight detection with confidence gating and deduplication
+- Clip generation, AI titles, subtitles, vertical formatting
+- Thumbnail generation with smart frame selection
+- Ranking tiers + recency-weighted learning
+- Highlight reel compilation
+- Storage optimization (compression, rotation, deduplication)
 
-Hands-free voice conversation engine (mic + speech-to-text + LLM + TTS)
-Daily “Good Morning Bolt” spoken briefings with memory-aware context, live queue counts, and research notes
-Twitch chat personality bot with persistent conversation memory
-Local queue and memory commands via chat or voice
+### Creator Operations
+- Product/catalog tracking across lanes (tech/gaming, skincare/beauty, general product testing, etc.)
+- Status workflow: testing → drafting → ready → posted
+- Notes, drafts, performance logging
+- Sponsor/affiliate prospecting support
+- Social packaging with explicit approval gates
 
-Integrations & Runtime
+### Intelligence Layer
+- Memory-aware daily and weekly briefings
+- Local vector memory index
+- Researcher role with keep/drop/maybe decisions
+- Creator Command Center mission system
+- Intent routing so natural language maps to real actions
+- Multi-provider LLM (Grok / OpenAI / Ollama) with budget controls
 
-OBS Studio (scene control, monitoring)
-Twitch (VODs, chat, stats)
-Streamlabs events
-Discord notifications
-Google Calendar + Gmail hooks
-Apple Reminders / SMS / email delivery for briefings
-Local memory index (vector retrieval) for creator vision, lane notes, decisions, and performance history
-Storage optimization (compression, rotation, deduplication, monitoring with alerts)
+### Voice & Interfaces
+- Hands-free voice conversation (mic → STT → LLM → TTS)
+- “Good Morning Bolt” spoken briefings
+- Twitch chat personality with persistent memory
+- Single CLI entry point (`bolt <command>`)
+- Runtime doctor / verify / audit tools
 
-LLM Flexibility
+## Quick Start
 
-Multi-provider support (xAI/Grok preferred, OpenAI, local Ollama)
-Intent routing so natural language maps to real Bolt actions
-Budget-aware mode switching (local / light / full)
+```bash
+# Clone
+git clone https://github.com/BillyThunderstorm/Bolt.git
+cd Bolt
 
-Architecture Highlights
+# Install (uv recommended)
+uv sync
 
-Python-first, local-first design (macOS-optimized, night-owl friendly)
-Single CLI entry point (bolt <command>) with rich subcommands
-Modular Core (pipeline, manager, researcher, conversation, decision engine)
-Persistent memory and creator profile that guide ranking, titles, research, and briefings
-Heavy emphasis on reliability: per-clip failure isolation, quality gates, verification/doctor commands, and extensive test coverage
+# Or with pip
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r Docs/requirements.txt   # or use the locked environment
 
-Bolt is intentionally personal and opinionated — it is built around a real creator’s workflow, constraints, and long-term brand direction rather than generic automation. It is under active development with a strong focus on making the “what should I do next?” decision clear and low-friction every day.
+# Configure
+cp .env.example .env
+# Edit .env with your keys (Twitch, xAI/OpenAI, etc.)
+
+# Verify installation
+bolt verify
+# or
+bolt doctor
+Common Commands
+Bashbolt help                    # Full command list
+bolt morning                 # Spoken daily briefing
+bolt manage next             # Next content manager actions
+bolt research status         # Researcher status
+bolt mission start "..."     # Create a mission
+bolt recordings              # Process recordings
+bolt briefing                # Generate briefing
+See Core/modules/BOLT_COMMANDS.md for the complete reference.
+Project Structure (High Level)
+textBolt/
+├── Core/                 # Main application code & modules
+├── Data/                 # Memory, catalogs, queues, state
+├── Docs/                 # Guides, status, architecture
+├── bin/bolt              # Primary CLI entry point
+├── scripts/              # Utility & maintenance scripts
+├── media/                # Clips, verticals, samples
+└── ...
+Requirements
+
+Python 3.11 or 3.12
+macOS recommended (voice, OBS, local integrations)
+Optional: OBS Studio, Twitch account, xAI / OpenAI / Ollama keys
+
+Philosophy
+Bolt is local-first. Your data, memory, and pipelines stay on your machine. Cloud LLMs are used only when you choose them, with budget controls and local fallbacks available.
+It prioritizes reliability (per-clip failure isolation, quality gates, verification tools) and real creator constraints over flashy demos.
+Status
+Actively developed. See docs/PROJECT_STATUS.md and docs/upgrade/ for current build state and roadmaps.
+License
+[Add your preferred license here — e.g. MIT, or Private]
+Author
+Built by Billy Carter (@SimplyBilly_)
+
+Navy veteran • Independent developer • Content creator
+
+Bolt is a personal tooling project. It is not a commercial product.
