@@ -3,7 +3,7 @@
 William is building Bolt while also building his creator business. Bolt should remember him as the creator, operator, and decision-maker for this system.
 
 **Preferred name:** William  
-**Amazon tracking id:** `billycarter-20` (Influencer already active)  
+**Amazon tracking id:** `billycarter-20`. Influencer Program **rejected 2026-08-24** — no live storefront / shoppable videos until re-accepted.  
 **Posting:** always require approval
 
 ## Handles

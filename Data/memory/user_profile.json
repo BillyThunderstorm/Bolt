@@ -2,7 +2,7 @@
   "_meta": {
     "schema_version": 1,
     "created_at": "2026-07-29T04:25:00",
-    "last_updated": "2026-08-18T21:00:00",
+    "last_updated": "2026-08-24T16:00:00",
     "interview_status": "complete",
     "questions_answered": ["q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "schedule_decision"],
     "questions_open": [],
@@ -91,30 +91,32 @@
   ],
   "lane_mix": {
     "status": "answered",
+    "confirmed_at": "2026-08-24",
     "current": {
-      "pop_culture_superheroes_film_tv": 95,
-      "tech_gadgets_ai": 0,
-      "general_product_testing": 0,
-      "skincare_personal_advice": 5,
-      "_total": 100
+      "pop_culture_tv_film": 10,
+      "gaming_tech": 80,
+      "beauty_skincare": 10,
+      "general_product_amazon": 0,
+      "_total": 100,
+      "_note": "Current mix is approximate (Twitch/clips still dominate). Target is equal 25s."
     },
     "target": {
-      "pop_culture_superheroes_film_tv": 25,
-      "tech_gadgets_ai": 25,
-      "general_product_testing": 25,
-      "skincare_personal_advice": 25,
+      "pop_culture_tv_film": 25,
+      "gaming_tech": 25,
+      "beauty_skincare": 25,
+      "general_product_amazon": 25,
       "_total": 100
     },
     "approach": "parallel_trials",
-    "approach_note": "User explicitly chose 25/25/25/25 — meaning all four lanes run in parallel from this point. NOT weighted-exploration. Each lane gets equal focus.",
+    "approach_note": "Equal 25/25/25/25. Gaming and tech are ONE lane, not two careers. Amazon Influencer was rejected 2026-08-24 — no shoppable videos / live storefront until re-accepted. General product reviews can still go on William's socials. Written Amazon customer reviews as a buyer still work. Do not invent a fifth topic.",
     "lane_definitions": {
-      "pop_culture_superheroes_film_tv": "Superhero (Marvel/DC) + film/TV review commentary. Anchored by user's existing Twitch presence.",
-      "tech_gadgets_ai": "Tech product reviews + AI tools/development coverage. Aligns with Q1 'gaming companies test newest releases' + AI-development lane doc.",
-      "general_product_testing": "Cross-category product testing that doesn't fit tech, gaming, or skincare. The 'company sends me stuff to test' lane.",
-      "skincare_personal_advice": "Skincare and personal-care content. Aligns with CeraVe/The Ordinary brands already in Content_Manager."
+      "pop_culture_tv_film": "Pop culture, TV, and film. Marvel/DC movies and shows, commentary, fandom. Not Marvel Rivals gameplay — that is gaming/tech.",
+      "gaming_tech": "Games you play AND gadgets/setup (headset, mouse, capture, AI tools). One bucket. Catalog items may still be tagged game or tech.",
+      "beauty_skincare": "Routines, products, honest first-use. Steamer posted 2026-08 week; snail care is leftover in this lane.",
+      "general_product_amazon": "Product reviews that are not games, tech, or skincare. Amazon Influencer rejected 2026-08-24 — do not tell William to upload on-Amazon shoppable videos. Public reviews go on his socials if he posts. Customer reviews on the listing still allowed."
     },
-    "user_words": "gaming, pop culture (superheroes: Marvel/DC) and film/TV reviews / tech gadgets and latest AI development and advancement / general product testing / skincare and personal advice. Focus these evenly. each have 25% out of 100% of my content.",
-    "trial_status": "all four lanes are in trial from this point. Each lane gets evaluated at intervals against the C5/C6 tests ('would I want to be known for this?' + 'believe in / stand behind / trust it')."
+    "user_words": "1. pop culture / TV and film. 2. gaming / tech. 3. beauty / skincare. 4. general product review / Amazon storefront. Focus these evenly, 25% each.",
+    "trial_status": "all four lanes are in trial. Each lane gets evaluated at intervals against C5/C6 ('would I want to be known for this?' + 'believe in / stand behind / trust it')."
   },
   "risk_tolerance": {
     "status": "approved",
@@ -258,7 +260,7 @@
     "what_bolt_cant_predict": [
       "Actual audience growth rate",
       "Which brands will pay at your tier",
-      "Whether tech-AI or skincare lane monetizes faster than gaming",
+      "Whether gaming/tech or skincare monetizes faster than general product reviews",
       "Whether 'creating with Marvel' is realistic at all"
     ],
     "user_target_question": "answered",

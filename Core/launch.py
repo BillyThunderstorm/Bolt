@@ -83,6 +83,7 @@ def main():
         for a in raw_args
         if a not in {"setup", "--setup-only", "--setup", "wizard", "configure"}
     ]
+    batch_process = "process" in bot_args
 
     if setup_only:
         notify(
@@ -120,7 +121,10 @@ def main():
     _check_env_file()
 
     # ── Step 3: Twitch stats ──────────────────────────────────────────────────
-    _show_twitch_stats()
+    if batch_process:
+        notify("Process mode — skipping Twitch stats fetch", level="info")
+    else:
+        _show_twitch_stats()
 
     # Setup-only: skip voice checklist, OBS launch, chat warm-up, and bot handoff.
     # Those belong to `bolt launch` / live streaming, not a one-shot setup pass.
@@ -148,12 +152,32 @@ def main():
         )
         return
 
+    # Batch `process` is not a stream start — skip checklist, OBS, and chat warmup.
+    # Accept `process --no-checklist` or `--no-checklist process`.
+    bot_args = [a for a in bot_args if a not in {"process", "--no-checklist"}]
+    if batch_process:
+        bot_args = ["process"] + bot_args
+
     # ── Step 4: Voice pre-stream checklist ───────────────────────────────────
-    _run_voice_checklist(config)
+    if batch_process:
+        notify(
+            "Process mode — skipping pre-stream checklist",
+            level="info",
+            reason="This is a batch recordings pass, not a live stream. "
+            "Use `bolt launch` when you are going live.",
+        )
+    else:
+        _run_voice_checklist(config)
 
     # ── Step 5: Launch OBS if needed ─────────────────────────────────────────
     obs_connected = False
-    if config.get("use_obs_integration", True):
+    if batch_process:
+        notify(
+            "Process mode — skipping OBS launch",
+            level="info",
+            reason="Folder files are processed without a live OBS session.",
+        )
+    elif config.get("use_obs_integration", True):
         obs_connected = _launch_and_wait_for_obs(config)
 
         # Start OBS game tracker if connected
@@ -168,22 +192,25 @@ def main():
             "any recordings you drop into the recordings/ folder.",
         )
 
-    # ── Step 6: Print missing-items checklist ────────────────────────────────
-    _print_checklist(config)
+    # ── Step 6–8: checklist print / checkup / clip cleanup ───────────────────
+    if not batch_process:
+        _print_checklist(config)
+        try:
+            from modules.Checkup_Writer import update_checkup
 
-    # ── Step 7: Refresh checkup dashboard data ───────────────────────────────
-    try:
-        from modules.Checkup_Writer import update_checkup
-
-        update_checkup()
-    except Exception as exc:
-        notify(f"Checkup data skipped: {exc}", level="info")
-
-    # ── Step 8: Clean up old clips ────────────────────────────────────────────
-    _cleanup_old_clips()
+            update_checkup()
+        except Exception as exc:
+            notify(f"Checkup data skipped: {exc}", level="info")
+        _cleanup_old_clips()
 
     # ── Step 9: Start Bolt's voice + chat bot ────────────────────────────────
-    _start_personality_layer()
+    if batch_process:
+        notify(
+            "Process mode — skipping live voice/chat warmup",
+            level="info",
+        )
+    else:
+        _start_personality_layer()
 
     # ── Step 10: Hand off to bot.py ───────────────────────────────────────────
     mode = bot_args[0] if bot_args else "live"

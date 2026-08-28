@@ -5,8 +5,9 @@ process_recordings.py — Process your existing recordings right now
 Run this to turn recordings you already have into TikTok-ready clips.
 
 Usage:
-  python3 process_recordings.py           → process ALL recordings in the folder
-  python3 process_recordings.py latest    → process the most recent recording only
+  python3 process_recordings.py           → process the newest recording only (default: latest)
+  python3 process_recordings.py latest    → same as default
+  python3 process_recordings.py all       → every unique recording (skips already-processed)
   python3 process_recordings.py list      → just show what recordings are found
 
 How it works:

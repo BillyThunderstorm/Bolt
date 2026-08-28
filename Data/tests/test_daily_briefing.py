@@ -60,6 +60,19 @@ def _extract_section(briefing: str, heading: str) -> str:
 
 
 class DailyBriefingMemoryTests(unittest.TestCase):
+    def setUp(self):
+        # generate_briefing() otherwise hits live Nexus/Grok on every test.
+        self.nexus_patch = patch("modules.Nexus_Creator.NexusCreator")
+        mock_cls = self.nexus_patch.start()
+        mock_cls.return_value.consult.return_value = {
+            "advice": "",
+            "provider": "mock",
+            "model": "",
+        }
+
+    def tearDown(self):
+        self.nexus_patch.stop()
+
     def test_briefing_renders_memory_notes_when_hits_available(self):
         with patch.object(db, "_retrieve_briefing_memory", return_value=SAMPLE_HITS):
             briefing, _ = db.generate_briefing()
@@ -78,6 +91,28 @@ class DailyBriefingMemoryTests(unittest.TestCase):
         self.assertIn("Creator note active: Creator Context", actions)
         # The decision_event hit also gets surfaced.
         self.assertIn("Follow up on recent decision: queue_clip", actions)
+
+    def test_briefing_includes_week_card(self):
+        with patch.object(db, "_retrieve_briefing_memory", return_value=[]):
+            briefing, _ = db.generate_briefing()
+        self.assertIn("## This Week", briefing)
+
+    def test_nexus_enrichment_is_not_an_action_item(self):
+        hits = [
+            {
+                "title": "nexus_enrichment: Film the facial steamer",
+                "action": "nexus_enrichment",
+                "result": "completed",
+                "kind": "decision_event",
+                "text": "nexus_enrichment: Film the facial steamer",
+                "summary": "Film the facial steamer",
+                "score": 0.9,
+            }
+        ]
+        actions = db._memory_to_action_items(hits)
+        joined = " ".join(actions).lower()
+        self.assertNotIn("steamer", joined)
+        self.assertNotIn("nexus_enrichment", joined)
 
     def test_briefing_falls_back_when_no_memory(self):
         with patch.object(db, "_retrieve_briefing_memory", return_value=[]):

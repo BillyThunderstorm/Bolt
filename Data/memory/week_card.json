@@ -1,17 +1,26 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-17T03:34:41",
+  "updated_at": "2026-08-25T22:49:17",
   "this_week": {
-    "topic": "beauty / skin care. Lets post a video or two, with a full product review on the snail care facial products or the facial steamer and the products that came with it. If bwe do both, The next skin care review would already be done and prepared for the next beauty / skin care run.",
-    "note": "",
-    "started": "2026-08-17",
+    "topic": "general product review / Amazon storefront",
+    "note": "PAUSE. Amazon Influencer rejected 2026-08-24. William is stepping away. Do not ask him to film, post, reapply, or pick a next product. The written Amazon customer reviews and ~5k helpful views still happened \u2014 they were buyer reviews, not wasted, just not the Influencer video path.",
+    "started": "2026-08-24",
     "done": []
   },
   "last_week": {
-    "topic": "",
-    "note": "",
-    "started": "",
-    "done": []
+    "topic": "beauty / skincare",
+    "note": "Beauty/skincare week ended. Steamer Short shipped. Snail care leftover is CLOSED \u2014 not a task for later weeks unless William sets beauty/skincare again and asks for it.",
+    "started": "2026-08-17",
+    "done": [
+      "Posted facial steamer review on YouTube (https://www.youtube.com/watch?v=gYqRPoCkIy0, 713 views as of 2026-08-21)",
+      "Snail care leftover closed \u2014 not carried into later weeks"
+    ]
   },
-  "do_not_suggest": []
+  "do_not_suggest": [
+    {
+      "text": "snail care as this week's post",
+      "why": "Leftover from 2026-08-17 beauty week. Closed unless William sets beauty/skincare and asks.",
+      "added": "2026-08-25T22:49:17"
+    }
+  ]
 }

@@ -44,7 +44,7 @@ import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 try:
@@ -133,6 +133,90 @@ def get_named_aspirations(profile: Dict[str, Any]) -> List[str]:
 def get_career_goal(profile: Dict[str, Any]) -> str:
     """Extract the user's career_goal string."""
     return profile.get("vision", {}).get("career_goal", "")
+
+
+# Four content topics (William, 2026-08-24). Gaming and tech are one lane.
+# Amazon storefront is the shelf for general product reviews, not a fifth topic.
+# Default `bolt research find` follows this week's card, not long-term
+# "gaming companies" aspirations.
+_LANE_QUERIES = {
+    "pop_culture": "honest pop culture film TV reviewer YouTube creator",
+    "gaming_tech": "honest gaming and tech reviewer YouTube creator",
+    "skincare": "honest skincare beauty reviewer YouTube creator",
+    "product": "honest product reviewer Amazon storefront YouTube",
+}
+_LANE_HINTS = (
+    ("skincare", ("skincare", "skin care", "beauty", "snail")),
+    ("product", ("product", "amazon", "storefront", "general product")),
+    ("pop_culture", ("pop culture", "film", " tv", "tv ", "movie", "movies", "superhero")),
+    ("gaming_tech", ("gaming", "game", "tech", "gadget", "twitch", "007", "hades", "headset")),
+)
+_GAME_TITLE_HINTS = ("rivals", "gameplay", "007", "hades", "first light")
+_LANE_ALIASES = {
+    "skin": "skincare",
+    "skincare": "skincare",
+    "beauty": "skincare",
+    "beauty / skincare": "skincare",
+    "tech": "gaming_tech",
+    "gadget": "gaming_tech",
+    "ai": "gaming_tech",
+    "game": "gaming_tech",
+    "gaming": "gaming_tech",
+    "games": "gaming_tech",
+    "gaming / tech": "gaming_tech",
+    "gaming-tech": "gaming_tech",
+    "gaming_tech": "gaming_tech",
+    "product": "product",
+    "products": "product",
+    "amazon": "product",
+    "storefront": "product",
+    "general product": "product",
+    "general product review": "product",
+    "pop": "pop_culture",
+    "pop culture": "pop_culture",
+    "pop-culture": "pop_culture",
+    "pop_culture": "pop_culture",
+    "film": "pop_culture",
+    "tv": "pop_culture",
+    "movies": "pop_culture",
+}
+
+
+def _current_week_topic() -> str:
+    try:
+        from modules.Week_Card import load as load_week
+
+        return str((load_week().get("this_week") or {}).get("topic") or "").strip()
+    except Exception:
+        return ""
+
+
+def lane_from_topic(topic: str) -> str:
+    """Map a week-card topic (or --lane flag) onto one of the four content topics."""
+    raw = (topic or "").strip().lower()
+    if not raw:
+        return ""
+    if raw in _LANE_ALIASES:
+        return _LANE_ALIASES[raw]
+    # Game titles beat "Marvel" as pop culture (Marvel Rivals is gaming/tech).
+    if any(h in raw for h in _GAME_TITLE_HINTS):
+        return "gaming_tech"
+    if "marvel" in raw or "dc" in raw.split():
+        return "pop_culture"
+    for lane, hints in _LANE_HINTS:
+        if any(h in raw for h in hints):
+            return lane
+    return ""
+
+
+def query_for_lane(lane: str, topic: str = "") -> str:
+    lane = (lane or "").strip().lower()
+    if lane in _LANE_QUERIES:
+        return _LANE_QUERIES[lane]
+    topic = " ".join((topic or "").split())[:40]
+    if topic:
+        return f"honest {topic} reviewer YouTube creator"
+    return "honest product reviewer YouTube creator"
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -486,6 +570,8 @@ _SKIP_TITLE_HINTS = (
     "best ",
     "top 10",
     "top ten",
+    "top 15",
+    "top 20",
     "how to",
     "wikipedia",
     "reddit",
@@ -504,6 +590,21 @@ _SKIP_TITLE_HINTS = (
     "youtube channels",
     "channels for",
     "channels from",
+    "ultimate guide",
+    "get paid",
+    "work-from-home",
+    "work from home",
+    "faceless",
+    "amazon review program",
+    "amazon vine",
+    "watch the latest",
+    "amazon live",
+    "review program",
+)
+
+_SKIP_TITLE_RES = (
+    re.compile(r"\btop\s+\d+\b", re.I),
+    re.compile(r"\bmake money\b", re.I),
 )
 
 _SKIP_HOSTS = (
@@ -512,6 +613,11 @@ _SKIP_HOSTS = (
     "glassdoor.com",
     "ziprecruiter.com",
     "wikipedia.org",
+    "amazon.com",
+    "amazon.co",
+    "socialbook.io",
+    "moneymakingmommy.com",
+    "thetechedvocate.org",
 )
 
 _PLATFORM_HOSTS = (
@@ -525,14 +631,28 @@ _PLATFORM_HOSTS = (
 )
 
 
-def default_find_query(profile: Optional[Dict[str, Any]] = None) -> str:
-    """Short creator-examples query. Never dump the full career_goal paragraph."""
-    profile = profile if profile is not None else load_profile()
-    bits = ["honest product reviewer", "YouTube creator"]
-    text = " ".join(get_named_aspirations(profile)).lower()
-    if "gaming" in text or "game" in text:
-        bits.insert(1, "gaming")
-    return " ".join(bits)
+def default_find_query(
+    profile: Optional[Dict[str, Any]] = None,
+    *,
+    week_topic: Optional[str] = None,
+    lane: Optional[str] = None,
+) -> str:
+    """Short creator-examples query for *this week*.
+
+    Week-card topic (or an explicit ``lane``) wins. Long-term aspirations
+    like "gaming companies" must not pin every search to gaming.
+    Never dump the full career_goal paragraph.
+    """
+    del profile  # kept for call-site compatibility
+    explicit = (lane or "").strip()
+    mapped = lane_from_topic(explicit) if explicit else ""
+    if mapped:
+        return query_for_lane(mapped, explicit)
+    topic = week_topic if week_topic is not None else _current_week_topic()
+    topic = (topic or "").strip()
+    if topic:
+        return query_for_lane(lane_from_topic(topic), topic)
+    return query_for_lane("")
 
 
 def _platform_from_url(url: str) -> str:
@@ -566,17 +686,27 @@ def _is_noise_name(name: str) -> bool:
     low = name.lower()
     if len(name) < 3:
         return True
-    return any(hint in low for hint in _SKIP_TITLE_HINTS)
+    if any(hint in low for hint in _SKIP_TITLE_HINTS):
+        return True
+    return any(rx.search(low) for rx in _SKIP_TITLE_RES)
 
 
 def _is_noise_result(name: str, url: str) -> bool:
+    """True for listicles, programs, marketplace pages — not a creator to C5."""
     if _is_noise_name(name):
         return True
     host = (urlparse(url or "").netloc or "").lower()
+    if host.startswith("www."):
+        host = host[4:]
     if any(skip in host for skip in _SKIP_HOSTS):
         return True
     path = (url or "").lower()
-    return "/jobs" in path or "/career" in path
+    if "/jobs" in path or "/career" in path or "/blog/" in path:
+        return True
+    # A single YouTube video is not a creator channel.
+    if "youtube.com/watch" in path or "youtu.be/" in path:
+        return True
+    return False
 
 
 def _web_search_results(query: str, limit: int) -> List[Dict[str, str]]:
@@ -604,15 +734,20 @@ def find_candidates(
     dry_run: bool = False,
     search_fn: Optional[Callable[[str, int], List[Dict[str, str]]]] = None,
     profile: Optional[Dict[str, Any]] = None,
+    lane: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Search the web for creator-example candidates, gate C7/C6, leave C5 open.
 
     Does not pick for Billy. Cleared names are logged as pending C5 unless
     ``dry_run`` is True. C7 blocks are skipped. Existing names are not re-logged.
+    Default query follows this week's topic, not the long-term gaming aspiration.
     """
     if profile is None:
         profile = load_profile()
-    query = (query or "").strip() or default_find_query(profile)
+    week_topic = _current_week_topic()
+    query = (query or "").strip() or default_find_query(
+        profile, week_topic=week_topic, lane=lane
+    )
     limit = max(1, min(int(limit), 10))
     search = search_fn or _web_search_results
     results = search(query, limit)
@@ -668,6 +803,8 @@ def find_candidates(
 
     return {
         "query": query,
+        "week_topic": week_topic,
+        "lane": (lane or lane_from_topic(week_topic) or "").strip(),
         "result_count": len(results),
         "dry_run": dry_run,
         "added": added,
@@ -715,6 +852,70 @@ C5_VERDICT_ALIASES = {
 }
 
 
+def _pending_numbered(limit: int = 50) -> List[Tuple[int, Dict[str, Any]]]:
+    pending = list_candidates(pending_c5_only=True, limit=limit)
+    return [(i + 1, e) for i, e in enumerate(pending)]
+
+
+def resolve_c5_name(name: str) -> str:
+    """Map a pending index ('1') or a typed name to a candidate name."""
+    raw = (name or "").strip()
+    if not raw:
+        raise ValueError(
+            "Need a name or a pending number. Try: bolt research pending"
+        )
+    if raw.isdigit():
+        idx = int(raw)
+        numbered = _pending_numbered()
+        for n, e in numbered:
+            if n == idx:
+                found = _candidate_name(e)
+                if found:
+                    return found
+        shown = ", ".join(
+            f"{n}. {_candidate_name(e)}" for n, e in numbered[:8]
+        ) or "(none pending)"
+        raise ValueError(
+            f"No pending #{idx}. From `bolt research pending`: {shown}"
+        )
+    return raw
+
+
+def _c5_no_match_hint(name: str, *, only_pending: bool) -> str:
+    numbered = _pending_numbered(limit=12)
+    lines = [
+        f"No matching candidate for '{name}'"
+        + (" that still needs a C5 decision" if only_pending else "")
+        + "."
+    ]
+    if numbered:
+        lines.append("Pending (use the number, quotes optional):")
+        for n, e in numbered:
+            lines.append(f"  {n}. {_candidate_name(e)}")
+        lines.append(f'Try: bolt research c5 drop {numbered[0][0]} --why "…"')
+    else:
+        lines.append("Try: bolt research pending")
+    return "\n".join(lines)
+
+
+def _c5_ambiguous_hint(
+    name: str, matches_idx: List[int], entries: List[Dict[str, Any]]
+) -> str:
+    names = sorted({_candidate_name(entries[i]) for i in matches_idx})
+    numbered = _pending_numbered(limit=20)
+    index_for = {_candidate_name(e): n for n, e in numbered}
+    lines = [
+        f"'{name}' matches more than one candidate. Pick a number or quote the full name:"
+    ]
+    for nm in names:
+        n = index_for.get(nm)
+        if n is not None:
+            lines.append(f'  {n}. {nm}   →  bolt research c5 keep {n}')
+        else:
+            lines.append(f'  {nm}   →  bolt research c5 keep "{nm}"')
+    return "\n".join(lines)
+
+
 def set_c5_verdict(
     name: str,
     verdict: str,
@@ -728,7 +929,7 @@ def set_c5_verdict(
     short audit entry so the decision is searchable later.
 
     Args:
-        name: creator name (exact or unique substring)
+        name: creator name, unique substring, or pending index ('1')
         verdict: keep|drop|fits|no|maybe (aliases accepted)
         why: optional free-text reason in Billy's words
         only_pending: if True, only update candidates without c5_verdict
@@ -750,6 +951,7 @@ def set_c5_verdict(
         raise ValueError(
             f"Unknown C5 verdict '{verdict}'. Use: keep, drop, fits, no, maybe."
         )
+    name = resolve_c5_name(name)
 
     entries = _read_all_entries()
     matches_idx: List[int] = []
@@ -765,20 +967,7 @@ def set_c5_verdict(
         matched_names.append(_candidate_name(e) or f"entry-{i}")
 
     if not matches_idx:
-        pending = [
-            _candidate_name(e)
-            for e in list_candidates(pending_c5_only=True, limit=12)
-            if _candidate_name(e)
-        ]
-        hint = ""
-        if pending:
-            hint = " Pending: " + "; ".join(pending)
-        raise ValueError(
-            f"No matching candidate for '{name}'"
-            + (" that still needs a C5 decision" if only_pending else "")
-            + ". Try: bolt research pending"
-            + hint
-        )
+        raise ValueError(_c5_no_match_hint(name, only_pending=only_pending))
 
     # Disambiguation: prefer exact (case-insensitive) matches over substring
     # matches. Substring-only searches report ambiguity and refuse. This lets
@@ -793,10 +982,7 @@ def set_c5_verdict(
     elif substring_idx:
         unique_names = sorted({_candidate_name(entries[i]).lower() for i in substring_idx})
         if len(unique_names) > 1:
-            raise ValueError(
-                f"Ambiguous name '{name}' matches: {', '.join(sorted({_candidate_name(entries[i]) for i in matches_idx}))}. "
-                "Use a more specific name."
-            )
+            raise ValueError(_c5_ambiguous_hint(name, matches_idx, entries))
         # Substring search disambiguated to exactly one pending candidate — proceed.
 
     decided_at = _now_iso()
@@ -886,9 +1072,11 @@ def summary(profile: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         week_topic = ""
 
     if week_topic:
+        find_q = default_find_query(profile, week_topic=week_topic)
         next_action = (
             f"This week is already set: {week_topic}. "
-            "Do not open a new research project. Continue that topic."
+            f"Research that lane (`bolt research find` → {find_q}), "
+            "not a new career plan."
         )
     elif candidates_pending_c5 > 0:
         next_action = (
@@ -962,6 +1150,17 @@ def _print_summary() -> None:
         print(format_card())
     except Exception:
         pass
+    try:
+        find_q = default_find_query()
+        week = _current_week_topic() or "(not set)"
+        print(f"\nThis week's find query ({week}): {find_q}")
+        print("  bolt research find              # search that query")
+        print("  bolt research find --lane product     # general products / Amazon")
+        print("  bolt research find --lane gaming-tech # games + gadgets")
+        print("  bolt research find --lane skincare")
+        print("  bolt research find --lane pop-culture")
+    except Exception:
+        pass
     print(f"\nNext action: {s['next_action']}")
     print("═" * 70)
 
@@ -993,23 +1192,30 @@ def _print_questions() -> None:
     print()
 
 
-def _format_candidate_line(e: Dict[str, Any]) -> None:
+def _format_candidate_line(e: Dict[str, Any], *, index: Optional[int] = None) -> None:
     gate = e.get("gate") or {}
     name = _candidate_name(e) or "(unnamed)"
     platform = e.get("platform") or "?"
     gate_verdict = gate.get("verdict", "ungated")
     c5 = e.get("c5_verdict") or "pending"
-    print(f"\n• {name}  [{platform}]  gate={gate_verdict}  c5={c5}")
+    prefix = f"{index}. " if index is not None else "• "
+    print(f"\n{prefix}{name}  [{platform}]  gate={gate_verdict}  c5={c5}")
     if e.get("summary"):
         print(f"    {e['summary']}")
+    if e.get("url"):
+        print(f"    {e['url']}")
     if e.get("why_match"):
         print(f"    Why: {e['why_match']}")
     if e.get("c5_user_words"):
         print(f"    Your words: {e['c5_user_words']}")
     elif not e.get("c5_verdict") and gate.get("c5_user_decision_required"):
         print(f"    C5: {gate.get('user_test', 'Would you want to be known for this?')}")
-        print(f"    → bolt research c5 keep \"{name}\"")
-        print(f"    → bolt research c5 drop \"{name}\"")
+        if index is not None:
+            print(f"    → bolt research c5 keep {index}")
+            print(f"    → bolt research c5 drop {index} --why \"not a creator / already in this\"")
+        else:
+            print(f"    → bolt research c5 keep \"{name}\"")
+            print(f"    → bolt research c5 drop \"{name}\"")
 
 
 def _print_candidates(limit: int = 20, pending_only: bool = False) -> None:
@@ -1027,8 +1233,10 @@ def _print_candidates(limit: int = 20, pending_only: bool = False) -> None:
             print("  Add one: bolt research add \"Name\" --platform YouTube --summary \"...\" --why \"...\"")
         print()
         return
-    for e in entries:
-        _format_candidate_line(e)
+    for i, e in enumerate(entries, 1):
+        _format_candidate_line(e, index=i if pending_only else None)
+    if pending_only:
+        print("\n  Numbers work:  bolt research c5 drop 1 --why \"already in this\"")
     print()
 
 
@@ -1128,7 +1336,9 @@ def main(argv: Optional[List[str]] = None) -> int:
             "  bolt research c5 drop \"Someone\" --why \"Not my voice\"\n"
             "  bolt research note \"Through-line idea: honest tangent reviews\"\n"
             "  bolt research find --dry-run\n"
-            "  bolt research find \"honest tech reviewer YouTube\" --limit 5\n"
+            "  bolt research find --lane product --dry-run\n"
+            "  bolt research find --lane gaming-tech --dry-run\n"
+            "  bolt research find \"honest product reviewer YouTube\" --limit 5\n"
         ),
     )
     parser.add_argument(
@@ -1201,7 +1411,12 @@ def main(argv: Optional[List[str]] = None) -> int:
             "query",
             nargs="*",
             default=[],
-            help="Search query (default: profile career goal + YouTube creator)",
+            help="Search query (default: this week's topic, not the career-goal paragraph)",
+        )
+        find_parser.add_argument(
+            "--lane",
+            default="",
+            help="pop-culture|gaming-tech|skincare|product (default: this week's topic)",
         )
         find_parser.add_argument("--limit", type=int, default=5)
         find_parser.add_argument(
@@ -1218,9 +1433,14 @@ def main(argv: Optional[List[str]] = None) -> int:
             query=query or None,
             limit=find_args.limit,
             dry_run=find_args.dry_run,
+            lane=find_args.lane or None,
         )
         mode = "dry-run" if report["dry_run"] else "logged"
         print(f"Search ({mode}): {report['query']}")
+        if report.get("week_topic"):
+            print(f"  week topic: {report['week_topic']}")
+        if report.get("lane"):
+            print(f"  lane: {report['lane']}")
         print(f"  web hits: {report['result_count']}")
         if not report["result_count"]:
             print("  No results. Check the network, or pass a more specific query.")
@@ -1307,7 +1527,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         c5_parser.add_argument(
             "name",
             nargs="+",
-            help="Creator name (quotes optional; unique substring OK)",
+            help="Creator name, unique substring, or pending number (1)",
         )
         c5_parser.add_argument("--why", default="", help="Your words — why keep or drop")
         c5_parser.add_argument(

@@ -175,12 +175,28 @@ class NexusCreator:
             )
             if not relevant:
                 return context or ""
-            enriched = "\n\n--- Relevant Memory ---\n" + "\n\n".join(
-                [
-                    f"Source: {r['metadata'].get('file', 'unknown')}\n{r['text'][:700]}"
-                    for r in relevant
-                ]
-            )
+            week_topic = ""
+            try:
+                from modules.Week_Card import is_stale_skincare_leftover, load as load_week
+
+                week_topic = str(
+                    (load_week().get("this_week") or {}).get("topic") or ""
+                )
+            except Exception:
+                is_stale_skincare_leftover = None  # type: ignore
+            kept = []
+            for r in relevant:
+                chunk = r.get("text") or ""
+                if is_stale_skincare_leftover and is_stale_skincare_leftover(
+                    chunk, week_topic
+                ):
+                    continue
+                kept.append(
+                    f"Source: {r['metadata'].get('file', 'unknown')}\n{chunk[:700]}"
+                )
+            if not kept:
+                return context or ""
+            enriched = "\n\n--- Relevant Memory ---\n" + "\n\n".join(kept)
             return (context or "") + enriched
         except Exception as e:
             print(f"Vector DB enrichment skipped: {e}")
@@ -203,12 +219,18 @@ class NexusCreator:
         return f"""You are Nexus, Billy's strategic AI teammate.
 Creator profile: {brain}
 {week}
-Focus: continue this week's topic. Do not invent a new career plan or rotate lanes unless asked."""
+The WEEK CARD is the source of truth for "what week is it" and "what to do."
+Old memory, briefings, and prior Nexus notes are often from last week. Ignore them when they conflict.
+Do not tell William to post snail care or the facial steamer unless this week's topic is beauty/skincare and he asked.
+If the week card says PAUSED, do not invent a film/post/reapply task.
+Focus: this week's topic only. Do not invent a new career plan or rotate lanes unless asked."""
 
     def _build_user_prompt(self, topic: str, full_context: str) -> str:
         return (
             f"Topic: {topic}\nContext + Memory:\n{full_context}\n\n"
-            "Give detailed, actionable advice with next steps."
+            "Obey the WEEK CARD over retrieved memory. "
+            "If this week is paused, say so and do not recommend a video. "
+            "Otherwise give one next step that belongs to THIS week, not last week's leftovers."
         )
 
     def _pick_provider(

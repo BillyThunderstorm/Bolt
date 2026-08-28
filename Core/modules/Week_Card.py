@@ -28,6 +28,14 @@ RESEARCH_LOG = PROJECT_ROOT / "Data" / "memory" / "research_log.jsonl"
 
 _EMPTY_WEEK = {"topic": "", "note": "", "started": "", "done": []}
 
+# William's four content topics (2026-08-24). Gaming and tech are one lane.
+CONTENT_LANES = (
+    "pop culture / TV and film",
+    "gaming / tech",
+    "beauty / skincare",
+    "general product review / Amazon storefront",
+)
+
 
 def _now_iso() -> str:
     return datetime.now().isoformat(timespec="seconds")
@@ -209,6 +217,23 @@ def unban(text: str) -> Dict[str, Any]:
     return data
 
 
+def is_paused(data: Optional[Dict[str, Any]] = None) -> bool:
+    """True when this week's note is a pause (do not invent a post)."""
+    card = data or load()
+    note = str((card.get("this_week") or {}).get("note") or "")
+    head = note.strip().upper()
+    return head.startswith("PAUSE") or "stepping away" in note.lower()
+
+
+def is_stale_skincare_leftover(text: str, week_topic: str = "") -> bool:
+    """True when retrieved text is last-week snail/steamer advice on a non-beauty week."""
+    topic = (week_topic or "").lower()
+    if "skincare" in topic or "beauty" in topic or "snail" in topic:
+        return False
+    low = (text or "").lower()
+    return "snail" in low or "facial steamer" in low or "steamer kit" in low
+
+
 def days_old(data: Optional[Dict[str, Any]] = None) -> Optional[int]:
     card = data or load()
     started = (card.get("this_week") or {}).get("started") or ""
@@ -273,27 +298,58 @@ def format_prompt(data: Optional[Dict[str, Any]] = None) -> str:
     this = card["this_week"]
     last = card["last_week"]
     topic = (this.get("topic") or "").strip()
+    today = date.today()
     lines = [
         "WEEK CARD (read this before inventing a plan).",
+        f"Today is {today.strftime('%A, %Y-%m-%d')}. Use this date. Notes from a prior week are history, not today's to-do.",
         "Do not restart the career. Do not open a new research project unless William asks.",
         "Do not suggest anything listed under DO NOT SUGGEST.",
+        "The only four content topics: "
+        + "; ".join(CONTENT_LANES)
+        + ". Gaming and tech are one lane. Amazon is the shelf for general product reviews, not a fifth topic.",
+        "Retrieved memory is often stale. The WEEK CARD beats old Nexus notes.",
     ]
     if topic:
         lines.append(f"This week is: {topic}.")
+        if this.get("started"):
+            lines.append(f"This week's card started {this['started']}.")
         if this.get("note"):
             lines.append(f"Note: {this['note']}")
         done = this.get("done") or []
         if done:
             lines.append("Already done this week: " + "; ".join(done))
-        lines.append("Continue this week. One next step only.")
+            lines.append(
+                "Already-done items are finished. Do not tell William to film, "
+                "post, pick, or start them again. The original week-start note "
+                "was a plan, not an open to-do — if something from it is in "
+                "Already done, treat it as shipped."
+            )
+        if is_paused(card):
+            lines.append(
+                "This week is PAUSED. Do not invent a film, post, reapply, or "
+                "product-review next step. Acknowledge the pause. Wait until William returns."
+            )
+        else:
+            lines.append("Continue this week. One next step only. Do not repeat a finished step.")
     else:
         lines.append(
             "This week has no topic yet. Ask William to pick one "
-            "(`bolt week set \"…\"`). Do not invent a new lane mix."
+            "(`bolt week set \"…\"`). Do not invent a new lane mix. "
+            "Do not fill the gap with last week's leftovers."
         )
     last_topic = (last.get("topic") or "").strip()
     if last_topic:
         lines.append(f"Last week was: {last_topic}. Do not assign it again as if new.")
+        if last.get("note"):
+            lines.append(f"Last week's note: {last['note']}")
+        last_done = last.get("done") or []
+        if last_done:
+            lines.append("Last week already shipped: " + "; ".join(last_done))
+        lines.append(
+            "Last week's leftovers are closed. Do not tell William to film or post "
+            "snail care, the facial steamer, or any optional leftover from last week "
+            "unless this week's topic is beauty/skincare AND William asks."
+        )
     blocked = blocked_suggestions(card)
     if blocked:
         lines.append("Do not suggest: " + "; ".join(blocked[:20]))
@@ -303,13 +359,18 @@ def format_prompt(data: Optional[Dict[str, Any]] = None) -> str:
 def spoken_line(data: Optional[Dict[str, Any]] = None) -> str:
     card = data or load()
     topic = (card["this_week"].get("topic") or "").strip()
+    if is_paused(card):
+        return (
+            f"This week is {topic or 'set'} and it is paused. "
+            "Do not start a new post. Snail care is not this week's job."
+        )
     if topic:
         done = card["this_week"].get("done") or []
         extra = f" Already done: {done[-1]}." if done else ""
         return f"This week is {topic}.{extra} Stay on that. Do not start a new plan."
     return (
         "This week has no topic yet. Pick one today with bolt week set, "
-        "then we stay on it."
+        "then we stay on it. Do not suggest last week's leftovers."
     )
 
 

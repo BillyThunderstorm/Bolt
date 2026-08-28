@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-08-13T20:25:45",
+  "updated_at": "2026-08-23T16:08:00",
   "preferred_lanes": [
     "game",
     "tech"
@@ -895,6 +895,33 @@
         "amazon"
       ],
       "posted_where": "https://www.amazon.com/gp/customer-reviews/R1VTLP0M5M8F80"
+    },
+    {
+      "id": "facial-steamer-kit",
+      "name": "Facial steamer kit",
+      "lane": "skincare",
+      "status": "posted",
+      "asin": "",
+      "started_at": "2026-08-23",
+      "created_at": "2026-08-23T16:08:00",
+      "notes_log": [
+        {
+          "day": 1,
+          "text": "YouTube Short posted this week: https://www.youtube.com/watch?v=gYqRPoCkIy0 — 713 views, 5 likes as of 2026-08-21. Title: if sputtering sounds make you nervous. 4/5.",
+          "at": "2026-08-23T16:08:00"
+        },
+        {
+          "day": null,
+          "text": "Post update: 713 views / 5 likes as of 2026-08-21. Unmatched YouTube stats row youtube_video_id=gYqRPoCkIy0.",
+          "at": "2026-08-23T16:08:00"
+        }
+      ],
+      "verdict": null,
+      "priority": 5,
+      "posted_platforms": [
+        "youtube_shorts"
+      ],
+      "posted_where": "https://www.youtube.com/watch?v=gYqRPoCkIy0"
     }
   ]
 }

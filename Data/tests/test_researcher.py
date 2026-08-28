@@ -49,10 +49,10 @@ SAMPLE_PROFILE = {
     },
     "lane_mix": {
         "target": {
-            "pop_culture_superheroes_film_tv": 25,
-            "tech_gadgets_ai": 25,
-            "general_product_testing": 25,
-            "skincare_personal_advice": 25,
+            "pop_culture_tv_film": 25,
+            "gaming_tech": 25,
+            "beauty_skincare": 25,
+            "general_product_amazon": 25,
         },
     },
     "hard_constraints": [
@@ -528,8 +528,20 @@ class C5AndAddTests(unittest.TestCase):
     def test_c5_ambiguous_raises(self):
         rs.add_candidate("Alex One", summary="x", public_signal="clean")
         rs.add_candidate("Alex Two", summary="x", public_signal="clean")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as err:
             rs.set_c5_verdict("Alex", "keep")
+        self.assertIn("more than one", str(err.exception))
+        self.assertIn("keep 1", str(err.exception))
+
+    def test_c5_keep_by_pending_number(self):
+        rs.add_candidate("First Pending", summary="x", public_signal="clean")
+        rs.add_candidate("Second Pending", summary="x", public_signal="clean")
+        # newest first in pending list
+        result = rs.set_c5_verdict("1", "keep")
+        self.assertEqual(result["updated"][0], "Second Pending")
+        result = rs.set_c5_verdict("1", "drop", why="not a creator")
+        self.assertEqual(result["updated"][0], "First Pending")
+        self.assertEqual(rs.pending_c5_count(), 0)
 
     def test_c5_unknown_verdict_raises(self):
         rs.add_candidate("Zed", summary="x", public_signal="clean")
@@ -606,10 +618,43 @@ class FindCandidatesTests(unittest.TestCase):
         self._tmp.cleanup()
 
     def test_default_query_is_short(self):
-        q = rs.default_find_query(SAMPLE_PROFILE)
+        q = rs.default_find_query(SAMPLE_PROFILE, week_topic="")
         self.assertLess(len(q), 80)
         self.assertIn("YouTube", q)
         self.assertIn("honest product reviewer", q)
+        # Long-term "gaming companies" aspiration must not pin the query.
+        self.assertNotIn("gaming", q.lower())
+
+    def test_default_query_follows_week_topic_not_gaming_aspiration(self):
+        # Gaming and tech are one lane.
+        tech = rs.default_find_query(SAMPLE_PROFILE, week_topic="tech")
+        self.assertIn("tech", tech.lower())
+        self.assertIn("gaming", tech.lower())
+        product = rs.default_find_query(
+            SAMPLE_PROFILE, week_topic="general product review / Amazon storefront"
+        )
+        self.assertIn("product", product.lower())
+        self.assertNotIn("gaming", product.lower())
+        skin = rs.default_find_query(SAMPLE_PROFILE, week_topic="beauty / skincare")
+        self.assertIn("skincare", skin.lower())
+        self.assertNotIn("gaming", skin.lower())
+        games = rs.default_find_query(SAMPLE_PROFILE, week_topic="007 First Light")
+        self.assertIn("gaming", games.lower())
+        override = rs.default_find_query(
+            SAMPLE_PROFILE, week_topic="skincare", lane="product"
+        )
+        self.assertIn("product", override.lower())
+        self.assertNotIn("skincare", override.lower())
+
+    def test_lane_from_topic_four_buckets(self):
+        self.assertEqual(rs.lane_from_topic("tech"), "gaming_tech")
+        self.assertEqual(rs.lane_from_topic("gaming / tech"), "gaming_tech")
+        self.assertEqual(rs.lane_from_topic("Marvel Rivals"), "gaming_tech")
+        self.assertEqual(rs.lane_from_topic("Marvel movie night"), "pop_culture")
+        self.assertEqual(
+            rs.lane_from_topic("general product review / Amazon storefront"), "product"
+        )
+        self.assertEqual(rs.lane_from_topic("beauty / skincare"), "skincare")
 
     def test_find_logs_cleared_and_leaves_c5_open(self):
         report = rs.find_candidates(
@@ -625,6 +670,46 @@ class FindCandidatesTests(unittest.TestCase):
         self.assertNotIn("c5_verdict", justine)
         self.assertTrue(justine["gate"]["c5_user_decision_required"])
         self.assertEqual(justine.get("source"), "web_search")
+
+    def test_find_skips_amazon_review_program_and_listicles(self):
+        results = [
+            {
+                "url": "https://www.moneymakingmommy.com/amazon-review-program/",
+                "title": "Amazon Review Program | Get Paid for Short Faceless Videos!",
+                "description": "work-from-home moms",
+            },
+            {
+                "url": "https://www.amazon.com/live/influencer-0065a9ac",
+                "title": "Watch the latest from Honest product Reviews with Sam on Amazon Live",
+                "description": "Shop favorite products",
+            },
+            {
+                "url": "https://www.youtube.com/watch?v=jQYP3wY9mYk",
+                "title": "The Ultimate Guide to Honest Product Reviews Amazon",
+                "description": "a video",
+            },
+            {
+                "url": "https://socialbook.io/blog/top-15-amazon-product-review-youtubers-2026/",
+                "title": "Top 15 Amazon & Product Review YouTubers (2026)",
+                "description": "listicle",
+            },
+            {
+                "url": "https://www.youtube.com/@realreviewer",
+                "title": "Real Reviewer - YouTube",
+                "description": "honest takes on products",
+            },
+        ]
+        report = rs.find_candidates(
+            query="honest reviewer",
+            search_fn=lambda q, n: results,
+            profile=SAMPLE_PROFILE,
+        )
+        names = [e["name"] for e in report["added"]]
+        self.assertEqual(names, ["Real Reviewer"])
+        skipped = " ".join(s["name"] for s in report["skipped"])
+        self.assertIn("Amazon Review Program", skipped)
+        self.assertIn("Ultimate Guide", skipped)
+        self.assertIn("Top 15", skipped)
 
     def test_find_skips_youtube_channels_listicle(self):
         results = [
@@ -675,6 +760,24 @@ class FindCandidatesTests(unittest.TestCase):
             code = rs.main(["find", "honest reviewer", "--dry-run"])
         self.assertEqual(code, 0)
         self.assertEqual(rs.list_candidates(), [])
+
+    def test_find_without_query_uses_week_topic(self):
+        captured = {}
+
+        def _search(q, n):
+            captured["query"] = q
+            return []
+
+        with patch.object(rs, "_current_week_topic", return_value="tech"):
+            report = rs.find_candidates(
+                search_fn=_search,
+                profile=SAMPLE_PROFILE,
+                dry_run=True,
+            )
+        self.assertIn("tech", captured["query"].lower())
+        self.assertIn("gaming", captured["query"].lower())
+        self.assertEqual(report["week_topic"], "tech")
+        self.assertEqual(report["lane"], "gaming_tech")
 
 
 class DdgHtmlParseTests(unittest.TestCase):

@@ -66,7 +66,7 @@ def _format_unified_decision_hit(evt: dict) -> dict | None:
     # Score: real follow-ups high; pipeline audit low so they lose the rank war.
     # queue_clip rejections and clip_performance outcomes are already logged —
     # they are memory, not open commands (there is no bolt queue_clip to run).
-    already_handled = action in {"clip_performance"} or (
+    already_handled = action in {"clip_performance", "nexus_enrichment"} or (
         action == "queue_clip" and result == "rejected"
     )
     if already_handled:
@@ -301,6 +301,8 @@ def _memory_to_action_items(hits: list) -> list:
             # Already-recorded outcomes: context only, no command to run.
             if action_name == "clip_performance":
                 continue
+            if action_name == "nexus_enrichment":
+                continue
             if action_name == "queue_clip" and result == "rejected":
                 continue
             # Pipeline audit (started/completed) is context, not a to-do
@@ -458,17 +460,34 @@ def generate_briefing():
     text += _calendar_block()
     text += _gmail_block()
 
+    # This week's topic + already-done (stops Nexus from repeating a finished plan)
+    try:
+        from modules.Week_Card import format_card
+
+        text += "## This Week\n\n"
+        text += format_card() + "\n\n---\n\n"
+    except Exception:
+        pass
+
     # Memory notes
     if memory_hits:
         text += "## Memory Notes\n\n"
+        shown = 0
         for h in memory_hits:
+            action = str(h.get("action") or "")
             note_text = h.get("title") or h.get("text") or h.get("summary") or ""
+            # Pipeline Nexus loops are not memory — they restate the week card.
+            if action == "nexus_enrichment" or "nexus_enrichment" in str(note_text).lower():
+                continue
             source = h.get("source") or ""
             # Surface source when present (helps trace where memory came from)
             if source:
                 text += f"- [{h.get('kind', 'note')}] {note_text} (source: {source})\n"
             else:
                 text += f"- [{h.get('kind', 'note')}] {note_text}\n"
+            shown += 1
+        if shown == 0:
+            text += "*No relevant memory retrieved.*\n"
         text += "\n---\n\n"
     else:
         text += "## Memory Notes\n\n*No relevant memory retrieved.*\n\n---\n\n"
@@ -486,9 +505,20 @@ def generate_briefing():
 
         allow_paid, force_provider = briefing_consult_kwargs()
         nexus = NexusCreator()
+        week_ctx = ""
+        try:
+            from modules.Week_Card import format_prompt as week_prompt
+
+            week_ctx = week_prompt()
+        except Exception:
+            week_ctx = ""
         nexus_result = nexus.consult(
             "Morning priorities, content plan, and action items",
-            context="Current queue, recent performance, M-tier progress",
+            context=(
+                f"{week_ctx}\n"
+                "Current queue, recent performance, M-tier progress. "
+                "Do not repeat an already-done week-card item as the next step."
+            ),
             task_type="strategy",
             complexity="high",
             allow_paid=allow_paid,

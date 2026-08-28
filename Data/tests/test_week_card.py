@@ -63,7 +63,48 @@ class WeekCardTests(unittest.TestCase):
         text = wc.format_prompt()
         self.assertIn("Do not restart the career", text)
         self.assertIn("pick one", text.lower())
+        self.assertIn("gaming / tech", text)
+        self.assertIn("Amazon is the shelf", text)
         wc.set_week("Hades 2 fails")
         text = wc.format_prompt()
         self.assertIn("This week is: Hades 2 fails", text)
         self.assertIn("Hyram", text)
+
+    def test_prompt_treats_done_items_as_finished(self):
+        wc.set_week("beauty / skincare")
+        wc.mark_done("Posted facial steamer review on YouTube")
+        text = wc.format_prompt()
+        self.assertIn("Already done this week: Posted facial steamer review on YouTube", text)
+        self.assertIn("Do not tell William to film", text)
+        self.assertIn("treat it as shipped", text)
+        spoken = wc.spoken_line()
+        self.assertIn("Already done: Posted facial steamer review on YouTube", spoken)
+
+    def test_prompt_closes_last_week_leftovers_and_pause(self):
+        wc.set_week("beauty / skincare", note="snail leftover")
+        wc.set_week(
+            "general product review / Amazon storefront",
+            note="PAUSE. William is stepping away.",
+        )
+        text = wc.format_prompt()
+        self.assertIn("Today is", text)
+        self.assertIn("This week is: general product review / Amazon storefront", text)
+        self.assertIn("Last week was: beauty / skincare", text)
+        self.assertIn("Last week's leftovers are closed", text)
+        self.assertIn("snail care", text.lower())
+        self.assertIn("This week is PAUSED", text)
+        self.assertNotIn("Continue this week. One next step only", text)
+        spoken = wc.spoken_line()
+        self.assertIn("paused", spoken.lower())
+        self.assertTrue(
+            wc.is_stale_skincare_leftover(
+                "Film the snail care review today",
+                week_topic="general product review",
+            )
+        )
+        self.assertFalse(
+            wc.is_stale_skincare_leftover(
+                "Film the snail care review today",
+                week_topic="beauty / skincare",
+            )
+        )

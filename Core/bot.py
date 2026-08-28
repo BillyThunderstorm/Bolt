@@ -85,15 +85,46 @@ def process_recording(
     chat_bot=None,
     intelligence: ThinkLearnDecideEngine = None,
 ):
-    """Full pipeline for one recording."""
+    """Full pipeline for one recording.
+
+    Always records the filename as processed on the way out (clips, no
+    highlights, or error) so cron/live watch cannot retry the same file
+    forever. Reprocess with ``bolt recordings … --force``.
+    """
     filename = Path(recording_path).name
     intelligence = intelligence or ThinkLearnDecideEngine(config)
-    
+
     notify(
         f"New recording detected: {filename}",
         level="info",
         reason="Starting the full processing pipeline.",
     )
+    try:
+        return _process_recording_body(
+            recording_path,
+            filename,
+            config,
+            creator_brain,
+            chat_bot=chat_bot,
+            intelligence=intelligence,
+        )
+    finally:
+        try:
+            from modules.Watcher import mark_processed
+
+            mark_processed(filename)
+        except Exception:
+            pass
+
+
+def _process_recording_body(
+    recording_path: str,
+    filename: str,
+    config: dict,
+    creator_brain: str,
+    chat_bot=None,
+    intelligence: ThinkLearnDecideEngine = None,
+):
 
     if hasattr(intelligence, "record_event"):
         intelligence.record_event(
@@ -168,7 +199,7 @@ def process_recording(
                 level="warning",
                 reason="Try lowering 'highlight_sensitivity' in config.json.",
             )
-            return
+            return "no_highlights"
 
         notify(f"Found {len(highlights)} highlight(s) ✓", level="success")
 
@@ -358,21 +389,33 @@ def main():
     config = load_config()
     intelligence = ThinkLearnDecideEngine(config)
     
-    chat_bot = _start_chat_bot(creator_brain)
+    # Batch process is not a live stream — skip Twitch chat warmup.
+    chat_bot = None if mode == "process" else _start_chat_bot(creator_brain)
 
     if mode == "process":
-        recordings = []
-        for ext in ("*.mp4", "*.mkv", "*.mov", "*.avi"):
-            recordings.extend(Path(RECORDINGS_DIR).glob(ext))
-        recordings = sorted(recordings)
-        if not recordings:
+        from modules.Watcher import list_pending_recordings
+
+        pending = list_pending_recordings(RECORDINGS_DIR)
+        if not pending:
             notify(
-                "No recordings found",
-                level="warning",
-                reason=f"Drop new stream videos into '{RECORDINGS_DIR}/' to begin processing.",
+                "No new recordings to process",
+                level="info",
+                reason=(
+                    f"Everything in '{RECORDINGS_DIR}/' is already in "
+                    "Data/processed_recordings.json. Drop a new file, or "
+                    "reprocess with: bolt recordings latest --force"
+                ),
             )
             return
-        process_recording(str(recordings[-1]), config, creator_brain, chat_bot=chat_bot, intelligence=intelligence)
+        newest = pending[0]
+        notify(
+            f"Process mode — newest unprocessed: {newest.name}",
+            level="info",
+            reason=f"{len(pending)} pending file(s); skipping already-processed names.",
+        )
+        process_recording(
+            str(newest), config, creator_brain, chat_bot=chat_bot, intelligence=intelligence
+        )
         return
 
     if mode not in ("live", "watch"):
