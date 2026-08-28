@@ -35,7 +35,7 @@ Monetize via Amazon Influencer (`billycarter-20`), affiliates, then brand deals.
 - Affiliate links need honest opinion first
 
 ## First Money Paths
-1. Amazon Associates / Influencer (`billycarter-20`)
+1. Amazon Influencer — **rejected 2026-08-24**. Pause shoppable-video / storefront plans. Social product reviews and written Amazon customer reviews still exist. Revisit Influencer only after a real content stretch, not a same-day reapply.
 2. Platform creator funds
 3. Brand affiliate programs (peripherals, stream gear)
 4. Sponsored reviews after portfolio exists

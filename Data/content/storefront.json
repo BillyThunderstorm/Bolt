@@ -1,8 +1,9 @@
 {
   "version": 1,
   "affiliate_tag": "billycarter-20",
-  "storefront_status": "influencer_active",
-  "updated_at": "2026-08-13T20:25:45",
+  "storefront_status": "influencer_rejected",
+  "storefront_status_note": "Amazon Influencer Program rejected 2026-08-24. No shoppable videos / Creator Hub until re-accepted. Do not treat storefront as live.",
+  "updated_at": "2026-08-24T21:00:00",
   "items": [
     {
       "id": "mouse",

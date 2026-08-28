@@ -96,7 +96,7 @@ def install_cron() -> int:
     )
     process = (
         f"# {PROCESS_CRON_MARK}\n"
-        f"0 */2 * * * cd {REPO} && {VENV_PY} {REPO / 'Core' / 'launch.py'} process "
+        f"0 */2 * * * cd {REPO} && {VENV_PY} {REPO / 'Core' / 'launch.py'} process --no-checklist "
         f">> {REPO / 'logs' / 'auto_process.log'} 2>&1"
     )
 

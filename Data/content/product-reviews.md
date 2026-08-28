@@ -32,9 +32,22 @@ Lean into:
 
 ## Amazon Influencer Storefront Context
 
-Reviews should help someone decide whether a product is actually worth trying or buying. Bolt should track:
+William was in the Amazon Influencer Program (`billycarter-20`). **Rejected 2026-08-24.** Bolt must not tell him to upload Shoppable Videos or treat the storefront as live.
+
+**Until re-accepted:**
+- Product reviews for the public go on **his** channels (TikTok / YouTube / Twitch) if he wants to post.
+- Written Amazon **customer** reviews as a buyer still work (Mouse, Ordinary toner, etc.).
+- Do not instruct Creator Hub / on-Amazon video / storefront placement.
+- Do not assume affiliate links still pay — Influencer is closed; Associates may or may not still be active. Financial links stay fully manual.
+
+**If / when Influencer is restored:**
+- Then Amazon-first Shoppable Video is the program loop again.
+- Social is optional reuse, not the requirement.
+
+Bolt should track:
 
 - product name and category
+- ASIN + whether a shoppable video is on Amazon
 - where it fits in the storefront
 - why Billy tested it
 - real-world use case
@@ -42,7 +55,8 @@ Reviews should help someone decide whether a product is actually worth trying or
 - what did not work
 - who it is for
 - honest verdict
-- content links or posting results when available
+- Amazon video / customer-review links when available
+- social links only if he actually posted there
 
 ## Reusable Review Shape
 

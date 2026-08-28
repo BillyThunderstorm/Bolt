@@ -358,6 +358,20 @@
       "posted_at": "2026-08-13T20:25:45",
       "posted_by": "William",
       "kind": "import"
+    },
+    {
+      "id": "facial-steamer-kit-update-2026-08-23t16-08-00",
+      "item_id": "facial-steamer-kit",
+      "name": "Facial steamer kit",
+      "lane": "skincare",
+      "platforms": [
+        "youtube_shorts"
+      ],
+      "where": "https://www.youtube.com/watch?v=gYqRPoCkIy0",
+      "note": "713 views / 5 likes as of 2026-08-21. Unmatched YouTube stats row youtube_video_id=gYqRPoCkIy0.",
+      "posted_at": "2026-08-23T16:08:00",
+      "posted_by": "William",
+      "kind": "update"
     }
   ],
   "outreach_log": [],
@@ -487,8 +501,15 @@
       "status": "posted",
       "asin": "B0FX4PGLW4",
       "added_at": "2026-08-13T20:25:45"
+    },
+    {
+      "name": "Facial steamer kit",
+      "lane": "skincare",
+      "status": "posted",
+      "asin": "",
+      "added_at": "2026-08-23T16:08:00"
     }
   ],
   "settings": {},
-  "updated_at": "2026-08-13T20:25:45"
+  "updated_at": "2026-08-23T16:08:00"
 }

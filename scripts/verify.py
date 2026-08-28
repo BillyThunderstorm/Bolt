@@ -226,7 +226,7 @@ def main():
     for name, passed in results.items():
         print(f"{'PASS' if passed else 'WARN'}: {name}")
     if all(results.values()):
-        print("\nBolt basics look good. Next: python3 launch.py --no-checklist")
+        print("\nBolt basics look good. Next: bolt launch --no-checklist")
         return 0
     print("\nSome checks still need attention. See FAIL lines above.")
     return 1

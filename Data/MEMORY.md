@@ -36,7 +36,7 @@ Help William become a stronger creator across **game + tech testing first**, the
 
 Priority lanes: **games + tech**.  
 Platforms: TikTok `@itssimplybilly`, Twitch `ItsSimplyBilly`, YouTube `@SimplyBilly`, X `@SimplyBilly_`.  
-Amazon Influencer active: tag **`billycarter-20`**.  
+Amazon Influencer: **rejected 2026-08-24**. Tag `billycarter-20` may still exist; do not treat storefront or shoppable video as live. Public product reviews go on William's socials if he wants them. Written Amazon customer reviews as a buyer still work.  
 Posting rule: **always require approval**.
 
 Clip everything from Twitch, but do not treat every saved moment as post-worthy. For non-gaming content, capture tests, first impressions, routines, results, mistakes, and lessons. A strong content idea needs at least one of these signals:
@@ -112,6 +112,16 @@ Use `memory/content/` for broad creator growth:
 The best memory entry is specific: date, platform, content idea, result, and lesson.
 
 ## Recent Notes
+- [2026-08-25] Do not suggest again: snail care as this week's post (Leftover from 2026-08-17 beauty week. Closed unless William sets beauty/skincare and asks.)
+- [2026-08-25] New week. This week is general product / Amazon (PAUSED). Last week was beauty/skincare (steamer posted). Snail care leftover is CLOSED. Nexus must not push snail or steamer as this week's post.
+- [2026-08-24] William is pausing. Do not nag film/post/reapply. Influencer rejection hurt; he spent ~6 months writing Amazon customer reviews (~5k helpful views). Those reviews were real buyer reviews, not "doing everything wrong." They were a different Amazon job than Shoppable Video. Leave him space.
+- [2026-08-24] Amazon Influencer Program: **rejected**. Stop Amazon-first shoppable-video instructions. Do not treat the storefront as live. Reapply only after real content/engagement changes — do not spam the same application.
+- [2026-08-24] Amazon Influencer correction: William thought affiliate reviews had to go on his own socials. They do not. Shoppable Videos upload to Amazon (Creator Hub / storefront / product pages). Social is extra. Bolt must not mark an Amazon review unfinished because it is not on TikTok.
+- [2026-08-24] Four content topics locked: (1) pop culture / TV and film (2) gaming / tech as one lane (3) beauty / skincare (4) general product review / Amazon storefront. Amazon is the shelf, not a fifth topic.
+- [2026-08-24] This week corrected from "tech" to general product review / Amazon storefront. Last week remains beauty/skincare (steamer posted).
+- [2026-08-24] This week is: tech
+- [2026-08-23] This week (beauty / skincare) done: Posted facial steamer review on YouTube (https://www.youtube.com/watch?v=gYqRPoCkIy0, 713 views as of 2026-08-21)
+- [2026-08-23] Facial steamer review already posted on YouTube this week (https://www.youtube.com/watch?v=gYqRPoCkIy0 — 713 views / 5 likes as of 2026-08-21). The Aug 17 week-start note was a plan, not an open to-do. Do not tell William to film or post the steamer again. Snail care is optional leftover, not required.
 - [2026-08-18] Held clip 1976be1d (Test): not ready
 - [2026-08-18] Held clip 59eb0958 (Ready clip): bad hook
 - [2026-08-18] Held clip 872c1b19 (Test): not ready

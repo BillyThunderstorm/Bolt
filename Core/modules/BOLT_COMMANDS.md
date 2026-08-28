@@ -121,9 +121,10 @@ bolt research questions               # Standing research questions from profile
 bolt research candidates              # All gated candidates (newest first)
 bolt research candidates --limit 10
 bolt research pending                 # Only candidates still needing your C5 call
-bolt research find                    # Web search from the profile career goal
+bolt research find                    # Web search from this week's topic (one of the four lanes)
+bolt research find --lane product     # Override: pop-culture | gaming-tech | skincare | product
 bolt research find --dry-run          # Preview gated names; write nothing
-bolt research find "honest tech reviewer YouTube" --limit 5
+bolt research find "honest product reviewer YouTube" --limit 5
 bolt research log                     # Recent findings
 bolt research log --limit 15
 
@@ -138,6 +139,8 @@ bolt research note "Through-line: honest tangent reviews" --type pattern_note
 bolt research note "Lane signal: skincare feels natural" --type lane_signal --title "Skincare"
 
 # Your C5 decision (keep = fits, drop = no; maybe also allowed)
+bolt research c5 keep 1 --why "Want that event path"
+bolt research c5 drop 2 --why "already in this / not a creator"
 bolt research c5 keep "iJustine" --why "Want that event path"
 bolt research c5 drop "Someone" --why "Not my voice"
 bolt research c5 maybe "Name" --why "Revisit after 2 more samples"

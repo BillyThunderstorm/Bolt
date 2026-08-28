@@ -398,8 +398,16 @@ def main() -> int:
 
     directories = args.directories or DEFAULT_DIRECTORIES
     all_results: list[ThumbnailResult] = []
+    _stale_dirs = {
+        "clips": CLIPS_DIR,
+        "vertical_clips": VERTICAL_CLIPS_DIR,
+    }
     for path_str in directories:
         path = Path(path_str)
+        if not path.exists():
+            mapped = _stale_dirs.get(path.name) or _stale_dirs.get(str(path).rstrip("/"))
+            if mapped is not None:
+                path = mapped
         if path.is_file():
             # Single-file mode.
             if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
