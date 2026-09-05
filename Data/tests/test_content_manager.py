@@ -514,6 +514,14 @@ class ContentManagerTests(unittest.TestCase):
         self.assertGreaterEqual(len(actions), 1)
         self.assertIn(actions[0]["type"], {"content", "business", "advance"})
 
+    def test_business_action_is_sponsor_pitch_not_creator_research(self):
+        actions = cm.next_actions()
+        biz = next((a for a in actions if a["type"] == "business"), None)
+        self.assertIsNotNone(biz)
+        self.assertIn("sponsors pitch", biz["command"])
+        self.assertNotIn("Pitch or research", biz["title"])
+        self.assertNotIn("bolt research", biz["command"])
+
     def test_parse_review_json_and_text_blocks(self):
         rows = cm.parse_review_text(
             json.dumps(

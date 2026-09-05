@@ -23,6 +23,7 @@ When connector access exists, use:
 - Google Calendar: today's events in `America/Chicago`
 - Gmail: unread inbox items that actually matter
 - Bolt memory: current project status, content lanes, and recent lessons
+- Google Drive handbook (canonical journal / todo / how-to): IDs in `Core/config.json` → `google_drive_handbook`; pointer `Docs/GOOGLE_DRIVE_HANDBOOK.md`. Bolt appends the briefing to today's Daily Log when Drive OAuth is present. Do not duplicate the handbook into markdown.
 
 When connector access does not exist, use local Bolt context and say which external inputs were unavailable.
 

@@ -1,20 +1,17 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-25T22:49:17",
+  "updated_at": "2026-08-30T18:19:02",
   "this_week": {
+    "topic": "tech",
+    "note": "",
+    "started": "2026-08-30",
+    "done": []
+  },
+  "last_week": {
     "topic": "general product review / Amazon storefront",
     "note": "PAUSE. Amazon Influencer rejected 2026-08-24. William is stepping away. Do not ask him to film, post, reapply, or pick a next product. The written Amazon customer reviews and ~5k helpful views still happened \u2014 they were buyer reviews, not wasted, just not the Influencer video path.",
     "started": "2026-08-24",
     "done": []
-  },
-  "last_week": {
-    "topic": "beauty / skincare",
-    "note": "Beauty/skincare week ended. Steamer Short shipped. Snail care leftover is CLOSED \u2014 not a task for later weeks unless William sets beauty/skincare again and asks for it.",
-    "started": "2026-08-17",
-    "done": [
-      "Posted facial steamer review on YouTube (https://www.youtube.com/watch?v=gYqRPoCkIy0, 713 views as of 2026-08-21)",
-      "Snail care leftover closed \u2014 not carried into later weeks"
-    ]
   },
   "do_not_suggest": [
     {

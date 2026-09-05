@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-08-25T18:25:45",
+  "updated_at": "2026-08-31T18:39:10",
   "prospects": [
     {
       "id": "razer",
@@ -142,7 +142,14 @@
       "contact_hint": "influencers@secretlab.co",
       "status": "prospect",
       "outreach": [],
-      "added_at": "2026-07-09T22:44:07"
+      "added_at": "2026-07-09T22:44:07",
+      "notes": [
+        {
+          "at": "2026-08-31T18:39:10",
+          "text": "William 2026-08-31: These chairs look fantastic and this is a visual goal and representation of something I want to be able to afford or be sponsors / affiliated with. I can't afford this yet, but hopefully I'll be able to easily buy a matching chair and desk set with all of the matching accessories if this works out. (Was entered on creator C5 by mistake — chairs vs desks were store sections, not two creators.)",
+          "link": "https://secretlab.co/"
+        }
+      ]
     },
     {
       "id": "amazon-influencer-associates",

@@ -75,6 +75,9 @@ def add_to_queue(
     hashtags: list = None,
     score: float = 0,
     tier: str = "queue",
+    game: str = None,
+    trigger: str = None,
+    platform: str = None,
 ):
     """
     Add a finished clip to the ready-to-post list.
@@ -89,10 +92,21 @@ def add_to_queue(
         "queue" (default), "mid", or "discard". Only "queue" triggers
         peak-hour Discord alerts. "discard" should be filtered upstream
         in bot.py and never reach this function.
+    game / trigger / platform : optional
+        Passed through for Predictive_Analytics queue forecasts.
     """
     from modules.Peak_Hour_Notifier import queue_clip
 
-    return queue_clip(clip_path, title, hashtags=hashtags, score=score, tier=tier)
+    return queue_clip(
+        clip_path,
+        title,
+        hashtags=hashtags,
+        score=score,
+        tier=tier,
+        game=game,
+        trigger=trigger,
+        platform=platform,
+    )
 
 
 def get_summary() -> dict:

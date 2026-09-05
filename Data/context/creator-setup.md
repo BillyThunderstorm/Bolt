@@ -26,7 +26,6 @@
 | Twitch | Live streaming platform |
 | TikTok | Primary short-form platform |
 | Python | Coding language for bots/automation |
-| Docker | Deployment for Bolt bot |
 | Local AI tools | Optional help for content, coding, titles, and recall |
 
 ## Content History

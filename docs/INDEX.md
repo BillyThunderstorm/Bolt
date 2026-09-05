@@ -17,12 +17,14 @@ Use this page as the central map for Bolt.
 
 | Label | File | Description |
 |-------|------|-------------|
+| 🔴 | `AGENTS.md` | **Teacher Grok rules** (how this session builds Bolt) |
 | 🔴 | `Core/modules/BOLT_COMMANDS.md` | **All commands** (manager + researcher + Grok conversation) |
 | 🟢 | `docs/PROJECT_STATUS.md` | Current build status + progress |
 | 🟢 | `docs/upgrade/NEXT_UPGRADE_STEPS.md` | Upgrade tracker (L1–L4 Grok, M1–M13, R1–R7, CC) |
 | 🟢 | `docs/upgrade/UPGRADE_STATUS.md` | Per-upgrade checklist |
 | 🟢 | `docs/upgrade/SHIP_LOG_2026-08-02.md` | **Grok layer ship log** |
 | 🟢 | `docs/INDEX.md` | This map |
+| 🟢 | `Docs/GOOGLE_DRIVE_HANDBOOK.md` | **Canonical handbook pointer** (Drive journal / briefing / todo / how-to) |
 | 🟡 | `Core/modules/LLM_Handler.py` | Multi-provider LLM (OpenAI + xAI/Grok) |
 | 🟡 | `Core/modules/Intent_Router.py` | Natural-language → real Bolt actions |
 | 🟡 | `Core/Bolt_Conversation.py` | Voice/text conversation (Grok + intents) |
@@ -67,6 +69,7 @@ PYTHONPATH=Core python3 -m Bolt_Conversation --text
 |------|-------------|
 | `docs/guides/SETUP_GUIDE.md` | Setup, prerequisites, and troubleshooting |
 | `docs/guides/STREAM_DECK_SETUP.md` | Stream Deck setup notes |
+| `Docs/guides/OBS_VERTICAL.md` | Aitum 9:16 canvas on Thunderstone (linked to 16:9 scenes) |
 | `scripts/setup.sh` | First-time setup and dependency install |
 | `scripts/verify.py` | Project verification checks |
 | `scripts/doctor.py` | Live vs mocked vs stale-path / missing-key audit (`bolt doctor`) |
@@ -101,4 +104,4 @@ PYTHONPATH=Core python3 -m Bolt_Conversation --text
 
 ---
 
-*Last updated: August 2, 2026 — Grok LLM layer + Intent_Router documented.*
+*Last updated: September 1, 2026 — Teacher Grok `AGENTS.md` added.*

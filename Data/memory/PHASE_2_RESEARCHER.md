@@ -37,7 +37,7 @@ bolt briefing --print
   `bolt research find`: search + C7/C6 gate, then pending C5. Does not
   auto-keep and does not run inside chat. Sponsor search stays
   `bolt manage sponsors-research` (M13).
-- External `bolt-creator-command-center` skill (not part of `bin/bolt`)
+- Creator Command Center lives in `Core/skills/creator-command-center/` and `bolt mission` (not a separate agent)
 
 ## Verification
 

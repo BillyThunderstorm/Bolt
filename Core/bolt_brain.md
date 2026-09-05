@@ -2,11 +2,20 @@
 
 *Layer 2: Knowledge about the creator. Not the command list, not the system manual.*
 
-*Last updated: 2026-08-15*
+*Last updated: 2026-09-01*
 
 Commands: `Core/modules/BOLT_COMMANDS.md`  
 Purpose / architecture: `Core/SYSTEM_README.pages` and `Docs/architecture/SYSTEM_README.md`  
-Hard constraints (source): `Data/memory/user_profile.json`
+Hard constraints (source): `Data/memory/user_profile.json`  
+Teacher rules: `AGENTS.md` (repo root)
+
+---
+
+## Grok and Bolt
+
+Grok (the coding session) is Bolt’s **teacher**. Bolt is the **student** and daily teammate. William is the owner.
+
+Grok teaches by changing Bolt’s files. Bolt only knows those files. OpenAI and local Ollama are fallbacks for Bolt’s LLM calls, not other teachers.
 
 ---
 

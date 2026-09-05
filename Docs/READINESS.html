@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bolt readiness audit</title>
+<style>
+  @page { size: letter; margin: 0.55in 0.6in 0.6in 0.6in; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.38;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  h1 { font-size: 20pt; margin: 0 0 4pt; letter-spacing: -0.02em; }
+  .meta { color: #555; font-size: 9pt; margin: 0 0 10pt; }
+  .lede { font-size: 11.5pt; margin: 0 0 12pt; }
+  .key { display: flex; gap: 10pt; flex-wrap: wrap; margin: 0 0 14pt; font-size: 9pt; font-weight: 600; }
+  .pill { padding: 2pt 8pt; border-radius: 999px; color: #111; }
+  .ready { background: #b7e4c7; }
+  .partial { background: #ffd166; }
+  .shell { background: #f4a3a3; }
+  .idea { background: #d3d3d3; }
+  h2 {
+    font-size: 12.5pt;
+    margin: 14pt 0 6pt;
+    padding: 4pt 8pt;
+    border-radius: 4pt;
+    page-break-after: avoid;
+  }
+  h2.ready-h { background: #b7e4c7; }
+  h2.partial-h { background: #ffd166; }
+  h2.shell-h { background: #f4a3a3; }
+  h2.idea-h { background: #d3d3d3; }
+  h2.plain { background: #dbeafe; }
+  h3 { font-size: 11pt; margin: 10pt 0 4pt; page-break-after: avoid; }
+  p, ul, ol { margin: 0 0 8pt; }
+  ul, ol { padding-left: 1.15em; }
+  li { margin-bottom: 2pt; }
+  table { width: 100%; border-collapse: collapse; font-size: 9pt; margin: 0 0 10pt; page-break-inside: auto; }
+  th, td { border: 0.4pt solid #ccc; padding: 3.5pt 5pt; vertical-align: top; text-align: left; }
+  th { background: #f3f3f3; font-weight: 650; }
+  tr { page-break-inside: avoid; }
+  code, pre { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 8.2pt; }
+  pre {
+    background: #f6f6f6;
+    border: 0.4pt solid #ddd;
+    padding: 8pt 10pt;
+    border-radius: 4pt;
+    white-space: pre-wrap;
+    page-break-inside: avoid;
+  }
+  .foot { font-size: 8.5pt; color: #666; margin-top: 8pt; }
+  strong { font-weight: 650; }
+</style>
+</head>
+<body>
+<h1>Bolt readiness audit</h1>
+<p class="meta">31 August 2026 · Goddess.local · /Users/carter/developer/Bolt<br>
+Read-only checkup. Nothing was modified to produce this.</p>
+<p class="lede">If someone else used Bolt tomorrow, the <strong>real product</strong> is the CLI plus the local clip factory and queue — not the apps or auto-posting.</p>
+<div class="key">
+  <span class="pill ready">READY — works</span>
+  <span class="pill partial">PARTIAL — gated / incomplete</span>
+  <span class="pill shell">SHELL — stub</span>
+  <span class="pill idea">IDEA — named, not built</span>
+</div>
+
+<h2 class="plain">How you actually run it</h2>
+<p>Canonical entry: <code>bin/bolt</code> (<code>uv sync</code>, then <code>uv run bolt …</code>).</p>
+<pre>cd /Users/carter/developer/Bolt
+uv sync
+bolt setup          # Core/launch.py — finite, must exit
+bolt verify / bolt doctor
+bolt recordings     # → Core/bot.py pipeline
+bolt day --decide   # queue review
+bolt launch         # folder-watch + optional OBS
+bolt queue decide
+bolt morning / manage / research / mission / voice / budget / overlay</pre>
+<p>Live clip path: Highlight_Detector → Clip_Generator → Clip_Deduplicator → Title_Generator → <strong>(subtitles: pass)</strong> → Clip_Ranker → Clip_Factory → Post_Queue / Peak_Hour_Notifier.</p>
+<p>Not real launchers for a stranger: <code>python3 Core/src/launch.py</code> (empty), <code>App/app.py</code> (stale path), <code>App/BoltApp</code> (Base44 todo app), <code>bolt-creator-command-center/</code> (redirect only).</p>
+
+<h2 class="ready-h">READY — another person could use this</h2>
+<table>
+<thead><tr><th>Surface</th><th>Path</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>CLI</td><td><code>bin/bolt</code>, <code>bolt_cli/</code></td><td>Subcommands map to real scripts after <code>uv sync</code>.</td></tr>
+<tr><td>Setup / live launcher</td><td><code>Core/launch.py</code></td><td>Config wizard, then exec <code>Core/bot.py</code>.</td></tr>
+<tr><td>Clip pipeline</td><td><code>Core/bot.py</code> + detector/generator/factory/deduper/watcher</td><td>Real ffmpeg/librosa/moviepy; folder-watch + <code>bolt recordings</code>.</td></tr>
+<tr><td>Ranker</td><td>Clip_Ranker.py</td><td>Trigger bonuses + recency <code>learned_boost()</code>; called from bot.py.</td></tr>
+<tr><td>Queue / review</td><td>Peak_Hour_Notifier, Post_Queue</td><td>status/decide/approve/hold/mark-posted/package → <code>Data/ready_to_post.json</code>.</td></tr>
+<tr><td>Titles (local)</td><td>Title_Generator</td><td>Templates always work; AI optional.</td></tr>
+<tr><td>LLM routing</td><td>LLM_Handler, LLM_Budget, XAI_Usage</td><td>Real OpenAI-compatible clients; light/local/full; monthly cap.</td></tr>
+<tr><td>Decision engine</td><td>Think_Learn_Decide</td><td>Local think_and_propose; wired in bot.py.</td></tr>
+<tr><td>Content Manager</td><td>Content_Manager</td><td>Real JSON catalog CRUD (manage/store/social/sponsors/morning).</td></tr>
+<tr><td>Researcher</td><td>Researcher</td><td>add/note/c5/find; DDG via scripts/_research.py.</td></tr>
+<tr><td>Missions</td><td>Command_Center</td><td>Markdown under <code>Data/memory/missions/</code>.</td></tr>
+<tr><td>Day / week / voice</td><td>bolt_day, Week_Card, Intent_Router, Bolt_Voice</td><td>Grounded in queue/peak; macOS <code>say</code>.</td></tr>
+<tr><td>Briefing + Reminders</td><td>daily_briefing, Apple_Reminders</td><td><code>bolt briefing --send</code> is real JXA.</td></tr>
+<tr><td>Overlay</td><td>overlay_server + App/overlay</td><td>Local HTTP :8766; Stream Deck scripts.</td></tr>
+<tr><td>Doctor / verify / tests</td><td>doctor.py, verify.py, Data/tests</td><td><code>bolt doctor</code>, <code>verify</code>, <code>test</code>.</td></tr>
+<tr><td>Thumbnails / ICS</td><td>generate_thumbnails, generate_calendar</td><td>ffmpeg + hand-rolled ICS.</td></tr>
+<tr><td>Memory index</td><td>Memory_Index</td><td>File-based retrieve; used by briefings.</td></tr>
+<tr><td>Config / paths</td><td>Config_Loader, _paths.py</td><td>Post-reorg canonical layout.</td></tr>
+</tbody>
+</table>
+<p><strong>Most real core (not shells):</strong> LLM_Handler, LLM_Budget, Clip_Ranker, Think_Learn_Decide.</p>
+
+<h2 class="partial-h">PARTIAL — real code, gated or incomplete</h2>
+<table>
+<thead><tr><th>Surface</th><th>What's missing</th></tr></thead>
+<tbody>
+<tr><td>Nexus / Vector DB</td><td>Need Ollama (or paid Grok). Chroma <strong>raises if Ollama down</strong>.</td></tr>
+<tr><td>TikTok publish</td><td>Real API, <strong>hard-paused</strong> (<code>TIKTOK_API_ENABLED=false</code>, app denied).</td></tr>
+<tr><td>TikTok Post UI</td><td>Real Flask; mock creator when no token.</td></tr>
+<tr><td>YouTube / X</td><td>Paste-text packages. “Real API publisher pending app review.”</td></tr>
+<tr><td>Social stats</td><td>YouTube OAuth can work; TikTok paused; needs tokens.</td></tr>
+<tr><td>Amazon ASIN verify</td><td>HTML scrape, no PA-API. Fragile.</td></tr>
+<tr><td>OBS live / Twitch chat</td><td>Real clients; need OBS password / TWITCH_BOT_TOKEN. Folder-watch works without them.</td></tr>
+<tr><td>Voice loop</td><td>Mic→STT→LLM→TTS. Needs mic, PortAudio, macOS.</td></tr>
+<tr><td>Google Calendar / Gmail</td><td>Real OAuth. Token path stale (<code>Core/data</code> not <code>Data/</code>).</td></tr>
+<tr><td>Multi_Publisher</td><td>Planner only, no upload. Writes pre-reorg <code>data/</code> path.</td></tr>
+<tr><td>OCR / Video_Intelligence</td><td>Real tesseract + tests. <strong>bot.py never calls extract_stats()</strong>.</td></tr>
+<tr><td>Subtitle_Generator</td><td>Real Whisper wrapper. <strong>bot.py Step D is pass</strong>. Whisper not in pyproject.toml.</td></tr>
+<tr><td>Anomaly / Predictive</td><td>Real math + tests. <strong>Zero pipeline callers</strong>.</td></tr>
+<tr><td>Smart_Trim / Text_Overlay</td><td>Real ffmpeg; only via enhance_clips.py (not a bolt subcommand).</td></tr>
+<tr><td>Checkup dashboard</td><td>Writes Bolt_data.js. <strong>No Bolt_Checkup.html</strong>.</td></tr>
+<tr><td>macOS menu bar</td><td>Looks for old launch.py path. rumps not in deps.</td></tr>
+<tr><td>VOD / highlight reel</td><td>Real scripts; need Twitch creds + yt-dlp.</td></tr>
+<tr><td>Sites / storage cron</td><td>William’s Cloudflare/machine paths, not portable.</td></tr>
+<tr><td>Gemini / Analytics_Tracker</td><td>Real clients; opt-in / not in bin/bolt.</td></tr>
+<tr><td>Brain_Controller</td><td>Compat wrapper around Think_Learn_Decide — not a second brain.</td></tr>
+</tbody>
+</table>
+<p><strong>ffmpeg</strong> required (pipeline dies without it). <strong>Ollama</strong> degrades titles/Nexus, clip cutter still runs. TikTok auto-post is dead until the app is approved. A stranger also lacks William’s .env, user_profile, catalog, and Google credentials.</p>
+
+<h2 class="shell-h">SHELL — stub / canned / goes nowhere</h2>
+<table>
+<thead><tr><th>Evidence</th><th>Fact</th></tr></thead>
+<tbody>
+<tr><td>bot.py subtitles step</td><td>Labeled “Generating subtitles”, then <code>pass</code> (~lines 279–283).</td></tr>
+<tr><td>Bolt_Search</td><td><code>search_and_answer()</code> always returns None: “Live web search is disabled”.</td></tr>
+<tr><td>App/BoltApp</td><td>Base44 React todo template. Not Bolt.</td></tr>
+<tr><td>bolt-creator-command-center/</td><td>“This root folder is a redirect only.”</td></tr>
+<tr><td>Core/src/</td><td>Empty. PROJECT_STATUS still says <code>python3 Core/src/launch.py</code>.</td></tr>
+<tr><td>TikTok demo creator</td><td>MOCK_CREATOR_INFO ("demo_creator").</td></tr>
+<tr><td>Checkup HTML</td><td>Writer exists; the page it feeds does not.</td></tr>
+</tbody>
+</table>
+<p>OBS_Integration.py is a thin shim to Stream_Monitor — wrapper, not a shell.</p>
+
+<h2 class="idea-h">IDEA — named, not built</h2>
+<ul>
+<li><code>Data/learning/</code> — LLM textbook notes. Study log, not architecture.</li>
+<li>Skincare_Analyzer / AI_Analyzer — docs claim pipeline wiring; bot.py never calls them.</li>
+<li>Title trainer / A/B loop — doctor.py: “no trainer or A/B loop exists.”</li>
+<li>Kick / Instagram auto-post — metadata only (“Upload manually…”).</li>
+<li>Websites as a product — Cloudflare deploy is William’s, not an in-repo app.</li>
+<li>License still says <code>[Add your preferred license here]</code>.</li>
+<li>Discord-first bot leftover in .env.example; Core README says Bolt is not this.</li>
+</ul>
+
+<h2 class="plain">If someone else used this tomorrow</h2>
+<h3>What works</h3>
+<ul>
+<li>After <code>uv sync</code> + .env, <strong>bolt recordings / bolt launch</strong> on local video: detect, cut, rank, 9:16, enqueue.</li>
+<li><strong>bolt queue decide</strong> is the real posting OS (manual upload + mark-posted).</li>
+<li>manage / research / mission / day / morning / briefing are real local JSON/markdown tools.</li>
+<li>doctor / verify / test will tell them what’s missing.</li>
+<li>With Ollama (llama3.1:8b + nomic-embed-text), Nexus/titles get smarter. Without it, templates still cut clips.</li>
+</ul>
+<h3>What will disappoint</h3>
+<ul>
+<li>README “titles, <strong>subtitles</strong>, ranked queues” — subtitles are a no-op.</li>
+<li>TikTok auto-post / M11 — API paused.</li>
+<li>Creator Command Center / BoltApp — Base44 todo template.</li>
+<li>Dashboard (JS, no HTML) and menu bar app (wrong paths, missing rumps).</li>
+<li>OCR “KILL STREAK” titles, anomaly/predictive, skincare/tech analyzers look shipped; they are not wired.</li>
+<li>PROJECT_STATUS oversells M1–M13, Discord, ElevenLabs. Voice default is macOS Voice 3.</li>
+</ul>
+<h3>Top 5 that look like features but aren’t</h3>
+<ol>
+<li><strong>Subtitles in the clip pipeline</strong> — advertised; bot.py Step D is pass.</li>
+<li><strong>TikTok auto-publish</strong> — real client, hard-paused.</li>
+<li><strong>OCR data-driven titles</strong> — Video_Intelligence exists; bot.py never calls extract_stats().</li>
+<li><strong>Anomaly detection + view forecasting</strong> — tested modules, zero pipeline callers.</li>
+<li><strong>Checkup dashboard / macOS app / App/BoltApp</strong> — claimed UIs that aren’t Bolt.</li>
+</ol>
+<p><strong>Stranger-ready subset:</strong> CLI + local clip factory + queue review + catalog/research/mission markdown. Everything that needs cloud APIs, TikTok app review, OBS, or a GUI is gated, paused, or a shell.</p>
+<p class="foot">Printed from Goddess · HP Tango · color key matches the section bars.</p>
+</body>
+</html>

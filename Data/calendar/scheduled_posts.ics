@@ -4,4 +4,382 @@ PRODID:-//Bolt//Calendar Feeds//EN
 X-WR-CALNAME:Scheduled Posts
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
+BEGIN:VEVENT
+UID:bolt-post-f9e134a0-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip f9e134a0
+DESCRIPTION:queue_id: f9e134a0\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip01_audio_spike_18_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (f9e134a0)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-9ca962a0-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 9ca962a0
+DESCRIPTION:queue_id: 9ca962a0\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip05_audio_spike_235_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (9ca962a0)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-db0605e9-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip db0605e9
+DESCRIPTION:queue_id: db0605e9\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip04_audio_spike_187_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (db0605e9)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-077a512c-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 077a512c
+DESCRIPTION:queue_id: 077a512c\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip06_audio_spike_289_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (077a512c)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-3c7dc9c3-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 3c7dc9c3
+DESCRIPTION:queue_id: 3c7dc9c3\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip05_audio_spike_235_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (3c7dc9c3)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-2f794113-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 2f794113
+DESCRIPTION:queue_id: 2f794113\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip07_audio_spike_344_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (2f794113)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-f44b0072-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip f44b0072
+DESCRIPTION:queue_id: f44b0072\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip06_audio_spike_289_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (f44b0072)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-7a5f374d-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 7a5f374d
+DESCRIPTION:queue_id: 7a5f374d\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip08_audio_spike_401_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (7a5f374d)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-7fd9128a-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 7fd9128a
+DESCRIPTION:queue_id: 7fd9128a\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip07_audio_spike_344_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (7fd9128a)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-60354095-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 60354095
+DESCRIPTION:queue_id: 60354095\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_11-52-07_clip04_audio_spike_187_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (60354095)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-a4957e82-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip a4957e82
+DESCRIPTION:queue_id: a4957e82\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_11-52-07_clip06_audio_spike_290_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (a4957e82)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-8c84f733-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 8c84f733
+DESCRIPTION:queue_id: 8c84f733\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip01_audio_spike_64_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (8c84f733)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-82debcf1-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 82debcf1
+DESCRIPTION:queue_id: 82debcf1\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip02_audio_spike_116_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (82debcf1)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-6d289802-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 6d289802
+DESCRIPTION:queue_id: 6d289802\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip03_audio_spike_186_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (6d289802)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-56e52b17-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 56e52b17
+DESCRIPTION:queue_id: 56e52b17\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-05-09_clip02_audio_spike_124_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (56e52b17)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-2e07d409-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 2e07d409
+DESCRIPTION:queue_id: 2e07d409\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip04_audio_spike_245_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (2e07d409)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-fcc0105d-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip fcc0105d
+DESCRIPTION:queue_id: fcc0105d\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-05-09_clip04_audio_spike_244_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (fcc0105d)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-2b4767b3-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 2b4767b3
+DESCRIPTION:queue_id: 2b4767b3\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip10_audio_spike_1355_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (2b4767b3)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-53c92860-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 53c92860
+DESCRIPTION:queue_id: 53c92860\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip06_audio_spike_1096_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (53c92860)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-2f573c72-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 2f573c72
+DESCRIPTION:queue_id: 2f573c72\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip07_audio_spike_1178_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (2f573c72)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-73ebae56-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 73ebae56
+DESCRIPTION:queue_id: 73ebae56\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip01_audio_spike_17_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (73ebae56)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-79a1b4f9-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 79a1b4f9
+DESCRIPTION:queue_id: 79a1b4f9\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip06_audio_spike_1096_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (79a1b4f9)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-343909d2-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 343909d2
+DESCRIPTION:queue_id: 343909d2\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip07_audio_spike_1178_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (343909d2)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-d175d01f-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip d175d01f
+DESCRIPTION:queue_id: d175d01f\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip08_audio_spike_1240_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (d175d01f)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-9fb5c51c-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 9fb5c51c
+DESCRIPTION:queue_id: 9fb5c51c\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip08_audio_spike_1240_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (9fb5c51c)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-bb07f55e-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip bb07f55e
+DESCRIPTION:queue_id: bb07f55e\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip09_audio_spike_1302_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (bb07f55e)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-d67b1b84-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip d67b1b84
+DESCRIPTION:queue_id: d67b1b84\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip09_audio_spike_1302_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (d67b1b84)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-1222294b-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 1222294b
+DESCRIPTION:queue_id: 1222294b\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip10_audio_spike_1355_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (1222294b)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-96362289-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 96362289
+DESCRIPTION:queue_id: 96362289\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip09_audio_spike_2747_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (96362289)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-e02a3f9e-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip e02a3f9e
+DESCRIPTION:queue_id: e02a3f9e\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip01_audio_spike_81_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (e02a3f9e)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-7a55a48c-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 7a55a48c
+DESCRIPTION:queue_id: 7a55a48c\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip10_audio_spike_2838_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (7a55a48c)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-0e671a72-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 0e671a72
+DESCRIPTION:queue_id: 0e671a72\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip09_audio_spike_2747_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (0e671a72)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-d7ce28b6-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip d7ce28b6
+DESCRIPTION:queue_id: d7ce28b6\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip12_audio_spike_3422_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (d7ce28b6)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-ff7ca2f0-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip ff7ca2f0
+DESCRIPTION:queue_id: ff7ca2f0\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip08_audio_spike_2462_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (ff7ca2f0)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-b075f2ca-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip b075f2ca
+DESCRIPTION:queue_id: b075f2ca\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip11_audio_spike_3358_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (b075f2ca)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-3b36d979-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 3b36d979
+DESCRIPTION:queue_id: 3b36d979\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip07_audio_spike_2269_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (3b36d979)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-ead3ef19-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip ead3ef19
+DESCRIPTION:queue_id: ead3ef19\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip02_audio_spike_165_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (ead3ef19)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-9e153aed-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 9e153aed
+DESCRIPTION:queue_id: 9e153aed\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip01_audio_spike_81_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (9e153aed)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-2aa86e14-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 2aa86e14
+DESCRIPTION:queue_id: 2aa86e14\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip09_audio_spike_2688_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (2aa86e14)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-0eced307-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 0eced307
+DESCRIPTION:queue_id: 0eced307\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip08_audio_spike_2403_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (0eced307)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-d9b4c7c3-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip d9b4c7c3
+DESCRIPTION:queue_id: d9b4c7c3\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip07_audio_spike_2210_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (d9b4c7c3)
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-post-30571f7a-youtube_shorts-1788614400@bolt
+DTSTAMP:20260904T211629
+DTSTART:20260905T082000
+DTEND:20260905T083000
+SUMMARY:Post to YouTube Shorts: Clip 30571f7a
+DESCRIPTION:queue_id: 30571f7a\nplatform: YouTube Shorts\nclip: /Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip05_audio_spike_1263_tiktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the vertical file and original audio.
+LOCATION:Bolt queue (30571f7a)
+END:VEVENT
 END:VCALENDAR

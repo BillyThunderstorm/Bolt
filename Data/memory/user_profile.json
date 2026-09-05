@@ -2,11 +2,11 @@
   "_meta": {
     "schema_version": 1,
     "created_at": "2026-07-29T04:25:00",
-    "last_updated": "2026-08-24T16:00:00",
+    "last_updated": "2026-08-30T12:00:00",
     "interview_status": "complete",
     "questions_answered": ["q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "schedule_decision"],
     "questions_open": [],
-    "note": "Interview complete. Q3 allocation adopted 2026-08-18 from the pending 40-hour default (user asked to close what we can). C1 wording updated the same day: honest review of a hyped dud you own + a working alternative is allowed. Standing research questions (through-line, creator examples) stay open on purpose — those are research, not missing policy."
+    "note": "Interview complete. Q3 allocation adopted 2026-08-18 from the pending 40-hour default (user asked to close what we can). C1 wording updated the same day: honest review of a hyped dud you own + a working alternative is allowed. Standing research questions (through-line, creator examples, year-end proof) stay open on purpose — those are research, not missing policy. 2026-08-30: year-end horizon is direction + proof, not a finished career outcome. Do not ask William to invent a measurable result he does not have."
   },
   "vision": {
     "career_goal": "Build a content-career reviewing products that companies send. Travel to company sites to test products firsthand. Being chosen by gaming companies to test their newest releases and asked to present or host at game awards and events like Dream Con. Creating with Marvel. Voice must matter and be valuable; never sell the next gimmick.",
@@ -26,7 +26,15 @@
     "primary_blocker": "no_roadmap_or_example_to_follow",
     "secondary_blocker": null,
     "user_words": "I have no knowledge of how to start it, what to do to maintain it, no successful roadmap I know of or anyone to look at as a goal or example of where I want to be.",
-    "implication": "This is a direction-finding problem, not an execution problem. Bolt must prioritize research before management/production. When given a to-do list, Bolt should push back with 'do we know this is the right list?' before charging ahead."
+    "implication": "This is a direction-finding problem, not an execution problem. Bolt must prioritize research before management/production. When given a to-do list, Bolt should push back with 'do we know this is the right list?' before charging ahead. Do not treat a blank mission 'measurable result' as William forgetting to plan — he does not know what success looks like in this profession yet; that is the research job."
+  },
+  "near_term_horizon": {
+    "target_date": "2026-12-31",
+    "kind": "figure_it_out",
+    "success_is": "Not a finished career and not a content calendar. By 2026-12-31: either know what success looks like in this profession, or have a written roadmap plus proof that the work already done is leading somewhere.",
+    "user_words": "I don't know what the outcome would look like. I have no plan because I don't know what success looks like in this profession. That's why research was put in place. The date was to figure it out by the end of the year or have some type of roadmap with proof that what I was doing was leading somewhere.",
+    "recorded_at": "2026-08-30",
+    "implication_for_bolt": "Missions must not demand a known career outcome as an input. Daily work does not require a mission. A mission without a known outcome is a research mission. Year-end success is direction plus proof, not a shipped title or a posting streak."
   },
   "time_budget": {
     "hours_per_week_total": 40,

@@ -255,6 +255,65 @@ def _find_ready_clip(
     return None
 
 
+
+def _attach_prediction(clip: dict, *, notify_viral: bool = True) -> dict | None:
+    """Attach Predictive_Analytics forecast onto a queue row. Never raises."""
+    try:
+        from modules.Predictive_Analytics import predict
+    except Exception:
+        return None
+    features = {
+        "game": clip.get("game") or "unknown",
+        "trigger": clip.get("trigger") or "unknown",
+        "platform": clip.get("platform"),
+    }
+    try:
+        pred = predict(features)
+    except Exception:
+        return None
+    payload = {
+        "median_views": pred.median_views,
+        "low_views": pred.low_views,
+        "high_views": pred.high_views,
+        "confidence": pred.confidence,
+        "is_potential_viral": pred.is_potential_viral,
+        "insufficient_data": pred.insufficient_data,
+        "summary": pred.summary,
+        "sample_size": pred.sample_size,
+    }
+    clip["prediction"] = payload
+    if notify_viral and pred.is_potential_viral and not pred.insufficient_data:
+        try:
+            notify(
+                f"Potential viral clip: {clip.get('title') or clip.get('id')}",
+                level="success",
+                reason=pred.summary,
+            )
+        except Exception:
+            pass
+    return payload
+
+
+def _prediction_line(clip: dict) -> str | None:
+    """One-line forecast for clip cards; computes on the fly if missing."""
+    pred = clip.get("prediction")
+    if not isinstance(pred, dict):
+        pred = _attach_prediction(dict(clip), notify_viral=False)
+        if pred is None:
+            return None
+    if pred.get("insufficient_data"):
+        summary = str(pred.get("summary") or "")[:80]
+        return f"  forecast: insufficient history ({summary})"
+    flag = " VIRAL" if pred.get("is_potential_viral") else ""
+    try:
+        median_i = int(pred.get("median_views") or 0)
+        high_i = int(pred.get("high_views") or 0)
+    except (TypeError, ValueError):
+        return f"  forecast: {str(pred.get('summary') or '')[:100]}"
+    prefix = (" VIRAL " if flag.strip() else " ")
+    return f"  forecast:{prefix}~{median_i:,} views (up to ~{high_i:,})"
+
+
 def _clip_display_name(clip: dict) -> str:
     path = clip.get("clip_path") or ""
     return Path(path).name if path else "(no file)"
@@ -279,6 +338,9 @@ def _format_clip_card(clip: dict, index: int | None = None, total: int | None = 
     ]
     if not _clip_file_exists(clip):
         lines.append("  ⚠  video file is MISSING on this Mac (ghost queue row)")
+    forecast = _prediction_line(clip)
+    if forecast:
+        lines.append(forecast)
     return "\n".join(lines)
 
 
@@ -604,6 +666,9 @@ def queue_clip(
     hashtags: list = None,
     score: float = 0,
     tier: str = "queue",
+    game: str | None = None,
+    trigger: str | None = None,
+    platform: str | None = None,
 ) -> dict:
     """
     Add a clip to the ready-to-post list.
@@ -636,6 +701,14 @@ def queue_clip(
         "queued_at": now.isoformat(),
         "posted_at": None,
     }
+    if game:
+        item["game"] = game
+    if trigger:
+        item["trigger"] = trigger
+    if platform:
+        item["platform"] = platform
+    # Best-effort view forecast for queue insight (never blocks enqueue).
+    _attach_prediction(item)
     if tier == "queue":
         _ensure_auto_post_plan(item, now)
 

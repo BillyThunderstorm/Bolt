@@ -141,6 +141,35 @@ class DailyBriefingMemoryTests(unittest.TestCase):
         self.assertIn("Action Items For Today", briefing)
         self.assertIn("Quick Commands", briefing)
 
+    def test_briefing_comments_apply_write_intents(self):
+        import tempfile
+        from modules import Week_Card as wc
+
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        root = Path(tmp.name)
+        daily = root / "Docs" / "briefings" / "daily"
+        daily.mkdir(parents=True)
+        (daily / "latest_morning.md").write_text(
+            "# Bolt Daily Briefing\n\n## Comments\n\n"
+            "this shipped: posted the earbuds hook\n"
+            "the lighting still looks off\n",
+            encoding="utf-8",
+        )
+        week_file = root / "week_card.json"
+        with patch.object(db, "REPO_ROOT", root), patch.object(wc, "WEEK_FILE", week_file), patch.object(
+            wc, "_remember", lambda *_a, **_k: None
+        ), patch.object(wc, "RESEARCH_LOG", root / "research.jsonl"):
+            (root / "research.jsonl").write_text("", encoding="utf-8")
+            wc.set_week("tech")
+            hits = db._load_previous_briefing_comments()
+            sources = {h.get("source") for h in hits}
+            self.assertIn("briefing_comment_applied", sources)
+            self.assertIn("briefing_comment", sources)
+            leftover = [h for h in hits if h.get("source") == "briefing_comment"][0]
+            self.assertIn("lighting", leftover["text"])
+            self.assertIn("posted the earbuds hook", wc.load()["this_week"]["done"])
+
 
 class MemoryToActionItemsTests(unittest.TestCase):
     def test_first_performance_outcome_becomes_canonical_review_item(self):

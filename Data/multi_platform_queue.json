@@ -303653,6 +303653,2862 @@
           "aspect_ratio": "9:16"
         }
       ]
+    },
+    {
+      "queue_id": "bcbb53cf",
+      "created_at": "2026-09-03T02:16:19.714424",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip03_audio_spike_336_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip03_audio_spike_336_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip03_audio_spike_336_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip03_audio_spike_336_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-02_23-25-40_clip03_audio_spike_336_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "38840fd5",
+      "created_at": "2026-09-03T02:16:36.179632",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip04_audio_spike_425_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip04_audio_spike_425_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip04_audio_spike_425_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip04_audio_spike_425_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-02_23-25-40_clip04_audio_spike_425_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "ff816cfd",
+      "created_at": "2026-09-03T02:17:00.415956",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip05_audio_spike_543_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip05_audio_spike_543_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip05_audio_spike_543_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip05_audio_spike_543_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-02_23-25-40_clip05_audio_spike_543_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "6b6457e1",
+      "created_at": "2026-09-03T02:17:19.094185",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip07_audio_spike_699_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip07_audio_spike_699_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip07_audio_spike_699_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip07_audio_spike_699_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-02_23-25-40_clip07_audio_spike_699_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "f7ef02a3",
+      "created_at": "2026-09-03T02:17:34.030727",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip08_audio_spike_778_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip08_audio_spike_778_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip08_audio_spike_778_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip08_audio_spike_778_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-02_23-25-40_clip08_audio_spike_778_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "dec25b53",
+      "created_at": "2026-09-03T14:08:46.458220",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip06_audio_spike_625_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip06_audio_spike_625_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip06_audio_spike_625_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip06_audio_spike_625_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-03_13-57-07_clip06_audio_spike_625_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "ef784f73",
+      "created_at": "2026-09-03T14:08:57.754005",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip04_audio_spike_386_tiktok.mp4",
+          "caption": "Almost got him this time... 007 First Light\n\n#007FirstLight #GamingWithBolt #BoltBrain #JamesBondGaming #FirstPersonShooter",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip04_audio_spike_386_tiktok.mp4",
+          "title": "Almost got him this time... 007 First Light",
+          "description": "Almost got him this time... 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #GamingWithBolt #BoltBrain #JamesBondGaming #FirstPersonShooter #BoltGaming #NextLevelBilly #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip04_audio_spike_386_tiktok.mp4",
+          "caption": "Almost got him this time... 007 First Light\n\n#007FirstLight #GamingWithBolt #BoltBrain #JamesBondGaming #FirstPersonShooter #BoltGaming #NextLevelBilly #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip04_audio_spike_386_tiktok.mp4",
+          "title": "Almost got him this time... 007 First Light",
+          "description": "Highlight from the stream: 2026-09-03_13-57-07_clip04_audio_spike_386_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "b45deed1",
+      "created_at": "2026-09-03T14:09:09.753655",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip03_audio_spike_132_tiktok.mp4",
+          "caption": "Stuck in the high score zone\n\n#007FirstLight #007FirstLightachievements #Highscorealert #GamingwithBolt #BoltBrain",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip03_audio_spike_132_tiktok.mp4",
+          "title": "Stuck in the high score zone",
+          "description": "Stuck in the high score zone\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #007FirstLightachievements #Highscorealert #GamingwithBolt #BoltBrain #WilliamCreates #TikTokGaming #GamingLoop",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip03_audio_spike_132_tiktok.mp4",
+          "caption": "Stuck in the high score zone\n\n#007FirstLight #007FirstLightachievements #Highscorealert #GamingwithBolt #BoltBrain #WilliamCreates #TikTokGaming #GamingLoop",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip03_audio_spike_132_tiktok.mp4",
+          "title": "Stuck in the high score zone",
+          "description": "Highlight from the stream: 2026-09-03_13-57-07_clip03_audio_spike_132_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "63ca7026",
+      "created_at": "2026-09-03T14:09:36.247469",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip01_audio_spike_31_tiktok.mp4",
+          "caption": "My 007 First Light gaming session hit a score of 50.5\n\n#007FirstLight #GamingSession #BillysGaming #BoltBrain #TikTokGamer",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip01_audio_spike_31_tiktok.mp4",
+          "title": "My 007 First Light gaming session hit a score of 50.5",
+          "description": "My 007 First Light gaming session hit a score of 50.5\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #GamingSession #BillysGaming #BoltBrain #TikTokGamer #GamingVlog #007Gaming #BoltGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip01_audio_spike_31_tiktok.mp4",
+          "caption": "My 007 First Light gaming session hit a score of 50.5\n\n#007FirstLight #GamingSession #BillysGaming #BoltBrain #TikTokGamer #GamingVlog #007Gaming #BoltGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip01_audio_spike_31_tiktok.mp4",
+          "title": "My 007 First Light gaming session hit a score of 50.5",
+          "description": "Highlight from the stream: 2026-09-03_13-57-07_clip01_audio_spike_31_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "985c0356",
+      "created_at": "2026-09-03T14:11:10.225881",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip05_audio_spike_540_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip05_audio_spike_540_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip05_audio_spike_540_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip05_audio_spike_540_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-03 13-57-07-vertical_clip05_audio_spike_540_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "f638d19f",
+      "created_at": "2026-09-03T14:11:14.948227",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip06_audio_spike_625_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip06_audio_spike_625_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip06_audio_spike_625_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip06_audio_spike_625_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-03 13-57-07-vertical_clip06_audio_spike_625_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "a059ea53",
+      "created_at": "2026-09-03T14:11:20.918285",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip04_audio_spike_386_tiktok.mp4",
+          "caption": "Bolt's 007 First Light struggle\n\n#007FirstLight #AudioSpike #GamingStruggles #BoltBrain #GrokAndBolt",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip04_audio_spike_386_tiktok.mp4",
+          "title": "Bolt's 007 First Light struggle",
+          "description": "Bolt's 007 First Light struggle\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #AudioSpike #GamingStruggles #BoltBrain #GrokAndBolt #GameOn #TikTokGaming #GamingLife",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip04_audio_spike_386_tiktok.mp4",
+          "caption": "Bolt's 007 First Light struggle\n\n#007FirstLight #AudioSpike #GamingStruggles #BoltBrain #GrokAndBolt #GameOn #TikTokGaming #GamingLife",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip04_audio_spike_386_tiktok.mp4",
+          "title": "Bolt's 007 First Light struggle",
+          "description": "Highlight from the stream: 2026-09-03 13-57-07-vertical_clip04_audio_spike_386_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "351e9542",
+      "created_at": "2026-09-03T14:11:27.500362",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip03_audio_spike_132_tiktok.mp4",
+          "caption": "Almost got him this time... 007 First Light\n\n#007FirstLight #GamingWithBolt #BoltBrain #JamesBondGaming #FirstPersonShooter",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip03_audio_spike_132_tiktok.mp4",
+          "title": "Almost got him this time... 007 First Light",
+          "description": "Almost got him this time... 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #GamingWithBolt #BoltBrain #JamesBondGaming #FirstPersonShooter #BoltGaming #NextLevelBilly #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip03_audio_spike_132_tiktok.mp4",
+          "caption": "Almost got him this time... 007 First Light\n\n#007FirstLight #GamingWithBolt #BoltBrain #JamesBondGaming #FirstPersonShooter #BoltGaming #NextLevelBilly #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip03_audio_spike_132_tiktok.mp4",
+          "title": "Almost got him this time... 007 First Light",
+          "description": "Highlight from the stream: 2026-09-03 13-57-07-vertical_clip03_audio_spike_132_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "9a9f29b9",
+      "created_at": "2026-09-03T14:11:39.603119",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip02_audio_spike_82_tiktok.mp4",
+          "caption": "Bolt's 007 First Light score: 62.3\n\n#BoltGaming #007FirstLight #RetroGaming #GamingClips #BoltBrain",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip02_audio_spike_82_tiktok.mp4",
+          "title": "Bolt's 007 First Light score: 62.3",
+          "description": "Bolt's 007 First Light score: 62.3\n\nDaily gaming highlights.\n\n#Shorts #Gaming #BoltGaming #007FirstLight #RetroGaming #GamingClips #BoltBrain #WilliamGaming #TikTokGaming #GamingCommunity",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip02_audio_spike_82_tiktok.mp4",
+          "caption": "Bolt's 007 First Light score: 62.3\n\n#BoltGaming #007FirstLight #RetroGaming #GamingClips #BoltBrain #WilliamGaming #TikTokGaming #GamingCommunity",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-03T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip02_audio_spike_82_tiktok.mp4",
+          "title": "Bolt's 007 First Light score: 62.3",
+          "description": "Highlight from the stream: 2026-09-03 13-57-07-vertical_clip02_audio_spike_82_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "f9e134a0",
+      "created_at": "2026-09-04T12:00:48.734449",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip01_audio_spike_18_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip01_audio_spike_18_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip01_audio_spike_18_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip01_audio_spike_18_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 11-52-07-vertical_clip01_audio_spike_18_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "9ca962a0",
+      "created_at": "2026-09-04T12:00:51.551671",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip05_audio_spike_235_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip05_audio_spike_235_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip05_audio_spike_235_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip05_audio_spike_235_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 11-52-07-vertical_clip05_audio_spike_235_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "db0605e9",
+      "created_at": "2026-09-04T12:00:57.454018",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip04_audio_spike_187_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip04_audio_spike_187_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip04_audio_spike_187_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip04_audio_spike_187_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 11-52-07-vertical_clip04_audio_spike_187_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "077a512c",
+      "created_at": "2026-09-04T12:01:00.506431",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip06_audio_spike_289_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip06_audio_spike_289_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip06_audio_spike_289_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip06_audio_spike_289_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 11-52-07-vertical_clip06_audio_spike_289_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "3c7dc9c3",
+      "created_at": "2026-09-04T12:01:05.504623",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip05_audio_spike_235_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip05_audio_spike_235_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip05_audio_spike_235_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip05_audio_spike_235_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 11-52-07-vertical_clip05_audio_spike_235_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "2f794113",
+      "created_at": "2026-09-04T12:01:09.283051",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip07_audio_spike_344_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip07_audio_spike_344_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip07_audio_spike_344_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip07_audio_spike_344_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 11-52-07-vertical_clip07_audio_spike_344_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "f44b0072",
+      "created_at": "2026-09-04T12:01:13.917236",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip06_audio_spike_289_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip06_audio_spike_289_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip06_audio_spike_289_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip06_audio_spike_289_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 11-52-07-vertical_clip06_audio_spike_289_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "7a5f374d",
+      "created_at": "2026-09-04T12:01:17.857027",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip08_audio_spike_401_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip08_audio_spike_401_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip08_audio_spike_401_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip08_audio_spike_401_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 11-52-07-vertical_clip08_audio_spike_401_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "7fd9128a",
+      "created_at": "2026-09-04T12:01:20.515393",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip07_audio_spike_344_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip07_audio_spike_344_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip07_audio_spike_344_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip07_audio_spike_344_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 11-52-07-vertical_clip07_audio_spike_344_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "60354095",
+      "created_at": "2026-09-04T12:01:38.008984",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_11-52-07_clip04_audio_spike_187_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_11-52-07_clip04_audio_spike_187_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_11-52-07_clip04_audio_spike_187_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_11-52-07_clip04_audio_spike_187_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_11-52-07_clip04_audio_spike_187_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "a4957e82",
+      "created_at": "2026-09-04T12:01:39.981688",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_11-52-07_clip06_audio_spike_290_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_11-52-07_clip06_audio_spike_290_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_11-52-07_clip06_audio_spike_290_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_11-52-07_clip06_audio_spike_290_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_11-52-07_clip06_audio_spike_290_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "8c84f733",
+      "created_at": "2026-09-04T12:10:47.297709",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip01_audio_spike_64_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip01_audio_spike_64_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip01_audio_spike_64_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip01_audio_spike_64_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 12-05-09-vertical_clip01_audio_spike_64_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "82debcf1",
+      "created_at": "2026-09-04T12:11:05.796258",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip02_audio_spike_116_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip02_audio_spike_116_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip02_audio_spike_116_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip02_audio_spike_116_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 12-05-09-vertical_clip02_audio_spike_116_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "6d289802",
+      "created_at": "2026-09-04T12:11:24.731003",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip03_audio_spike_186_tiktok.mp4",
+          "caption": "Stuck in the high score zone\n\n#007FirstLight #007FirstLightachievements #Highscorealert #GamingwithBolt #BoltBrain",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip03_audio_spike_186_tiktok.mp4",
+          "title": "Stuck in the high score zone",
+          "description": "Stuck in the high score zone\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #007FirstLightachievements #Highscorealert #GamingwithBolt #BoltBrain #WilliamCreates #TikTokGaming #GamingLoop",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip03_audio_spike_186_tiktok.mp4",
+          "caption": "Stuck in the high score zone\n\n#007FirstLight #007FirstLightachievements #Highscorealert #GamingwithBolt #BoltBrain #WilliamCreates #TikTokGaming #GamingLoop",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip03_audio_spike_186_tiktok.mp4",
+          "title": "Stuck in the high score zone",
+          "description": "Highlight from the stream: 2026-09-04 12-05-09-vertical_clip03_audio_spike_186_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "56e52b17",
+      "created_at": "2026-09-04T12:11:38.600461",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-05-09_clip02_audio_spike_124_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-05-09_clip02_audio_spike_124_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-05-09_clip02_audio_spike_124_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-05-09_clip02_audio_spike_124_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_12-05-09_clip02_audio_spike_124_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "2e07d409",
+      "created_at": "2026-09-04T12:11:41.413096",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip04_audio_spike_245_tiktok.mp4",
+          "caption": "Just when I thought I had it... 72.7 in 007 First Light\n\n#007FirstLight #JamesBondGames #GamingFails #BoltBrain #GrokAndBolt",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip04_audio_spike_245_tiktok.mp4",
+          "title": "Just when I thought I had it... 72.7 in 007 First Light",
+          "description": "Just when I thought I had it... 72.7 in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGames #GamingFails #BoltBrain #GrokAndBolt #TikTokGaming #GamingCommunity #William",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip04_audio_spike_245_tiktok.mp4",
+          "caption": "Just when I thought I had it... 72.7 in 007 First Light\n\n#007FirstLight #JamesBondGames #GamingFails #BoltBrain #GrokAndBolt #TikTokGaming #GamingCommunity #William",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip04_audio_spike_245_tiktok.mp4",
+          "title": "Just when I thought I had it... 72.7 in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 12-05-09-vertical_clip04_audio_spike_245_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "fcc0105d",
+      "created_at": "2026-09-04T12:11:56.666766",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-05-09_clip04_audio_spike_244_tiktok.mp4",
+          "caption": "Just made it past the first level of 007 First Light\n\n#007FirstLight #BondGames #GamingWithBolt #TikTokGamer #BoltBrain",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-05-09_clip04_audio_spike_244_tiktok.mp4",
+          "title": "Just made it past the first level of 007 First Light",
+          "description": "Just made it past the first level of 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #BondGames #GamingWithBolt #TikTokGamer #BoltBrain #GamingChallenges #FirstLight #007Games",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-05-09_clip04_audio_spike_244_tiktok.mp4",
+          "caption": "Just made it past the first level of 007 First Light\n\n#007FirstLight #BondGames #GamingWithBolt #TikTokGamer #BoltBrain #GamingChallenges #FirstLight #007Games",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-05-09_clip04_audio_spike_244_tiktok.mp4",
+          "title": "Just made it past the first level of 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_12-05-09_clip04_audio_spike_244_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "2b4767b3",
+      "created_at": "2026-09-04T12:36:07.973257",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip10_audio_spike_1355_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip10_audio_spike_1355_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip10_audio_spike_1355_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip10_audio_spike_1355_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_12-10-37_clip10_audio_spike_1355_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "53c92860",
+      "created_at": "2026-09-04T12:36:10.832799",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip06_audio_spike_1096_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip06_audio_spike_1096_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip06_audio_spike_1096_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip06_audio_spike_1096_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_12-10-37_clip06_audio_spike_1096_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "2f573c72",
+      "created_at": "2026-09-04T12:37:08.234622",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip07_audio_spike_1178_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip07_audio_spike_1178_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip07_audio_spike_1178_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip07_audio_spike_1178_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_12-10-37_clip07_audio_spike_1178_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "73ebae56",
+      "created_at": "2026-09-04T12:37:16.948002",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip01_audio_spike_17_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip01_audio_spike_17_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip01_audio_spike_17_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip01_audio_spike_17_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 12-10-37-vertical_clip01_audio_spike_17_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "79a1b4f9",
+      "created_at": "2026-09-04T12:37:31.930430",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip06_audio_spike_1096_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip06_audio_spike_1096_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip06_audio_spike_1096_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip06_audio_spike_1096_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 12-10-37-vertical_clip06_audio_spike_1096_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "343909d2",
+      "created_at": "2026-09-04T12:37:47.817110",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip07_audio_spike_1178_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip07_audio_spike_1178_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip07_audio_spike_1178_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip07_audio_spike_1178_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 12-10-37-vertical_clip07_audio_spike_1178_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "d175d01f",
+      "created_at": "2026-09-04T12:38:02.417335",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip08_audio_spike_1240_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip08_audio_spike_1240_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip08_audio_spike_1240_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip08_audio_spike_1240_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 12-10-37-vertical_clip08_audio_spike_1240_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "9fb5c51c",
+      "created_at": "2026-09-04T12:38:11.632594",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip08_audio_spike_1240_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip08_audio_spike_1240_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip08_audio_spike_1240_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip08_audio_spike_1240_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_12-10-37_clip08_audio_spike_1240_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "bb07f55e",
+      "created_at": "2026-09-04T12:38:14.818505",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip09_audio_spike_1302_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip09_audio_spike_1302_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip09_audio_spike_1302_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip09_audio_spike_1302_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 12-10-37-vertical_clip09_audio_spike_1302_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "d67b1b84",
+      "created_at": "2026-09-04T12:39:00.254785",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip09_audio_spike_1302_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip09_audio_spike_1302_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip09_audio_spike_1302_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip09_audio_spike_1302_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_12-10-37_clip09_audio_spike_1302_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "1222294b",
+      "created_at": "2026-09-04T12:39:48.024949",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip10_audio_spike_1355_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip10_audio_spike_1355_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip10_audio_spike_1355_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip10_audio_spike_1355_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_12-10-37_clip10_audio_spike_1355_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "96362289",
+      "created_at": "2026-09-04T13:35:04.448765",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip09_audio_spike_2747_tiktok.mp4",
+          "caption": "Bolt's 007 First Light struggle\n\n#007FirstLight #AudioSpike #GamingStruggles #BoltBrain #GrokAndBolt",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip09_audio_spike_2747_tiktok.mp4",
+          "title": "Bolt's 007 First Light struggle",
+          "description": "Bolt's 007 First Light struggle\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #AudioSpike #GamingStruggles #BoltBrain #GrokAndBolt #GameOn #TikTokGaming #GamingLife",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip09_audio_spike_2747_tiktok.mp4",
+          "caption": "Bolt's 007 First Light struggle\n\n#007FirstLight #AudioSpike #GamingStruggles #BoltBrain #GrokAndBolt #GameOn #TikTokGaming #GamingLife",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip09_audio_spike_2747_tiktok.mp4",
+          "title": "Bolt's 007 First Light struggle",
+          "description": "Highlight from the stream: 2026-09-04 12-34-12-vertical_clip09_audio_spike_2747_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "e02a3f9e",
+      "created_at": "2026-09-04T13:35:08.647069",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip01_audio_spike_81_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip01_audio_spike_81_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip01_audio_spike_81_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip01_audio_spike_81_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 12-34-12-vertical_clip01_audio_spike_81_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "7a55a48c",
+      "created_at": "2026-09-04T13:35:11.148853",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip10_audio_spike_2838_tiktok.mp4",
+          "caption": "Just got wrecked by a laser beam\n\n#007FirstLight #GamingStruggles #LaserBeamFury #BondLife #GamingMemories",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip10_audio_spike_2838_tiktok.mp4",
+          "title": "Just got wrecked by a laser beam",
+          "description": "Just got wrecked by a laser beam\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #GamingStruggles #LaserBeamFury #BondLife #GamingMemories #TikTokGaming #BoltBrainGaming #GamingFailures",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip10_audio_spike_2838_tiktok.mp4",
+          "caption": "Just got wrecked by a laser beam\n\n#007FirstLight #GamingStruggles #LaserBeamFury #BondLife #GamingMemories #TikTokGaming #BoltBrainGaming #GamingFailures",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip10_audio_spike_2838_tiktok.mp4",
+          "title": "Just got wrecked by a laser beam",
+          "description": "Highlight from the stream: 2026-09-04 12-34-12-vertical_clip10_audio_spike_2838_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "0e671a72",
+      "created_at": "2026-09-04T13:35:15.223532",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip09_audio_spike_2747_tiktok.mp4",
+          "caption": "Bolt's 007 First Light struggle\n\n#007FirstLight #AudioSpike #GamingStruggles #BoltBrain #GrokAndBolt",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip09_audio_spike_2747_tiktok.mp4",
+          "title": "Bolt's 007 First Light struggle",
+          "description": "Bolt's 007 First Light struggle\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #AudioSpike #GamingStruggles #BoltBrain #GrokAndBolt #GameOn #TikTokGaming #GamingLife",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip09_audio_spike_2747_tiktok.mp4",
+          "caption": "Bolt's 007 First Light struggle\n\n#007FirstLight #AudioSpike #GamingStruggles #BoltBrain #GrokAndBolt #GameOn #TikTokGaming #GamingLife",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip09_audio_spike_2747_tiktok.mp4",
+          "title": "Bolt's 007 First Light struggle",
+          "description": "Highlight from the stream: 2026-09-04 12-34-12-vertical_clip09_audio_spike_2747_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "d7ce28b6",
+      "created_at": "2026-09-04T13:35:18.041567",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip12_audio_spike_3422_tiktok.mp4",
+          "caption": "Just got wrecked by a laser beam\n\n#007FirstLight #GamingStruggles #LaserBeamFury #BondLife #GamingMemories",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip12_audio_spike_3422_tiktok.mp4",
+          "title": "Just got wrecked by a laser beam",
+          "description": "Just got wrecked by a laser beam\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #GamingStruggles #LaserBeamFury #BondLife #GamingMemories #TikTokGaming #BoltBrainGaming #GamingFailures",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip12_audio_spike_3422_tiktok.mp4",
+          "caption": "Just got wrecked by a laser beam\n\n#007FirstLight #GamingStruggles #LaserBeamFury #BondLife #GamingMemories #TikTokGaming #BoltBrainGaming #GamingFailures",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip12_audio_spike_3422_tiktok.mp4",
+          "title": "Just got wrecked by a laser beam",
+          "description": "Highlight from the stream: 2026-09-04 12-34-12-vertical_clip12_audio_spike_3422_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "ff7ca2f0",
+      "created_at": "2026-09-04T13:35:21.656865",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip08_audio_spike_2462_tiktok.mp4",
+          "caption": "Almost got him this time... 007 First Light\n\n#007FirstLight #GamingWithBolt #BoltBrain #JamesBondGaming #FirstPersonShooter",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip08_audio_spike_2462_tiktok.mp4",
+          "title": "Almost got him this time... 007 First Light",
+          "description": "Almost got him this time... 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #GamingWithBolt #BoltBrain #JamesBondGaming #FirstPersonShooter #BoltGaming #NextLevelBilly #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip08_audio_spike_2462_tiktok.mp4",
+          "caption": "Almost got him this time... 007 First Light\n\n#007FirstLight #GamingWithBolt #BoltBrain #JamesBondGaming #FirstPersonShooter #BoltGaming #NextLevelBilly #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip08_audio_spike_2462_tiktok.mp4",
+          "title": "Almost got him this time... 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 12-34-12-vertical_clip08_audio_spike_2462_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "b075f2ca",
+      "created_at": "2026-09-04T13:35:24.564097",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip11_audio_spike_3358_tiktok.mp4",
+          "caption": "Just beat 007 First Light with a sweet audio spike\n\n#007FirstLight #GamingFailures #AudioSpike #BoltBrainGaming #GamingLessons",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip11_audio_spike_3358_tiktok.mp4",
+          "title": "Just beat 007 First Light with a sweet audio spike",
+          "description": "Just beat 007 First Light with a sweet audio spike\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #GamingFailures #AudioSpike #BoltBrainGaming #GamingLessons #MissionImpossible #BoltOnTikTok #GamingWithBolt",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip11_audio_spike_3358_tiktok.mp4",
+          "caption": "Just beat 007 First Light with a sweet audio spike\n\n#007FirstLight #GamingFailures #AudioSpike #BoltBrainGaming #GamingLessons #MissionImpossible #BoltOnTikTok #GamingWithBolt",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip11_audio_spike_3358_tiktok.mp4",
+          "title": "Just beat 007 First Light with a sweet audio spike",
+          "description": "Highlight from the stream: 2026-09-04 12-34-12-vertical_clip11_audio_spike_3358_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "3b36d979",
+      "created_at": "2026-09-04T13:35:26.367487",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip07_audio_spike_2269_tiktok.mp4",
+          "caption": "Tense moment in 007 First Light\n\n#007FirstLight #GamingWithBolt #GamingTips #GameReview #BoltBrain",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip07_audio_spike_2269_tiktok.mp4",
+          "title": "Tense moment in 007 First Light",
+          "description": "Tense moment in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #GamingWithBolt #GamingTips #GameReview #BoltBrain #GamerLife #007 #FirstLight",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip07_audio_spike_2269_tiktok.mp4",
+          "caption": "Tense moment in 007 First Light\n\n#007FirstLight #GamingWithBolt #GamingTips #GameReview #BoltBrain #GamerLife #007 #FirstLight",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip07_audio_spike_2269_tiktok.mp4",
+          "title": "Tense moment in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 12-34-12-vertical_clip07_audio_spike_2269_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "ead3ef19",
+      "created_at": "2026-09-04T13:35:29.907033",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip02_audio_spike_165_tiktok.mp4",
+          "caption": "Just made it past the first level of 007 First Light\n\n#007FirstLight #BondGames #GamingWithBolt #TikTokGamer #BoltBrain",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip02_audio_spike_165_tiktok.mp4",
+          "title": "Just made it past the first level of 007 First Light",
+          "description": "Just made it past the first level of 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #BondGames #GamingWithBolt #TikTokGamer #BoltBrain #GamingChallenges #FirstLight #007Games",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip02_audio_spike_165_tiktok.mp4",
+          "caption": "Just made it past the first level of 007 First Light\n\n#007FirstLight #BondGames #GamingWithBolt #TikTokGamer #BoltBrain #GamingChallenges #FirstLight #007Games",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip02_audio_spike_165_tiktok.mp4",
+          "title": "Just made it past the first level of 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04 12-34-12-vertical_clip02_audio_spike_165_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "9e153aed",
+      "created_at": "2026-09-04T14:19:43.152807",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip01_audio_spike_81_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip01_audio_spike_81_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Just barely survived the first mission in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip01_audio_spike_81_tiktok.mp4",
+          "caption": "Just barely survived the first mission in 007 First Light\n\n#007FirstLight #JamesBondGaming #FirstPersonShooter #GamingWithBolt #BondLife #GamingHighlights #BoltBrain #007Forever",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip01_audio_spike_81_tiktok.mp4",
+          "title": "Just barely survived the first mission in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_12-34-12_clip01_audio_spike_81_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "2aa86e14",
+      "created_at": "2026-09-04T14:20:04.315457",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip09_audio_spike_2688_tiktok.mp4",
+          "caption": "Bolt's 007 First Light struggle\n\n#007FirstLight #AudioSpike #GamingStruggles #BoltBrain #GrokAndBolt",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip09_audio_spike_2688_tiktok.mp4",
+          "title": "Bolt's 007 First Light struggle",
+          "description": "Bolt's 007 First Light struggle\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #AudioSpike #GamingStruggles #BoltBrain #GrokAndBolt #GameOn #TikTokGaming #GamingLife",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip09_audio_spike_2688_tiktok.mp4",
+          "caption": "Bolt's 007 First Light struggle\n\n#007FirstLight #AudioSpike #GamingStruggles #BoltBrain #GrokAndBolt #GameOn #TikTokGaming #GamingLife",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip09_audio_spike_2688_tiktok.mp4",
+          "title": "Bolt's 007 First Light struggle",
+          "description": "Highlight from the stream: 2026-09-04_12-34-12_clip09_audio_spike_2688_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "0eced307",
+      "created_at": "2026-09-04T14:20:38.859034",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip08_audio_spike_2403_tiktok.mp4",
+          "caption": "Almost got him this time... 007 First Light\n\n#007FirstLight #GamingWithBolt #BoltBrain #JamesBondGaming #FirstPersonShooter",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip08_audio_spike_2403_tiktok.mp4",
+          "title": "Almost got him this time... 007 First Light",
+          "description": "Almost got him this time... 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #GamingWithBolt #BoltBrain #JamesBondGaming #FirstPersonShooter #BoltGaming #NextLevelBilly #BoltBrainGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip08_audio_spike_2403_tiktok.mp4",
+          "caption": "Almost got him this time... 007 First Light\n\n#007FirstLight #GamingWithBolt #BoltBrain #JamesBondGaming #FirstPersonShooter #BoltGaming #NextLevelBilly #BoltBrainGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip08_audio_spike_2403_tiktok.mp4",
+          "title": "Almost got him this time... 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_12-34-12_clip08_audio_spike_2403_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "d9b4c7c3",
+      "created_at": "2026-09-04T14:21:06.162593",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip07_audio_spike_2210_tiktok.mp4",
+          "caption": "Tense moment in 007 First Light\n\n#007FirstLight #GamingWithBolt #GamingTips #GameReview #BoltBrain",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip07_audio_spike_2210_tiktok.mp4",
+          "title": "Tense moment in 007 First Light",
+          "description": "Tense moment in 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #GamingWithBolt #GamingTips #GameReview #BoltBrain #GamerLife #007 #FirstLight",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip07_audio_spike_2210_tiktok.mp4",
+          "caption": "Tense moment in 007 First Light\n\n#007FirstLight #GamingWithBolt #GamingTips #GameReview #BoltBrain #GamerLife #007 #FirstLight",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip07_audio_spike_2210_tiktok.mp4",
+          "title": "Tense moment in 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_12-34-12_clip07_audio_spike_2210_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "30571f7a",
+      "created_at": "2026-09-04T14:21:31.247600",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip05_audio_spike_1263_tiktok.mp4",
+          "caption": "Just made it past the first level of 007 First Light\n\n#007FirstLight #BondGames #GamingWithBolt #TikTokGamer #BoltBrain",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-05T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip05_audio_spike_1263_tiktok.mp4",
+          "title": "Just made it past the first level of 007 First Light",
+          "description": "Just made it past the first level of 007 First Light\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #BondGames #GamingWithBolt #TikTokGamer #BoltBrain #GamingChallenges #FirstLight #007Games",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip05_audio_spike_1263_tiktok.mp4",
+          "caption": "Just made it past the first level of 007 First Light\n\n#007FirstLight #BondGames #GamingWithBolt #TikTokGamer #BoltBrain #GamingChallenges #FirstLight #007Games",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-04T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip05_audio_spike_1263_tiktok.mp4",
+          "title": "Just made it past the first level of 007 First Light",
+          "description": "Highlight from the stream: 2026-09-04_12-34-12_clip05_audio_spike_1263_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
     }
   ]
 }

@@ -96,5 +96,32 @@
   "title_generation": {
     "enabled": true
   },
-  "notes": "Auto-posting has safeguards: Bolt asks for review 30 minutes before peak time, posts if approved or if the deadline is missed, and holds rejected clips with a required reason. max_highlight_candidates caps how many spikes get cut per recording before ranking (prevents multi-hour runs on long VODs)."
+  "notes": "Auto-posting has safeguards: Bolt asks for review 30 minutes before peak time, posts if approved or if the deadline is missed, and holds rejected clips with a required reason. max_highlight_candidates caps how many spikes get cut per recording before ranking (prevents multi-hour runs on long VODs).",
+  "google_drive_handbook": {
+    "_comment": "Canonical shared journal, briefing, todo, and how-to. IDs only -- never put OAuth secrets here. bolt briefing / bolt morning append a Bolt briefing section to today's Daily Log in 02_Daily_Operations when Core/credentials.json + Core/data/google_drive_token.json exist. First-time consent: bolt drive-auth. Daily loop: Docs/GOOGLE_DRIVE_HANDBOOK.md",
+    "root_folder_id": "1GZ93zTznYK97Nv9Do5bidLOd9Im1J1XK",
+    "docs": {
+      "start_here": "1u3dRveLkOBsfSpuBXKeFbfj7tVH3EhjZJr-aic5bxjw",
+      "handbook": "12idgxLR-OzcOyCC6mDQwqmOnZQDuMIZIJCwwMnm_krg",
+      "shared_journal": "1paZNFGea-RBAwQ5YMxpuXN8OBRH7R33RAkakYZ23Tfw",
+      "daily_log_2026_08_31": "1RwUyRhjPGjpugrHLkUvyQAog09YMadiMebeZCn0dlLQ",
+      "archive_word": "138abBq9A-zWY0MZCBeyXxRCuwtsjxjeK",
+      "daily_log_today": "1fMpyZuRfcye4FOLkTfT-cUrHdFBuWY8E9ocXQ-CIFug",
+      "daily_log_today_date": "2026-09-04",
+      "daily_log_2026_09_01": "1kQw-ggIqYQQ17Q57IZi_WbcSnbsmOFHABU-6BxdQcR0",
+      "daily_log_2026_09_02": "1pKN4-h_xuFu1A-rNSxg35_b8WVBhR--dDXA9OnPJ9JE",
+      "daily_log_2026_09_03": "1d_yRmAnJF_697LKHGmXBqmQAaCYsGEDFZRP-McDEuHg",
+      "daily_log_2026_09_04": "1fMpyZuRfcye4FOLkTfT-cUrHdFBuWY8E9ocXQ-CIFug"
+    },
+    "folders": {
+      "00_Brand": "1YHZSqjoP7JPNP7NPChdgCRQH80advpHj",
+      "01_Strategy": "1tvdBRHvkDeRFaF0zB8ieyJnKwFAp3dqH",
+      "02_Daily_Operations": "1wanq-qUUGc4qF-uqtqnajAwLd877qSQ4",
+      "03_Recordings": "1gg0mwaptH0IY91L-_dJscM4b14TxTElZ",
+      "04_Clips_In_Progress": "1KvcwqLO8MeGz_mr4R1RJoqYdpmibNYTe",
+      "05_Ready_To_Post": "1tTOf1h3b_PEU3VQjX_zAJAfkvCqJNFSU",
+      "06_Learnings": "1oPmHtmY28r_fPjr5cYwiYb5BUDdQCWLH",
+      "07_Code_And_System": "1KElSeoxBkUJTyDx8CBIm-BH1_XxSjDzy"
+    }
+  }
 }

@@ -70,15 +70,14 @@ Install these (all free):
 
 ### Button 4 — 🎮 Scene: Gaming
 1. Drag **OBS Studio → Switch Scene** onto button 4
-2. Set **Scene** → the name of your main gameplay scene in OBS
-   (e.g. "Gaming", "Gameplay", "Marvel Rivals")
+2. Set **Scene** → `Gaming` (Thunderstone). Aitum Vertical follows this to `Vertical Gaming`.
 3. Label: `Gaming`
 
 ---
 
 ### Button 5 — 💬 Scene: Just Chatting
 1. Drag **OBS Studio → Switch Scene** onto button 5
-2. Set **Scene** → your Just Chatting / cam scene name
+2. Set **Scene** → `Chatting`. Vertical canvas follows to `Vertical Chatting`.
 3. Label: `Chat`
 
 ---

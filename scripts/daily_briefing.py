@@ -141,7 +141,12 @@ def _load_unified_decision_hits(limit: int = 3) -> list:
 
 
 def _load_previous_briefing_comments() -> list:
-    """Pick up notes written under ## Comments on the last briefing file."""
+    """Apply write intents under ## Comments, then keep leftover as a note.
+
+    ``this shipped`` / ``I'm ready`` / mission check-in lines run through
+    Intent_Router (same Week_Card / Command_Center writes as the CLI).
+    Unmatched lines stay a memory note for this briefing.
+    """
     path = REPO_ROOT / "Docs" / "briefings" / "daily" / "latest_morning.md"
     if not path.exists():
         return []
@@ -162,18 +167,45 @@ def _load_previous_briefing_comments() -> list:
         lines.append(line)
     if not lines:
         return []
-    note = " ".join(lines)
-    return [
-        {
-            "kind": "creator_note",
-            "title": "Briefing comment",
-            "text": note[:400],
-            "summary": note[:160],
-            "score": 0.85,
-            "source": "briefing_comment",
-            "timestamp": "",
-        }
-    ]
+
+    hits: list = []
+    leftover = lines
+    try:
+        from modules.Intent_Router import apply_reply_block
+
+        applied = apply_reply_block("\n".join(lines))
+        leftover = applied.get("leftover") or []
+        replies = applied.get("replies") or []
+        if replies:
+            note = " ".join(replies)
+            hits.append(
+                {
+                    "kind": "creator_note",
+                    "title": "Briefing replies applied",
+                    "text": note[:400],
+                    "summary": note[:160],
+                    "score": 0.9,
+                    "source": "briefing_comment_applied",
+                    "timestamp": "",
+                }
+            )
+    except Exception:
+        leftover = lines
+
+    if leftover:
+        note = " ".join(leftover)
+        hits.append(
+            {
+                "kind": "creator_note",
+                "title": "Briefing comment",
+                "text": note[:400],
+                "summary": note[:160],
+                "score": 0.85,
+                "source": "briefing_comment",
+                "timestamp": "",
+            }
+        )
+    return hits
 
 
 def _retrieve_briefing_memory(query: str = "", limit: int = 5) -> list:
@@ -420,6 +452,68 @@ def _gmail_block() -> str:
         return ""
 
 
+def _handbook_block() -> str:
+    """Point at the canonical Google Drive handbook. Links only here.
+
+    After the local markdown is saved, main() also pushes a Bolt briefing
+    section to today's Daily Log in 02_Daily_Operations (fail-soft OAuth).
+    IDs live in Core/config.json.
+    """
+    try:
+        import json as _json
+        cfg_path = REPO_ROOT / "Core" / "config.json"
+        cfg = _json.loads(cfg_path.read_text(encoding="utf-8"))
+        hb = cfg.get("google_drive_handbook") or {}
+        docs = hb.get("docs") or {}
+        folders = hb.get("folders") or {}
+        root_id = hb.get("root_folder_id") or ""
+        if not root_id and not docs:
+            return ""
+
+        def _doc(doc_id: str) -> str:
+            return f"https://docs.google.com/document/d/{doc_id}/edit" if doc_id else ""
+
+        def _folder(fid: str) -> str:
+            return f"https://drive.google.com/drive/folders/{fid}" if fid else ""
+
+        lines = [
+            "## Shared Handbook (Google Drive)",
+            "",
+            "Canonical journal / briefing / todo / how-to. Do not duplicate into markdown.",
+            "",
+        ]
+        start = _doc(docs.get("start_here") or "")
+        handbook = _doc(docs.get("handbook") or "")
+        journal = _doc(docs.get("shared_journal") or "")
+        daily = _folder(folders.get("02_Daily_Operations") or "")
+        learnings = _folder(folders.get("06_Learnings") or "")
+        root_url = _folder(root_id)
+        if start:
+            lines.append(f"- START HERE: {start}")
+        if handbook:
+            lines.append(f"- How-to: {handbook}")
+        if journal:
+            lines.append(f"- Shared Journal: {journal}")
+        today_log = _doc(
+            docs.get("daily_log_today")
+            or docs.get("daily_log_2026_08_31")
+            or ""
+        )
+        if today_log:
+            lines.append(f"- Today's Daily Log: {today_log}")
+        if daily:
+            lines.append(f"- Daily logs (02): {daily}")
+        if learnings:
+            lines.append(f"- Learnings (06): {learnings}")
+        if root_url:
+            lines.append(f"- Root folder: {root_url}")
+        lines.append("- Local pointer: `Docs/GOOGLE_DRIVE_HANDBOOK.md`")
+        lines.extend(["", "---", "", ""])
+        return "\n".join(lines)
+    except Exception:
+        return ""
+
+
 def _research_block() -> str:
     """Researcher role notes for direction-finding. Best-effort."""
     try:
@@ -459,6 +553,7 @@ def generate_briefing():
     # Calendar + Gmail (best-effort; silent if no token)
     text += _calendar_block()
     text += _gmail_block()
+    text += _handbook_block()
 
     # This week's topic + already-done (stops Nexus from repeating a finished plan)
     try:
@@ -729,6 +824,16 @@ def _deliver_briefing(
     return delivery
 
 
+
+def _push_daily_log(briefing_text: str) -> None:
+    """Best-effort Drive Daily Log write. Never raises; never opens a browser."""
+    try:
+        from modules.Google_Drive_Handbook import push_briefing_to_daily_log
+
+        push_briefing_to_daily_log(briefing_text, interactive=False)
+    except Exception as exc:
+        print(f"Drive Daily Log skipped ({exc}).")
+
 def main(
     print_only: bool = False,
     speak_aloud: bool = False,
@@ -749,6 +854,7 @@ def main(
     output_file = OUTPUT_DIR / "latest_morning.md"
     output_file.write_text(briefing_text, encoding="utf-8")
     _dated_briefing_copy(OUTPUT_DIR, briefing_text)
+    _push_daily_log(briefing_text)
 
     if print_only:
         print(briefing_text)

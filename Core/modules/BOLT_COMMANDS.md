@@ -37,7 +37,7 @@ Run `bolt help` to show the built-in summary. Commands that expose their own hel
 
 ## LLM provider (SuperGrok + light API)
 
-Conversation, titles, and Nexus go through `Core/modules/LLM_Handler.py` + `LLM_Budget.py`.
+Grok (the coding session) is Bolt’s teacher — see repo-root `AGENTS.md`. This section is Bolt’s **runtime** brain: how the student calls models. Conversation, titles, and Nexus go through `Core/modules/LLM_Handler.py` + `LLM_Budget.py`. OpenAI and Ollama are fallbacks, not other teachers.
 
 ```bash
 # .env (local only — never commit real keys)
@@ -82,11 +82,31 @@ bolt day --decide --voice             # Decide, then hands-free voice
 bolt week                             # This week / last week / do not suggest
 bolt week set "topic" [--note "…"]    # William picks; Bolt stays on it
 bolt week done "what shipped"         # Mark progress so next week isn't day one
+bolt week paper [--open]              # One-page fridge sheet (goal + checkboxes)
 bolt week rotate                      # Archive this week → last week
 bolt week ban "idea" [--why "C5 no"]  # Never suggest this again
 bolt stats [status|sync|tiktok|youtube] [--dry-run]
                                       # Social readiness + TikTok/YouTube pull
+bolt analytics [--days N] [--top N]
+                                      # Summarize clip performance from Data/performance_outcomes.jsonl
+bolt anomaly <recording> [--game NAME] [--dry-run|--no-save] [--z N] [--json]
+                                      # Score recording vs audio baseline (Anomaly_Detector)
+                                      # Aliases: anomalies, anomaly-detect
+bolt predict --game G --trigger T [--platform P] [--days N] [--json]
+                                      # Forecast 24h views from performance_outcomes.jsonl
+bolt predict --queue [--limit N] [--days N] [--json]
+                                      # Forecast for ready queue clips (Peak_Hour_Notifier insight)
+                                      # Aliases: forecast, views-predict, predictive
+bolt enhance [--dry-run] [--limit N]
+                                      # Smart_Trim → Text_Overlay on media/vertical_clips/
+                                      # Writes media/vertical_clips_trimmed/ then media/vertical_clips_final/
+bolt checkup [--open] [--json]        # Refresh Data/Bolt_data.js; --open → App/Bolt_Checkup.html
+                                      # (aliases: dashboard, checkup-dashboard)
+bolt ocr <clip> [--verbose]           # On-screen game-stat OCR (Video_Intelligence)
+                                      # Feeds titles in bot.py Step C; aliases: video-ocr, extract-stats
+                                      # Needs: uv sync --extra ocr + brew install tesseract
 bolt overlay [--port 8766]            # OBS overlay server (Stream Deck kill/win + cam frame)
+                                      # Thunderstone also has Aitum Vertical 1080x1920; see Docs/guides/OBS_VERTICAL.md
 bolt launch                       # Start live mode (folder watch + optional OBS)
 bolt launch --no-checklist        # Live mode without the pre-stream voice checklist
 bolt status                       # Check the decision engine, vector DB, and Nexus
@@ -121,6 +141,7 @@ bolt research questions               # Standing research questions from profile
 bolt research candidates              # All gated candidates (newest first)
 bolt research candidates --limit 10
 bolt research pending                 # Only candidates still needing your C5 call
+bolt research pending --decide        # Answer every pending item in one pass (2nd answer won't vanish)
 bolt research find                    # Web search from this week's topic (one of the four lanes)
 bolt research find --lane product     # Override: pop-culture | gaming-tech | skincare | product
 bolt research find --dry-run          # Preview gated names; write nothing
@@ -140,7 +161,9 @@ bolt research note "Lane signal: skincare feels natural" --type lane_signal --ti
 
 # Your C5 decision (keep = fits, drop = no; maybe also allowed)
 bolt research c5 keep 1 --why "Want that event path"
-bolt research c5 drop 2 --why "already in this / not a creator"
+bolt research c5 drop 1 --why "already in this / not a creator"   # numbers refresh; next is also 1
+bolt research pending --decide        # walk 1 and 2 in one sitting
+bolt research c5                      # same as pending --decide
 bolt research c5 keep "iJustine" --why "Want that event path"
 bolt research c5 drop "Someone" --why "Not my voice"
 bolt research c5 maybe "Name" --why "Revisit after 2 more samples"
@@ -165,7 +188,10 @@ bolt mission start "fund a new mic" \
   --hours 6 --budget 50 \
   --assets "OBS, Mouse ASIN, clips" \
   --restrictions "no gimmick posts"
-bolt mission start "first Amazon review" --no-nexus   # skip AI fill-in
+bolt mission start "first Amazon review" --no-nexus   # local evidence only
+bolt mission fill latest                  # rebuild strategy from current evidence
+bolt mission fill latest --no-nexus
+bolt mission update latest --hours 6 --budget 50 --assets "OBS, mic"
 bolt mission list
 bolt mission show latest
 bolt mission next                         # Section 13 only
@@ -174,6 +200,24 @@ bolt mission next                         # Section 13 only
 bolt command-center …                     # Alias for `mission`
 bolt ccc …                                # Short alias for `mission`
 ```
+
+`bolt mission start` writes a **filled** 13-section briefing from the week
+card, catalog, C5-kept examples, and profile limits. Nexus may overlay
+strategy JSON when available; `--no-nexus` uses local evidence only. It
+does not invent program URLs, earnings, or approvals, and it does not
+post or purchase anything.
+
+`bolt mission checkin` **prints** the five questions. It does not collect
+answers. Typing the answers in conversation is not saved. Fill them as flags
+on `start`, `bolt mission update latest --hours …`, or edit the mission
+markdown. Voice `mission status` reads the latest file (including section 13)
+— it does not write check-in fields.
+
+Measurable result and target date are **research outputs**, not homework.
+William’s year-end bar (2026-12-31) is: know what success looks like in this
+profession, or have a roadmap with proof the work is leading somewhere. Blank
+outcome fields are expected. Do not treat them as a missed assignment. Daily
+`bolt day` / week card does not require a mission.
 
 ## Creator manager
 
@@ -513,6 +557,30 @@ bolt morning --quiet
 | `bolt morning` | Run the full "Good Morning Bolt" spoken daily briefing |
 | `bolt morning --quiet` | Same as `morning`, but skip the spoken audio output |
 
+## How to reply to Bolt
+
+Conversation, voice, and `## Comments` on a briefing are a **front-end** for
+the same writes as the CLI. Intent router + `bolt week` / `bolt mission`
+stay the source of truth. No second brain.
+
+`bolt morning` and `bolt briefing` both write
+`Docs/briefings/daily/latest_morning.md` (plus a dated `morning_YYYY-MM-DD.md`
+copy). They overwrite each other. Comments on the *previous* file are applied
+once (writes first, leftover as a memory note) when the next briefing runs.
+
+The **canonical** shared journal / briefing / todo / how-to is Google Drive, not a second markdown handbook. IDs: `Core/config.json` → `google_drive_handbook`. Pointer: `Docs/GOOGLE_DRIVE_HANDBOOK.md`. Daily loop: local `bolt briefing` / `bolt morning` write markdown **and** append a Bolt briefing section to today's Daily Log in `02_Daily_Operations` when Drive OAuth is present (one-time `bolt drive-auth`). Lessons in `06_Learnings`.
+
+| You want to… | Say this (or still use the CLI) |
+|---|---|
+| Unpause / say you’re back | “I’m ready to continue” (keeps this week’s topic) or “this week is tech” |
+| Log what shipped | “this shipped: posted the earbuds hook” / “I posted the tech clip” |
+| Fridge / show husband | `bolt week paper --open` then print. Goal + checkboxes. Not the mission. |
+| Answer mission check-in | “hours: 6, budget 40” / “I have 6 hours” / “assets: OBS, iPhone” (latest mission) |
+| Leave a note Bolt should remember tomorrow | “remember: filming after Randy’s lunch” |
+| Comment on a briefing | Write under `## Comments` on `latest_morning.md`. Write-intent lines are applied on the next `bolt briefing`. Leftover lines stay a memory note. |
+
+CLI still works: `bolt week set` / `bolt week done` / `bolt mission update latest`.
+
 ## Recordings, clips, and highlights
 
 ```bash
@@ -578,6 +646,7 @@ bolt twitch_bot_token
 bolt tiktok_token [--client-key <key>] [--client-secret <secret>] [--redirect-uri <uri>]
                   [--scopes "user.info.basic,video.list,video.publish,video.upload"]
 bolt youtube_token [--client-id <id>] [--client-secret <secret>] [--redirect-uri <uri>]
+bolt drive-auth                      # one-time Google Drive/Docs consent (Daily Log)
 ```
 
 Token commands are interactive and may open a browser or prompt for credentials.
@@ -660,9 +729,11 @@ use `log_perf` for manual entry or platforms without API pull (e.g. X).
 
 ```bash
 bolt briefing                    # Generate and save the current daily briefing
+                                  # also appends to today's Drive Daily Log if authorized
 bolt briefing --print            # Print it in the terminal
 bolt briefing --send             # Reminders list "Bolt" + Voice 3 alert + email
                                   # Cron: every day at 17:00
+bolt drive-auth                  # One-time browser Allow for Drive/Docs Daily Log writes
 bolt calendar [--output-dir <directory>] [--days 30] [--dry-run]
 bolt refresh_memory              # Rebuild Data/memory_index.json
 bolt refresh_vector_db           # Rebuild Data/vector_db/ for Nexus (needs Ollama)
@@ -686,6 +757,9 @@ bolt reindex
 | `bolt briefing` | Generate (and save) the current daily briefing under `Docs/briefings/` |
 | `bolt briefing --print` | Generate the briefing and print it to the terminal instead of saving |
 | `bolt briefing --send` | Same, then write the **Bolt** Reminders list, speak Voice 3, Mac banner, email |
+
+Reply path for briefings: see **How to reply to Bolt** above. Write-intent lines
+under `## Comments` are applied on the next `bolt briefing`; leftover is a note.
 | `bolt calendar` | Generate ICS calendar feeds for scheduled posts |
 | `bolt refresh_memory` | Rebuild the clip memory index (`Data/memory_index.json`) |
 | `bolt refresh_vector_db` | Rebuild the vector DB used by Nexus for retrieval (`Data/vector_db/`) |
@@ -831,6 +905,11 @@ In conversation mode, these phrases trigger **real** Bolt actions before free-fo
 | social stats / how did my posts do | Token readiness + recent TikTok/YouTube outcomes |
 | Research status / Mission status | Research or mission summary |
 | This week / current week | Week card (topic + do not suggest) |
+| I’m ready / I’m back / unpause | `bolt week set` current topic, note “ready to continue” |
+| this week is … / let’s do … this week | `bolt week set` |
+| this shipped: … / I posted … | `bolt week done` |
+| hours: … / budget … / I have 6 hours / assets: … | `bolt mission update latest` |
+| remember: … | MEMORY.md Recent Notes |
 
 Anything else is short free-form chat (Ollama by default in light mode). Spoken replies stay plain sentences — no markdown dumps.
 

@@ -59,8 +59,6 @@ CUSTOM_HANDLERS = {
     # Core/modules/. If the file at Core/modules/ is empty/missing,
     # the import fails. Action: move root -> Core/modules/. If
     # destination already has a file, refuse (the user has to decide).
-    # Langchain_install.py: one-off installer -> Core/src/
-    "Langchain_install.py": "move",
     # 101_hello_tinker.py: colab sandbox -> 3rd_Party/colabs/
     "101_hello_tinker.py": "move",
     # 3 docs / 1 media / 2 data files: plain moves

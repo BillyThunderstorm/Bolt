@@ -186,6 +186,20 @@ def _process_recording_body(
     except Exception as e:
         notify(f"Decision Engine enrichment skipped: {e}", level="warning")
         
+    # ── Anomaly check (best-effort; never blocks the pipeline) ───────────────
+    try:
+        from modules.Anomaly_Detector import detect_and_record
+
+        _profile, report = detect_and_record(recording_path, game)
+        if report is not None and report.is_anomalous:
+            notify(
+                f"Recording anomaly ({report.severity}): {report.summary}",
+                level="warning",
+                reason="Pipeline continues; review manually if audio looks wrong.",
+            )
+    except Exception as e:
+        notify(f"Anomaly check skipped: {e}", level="info")
+
     # ── Step A: Detect highlights ─────────────────────────────────────────────
     notify("Step 1/6 — Detecting highlights…", level="info")
 
@@ -257,30 +271,119 @@ def _process_recording_body(
     except Exception as e:
         notify(f"Deduplicator skipped: {e}", level="warning")
 
-    # ── Step C: Generate titles ───────────────────────────────────────────────
+    # ── Step C: Generate titles (OCR on-screen stats → Title_Generator) ───────
+    # Video_Intelligence.extract_stats feeds on_screen_stats into generate_titles
+    # so templates/AI can prepend "15 KILL STREAK — …". Missing pytesseract /
+    # tesseract = warn + continue with empty stats (same degrade pattern as Whisper).
     content_type = config.get("content_type", "gaming")
     clip_titles = {}
+    notify("Step 3/6 — Generating titles…", level="info")
 
     try:
         from modules.Title_Generator import generate_titles
+
+        try:
+            from modules.Video_Intelligence import HAS_OCR, extract_stats
+        except Exception:
+            HAS_OCR = False
+            extract_stats = None  # type: ignore
+
+        if not HAS_OCR:
+            notify(
+                "OCR unavailable — titles without on-screen stats",
+                level="warning",
+                reason="Optional: uv sync --extra ocr  (or pip install pytesseract). "
+                "Also need brew install tesseract. Pipeline continues.",
+            )
+
         for clip in successful_clips:
             trigger = _guess_trigger(clip.output_file, highlights)
             hl_score = float(getattr(getattr(clip, "highlight", None), "score", 0.0) or 0.0)
+            on_screen_stats = []
+            if HAS_OCR and extract_stats is not None:
+                try:
+                    on_screen_stats = extract_stats(clip.output_file) or []
+                    if on_screen_stats:
+                        notify(
+                            f"OCR for {Path(clip.output_file).name}: {on_screen_stats[0]}",
+                            level="info",
+                        )
+                except Exception as ocr_exc:
+                    notify_error(
+                        f"Video_Intelligence ({Path(clip.output_file).name})",
+                        ocr_exc,
+                        recoverable=True,
+                    )
             titles, hashtags = generate_titles(
                 trigger=trigger,
                 game=game,
                 score=hl_score,
-                context={"creator_brain": creator_brain, "config": config},
+                context={
+                    "creator_brain": creator_brain,
+                    "config": config,
+                    "on_screen_stats": on_screen_stats,
+                },
             )
-            clip_titles[clip.output_file] = {"titles": titles, "hashtags": hashtags}
+            clip_titles[clip.output_file] = {
+                "titles": titles,
+                "hashtags": hashtags,
+                "on_screen_stats": on_screen_stats,
+                "trigger": trigger,
+            }
     except Exception as e:
         notify_error("Title_Generator", e)
 
     # ── Step D: Generate subtitles ────────────────────────────────────────────
+    # Local Whisper via Subtitle_Generator. Sidecar .srt next to each clip;
+    # segments passed to Clip_Factory in Step F. Missing Whisper = skip, continue.
     notify("Step 4/6 — Generating subtitles…", level="info")
+    clip_subtitles = {}  # output_file -> {segments, transcript, srt_path}
     try:
-        # Handled locally via standard subtitle generation models
-        pass
+        from modules.Subtitle_Generator import (
+            generate_subtitles_with_timestamps,
+            whisper_available,
+            write_srt,
+        )
+
+        if not whisper_available():
+            notify(
+                "Whisper not installed — skipping subtitles",
+                level="warning",
+                reason="Optional: uv sync --extra subtitles  (or pip install openai-whisper). "
+                "Pipeline continues without .srt sidecars.",
+            )
+        else:
+            whisper_model = config.get("whisper_model", "base")
+            for clip in successful_clips:
+                clip_path = clip.output_file
+                try:
+                    segments, transcript = generate_subtitles_with_timestamps(
+                        clip_path, model_size=whisper_model
+                    )
+                    srt_path = write_srt(clip_path, segments) if segments else None
+                    clip_subtitles[clip_path] = {
+                        "segments": segments,
+                        "transcript": transcript,
+                        "srt_path": srt_path,
+                    }
+                    name = Path(clip_path).name
+                    if segments:
+                        notify(
+                            f"Subtitles for {name}: {len(segments)} segment(s)"
+                            + (f" → {Path(srt_path).name}" if srt_path else ""),
+                            level="success",
+                        )
+                    else:
+                        notify(
+                            f"No speech detected for {name} — no .srt written",
+                            level="warning",
+                        )
+                except Exception as clip_exc:
+                    notify_error(
+                        f"Subtitle_Generator ({Path(clip_path).name})",
+                        clip_exc,
+                        recoverable=True,
+                    )
     except Exception as e:
         notify_error("Subtitle_Generator", e, recoverable=True)
 
@@ -306,7 +409,12 @@ def _process_recording_body(
             best_title = title_data.get("titles", [f"Clip from {game}"])[0]
             hashtags = title_data.get("hashtags", [])
 
-            vertical = format_for_tiktok(clip_path, style=style)
+            sub_data = clip_subtitles.get(clip_path, {})
+            vertical = format_for_tiktok(
+                clip_path,
+                transcript_segments=sub_data.get("segments") or None,
+                style=style,
+            )
             add_to_queue(
                 clip_path=vertical or clip_path,
                 title=best_title,
@@ -317,6 +425,8 @@ def _process_recording_body(
                     or 0.0
                 ),
                 tier=getattr(clip, "tier", "queue"),
+                game=game,
+                trigger=title_data.get("trigger") or _guess_trigger(clip_path, highlights),
             )
             
             # Confirmed real highlight alert routes directly to Twitch chat loop!
@@ -324,6 +434,14 @@ def _process_recording_body(
                 chat_bot.trigger_highlight()
     except Exception as e:
         notify_error("TikTok formatting / post queue", e)
+
+    # Refresh local checkup dashboard data (Data/Bolt_data.js → App/Bolt_Checkup.html)
+    try:
+        from modules.Checkup_Writer import update_checkup
+
+        update_checkup()
+    except Exception as e:
+        notify(f"Checkup data skipped: {e}", level="info")
 
 def _guess_trigger(clip_path: str, highlights: list) -> str:
     try:

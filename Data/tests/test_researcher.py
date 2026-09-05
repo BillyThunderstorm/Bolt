@@ -314,6 +314,13 @@ class ResearchQuestionsTests(unittest.TestCase):
         ids = [q["id"] for q in questions]
         self.assertIn("through_line", ids)
 
+    def test_year_end_proof_question_present(self):
+        questions = rs.get_research_questions(SAMPLE_PROFILE)
+        ids = [q["id"] for q in questions]
+        self.assertIn("year_end_proof", ids)
+        q = next(x for x in questions if x["id"] == "year_end_proof")
+        self.assertIn("2026-12-31", q["question"])
+
     def test_creator_examples_question_present(self):
         questions = rs.get_research_questions(SAMPLE_PROFILE)
         ids = [q["id"] for q in questions]
@@ -543,6 +550,51 @@ class C5AndAddTests(unittest.TestCase):
         self.assertEqual(result["updated"][0], "First Pending")
         self.assertEqual(rs.pending_c5_count(), 0)
 
+    def test_c5_number_two_after_one_explains_refresh(self):
+        rs.add_candidate("First Pending", summary="x", public_signal="clean")
+        rs.add_candidate("Second Pending", summary="x", public_signal="clean")
+        rs.set_c5_verdict("1", "keep")
+        with self.assertRaises(ValueError) as err:
+            rs.set_c5_verdict("2", "drop")
+        msg = str(err.exception)
+        self.assertIn("now #1", msg)
+        self.assertIn("pending --decide", msg)
+        self.assertIn("First Pending", msg)
+
+    def test_short_word_does_not_match_longer_pending_name(self):
+        rs.add_candidate("Chairs", summary="x", public_signal="clean")
+        rs.add_candidate(
+            "Secretlab Gaming Chairs & Gaming Desk",
+            summary="x",
+            public_signal="clean",
+        )
+        result = rs.set_c5_verdict("Chairs", "keep", why="visual goal")
+        self.assertEqual(result["matches"], 1)
+        self.assertEqual(result["updated"][0], "Chairs")
+        pending = rs.list_candidates(pending_c5_only=True)
+        self.assertEqual(len(pending), 1)
+        self.assertIn("Secretlab", pending[0]["name"])
+
+    def test_decide_pending_records_both_without_renumbering(self):
+        rs.add_candidate("First Pending", summary="x", public_signal="clean")
+        rs.add_candidate("Second Pending", summary="x", public_signal="clean")
+        code = rs.decide_pending(
+            input_lines=[
+                "keep looks like me",
+                "drop not a creator",
+            ]
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(rs.pending_c5_count(), 0)
+        entries = [
+            e
+            for e in rs._read_all_entries()
+            if e.get("finding_type") == "candidate_creator"
+        ]
+        by_name = {e["name"]: e["c5_verdict"] for e in entries}
+        self.assertEqual(by_name["Second Pending"], "fits")
+        self.assertEqual(by_name["First Pending"], "no")
+
     def test_c5_unknown_verdict_raises(self):
         rs.add_candidate("Zed", summary="x", public_signal="clean")
         with self.assertRaises(ValueError):
@@ -670,6 +722,40 @@ class FindCandidatesTests(unittest.TestCase):
         self.assertNotIn("c5_verdict", justine)
         self.assertTrue(justine["gate"]["c5_user_decision_required"])
         self.assertEqual(justine.get("source"), "web_search")
+
+    def test_find_skips_brand_shop_and_generic_product_word(self):
+        results = [
+            {
+                "url": "https://secretlab.co/",
+                "title": "Secretlab Gaming Chairs & Gaming Desk",
+                "description": "multi-award winning chairs",
+            },
+            {
+                "url": "https://secretlab.co/chairs",
+                "title": "Chairs",
+                "description": "gaming chairs",
+            },
+            {
+                "url": "https://www.youtube.com/@realreviewer",
+                "title": "Real Reviewer - YouTube",
+                "description": "honest takes on products",
+            },
+        ]
+        report = rs.find_candidates(
+            query="tech reviewer",
+            search_fn=lambda q, n: results,
+            profile=SAMPLE_PROFILE,
+        )
+        names = [e["name"] for e in report["added"]]
+        self.assertIn("Real Reviewer", names)
+        skipped = " ".join(s["name"] for s in report["skipped"])
+        self.assertIn("Secretlab", skipped)
+        self.assertIn("Chairs", skipped)
+
+    def test_find_secretlab_query_hints_sponsor_command(self):
+        hint = rs._sponsor_query_hint("Secretlab")
+        self.assertIn("sponsor", hint.lower())
+        self.assertIn("bolt sponsors pitch", hint)
 
     def test_find_skips_amazon_review_program_and_listicles(self):
         results = [

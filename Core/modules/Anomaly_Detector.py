@@ -426,8 +426,8 @@ def _main() -> int:
     parser.add_argument("recording_path")
     parser.add_argument("--game", default="unknown")
     parser.add_argument(
-        "--no-save", action="store_true",
-        help="Don't append this profile to the JSONL.",
+        "--no-save", "--dry-run", action="store_true",
+        help="Don't append this profile to the JSONL (alias: --dry-run).",
     )
     parser.add_argument(
         "--z", type=float, default=DEFAULT_Z_THRESHOLD,
