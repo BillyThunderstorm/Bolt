@@ -1615,8 +1615,9 @@ def next_actions(limit: int = 3) -> List[Dict[str, str]]:
         actions.append(
             {
                 "type": "business",
-                "title": f"Pitch or research {s['name']}",
-                "why": s.get("why", "Strong fit for game/tech lane."),
+                "title": f"Draft a sponsor pitch for {s['name']}",
+                "why": s.get("why", "Strong fit for game/tech lane.")
+                + " This is a brand on the sponsor list, not a creator C5.",
                 "command": f'bolt sponsors pitch "{s["name"]}"',
             }
         )
@@ -2502,7 +2503,7 @@ def build_morning_briefing() -> Dict[str, Any]:
     if store.get("feature"):
         lines.append(f"Storefront feature idea: {store['feature']['name']}.")
     if sponsors:
-        lines.append(f"Hopeful partner to research: {sponsors[0]['name']}.")
+        lines.append(f"Sponsor watchlist: {sponsors[0]['name']}.")
     lines.append("All social posts still need your approval. Let's make something real today.")
 
     spoken = " ".join(lines)
@@ -2555,7 +2556,14 @@ def build_morning_briefing() -> Dict[str, Any]:
     path = BRIEFINGS_DIR / f"morning_{date.today().isoformat()}.md"
     path.write_text("\n".join(md_lines), encoding="utf-8")
     latest = BRIEFINGS_DIR / "latest_morning.md"
-    latest.write_text("\n".join(md_lines), encoding="utf-8")
+    briefing_md = "\n".join(md_lines)
+    latest.write_text(briefing_md, encoding="utf-8")
+    try:
+        from modules.Google_Drive_Handbook import push_briefing_to_daily_log
+
+        push_briefing_to_daily_log(briefing_md, interactive=False)
+    except Exception as exc:
+        print(f"Drive Daily Log skipped ({exc}).")
 
     return {
         "spoken": spoken,

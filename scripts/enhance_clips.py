@@ -11,18 +11,20 @@ Idempotent: skips clips that already exist in vertical_clips_final/.
 Supports --dry-run and --limit flags for testing.
 
 Usage:
-  python3 enhance_clips.py              # process all clips
-  python3 enhance_clips.py --limit 5    # process first 5 clips only
-  python3 enhance_clips.py --dry-run    # show what would be done
+  bolt enhance                          # process all clips (preferred)
+  bolt enhance --limit 5                # process first 5 clips only
+  bolt enhance --dry-run                # show what would be done
+  python3 scripts/enhance_clips.py      # same script, direct
 """
 
 import argparse
 import sys
 from pathlib import Path
 
-# Ensure we can import from modules/ regardless of CWD
-PROJECT_ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(PROJECT_ROOT))
+# Repo root is parent of scripts/; Core/ holds modules/
+REPO_ROOT = Path(__file__).resolve().parent.parent
+CORE_DIR = REPO_ROOT / "Core"
+sys.path.insert(0, str(CORE_DIR))
 
 from modules.Config_Loader import load_config
 from modules.notifier import notify
@@ -31,8 +33,23 @@ from modules.Text_Overlay import add_text_overlay, FINAL_DIR
 
 CONFIG = load_config()
 
+
+def _vertical_clips_dir() -> Path:
+    """Resolve vertical clips folder against the repo (config may be relative)."""
+    raw = CONFIG.get("vertical_clips_folder", "media/vertical_clips")
+    path = Path(raw)
+    if not path.is_absolute():
+        path = REPO_ROOT / path
+    if path.exists():
+        return path
+    legacy = REPO_ROOT / "vertical_clips"
+    if legacy.exists():
+        return legacy
+    return path
+
+
 # Source directory for vertical clips
-VERTICAL_DIR = PROJECT_ROOT / CONFIG.get("vertical_clips_folder", "vertical_clips")
+VERTICAL_DIR = _vertical_clips_dir()
 
 
 def main():

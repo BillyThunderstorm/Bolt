@@ -49,3 +49,7 @@ bolt social status
 bolt sponsors next
 bolt advance next
 ```
+
+## How William talks back
+
+Chat, voice, and `## Comments` on a briefing do **not** update the week card or a mission. Use `bolt week set` / `bolt week done` / `bolt mission start --hours …` or edit the markdown. Wanted: blend that natural conversation into those command prompts (`Data/business/bolt-advancement.md` item 12). Full current path: `Core/modules/BOLT_COMMANDS.md` → **How to reply to Bolt**.

@@ -44,7 +44,6 @@ Full decoder ring — all terms, acronyms, nicknames, and shorthand.
 | env / .env | Environment variables file (stores secrets like API keys) |
 | config | config.json — Billy's project config file |
 | deploy | Pushing/running code in production |
-| docker | Docker containers used in Billy's deploy setup |
 
 ## Billy's Shorthand (add more as they come up)
 

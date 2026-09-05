@@ -1,11 +1,15 @@
 # Bolt Memory
-*Hot cache for Bolt's own working memory. Detailed notes live in `Data/`. Last updated: 2026-08-20.*
+*Hot cache for Bolt's own working memory. Detailed notes live in `Data/`. Last updated: 2026-09-04.*
 
 ## Identity
 
 Bolt is **William's** local-first AI **content manager + business assistant** (also known as Billy / SimplyBilly).
 
+**Grok is the teacher. Bolt is the student.** Grok (this coding session) builds and teaches by changing Bolt’s files. Bolt only knows those files. William owns the work. OpenAI and Ollama are fallbacks, not other teachers. Rules: repo-root `AGENTS.md`.
+
 Bolt's job is to help turn recordings, stream moments, product tests, creator ideas, and posting results into better content and business decisions over time.
+
+Bolt does **not** use Docker, Testcontainers, or Dev Containers. Those were leftover experiment/CI files and were removed 2026-09-04.
 
 ## Label map (quick find)
 
@@ -85,6 +89,7 @@ Bolt should retrieve from these local sources before guessing:
 - `data/performance_outcomes.jsonl` for content results and lessons
 - `Data/seen_clips.json` and processed recording data for clip history
 - `logs/decision_audit.log` for past decision traces
+- `Docs/GOOGLE_DRIVE_HANDBOOK.md` + `Core/config.json` → `google_drive_handbook` for the **canonical** shared journal / briefing / todo / how-to (Google Drive; do not duplicate into markdown)
 
 ## Decision Rules
 
@@ -112,6 +117,16 @@ Use `memory/content/` for broad creator growth:
 The best memory entry is specific: date, platform, content idea, result, and lesson.
 
 ## Recent Notes
+- [2026-09-03] OBS Thunderstone now has Aitum Vertical at 1080×1920. Horizontal scenes are linked (Gaming → Vertical Gaming, plus Starting Soon / Chatting / BRB / Offline). Twitch stays 16:9. Vertical record/backtrack is the 9:16 path. Notes: `Docs/guides/OBS_VERTICAL.md`, `App/overlay/theme/README.md`.
+- [2026-09-01] Item 12 shipped: conversation / briefing comments write week + mission via Intent_Router (same functions as `bolt week` / `bolt mission update`). Say “I’m ready to continue”, “this shipped: …”, “hours: 6, budget 40”. This week is **tech** (not paused). Amazon pause is last week only.
+- [2026-09-01] Base44 `App/BoltApp` removed. It was a todo template, not a website or Mac/iOS app. Real surfaces: `bolt` CLI, overlay, Drive handbook.
+- [2026-08-31] Canonical handbook is Google Drive (**Bolt Creator OS**), not a parallel markdown book. Pointer: `Docs/GOOGLE_DRIVE_HANDBOOK.md`. IDs: `Core/config.json` → `google_drive_handbook`. Daily loop: morning briefing + Daily Log / Shared Journal in Drive `02_Daily_Operations`; lasting lessons in `06_Learnings`. Bolt **writes** a briefing section to today's Daily Log (`Google_Drive_Handbook.py`, `bolt drive-auth`). It does **not** yet read the how-to or journal back into decisions.
+
+- [2026-08-30] This week is: tech
+- [2026-08-30] Rotated week. Last week was: general product review / Amazon storefront. This week is unset.
+- [2026-08-30] Year-end bar (not a missed mission field): William does **not** know what the career outcome looks like and has no plan because he does not know what success looks like in this profession. That is why Researcher exists. The date he had is **2026-12-31**: figure that out, or have a roadmap with proof the work is leading somewhere. Do not ask him to invent a measurable result. Daily work does not need a mission. Profile: `near_term_horizon`. Standing question: `bolt research questions` → `year_end_proof`.
+- [2026-08-30] Communication gap closed 2026-09-01 (item 12): chat / voice / briefing comments now write week and mission through Intent_Router. CLI still works.
+- [2026-08-30] William said earlier this week he was **ready to continue**. That reply was not ingested (briefing comments get overwritten by `bolt morning`; chat does not update `week_card.json`). Week is still PAUSED until he runs `bolt week set "topic" --note "ready to continue"` (or we take the pause off on purpose). Do not nag film/post/reapply; wait for the topic he wants to reopen.
 - [2026-08-25] Do not suggest again: snail care as this week's post (Leftover from 2026-08-17 beauty week. Closed unless William sets beauty/skincare and asks.)
 - [2026-08-25] New week. This week is general product / Amazon (PAUSED). Last week was beauty/skincare (steamer posted). Snail care leftover is CLOSED. Nexus must not push snail or steamer as this week's post.
 - [2026-08-24] William is pausing. Do not nag film/post/reapply. Influencer rejection hurt; he spent ~6 months writing Amazon customer reviews (~5k helpful views). Those reviews were real buyer reviews, not "doing everything wrong." They were a different Amazon job than Shoppable Video. Leave him space.

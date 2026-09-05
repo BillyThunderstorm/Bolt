@@ -105,12 +105,6 @@
 ./BoltApp/src
 ./101_hello_tinker.py
 ./AI_Guide.md
-./docker
-./docker/DOCKER_QUICKSTART.sh
-./docker/DOCKER_SETUP.md
-./docker/compose.yaml
-./docker/docker-compose.yml
-./docker/compose.debug.yaml
 ./llm
 ./llm/neural_model.pth
 ./llm/LLMs-from-scratch

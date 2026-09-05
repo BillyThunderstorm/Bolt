@@ -13,6 +13,7 @@ Priority order for making Bolt a better manager for William:
 9. Performance feedback loop into next-content suggestions (log_perf exists; needs real posts)
 10. ~~Creator Command Center in `bin/bolt`~~ ✅ (`bolt mission` / `ccc`, Aug 1, 2026)
 11. ~~Apple Reminders as default delivery channel~~ ✅ (Aug 17, 2026 — `bolt briefing --send`)
+12. ~~**Blend natural conversation into command prompts**~~ ✅ (2026-09-01). Voice/chat/`## Comments` call the same `Week_Card` / `Command_Center` writes as the CLI (`Intent_Router` write intents). “I’m ready” → week set + ready note; “this shipped” / “I posted” → week done; hours/budget/assets → latest mission; leftover comments stay a memory note. Docs: `BOLT_COMMANDS.md` → **How to reply to Bolt**.
 
 ## How William advances Bolt
 - **Direction before production** — clear C5 queue before inventing new to-dos

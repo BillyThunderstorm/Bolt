@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-modules/Checkup_Writer.py — Writes live data to Bolt_Checkup.html
-===================================================================
+modules/Checkup_Writer.py — Live data bridge for App/Bolt_Checkup.html
+=======================================================================
 The checkup dashboard is a static HTML file — it can't pull data by itself.
 This module bridges that gap: it reads Bolt's real runtime data and writes
 a small JavaScript file that the HTML page loads on refresh.
@@ -10,12 +10,13 @@ Why a .js file instead of JSON?
   Browsers block fetch() requests to local files (file:// protocol) due to
   security restrictions. But <script src="..."> for local files works fine.
   So we write the data as a JS variable: window.Bolt_DATA = {...}
-  The HTML reads window.Bolt_DATA and populates itself.
+  App/Bolt_Checkup.html reads window.Bolt_DATA and populates itself.
 
 When does this run?
   - Called by launch.py at startup (so the page is fresh when you open it)
   - Called by bot.py after each pipeline run (so stats update as clips process)
-  - Can also be run standalone: python -m modules.Checkup_Writer
+  - CLI: bolt checkup [--open] [--json]
+  - Standalone: python -m modules.Checkup_Writer
 """
 
 from __future__ import annotations
@@ -44,6 +45,7 @@ if not VERTICAL_DIR.exists():
 RANKINGS_FILE = DATA_DIR / "rankings.json"
 QUEUE_FILE = DATA_DIR / "ready_to_post.json"
 OUTPUT_FILE = DATA_DIR / "Bolt_data.js"
+HTML_FILE = _REPO / "App" / "Bolt_Checkup.html"
 
 
 def _count_clips() -> int:
@@ -271,24 +273,88 @@ def update_checkup():
 
     print(f"  ✓  Checkup data updated → {path}")
     print(f"     Clips: {clips}  |  Ready to post: {queue}  |  Avg score: {avg}")
+    if HTML_FILE.exists():
+        print(f"     Dashboard: {HTML_FILE}")
     return stats
 
 
 # ── CLI ────────────────────────────────────────────────────────────────────────
 
-if __name__ == "__main__":
+def open_dashboard() -> bool:
+    """Open App/Bolt_Checkup.html in the default browser. Returns True if opened."""
+    if not HTML_FILE.exists():
+        print(f"  ✗  Dashboard HTML missing: {HTML_FILE}")
+        return False
+    try:
+        import webbrowser
+        # file:// URL so a local double-click / browser open works without a server
+        webbrowser.open(HTML_FILE.resolve().as_uri())
+        print(f"  ✓  Opened {HTML_FILE}")
+        return True
+    except Exception as exc:
+        print(f"  ✗  Could not open dashboard: {exc}")
+        return False
+
+
+def _main(argv=None) -> int:
+    import argparse
+    import sys
+
+    parser = argparse.ArgumentParser(
+        description="Refresh Bolt checkup data and optionally open the dashboard."
+    )
+    parser.add_argument(
+        "--open",
+        action="store_true",
+        help="Open App/Bolt_Checkup.html after writing Data/Bolt_data.js",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print the stats dict as JSON instead of the human summary",
+    )
+    parser.add_argument(
+        "--path",
+        action="store_true",
+        help="Print the HTML and data file paths, then exit (no write)",
+    )
+    args = parser.parse_args(list(argv) if argv is not None else None)
+
+    if args.path:
+        print(f"html={HTML_FILE}")
+        print(f"data={OUTPUT_FILE}")
+        return 0
+
     print("\n  ⚡️  Bolt Checkup Writer")
     stats = update_checkup()
-    print("\n  Full stats:")
-    for k, v in stats.items():
-        if k not in ("api_keys", "top_clip", "phase"):
-            print(f"    {k:20} {v}")
-    print("\n  API keys present:")
-    for k, v in stats["api_keys"].items():
-        mark = "✓" if v else "✗"
-        print(f"    {mark}  {k}")
-    if stats["top_clip"]:
-        tc = stats["top_clip"]
-        print(f"\n  Top clip: {tc['title']} (score: {tc['score']})")
-    print(f"\n  Dashboard data written to: {OUTPUT_FILE}")
-    print("  Open the checkup HTML in your browser to see it.\n")
+
+    if args.json:
+        print(json.dumps(stats, indent=2))
+    else:
+        print("\n  Full stats:")
+        for k, v in stats.items():
+            if k not in ("api_keys", "top_clip", "phase"):
+                print(f"    {k:20} {v}")
+        print("\n  API keys present:")
+        for k, v in stats["api_keys"].items():
+            mark = "✓" if v else "✗"
+            print(f"    {mark}  {k}")
+        if stats["top_clip"]:
+            tc = stats["top_clip"]
+            print(f"\n  Top clip: {tc['title']} (score: {tc['score']})")
+        print(f"\n  Dashboard data: {OUTPUT_FILE}")
+        if HTML_FILE.exists():
+            print(f"  Dashboard HTML:  {HTML_FILE}")
+            print("  Open with: bolt checkup --open")
+        else:
+            print(f"  ✗  Expected HTML missing: {HTML_FILE}")
+        print()
+
+    if args.open:
+        ok = open_dashboard()
+        return 0 if ok else 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(_main())

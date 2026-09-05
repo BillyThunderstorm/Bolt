@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bolt Checkup</title>
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --panel: #141a24;
+      --panel-2: #1a2230;
+      --text: #e8eef7;
+      --muted: #8b9bb4;
+      --line: rgba(255,255,255,0.08);
+      --ready: #3dd68c;
+      --partial: #f5c542;
+      --shell: #ff6b6b;
+      --idea: #9aa4b5;
+      --accent: #6ea8ff;
+      --glow: rgba(110,168,255,0.25);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(110,168,255,0.18), transparent 60%),
+        radial-gradient(900px 500px at 100% 0%, rgba(61,214,140,0.12), transparent 55%),
+        var(--bg);
+      color: var(--text);
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 48px; }
+    header {
+      display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+      gap: 12px; margin-bottom: 24px;
+    }
+    h1 {
+      margin: 0; font-size: 1.75rem; letter-spacing: -0.02em;
+      display: flex; align-items: center; gap: 10px;
+    }
+    h1 span.bolt { color: var(--accent); text-shadow: 0 0 18px var(--glow); }
+    .meta { color: var(--muted); font-size: 0.92rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .card {
+      background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .card .label {
+      color: var(--muted); font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 8px;
+    }
+    .card .value {
+      font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em;
+    }
+    .card .sub { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+    .panel {
+      background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    .panel h2 {
+      margin: 0 0 14px; font-size: 1rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+    }
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+    }
+    .key {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px; border-radius: 12px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--line);
+      font-size: 0.92rem;
+    }
+    .dot {
+      width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+    }
+    .dot.on { background: var(--ready); box-shadow: 0 0 10px rgba(61,214,140,0.55); }
+    .dot.off { background: var(--shell); box-shadow: 0 0 10px rgba(255,107,107,0.4); }
+    .phases { display: flex; flex-wrap: wrap; gap: 8px; }
+    .phase {
+      padding: 8px 12px; border-radius: 999px; font-size: 0.85rem;
+      border: 1px solid var(--line); color: var(--muted);
+    }
+    .phase.done { color: var(--ready); border-color: rgba(61,214,140,0.35); background: rgba(61,214,140,0.08); }
+    .phase.active { color: var(--partial); border-color: rgba(245,197,66,0.4); background: rgba(245,197,66,0.1); }
+    .top-clip {
+      display: flex; flex-wrap: wrap; gap: 16px; align-items: center;
+      justify-content: space-between;
+    }
+    .top-clip .title { font-size: 1.15rem; font-weight: 650; }
+    .badge {
+      display: inline-block; padding: 6px 10px; border-radius: 999px;
+      background: rgba(110,168,255,0.15); color: var(--accent);
+      font-weight: 600; font-size: 0.85rem;
+    }
+    .empty {
+      color: var(--muted); padding: 24px; text-align: center;
+      border: 1px dashed var(--line); border-radius: 16px;
+    }
+    footer {
+      margin-top: 22px; color: var(--muted); font-size: 0.8rem;
+      display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between;
+    }
+    code { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1><span class="bolt">⚡</span> Bolt Checkup</h1>
+        <div class="meta" id="generated">Loading live stats…</div>
+      </div>
+      <div class="meta">Local dashboard · refreshes when data is rewritten</div>
+    </header>
+
+    <div id="error" class="empty" style="display:none"></div>
+
+    <div id="dash" style="display:none">
+      <div class="grid" id="stats"></div>
+
+      <div class="panel">
+        <h2>Top clip in queue</h2>
+        <div class="top-clip" id="top-clip"></div>
+      </div>
+
+      <div class="panel">
+        <h2>API / integration keys</h2>
+        <div class="keys" id="keys"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Build phase</h2>
+        <div class="phases" id="phases"></div>
+      </div>
+    </div>
+
+    <footer>
+      <span>Data file: <code>Data/Bolt_data.js</code> (via Checkup_Writer)</span>
+      <span>Refresh: <code>bolt checkup</code> · open: <code>bolt checkup --open</code></span>
+    </footer>
+  </div>
+
+  <script src="../Data/Bolt_data.js"></script>
+  <script>
+    (function () {
+      var err = document.getElementById("error");
+      var dash = document.getElementById("dash");
+      var data = window.Bolt_DATA;
+
+      if (!data) {
+        err.style.display = "block";
+        err.innerHTML =
+          "No <code>window.Bolt_DATA</code> found.<br/>Run <code>bolt checkup</code> to write <code>Data/Bolt_data.js</code>, then reload this page.";
+        return;
+      }
+
+      dash.style.display = "block";
+      document.getElementById("generated").textContent =
+        "Updated " + (data.generated_at || "unknown");
+
+      function fmt(n) {
+        if (n === null || n === undefined) return "—";
+        if (typeof n === "number") return n.toLocaleString();
+        return String(n);
+      }
+
+      var cards = [
+        { label: "Clips made", value: data.clips_made },
+        { label: "Vertical clips", value: data.vertical_clips },
+        { label: "Ready to post", value: data.ready_to_post },
+        { label: "Avg score", value: data.avg_score },
+        { label: "Highlights", value: data.highlights },
+        { label: "Titles in queue", value: data.titles_generated },
+        { label: "Recordings done", value: data.recordings_processed },
+        { label: "Clips posted", value: data.clips_posted },
+        { label: "Total views", value: data.total_views },
+        { label: "Total likes", value: data.total_likes }
+      ];
+
+      var stats = document.getElementById("stats");
+      stats.innerHTML = cards.map(function (c) {
+        return (
+          '<div class="card"><div class="label">' + c.label +
+          '</div><div class="value">' + fmt(c.value) + "</div></div>"
+        );
+      }).join("");
+
+      var top = document.getElementById("top-clip");
+      if (data.top_clip && data.top_clip.title) {
+        top.innerHTML =
+          '<div><div class="title">' + escapeHtml(data.top_clip.title) +
+          '</div><div class="meta">' + escapeHtml(data.top_clip.path || "") +
+          "</div></div><span class=\"badge\">score " +
+          fmt(data.top_clip.score) + "</span>";
+      } else {
+        top.innerHTML = '<div class="meta">Queue is empty — process a recording or check ready_to_post.json.</div>';
+      }
+
+      var keys = data.api_keys || {};
+      var keysEl = document.getElementById("keys");
+      var labels = {
+        twitch: "Twitch",
+        obs: "OBS",
+        streamlabs: "Streamlabs",
+        discord: "Discord",
+        openai: "OpenAI",
+        xai: "xAI / Grok",
+        tiktok: "TikTok",
+        bot_token: "Twitch bot"
+      };
+      keysEl.innerHTML = Object.keys(labels).map(function (k) {
+        var on = !!keys[k];
+        return (
+          '<div class="key"><span class="dot ' + (on ? "on" : "off") +
+          '"></span>' + labels[k] + "</div>"
+        );
+      }).join("");
+
+      var phase = data.phase || {};
+      var phasesEl = document.getElementById("phases");
+      var items = [
+        { label: "Phase 1", done: phase.p1_done },
+        { label: "Phase 2", done: phase.p2_done },
+        { label: "Phase 3", done: phase.p3_active, active: true },
+        { label: "Phase 4", done: phase.p4_done }
+      ];
+      phasesEl.innerHTML = items.map(function (p) {
+        var cls = "phase";
+        if (p.done && !p.active) cls += " done";
+        if (p.active && phase.p3_active) cls += " active";
+        if (p.label === "Phase 4" && p.done) cls += " done";
+        var current = phase.current ? " · current " + phase.current : "";
+        return '<span class="' + cls + '">' + p.label +
+          (p.label === "Phase 3" ? current : "") + "</span>";
+      }).join("");
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+    })();
+  </script>
+</body>
+</html>

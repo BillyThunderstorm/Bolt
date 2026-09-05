@@ -149,7 +149,7 @@ python3 launch.py            # go
 |-------|-------------|--------|
 | Phase 1 | Dashboard + personality shell | ✅ Done (Bolt_Checkup.html in docs/) |
 | Phase 2 | Live API connections | ✅ Done |
-| Phase 3 | Voice + personality layer | 🔄 Almost there (Apr 28 2026) - env verified via `--check`, TWITCH_BOT_TOKEN active, Codex reachable. Still needs live `!Bolt hi` test in chat to confirm twitchio connection works. |
+| Phase 3 | Voice + personality layer | 🔄 Almost there (Apr 28 2026) - env verified via `--check`, TWITCH_BOT_TOKEN active, LLM via `LLM_Handler`. Still needs live `!Bolt hi` test in chat to confirm twitchio connection works. |
 | Phase 4 | Self-improving memory | 🔄 Started - Bolt_Memory.py / Bolt_Search.py / Brain_Controller.py / Think_Learn_Decide.py scaffolded, NOT yet integrated |
 | Quality Gating | Hard confidence + tier system | ✅ Done Apr 28 2026 |
 | Performance Loop | log_clip_performance.py CLI + sync_tiktok_stats.py (TikTok API) | ✅ Manual log Apr 28 2026; auto TikTok pull Aug 2026 (needs video.list token) |
@@ -247,7 +247,7 @@ python3 -m modules.Bolt_Voice --list-events           # Show all built-in event 
 - Wants to grow alongside Bolt - this is a collaboration, not just a tool
 
 **Phase 3 progress:**
-- ✅ Bolt_Chat.py - Twitch chat bot with Codex-powered personality, session memory, greets viewers, reacts to highlights/raids/subs/bits, answers !Bolt questions
+- ✅ Bolt_Chat.py - Twitch chat bot with LLM-powered personality (`LLM_Handler`), session memory, greets viewers, reacts to highlights/raids/subs/bits, answers !Bolt questions
 - ✅ Bolt_Voice.py - TTS voice using macOS `say` command, speaks for highlights/raids/subs, ElevenLabs upgrade path ready
 - ✅ bot.py updated - starts chat bot, wires highlight events into Bolt_Chat + Bolt_Voice
 - ✅ launch.py updated - checks Phase 3 config at startup, speaks "Bolt online" line
@@ -267,12 +267,8 @@ python3 -m modules.Bolt_Voice --list-events           # Show all built-in event 
    `Think_Learn_Decide.py` as the intelligence layer. Brain_Controller is
    scaffolded but unused. Decide which is canonical.
 
-3. **Langchain memory build (per Upgrade_thoughts doc).** `memory/` folder
-   exists but is empty of indexed data. Run `pip install langchain
-   langchain-community langchain-text-splitters chromadb` and then build
-   the vectorstore - but swap `OpenAIEmbeddings` for `HuggingFaceEmbeddings`
-   to avoid needing an OpenAI key on top of Anthropic.
-remove Anthropic key.
+3. **Memory is local.** Use `Memory_Index` / `bolt reindex`, not a LangChain
+   + OpenAI embeddings side brain. Grok teaches by writing into Bolt’s files.
 4. **Motion detection** to complete the "no audio peaks AND no motion"
    filter from Upgrade_thoughts. Audio gate is live; motion would require
    cv2 + optical flow on each candidate window. Defer until you find audio

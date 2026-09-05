@@ -120,6 +120,10 @@ SUBCOMMANDS: dict[str, str] = {
     "make_highlights": "make_highlights.py",
     "layout": "check_layout.py",
     "check_layout": "check_layout.py",
+    "enhance": "enhance_clips.py",
+    "enhance_clips": "enhance_clips.py",
+    "smart_trim": "enhance_clips.py",
+    "smart-trim": "enhance_clips.py",
 }
 
 # Content-manager subcommands handled by Core/modules/Content_Manager.py
@@ -161,6 +165,7 @@ Script subcommands (each maps to scripts/X.py):
   twitch_bot_token        Get a Twitch bot chat token
   tiktok_token            Get a TikTok OAuth token (needs video.list for stats)
   youtube_token           Get a YouTube OAuth token (Data API readonly)
+  drive-auth              One-time Google Drive/Docs consent (Daily Log writes)
   sync_tiktok_stats       Pull TikTok views/likes into performance log
   sync_youtube_stats      Pull YouTube/Shorts views/likes into performance log
   send "<msg>"            Send an SMS / email notification
@@ -194,22 +199,44 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
   budget | api-usage      xAI spend this month, soft cap, budget mode
   day [--decide|--voice|--quiet|--open|--process]
                           Morning kickoff; --decide → queue decide (default offer on TTY)
-  week [show|set|done|rotate|ban]
+  week [show|set|done|paper|rotate|ban]
                           This week / last week / do not suggest (read before any plan)
+                          paper [--open]  one-page fridge sheet (goal + checkboxes)
   stats [status|sync|tiktok|youtube] [--dry-run]
                           Social performance pull readiness + TikTok/YouTube sync
+  analytics [--days N] [--top N]
+                          Summarize clip performance from Data/performance_outcomes.jsonl
+  anomaly <recording> [--game NAME] [--no-save|--dry-run] [--z N] [--json]
+                          Score a recording vs historical audio baseline (Anomaly_Detector)
+                          (aliases: anomalies, anomaly-detect)
+  predict --game G --trigger T [--platform P] [--days N] [--json]
+                          Forecast 24h views from performance_outcomes.jsonl
+  predict --queue [--limit N] [--days N] [--json]
+                          Predict for ready queue clips (Peak_Hour_Notifier insight)
+                          (aliases: forecast, views-predict)
+  enhance [--dry-run] [--limit N]
+                          Smart_Trim → Text_Overlay on media/vertical_clips/
+                          (aliases: enhance_clips, smart_trim)
+  checkup [--open] [--json]
+                          Refresh Data/Bolt_data.js + show App/Bolt_Checkup.html
+                          (aliases: dashboard, checkup-dashboard)
+  ocr <clip> [--verbose]  Extract on-screen game-stat text via Video_Intelligence
+                          (aliases: video-ocr, extract-stats). Needs pytesseract + tesseract.
   overlay [--port 8766]   OBS overlay server (Stream Deck kill/win + cam frame)
 
 Direction-finding researcher (Core/modules/Researcher.py):
   research [status|questions|candidates|pending|log|add|note|c5|find]
                           Profile-aware research role (C5/C6/C7 gates + log)
+                          pending --decide  answer every C5 in one pass
                           c5 keep|drop "Name"  — record your C5 decision
                           add "Name" --platform … --summary … --why …
                           find [query] [--dry-run]  — web search → pending C5
 
 Creator Command Center (Core/modules/Command_Center.py):
-  mission [status|checkin|playbook|list|show|start|next]
+  mission [status|checkin|playbook|list|show|start|fill|update|next]
                           Turn a goal into a printable mission briefing
+                          fill latest   rebuild empty sections from evidence
+                          update latest --hours … --budget … --assets …
   command-center …        Alias for mission
   ccc …                   Short alias for mission
 
@@ -623,6 +650,74 @@ print()
 print('System is fully upgraded.')
 '''
         cmd = [py, "-c", script]
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+
+    # Built-in: clip performance analytics (Analytics_Tracker)
+    if subcommand in ("analytics", "analytics-summary", "analytics_summary", "clip-analytics", "clip_analytics"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Analytics_Tracker"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: recording anomaly scoring (Anomaly_Detector)
+    if subcommand in ("anomaly", "anomalies", "anomaly-detect", "anomaly_detect"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        # Accept --dry-run as alias for module --no-save
+        anomaly_args = []
+        for a in rest:
+            if a in ("--dry-run", "--dry_run"):
+                anomaly_args.append("--no-save")
+            else:
+                anomaly_args.append(a)
+        cmd = [py, "-m", "modules.Anomaly_Detector"] + anomaly_args
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: view forecasting (Predictive_Analytics)
+    if subcommand in ("predict", "forecast", "views-predict", "views_predict", "predictive"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Predictive_Analytics"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: checkup dashboard (Checkup_Writer → App/Bolt_Checkup.html)
+    if subcommand in ("checkup", "dashboard", "checkup-dashboard", "checkup_dashboard"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Checkup_Writer"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: on-screen OCR stats (Video_Intelligence → title pipeline)
+    if subcommand in ("ocr", "video-ocr", "video_ocr", "extract-stats", "extract_stats"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Video_Intelligence"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: Google Drive/Docs consent for Daily Log writes
+    if subcommand in ("drive-auth", "drive_auth"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Google_Drive_Handbook"] + (rest if rest else ["auth"])
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 

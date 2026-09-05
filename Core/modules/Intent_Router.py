@@ -10,6 +10,9 @@ Design goals:
   - Prefer high-value, low-risk actions (status, next, morning, queue)
   - Return a short spoken-friendly string the conversation layer can use
   - Fall through (return None) when the message is just normal chat
+  - Write intents (ready / week set / shipped / mission check-in) call the
+    same Week_Card and Command_Center functions as the CLI — conversation
+    is a front-end, not a second brain
 
 Usage from Bolt_Conversation:
   from modules.Intent_Router import try_handle_intent
@@ -22,7 +25,7 @@ Usage from Bolt_Conversation:
 from __future__ import annotations
 
 import re
-from typing import Callable, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 
 def _normalize(text: str) -> str:
@@ -429,6 +432,269 @@ def _action_mission() -> str:
         )
 
 
+# ── Write intents (item 12) — same functions the CLI uses ────────────────────
+
+_QUESTION_HEAD = re.compile(
+    r"^(what|whats|what's|how|how's|hows|tell me|can you|could you)\b",
+    re.I,
+)
+
+_READY_RE = re.compile(
+    r"^(?:"
+    r"i(?:'m| am|m)? ready to continue"
+    r"|ready to continue"
+    r"|i(?:'m| am|m)? ready"
+    r"|i(?:'m| am|m)? back"
+    r"|un-?pause"
+    r"|let'?s continue"
+    r")(?:\s+(?:with|on)\s+(?P<topic>.+))?$",
+    re.I,
+)
+
+_WEEK_SET_RE = re.compile(
+    r"^(?:this week is|set this week(?: to)?|week set)\s+(?P<topic>.+)$",
+    re.I,
+)
+
+_WEEK_SET_LETS_RE = re.compile(
+    r"^let'?s do\s+(?P<topic>.+?)(?:\s+this week)?$",
+    re.I,
+)
+
+_WEEK_DONE_RE = re.compile(
+    r"^(?:this shipped|i shipped|week done|mark done|that(?:'s|s) done|done)"
+    r"(?:\s*[:\-]\s*|\s+)(?P<item>.+)$",
+    re.I,
+)
+
+_WEEK_DONE_DID_RE = re.compile(
+    r"^i (?:posted|filmed|shipped|finished)\s+(?P<item>.+)$",
+    re.I,
+)
+
+_REMEMBER_RE = re.compile(
+    r"^(?:remember|note for tomorrow|leave a note)\s*[:\-]\s*(?P<note>.+)$",
+    re.I,
+)
+
+_CHECKIN_HOURS_LABELED = re.compile(
+    r"(?:^|\b)(?:mission\s+)?(?:hours|time available)\s*[:=]\s*(?P<val>[^\n,;]+)",
+    re.I,
+)
+_CHECKIN_HOURS_HAVE = re.compile(
+    r"^i have\s+(?P<val>\d+(?:\.\d+)?)\s*(?:hours?|hrs?)\b",
+    re.I,
+)
+_CHECKIN_BUDGET = re.compile(
+    r"(?:^|\b)(?:mission\s+)?(?:max\s+)?budget\s*[:=]?\s*(?P<val>\$?\d+(?:\.\d+)?(?:\s*dollars?)?)",
+    re.I,
+)
+_CHECKIN_ASSETS = re.compile(
+    r"(?:^|\b)(?:mission\s+)?(?:assets|already own(?:ed)?|already have)\s*[:=]\s*(?P<val>.+)$",
+    re.I,
+)
+_CHECKIN_ASSETS_HAVE = re.compile(
+    r"^already (?:own|have)\s+(?P<val>.+)$",
+    re.I,
+)
+_CHECKIN_BORROW = re.compile(
+    r"(?:^|\b)(?:mission\s+)?(?:borrow(?:\/free)?|free \/ cheap|borrow free)\s*[:=]\s*(?P<val>.+)$",
+    re.I,
+)
+_CHECKIN_RESTRICT = re.compile(
+    r"(?:^|\b)(?:mission\s+)?(?:restrictions|deal-?breakers?)\s*[:=]\s*(?P<val>.+)$",
+    re.I,
+)
+_CHECKIN_DEADLINE = re.compile(
+    r"(?:^|\b)(?:mission\s+)?deadline\s*[:=]\s*(?P<val>.+)$",
+    re.I,
+)
+
+
+def _soft(text: str) -> str:
+    t = (text or "").strip()
+    t = t.replace("\u2019", "'").replace("\u2018", "'").replace("`", "'")
+    t = re.sub(r"\s+", " ", t)
+    return t.strip()
+
+
+def _payload(value: str) -> str:
+    v = (value or "").strip().strip("\"'")
+    v = re.sub(r"[.!?]+$", "", v).strip()
+    return v
+
+
+def _is_question(text: str) -> bool:
+    return bool(_QUESTION_HEAD.match(text or ""))
+
+
+def _save_memory_note(fact: str) -> None:
+    try:
+        from modules.Bolt_Memory import remember
+
+        remember(fact, section="Recent Notes")
+    except Exception:
+        pass
+
+
+def _write_ready(topic_extra: str = "") -> str:
+    from modules.Week_Card import is_paused, load, set_week, spoken_line
+
+    data = load()
+    current = (data["this_week"].get("topic") or "").strip()
+    topic = _payload(topic_extra) or current
+    if not topic:
+        return (
+            "You're back. Which week topic should I set — games, tech, "
+            "beauty, or general product?"
+        )
+    was_paused = is_paused(data)
+    set_week(topic, note="ready to continue")
+    line = spoken_line()
+    if was_paused:
+        return f"Unpaused. {line}"
+    return f"Ready. {line}"
+
+
+def _write_week_set(topic: str) -> str:
+    from modules.Week_Card import set_week, spoken_line
+
+    topic = _payload(topic)
+    if not topic:
+        return "Which week topic? Games, tech, beauty, or general product."
+    set_week(topic)
+    return spoken_line()
+
+
+def _write_week_done(item: str) -> str:
+    from modules.Week_Card import load, mark_done, spoken_line
+
+    item = _payload(item)
+    if not item:
+        return "What shipped? Say this shipped, then the thing."
+    data = load()
+    if not (data["this_week"].get("topic") or "").strip():
+        mark_done(item)
+        return (
+            f"Logged: {item}. This week still has no topic — "
+            "set one when you can so we stay on it."
+        )
+    mark_done(item)
+    return spoken_line()
+
+
+def _write_remember(note: str) -> str:
+    note = _payload(note)
+    if not note:
+        return "What should I remember?"
+    _save_memory_note(note)
+    return "Saved that note for tomorrow."
+
+
+def _parse_checkin_fields(soft: str) -> Dict[str, str]:
+    fields: Dict[str, str] = {}
+    m = _CHECKIN_HOURS_LABELED.search(soft) or _CHECKIN_HOURS_HAVE.search(soft)
+    if m:
+        fields["hours"] = _payload(m.group("val"))
+    m = _CHECKIN_BUDGET.search(soft)
+    if m:
+        fields["budget"] = _payload(m.group("val"))
+    m = _CHECKIN_ASSETS.search(soft) or _CHECKIN_ASSETS_HAVE.search(soft)
+    if m:
+        fields["assets"] = _payload(m.group("val"))
+    m = _CHECKIN_BORROW.search(soft)
+    if m:
+        fields["borrow_free"] = _payload(m.group("val"))
+    m = _CHECKIN_RESTRICT.search(soft)
+    if m:
+        fields["restrictions"] = _payload(m.group("val"))
+    m = _CHECKIN_DEADLINE.search(soft)
+    if m:
+        fields["deadline"] = _payload(m.group("val"))
+    return {k: v for k, v in fields.items() if v}
+
+
+def _write_checkin(soft: str) -> Optional[str]:
+    if _is_question(soft):
+        return None
+    fields = _parse_checkin_fields(soft)
+    if not fields:
+        return None
+    from modules.Command_Center import latest_mission, update_mission_checkin
+
+    path = latest_mission()
+    if path is None:
+        return (
+            "No mission file yet. Start one with bolt mission start, "
+            "then I can save those answers."
+        )
+    update_mission_checkin(path, **fields)
+    bits = ", ".join(f"{k.replace('_', ' ')} {v}" for k, v in fields.items())
+    return f"Saved {bits} on the latest mission."
+
+
+def _try_write_intent(user_text: str) -> Optional[str]:
+    """Map a single reply onto week set / done / mission check-in / remember."""
+    soft = _soft(user_text)
+    if not soft or _is_question(soft):
+        return None
+
+    m = _READY_RE.match(soft)
+    if m:
+        return _write_ready(m.group("topic") or "")
+
+    m = _WEEK_SET_RE.match(soft) or _WEEK_SET_LETS_RE.match(soft)
+    if m:
+        return _write_week_set(m.group("topic"))
+
+    m = _WEEK_DONE_RE.match(soft) or _WEEK_DONE_DID_RE.match(soft)
+    if m:
+        return _write_week_done(m.group("item"))
+
+    m = _REMEMBER_RE.match(soft)
+    if m:
+        return _write_remember(m.group("note"))
+
+    return _write_checkin(soft)
+
+
+def _iter_reply_lines(block: str) -> List[str]:
+    lines: List[str] = []
+    for raw in (block or "").splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        if line.startswith("Write below this line") or line.startswith("*Generated"):
+            continue
+        if line.startswith("#"):
+            continue
+        line = re.sub(r"^[-*•]\s+", "", line)
+        if line:
+            lines.append(line)
+    return lines
+
+
+def apply_reply_block(block: str) -> Dict[str, List[str]]:
+    """Run each line through write intents. CLI functions stay the source of truth.
+
+    Returns ``{"replies": [...], "leftover": [...]}``. Leftover lines did not
+    match a write and should stay as a note (briefing) or fall through to chat.
+    """
+    replies: List[str] = []
+    leftover: List[str] = []
+    for line in _iter_reply_lines(block):
+        try:
+            handled = _try_write_intent(line)
+        except Exception as exc:
+            replies.append(f"I recognized that but failed while saving it: {exc}")
+            continue
+        if handled is None:
+            leftover.append(line)
+        else:
+            replies.append(handled)
+    return {"replies": replies, "leftover": leftover}
+
+
 # Order matters: more specific patterns first.
 _INTENT_TABLE: Tuple[Tuple[Tuple[str, ...], Callable[[], str]], ...] = (
     (
@@ -632,8 +898,33 @@ def try_handle_intent(user_text: str) -> Optional[str]:
     If user_text matches a known intent, run the action and return a
     spoken-friendly reply string. Otherwise return None so the caller
     can fall through to free-form LLM chat.
+
+    Write intents (week / mission / remember) run first and call the same
+    functions as ``bolt week`` / ``bolt mission update``.
     """
-    text = _normalize(user_text)
+    raw = (user_text or "").strip()
+    if not raw:
+        return None
+
+    if "\n" in raw:
+        applied = apply_reply_block(raw)
+        if applied["replies"]:
+            parts = list(applied["replies"])
+            if applied["leftover"]:
+                _save_memory_note(" ".join(applied["leftover"]))
+                parts.append("Saved the rest as a note.")
+            return " ".join(parts)
+        # No writes in the block — let chat handle the whole message.
+        raw = _soft(raw)
+
+    try:
+        write_reply = _try_write_intent(raw)
+    except Exception as exc:
+        return f"I recognized that request but failed while saving it: {exc}"
+    if write_reply is not None:
+        return write_reply
+
+    text = _normalize(raw)
     if not text:
         return None
 

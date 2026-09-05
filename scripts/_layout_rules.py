@@ -50,11 +50,7 @@ RULES: List[Tuple[str, str, str]] = [
         "Core/modules/Multi_Publisher.py",
         "Publisher logic belongs in Core/modules/ alongside the other pipeline modules.",
     ),
-    (
-        "Langchain_install.py",
-        "Core/src/Langchain_install.py",
-        "One-off installer scripts live under Core/src/.",
-    ),
+
     (
         "101_hello_tinker.py",
         "3rd_Party/colabs/101_hello_tinker.py",
@@ -121,12 +117,11 @@ ROOT_ALLOWED: List[str] = [
     # Tooling / build
     "setup.py", "requirements.txt", "Makefile", "pyproject.toml",
     # Top-level docs
-    "README.md", "AGENTS.md", "CLAUDE.md", "LICENSE",
+    "README.md", "AGENTS.md", "LICENSE",
     # Env (gitignored, but if they're committed somewhere we want to see them)
     ".env", ".env.example", ".env.local", ".example.env",
     # Hidden
-    ".gitignore", ".gitattributes", ".aider.chat.history.md",
-    ".aider.input.history", ".DS_Store",
+    ".gitignore", ".gitattributes", ".DS_Store",
     # Personality
     "Bolt_Personality.txt", "Bolt_Personality.pages",
     # Top-level script entrypoint and a few legacy scripts the user
@@ -143,7 +138,7 @@ ROOT_ALLOWED: List[str] = [
 KNOWN_TOP_LEVEL_DIRS: List[str] = [
     "Core", "App", "Data", "Docs", "3rd_Party", "media",
     "scripts", "bin", "tests", "logs", "memory", "api",
-    "dist", "gemini", "my_agent", "archive", "vod_samples",
+    "dist", "archive", "vod_samples",
     # macOS / vendored noise that should never trigger a finding
     ".venv", ".git", ".vscode", "node_modules", "__pycache__",
 ]

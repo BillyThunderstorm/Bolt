@@ -144,12 +144,16 @@ def generate_titles(
 
     AI generation is opt-in via config (`use_ai_titles` or
     `quality_tiers.use_ai_titles`) and always falls back to local templates.
+
+    When context includes `on_screen_stats` (from Video_Intelligence OCR),
+    the strongest stat is prepended to every title — AI and templates alike.
     """
     context = context or {}
     if _ai_titles_enabled(context):
         titles_and_tags = _llm_titles(trigger, game, score, context, count)
         if titles_and_tags:
-            return titles_and_tags
+            titles, hashtags = titles_and_tags
+            return _with_on_screen_prefix(titles, context), hashtags
 
     notify(
         f"Generating local template titles for {trigger} clip (score {score:.0f})",
@@ -159,7 +163,27 @@ def generate_titles(
 
     titles = _template_titles(trigger, game, context, count)
     hashtags = _pick_hashtags(game, trigger)
-    return titles, hashtags
+    return _with_on_screen_prefix(titles, context), hashtags
+
+
+def _with_on_screen_prefix(titles: List[str], context: dict) -> List[str]:
+    """Prepend the strongest OCR stat when present (Tier 2.1 data-driven titles)."""
+    on_screen = context.get("on_screen_stats") or []
+    if not on_screen:
+        return titles
+    headline = str(on_screen[0]).strip()
+    if not headline:
+        return titles
+    out = []
+    for t in titles:
+        t = str(t or "").strip()
+        if not t:
+            out.append(f"{headline}")
+        elif t.startswith(f"{headline} — ") or t.startswith(f"{headline} - "):
+            out.append(t)  # already prefixed (LLM may have used the prompt hint)
+        else:
+            out.append(f"{headline} — {t}")
+    return out
 
 
 def _ai_titles_enabled(context: dict) -> bool:
@@ -283,13 +307,21 @@ def _build_title_prompt(
     brain = str(context.get("creator_brain") or _load_creator_brain())
     transcript = str(context.get("transcript") or "").strip()
     memory = str(context.get("memory") or context.get("retrieved_memory") or "").strip()
+    on_screen = context.get("on_screen_stats") or []
     details = {
         "trigger": trigger,
         "game": game,
         "score": round(score, 1),
         "kill_count": context.get("kill_count"),
         "window_seconds": context.get("window_seconds"),
+        "on_screen_stats": on_screen[:5] if on_screen else [],
     }
+    ocr_hint = ""
+    if on_screen:
+        ocr_hint = (
+            "\nOn-screen HUD text (from OCR) — prefer weaving the strongest "
+            f"stat into titles when it fits: {on_screen[0]!r}.\n"
+        )
     return f"""You write short-form gaming captions for Billy.
 
 Creator profile:
@@ -297,7 +329,7 @@ Creator profile:
 
 Clip details:
 {json.dumps(details, indent=2)}
-
+{ocr_hint}
 Transcript:
 {transcript[:1200] or "No transcript available."}
 
@@ -309,6 +341,7 @@ Rules:
 - Titles should be 1 short sentence each.
 - Sound like Billy, not generic marketing copy.
 - Avoid overpromising what is not in the clip.
+- If on_screen_stats are present, lead with the strongest stat when natural.
 - Return only JSON with this shape:
 {{"titles": ["..."], "hashtags": ["#MarvelRivals", "..."]}}
 """
@@ -348,6 +381,7 @@ def _cache_key(trigger: str, game: str, score: float, context: dict, count: int)
         "context": {
             "kill_count": context.get("kill_count"),
             "window_seconds": context.get("window_seconds"),
+            "on_screen_stats": (context.get("on_screen_stats") or [])[:5],
             "transcript": transcript[:500],
             "creator_brain": creator_brain[:500],
         },
@@ -575,14 +609,8 @@ def _template_titles(trigger: str, game: str, context: dict, count: int) -> List
         except KeyError:
             filled.append(t.replace("{game}", game).replace("{trigger}", trigger))
 
-    # If Video_Intelligence surfaced on-screen stats, prepend the strongest
-    # one to each title. The result: "15 KILL STREAK — Billy just erased
-    # the lobby" instead of just the template alone. This is the Tier 2.1
-    # "data-driven titles" piece of the spec.
-    on_screen = context.get("on_screen_stats") or []
-    if on_screen:
-        headline = on_screen[0]
-        filled = [f"{headline} — {t}" for t in filled]
+    # on_screen_stats prefix is applied by generate_titles → _with_on_screen_prefix
+    # so both AI and template paths share one code path.
 
     while len(filled) < count:
         filled.append(f"This {game} clip goes crazy 🔥 #{game}")

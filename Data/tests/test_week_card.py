@@ -108,3 +108,40 @@ class WeekCardTests(unittest.TestCase):
                 week_topic="beauty / skincare",
             )
         )
+
+    def test_paper_is_plain_english_and_paused(self):
+        profile = self.root / "user_profile.json"
+        profile.write_text(
+            json.dumps(
+                {
+                    "near_term_horizon": {
+                        "target_date": "2026-12-31",
+                        "success_is": "Know what success looks like, or a roadmap with proof.",
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+        paper_file = self.root / "this_week_paper.txt"
+        with patch.object(wc, "USER_PROFILE", profile), patch.object(
+            wc, "PAPER_FILE", paper_file
+        ):
+            wc.set_week(
+                "general product review / Amazon storefront",
+                note="PAUSE. William is stepping away.",
+            )
+            wc.mark_done("nothing required this week")
+            text = wc.format_paper()
+            self.assertIn("WILLIAM — THIS WEEK", text)
+            self.assertIn("THE BIG GOAL", text)
+            self.assertIn("2026-12-31", text)
+            self.assertIn("roadmap with proof", text)
+            self.assertIn("PAUSED", text)
+            self.assertIn("[x] nothing required this week", text)
+            self.assertIn("[ ] ________________________________", text)
+            self.assertNotIn("C5", text)
+            self.assertNotIn("Nexus", text)
+            path = wc.write_paper()
+            self.assertEqual(path, paper_file)
+            self.assertTrue(paper_file.is_file())
+            self.assertIn("WILLIAM — THIS WEEK", paper_file.read_text(encoding="utf-8"))

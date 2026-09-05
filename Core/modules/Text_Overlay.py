@@ -15,7 +15,7 @@ Workflow:
      - Hook shows for first 3-4 seconds, then fades out
      - Optional second caption if transcript has a good later moment
 
-Outputs to vertical_clips_final/ by default.
+Outputs to media/vertical_clips_final/ by default.
 """
 
 import os
@@ -59,10 +59,12 @@ except ImportError:
 
 
 CONFIG = load_config()
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+CORE_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = CORE_ROOT.parent
+PROJECT_ROOT = REPO_ROOT  # clips live under repo media/, not Core/
 
-# Default output directory for final clips with overlays
-FINAL_DIR = PROJECT_ROOT / "vertical_clips_final"
+# Default output directory for final overlaid clips
+FINAL_DIR = REPO_ROOT / "media" / "vertical_clips_final"
 
 # ── Font discovery ────────────────────────────────────────────────────────────
 # macOS font paths — we look for bold fonts for maximum visibility on TikTok.
@@ -456,7 +458,7 @@ def add_text_overlay(
     ----------
     video_path : path to the vertical clip (9:16 .mp4)
     output_path : where to write the final clip; if None, outputs to
-                  vertical_clips_final/ with the same filename
+                  media/vertical_clips_final/ with the same filename
 
     Returns
     -------

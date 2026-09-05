@@ -145,7 +145,7 @@
 	<cameraType>0</cameraType>
 	<cameraName>Active Camera</cameraName>
 	<mirrorHMD>0</mirrorHMD>
-	<panZoom camera="0" zoom="0.5" panX="186" panY="97" mode="1" centered="1"/>
+	<panZoom camera="0" zoom="0.87343752384185791" panX="287" panY="242" mode="2" centered="1"/>
 </viewer>
 
 <projectPanel>
@@ -182,7 +182,7 @@
 	<displayEffects>1</displayEffects>
 	<videoVerticalZoom>2.2222222222222223</videoVerticalZoom>
 	<audioVerticalZoom>2.2222222222222223</audioVerticalZoom>
-	<displayRange in="-547857496 2093750000 3 0" out="6261663282 1000000000 3 0"/>
+	<displayRange in="-636056 1982128 1 0" out="847 134 1 0"/>
 </timeline>
 
 <curveeditor>
@@ -190,8 +190,8 @@
 	<snapping>0</snapping>
 	<displayAudioWaveform>0</displayAudioWaveform>
 	<lockKeyframesInTime>0</lockKeyframesInTime>
-	<displayRange in="-547857496 2093750000 3 0" out="6261663282 1000000000 3 0"/>
-	<currentviewvolume originx="-0.26166328167164177" originy="-48.75" width="6.5233265640000004" height="64.166666666666856"/>
+	<displayRange in="-636056 1982128 1 0" out="847 134 1 0"/>
+	<currentviewvolume originx="-0.32089552238805968" originy="-62.5" width="6.6417910447761193" height="125"/>
 	<snapshotChannels>0</snapshotChannels>
 </curveeditor>
 
@@ -232,7 +232,7 @@
 		<savePreviewMovie>0</savePreviewMovie>
 		<Object3DEnvironments>100</Object3DEnvironments>
 		<DRTSupport>0</DRTSupport>
-		<onHDRDisplay>0</onHDRDisplay>
+		<onHDRDisplay>1</onHDRDisplay>
 	</sceneSettings>
 	<exportSettings>
 		<version>1</version>
@@ -259,8 +259,8 @@
 	<publishSettings>
 		<version>2</version>
 	</publishSettings>
-	<currentFrame>0 1 1 0</currentFrame>
-	<currentObject>1825776043</currentObject>
+	<currentFrame>6400 153600 1 0</currentFrame>
+	<currentObject>10065</currentObject>
 	<activeLayer>10065</activeLayer>
 	<timeRange offset="0 1 1 0" duration="921600 153600 1 0"/>
 	<playRange offset="0 153600 1 0" duration="921600 153600 1 0"/>
@@ -293,7 +293,7 @@
 	<layer name="Group" id="10065">
 		<scenenode name="Bolts" id="16538" factoryID="7" version="5">
 			<validTracks>1</validTracks>
-			<aspectRatio>0</aspectRatio>
+			<aspectRatio>1.5</aspectRatio>
 			<flags>0</flags>
 			<timing in="0 1 1 0" out="915200 153600 1 0" offset="0 1 1 0"/>
 			<foldFlags>16384</foldFlags>
@@ -697,12 +697,13 @@
 				<timing in="0 1 1 0" out="915200 153600 1 0" offset="0 1 1 0"/>
 				<baseFlags>8589934608</baseFlags>
 				<parameter name="Affecting Object (Hidden)" id="199" flags="77326254098" default="0" value="16538"/>
-				<parameter name="Amount" id="200" flags="8606711824" default="0.01" value="0.14460000000000001"/>
+				<parameter name="Amount" id="200" flags="12901679120" default="0.01" value="0.30630000000000002"/>
+				<parameter name="Frequency" id="203" flags="8606711824" default="1" value="0.5"/>
 			</behavior>
 		</scenenode>
 		<scenenode name="Rim" id="1825776015" factoryID="7" version="5">
 			<validTracks>1</validTracks>
-			<aspectRatio>0</aspectRatio>
+			<aspectRatio>1.5</aspectRatio>
 			<flags>0</flags>
 			<timing in="0 1 1 0" out="915200 153600 1 0" offset="0 1 1 0"/>
 			<foldFlags>16384</foldFlags>
@@ -944,7 +945,7 @@
 		</scenenode>
 		<scenenode name="Plate" id="16537" factoryID="7" version="5">
 			<validTracks>1</validTracks>
-			<aspectRatio>0</aspectRatio>
+			<aspectRatio>1.5</aspectRatio>
 			<flags>0</flags>
 			<timing in="0 1 1 0" out="915200 153600 1 0" offset="0 1 1 0"/>
 			<foldFlags>16384</foldFlags>
@@ -1145,7 +1146,7 @@
 			<flags>0</flags>
 			<timing in="0 1 1 0" out="915200 153600 1 0" offset="0 1 1 0"/>
 			<foldFlags>0</foldFlags>
-			<baseFlags>524305</baseFlags>
+			<baseFlags>524304</baseFlags>
 			<parameter name="Properties" id="1" flags="8589938704">
 				<parameter name="Transform" id="100" flags="8589938704">
 					<parameter name="Position" id="101" flags="8589938704">
@@ -1253,7 +1254,7 @@
 		<flags>0</flags>
 		<timing in="0 1 1 0" out="915200 153600 1 0" offset="0 1 1 0"/>
 		<foldFlags>0</foldFlags>
-		<baseFlags>524304</baseFlags>
+		<baseFlags>268959761</baseFlags>
 		<parameter name="Properties" id="1" flags="8589938704">
 			<parameter name="Lighting" id="230" flags="8589938706">
 				<foldFlags>15</foldFlags>
@@ -1264,15 +1265,15 @@
 			<parameter name="Reflection" id="223" flags="8589971474">
 				<foldFlags>131087</foldFlags>
 			</parameter>
-			<parameter name="Color" id="243" flags="8589938688">
+			<parameter name="Color" id="243" flags="8589938690">
 				<parameter name="Hidden Channel" id="245" flags="8589934610" default="1" value="3"/>
-				<parameter name="Conversion Type" id="247" flags="8590032912" default="3" value="3"/>
-				<parameter name="PQ Peak (nits)" id="248" flags="8589967376" default="1000" value="1000"/>
+				<parameter name="Conversion Type" id="247" flags="8606810128" default="3" value="3"/>
+				<parameter name="PQ Peak (nits)" id="248" flags="8606744592" default="1000" value="1000"/>
 			</parameter>
 		</parameter>
 		<parameter name="Object" id="2" flags="8589938704">
-			<parameter name="Fixed Width" id="302" flags="12884901908" default="720" value="720"/>
-			<parameter name="Fixed Height" id="303" flags="12884901908" default="480" value="480"/>
+			<parameter name="Fixed Width" id="302" flags="12901679124" default="720" value="720"/>
+			<parameter name="Fixed Height" id="303" flags="12901679124" default="480" value="480"/>
 			<parameter name="Flatten" id="311" flags="8589934610" default="0" value="0"/>
 			<parameter name="Layer Order" id="305" flags="8589934610" default="0" value="0"/>
 			<parameter name="Aperture Width" id="312" flags="12884901906" default="720" value="720"/>

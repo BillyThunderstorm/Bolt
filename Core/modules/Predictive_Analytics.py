@@ -377,19 +377,74 @@ def predict_queue(
 # ── CLI ──────────────────────────────────────────────────────────────────────
 
 
+def _print_prediction(p: Prediction, *, game: str, trigger: str, platform: Optional[str] = None) -> None:
+    print("=" * 60)
+    print(f"  PREDICTED VIEWS: {game} {trigger} clip")
+    if platform:
+        print(f"  Platform: {platform}")
+    print("=" * 60)
+    if p.insufficient_data:
+        print(f"  {p.summary}")
+    else:
+        print(f"  Median (50th pct):  {int(p.median_views):>10,}")
+        print(f"  Range (25-75 pct):  {int(p.low_views):>5,} – {int(p.high_views):>10,}")
+        print(f"  Confidence:         {int(p.confidence * 100)}%  ({p.sample_size} sample(s))")
+        print(f"  Percentile rank:    {int(p.percentile * 100)}%")
+        print(f"  Viral threshold:    {int(p.viral_threshold):>10,} (90th pct of all clips)")
+        print(f"  Viral pick:         {'YES 🌟' if p.is_potential_viral else 'no'}")
+        print()
+        print(f"  {p.summary}")
+    print("=" * 60)
+
+
+def _load_queue_clips(limit: int = 10) -> List[Dict[str, Any]]:
+    """Best-effort read of ready_to_post.json for --queue mode."""
+    ready_path = DATA_DIR / "ready_to_post.json"
+    if not ready_path.exists():
+        return []
+    try:
+        data = json.loads(ready_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    clips = []
+    for c in data.get("clips") or []:
+        if c.get("status") != "ready":
+            continue
+        clips.append({
+            "id": c.get("id"),
+            "title": c.get("title") or "",
+            "game": c.get("game") or "unknown",
+            "trigger": c.get("trigger") or "unknown",
+            "platform": c.get("platform"),
+            "score": c.get("score"),
+            "clip_path": c.get("clip_path"),
+        })
+        if len(clips) >= limit:
+            break
+    return clips
+
+
 def _main() -> int:
     import argparse
     import sys
 
     parser = argparse.ArgumentParser(
-        description="Predict 24-hour view count for a clip."
+        description="Predict 24-hour view count for a clip (or ready queue)."
     )
-    parser.add_argument("--game", required=True, help="Game name (e.g. 'Marvel Rivals')")
-    parser.add_argument("--trigger", required=True, help="Trigger type (e.g. 'kill', 'multi_kill', 'donation')")
+    parser.add_argument("--game", default=None, help="Game name (e.g. 'Marvel Rivals')")
+    parser.add_argument("--trigger", default=None, help="Trigger type (e.g. 'kill', 'multi_kill', 'donation')")
     parser.add_argument("--platform", default=None, help="Platform (e.g. 'tiktok', 'youtube')")
     parser.add_argument(
         "--days", type=int, default=None,
         help="Only use historical data from the last N days",
+    )
+    parser.add_argument(
+        "--queue", action="store_true",
+        help="Predict for ready clips in Data/ready_to_post.json",
+    )
+    parser.add_argument(
+        "--limit", type=int, default=10,
+        help="With --queue: max clips to score (default 10)",
     )
     parser.add_argument(
         "--json", action="store_true",
@@ -398,6 +453,38 @@ def _main() -> int:
     args = parser.parse_args()
 
     rows = _load_outcomes(days=args.days)
+
+    if args.queue:
+        clips = _load_queue_clips(limit=max(1, args.limit))
+        if not clips:
+            print("No ready clips in Data/ready_to_post.json (or file missing).")
+            print("Add clips via the pipeline / bolt queue add, then retry.")
+            return 0
+        preds = predict_queue(clips, days=args.days)
+        if args.json:
+            payload = [
+                {"clip": c, "prediction": p.to_dict()}
+                for c, p in zip(clips, preds)
+            ]
+            json.dump(payload, sys.stdout, indent=2, default=str)
+            sys.stdout.write("\n")
+        else:
+            print(
+                f"Queue predictions ({len(preds)} clip(s)"
+                + (f", last {args.days}d history" if args.days else "")
+                + ")"
+            )
+            for c, p in zip(clips, preds):
+                label = c.get("title") or c.get("id") or "?"
+                flag = " 🌟" if p.is_potential_viral else ""
+                print(f"\n• {label}{flag}")
+                print(f"  id={c.get('id')}  game={c.get('game')}  trigger={c.get('trigger')}")
+                print(f"  {p.summary}")
+        return 0
+
+    if not args.game or not args.trigger:
+        parser.error("--game and --trigger are required unless --queue is set")
+
     p = predict(
         {"game": args.game, "trigger": args.trigger, "platform": args.platform},
         rows=rows,
@@ -407,23 +494,7 @@ def _main() -> int:
         json.dump(p.to_dict(), sys.stdout, indent=2, default=str)
         sys.stdout.write("\n")
     else:
-        print("=" * 60)
-        print(f"  PREDICTED VIEWS: {args.game} {args.trigger} clip")
-        if args.platform:
-            print(f"  Platform: {args.platform}")
-        print("=" * 60)
-        if p.insufficient_data:
-            print(f"  {p.summary}")
-        else:
-            print(f"  Median (50th pct):  {int(p.median_views):>10,}")
-            print(f"  Range (25-75 pct):  {int(p.low_views):>5,} – {int(p.high_views):>10,}")
-            print(f"  Confidence:         {int(p.confidence * 100)}%  ({p.sample_size} sample(s))")
-            print(f"  Percentile rank:    {int(p.percentile * 100)}%")
-            print(f"  Viral threshold:    {int(p.viral_threshold):>10,} (90th pct of all clips)")
-            print(f"  Viral pick:         {'YES 🌟' if p.is_potential_viral else 'no'}")
-            print()
-            print(f"  {p.summary}")
-        print("=" * 60)
+        _print_prediction(p, game=args.game, trigger=args.trigger, platform=args.platform)
     return 0
 
 

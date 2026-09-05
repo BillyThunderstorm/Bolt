@@ -85,6 +85,7 @@ llm/
 Core/data/twitch_token_cache.json
 Data/twitch_token_cache.json
 .aider*
+.cursor/
 
 # Runtime log files
 scripts/launcher_stderr*.log

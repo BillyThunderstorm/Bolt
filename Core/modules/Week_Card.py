@@ -10,6 +10,7 @@ William picks the topic. Bolt keeps the floor marked.
   bolt week
   bolt week set "skincare first-use" --note "already filmed AM"
   bolt week done "posted the AM routine clip"
+  bolt week paper [--open]            # one-page fridge sheet (not the mission)
   bolt week rotate
   bolt week ban "Hyram-style education" --why "C5 no"
 """
@@ -25,6 +26,8 @@ from typing import Any, Dict, List, Optional
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 WEEK_FILE = PROJECT_ROOT / "Data" / "memory" / "week_card.json"
 RESEARCH_LOG = PROJECT_ROOT / "Data" / "memory" / "research_log.jsonl"
+USER_PROFILE = PROJECT_ROOT / "Data" / "memory" / "user_profile.json"
+PAPER_FILE = PROJECT_ROOT / "Data" / "memory" / "this_week_paper.txt"
 
 _EMPTY_WEEK = {"topic": "", "note": "", "started": "", "done": []}
 
@@ -356,6 +359,129 @@ def format_prompt(data: Optional[Dict[str, Any]] = None) -> str:
     return "\n".join(lines)
 
 
+def _horizon() -> Dict[str, Any]:
+    """Year-end bar from the profile. Empty dict if the profile is missing."""
+    try:
+        raw = json.loads(USER_PROFILE.read_text(encoding="utf-8"))
+        h = (raw or {}).get("near_term_horizon") or {}
+        return h if isinstance(h, dict) else {}
+    except Exception:
+        return {}
+
+
+def format_paper(data: Optional[Dict[str, Any]] = None) -> str:
+    """One-page fridge sheet: goal, status, checkboxes. Plain English.
+
+    For William and anyone in the house. Not the 13-section mission.
+    Tick a box when something actually ships; log it later with
+    `bolt week done`.
+    """
+    card = data or load()
+    this = card["this_week"]
+    last = card["last_week"]
+    horizon = _horizon()
+    topic = (this.get("topic") or "").strip() or "(not picked yet)"
+    paused = is_paused(card)
+    today = date.today().strftime("%A, %Y-%m-%d")
+
+    goal_date = horizon.get("target_date") or "2026-12-31"
+    goal_text = horizon.get("success_is") or (
+        "Know what success looks like in this kind of work, or have a "
+        "written roadmap plus proof the work is leading somewhere."
+    )
+
+    status = "PAUSED — stepping back. Not behind. Not a skipped plan."
+    if not paused:
+        if topic.startswith("("):
+            status = "No topic yet. Pick one when work starts again."
+        else:
+            status = "In progress. Stay on this week's topic."
+
+    lines = [
+        "WILLIAM — THIS WEEK",
+        "(one page for the fridge — not a computer briefing)",
+        f"Printed: {today}",
+        "",
+        f"THE BIG GOAL  (by {goal_date})",
+    ]
+    for wrap in _wrap(str(goal_text), 72):
+        lines.append(wrap)
+    lines.extend(
+        [
+            "This is figuring out the map. It is not a finished career plan.",
+            "",
+            "THIS WEEK",
+            f"  Topic:  {topic}",
+            f"  Status: {status}",
+        ]
+    )
+    if this.get("started"):
+        lines.append(f"  Started: {this['started']}")
+    note = (this.get("note") or "").strip()
+    if note and not paused:
+        lines.append(f"  Note: {note}")
+    lines.extend(["", "DONE (tick when it actually happened)"])
+    done = [str(x).strip() for x in (this.get("done") or []) if str(x).strip()]
+    if done:
+        for item in done:
+            lines.append(f"  [x] {item}")
+    else:
+        lines.append("  (nothing logged on the computer yet)")
+    lines.extend(
+        [
+            "  [ ] ________________________________",
+            "  [ ] ________________________________",
+            "  [ ] ________________________________",
+            "",
+            "LAST WEEK (already happened — not this week's job)",
+        ]
+    )
+    last_topic = (last.get("topic") or "").strip()
+    if last_topic:
+        lines.append(f"  Topic: {last_topic}")
+        last_done = [str(x).strip() for x in (last.get("done") or []) if str(x).strip()]
+        if last_done:
+            for item in last_done:
+                lines.append(f"  [x] {item}")
+        else:
+            lines.append("  (nothing logged)")
+    else:
+        lines.append("  (none yet)")
+    lines.extend(
+        [
+            "",
+            "HOW TO READ THIS",
+            "  A blank week is not failure. Daily computer work does not",
+            "  require this sheet to be full. Tick a box when something",
+            "  ships. At the computer later:  bolt week done \"what shipped\"",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def _wrap(text: str, width: int) -> List[str]:
+    words = (text or "").split()
+    if not words:
+        return [""]
+    out: List[str] = []
+    buf = words[0]
+    for w in words[1:]:
+        if len(buf) + 1 + len(w) <= width:
+            buf = f"{buf} {w}"
+        else:
+            out.append(buf)
+            buf = w
+    out.append(buf)
+    return out
+
+
+def write_paper(data: Optional[Dict[str, Any]] = None) -> Path:
+    PAPER_FILE.parent.mkdir(parents=True, exist_ok=True)
+    PAPER_FILE.write_text(format_paper(data), encoding="utf-8")
+    return PAPER_FILE
+
+
 def spoken_line(data: Optional[Dict[str, Any]] = None) -> str:
     card = data or load()
     topic = (card["this_week"].get("topic") or "").strip()
@@ -405,6 +531,15 @@ def _cli(argv: List[str]) -> int:
             mark_done(" ".join(rest).strip().strip('"'))
             print(format_card())
             return 0
+        if cmd in ("paper", "print", "fridge"):
+            path = write_paper()
+            print(path.read_text(encoding="utf-8"))
+            print(f"Saved: {path}")
+            if "--open" in rest:
+                import subprocess
+
+                subprocess.run(["open", str(path)], check=False)
+            return 0
         if cmd == "rotate":
             rotate()
             print(format_card())
@@ -425,7 +560,10 @@ def _cli(argv: List[str]) -> int:
         if cmd in ("help", "-h", "--help"):
             print(__doc__)
             return 0
-        print("usage: bolt week [show|set|done|rotate|ban|unban]", file=sys.stderr)
+        print(
+            "usage: bolt week [show|set|done|paper|rotate|ban|unban]",
+            file=sys.stderr,
+        )
         return 2
     except ValueError as exc:
         print(f"error: {exc}", file=sys.stderr)

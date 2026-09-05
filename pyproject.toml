@@ -66,6 +66,17 @@ dependencies = [
 dev = [
     "pytest",
 ]
+# Local Whisper for clip-pipeline subtitles (heavy torch stack).
+# Default `uv sync` stays light; enable with: uv sync --extra subtitles
+subtitles = [
+    "openai-whisper",
+]
+# On-screen HUD OCR for data-driven titles (Video_Intelligence → Title_Generator).
+# Also needs the tesseract binary: brew install tesseract
+# Enable with: uv sync --extra ocr
+ocr = [
+    "pytesseract",
+]
 
 [project.scripts]
 # After `uv sync`, these all work:

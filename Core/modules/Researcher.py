@@ -331,6 +331,21 @@ def get_research_questions(profile: Dict[str, Any]) -> List[Dict[str, Any]]:
             "status": "open",
         },
         {
+            "id": "year_end_proof",
+            "question": (
+                "What counts as proof by 2026-12-31 that the work is leading "
+                "somewhere, and what does success actually look like in this "
+                "profession for someone starting with no model to copy?"
+            ),
+            "why": "William's year-end bar is direction plus proof, not a "
+                   "shipped career. The outcome is research output, not a "
+                   "blank he failed to fill on a mission form.",
+            "method": "Creator-path case studies; proof markers short of $1k/mo; "
+                      "what a followable C3 roadmap looks like after months of "
+                      "real work (posted reviews, kept C5, rejected dead ends).",
+            "status": "open",
+        },
+        {
             "id": "creator_examples",
             "question": (
                 "Which 3-5 creators are doing adjacent work — product reviews "
@@ -504,6 +519,8 @@ def _name_matches(entry: Dict[str, Any], query: str) -> bool:
     """Match a candidate name: exact, substring, or same content words.
 
     'from' vs 'for' (and other small function words) should not miss a drop.
+    A short generic word like 'chairs' must not match
+    'Secretlab Gaming Chairs & Gaming Desk'.
     """
     q = (query or "").strip().lower()
     if not q:
@@ -511,10 +528,20 @@ def _name_matches(entry: Dict[str, Any], query: str) -> bool:
     name = _candidate_name(entry).lower()
     if not name:
         return False
-    if name == q or q in name or name in q:
+    if name == q:
         return True
     q_tokens = _name_tokens(query)
     n_tokens = set(_name_tokens(name))
+    # One-word queries: whole-token only, never a generic product word.
+    # "Alex" matches Alex One / Alex Two (ambiguous). "Chairs" does not
+    # match Secretlab Gaming Chairs & Gaming Desk.
+    if len(q_tokens) == 1:
+        tok = q_tokens[0]
+        if tok in _GENERIC_PRODUCT_WORDS:
+            return False
+        return tok in n_tokens
+    if q in name or name in q:
+        return True
     if len(q_tokens) >= 3 and n_tokens and all(t in n_tokens for t in q_tokens):
         return True
     if len(q_tokens) >= 4 and n_tokens:
@@ -618,6 +645,33 @@ _SKIP_HOSTS = (
     "socialbook.io",
     "moneymakingmommy.com",
     "thetechedvocate.org",
+    "secretlab.co",
+    "secretlab.com",
+)
+
+_GENERIC_PRODUCT_WORDS = frozenset(
+    {
+        "chairs",
+        "chair",
+        "desk",
+        "desks",
+        "keyboard",
+        "mouse",
+        "headset",
+        "monitor",
+        "laptop",
+        "phone",
+        "camera",
+        "mic",
+        "microphone",
+        "light",
+        "tripod",
+        "store",
+        "shop",
+        "cart",
+        "sale",
+        "deals",
+    }
 )
 
 _PLATFORM_HOSTS = (
@@ -684,9 +738,14 @@ def _name_from_title(title: str) -> str:
 
 def _is_noise_name(name: str) -> bool:
     low = name.lower()
-    if len(name) < 3:
+    if len(name.strip()) < 3:
+        return True
+    tokens = [t for t in re.sub(r"[^a-zA-Z0-9]+", " ", name).split() if t]
+    if len(tokens) == 1 and tokens[0].lower() in _GENERIC_PRODUCT_WORDS:
         return True
     if any(hint in low for hint in _SKIP_TITLE_HINTS):
+        return True
+    if "gaming chair" in low or "gaming desk" in low:
         return True
     return any(rx.search(low) for rx in _SKIP_TITLE_RES)
 
@@ -706,6 +765,15 @@ def _is_noise_result(name: str, url: str) -> bool:
     # A single YouTube video is not a creator channel.
     if "youtube.com/watch" in path or "youtu.be/" in path:
         return True
+    platform = _platform_from_url(url)
+    if platform == "unknown":
+        parsed = urlparse(url or "")
+        rel = (parsed.path or "").rstrip("/") or "/"
+        # Brand/shop homepage is not a creator to C5.
+        if rel == "/":
+            return True
+        if any(w in (name or "").lower() for w in _GENERIC_PRODUCT_WORDS):
+            return True
     return False
 
 
@@ -725,6 +793,33 @@ def _web_search_results(query: str, limit: int) -> List[Dict[str, str]]:
         return list(web_search_results(query, limit=limit) or [])
     except Exception:
         return []
+
+
+def _sponsor_query_hint(query: str) -> str:
+    """If the find query is already a sponsor brand, point at the right command."""
+    q = (query or "").strip().lower()
+    if not q:
+        return ""
+    path = PROJECT_ROOT / "Data" / "content" / "sponsors.json"
+    if not path.exists():
+        return ""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return ""
+    for p in data.get("prospects") or []:
+        if not isinstance(p, dict):
+            continue
+        name = str(p.get("name") or "").strip()
+        pid = str(p.get("id") or "").strip()
+        if not name:
+            continue
+        if q == name.lower() or q == pid.lower() or name.lower() in q.split():
+            return (
+                f"{name} is already a sponsor prospect, not a creator to C5. "
+                f'Use: bolt sponsors pitch "{name}"'
+            )
+    return ""
 
 
 def find_candidates(
@@ -751,6 +846,7 @@ def find_candidates(
     limit = max(1, min(int(limit), 10))
     search = search_fn or _web_search_results
     results = search(query, limit)
+    sponsor_hint = _sponsor_query_hint(query)
     known = {
         _candidate_name(entry).lower()
         for entry in list_candidates(limit=1000)
@@ -811,6 +907,7 @@ def find_candidates(
         "skipped": skipped,
         "blocked": blocked,
         "preview": preview,
+        "sponsor_hint": sponsor_hint,
     }
 
 
@@ -876,7 +973,11 @@ def resolve_c5_name(name: str) -> str:
             f"{n}. {_candidate_name(e)}" for n, e in numbered[:8]
         ) or "(none pending)"
         raise ValueError(
-            f"No pending #{idx}. From `bolt research pending`: {shown}"
+            f"No pending #{idx}. Numbers refresh after each answer — "
+            f"the next one is now #1.\n"
+            f"Still pending: {shown}\n"
+            f"Or answer every remaining item in one pass: "
+            f"bolt research pending --decide"
         )
     return raw
 
@@ -1236,8 +1337,101 @@ def _print_candidates(limit: int = 20, pending_only: bool = False) -> None:
     for i, e in enumerate(entries, 1):
         _format_candidate_line(e, index=i if pending_only else None)
     if pending_only:
-        print("\n  Numbers work:  bolt research c5 drop 1 --why \"already in this\"")
+        print("\n  Numbers refresh after each answer. After #1, the next item is #1 again.")
+        print('  One at a time:  bolt research c5 drop 1 --why "already in this"')
+        if len(entries) > 1:
+            print("  Both in one pass (this is the 2nd-answer path):")
+            print("    bolt research pending --decide")
     print()
+
+
+def _print_remaining_pending() -> None:
+    remaining = list_candidates(pending_c5_only=True, limit=20)
+    n = len(remaining)
+    print(f"  Pending remaining: {n}")
+    if not remaining:
+        return
+    print("  Numbers refreshed — use #1 for the next one, or:")
+    print("    bolt research pending --decide")
+    for i, e in enumerate(remaining, 1):
+        print(f"    {i}. {_candidate_name(e)}")
+
+
+def _parse_decide_line(line: str) -> Tuple[str, str]:
+    """Split 'drop not a creator' into (verdict, why). Empty why if only a verb."""
+    raw = (line or "").strip()
+    if not raw:
+        return "", ""
+    parts = raw.split(None, 1)
+    verb = parts[0].strip().lower()
+    why = parts[1].strip() if len(parts) > 1 else ""
+    if why.startswith("--why"):
+        why = why[5:].strip().strip("=").strip().strip('"').strip("'")
+    return verb, why
+
+
+def decide_pending(*, input_lines: Optional[List[str]] = None) -> int:
+    """Walk every pending C5 using names, so the 2nd answer cannot vanish.
+
+    Each line: keep|drop|maybe|skip  [optional why]
+    If why is omitted, a second line is the why (blank is allowed).
+    """
+    pending = list_candidates(pending_c5_only=True, limit=50)
+    if not pending:
+        print("\n  (none pending — all cleared candidates have a C5 decision)\n")
+        return 0
+
+    snapshot = [(_candidate_name(e), e) for e in pending]
+    n = len(snapshot)
+    print("═" * 70)
+    print(f"  C5 DECIDE — {n} pending (names are fixed; #2 does not move)")
+    print("═" * 70)
+    print("  Type: keep / drop / maybe / skip   optional why on the same line")
+    print('  Example:  drop not a creator')
+    print()
+
+    queue = list(input_lines) if input_lines is not None else None
+
+    def _read(prompt: str) -> str:
+        if queue is not None:
+            return queue.pop(0) if queue else ""
+        try:
+            return input(prompt)
+        except EOFError:
+            return ""
+
+    decided = 0
+    for i, (name, entry) in enumerate(snapshot, 1):
+        _format_candidate_line(entry, index=i)
+        print(f"  [{i}/{n}] {name}")
+        line = _read("  keep / drop / maybe / skip / quit: ")
+        verb, why = _parse_decide_line(line)
+        if verb in ("q", "quit", ""):
+            print("  Stopped. Remaining stay pending.")
+            break
+        if verb in ("s", "skip"):
+            print("  skipped")
+            print()
+            continue
+        if verb not in C5_VERDICT_ALIASES:
+            print(f"  skipped — unknown '{verb}' (use keep, drop, maybe, skip)")
+            print()
+            continue
+        if not why:
+            why = _read("  why (optional): ").strip()
+        try:
+            result = set_c5_verdict(name, verb, why=why)
+        except ValueError as exc:
+            print(f"  error: {exc}")
+            print()
+            continue
+        print(f"  ✓ C5 {result['verdict']}: {name}")
+        decided += 1
+        print()
+
+    print(f"  Recorded {decided} of {n}.")
+    _print_remaining_pending()
+    return 0
 
 
 def _print_log(limit: int = 15) -> None:
@@ -1330,6 +1524,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             "Examples:\n"
             "  bolt research\n"
             "  bolt research pending\n"
+            "  bolt research pending --decide\n"
             "  bolt research add \"iJustine\" --platform YouTube "
             "--summary \"Tech reviews + events\" --why \"Industry insider path\"\n"
             "  bolt research c5 keep \"iJustine\" --why \"Want that event path\"\n"
@@ -1398,6 +1593,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
 
     if cmd == "pending":
+        if "--decide" in rest or "-d" in rest or "decide" in rest:
+            return decide_pending()
         _print_candidates(limit=limit, pending_only=True)
         return 0
 
@@ -1442,6 +1639,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         if report.get("lane"):
             print(f"  lane: {report['lane']}")
         print(f"  web hits: {report['result_count']}")
+        if report.get("sponsor_hint"):
+            print(f"  ⚠  {report['sponsor_hint']}")
         if not report["result_count"]:
             print("  No results. Check the network, or pass a more specific query.")
             return 1
@@ -1519,6 +1718,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
 
     if cmd == "c5":
+        if not rest or rest in (["--decide"], ["-d"], ["decide"]):
+            return decide_pending()
         c5_parser = argparse.ArgumentParser(prog="bolt research c5")
         c5_parser.add_argument(
             "verdict",
@@ -1553,7 +1754,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(f"✓ C5 {result['verdict']}: {names}")
         if result.get("why"):
             print(f"  Why: {result['why']}")
-        print(f"  Pending remaining: {pending_c5_count()}")
+        _print_remaining_pending()
         return 0
 
     print(f"bolt research: unknown command '{cmd}'", flush=True)

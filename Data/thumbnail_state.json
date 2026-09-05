@@ -1,9 +1,1450 @@
 {
   "last_run": {
     "dry_run": false,
-    "results": [],
+    "results": [
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip01_audio_spike_1.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip02_audio_spike_138.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip03_audio_spike_336.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip04_audio_spike_425.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip05_audio_spike_543.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip06_audio_spike_591.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip07_audio_spike_699.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip08_audio_spike_778.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip09_audio_spike_832.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip10_audio_spike_915.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip11_audio_spike_1096.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip12_audio_spike_1349.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-03 13-57-07-vertical_clip01_audio_spike_31.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-03 13-57-07-vertical_clip02_audio_spike_82.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-03 13-57-07-vertical_clip03_audio_spike_132.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-03 13-57-07-vertical_clip04_audio_spike_386.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-03 13-57-07-vertical_clip05_audio_spike_540.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-03 13-57-07-vertical_clip06_audio_spike_625.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-03_13-57-07_clip01_audio_spike_31.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-03_13-57-07_clip02_audio_spike_82.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-03_13-57-07_clip03_audio_spike_132.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-03_13-57-07_clip04_audio_spike_386.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-03_13-57-07_clip05_audio_spike_540.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-03_13-57-07_clip06_audio_spike_625.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip01_audio_spike_18.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip02_audio_spike_78.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip03_audio_spike_134.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip04_audio_spike_187.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip05_audio_spike_235.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip06_audio_spike_289.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip07_audio_spike_344.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip08_audio_spike_401.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-05-09-vertical_clip01_audio_spike_64.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-05-09-vertical_clip02_audio_spike_116.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-05-09-vertical_clip03_audio_spike_186.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-05-09-vertical_clip04_audio_spike_245.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip01_audio_spike_17.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip02_audio_spike_486.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip03_audio_spike_568.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip04_audio_spike_715.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip05_audio_spike_1008.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip06_audio_spike_1096.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip07_audio_spike_1178.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip08_audio_spike_1240.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip09_audio_spike_1302.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip10_audio_spike_1355.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip01_audio_spike_81.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip02_audio_spike_165.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip03_audio_spike_331.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip04_audio_spike_1240.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip05_audio_spike_1322.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip06_audio_spike_1832.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip07_audio_spike_2269.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip08_audio_spike_2462.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip09_audio_spike_2747.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip10_audio_spike_2838.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip11_audio_spike_3358.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip12_audio_spike_3422.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_11-52-07_clip01_audio_spike_18.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_11-52-07_clip02_audio_spike_78.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_11-52-07_clip03_audio_spike_139.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_11-52-07_clip04_audio_spike_187.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_11-52-07_clip05_audio_spike_235.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_11-52-07_clip06_audio_spike_290.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_11-52-07_clip07_audio_spike_344.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_11-52-07_clip08_audio_spike_400.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-05-09_clip01_audio_spike_64.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-05-09_clip02_audio_spike_124.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-05-09_clip03_audio_spike_186.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-05-09_clip04_audio_spike_244.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip01_audio_spike_17.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip02_audio_spike_486.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip03_audio_spike_568.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip04_audio_spike_715.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip05_audio_spike_1008.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip06_audio_spike_1096.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip07_audio_spike_1178.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip08_audio_spike_1240.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip09_audio_spike_1302.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip10_audio_spike_1355.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip01_audio_spike_81.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip02_audio_spike_165.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip03_audio_spike_331.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip04_audio_spike_1181.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip05_audio_spike_1263.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip06_audio_spike_1773.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip07_audio_spike_2210.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip08_audio_spike_2403.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip09_audio_spike_2688.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip10_audio_spike_2778.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip11_audio_spike_3299.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip12_audio_spike_3363.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip03_audio_spike_336_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip04_audio_spike_425_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip05_audio_spike_543_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip07_audio_spike_699_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-02_23-25-40_clip08_audio_spike_778_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip02_audio_spike_82_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip03_audio_spike_132_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip04_audio_spike_386_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip05_audio_spike_540_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03 13-57-07-vertical_clip06_audio_spike_625_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip01_audio_spike_31_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip03_audio_spike_132_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip04_audio_spike_386_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-03_13-57-07_clip06_audio_spike_625_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip01_audio_spike_18_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip04_audio_spike_187_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip05_audio_spike_235_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip06_audio_spike_289_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip07_audio_spike_344_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 11-52-07-vertical_clip08_audio_spike_401_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip01_audio_spike_64_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip02_audio_spike_116_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip03_audio_spike_186_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-05-09-vertical_clip04_audio_spike_245_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip01_audio_spike_17_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip06_audio_spike_1096_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip07_audio_spike_1178_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip08_audio_spike_1240_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-10-37-vertical_clip09_audio_spike_1302_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip01_audio_spike_81_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip02_audio_spike_165_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip07_audio_spike_2269_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip08_audio_spike_2462_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip09_audio_spike_2747_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip10_audio_spike_2838_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip11_audio_spike_3358_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04 12-34-12-vertical_clip12_audio_spike_3422_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_11-52-07_clip04_audio_spike_187_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_11-52-07_clip06_audio_spike_290_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-05-09_clip02_audio_spike_124_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-05-09_clip04_audio_spike_244_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip06_audio_spike_1096_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip07_audio_spike_1178_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip08_audio_spike_1240_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip09_audio_spike_1302_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-10-37_clip10_audio_spike_1355_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip01_audio_spike_81_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip05_audio_spike_1263_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip07_audio_spike_2210_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip08_audio_spike_2403_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2026-09-04_12-34-12_clip09_audio_spike_2688_tiktok.mp4",
+        "strategy": "smart",
+        "width": 1280
+      },
+      {
+        "duration_sec": null,
+        "error": "ffmpeg extraction failed",
+        "output": null,
+        "seek_seconds": 0.0,
+        "skipped": false,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/BoltShow.mp4",
+        "strategy": "smart",
+        "width": 1280
+      }
+    ],
     "strategy": "smart",
-    "timestamp": "2026-08-27T05:00:00.535233",
+    "timestamp": "2026-09-05T05:00:00.731213",
     "width": 1280
   }
 }

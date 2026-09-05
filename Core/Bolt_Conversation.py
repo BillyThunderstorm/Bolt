@@ -7,7 +7,8 @@ Back-and-forth voice (or text) conversation with Billy.
 What it does:
   - Listens via microphone using speech_recognition + Whisper (OpenAI) with Google fallback
   - Maintains persistent conversation history (Project Memory)
-  - Routes high-value intents (morning, next, status, queue, research, mission) to real actions
+  - Routes high-value intents (morning, next, status, queue, research, mission)
+    and write-backs (ready / this week is / this shipped / mission check-in) to real actions
   - Generates personality-driven responses via LLM_Handler (OpenAI or xAI/Grok)
   - Speaks responses aloud through Bolt_Voice (ElevenLabs primary)
   - Can be used hands-free during streams or desk work

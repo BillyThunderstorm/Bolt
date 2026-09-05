@@ -41,10 +41,12 @@ except ImportError:
 
 
 CONFIG = load_config()
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+CORE_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = CORE_ROOT.parent
+PROJECT_ROOT = REPO_ROOT  # clips live under repo media/, not Core/
 
 # Default output directory for trimmed clips
-TRIMMED_DIR = PROJECT_ROOT / "vertical_clips_trimmed"
+TRIMMED_DIR = REPO_ROOT / "media" / "vertical_clips_trimmed"
 
 # Analysis parameters — match Highlight_Detector's approach
 WINDOW_SEC = 1.0   # smaller window than Highlight_Detector for finer peak detection
@@ -69,7 +71,7 @@ def smart_trim(
     peak_position : fraction of output duration where the peak should land
                     (0.28 = ~28% through, so a quick build-up then payoff)
     output_dir    : where to write the trimmed clip; defaults to
-                    vertical_clips_trimmed/ in the project root
+                    media/vertical_clips_trimmed/ in the repo root
 
     Returns
     -------
