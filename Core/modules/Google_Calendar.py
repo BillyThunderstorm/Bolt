@@ -9,7 +9,7 @@ How the auth flow works (important to understand):
   1. First run: opens a browser window asking you to sign in to Google
      and approve access. This happens ONCE.
   2. After you approve, Google gives Bolt a token that gets saved to
-     data/google_token.json on your machine.
+     Data/google_token.json on your machine.
   3. Every run after that: Bolt uses the saved token. No browser needed.
   4. If the token expires, it auto-refreshes silently using the refresh
      token embedded in the file.
@@ -39,10 +39,20 @@ except ImportError:
 
 # -- Paths ---------------------------------------------------------------------
 
-_ROOT = Path(__file__).parent.parent
-CREDENTIALS = _ROOT / "credentials.json"
-TOKEN_PATH = _ROOT / "data" / "google_token.json"
+_CORE = Path(__file__).resolve().parent.parent
+_REPO_ROOT = _CORE.parent
+CREDENTIALS = _CORE / "credentials.json"
+TOKEN_PATH = _REPO_ROOT / "Data" / "google_token.json"
+_LEGACY_TOKEN = _CORE / "data" / "google_token.json"
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+
+# One-time migrate pre-reorg Core/data/ token into Data/
+if _LEGACY_TOKEN.exists() and not TOKEN_PATH.exists():
+    try:
+        TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
+        TOKEN_PATH.write_bytes(_LEGACY_TOKEN.read_bytes())
+    except OSError:
+        pass
 
 
 # -- Auth ----------------------------------------------------------------------
@@ -71,7 +81,7 @@ def _get_service():
         return None
 
     creds = None
-    TOKEN_PATH.parent.mkdir(exist_ok=True)
+    TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     if TOKEN_PATH.exists():
         try:

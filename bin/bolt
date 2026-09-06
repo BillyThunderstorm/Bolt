@@ -214,14 +214,22 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
   predict --queue [--limit N] [--days N] [--json]
                           Predict for ready queue clips (Peak_Hour_Notifier insight)
                           (aliases: forecast, views-predict)
+  multi [status|plan|show] …
+                          Multi-platform manual posting plans (Data/multi_platform_queue.json)
+                          (aliases: platforms, multi-publish)
   enhance [--dry-run] [--limit N]
                           Smart_Trim → Text_Overlay on media/vertical_clips/
                           (aliases: enhance_clips, smart_trim)
   checkup [--open] [--json]
                           Refresh Data/Bolt_data.js + show App/Bolt_Checkup.html
                           (aliases: dashboard, checkup-dashboard)
+  menubar                 Start the macOS menu bar app (App/app.py; needs rumps)
+                          (aliases: menu-bar, menu_bar). Install: uv sync --extra menubar
   ocr <clip> [--verbose]  Extract on-screen game-stat text via Video_Intelligence
                           (aliases: video-ocr, extract-stats). Needs pytesseract + tesseract.
+  search "question" [--raw|--long|--json] [--limit N]
+                          Live DuckDuckGo web search (+ optional LLM summary)
+                          (aliases: web-search, websearch). Powers !Bolt chat search.
   overlay [--port 8766]   OBS overlay server (Stream Deck kill/win + cam frame)
 
 Direction-finding researcher (Core/modules/Researcher.py):
@@ -691,6 +699,46 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
+    # Built-in: multi-platform posting planner (Multi_Publisher)
+    if subcommand in ("multi", "platforms", "multi-publish", "multi_publish", "multi-platform", "multi_platform"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Multi_Publisher"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: macOS menu bar (App/app.py via rumps)
+    if subcommand in ("menubar", "menu-bar", "menu_bar", "menu"):
+        app_py = REPO_ROOT / "App" / "app.py"
+        if not app_py.exists():
+            print(f"bolt: menu bar app not found: {app_py}", file=sys.stderr)
+            return 1
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        # Import check with a friendly hint before blocking on rumps.App.run()
+        py = str(VENV_PYTHON if VENV_PYTHON.exists() else sys.executable)
+        probe = subprocess.run(
+            [py, "-c", "import rumps"],
+            cwd=str(REPO_ROOT),
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+        if probe.returncode != 0:
+            print(
+                "bolt menubar needs rumps (macOS only).\n"
+                "  uv sync --extra menubar\n"
+                "  bolt menubar",
+                file=sys.stderr,
+            )
+            return 1
+        os.chdir(REPO_ROOT)
+        return subprocess.call([py, str(app_py)] + rest, cwd=str(REPO_ROOT), env=env)
+
     # Built-in: checkup dashboard (Checkup_Writer → App/Bolt_Checkup.html)
     if subcommand in ("checkup", "dashboard", "checkup-dashboard", "checkup_dashboard"):
         env = os.environ.copy()
@@ -708,6 +756,16 @@ print('System is fully upgraded.')
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
         cmd = [py, "-m", "modules.Video_Intelligence"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: live web search (Bolt_Search → DuckDuckGo)
+    if subcommand in ("search", "web-search", "web_search", "websearch"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}:{REPO_ROOT}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Bolt_Search"] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 

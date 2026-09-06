@@ -201,7 +201,7 @@ def main():
             update_checkup()
         except Exception as exc:
             notify(f"Checkup data skipped: {exc}", level="info")
-        _cleanup_old_clips()
+        _cleanup_old_clips(config=config)
 
     # ── Step 9: Start Bolt's voice + chat bot ────────────────────────────────
     if batch_process:
@@ -234,25 +234,50 @@ def main():
 # ── Clip cleanup ──────────────────────────────────────────────────────────────
 
 
-def _cleanup_old_clips(max_age_days: int = 14):
+def _cleanup_old_clips(max_age_days: int = 14, config: dict | None = None):
     """
     Delete clips and vertical clips older than max_age_days.
 
     Why auto-delete? Clips pile up fast. After 14 days they're either
     already posted or not worth posting — keeping them just wastes space.
     Runs silently on every launch so you never have to think about it.
+
+    Targets the live media folders from config (media/clips + media/vertical_clips),
+    not the pre-reorg CWD stubs clips/ and vertical_clips/.
     """
     import time
 
     cutoff = time.time() - (max_age_days * 86400)  # 86400 seconds in a day
-    folders = [Path("clips"), Path("vertical_clips")]
+    cfg = config if isinstance(config, dict) else {}
+    clip_rel = cfg.get("clips_folder") or "media/clips"
+    vert_rel = cfg.get("vertical_clips_folder") or "media/vertical_clips"
+
+    # Resolve against repo root (launch.py already chdirs there).
+    folders: list[Path] = []
+    seen: set[Path] = set()
+    for rel in (clip_rel, vert_rel, "media/clips", "media/vertical_clips"):
+        folder = (_REPO / rel).resolve() if not Path(rel).is_absolute() else Path(rel).resolve()
+        if folder in seen:
+            continue
+        seen.add(folder)
+        folders.append(folder)
+
+    # Also sweep legacy pre-reorg folders if they still exist beside the repo root.
+    for legacy in (_REPO / "clips", _REPO / "vertical_clips"):
+        resolved = legacy.resolve()
+        if resolved not in seen and legacy.is_dir():
+            seen.add(resolved)
+            folders.append(resolved)
+
     extensions = {".mp4", ".mkv", ".mov"}
     deleted = []
 
     for folder in folders:
-        if not folder.exists():
+        if not folder.is_dir():
             continue
         for f in folder.iterdir():
+            if not f.is_file():
+                continue
             if f.suffix.lower() in extensions and f.stat().st_mtime < cutoff:
                 try:
                     f.unlink()
@@ -264,13 +289,13 @@ def _cleanup_old_clips(max_age_days: int = 14):
         notify(
             f"🗑️  Cleaned up {len(deleted)} clip{'s' if len(deleted) != 1 else ''} older than {max_age_days} days.",
             level="info",
-            reason="Old clips auto-deleted on launch. Anything older than 14 days is assumed posted or skipped.",
+            reason="Old clips auto-deleted on launch from media/clips + media/vertical_clips (plus any leftover legacy folders).",
         )
     else:
         notify(
             f"✅ No clips older than {max_age_days} days — nothing to clean up.",
             level="info",
-            reason="Clip folder check passed. All clips are recent.",
+            reason="Clip folder check passed under media/clips + media/vertical_clips. All clips are recent.",
         )
 
 
@@ -532,9 +557,9 @@ def _run_setup_wizard():
     # ── Write config.json ─────────────────────────────────────────────────────
     config = {
         "game": game,
-        "recordings_folder": "recordings",
-        "clips_folder": "clips",
-        "vertical_clips_folder": "vertical_clips",
+        "recordings_folder": "media/Recordings",
+        "clips_folder": "media/clips",
+        "vertical_clips_folder": "media/vertical_clips",
         "highlight_sensitivity": sens_value,
         "use_obs_integration": use_obs,
         "obs_path": obs_path,

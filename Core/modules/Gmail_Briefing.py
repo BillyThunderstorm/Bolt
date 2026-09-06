@@ -20,10 +20,19 @@ except ImportError:
             print(f"           Why: {reason}")
 
 
-ROOT = Path(__file__).parent.parent
-CREDENTIALS = ROOT / "credentials.json"
-TOKEN_PATH = ROOT / "data" / "gmail_token.json"
+_CORE = Path(__file__).resolve().parent.parent
+_REPO_ROOT = _CORE.parent
+CREDENTIALS = _CORE / "credentials.json"
+TOKEN_PATH = _REPO_ROOT / "Data" / "gmail_token.json"
+_LEGACY_TOKEN = _CORE / "data" / "gmail_token.json"
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+
+if _LEGACY_TOKEN.exists() and not TOKEN_PATH.exists():
+    try:
+        TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
+        TOKEN_PATH.write_bytes(_LEGACY_TOKEN.read_bytes())
+    except OSError:
+        pass
 
 IMPORTANT_QUERY = (
     "is:unread newer_than:7d "
@@ -56,7 +65,7 @@ def _get_service():
         return None
 
     creds = None
-    TOKEN_PATH.parent.mkdir(exist_ok=True)
+    TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     if TOKEN_PATH.exists():
         try:

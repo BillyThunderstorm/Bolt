@@ -21,7 +21,10 @@ except ImportError:
 
 
 DEFAULT_TIMEZONE = "America/Chicago"
-PLATFORM_QUEUE_FILE = Path("data/multi_platform_queue.json")
+# Anchor to repo Data/ (not CWD-relative pre-reorg data/).
+# Multi_Publisher.py -> modules/ -> Core/ -> <repo root>
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PLATFORM_QUEUE_FILE = _PROJECT_ROOT / "Data" / "multi_platform_queue.json"
 
 
 class Platform(Enum):
@@ -198,7 +201,7 @@ def _coerce_platform(value: str | Platform) -> Platform:
 
 
 def _load_platform_queue() -> dict:
-    PLATFORM_QUEUE_FILE.parent.mkdir(exist_ok=True)
+    PLATFORM_QUEUE_FILE.parent.mkdir(parents=True, exist_ok=True)
     if PLATFORM_QUEUE_FILE.exists():
         try:
             return json.loads(PLATFORM_QUEUE_FILE.read_text(encoding="utf-8"))
@@ -208,24 +211,148 @@ def _load_platform_queue() -> dict:
 
 
 def _save_platform_queue(data: dict) -> None:
-    PLATFORM_QUEUE_FILE.parent.mkdir(exist_ok=True)
+    PLATFORM_QUEUE_FILE.parent.mkdir(parents=True, exist_ok=True)
     PLATFORM_QUEUE_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
-if __name__ == "__main__":
+def list_platform_queue(limit: int = 10) -> list[dict]:
+    """Return the newest platform-plan items (most recent first)."""
+    data = _load_platform_queue()
+    items = list(data.get("items") or [])
+    items.reverse()
+    return items[: max(1, limit)]
+
+
+def _print_plan(platforms: list[dict], indent: str = "  ") -> None:
+    for p in platforms:
+        when = (p.get("scheduled_for") or "")[:16]
+        label = p.get("label") or p.get("platform") or "?"
+        status = p.get("status") or ""
+        print(f"{indent}• {label:<18} {when}  [{status}]")
+        instr = p.get("instructions")
+        if instr:
+            print(f"{indent}  {instr}")
+
+
+def _main() -> int:
     import argparse
+    import sys
 
     parser = argparse.ArgumentParser(
-        description="Build a no-cost multi-platform posting plan."
-    )
-    parser.add_argument("clip_path")
-    parser.add_argument("title")
-    parser.add_argument("--hashtags", nargs="*", default=[])
-    args = parser.parse_args()
-
-    print(
-        json.dumps(
-            build_platform_plan(args.clip_path, args.title, args.hashtags),
-            indent=2,
+        description=(
+            "No-cost multi-platform posting planner "
+            "(TikTok / YouTube Shorts / Instagram Reels / Kick). "
+            "Does not upload — writes Data/multi_platform_queue.json."
         )
     )
+    sub = parser.add_subparsers(dest="cmd")
+
+    p_status = sub.add_parser(
+        "status", help="Show recent saved platform plans (default)"
+    )
+    p_status.add_argument(
+        "--limit", type=int, default=10, help="How many queue items to show"
+    )
+    p_status.add_argument("--json", action="store_true")
+
+    p_plan = sub.add_parser(
+        "plan", help="Build a platform plan for one clip (optionally save)"
+    )
+    p_plan.add_argument("clip_path")
+    p_plan.add_argument("title")
+    p_plan.add_argument("--hashtags", nargs="*", default=[])
+    p_plan.add_argument(
+        "--save",
+        metavar="QUEUE_ID",
+        default=None,
+        help="Persist under this queue id in Data/multi_platform_queue.json",
+    )
+    p_plan.add_argument("--json", action="store_true")
+
+    p_show = sub.add_parser("show", help="Show one saved plan by queue id")
+    p_show.add_argument("queue_id")
+    p_show.add_argument("--json", action="store_true")
+
+    # Backward-compatible: `python -m modules.Multi_Publisher CLIP TITLE`
+    # with no subcommand still builds a plan (no save).
+    args, unknown = parser.parse_known_args()
+    if args.cmd is None and unknown:
+        # Legacy positional form
+        legacy = argparse.ArgumentParser()
+        legacy.add_argument("clip_path")
+        legacy.add_argument("title")
+        legacy.add_argument("--hashtags", nargs="*", default=[])
+        larg = legacy.parse_args(unknown)
+        plan = build_platform_plan(larg.clip_path, larg.title, larg.hashtags)
+        print(json.dumps(plan, indent=2))
+        return 0
+
+    if args.cmd is None:
+        args.cmd = "status"
+        if not hasattr(args, "limit"):
+            args.limit = 10
+        if not hasattr(args, "json"):
+            args.json = False
+
+    if args.cmd == "status":
+        items = list_platform_queue(limit=args.limit)
+        if args.json:
+            json.dump(items, sys.stdout, indent=2)
+            sys.stdout.write("\n")
+            return 0
+        path = PLATFORM_QUEUE_FILE
+        print(f"Multi-platform queue: {path}")
+        if not items:
+            print("  (empty — plans are written when Peak_Hour queues a clip)")
+            return 0
+        print(f"  Showing {len(items)} newest item(s)\n")
+        for item in items:
+            qid = item.get("queue_id") or "?"
+            created = (item.get("created_at") or "")[:19]
+            platforms = item.get("platforms") or []
+            print(f"• {qid}  ({created})  {len(platforms)} platform(s)")
+            _print_plan(platforms)
+            print()
+        return 0
+
+    if args.cmd == "plan":
+        plan = build_platform_plan(args.clip_path, args.title, args.hashtags)
+        if args.save:
+            append_platform_plan(args.save, plan)
+        if args.json:
+            json.dump(plan, sys.stdout, indent=2)
+            sys.stdout.write("\n")
+        else:
+            print(f"Plan for: {args.title}")
+            print(f"Clip:     {args.clip_path}")
+            if args.save:
+                print(f"Saved as: {args.save} → {PLATFORM_QUEUE_FILE}")
+            _print_plan(plan)
+        return 0
+
+    if args.cmd == "show":
+        data = _load_platform_queue()
+        match = next(
+            (i for i in (data.get("items") or []) if i.get("queue_id") == args.queue_id),
+            None,
+        )
+        if not match:
+            print(f"No plan with queue_id={args.queue_id!r} in {PLATFORM_QUEUE_FILE}")
+            return 1
+        if args.json:
+            json.dump(match, sys.stdout, indent=2)
+            sys.stdout.write("\n")
+        else:
+            print(f"queue_id: {match.get('queue_id')}")
+            print(f"created:  {match.get('created_at')}")
+            _print_plan(match.get("platforms") or [])
+        return 0
+
+    parser.print_help()
+    return 2
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(_main())

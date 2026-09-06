@@ -97,14 +97,22 @@ bolt predict --game G --trigger T [--platform P] [--days N] [--json]
 bolt predict --queue [--limit N] [--days N] [--json]
                                       # Forecast for ready queue clips (Peak_Hour_Notifier insight)
                                       # Aliases: forecast, views-predict, predictive
+bolt multi [status|plan|show] …
+                                      # Manual multi-platform posting plans (no upload)
+                                      # Aliases: platforms, multi-publish
 bolt enhance [--dry-run] [--limit N]
                                       # Smart_Trim → Text_Overlay on media/vertical_clips/
                                       # Writes media/vertical_clips_trimmed/ then media/vertical_clips_final/
 bolt checkup [--open] [--json]        # Refresh Data/Bolt_data.js; --open → App/Bolt_Checkup.html
                                       # (aliases: dashboard, checkup-dashboard)
+bolt menubar                          # macOS menu bar (App/app.py via rumps)
+                                      # (aliases: menu-bar, menu_bar). Needs: uv sync --extra menubar
 bolt ocr <clip> [--verbose]           # On-screen game-stat OCR (Video_Intelligence)
                                       # Feeds titles in bot.py Step C; aliases: video-ocr, extract-stats
                                       # Needs: uv sync --extra ocr + brew install tesseract
+bolt search "question" [--raw|--long|--json] [--limit N]
+                                      # Live DuckDuckGo web search (+ optional LLM summary)
+                                      # Aliases: web-search, websearch. Powers !Bolt chat search.
 bolt overlay [--port 8766]            # OBS overlay server (Stream Deck kill/win + cam frame)
                                       # Thunderstone also has Aitum Vertical 1080x1920; see Docs/guides/OBS_VERTICAL.md
 bolt launch                       # Start live mode (folder watch + optional OBS)
@@ -282,6 +290,25 @@ bolt manage import [--dry-run] [--no-storefront] [--open]
 | `bolt manage mark-posted "Name" --platforms … --where …` | Mark an item as posted, recording publish URLs |
 | `bolt manage shipped` | List every item that has been marked posted |
 | `bolt manage import` | Import Amazon reviews dropped in `Docs/reviews/inbox/` (alias: `inbox`) |
+
+
+### Multi-platform manual plans (`Multi_Publisher`)
+
+No-cost planner for TikTok / YouTube Shorts / Instagram Reels / Kick. Does **not** upload — Peak_Hour_Notifier already embeds a `platform_plan` when a clip is queued, and persists it to `Data/multi_platform_queue.json`.
+
+```bash
+bolt multi                        # status: newest saved plans
+bolt multi status [--limit N] [--json]
+bolt multi plan <clip> "<title>" [--hashtags …] [--save QUEUE_ID] [--json]
+bolt multi show <queue_id> [--json]
+```
+
+| Command | What it does |
+|---|---|
+| `bolt multi` / `bolt multi status` | List recent plans from `Data/multi_platform_queue.json` |
+| `bolt multi plan CLIP TITLE` | Build captions/instructions (optional `--save`) |
+| `bolt multi show QUEUE_ID` | Show one saved plan |
+| Aliases | `platforms`, `multi-publish` |
 
 ### Publishing and platform readiness
 
@@ -704,6 +731,8 @@ bolt sync_tiktok_stats --dry-run
 bolt nexus "question" [--task-type <type>] [--complexity high|medium] [--paid]
 # Free by default (Ollama). --paid allows xAI Grok API for that call.
 # Gemini only if NEXUS_USE_GEMINI=true (off by default). SuperGrok app sub ≠ free API.
+bolt search "question" [--raw|--long|--json] [--limit N]
+# Live DuckDuckGo (ddgs); summarizes for chat. --raw = hits only.
 bolt performance
 bolt log_perf --trigger <trigger> --views <count> [--likes <count>] [--clip <file>]
               [--game "Game Name"] [--platform TikTok] [--note "text"]
@@ -719,6 +748,7 @@ use `log_perf` for manual entry or platforms without API pull (e.g. X).
 | Command | What it does |
 |---------|--------------|
 | `bolt nexus "question"` | Ask Nexus for advice (free: Ollama; `--paid` = Grok API; Gemini opt-in only) |
+| `bolt search "question"` | Live web search (DuckDuckGo via `ddgs`) + optional LLM summary |
 | `bolt performance` | Run a performance baseline / snapshot of recent clip outcomes |
 | `bolt log_perf …` | Manually log a clip's views/likes back to the ranker so it learns |
 | `bolt log_perf --list` | Show recent performance-log entries (most recent first) |
@@ -1012,6 +1042,8 @@ These names perform the same actions as their primary commands:
 | `mission` | `command-center`, `ccc` |
 | `week` | `this-week`, `week-card` |
 | `setup` | (routes to `Core/launch.py`) |
+| `menubar` | `menu-bar`, `menu_bar`, `menu` |
+| `search` | `web-search`, `websearch` |
 
 ---
 

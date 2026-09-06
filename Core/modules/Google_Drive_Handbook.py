@@ -29,12 +29,20 @@ except ImportError:
             print(f"           Why: {reason}")
 
 
-_ROOT = Path(__file__).resolve().parent.parent
+_ROOT = Path(__file__).resolve().parent.parent  # Core/
 REPO_ROOT = _ROOT.parent
 CONFIG_PATH = _ROOT / "config.json"
 CREDENTIALS = _ROOT / "credentials.json"
-TOKEN_PATH = _ROOT / "data" / "google_drive_token.json"
+TOKEN_PATH = REPO_ROOT / "Data" / "google_drive_token.json"
+_LEGACY_TOKEN = _ROOT / "data" / "google_drive_token.json"
 TZ = ZoneInfo("America/Chicago")
+
+if _LEGACY_TOKEN.exists() and not TOKEN_PATH.exists():
+    try:
+        TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
+        TOKEN_PATH.write_bytes(_LEGACY_TOKEN.read_bytes())
+    except OSError:
+        pass
 
 SCOPES = [
     "https://www.googleapis.com/auth/drive.file",
@@ -104,7 +112,7 @@ def _get_service(interactive: bool = False):
         return None, None
 
     creds = None
-    TOKEN_PATH.parent.mkdir(exist_ok=True)
+    TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     if TOKEN_PATH.exists():
         try:
