@@ -1,7 +1,7 @@
 # Bolt readiness audit
 
 *31 August 2026 · Goddess.local · `/Users/carter/developer/Bolt`*
-*Originally read-only 31 Aug 2026. Updated 3 Sep 2026: Analytics_Tracker → `bolt analytics`. Updated 4 Sep 2026: Subtitle_Generator → bot.py Step D; Smart_Trim/Text_Overlay → `bolt enhance`; Checkup dashboard → `bolt checkup` + `App/Bolt_Checkup.html`; Video_Intelligence OCR → bot.py Step C + `bolt ocr`. Updated 5 Sep 2026: Anomaly_Detector / Predictive_Analytics → `bolt anomaly` / `bolt predict` + Peak_Hour_Notifier / bot.py hooks.*
+*Originally read-only 31 Aug 2026. Updated 3 Sep 2026: Analytics_Tracker → `bolt analytics`. Updated 4 Sep 2026: Subtitle_Generator → bot.py Step D; Smart_Trim/Text_Overlay → `bolt enhance`; Checkup dashboard → `bolt checkup` + `App/Bolt_Checkup.html`; Video_Intelligence OCR → bot.py Step C + `bolt ocr`. Updated 5 Sep 2026: Anomaly_Detector / Predictive_Analytics → `bolt anomaly` / `bolt predict` + Peak_Hour_Notifier / bot.py hooks. Updated 5 Sep 2026 (pm): Multi_Publisher → `bolt multi` + `Data/multi_platform_queue.json`; Google Calendar/Gmail/Drive tokens → `Data/`. Updated 5 Sep 2026 (later): Clip cleanup on launch → `media/clips` + `media/vertical_clips` via config. Updated 5 Sep 2026 (evening): macOS menu bar → `bolt menubar` + fixed `App/app.py` paths + `uv sync --extra menubar`. Updated 5 Sep 2026 (night): Clip_Factory burn-in captions from Step D `transcript_segments` → READY. Updated 5 Sep 2026 (late): Bolt_Search → live DuckDuckGo via `ddgs` + `bolt search` (!Bolt chat + CLI).*
 
 If someone else used Bolt tomorrow, the **real product** is the CLI plus the local clip factory and queue — not the apps or auto-posting.
 
@@ -22,12 +22,12 @@ bolt recordings     # scripts/process_recordings.py → Core/bot.py
 bolt day --decide   # Core/bolt_day.py → queue review
 bolt launch         # Core/launch.py → exec Core/bot.py
 bolt queue decide   # Peak_Hour_Notifier
-bolt morning / manage / research / mission / voice / budget / overlay / analytics / anomaly / predict / enhance / checkup / ocr
+bolt morning / manage / research / mission / voice / budget / overlay / analytics / anomaly / predict / enhance / checkup / ocr / menubar / search
 ```
 
 Live clip path: `launch.py` → `bot.py.process_recording`: Highlight_Detector → Clip_Generator → Clip_Deduplicator → Title_Generator → Subtitle_Generator → Clip_Ranker → Clip_Factory → Post_Queue / Peak_Hour_Notifier.
 
-Not real launchers for a stranger: `python3 Core/src/launch.py` (empty `Core/src/`), `App/app.py` (stale `launch.py` path; rumps menu bar, not a shipping Mac/iOS app).
+Not real launchers for a stranger: `python3 Core/src/launch.py` (empty `Core/src/`). Menu bar is real via `bolt menubar` (rumps; not a shipping Mac/iOS `.app` bundle).
 
 ---
 
@@ -41,7 +41,7 @@ Not real launchers for a stranger: `python3 Core/src/launch.py` (empty `Core/src
 | Ranker | `Core/modules/Clip_Ranker.py` | Trigger bonuses + recency-weighted `learned_boost()`; called from `bot.py`. |
 | Queue / review | Peak_Hour_Notifier, Post_Queue | `bolt queue status\|decide\|approve\|hold\|mark-posted\|package` writes `Data/ready_to_post.json`. |
 | Titles (local) | Title_Generator | Templates always work; AI path optional. |
-| Subtitles (local) | Subtitle_Generator + `bot.py` Step D | Whisper segments → `.srt` sidecar next to clip; segments passed to `Clip_Factory.format_for_tiktok`. Missing Whisper = warn + continue (`uv sync --extra subtitles`). |
+| Subtitles (local) | Subtitle_Generator + `bot.py` Step D + Clip_Factory burn-in | Whisper segments → `.srt` sidecar; `format_for_tiktok` burns timed drawtext captions into the vertical/TikTok output. Missing Whisper / no segments / ffmpeg drawtext failure = warn + continue without burn-in (`uv sync --extra subtitles`; prefer `ffmpeg-full` for drawtext). |
 | LLM routing | LLM_Handler, LLM_Budget, XAI_Usage | Real OpenAI-compatible clients, light/local/full, monthly cap. |
 | Decision engine | Think_Learn_Decide | Local `think_and_propose`, queue_clip auto-approve; wired in `bot.py`. |
 | Content Manager | Content_Manager | Real JSON catalog CRUD: `bolt manage/store/social/sponsors/morning`. |
@@ -56,9 +56,14 @@ Not real launchers for a stranger: `python3 Core/src/launch.py` (empty `Core/src
 | Checkup dashboard | `Checkup_Writer` + `App/Bolt_Checkup.html` + `bolt checkup` | Writes `Data/Bolt_data.js`; `bolt checkup [--open]` refreshes + opens the local HTML dashboard. Also refreshed on `launch` and after each `bot.py` pipeline run. |
 | OCR titles | `Video_Intelligence` + `bot.py` Step C + `bolt ocr` | `extract_stats(clip)` → `on_screen_stats` → Title_Generator prepends strongest HUD line. `bolt ocr <clip> [--verbose]`. Missing pytesseract/tesseract = warn + continue (`uv sync --extra ocr`). |
 | Anomaly detection / view forecasting | `Anomaly_Detector` + `Predictive_Analytics` + `bolt anomaly` / `bolt predict` | Anomaly: `detect_and_record` in `bot.py` before highlights (warn + continue). Predict: `queue_clip` / clip cards in Peak_Hour_Notifier; CLI `--queue` / `--game`+`--trigger`. Degrades when profiles/outcomes are thin. |
+| Multi-platform plans | `Multi_Publisher` + `bolt multi` | Manual TikTok/Shorts/Reels/Kick captions + stagger times; Peak_Hour embeds `platform_plan` on queue; persists `Data/multi_platform_queue.json`. No upload (by design). |
 | Thumbnails / ICS | generate_thumbnails, generate_calendar | ffmpeg + hand-rolled ICS. |
 | Memory index | Memory_Index, refresh_memory_index | File-based retrieve; used by briefings. |
 | Config / paths | Config_Loader, `_paths.py`, `Core/config.json` | Post-reorg canonical layout. |
+
+| Clip cleanup on launch | `Core/launch.py` `_cleanup_old_clips` | Deletes aged clips from config `media/clips` + `media/vertical_clips` (legacy `clips/` / `vertical_clips/` swept if still present). Wizard + Config_Loader defaults match. |
+| macOS menu bar | `App/app.py` + `bolt menubar` | Paths use `Core/launch.py`, `App/Bolt_Checkup.html`, `Core/config.json`. Launch = `bolt launch --no-checklist`; process = `bolt recordings latest`; dashboard refreshes via checkup. Needs `uv sync --extra menubar` (rumps). Not a shipping `.app` / iOS build. |
+| Live web search | `Bolt_Search` + `bolt search` | DuckDuckGo via `ddgs` (+ HTML/lite/Instant Answer fallbacks in `scripts/_research.py`). `search_and_answer()` summarizes for !Bolt chat; CLI: `bolt search "…" [--raw|--long|--json]`. Empty/network fail → None / local LLM fallback. Needs `ddgs` (`uv sync`). |
 
 **Most real core (not shells):** LLM_Handler, LLM_Budget, Clip_Ranker, Think_Learn_Decide.
 
@@ -78,14 +83,11 @@ Not real launchers for a stranger: `python3 Core/src/launch.py` (empty `Core/src
 | OBS live | Real WS 5.x. Needs OBS + password. Folder-watch still works without it. |
 | Twitch chat | Real twitchio bot. Needs `TWITCH_BOT_TOKEN`. `use_twitch: false`. |
 | Voice loop | Mic→STT→intent/LLM→TTS. Needs mic, PortAudio, macOS. STT defaults to free Google. |
-| Google Calendar / Gmail | Real OAuth. Token path **stale** (`Core/data` not `Data/`). Needs `credentials.json`. |
-| Multi_Publisher | Real *planner* (no upload). Writes pre-reorg `data/` path; live file is `Data/`. |
-| macOS menu bar | rumps UI looks for repo-root `launch.py` (now `Core/launch.py`). `rumps` not in deps. |
+| Google Calendar / Gmail | Real OAuth. Tokens now under `Data/` (`google_token.json`, `gmail_token.json`); credentials still `Core/credentials.json`. Needs `credentials.json` + consent. |
 | VOD / highlight reel | Real scripts; need Twitch creds + yt-dlp. |
 | Sites / storage cron | William's Cloudflare/GitHub/machine paths, not portable. |
 | Gemini_Client | Real REST; opt-in (`NEXUS_USE_GEMINI=false`). |
 | Brain_Controller | Compat wrapper around Think_Learn_Decide — not a second brain. |
-| Clip cleanup on launch | Deletes `clips/` at CWD, not live `media/clips/`. Harmless miss. |
 
 ### Services
 
@@ -98,6 +100,7 @@ Not real launchers for a stranger: `python3 Core/src/launch.py` (empty `Core/src
 - **Google Calendar/Gmail** — briefing extra only.
 - **Tesseract** — optional for OCR titles (`uv sync --extra ocr` + `brew install tesseract`). Missing = Step C skips stats; titles continue.
 - **openai-whisper** — optional (`uv sync --extra subtitles`). Missing = Step D skips; clip pipeline continues.
+- **ddgs** — web search for `bolt search` / !Bolt / `research find`. In core deps after `uv sync`; without it HTML/lite/IA fallbacks still try.
 
 A stranger also lacks William’s `.env`, `user_profile.json`, catalog notes, queue history, and Google `credentials.json`.
 
@@ -107,7 +110,6 @@ A stranger also lacks William’s `.env`, `user_profile.json`, catalog notes, qu
 
 | Evidence | Fact |
 |---|---|
-| Bolt_Search | `search_and_answer()` **always `return None`**: “Live web search is disabled”. |
 | Core/src/ | Empty except `.DS_Store` + `__pycache__`. `Docs/PROJECT_STATUS.md` still says `python3 Core/src/launch.py`. |
 | TikTok demo creator | `MOCK_CREATOR_INFO` (`"demo_creator"`, `"demo": True`). |
 | merge_py.py | Walk-the-tree helper, not a product surface. |
@@ -141,22 +143,23 @@ A stranger also lacks William’s `.env`, `user_profile.json`, catalog notes, qu
 
 **What will disappoint**
 
-- README “titles, **subtitles**, ranked queues” — subtitles run when Whisper is installed (`uv sync --extra subtitles`); otherwise Step D skips gracefully.
+- README “titles, **subtitles**, ranked queues” — subtitles + vertical burn-in when Whisper is installed (`uv sync --extra subtitles`); otherwise Step D skips and Clip_Factory continues without captions.
 - “Auto-post to TikTok” / M11 — **API paused**.
 - “Creator Command Center” web UI — removed Base44 todo template (`App/BoltApp`). Real CCC is `bolt mission`.
 - **Dashboard** — `bolt checkup --open` loads `App/Bolt_Checkup.html` from `Data/Bolt_data.js`.
-- **Menu bar app** — wrong paths, missing `rumps`.
+- **Menu bar app** — works via `bolt menubar` after `uv sync --extra menubar`. Still rumps (not a notarized Mac/iOS `.app`).
 - **OCR “15 KILL STREAK” titles** — wired in `bot.py` Step C when pytesseract + tesseract are installed (`uv sync --extra ocr`); otherwise titles skip the HUD prefix.
 - **Skincare / tech analyzers** look like features; they are library code or docs. (Anomaly + predictive are READY via CLI + queue/bot hooks.)
 - Personal Cloudflare sites, Streamlabs, Google mail, Twitch chat will be blank without his keys.
 - `Core/README.md` and `PROJECT_STATUS.md` oversell (“M1–M13 code-complete”, Discord integration, ElevenLabs as default). Voice default is **macOS Voice 3**.
 
-**Top 5 unfinished things that look like features but aren’t**
+**Top unfinished things that look like features but aren’t**
 
 1. **TikTok auto-publish** — real client, **hard-paused**.
-2. **macOS menu bar** — `App/app.py` rumps paths are stale (`launch.py` vs `Core/launch.py`); `rumps` not in deps. Not a shipping Mac/iOS app. (Checkup HTML is ready via `bolt checkup`.)
-3. **Burn-in captions in Clip_Factory** — Step D writes `.srt` + passes segments; `format_for_tiktok` accepts `transcript_segments` but does not burn them yet (Text_Overlay is a separate enhance path).
-4. **Multi_Publisher / Google token paths** — still write pre-reorg `data/` / `Core/data` instead of `Data/`.
-5. **Skincare_Analyzer / AI_Analyzer** — docs claim pipeline wiring; `bot.py` never calls them.
+2. **Skincare_Analyzer / AI_Analyzer** — docs claim pipeline wiring; `bot.py` never calls them.
+3. **Config_Loader / Clip_Generator legacy defaults** — live `Core/config.json` uses `media/…`; some module fallbacks still mention bare `clips/` / `vertical_clips/` when config is missing (wizard + Config_Loader defaults now match media/).
+4. **TikTok Post UI demo mode** — Flask UI still falls back to `MOCK_CREATOR_INFO` without a live token.
+
+~~Burn-in captions in Clip_Factory~~ — **DONE / READY** (5 Sep 2026 night): Step D segments are burned via drawtext in `format_for_tiktok`; graceful degrade if empty/ffmpeg fails. Text_Overlay remains the separate `bolt enhance` hook path.
 
 **Stranger-ready subset:** CLI + local clip factory + queue review + catalog/research/mission markdown. Everything that needs cloud APIs, TikTok app review, OBS, or a GUI is gated, paused, or a shell.

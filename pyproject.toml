@@ -39,6 +39,7 @@ dependencies = [
     "python-socketio[client]", # Streamlabs real-time events
     "websocket-client",   # Low-level WebSocket support
     "requests",           # HTTP requests for APIs
+    "ddgs",               # DuckDuckGo search (Bolt_Search + research find)
 
     # GOOGLE SERVICES
     "google-api-python-client",  # Gmail, Calendar APIs
@@ -76,6 +77,11 @@ subtitles = [
 # Enable with: uv sync --extra ocr
 ocr = [
     "pytesseract",
+]
+# macOS menu bar app (App/app.py via `bolt menubar`). macOS only.
+# Enable with: uv sync --extra menubar
+menubar = [
+    "rumps",
 ]
 
 [project.scripts]

@@ -6,9 +6,9 @@ from pathlib import Path
 DEFAULT_CONFIG = {
     "game": "Gaming",
     "highlight_sensitivity": 0.7,
-    "recordings_folder": "recordings",
-    "clips_folder": "clips",
-    "vertical_clips_folder": "vertical_clips",
+    "recordings_folder": "media/Recordings",
+    "clips_folder": "media/clips",
+    "vertical_clips_folder": "media/vertical_clips",
     "use_brain": True,
     "use_voice": True,
     "use_twitch": False,
