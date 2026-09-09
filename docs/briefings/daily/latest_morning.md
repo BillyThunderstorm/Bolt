@@ -1,34 +1,129 @@
-# Good Morning Bolt — 2026-09-09
+# Bolt Daily Briefing
 
-Creator: William
-Priority lanes: game, tech
-Amazon tag: `billycarter-20`
-Posting: approval required = True
+**Wednesday, September 09, 2026**
 
-## Spoken Briefing
-Good morning, William. Bolt is online. Focus lanes today: games and tech. Items currently testing: 2. Shipped reviews: 20 (last: 2026-08-23T16:08:00). Top test item: Bolt Verify Smoke. Content action: Log day-1 notes for Bolt Verify Smoke. Business action: Draft a sponsor pitch for Secretlab. Bolt advance: Attach ASINs to storefront items you already own. Business lesson: Proof before pitches: one honest game/tech review online beats ten unsent emails. Storefront feature idea: Mouse. Sponsor watchlist: Amazon Influencer / Associates. All social posts still need your approval. Let's make something real today.
+## Queue Status
 
-## Next Actions
-- **content**: Log day-1 notes for Bolt Verify Smoke — No journal yet — reviews need real observations.
-  - `bolt manage note "Bolt Verify Smoke" --day 1 --text "..."`
-- **business**: Draft a sponsor pitch for Secretlab — High AOV chair reviews; needs longer test journal. This is a brand on the sponsor list, not a creator C5.
-  - `bolt sponsors pitch "Secretlab"`
-- **advance**: Ship one content action before the next Bolt feature — Content proof advances the business faster than idle tooling.
-  - `bolt advance next`
+**Clips ready to post:** 56
 
-## Storefront
-All storefront items have drafts. Revisit Mouse with a comparison angle.
-Command: `bolt manage note "Mouse" --text "comparison angle"`
+- Total tracked: 73 (ready 56 · posted 4 · scrapped 5)
 
-## Sponsor Watchlist
-- Amazon Influencer / Associates (fit 10): William already has tag billycarter-20 — primary monetization path.
-- Razer (fit 9): Core gaming peripherals; strong starter review products (mice, pads, headsets).
-- Logitech G (fit 9): Mice, keyboards, headsets — easy first reviews from gear William already uses.
+---
 
-## Business Lesson
-Proof before pitches: one honest game/tech review online beats ten unsent emails.
+## Storage Status
 
-## Advance Bolt
-Attach ASINs to storefront items you already own
-Affiliate revenue needs tracked links on real reviews.
-`bolt store feature-next`
+| Directory | Size |
+|-----------|------|
+| Recordings | 46.2GB |
+
+---
+
+## Today's Calendar
+
+Calendar (Wednesday September 9): Nothing scheduled today -- open schedule.
+
+---
+
+## Important Gmail
+
+Important unread Gmail items:
+- [BillyThunderstorm/Bolt] Run failed: Bolt Python CI - main (6ff9a72) — ThunderstormBilly <notifications@github.com>
+  Why it matters: [BillyThunderstorm/Bolt] Bolt Python CI workflow run Bolt Python CI: All jobs have failed View workflow run Status Job Annotations Bolt P...
+- You have no events scheduled today. — Google Calendar <calendar-notification@google.com>
+  Why it matters: Google Calendar William Carter, you have no events scheduled today Wed Sep 9, 2026 You are receiving this email at the account billycarte...
+- You still have two complimentary gifts — "Amazon.com" <store-news@amazon.com>
+  Why it matters: ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏...
+- William Carter IV, ever wonder if your reviews are getting noticed? — "Amazon.com Reviews" <customer-reviews-messages@amazon.com>
+  Why it matters: Amazon Amazon They are! Keep it up by reviewing more products. Videos are especially helpful. 5374 12 Views Hearts What did you think of...
+- The_Scarlet_Sage posted: Oh I’m so happy — TikTok <notification@service.tiktok.com>
+  Why it matters: SimplyBilly, you are friends on TikTok ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌...
+
+---
+
+## Shared Handbook (Google Drive)
+
+Canonical journal / briefing / todo / how-to. Do not duplicate into markdown.
+
+- START HERE: https://docs.google.com/document/d/1u3dRveLkOBsfSpuBXKeFbfj7tVH3EhjZJr-aic5bxjw/edit
+- How-to: https://docs.google.com/document/d/12idgxLR-OzcOyCC6mDQwqmOnZQDuMIZIJCwwMnm_krg/edit
+- Shared Journal: https://docs.google.com/document/d/1paZNFGea-RBAwQ5YMxpuXN8OBRH7R33RAkakYZ23Tfw/edit
+- Today's Daily Log: https://docs.google.com/document/d/1EPMfX2eLauGLQ5Ovb1o9NnoTSo2JhLABdQYMh_ViWKU/edit
+- Daily logs (02): https://drive.google.com/drive/folders/1wanq-qUUGc4qF-uqtqnajAwLd877qSQ4
+- Learnings (06): https://drive.google.com/drive/folders/1oPmHtmY28r_fPjr5cYwiYb5BUDdQCWLH
+- Root folder: https://drive.google.com/drive/folders/1GZ93zTznYK97Nv9Do5bidLOd9Im1J1XK
+- Local pointer: `Docs/GOOGLE_DRIVE_HANDBOOK.md`
+
+---
+
+## This Week
+
+THIS WEEK
+  Topic: pop culture
+  Started: 2026-09-09  ·  0d ago
+  Already done: (nothing logged yet)
+LAST WEEK
+  Topic: tech
+DO NOT SUGGEST
+  • snail care as this week's post
+  • Kenny Sebastian
+  • The Verge / Nilay Patel
+  • Gigguk
+  • The Anime Man (Joey Bizinger)
+  • CDawgVA (Connor Colquhoun)
+  • Mother's Basement (Geoff Thew)
+  • YGG Studios / Under the Scope
+  • Hyram (Skincare by Hyram)
+  • James Welsh
+  • Cassandra Bankson
+  • The Budget Dermatologist
+  … +9 more (C5 drops + bans)
+
+---
+
+## Memory Notes
+
+- [decision_event] classify · queue (source: unified_memory)
+- [constraint] Reminder: No content that sells a hyped product as if it works. If Billy already has something that's hyped but doesn't deliver, cover it as an honest review — and pair it with a similar product that actually works. Never skip the dud just because it's trendy, and never recommend the dud. (source: user_profile)
+- [constraint] Reminder: Bolt prioritizes direction-finding over execution. When given a to-do list, push back with 'do we know this is the right list?' before charging ahead. (source: user_profile)
+
+---
+
+## Research Notes
+
+- Log: **72** findings · **0** pending C5 · **15** kept · **20** dropped · **0** blocked (C7)
+- Next: This week is already set: pop culture. Research that lane (`bolt research find` → honest pop culture film TV reviewer YouTube creator), not a new career plan.
+
+---
+🎯 NEXUS STRATEGY INSIGHT: (grok/grok-4.5)
+**Wednesday, 2026-09-09 — Pop culture week**
+
+One next step only: pick a single TV/film moment you’ve actually watched recently and turn it into one short TikTok hook (reaction or “hot take in 15 seconds”), then stop. Don’t research, don’t batch, don’t touch tech or last week’s leftovers.
+
+When that’s drafted or filmed, we review before anything else.
+
+---
+
+## Action Items For Today
+
+1. Review last clip performance and log outcomes
+2. Follow up on recent decision: classify
+
+---
+
+## Quick Commands
+
+- `bolt recordings` — process new recordings
+- `bolt research` — direction-finding researcher status
+- `bolt research candidates` — C5 review list
+- `bolt manage status` — content manager status
+- `bolt status` — intelligence stack health
+
+
+*Generated by Bolt at 05:00 PM*
+
+---
+
+## Comments
+
+Write below this line. The next briefing will surface what you wrote as a note. To change a hard rule (C1–C7), say so in chat or edit `Data/memory/user_profile.json` — comments here do not rewrite the profile.
+
