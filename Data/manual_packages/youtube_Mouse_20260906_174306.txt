@@ -1,0 +1,33 @@
+=== YouTube package (paste into Studio) ===
+
+TITLE
+Mouse — honest review
+
+DESCRIPTION
+Its cute, lightweight, easy to charge and connect, and very affordable.
+
+What worked:
+Its cute, lightweight, easy to charge and connect, and very affordable.
+
+What got in the way:
+Call out friction honestly when logged.
+
+Who it's for:
+Gamers and tech buyers who want practical takes, not hype.
+
+Verdict: Pending — keep testing until a clear call.
+
+Buy it: https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20
+
+Includes affiliate links. As an Amazon Associate I earn from qualifying purchases. Honest opinion only.
+
+#shorts  #review  #tech  #honest
+
+TAGS
+gaming, tech review, honest review, tech, mouse, pending
+
+UPLOAD URL
+https://studio.youtube.com/channel/upload
+
+NEXT STEP
+Paste the title, description, and tags into the YouTube upload UI. After the video is live, run: bolt manage mark-posted "Mouse" --platforms youtube_shorts --where <video_url>

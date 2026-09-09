@@ -187,7 +187,7 @@ def main():
         "--content-type", "-t",
         default="gaming",
         choices=["gaming", "review", "skincare", "tech"],
-        help="Content type: gaming (default), review, skincare, tech — controls title style and caption strategy",
+        help="Content type: gaming (default), review, skincare, tech — review|skincare|tech run lane analyzers in bot.py before titles",
     )
     parser.add_argument(
         "--force",

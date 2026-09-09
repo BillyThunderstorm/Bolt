@@ -3,13 +3,16 @@ Clip Factory
 ============
 Converts a horizontal gameplay clip into a vertical TikTok/Shorts format.
 
-Default style: "crop" — centre-crops to 9:16, fills the entire frame.
-Alternative: "letterbox" — scales to fit width, pads with black bars top/bottom.
+Default style: "crop" — centre-crops to 9:16 when the strip is wide enough.
+720p (and most 1080p 16:9) auto-switches to "blur_fill" — full gameplay, blurred 9:16 background.
+Already-vertical sources are not recropped. Alternative: "letterbox".
 
 Quality settings:
   - CRF 18 with libx264 (near-lossless, preserves source detail)
   - slow preset (best quality/size balance)
-  - lanczos scaling + unsharp filter (sharp upscale from 720p → 1080p)
+  - lanczos scale, no unsharp (sharpen-on-upscale is what made motion look VHS)
+  - 720p 16:9 sources use blur-fill instead of cropping a ~405px strip
+  - already-9:16 sources are not recropped
   - audio at 192kbps / 48kHz (preserves source quality)
   - +faststart for streaming-optimized MP4
 
@@ -41,13 +44,18 @@ if str(_PATHS_DIR) not in sys.path:
 
 from _paths import VERTICAL_CLIPS_DIR
 
+try:
+    from modules.FFmpeg_Bin import ffmpeg_bin, probe_video
+except ImportError:
+    from FFmpeg_Bin import ffmpeg_bin, probe_video
+
 TARGET_W = 1080
 TARGET_H = 1920
 DEFAULT_CRF = 18
 DEFAULT_PRESET = "slow"
-
-# Prefer ffmpeg-full (libfreetype / drawtext). Stock Homebrew ffmpeg often lacks it.
-_FFMPEG_FULL = "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg"
+# Center-crop of 720p 16:9 is only ~405px wide. Upscaling that strip is the
+# VHS-on-motion look. Below this width, use blur-fill instead.
+MIN_CROP_STRIP_PX = 640
 
 _FONT_CANDIDATES = [
     "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
@@ -59,10 +67,8 @@ _FONT_CANDIDATES = [
 
 
 def _ffmpeg_binary() -> str:
-    """Return the best available ffmpeg path (prefer ffmpeg-full for drawtext)."""
-    if os.path.isfile(_FFMPEG_FULL) and os.access(_FFMPEG_FULL, os.X_OK):
-        return _FFMPEG_FULL
-    return shutil.which("ffmpeg") or "ffmpeg"
+    """Return a ffmpeg that actually launches (not a broken PATH binary)."""
+    return ffmpeg_bin()
 
 
 def _find_bold_font() -> str:
@@ -152,13 +158,36 @@ def build_caption_drawtext_filter(
     return ",".join(filters) if filters else None
 
 
+def choose_vertical_mode(
+    style: str,
+    width: int | None = None,
+    height: int | None = None,
+) -> str:
+    """Pick the 9:16 layout. Never sharpen-upscale a thin crop."""
+    style = (style or "crop").strip().lower()
+    if width and height and height >= width * 1.3:
+        if width == TARGET_W and height == TARGET_H:
+            return "passthrough"
+        return "scale"
+    if style == "letterbox":
+        return "letterbox"
+    if style == "blur_fill":
+        return "blur_fill"
+    if width and height:
+        strip = int(height * TARGET_W / TARGET_H)
+        if strip < MIN_CROP_STRIP_PX:
+            return "blur_fill"
+    return "crop"
+
+
 def _vertical_vf(style: str) -> str:
-    """Base crop/letterbox + scale filter (no captions)."""
+    """Simple -vf chain (crop / letterbox / scale). No unsharp."""
+    if style == "scale":
+        return f"scale={TARGET_W}:{TARGET_H}:flags=lanczos"
     if style == "crop":
         return (
             f"crop=ih*{TARGET_W}/{TARGET_H}:ih,"
-            f"scale={TARGET_W}:{TARGET_H}:flags=lanczos,"
-            f"unsharp=5:5:0.8:3:3:0.4"
+            f"scale={TARGET_W}:{TARGET_H}:flags=lanczos"
         )
     return (
         f"scale={TARGET_W}:{TARGET_H}:force_original_aspect_ratio=decrease:flags=lanczos,"
@@ -166,40 +195,61 @@ def _vertical_vf(style: str) -> str:
     )
 
 
+def _blur_fill_filter() -> str:
+    """Keep the full 16:9 play, fill 9:16 with a blurred copy of the same frame."""
+    return (
+        f"[0:v]split=2[fg][bg];"
+        f"[bg]scale={TARGET_W}:{TARGET_H}:force_original_aspect_ratio=increase:flags=lanczos,"
+        f"crop={TARGET_W}:{TARGET_H},gblur=sigma=24[bg];"
+        f"[fg]scale={TARGET_W}:{TARGET_H}:force_original_aspect_ratio=decrease:flags=lanczos[fg];"
+        f"[bg][fg]overlay=(W-w)/2:(H-h)/2:format=auto,format=yuv420p"
+    )
+
+
 def _run_ffmpeg(
     video_path: str,
     out_path: str,
-    vf: str,
-    crf: int,
-    preset: str,
-    timeout: int = 180,
+    vf: str | None = None,
+    crf: int = DEFAULT_CRF,
+    preset: str = DEFAULT_PRESET,
+    timeout: int = 300,
+    filter_complex: str | None = None,
+    copy_video: bool = False,
 ) -> tuple[bool, str]:
-    """Run ffmpeg with the given -vf. Returns (ok, stderr_tail)."""
-    cmd = [
-        _ffmpeg_binary(),
-        "-y",
-        "-i",
-        video_path,
-        "-vf",
-        vf,
-        "-c:v",
-        "libx264",
-        "-crf",
-        str(crf),
-        "-preset",
-        preset,
-        "-pix_fmt",
-        "yuv420p",
-        "-movflags",
-        "+faststart",
-        "-c:a",
-        "aac",
-        "-b:a",
-        "192k",
-        "-ar",
-        "48000",
-        out_path,
-    ]
+    """Run ffmpeg. Returns (ok, stderr_tail)."""
+    cmd = [_ffmpeg_binary(), "-y", "-i", video_path]
+    if copy_video:
+        cmd.extend(["-c:v", "copy"])
+    else:
+        if filter_complex:
+            cmd.extend(["-filter_complex", filter_complex, "-map", "[v]", "-map", "0:a:0?"])
+        elif vf:
+            cmd.extend(["-vf", vf])
+        cmd.extend(
+            [
+                "-c:v",
+                "libx264",
+                "-crf",
+                str(crf),
+                "-preset",
+                preset,
+                "-pix_fmt",
+                "yuv420p",
+            ]
+        )
+    cmd.extend(
+        [
+            "-movflags",
+            "+faststart",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "192k",
+            "-ar",
+            "48000",
+            out_path,
+        ]
+    )
     try:
         result = subprocess.run(cmd, capture_output=True, timeout=timeout)
         err = (result.stderr or b"").decode(errors="replace")[-400:]
@@ -230,17 +280,24 @@ def format_for_tiktok(
     base = os.path.splitext(os.path.basename(video_path))[0]
     out_path = os.path.join(output_dir, f"{base}_tiktok.mp4")
 
-    if not shutil.which("ffmpeg") and not (
-        os.path.isfile(_FFMPEG_FULL) and os.access(_FFMPEG_FULL, os.X_OK)
-    ):
-        # No ffmpeg at all — moviepy path cannot burn captions; degrade.
+    probed = probe_video(video_path) or {}
+    src_w = probed.get("width")
+    src_h = probed.get("height")
+    mode = choose_vertical_mode(style, src_w, src_h)
+    if mode == "blur_fill" and style == "crop":
+        print(
+            f"[ClipFactory] {base}: {src_w}x{src_h} crop strip is too thin — "
+            "using blur-fill so motion stays sharp"
+        )
+
+    ffmpeg_path = _ffmpeg_binary()
+    if not shutil.which("ffmpeg") and not os.path.isfile(ffmpeg_path):
         if transcript_segments:
             print(
                 f"[ClipFactory] No ffmpeg — skipping caption burn-in for {base}"
             )
         return _format_with_moviepy(video_path, out_path, style)
 
-    vf_base = _vertical_vf(style)
     caption_vf = None
     try:
         caption_vf = build_caption_drawtext_filter(transcript_segments)
@@ -248,11 +305,41 @@ def format_for_tiktok(
         print(f"[ClipFactory] Caption filter build failed for {base}: {exc}")
         caption_vf = None
 
-    # Prefer one-pass: vertical + captions together.
+    def _encode(*, with_captions: bool) -> tuple[bool, str]:
+        captions = caption_vf if with_captions else None
+        if mode == "passthrough" and not captions:
+            ok, err = _run_ffmpeg(
+                video_path, out_path, crf=crf, preset=preset, copy_video=True
+            )
+            if ok:
+                return ok, err
+            return _run_ffmpeg(
+                video_path,
+                out_path,
+                vf=_vertical_vf("scale"),
+                crf=crf,
+                preset=preset,
+            )
+        if mode == "blur_fill":
+            graph = _blur_fill_filter()
+            if captions:
+                graph = f"{graph}[v0];[v0]{captions}[v]"
+            else:
+                graph = f"{graph}[v]"
+            return _run_ffmpeg(
+                video_path,
+                out_path,
+                crf=crf,
+                preset=preset,
+                filter_complex=graph,
+            )
+        vf = _vertical_vf(mode if mode in ("crop", "letterbox", "scale") else "letterbox")
+        if captions:
+            vf = f"{vf},{captions}"
+        return _run_ffmpeg(video_path, out_path, vf=vf, crf=crf, preset=preset)
+
     if caption_vf:
-        ok, err = _run_ffmpeg(
-            video_path, out_path, f"{vf_base},{caption_vf}", crf, preset
-        )
+        ok, err = _encode(with_captions=True)
         if ok:
             print(
                 f"[ClipFactory] Burned {len(transcript_segments or [])} "
@@ -264,8 +351,7 @@ def format_for_tiktok(
             f"retrying without captions: {err}"
         )
 
-    # Vertical only (no burn-in, or burn-in failed)
-    ok, err = _run_ffmpeg(video_path, out_path, vf_base, crf, preset)
+    ok, err = _encode(with_captions=False)
     if ok:
         return out_path
 

@@ -34,6 +34,7 @@ Everything else (TWITCH_CHANNEL, XAI_API_KEY / OPENAI_API_KEY) is already in .en
 """
 
 import os
+import json
 import time
 import random
 import asyncio
@@ -41,7 +42,7 @@ import threading
 from datetime import datetime
 from pathlib import Path
 from collections import deque
-from typing import Optional
+from typing import Any, Dict, Optional
 
 try:
     from dotenv import load_dotenv
@@ -817,7 +818,13 @@ else:
 _bot_instance: Optional[BoltBot] = None
 
 
-def start_chat_bot(brain: str = "", use_voice: bool = False) -> Optional[BoltBot]:
+def start_chat_bot(
+    brain: str = "",
+    use_voice: bool = False,
+    *,
+    force: bool = False,
+    config: Optional[Dict[str, Any]] = None,
+) -> Optional[BoltBot]:
     """
     Start BoltBot in a background daemon thread.
 
@@ -830,8 +837,19 @@ def start_chat_bot(brain: str = "", use_voice: bool = False) -> Optional[BoltBot
     (e.g. bot_instance.trigger_highlight() when a clip is found).
 
     Returns None if prerequisites aren't met.
+    Soft-fails (never raises) when twitchio / token / channel / use_twitch block.
+    Pass force=True to ignore config use_twitch=false (CLI connect).
     """
     global _bot_instance
+
+    if not force and not _use_twitch_enabled(config):
+        notify(
+            "Chat bot skipped — use_twitch is false",
+            level="info",
+            reason="Set use_twitch: true in Core/config.json (or bolt chat connect --force). "
+            "Clip pipeline still runs without Twitch chat.",
+        )
+        return None
 
     if not TWITCHIO_OK:
         notify(
@@ -924,44 +942,223 @@ def get_bot() -> Optional[BoltBot]:
     return _bot_instance
 
 
-# ── CLI test ──────────────────────────────────────────────────────────────────
+# ── Readiness / CLI (bolt chat) ───────────────────────────────────────────────
 
-if __name__ == "__main__":
-    """
-    Test Bolt's chat bot directly.
-    Connects to Twitch chat and stays running.
-    Press Ctrl+C to stop.
 
-    Usage: PYTHONPATH=Core python -m modules.Bolt_Chat
-    """
-    import sys
+def _reload_env_tokens() -> Dict[str, str]:
+    """Re-read Twitch env (tests / late dotenv). Never raises."""
+    token = (os.getenv("TWITCH_BOT_TOKEN", "") or "").strip()
+    name = (os.getenv("TWITCH_BOT_NAME", "") or "").strip() or "BoltBot"
+    channel = (os.getenv("TWITCH_CHANNEL", "") or "").strip().lstrip("#").lower()
+    return {"token": token, "bot_name": name, "channel": channel}
 
-    print("\n  🦊  Bolt Chat Bot — Direct Test")
-    print(f"  Channel:  #{CHANNEL}")
-    print(f"  Bot name: {BOT_NAME}")
-    print(
-        f"  Token set: {'yes ✓' if BOT_TOKEN else 'NO — add TWITCH_BOT_TOKEN to .env'}"
-    )
-    print(f"  LLM:      {'available ✓' if LLM_OK else 'not configured'}")
-    print(f"  Voice:    {'enabled ✓' if VOICE_OK else 'not configured'}")
-    print()
 
-    if "--check" in sys.argv:
-        sys.exit(0)
-
-    brain_path = Path("Bolt_brain.md")
-    if not brain_path.exists():
-        brain_path = Path("bolt_brain.md")
-    brain = brain_path.read_text() if brain_path.exists() else ""
-
-    use_voice = "--voice" in sys.argv
-    bot = start_chat_bot(brain=brain, use_voice=use_voice)
-    if not bot:
-        sys.exit(1)
-
+def _use_twitch_enabled(config: Optional[Dict[str, Any]] = None) -> bool:
+    """Core/config.json use_twitch (default false). Never raises."""
+    if isinstance(config, dict) and "use_twitch" in config:
+        return bool(config.get("use_twitch"))
+    cfg_path = Path(__file__).resolve().parent.parent / "config.json"
     try:
-        # Keep main thread alive while bot runs in background
+        raw = json.loads(cfg_path.read_text(encoding="utf-8"))
+        if isinstance(raw, dict):
+            return bool(raw.get("use_twitch", False))
+    except Exception:
+        pass
+    return False
+
+
+def status(*, probe: bool = False, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    Twitch chat readiness. Never connects unless probe=True (and even then only
+    validates token shape / running instance — no IRC login hang).
+    Soft-fail friendly for strangers without TWITCH_BOT_TOKEN.
+    """
+    # lazy import so module load stays light if json unused elsewhere
+    env = _reload_env_tokens()
+    use_twitch = _use_twitch_enabled(config)
+    token = env["token"]
+    token_set = bool(token)
+    token_looks_oauth = token.lower().startswith("oauth:") if token_set else False
+    running = get_bot() is not None
+
+    ready = bool(
+        TWITCHIO_OK and token_set and env["channel"] and use_twitch
+    )
+
+    info: Dict[str, Any] = {
+        "ready": ready,
+        "twitchio_installed": bool(TWITCHIO_OK),
+        "use_twitch": use_twitch,
+        "token_set": token_set,
+        "token_looks_oauth": token_looks_oauth,
+        "bot_name": env["bot_name"],
+        "channel": env["channel"] or None,
+        "llm_available": bool(LLM_OK),
+        "search_available": bool(SEARCH_OK),
+        "voice_available": bool(VOICE_OK),
+        "running": running,
+        "hint": "",
+    }
+
+    if not TWITCHIO_OK:
+        info["hint"] = (
+            "Twitch chat unavailable: twitchio not installed "
+            "(uv sync / pip install 'twitchio<3'). Folder-watch clips still work."
+        )
+    elif not use_twitch:
+        info["hint"] = (
+            "use_twitch is false in Core/config.json — chat stays off by design. "
+            "Set use_twitch: true + TWITCH_BOT_TOKEN, or: bolt chat connect --force"
+        )
+    elif not token_set:
+        info["hint"] = (
+            "Twitch chat unavailable: set TWITCH_BOT_TOKEN=oauth:… in .env "
+            "(https://twitchapps.com/tmi/). Also TWITCH_BOT_NAME + TWITCH_CHANNEL."
+        )
+    elif not env["channel"]:
+        info["hint"] = "Twitch chat unavailable: set TWITCH_CHANNEL in .env"
+    elif not token_looks_oauth:
+        info["hint"] = (
+            "Token set but should look like oauth:xxxx — get a fresh one at twitchapps.com/tmi"
+        )
+    elif running:
+        info["hint"] = f"Chat bot already running in #{env['channel']} as {env['bot_name']}."
+    else:
+        info["hint"] = (
+            f"Configured for #{env['channel']} as {env['bot_name']}. "
+            "Live connect: bolt chat connect (or bolt launch with use_twitch true)."
+        )
+
+    if probe:
+        # Non-network probe: confirm prerequisites only (no IRC — avoids hang).
+        info["probe_ok"] = ready and token_looks_oauth
+        if not TWITCHIO_OK:
+            info["probe_detail"] = "Twitch chat unavailable: twitchio missing"
+        elif not use_twitch:
+            info["probe_detail"] = "Twitch chat unavailable: use_twitch false"
+        elif not token_set:
+            info["probe_detail"] = "Twitch chat unavailable: TWITCH_BOT_TOKEN missing"
+        elif not token_looks_oauth:
+            info["probe_detail"] = "Twitch chat unavailable: token missing oauth: prefix"
+        elif not env["channel"]:
+            info["probe_detail"] = "Twitch chat unavailable: TWITCH_CHANNEL missing"
+        else:
+            info["probe_detail"] = (
+                f"ok — would join #{env['channel']} as {env['bot_name']} "
+                f"(LLM={'yes' if LLM_OK else 'no'})"
+            )
+
+    return info
+
+
+def _cli_status(*, as_json: bool = False, probe: bool = False) -> int:
+    info = status(probe=probe)
+    if as_json:
+        print(json.dumps(info, indent=2))
+        return 0
+    print("ready:", info["ready"])
+    print("twitchio_installed:", info["twitchio_installed"])
+    print("use_twitch:", info["use_twitch"])
+    print("token_set:", info["token_set"])
+    print("token_looks_oauth:", info["token_looks_oauth"])
+    print("bot_name:", info["bot_name"])
+    print("channel:", info["channel"])
+    print("llm_available:", info["llm_available"])
+    print("running:", info["running"])
+    if info.get("hint"):
+        print("hint:", info["hint"])
+    if probe:
+        print("probe_ok:", info.get("probe_ok"))
+        print("probe_detail:", info.get("probe_detail"))
+    return 0
+
+
+def _cli_help() -> int:
+    print("Usage: bolt chat [status|connect]")
+    print("  status [--json] [--probe]  Twitch chat readiness (default; never connects)")
+    print("  connect [--force] [--voice]  Start IRC bot in background (Ctrl+C to stop)")
+    print()
+    print("  bolt chat")
+    print("  bolt chat status")
+    print("  bolt chat status --probe")
+    print("  bolt chat connect          # respects use_twitch")
+    print("  bolt chat connect --force  # ignore use_twitch: false")
+    print()
+    print("Needs: twitchio + TWITCH_BOT_TOKEN + TWITCH_BOT_NAME + TWITCH_CHANNEL")
+    print("Token: https://twitchapps.com/tmi/  →  TWITCH_BOT_TOKEN=oauth:…")
+    print("Config: Core/config.json use_twitch (false = stay off; clips still work)")
+    return 0
+
+
+def _cli_connect(*, force: bool = False, use_voice: bool = False) -> int:
+    brain_path = Path(__file__).resolve().parent.parent / "bolt_brain.md"
+    if not brain_path.exists():
+        brain_path = Path(__file__).resolve().parent.parent / "Bolt_brain.md"
+    brain = brain_path.read_text(encoding="utf-8") if brain_path.exists() else ""
+
+    info = status(config=None)
+    if not force and not info["use_twitch"]:
+        print("Twitch chat unavailable: use_twitch is false")
+        print("hint:", info["hint"])
+        print("  Or: bolt chat connect --force")
+        return 1
+    if not info["twitchio_installed"] or not info["token_set"] or not info["channel"]:
+        print("Twitch chat unavailable:", info["hint"])
+        return 1
+
+    bot = start_chat_bot(brain=brain, use_voice=use_voice, force=True)
+    if not bot:
+        print("Twitch chat unavailable: bot failed to start (see hints above)")
+        return 1
+
+    print(f"Bolt chat connecting to #{info['channel']} as {info['bot_name']}…")
+    print("Ctrl+C to stop.")
+    try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
         print("\n  Bolt chat bot stopped.")
+    return 0
+
+
+def main(argv: Optional[list] = None) -> int:
+    import sys
+
+    args = list(argv) if argv is not None else sys.argv[1:]
+    if not args or args[0] in ("status", "ready", "check", "--json", "--probe"):
+        rest = args[1:] if args and args[0] in ("status", "ready", "check") else args
+        as_json = "--json" in rest
+        probe = "--probe" in rest
+        unknown = [a for a in rest if a not in ("--json", "--probe")]
+        if unknown:
+            print(f"Unknown status flag(s): {' '.join(unknown)}", file=sys.stderr)
+            return 2
+        return _cli_status(as_json=as_json, probe=probe)
+
+    cmd = args[0]
+    if cmd in ("-h", "--help", "help"):
+        return _cli_help()
+
+    if cmd in ("connect", "run", "start", "live"):
+        rest = args[1:]
+        force = "--force" in rest
+        use_voice = "--voice" in rest
+        unknown = [a for a in rest if a not in ("--force", "--voice")]
+        if unknown:
+            print(f"Unknown connect flag(s): {' '.join(unknown)}", file=sys.stderr)
+            return 2
+        return _cli_connect(force=force, use_voice=use_voice)
+
+    # Legacy: bare --check / --voice flags
+    if cmd == "--check":
+        return _cli_status()
+    if cmd == "--voice":
+        return _cli_connect(force=True, use_voice=True)
+
+    print(f"Unknown arg: {cmd}", file=sys.stderr)
+    _cli_help()
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

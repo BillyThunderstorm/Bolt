@@ -39,6 +39,11 @@ except ImportError:
     def load_config():
         return {}
 
+try:
+    from modules.FFmpeg_Bin import ffmpeg_bin, ffprobe_bin
+except ImportError:
+    from FFmpeg_Bin import ffmpeg_bin, ffprobe_bin
+
 
 CONFIG = load_config()
 CORE_ROOT = Path(__file__).resolve().parent.parent
@@ -181,7 +186,7 @@ def _find_audio_peak(video_path: str) -> float | None:
 
         result = subprocess.run(
             [
-                "ffmpeg", "-y",
+                ffmpeg_bin(), "-y",
                 "-i", video_path,
                 "-map", "0:a:0",
                 "-vn",          # audio only
@@ -238,7 +243,7 @@ def _trim_with_ffmpeg(
     Returns (success: bool, error_message: str | None).
     """
     cmd = [
-        "ffmpeg", "-y",
+        ffmpeg_bin(), "-y",
         "-ss", f"{start:.3f}",       # seek before input for fast + accurate trim
         "-i", source,
         "-t", f"{duration:.3f}",
@@ -268,7 +273,7 @@ def _trim_with_ffmpeg(
 def _get_duration(filepath: str) -> float:
     """Return video duration in seconds via ffprobe, or 0 on failure."""
     cmd = [
-        "ffprobe", "-v", "error",
+        ffprobe_bin(), "-v", "error",
         "-show_entries", "format=duration",
         "-of", "default=noprint_wrappers=1:nokey=1",
         filepath,

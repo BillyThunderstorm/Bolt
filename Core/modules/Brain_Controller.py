@@ -140,7 +140,8 @@ class BrainController:
     # ── State persistence ─────────────────────────────────────────────────────
 
     def _state_path(self) -> Path:
-        return Path(__file__).parent.parent / "data" / "brain_state.json"
+        # Repo-root Data/ (same pattern as Think_Learn_Decide PROJECT_ROOT / "Data")
+        return Path(__file__).resolve().parents[2] / "Data" / "brain_state.json"
 
     def _load_state(self) -> dict:
         try:
@@ -453,9 +454,96 @@ class BrainController:
         )
 
 
-if __name__ == "__main__":
-    import sys
 
+def status() -> Dict[str, Any]:
+    """
+    Brain_Controller readiness. Never raises.
+
+    Compat surface around Think_Learn_Decide — not a second brain.
+    ready stays True even when Think_Learn_Decide is missing (soft-fail).
+    """
+    try:
+        state_path = Path(__file__).resolve().parents[2] / "Data" / "brain_state.json"
+        tld_available = ThinkLearnDecideEngine is not None
+        intelligence_wired = False
+        if tld_available:
+            try:
+                # Light probe: construct with empty config; decide/record already no-op if None
+                probe = BrainController({})
+                intelligence_wired = probe._intelligence is not None
+            except Exception:
+                intelligence_wired = False
+
+        hint = (
+            "Live path uses Think_Learn_Decide; this module is the legacy event API. "
+            "Try: bolt brain status / bolt brain test"
+        )
+        if not tld_available:
+            hint = (
+                "Think_Learn_Decide not importable — decide/record_event soft no-op. "
+                "Canonical brain remains Think_Learn_Decide. Try: bolt brain status"
+            )
+
+        return {
+            "ready": True,
+            "role": "compat / not second brain",
+            "canonical": "Think_Learn_Decide",
+            "discard_below": float(DISCARD_BELOW),
+            "min_post_score": float(MIN_POST_SCORE),
+            "queue_at": float(QUEUE_AT),
+            "think_learn_decide_available": bool(tld_available),
+            "intelligence_wired": bool(intelligence_wired),
+            "state_path": str(state_path.resolve()),
+            "hint": hint,
+        }
+    except Exception as exc:
+        try:
+            state_path_s = str(
+                (Path(__file__).resolve().parents[2] / "Data" / "brain_state.json").resolve()
+            )
+        except Exception:
+            state_path_s = "Data/brain_state.json"
+        return {
+            "ready": False,
+            "role": "compat / not second brain",
+            "canonical": "Think_Learn_Decide",
+            "discard_below": None,
+            "min_post_score": None,
+            "queue_at": None,
+            "think_learn_decide_available": ThinkLearnDecideEngine is not None,
+            "intelligence_wired": False,
+            "state_path": state_path_s,
+            "hint": f"Brain_Controller status failed: {exc}",
+            "error": str(exc),
+        }
+
+
+def _cli_status(*, as_json: bool = False) -> int:
+    info = status()
+    if as_json:
+        print(json.dumps(info, indent=2))
+        return 0
+    print("ready:", info.get("ready"))
+    print("role:", info.get("role"))
+    print("canonical:", info.get("canonical"))
+    print(
+        "thresholds:",
+        f"discard_below={info.get('discard_below')} "
+        f"min_post_score={info.get('min_post_score')} "
+        f"queue_at={info.get('queue_at')}",
+    )
+    print("think_learn_decide_available:", info.get("think_learn_decide_available"))
+    print("intelligence_wired:", info.get("intelligence_wired"))
+    print("state_path:", info.get("state_path"))
+    if info.get("hint"):
+        print("hint:", info["hint"])
+    if info.get("error"):
+        print("error:", info["error"])
+    return 0
+
+
+def _cli_test() -> int:
+    """Existing event-test demo (legacy highlight/raid/sub decide path)."""
     try:
         with open(
             Path(__file__).parent.parent / "config.json", "r", encoding="utf-8"
@@ -470,6 +558,7 @@ if __name__ == "__main__":
     print(f"  Discard below: {DISCARD_BELOW:.0f}")
     print(f"  Queue floor:    {MIN_POST_SCORE:.0f}")
     print(f"  Alert at:       {QUEUE_AT:.0f}")
+    print(f"  State path:     {brain._state_path()}")
     print()
 
     test_events = [
@@ -492,3 +581,56 @@ if __name__ == "__main__":
 
     print(f"  {brain.session_summary()}")
     print()
+    return 0
+
+
+def _cli_help() -> int:
+    print("Usage: bolt brain [status|test]")
+    print("  status [--json]   Brain_Controller readiness (default; soft-fail)")
+    print("  ready / check     Aliases for status")
+    print("  test              Event-test demo (legacy decide path)")
+    print("  -h / help         This help")
+    print()
+    print("Think_Learn_Decide is the canonical decision path.")
+    print("Brain_Controller is the legacy event compat API (not a second brain).")
+    print()
+    print("Examples:")
+    print("  bolt brain status")
+    print("  bolt brain status --json")
+    print("  bolt brain test")
+    print("  python -m modules.Brain_Controller status")
+    return 0
+
+
+def main(argv: Optional[list] = None) -> int:
+    import sys
+
+    args = list(sys.argv[1:] if argv is None else argv)
+    if not args:
+        return _cli_status()
+
+    cmd = args[0]
+    if cmd in ("-h", "--help", "help"):
+        return _cli_help()
+
+    if cmd in ("status", "ready", "check") or cmd == "--json":
+        rest = args[1:] if cmd in ("status", "ready", "check") else args
+        as_json = "--json" in rest
+        unknown = [a for a in rest if a != "--json"]
+        if unknown:
+            print(f"Unknown status flag(s): {' '.join(unknown)}", file=sys.stderr)
+            return 2
+        return _cli_status(as_json=as_json)
+
+    if cmd == "test":
+        return _cli_test()
+
+    print(f"Unknown command: {cmd}", file=sys.stderr)
+    _cli_help()
+    return 2
+
+
+if __name__ == "__main__":
+    import sys
+
+    raise SystemExit(main())

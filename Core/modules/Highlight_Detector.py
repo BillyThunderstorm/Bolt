@@ -18,6 +18,11 @@ from typing import List, Optional
 
 from modules.Config_Loader import load_config
 
+try:
+    from modules.FFmpeg_Bin import ffmpeg_bin
+except ImportError:
+    from FFmpeg_Bin import ffmpeg_bin
+
 config = load_config()
 _CFG = config.get("highlight", config) if isinstance(config.get("highlight"), dict) else config
 
@@ -257,7 +262,7 @@ def _load_rms(video_path: str):
 
         result = subprocess.run(
             [
-                "ffmpeg",
+                ffmpeg_bin(),
                 "-y",
                 "-i",
                 video_path,

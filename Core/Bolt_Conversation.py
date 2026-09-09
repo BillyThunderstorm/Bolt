@@ -5,23 +5,28 @@ modules/Bolt_Conversation.py — Bolt's voice conversation engine
 Back-and-forth voice (or text) conversation with Billy.
 
 What it does:
-  - Listens via microphone using speech_recognition + Whisper (OpenAI) with Google fallback
+  - Listens via microphone using speech_recognition + free Google STT
+    (Whisper only if BOLT_USE_WHISPER=true)
   - Maintains persistent conversation history (Project Memory)
   - Routes high-value intents (morning, next, status, queue, research, mission)
     and write-backs (ready / this week is / this shipped / mission check-in) to real actions
-  - Generates personality-driven responses via LLM_Handler (OpenAI or xAI/Grok)
-  - Speaks responses aloud through Bolt_Voice (ElevenLabs primary)
-  - Can be used hands-free during streams or desk work
+  - Generates personality-driven responses via LLM_Handler (Ollama / xAI / OpenAI)
+  - Speaks responses through Bolt_Voice (default: macOS ``say`` / Voice 3;
+    edge-tts / ElevenLabs optional)
+  - Soft-fails when mic / SpeechRecognition / PortAudio is missing — use
+    ``bolt voice --text`` (stranger-safe). ``bolt voice status`` reports readiness.
 
 Usage:
   PYTHONPATH=Core python3 -m Bolt_Conversation          # start voice chat loop
-  PYTHONPATH=Core python3 -m Bolt_Conversation --text   # text-only mode (still speaks replies)
+  PYTHONPATH=Core python3 -m Bolt_Conversation --text   # type in; still speaks replies
+  PYTHONPATH=Core python3 -m Bolt_Conversation status   # mic / STT / TTS / LLM readiness
   PYTHONPATH=Core python3 -m Bolt_Conversation --once "What should I post today?"
 
 Environment:
   BOLT_LLM_PROVIDER / XAI_API_KEY / OPENAI_API_KEY  — response generation
-  OPENAI_API_KEY                                    — optional, for Whisper transcription only
-  ELEVENLABS_API_KEY                                — optional, Bolt_Voice uses it automatically if set
+  BOLT_STT_PROVIDER / BOLT_USE_WHISPER              — STT (default free Google)
+  Bolt_TTS_PROVIDER / Bolt_VOICE                    — TTS (default macos / Voice 3)
+  ELEVENLABS_API_KEY                                — optional character TTS
 """
 
 import os
@@ -33,6 +38,7 @@ import tempfile
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional
+import threading
 
 try:
     from dotenv import load_dotenv
@@ -308,6 +314,127 @@ def _stt_provider() -> str:
     return "google"
 
 
+
+def _mic_available(*, timeout: float = 1.5) -> bool:
+    """
+    True if SpeechRecognition can open a default microphone within ``timeout``.
+    Never raises. Timed out / hung open → False (do not block status forever).
+    """
+    if not SPEECH_OK:
+        return False
+    box: dict = {"ok": False}
+
+    def _try() -> None:
+        try:
+            with sr.Microphone() as _source:
+                box["ok"] = True
+        except Exception:
+            box["ok"] = False
+
+    t = threading.Thread(target=_try, daemon=True)
+    t.start()
+    t.join(timeout)
+    if t.is_alive():
+        return False
+    return bool(box["ok"])
+
+
+def voice_status(*, probe_mic: bool = False) -> dict:
+    """
+    Structured readiness for bolt voice / talk / say.
+
+    ``ready`` means stranger-usable via ``bolt voice --text`` (typed input +
+    intent/LLM reply). Mic listen is separate (``mic_ready``).
+    """
+    tts_ok = bool(VOICE_OK)
+    try:
+        if VOICE_OK:
+            from modules.Bolt_Voice import is_available as _tts_available
+
+            tts_ok = bool(_tts_available())
+    except Exception:
+        tts_ok = bool(VOICE_OK)
+
+    # Default: package present ⇒ report mic as presumed ready (opening the
+    # device can hang on some Macs). ``probe_mic=True`` does a timed open.
+    if not SPEECH_OK:
+        mic_ready = False
+    elif probe_mic:
+        mic_ready = _mic_available()
+    else:
+        mic_ready = True
+
+    stt = _stt_provider()
+    llm_prov = get_active_provider()
+    try:
+        llm_stat = provider_status()
+    except Exception as exc:
+        llm_stat = {"error": str(exc)}
+
+    hint_parts = []
+    if not SPEECH_OK:
+        hint_parts.append(
+            "SpeechRecognition missing — pip install SpeechRecognition PyAudio "
+            "(or use: bolt voice --text)"
+        )
+    elif probe_mic and not mic_ready:
+        hint_parts.append(
+            "Microphone / PortAudio unavailable — check mic permissions, or use: "
+            "bolt voice --text"
+        )
+    if not tts_ok:
+        hint_parts.append(
+            "TTS unavailable — macOS needs `say`; or set Bolt_TTS_PROVIDER=edge "
+            "and install edge-tts"
+        )
+    if not INTENT_OK and llm_prov in ("unavailable", None, ""):
+        hint_parts.append("Intent router and LLM both offline — replies will be thin")
+    if not hint_parts:
+        if mic_ready and SPEECH_OK:
+            hint_parts.append(
+                "Mic listen ready. Try: bolt voice · bolt voice --text · bolt talk \"what's next?\""
+            )
+        else:
+            hint_parts.append(
+                "Text mode ready. Try: bolt voice --text or bolt talk (one-shot)."
+            )
+
+    return {
+        "ready": True,  # --text path always offered; soft-fail mic separately
+        "mic_ready": bool(SPEECH_OK and mic_ready),
+        "speech_recognition": bool(SPEECH_OK),
+        "stt_provider": stt,
+        "tts_ok": bool(tts_ok),
+        "voice_output": bool(VOICE_OK),
+        "intent_ok": bool(INTENT_OK),
+        "llm_provider": llm_prov,
+        "llm_status": llm_stat,
+        "hint": " ".join(hint_parts),
+    }
+
+
+def print_voice_status(*, probe_mic: bool = False) -> int:
+    """Print human-readable voice readiness. Always exits 0 (status never fails hard)."""
+    info = voice_status(probe_mic=probe_mic)
+    print("\n  Bolt Voice Status")
+    print(f"  ready (text):     yes")
+    print(f"  mic_ready:        {'yes' if info['mic_ready'] else 'no'}")
+    print(f"  speech_recognition: {'yes' if info['speech_recognition'] else 'no'}")
+    print(f"  stt_provider:     {info['stt_provider']}")
+    print(f"  tts_ok:           {'yes' if info['tts_ok'] else 'no'}")
+    print(f"  voice_output:     {'yes' if info['voice_output'] else 'no'}")
+    print(f"  intent_ok:        {'yes' if info['intent_ok'] else 'no'}")
+    print(f"  llm_provider:     {info['llm_provider']}")
+    print(f"  llm_status:       {info['llm_status']}")
+    mem = ConversationMemory()
+    print(f"  history_turns:    {len(mem.history)}")
+    print(f"  history_file:     {HISTORY_FILE}")
+    if info.get("hint"):
+        print(f"  hint:             {info['hint']}")
+    print()
+    return 0
+
+
 def listen_for_speech() -> Optional[str]:
     """
     Listen to the microphone and return transcribed text.
@@ -332,22 +459,33 @@ def listen_for_speech() -> Optional[str]:
     recognizer.dynamic_energy_threshold = True
     recognizer.pause_threshold = float(os.getenv("BOLT_PHRASE_TIMEOUT", str(PHRASE_TIMEOUT)))
 
-    with sr.Microphone() as source:
-        notify("Listening...", level="info")
-        try:
-            # Longer ambient sample = fewer false "no speech" / empty phrases
+    try:
+        with sr.Microphone() as source:
+            notify("Listening...", level="info")
             try:
-                recognizer.adjust_for_ambient_noise(source, duration=0.8)
-            except Exception:
-                pass
-            listen_timeout = int(os.getenv("BOLT_LISTEN_TIMEOUT", str(LISTEN_TIMEOUT)))
-            phrase_limit = int(os.getenv("BOLT_PHRASE_LIMIT", "10"))
-            audio = recognizer.listen(
-                source, timeout=listen_timeout, phrase_time_limit=phrase_limit
-            )
-        except sr.WaitTimeoutError:
-            notify("No speech detected", level="info")
-            return None
+                # Longer ambient sample = fewer false "no speech" / empty phrases
+                try:
+                    recognizer.adjust_for_ambient_noise(source, duration=0.8)
+                except Exception:
+                    pass
+                listen_timeout = int(os.getenv("BOLT_LISTEN_TIMEOUT", str(LISTEN_TIMEOUT)))
+                phrase_limit = int(os.getenv("BOLT_PHRASE_LIMIT", "10"))
+                audio = recognizer.listen(
+                    source, timeout=listen_timeout, phrase_time_limit=phrase_limit
+                )
+            except sr.WaitTimeoutError:
+                notify("No speech detected", level="info")
+                return None
+    except Exception as exc:
+        notify(
+            "Microphone unavailable",
+            level="warning",
+            reason=(
+                f"{type(exc).__name__}: {exc}. "
+                "Install PortAudio/PyAudio or use: bolt voice --text"
+            ),
+        )
+        return None
 
     provider = _stt_provider()
     # Only paid Whisper when both provider says whisper AND explicit opt-in
@@ -506,13 +644,29 @@ def speak_response(text: str):
 # ── Main Conversation Loop ──────────────────────────────────────────────────────
 
 
-def conversation_loop(text_mode: bool = False):
+def conversation_loop(text_mode: bool = False) -> int:
     """
     Run an interactive conversation loop.
 
     text_mode=False: listens for voice input, speaks responses.
     text_mode=True:  accepts typed input, still speaks responses.
+
+    Returns 0 on normal exit, 1 when mic listen was requested but unavailable
+    (soft-fail — caller should suggest ``bolt voice --text``).
     """
+    if not text_mode and not SPEECH_OK:
+        info = voice_status(probe_mic=False)
+        print(
+            "\n  bolt voice: speech recognition unavailable.\n"
+            f"  {info.get('hint') or 'Try: bolt voice --text'}\n"
+        )
+        notify(
+            "Voice mic soft-fail",
+            level="warning",
+            reason=info.get("hint") or "bolt voice --text",
+        )
+        return 1
+
     memory = ConversationMemory()
 
     greeting = (
@@ -571,6 +725,7 @@ def conversation_loop(text_mode: bool = False):
         level="success",
         reason=f"{len(memory.history)} turns in history",
     )
+    return 0
 
 
 def single_exchange(prompt: str):
@@ -599,24 +754,13 @@ def single_exchange(prompt: str):
 if __name__ == "__main__":
     args = sys.argv[1:]
 
-    if "--clear" in args:
+    if "--clear" in args or (args and args[0] == "clear"):
         ConversationMemory().clear()
         notify("Conversation history cleared", level="success")
         sys.exit(0)
 
-    if "--status" in args:
-        mem = ConversationMemory()
-        status = provider_status()
-        print(f"\n  🤖  Bolt Conversation Status")
-        print(f"  History turns: {len(mem.history)}")
-        print(f"  History file:  {HISTORY_FILE}")
-        print(f"  Speech input:  {'✓' if SPEECH_OK else '✗'}")
-        print(f"  Voice output:  {'✓' if VOICE_OK else '✗'}")
-        print(f"  Intent router: {'✓' if INTENT_OK else '✗'}")
-        print(f"  LLM provider:  {get_active_provider()}")
-        print(f"  LLM status:    {status}")
-        print(f"\n  Recent context:\n{mem.last_summary()}\n")
-        sys.exit(0)
+    if "--status" in args or (args and args[0] in ("status", "ready")):
+        sys.exit(print_voice_status(probe_mic=("--probe" in args)))
 
     text_mode = "--text" in args
 
@@ -626,4 +770,4 @@ if __name__ == "__main__":
         single_exchange(" ".join(prompt_args))
         sys.exit(0)
 
-    conversation_loop(text_mode=text_mode)
+    sys.exit(conversation_loop(text_mode=text_mode) or 0)

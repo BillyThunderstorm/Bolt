@@ -29,6 +29,18 @@ from unittest.mock import patch, MagicMock
 from modules import Anomaly_Detector as ad
 
 
+class ResolveRecordingPathTests(unittest.TestCase):
+    def test_placeholder_is_rejected(self):
+        path, err = ad._resolve_recording_path("<recording>")
+        self.assertIsNone(path)
+        self.assertIn("placeholder", err)
+
+    def test_missing_name_is_rejected(self):
+        path, err = ad._resolve_recording_path("not-a-real-file.mkv")
+        self.assertIsNone(path)
+        self.assertIn("no file", err)
+
+
 class ProfileExtractionTests(unittest.TestCase):
     def test_missing_file_returns_none(self):
         self.assertIsNone(ad.extract_audio_profile("/tmp/does_not_exist_xyz.mp4"))
@@ -53,7 +65,7 @@ class ProfileExtractionTests(unittest.TestCase):
             # both high mean_rms and meaningful std_rms.
             r = __import__("subprocess").run(
                 [
-                    "ffmpeg", "-y",
+                    ad.ffmpeg_bin(), "-y",
                     "-f", "lavfi", "-i", f"anoisesrc=color=pink:duration=10:amplitude=0.3",
                     "-c:v", "libx264", "-pix_fmt", "yuv420p",
                     str(clip),

@@ -309,18 +309,22 @@ class ContentManagerTests(unittest.TestCase):
         self.assertIn("mark-posted", pkg["next_step"])
 
     def test_youtube_and_x_readiness_reports_manual_mode(self):
-        # Until the OAuth app is reviewed, both readiness reports
-        # should be ready=False but with a clear 'manual pkg available'
-        # message and concrete next steps.
+        # Manual paste packages are the intended surface → ready=True.
+        # API upload stays explicitly not-ready (api_upload_ready=False).
         for readiness in (cm.youtube_readiness(), cm.x_readiness()):
-            self.assertFalse(readiness["ready"])
-            # At least one of the checks should confirm the manual pkg
-            # generator is available.
+            self.assertTrue(readiness["ready"])
+            self.assertEqual(readiness.get("mode"), "manual_assisted")
+            self.assertFalse(readiness.get("api_upload_ready", True))
             ok_checks = [c for c in readiness["checks"] if c["ok"]]
-            self.assertTrue(ok_checks, "at least one ok check should be present")
+            miss_checks = [c for c in readiness["checks"] if not c["ok"]]
+            self.assertTrue(ok_checks, "manual pkg check should be ok")
+            self.assertTrue(miss_checks, "API upload check should still be miss")
             self.assertTrue(
-                any("pkg" in c["detail"] for c in ok_checks),
-                f"no 'pkg' mention in any ok check: {ok_checks}",
+                any(
+                    "pkg" in c["detail"].lower() or "paste" in c["detail"].lower()
+                    for c in ok_checks
+                ),
+                f"no paste/pkg mention in ok checks: {ok_checks}",
             )
             self.assertGreater(len(readiness["next_steps"]), 0)
             self.assertTrue(
@@ -508,6 +512,39 @@ class ContentManagerTests(unittest.TestCase):
         entry = cm.social_package("Controller", ["tiktok", "x"])
         self.assertEqual(entry["status"], "awaiting_approval")
         self.assertEqual(len(entry["packages"]), 2)
+        by_plat = {p["platform"]: p for p in entry["packages"]}
+        self.assertEqual(by_plat["tiktok"].get("package_source"), "weak_caption")
+        self.assertEqual(by_plat["x"].get("package_source"), "build_x_package")
+        self.assertIn("post_text", by_plat["x"])
+        self.assertIn("upload_url", by_plat["x"])
+
+    def test_social_package_uses_youtube_builder(self):
+        cm.add_item("HeadsetYT", lane="tech", asin="B0TESTYT01")
+        cm.add_note("HeadsetYT", "Comfortable pads")
+        entry = cm.social_package("HeadsetYT", ["youtube", "youtube_shorts"])
+        self.assertEqual(len(entry["packages"]), 2)
+        for pkg in entry["packages"]:
+            self.assertEqual(pkg.get("package_source"), "build_youtube_package")
+            self.assertIn("title", pkg)
+            self.assertIn("description", pkg)
+            self.assertIn("studio.youtube.com", pkg.get("upload_url", ""))
+
+    def test_format_and_save_manual_packages(self):
+        cm.add_item("PadSave", lane="tech", asin="B0SAVE01")
+        cm.add_note("PadSave", "Grip is solid")
+        cm.build_draft("PadSave", format="short")
+        ypkg = cm.build_youtube_package("PadSave")
+        ytxt = cm.format_youtube_package_text(ypkg)
+        self.assertIn("TITLE", ytxt)
+        self.assertIn(ypkg["title"], ytxt)
+        self.assertIn("DESCRIPTION", ytxt)
+        xpkg = cm.build_x_package("PadSave")
+        xtxt = cm.format_x_package_text(xpkg)
+        self.assertIn("POST", xtxt)
+        self.assertIn(xpkg["post_text"], xtxt)
+        saved = cm.save_manual_package("youtube", "PadSave", ypkg, text=ytxt)
+        self.assertTrue(Path(saved["txt"]).exists())
+        self.assertTrue(Path(saved["json"]).exists())
 
     def test_next_actions_not_empty(self):
         actions = cm.next_actions()

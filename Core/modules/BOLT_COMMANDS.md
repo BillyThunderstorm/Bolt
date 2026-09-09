@@ -62,6 +62,18 @@ Quick health check:
 ```bash
 bolt budget                      # mode, soft cap, alert channels
 PYTHONPATH=Core python3 -m modules.LLM_Handler
+bolt gemini status               # optional Gemini REST client (soft-fail; Nexus opt-in separate)
+bolt obs status                 # OBS WebSocket readiness (soft-fail; folder-watch still works)
+bolt streamlabs status          # Streamlabs Socket API readiness (soft-fail; optional)
+bolt chat status                # Twitch chat readiness (soft-fail; respects use_twitch)
+bolt vods status                # VOD / highlight deps (creds, yt-dlp, ffmpeg; soft-fail)
+bolt store status               # Storefront + ASIN HTML verify readiness (soft-fail)
+bolt sites status               # Local site-data + storage cron readiness (soft-fail)
+bolt pages status               # Cloudflare Pages readiness (PARTIAL; soft-fail)
+bolt license status             # Repo LICENSE / README placeholder (PARTIAL; soft-fail)
+bolt brain status               # Legacy Brain_Controller readiness (compat; Think_Learn_Decide canonical)
+bolt merge-py status            # Local .py source-dump readiness (soft-fail; Data/merged_bot.py)
+bolt titles status              # Title A/B trainer readiness (soft-fail; Data/viral_titles_model.json)
 ```
 
 ## Core commands
@@ -73,6 +85,14 @@ bolt help                         # Show the CLI command summary
 bolt version                      # Show the repository and Python in use
 bolt verify                       # Check required files, folders, config, and environment
 bolt doctor [--json]              # Live vs mocked vs stale path / missing key
+bolt merge-py [status|run] [--dry-run|--list] [-o PATH]
+                                      # Concatenate local .py → Data/merged_bot.py
+                                      # aliases: merge_py, merge-sources; soft-fail
+                                      # Bare merge-py = status; write: merge-py run
+bolt titles [status|train|ab] [--json] [--dry-run] [--days N] [--game NAME]
+                                      # Local title A/B trainer (AI_Title_Generator)
+                                      # aliases: title-train, train-titles; soft-fail
+                                      # Bare titles = status; train writes Data/viral_titles_model.json
 bolt audit                        # Alias for doctor
 bolt setup                        # Finite setup check (config + keys); exits when done
 bolt day [--decide|--voice|--quiet|--open|--process]
@@ -85,19 +105,24 @@ bolt week done "what shipped"         # Mark progress so next week isn't day one
 bolt week paper [--open]              # One-page fridge sheet (goal + checkboxes)
 bolt week rotate                      # Archive this week → last week
 bolt week ban "idea" [--why "C5 no"]  # Never suggest this again
-bolt stats [status|sync|tiktok|youtube] [--dry-run]
+bolt stats [status|sync|tiktok|youtube] [--dry-run] [--json] [--probe]
                                       # Social readiness + TikTok/YouTube pull
+bolt sites status [--json] [--probe]   # Local site-data + storage cron readiness
+                                      # aliases: sites-status, site-status, storage-cron
 bolt analytics [--days N] [--top N]
                                       # Summarize clip performance from Data/performance_outcomes.jsonl
-bolt anomaly <recording> [--game NAME] [--dry-run|--no-save] [--z N] [--json]
-                                      # Score recording vs audio baseline (Anomaly_Detector)
+bolt anomaly latest [--game NAME] [--dry-run|--no-save] [--z N] [--json]
+bolt anomaly media/Recordings/FILE.mkv
+                                      # Score a recording vs audio baseline.
+                                      # `latest` / `recordings` = newest file in media/Recordings.
+                                      # Don't type the docs' <recording> brackets — zsh treats < as redirect.
                                       # Aliases: anomalies, anomaly-detect
 bolt predict --game G --trigger T [--platform P] [--days N] [--json]
                                       # Forecast 24h views from performance_outcomes.jsonl
 bolt predict --queue [--limit N] [--days N] [--json]
                                       # Forecast for ready queue clips (Peak_Hour_Notifier insight)
                                       # Aliases: forecast, views-predict, predictive
-bolt multi [status|plan|show] …
+bolt multi [status|plan|show|publish] …
                                       # Manual multi-platform posting plans (no upload)
                                       # Aliases: platforms, multi-publish
 bolt enhance [--dry-run] [--limit N]
@@ -106,15 +131,50 @@ bolt enhance [--dry-run] [--limit N]
 bolt checkup [--open] [--json]        # Refresh Data/Bolt_data.js; --open → App/Bolt_Checkup.html
                                       # (aliases: dashboard, checkup-dashboard)
 bolt menubar                          # macOS menu bar (App/app.py via rumps)
+bolt mac-app                          # local dist/Bolt.app assemble (PARTIAL; not notarized)
                                       # (aliases: menu-bar, menu_bar). Needs: uv sync --extra menubar
 bolt ocr <clip> [--verbose]           # On-screen game-stat OCR (Video_Intelligence)
                                       # Feeds titles in bot.py Step C; aliases: video-ocr, extract-stats
                                       # Needs: uv sync --extra ocr + brew install tesseract
+bolt amazon <ASIN|URL> […] [--focus …] [--platform tiktok] [--fetch-only] [--json]
+                                      # Amazon product fetch + review plan (Amazon_Analyzer)
+                                      # Same enrichment as bolt recordings --content-type review
+                                      # Aliases: amazon-review, review-plan
+
+```bash
+bolt store                        # Storefront + ASIN verify readiness (default)
+bolt store status [--json]        # Same; verify counts + soft-fail hint
+bolt store add --name "…" --asin B0… [--category tech] [--notes "…"]
+                                  # Verifies ASIN via HTML scrape by default
+                                  # Amazon block → soft-fail (item still saved)
+bolt store add … --no-verify      # Skip HTML verify
+bolt store list                   # Storefront items (+ verify_status)
+bolt store feature-next           # Next storefront feature candidate
+```
+
 bolt search "question" [--raw|--long|--json] [--limit N]
                                       # Live DuckDuckGo web search (+ optional LLM summary)
                                       # Aliases: web-search, websearch. Powers !Bolt chat search.
 bolt overlay [--port 8766]            # OBS overlay server (Stream Deck kill/win + cam frame)
                                       # Thunderstone also has Aitum Vertical 1080x1920; see Docs/guides/OBS_VERTICAL.md
+
+bolt obs [status] [--json] [--probe]
+                                      # OBS WebSocket readiness (Stream_Monitor)
+                                      # Soft-fail when OBS closed / no password / no websocket-client
+                                      # Aliases: obs-status, stream-monitor
+bolt streamlabs [status] [--json] [--probe]
+                                      # Streamlabs Socket API readiness (donations/raids/subs)
+                                      # Soft-fail without STREAMLABS_SOCKET_TOKEN / python-socketio
+                                      # Aliases: streamlabs-status, slabs, streamlabs-monitor
+bolt chat [status|connect] [--json] [--probe] [--force] [--voice]
+                                      # Twitch chat readiness / connect (Bolt_Chat)
+                                      # status never connects; connect respects use_twitch (or --force)
+                                      # Aliases: twitch-chat, chat-status, bolt-chat
+bolt brain [status|test] [--json]
+                                      # Legacy Brain_Controller readiness (compat event API)
+                                      # Think_Learn_Decide is canonical; this is NOT a second brain
+                                      # Soft-fail without Think_Learn_Decide; state: Data/brain_state.json
+                                      # Aliases: brain-status, brain_status, brain-controller
 bolt launch                       # Start live mode (folder watch + optional OBS)
 bolt launch --no-checklist        # Live mode without the pre-stream voice checklist
 bolt status                       # Check the decision engine, vector DB, and Nexus
@@ -122,8 +182,9 @@ bolt intelligence                 # Alias for `status`
 bolt budget                       # xAI spend / soft cap / alert channel status
 bolt api-usage                    # Alias for budget
 bolt budget --test-alert          # Test Mac + email + iMessage alerts
-bolt storage status               # media/ sizes + disk free
+bolt storage status               # media/ sizes + disk free + sites/cron readiness
 bolt storage monitor|rotate|optimize
+bolt sites status                 # scripts + crontab advisory (no crontab install)
 bolt test                         # Run the full test suite
 bolt test <unittest-arguments>    # Run selected unittest targets
 bolt layout                       # Report misplaced root files; never moves them
@@ -294,33 +355,46 @@ bolt manage import [--dry-run] [--no-storefront] [--open]
 
 ### Multi-platform manual plans (`Multi_Publisher`)
 
-No-cost planner for TikTok / YouTube Shorts / Instagram Reels / Kick. Does **not** upload — Peak_Hour_Notifier already embeds a `platform_plan` when a clip is queued, and persists it to `Data/multi_platform_queue.json`.
+No-cost planner for TikTok / YouTube Shorts / Instagram Reels / Kick. Manual plans are READY — Peak_Hour_Notifier embeds a `platform_plan` when a clip is queued, and persists it to `Data/multi_platform_queue.json`.
+
+**Auto-upload** (Kick / Instagram and all platforms here) is PARTIAL: `bolt multi publish` **never uploads**; it soft-fails with `Kick unavailable:` / `Instagram unavailable:` (and similar) and points at `bolt multi plan` / manual upload. Exit 0 on soft-fail (informational). TikTok Content Posting API remains separately paused.
 
 ```bash
-bolt multi                        # status: newest saved plans
-bolt multi status [--limit N] [--json]
+bolt multi                        # readiness + newest saved plans
+bolt multi status [--limit N] [--json]   # --json → readiness dict + queue summary
 bolt multi plan <clip> "<title>" [--hashtags …] [--save QUEUE_ID] [--json]
 bolt multi show <queue_id> [--json]
+bolt multi publish <platform> [--clip PATH] [--title TITLE] [--json]
+# platform: kick|instagram|instagram_reels|reels|ig|tiktok|youtube|shorts|…
 ```
 
 | Command | What it does |
 |---|---|
-| `bolt multi` / `bolt multi status` | List recent plans from `Data/multi_platform_queue.json` |
+| `bolt multi` / `bolt multi status` | Readiness (`ready` = manual planner; `auto_upload` false) + recent plans from `Data/multi_platform_queue.json` |
+| `bolt multi status --json` | Readiness dict + `queue` / recent items summary |
 | `bolt multi plan CLIP TITLE` | Build captions/instructions (optional `--save`) |
 | `bolt multi show QUEUE_ID` | Show one saved plan |
+| `bolt multi publish PLATFORM` | Soft-fail auto-upload (`Kick unavailable:` / `Instagram unavailable:`); exit 0 |
 | Aliases | `platforms`, `multi-publish` |
 
 ### Publishing and platform readiness
 
 `post-dry-run` previews a TikTok post. `post` remains a dry run unless `--approve` is present.
 
+YouTube / X catalog packages are **manual paste by design** (Studio / compose UI). They do **not** call the YouTube Data API or X API.
+
 ```bash
 bolt manage post-dry-run "Headset"
 bolt manage post "Headset" [--video /path/to/video.mp4]
 bolt manage post "Headset" --approve [--video /path/to/video.mp4]
 bolt manage tiktok-status
-bolt manage youtube-pkg "Headset"
+bolt youtube-pkg "Headset"                 # paste-ready plain text (default)
+bolt youtube-pkg "Headset" --json          # machine JSON
+bolt youtube-pkg "Headset" --save          # also write Data/manual_packages/*.txt + .json
+bolt manage youtube-pkg "Headset"          # same handlers
 bolt manage youtube-status
+bolt x-pkg "Headset"
+bolt x-pkg "Headset" --json --save
 bolt manage x-pkg "Headset"
 bolt manage x-status
 ```
@@ -331,10 +405,16 @@ bolt manage x-status
 | `bolt manage post "Name"` | Default: dry-run only; refuses to publish |
 | `bolt manage post "Name" --approve` | Actually publish to TikTok (still requires `--video` if no draft video) |
 | `bolt manage tiktok-status` | Show whether the TikTok publisher is configured and ready |
-| `bolt manage youtube-pkg "Name"` | Build a YouTube Shorts package (title + description + tags) |
-| `bolt manage youtube-status` | Show whether the YouTube publisher is configured and ready |
-| `bolt manage x-pkg "Name"` | Build an X (Twitter) package from the item's draft |
-| `bolt manage x-status` | Show whether the X publisher is configured and ready |
+| `bolt youtube-pkg "Name"` | Paste-ready YouTube Studio package (title, description, tags, upload URL, next step). Default = plain text |
+| `bolt youtube-pkg "Name" --json` | Same package as JSON |
+| `bolt youtube-pkg "Name" --save` | Write `.txt` + `.json` under `Data/manual_packages/` |
+| `bolt manage youtube-pkg "Name"` | Same as `bolt youtube-pkg` |
+| `bolt manage youtube-status` | Manual package path ready; API upload still pending app review |
+| `bolt x-pkg "Name"` | Paste-ready X compose package (post body + hashtags, upload URL, next step). Default = plain text |
+| `bolt x-pkg "Name" --json` / `--save` | JSON and/or `Data/manual_packages/` write |
+| `bolt manage x-pkg "Name"` | Same as `bolt x-pkg` |
+| `bolt manage x-status` | Manual package path ready; API upload still pending |
+| Aliases | `yt-pkg` → youtube-pkg; `twitter-pkg` → x-pkg |
 
 ### Learned ranking model
 
@@ -377,7 +457,7 @@ Running `bolt social` with no action is the same as `bolt social status`.
 | Command | What it does |
 |---------|--------------|
 | `bolt social status` | Show queue counts and the next posting window status |
-| `bolt social package "Name" --platforms …` | Build ready-to-publish packages for the listed platforms |
+| \`bolt social package "Name" [--platforms …]\` | Queue approval-gated packages; youtube/youtube_shorts/x use rich \`build_*_package\` paste fields; other platforms keep a short caption |
 | `bolt social queue` | Print the full posting queue (status, clip path, scheduled time) |
 
 ## Ready-to-post clip queue (peak hours)
@@ -511,19 +591,22 @@ Typical flow:
 Local browser screen for a compliant TikTok export. Demo mode is safe without a token.
 
 ```bash
-bolt tiktok-post                  # Demo UI (mock creator; publish is dry-run)
-bolt tiktok-post --demo           # Force demo
-bolt tiktok-post --live           # Require a real TikTok token
+bolt tiktok-post                  # Auto: live creator if token ready, else honest DEMO mock
+bolt tiktok-post --demo           # Force mock creator (audit film; publish is dry-run)
+bolt tiktok-post --live           # Require real token; soft-fails with auth hint if not ready
+bolt tiktok-post status           # Token / API readiness (no server)
 bolt tiktok-post --no-open        # Print the URL only; do not open a tab
 bolt tiktok-post --port 8080
 ```
 
-Aliases: `post-ui`, `tiktok_post`, `tiktok-ui`.
+Aliases: `post-ui`, `tiktok_post`, `tiktok-ui`. Demo mock uses username `bolt_demo_not_real` / nickname `[DEMO] Bolt Audit Mock` — never looks like a real account. Live publish still needs `TIKTOK_API_ENABLED=true` + approved Content Posting API + `bolt tiktok_token`.
 
 | Command | What it does |
 |---------|--------------|
-| `bolt tiktok-post` | Open the local Post-to-TikTok UI (demo unless `--live`) |
-| `bolt tiktok-post --live` | Same UI, but a real token is required and publish is live |
+| `bolt tiktok-post` | Open the local Post-to-TikTok UI (auto demo/live) |
+| `bolt tiktok-post --demo` | Force mock creator; publish is dry-run (audit-safe) |
+| `bolt tiktok-post --live` | Require a real token; exits with auth hint if not ready |
+| `bolt tiktok-post status` | API/token readiness (no Flask server) |
 | `bolt tiktok-post --no-open` | Start the server and print the URL only |
 
 ## Sponsors
@@ -595,7 +678,30 @@ stay the source of truth. No second brain.
 copy). They overwrite each other. Comments on the *previous* file are applied
 once (writes first, leftover as a memory note) when the next briefing runs.
 
-The **canonical** shared journal / briefing / todo / how-to is Google Drive, not a second markdown handbook. IDs: `Core/config.json` → `google_drive_handbook`. Pointer: `Docs/GOOGLE_DRIVE_HANDBOOK.md`. Daily loop: local `bolt briefing` / `bolt morning` write markdown **and** append a Bolt briefing section to today's Daily Log in `02_Daily_Operations` when Drive OAuth is present (one-time `bolt drive-auth`). Lessons in `06_Learnings`.
+
+## Source merge dump (`bolt merge-py`)
+
+Maintenance / audit helper — concatenates local Bolt `.py` sources into one dump for LLM context or offline review. **Not** an executable bot.
+
+```bash
+bolt merge-py                         # status (default; safe)
+bolt merge-py status [--json]
+bolt merge-py --dry-run               # count files/bytes, no write
+bolt merge-py --list                  # relative paths only
+bolt merge-py run                     # write Data/merged_bot.py
+bolt merge-py run -o /tmp/bolt_dump.py
+```
+
+| Command | What it does |
+|---|---|
+| `bolt merge-py` / `bolt merge-py status` | Readiness: file count + default output path (soft-fail `Merge unavailable:`) |
+| `bolt merge-py --dry-run` | Preview merge size without writing |
+| `bolt merge-py --list` | Print included relative `.py` paths |
+| `bolt merge-py run` | Write `Data/merged_bot.py` (excludes vendor/cache/media/learning) |
+
+Aliases: `merge_py`, `mergepy`, `merge-sources`. Soft-fail prefix: `Merge unavailable:`.
+
+The **canonical** shared journal / briefing / todo / how-to is Google Drive, not a second markdown handbook. IDs: `Core/config.json` → `google_drive_handbook`. Pointer: `Docs/GOOGLE_DRIVE_HANDBOOK.md`. Daily loop: local `bolt briefing` / `bolt morning` write markdown **and** append a Bolt briefing section to today's Daily Log in `02_Daily_Operations` when Drive OAuth is present (one-time `bolt drive-auth`; check with `bolt drive status`). Lessons in `06_Learnings`.
 
 | You want to… | Say this (or still use the CLI) |
 |---|---|
@@ -607,6 +713,29 @@ The **canonical** shared journal / briefing / todo / how-to is Google Drive, not
 | Comment on a briefing | Write under `## Comments` on `latest_morning.md`. Write-intent lines are applied on the next `bolt briefing`. Leftover lines stay a memory note. |
 
 CLI still works: `bolt week set` / `bolt week done` / `bolt mission update latest`.
+
+## Title A/B trainer (`bolt titles`)
+
+Local learning loop: read titled rows from `Data/performance_outcomes.jsonl`,
+update category/template averages in `Data/viral_titles_model.json`, then bias
+`generate_title()` / `propose_ab()`.
+
+```bash
+bolt titles                           # status (default; safe)
+bolt titles status [--json]
+bolt titles train [--dry-run] [--days N]
+bolt titles ab "your title" [--game "Hades 2"] [--json]
+```
+
+| Command | What it does |
+|---|---|
+| `bolt titles` / `bolt titles status` | Readiness: titled outcomes + model path (soft-fail `Title trainer unavailable:`) |
+| `bolt titles train` | Learn from outcomes → write `Data/viral_titles_model.json` |
+| `bolt titles train --dry-run` | Show category averages without writing |
+| `bolt titles ab "…"` | Propose A/B title variants (optionally keep base as A) |
+
+Aliases: `title-train`, `train-titles`. After posting, `bolt log_perf` / `bolt stats` then `bolt titles train`.
+
 
 ## Recordings, clips, and highlights
 
@@ -636,11 +765,32 @@ duplicates (`.mp4` / `.mov` / `.mkv`) are collapsed to one file. Already-process
 names in `Data/processed_recordings.json`
 are skipped unless you pass `--force`.
 
+`--content-type review|skincare|tech` injects `content_type` into config for
+`bot.py`. Before titles, the pipeline runs a lane analyzer once per recording:
+
+- **skincare** — **Skincare_Analyzer**; `config.skincare_products` +
+  `skincare_goal` / `review_angle`, or Content_Manager `skincare` lane items.
+- **tech** — **AI_Analyzer**; `config.tech_url` + `tech_query` / `tech_params`,
+  or a tech-lane catalog item (ASIN → Amazon URL).
+- **review** — **Amazon_Analyzer**; `config.review_products` / `review_asin` /
+  `amazon_url`, or tech-lane catalog ASINs/URLs. Page fetch + Nexus review plan.
+  Standalone: `bolt amazon <ASIN|URL> […]` (aliases: `amazon-review`,
+  `review-plan`). `--fetch-only` skips Nexus. Store ASIN verify via
+  `bolt manage` still uses the same fetch helper.
+- Analyzer / Nexus / missing-input / Amazon-block failures **warn and continue**;
+  clips still cut.
+- Advice is passed into Title_Generator context (`content_analysis`).
+
 Highlight detection is intentionally strict (local peaks, prominence, confidence
 floor, min gap, candidate cap). Tune in `Core/config.json` under `highlight` and
 `max_highlight_candidates` / `max_clips_per_session`.
 
 `auto-clip-twitch` is an alias for `auto_clip_twitch`.
+`vod_download` is an alias for `vods`. Soft-fail readiness: `bolt vods status`
+(covers download + auto-clip deps). Missing yt-dlp on download paths →
+`VOD unavailable: …` (exit 1, no traceback). Empty `media/clips/` on
+`bolt highlights` → `Highlight reel unavailable: …` (points at `media/clips/` /
+`bolt recordings`).
 
 | Command | What it does |
 |---------|--------------|
@@ -662,7 +812,81 @@ floor, min gap, candidate cap). Tune in `Core/config.json` under `highlight` and
 | `bolt filter_backlog` | Move low-scoring clips to `media/clips/_low_score/` |
 | `bolt watch` | Watch the recordings folder for new files and trigger the pipeline |
 
+## Streamlabs Socket API
+
+Optional live donation/raid/sub/bits/host events (`Streamlabs_Monitor`). Soft-fails without python-socketio / token. Folder-watch still works.
+
+```bash
+bolt streamlabs                       # status (default)
+bolt streamlabs status [--json] [--probe]
+```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt streamlabs` / `bolt streamlabs status` | python-socketio / `STREAMLABS_SOCKET_TOKEN` readiness (no long-lived connect) |
+| `bolt streamlabs status --probe` | Short live Socket.IO connect (hard timeout; disconnects) |
+| Aliases | `streamlabs-status`, `slabs`, `streamlabs-monitor` |
+
+Token once: `STREAMLABS_SOCKET_TOKEN=…` from streamlabs.com/dashboard → Settings → API Settings → Socket API. Optional thresholds: `MIN_RAID_SIZE`, `MIN_BITS`, `MIN_DONATION_USD`.
+
+## Twitch chat bot
+
+Optional live IRC personality (`Bolt_Chat`). Off by default (`use_twitch: false`). Soft-fails without twitchio / token.
+
+```bash
+bolt chat                         # status (default; never connects)
+bolt chat status [--json] [--probe]
+bolt chat connect                 # start bot (needs use_twitch: true)
+bolt chat connect --force         # ignore use_twitch: false
+bolt chat connect --voice         # also speak reactions
+```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt chat` / `bolt chat status` | twitchio / `use_twitch` / token / channel readiness (no IRC) |
+| `bolt chat status --probe` | Same + local probe_ok detail (still no IRC login) |
+| `bolt chat connect` | Start background IRC bot; Ctrl+C to stop |
+| `bolt chat connect --force` | Connect even when `use_twitch` is false |
+| Aliases | `twitch-chat`, `chat-status`, `bolt-chat` |
+
+Token once: `TWITCH_BOT_TOKEN=oauth:…` from https://twitchapps.com/tmi/ plus `TWITCH_BOT_NAME` + `TWITCH_CHANNEL`. Enable in `Core/config.json` with `"use_twitch": true`.
+
+## Brain_Controller (legacy event compat)
+
+Compat wrapper around the older highlight/raid/sub decide + speak/chat/notify API.
+**Think_Learn_Decide is the canonical decision path** — Brain_Controller is not a second brain.
+Live bot path should keep calling Think_Learn_Decide. Soft-fails when Think_Learn_Decide is missing
+(decide/record no-op). State file: `Data/brain_state.json`.
+
+```bash
+bolt brain                        # status (default)
+bolt brain status [--json]
+bolt brain test                   # event-test demo (legacy decide path)
+```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt brain` / `bolt brain status` | Thresholds / TLD availability / state path readiness |
+| `bolt brain status --json` | Same as JSON |
+| `bolt brain test` | Run the legacy event-test demo |
+| Aliases | `brain-status`, `brain_status`, `brain-controller` |
+
 ## Twitch VOD downloads and authentication
+
+Readiness surface (soft-fail; never raises / never hangs):
+
+```bash
+bolt vods status                  # creds / channel / yt-dlp / ffmpeg (default readiness)
+bolt vods status --json
+bolt vods status --probe          # also ping Helix (informational if ready)
+```
+
+Needs `TWITCH_CLIENT_ID` + `TWITCH_CLIENT_SECRET` + `TWITCH_CHANNEL` in `.env`.
+`ready` = those three present. yt-dlp is resolved from the Bolt venv first, then PATH
+(`brew install yt-dlp` is fine). Missing creds / channel print `VOD unavailable: …`
+and exit 1 on download/list (no traceback). Status always exits 0.
+
+Download / sample (existing flags still work when not asking for status):
 
 ```bash
 bolt vods [--channel <channel>] [--type archive|highlight|upload] [--limit 10] [--sample-minutes 5]
@@ -674,12 +898,18 @@ bolt tiktok_token [--client-key <key>] [--client-secret <secret>] [--redirect-ur
                   [--scopes "user.info.basic,video.list,video.publish,video.upload"]
 bolt youtube_token [--client-id <id>] [--client-secret <secret>] [--redirect-uri <uri>]
 bolt drive-auth                      # one-time Google Drive/Docs consent (Daily Log)
+bolt drive status                    # Drive/Docs readiness (--json|--probe; soft-fail)
+bolt gcal-auth                       # one-time Google Calendar consent (briefing)
+bolt gmail-auth                      # one-time Gmail read consent (briefing)
+bolt gcal status                     # Calendar token readiness (no browser)
+bolt gmail status                    # Gmail token readiness (no browser)
 ```
 
-Token commands are interactive and may open a browser or prompt for credentials.
+Token commands are interactive and may open a browser or prompt for credentials. Google Calendar / Gmail / Drive use `Core/credentials.json`; tokens live under `Data/` (`google_token.json`, `gmail_token.json`, `google_drive_token.json`). Briefing/morning never open a browser — soft-skip until the matching `bolt *-auth` has been run once.
 
 | Command | What it does |
 |---------|--------------|
+| `bolt vods status` | Creds / channel / yt-dlp / ffmpeg readiness (`--json` / `--probe`) |
 | `bolt vods` | Download Twitch VOD samples for a channel with type/limit/sample filters |
 | `bolt twitch_token` | Get an OAuth token for the Twitch chat account (interactive) |
 | `bolt twitch_bot_token` | Get an OAuth token for the Bolt bot account (interactive) |
@@ -692,23 +922,28 @@ Pull real views/likes from TikTok or YouTube into `Data/performance_outcomes.jso
 (and clip history on first sight of each video). Preferred surface is **`bolt stats`**
 (wraps the same Performance_Sync path as the older script aliases).
 
+Missing YouTube tokens soft-fail with `Social stats unavailable: …` (status exits 0). While TikTok API is paused, use `bolt log_perf` for TT/X views.
+
 ```bash
-# Readiness + recent outcomes
+# Readiness + recent outcomes (default)
 bolt stats
+bolt stats status
+bolt stats status --json             # machine-readable readiness
+bolt stats status --probe            # optional YouTube dry-run ping
 
 # Safe pull (no write) — preferred first try
 bolt stats --dry-run                 # both platforms
 bolt stats youtube --dry-run
-bolt stats tiktok --dry-run
+bolt stats tiktok --dry-run          # soft-skips while TikTok API paused
 
 # Live write into learning store
-bolt stats sync                      # both
+bolt stats sync                      # both (skips paused TikTok)
 bolt stats youtube                   # YouTube only, live
 bolt stats tiktok --min-age-hours 24
 
 # Tokens (once)
 bolt youtube_token                   # Google OAuth, youtube.readonly
-bolt tiktok_token                    # needs video.list (not upload-only)
+bolt tiktok_token                    # needs video.list (not upload-only); API paused
 
 # Legacy aliases (still work)
 bolt sync_youtube_stats --dry-run
@@ -717,7 +952,9 @@ bolt sync_tiktok_stats --dry-run
 
 | Command | What it does |
 |---------|--------------|
-| `bolt stats` | Token readiness + recent outcomes one-liner |
+| `bolt stats` / `bolt stats status` | Token readiness + recent outcomes (aliases: `social-stats`, `performance-sync`) |
+| `bolt stats status --json` | Machine-readable readiness (soft-fail hints) |
+| `bolt stats status --probe` | Same + optional YouTube dry-run ping |
 | `bolt stats --dry-run` | Both platforms: fetch + match only; write nothing |
 | `bolt stats youtube [--dry-run]` | YouTube/Shorts metrics → performance outcomes |
 | `bolt stats tiktok [--dry-run]` | TikTok metrics (needs `video.list` scope) |
@@ -728,9 +965,19 @@ bolt sync_tiktok_stats --dry-run
 ## Advice, reporting, and learning
 
 ```bash
+bolt nexus status                    # Ollama / paid Grok / Gemini opt-in readiness
+bolt nexus status --json
+bolt nexus status --probe            # Optional live ping (uses a provider when ready)
 bolt nexus "question" [--task-type <type>] [--complexity high|medium] [--paid]
 # Free by default (Ollama). --paid allows xAI Grok API for that call.
-# Gemini only if NEXUS_USE_GEMINI=true (off by default). SuperGrok app sub ≠ free API.
+# Soft-fails with error "LLM unavailable: …" (empty advice) when no provider.
+# Gemini only if NEXUS_USE_GEMINI=true (off by default). Aliases: advice, nexus-status.
+bolt gemini status                   # Gemini key / model / Nexus opt-in readiness
+bolt gemini status --json            # Same as JSON
+bolt gemini status --probe           # Optional live ping (uses quota when key set)
+bolt gemini ask "one sentence tip for TikTok titles"
+# Soft-fails with "LLM unavailable: …" when GEMINI_API_KEY missing (exit 1 on ask).
+# Aliases: gemini-status, gemini_status. Nexus opt-in unchanged (NEXUS_USE_GEMINI=false).
 bolt search "question" [--raw|--long|--json] [--limit N]
 # Live DuckDuckGo (ddgs); summarizes for chat. --raw = hits only.
 bolt performance
@@ -747,13 +994,76 @@ use `log_perf` for manual entry or platforms without API pull (e.g. X).
 
 | Command | What it does |
 |---------|--------------|
-| `bolt nexus "question"` | Ask Nexus for advice (free: Ollama; `--paid` = Grok API; Gemini opt-in only) |
+| `bolt nexus status` | Nexus provider readiness (Ollama / paid Grok / `NEXUS_USE_GEMINI`; soft-fail) |
+| `bolt nexus status --probe` | Optional live ping when a provider is configured |
+| `bolt nexus "question"` | Ask Nexus for advice (free: Ollama; `--paid` = Grok API; Gemini opt-in only; soft-fail) |
+| `bolt gemini status` | Gemini REST client readiness (key / model / `NEXUS_USE_GEMINI`; soft-fail) |
+| `bolt gemini status --probe` | Optional live ping (quota only when key set) |
+| `bolt gemini ask "…"` | Direct `ask_gemini`; exit 1 if reply starts with `LLM unavailable:` |
 | `bolt search "question"` | Live web search (DuckDuckGo via `ddgs`) + optional LLM summary |
 | `bolt performance` | Run a performance baseline / snapshot of recent clip outcomes |
 | `bolt log_perf …` | Manually log a clip's views/likes back to the ranker so it learns |
 | `bolt log_perf --list` | Show recent performance-log entries (most recent first) |
 | `bolt doctor` | Audit live vs mocked vs stale paths / missing keys |
 | `bolt weekly` | Generate (and optionally send) the weekly performance insights |
+| `bolt learning status` | Browse local `Data/learning/` study notes readiness — `--json` / `--probe`; soft-fail `Learning unavailable:`; **study log only** (not product architecture). Aliases: `learn`, `notes`, `study-notes`. |
+| `bolt learning list` | List chapter markdown stems/titles under `Data/learning/` (ignores `_TEMPLATE.md`) |
+| `bolt learning show <slug>` | Print one chapter (`ch01`, stem, or unique substring); soft-fail if missing/ambiguous |
+| `bolt domains status` | Browse creator-domain requirements readiness — `--json` / `--probe`; soft-fail `Domains unavailable:`; **spec browser only** (not a multi-domain runtime). Aliases: `domain`, `creator-domains`, `creator_domains`. |
+| `bolt domains list` | List the 7 numbered domains (id / title / slug) from requirements |
+| `bolt domains show <slug|N>` | Print one domain section from requirements (or `show instructions`); soft-fail if missing/ambiguous |
+| `bolt pages status` | Cloudflare Pages / Worker deploy readiness — `--json` / `--probe`; soft-fail `Pages unavailable:`; **William-specific PARTIAL** (not stranger-ready). Aliases: `cloudflare-pages`, `cf-pages`, `pages-status`. |
+| `bolt pages list` | List known Pages projects + worker (`bolt-fortress` / `billythunderstorm` / `billythunderstorm-live` / `bolt-api-worker`) and `/tmp/sites` path presence |
+| `bolt pages deploy [project]` | Soft-fail wrangler pages deploy (needs auth + staging tree); `--dry-run` prints command only |
+| `bolt license status` | Repo LICENSE / README placeholder — `--json` / `--probe`; soft-fail `License unavailable:`; **PARTIAL** (does not auto-pick SPDX). Aliases: `licence`, `spdx`, `license-status`. |
+
+## Learning notes (`bolt learning`)
+
+Local LLM textbook / study-log browser for `Data/learning/*.md`. **Not product architecture** — PARTIAL discoverability only. Soft-fail prefix: `Learning unavailable:`.
+
+```bash
+bolt learning                         # status (default; safe)
+bolt learning status [--json] [--probe]
+bolt learning list [--json]
+bolt learning show ch01               # or stem / unique substring
+bolt learning ch01                    # bare slug → show
+```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt learning` / `status` | Readiness (`ready` = folder has chapter `.md` files; `is_study_log=true`) |
+| `bolt learning status --json` | Machine-readable readiness dict |
+| `bolt learning status --probe` | Read first chapter as a soft probe |
+| `bolt learning list` | List chapter stems + titles |
+| `bolt learning show <slug>` | Print chapter body (soft-fail if missing) |
+
+Aliases: `learn`, `notes`, `study-notes`. Template `_TEMPLATE.md` is ignored in counts.
+
+## Creator domains (`bolt domains`)
+
+Browse `Docs/requirements/creator-domains-requirements.md` and
+`.github/instructions/creator-domains.instructions.md`. **Not a multi-domain
+runtime** — PARTIAL discoverability only. Soft-fail prefix: `Domains unavailable:`.
+
+```bash
+bolt domains                          # status (default; safe)
+bolt domains status [--json] [--probe]
+bolt domains list [--json]
+bolt domains show 1                   # or slug / unique substring
+bolt domains show content-creation
+bolt domains show instructions        # or: bolt domains instructions
+```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt domains` / `status` | Readiness (`ready` = both docs exist with content + parsed domains; `is_spec_browser=true`) |
+| `bolt domains status --json` | Machine-readable readiness dict |
+| `bolt domains status --probe` | Soft probe of requirements + domain_count |
+| `bolt domains list` | List 7 domain ids / titles / slugs |
+| `bolt domains show <slug|N>` | Print one domain section (soft-fail if missing) |
+| `bolt domains show instructions` | Preview instructions file (first ~80 lines) |
+
+Aliases: `domain`, `creator-domains`, `creator_domains`, `creator-domain`.
 
 ## Briefings, calendars, memory, and site data
 
@@ -764,39 +1074,65 @@ bolt briefing --print            # Print it in the terminal
 bolt briefing --send             # Reminders list "Bolt" + Voice 3 alert + email
                                   # Cron: every day at 17:00
 bolt drive-auth                  # One-time browser Allow for Drive/Docs Daily Log writes
+                                  # aliases: drive_auth
+bolt drive status                # Drive/Docs readiness (default; --json|--probe; soft-fail)
+                                  # aliases: drive-status, gdrive, handbook; also: bolt drive push
+bolt gcal-auth                   # One-time browser Allow for Calendar (briefing)
+                                  # aliases: gcal_auth, calendar-auth, google-calendar-auth
+bolt gmail-auth                  # One-time browser Allow for Gmail read (briefing)
+                                  # aliases: gmail_auth, google-gmail-auth
+bolt gcal status                 # Calendar credentials/token readiness (no browser)
+bolt gmail status                # Gmail credentials/token readiness (no browser)
 bolt calendar [--output-dir <directory>] [--days 30] [--dry-run]
 bolt refresh_memory              # Rebuild Data/memory_index.json
 bolt refresh_vector_db           # Rebuild Data/vector_db/ for Nexus (needs Ollama)
 bolt vector_db                   # Alias for refresh_vector_db
 bolt reindex                     # Alias for refresh_vector_db
+bolt sites status [--json] [--probe]   # unified sites + storage cron readiness
+                                      # aliases: site-status, sites-status, storage-cron
 bolt site [--path <output-file>] [--push]
+bolt site status [--json] [--probe]    # same as bolt sites status
 ```
 
-Vector DB commands require a running Ollama with an embedding model
-(default `nomic-embed-text`). If Ollama is down they fail fast instead of hanging:
+Vector DB commands use Ollama embeddings (default `nomic-embed-text`) for *useful*
+results. If Ollama is down they **fail soft** (warn + exit 1 / empty search / no-op add)
+instead of raising or hanging — Nexus and other callers degrade gracefully:
 
 ```bash
 ollama pull nomic-embed-text
 bolt reindex
 ```
 
-`bolt site --push` writes site data and then attempts to commit and push it. Use it only when that is the intended action.
+`bolt site` always writes local `Data/site-data.json` (REPO_ROOT via `_paths`). `bolt site --push` also attempts git commit + push; failures **soft-fail** with `Sites unavailable: …` (timeout / no remote) and never crash callers. Cloudflare Pages deploy is PARTIAL via `bolt pages` (William-specific; soft-fail `Pages unavailable:`; not stranger-ready). `bolt sites status` reports scripts, crontab (advisory), and git remote without pushing.
 
 | Command | What it does |
 |---------|--------------|
 | `bolt briefing` | Generate (and save) the current daily briefing under `Docs/briefings/` |
 | `bolt briefing --print` | Generate the briefing and print it to the terminal instead of saving |
 | `bolt briefing --send` | Same, then write the **Bolt** Reminders list, speak Voice 3, Mac banner, email |
+| `bolt drive-auth` | One-time Google Drive/Docs consent (`Data/google_drive_token.json`; needs `Core/credentials.json`) |
+| `bolt drive status` | Drive/Docs readiness — `--json` / `--probe`; soft-fail `Drive unavailable:`; never opens a browser. Aliases: `drive-status`, `gdrive`, `handbook`. Also `bolt drive push`. |
+| `bolt merge-py status` | Local `.py` source-dump readiness — `--json`; soft-fail `Merge unavailable:`; write via `bolt merge-py run` → `Data/merged_bot.py`. Aliases: `merge_py`, `merge-sources`. |
+| `bolt titles status` | Title A/B trainer readiness — `--json`; soft-fail `Title trainer unavailable:`; `train` / `ab`; model `Data/viral_titles_model.json`. Aliases: `title-train`, `train-titles`. |
+| `bolt discord status` | Optional Discord **webhook** readiness — `--json` / `--probe`; soft-fail `Discord unavailable:`; not a bot; `test` / `send`. Aliases: `discord-status`, `webhook`, `notify-discord`. |
+| `bolt learning status` | Local `Data/learning/` study-note browser — `--json` / `--probe`; soft-fail `Learning unavailable:`; study log only. Aliases: `learn`, `notes`, `study-notes`. |
+| `bolt domains status` | Creator-domain requirements browser — `--json` / `--probe`; soft-fail `Domains unavailable:`; spec only (not runtime). Aliases: `domain`, `creator-domains`. |
+| `bolt pages status` | Cloudflare Pages deploy readiness — `--json` / `--probe`; soft-fail `Pages unavailable:`; William-specific PARTIAL (not stranger-ready). Aliases: `cloudflare-pages`, `cf-pages`, `pages-status`. |
+| `bolt gcal-auth` | One-time Google Calendar consent (`Data/google_token.json`; needs `Core/credentials.json`) |
+| `bolt gmail-auth` | One-time Gmail read consent (`Data/gmail_token.json`; same credentials file) |
+| `bolt gcal status` | Calendar token readiness — never opens a browser |
+| `bolt gmail status` | Gmail token readiness — never opens a browser |
 
 Reply path for briefings: see **How to reply to Bolt** above. Write-intent lines
 under `## Comments` are applied on the next `bolt briefing`; leftover is a note.
 | `bolt calendar` | Generate ICS calendar feeds for scheduled posts |
 | `bolt refresh_memory` | Rebuild the clip memory index (`Data/memory_index.json`) |
-| `bolt refresh_vector_db` | Rebuild the vector DB used by Nexus for retrieval (`Data/vector_db/`) |
+| `bolt refresh_vector_db` | Rebuild the vector DB used by Nexus for retrieval (`Data/vector_db/`); soft-fails if Ollama down |
 | `bolt vector_db` | Alias: same as `refresh_vector_db` |
 | `bolt reindex` | Alias: same as `refresh_vector_db` |
-| `bolt site` | Write `site-data.json` for the web dashboard |
-| `bolt site --push` | Write site data AND attempt to commit + push it (use carefully) |
+| `bolt sites status` | Local site-data + storage cron readiness (`--json` / `--probe`; soft-fail) |
+| `bolt site` | Write `Data/site-data.json` for the web dashboard (local only) |
+| `bolt site --push` | Write + soft-fail git push (`Sites unavailable:` if remote/git fails) |
 
 ## Notifications
 
@@ -812,6 +1148,103 @@ bolt send "message" [--subject "subject"] [--sms-only|--email-only]
 | `bolt send "msg" --sms-only` | Force phone path (iMessage on Mac for AT&T; email-to-SMS where still alive) |
 | `bolt send "msg" --email-only` | Force email, ignore phone |
 | `bolt send "msg" --subject "…"` | Override the email subject line |
+
+
+
+## Cloudflare Pages (`bolt pages`)
+
+William-specific Cloudflare Pages / Worker deploy readiness. **PARTIAL** — not stranger-ready
+(no full in-repo site apps; needs wrangler + CF auth + `/tmp/sites` staging). Soft-fail prefix:
+`Pages unavailable:`.
+
+```bash
+bolt pages                            # status (default; safe)
+bolt pages status [--json] [--probe]
+bolt pages list [--json]
+bolt pages deploy bolt-fortress --dry-run
+bolt pages deploy billythunderstorm --path /tmp/sites/main
+```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt pages` / `status` | Readiness (`ready` = wrangler + auth + ≥1 deploy path; `is_stranger_ready=false`) |
+| `bolt pages status --json` | Machine-readable readiness dict |
+| `bolt pages status --probe` | Soft probe of wrangler auth / deploy paths |
+| `bolt pages list` | Known projects + path presence |
+| `bolt pages deploy [project]` | Soft-fail deploy (`--dry-run` safe); missing keys → `Pages unavailable:` |
+
+Related: `bolt sites` (local site-data + storage cron — READY). Docs/site holds legal HTML stubs only.
+
+
+
+## Mac .app assemble (`bolt mac-app`)
+
+Local **thin** `dist/Bolt.app` wrapper that launches `bolt menubar` from this
+checkout. **Not notarized. Not iOS. Not App Store.** Soft-fail prefix:
+`Mac app unavailable:`.
+
+```bash
+bolt mac-app                        # status (default; safe)
+bolt mac-app status [--json] [--probe]
+bolt mac-app list [--json]
+bolt mac-app build [--dry-run] [--json]
+```
+
+| Command | What it does |
+|---|---|
+| `bolt mac-app` / `status` | Pieces + whether `dist/Bolt.app` is valid |
+| `bolt mac-app list` | Checklist (rumps, icons, launcher, notarized=never) |
+| `bolt mac-app build` | Assemble thin app (Info.plist + MacOS/Bolt launcher) |
+
+Aliases: `macapp`, `mac_app`, `bolt-app`, `app-bundle`, `app-status`.
+Day-to-day: prefer `bolt menubar` after `uv sync --extra menubar`.
+Legacy: `scripts/build_mac_app.sh` now calls this module.
+
+
+## License (`bolt license`)
+
+Repo LICENSE / README placeholder tooling (**PARTIAL**). Soft-fail `License unavailable:`.
+Does **not** auto-pick a license — `set` is explicit.
+
+```
+bolt license                          # status (default; safe)
+bolt license status [--json] [--probe]
+bolt license list [--json]
+bolt license show [--json]
+bolt license set MIT                  # or Apache-2.0 / BSD-3-Clause / Unlicense / Proprietary
+bolt license set MIT --dry-run
+```
+
+| Command | What it does |
+|---|---|
+| `bolt license status` | Readiness (`ready` = LICENSE present + README placeholder cleared; `readiness=PARTIAL`) |
+| `bolt license list` | Supported SPDX ids |
+| `bolt license show` | Print LICENSE body (soft-fail if missing) |
+| `bolt license set <spdx>` | Write root `LICENSE` + replace README `[Add your preferred license here]` |
+
+Aliases: `licence`, `spdx`, `license-status`.
+
+## Discord webhook alerts (`bolt discord`)
+
+Optional peak/error **webhook** alerts via `Core/modules/notifier.py` (also used by Peak_Hour_Notifier). **Not a Discord bot.** Soft-fail prefix: `Discord unavailable:`.
+
+```bash
+bolt discord                      # status (default; safe — no POST)
+bolt discord status [--json] [--probe]
+bolt discord test                 # soft-fail ping (POSTs when webhook set)
+bolt discord send "hello"         # soft-fail send
+```
+
+| Command | What it does |
+|---|---|
+| `bolt discord` / `bolt discord status` | Readiness (`ready` = webhook URL configured; `is_discord_bot` always false) |
+| `bolt discord status --json` | Machine-readable readiness dict |
+| `bolt discord status --probe` | POST a tiny test ping when webhook set; soft-fail otherwise |
+| `bolt discord test` | Same as a soft-fail test ping |
+| `bolt discord send "…"` | Soft-fail webhook POST |
+
+Aliases: `discord-status`, `webhook`, `notify-discord`. Env: `DISCORD_WEBHOOK_URL` (primary), optional `CAPTAIN_HOOK_WEBHOOK_URL` / `DISCORD_WEBHOOK_URLS`. Budget alerts stay Mac / Voice 3 / email / iMessage (`Bolt_Alerts`; `BOLT_ALERT_DISCORD` defaults off).
+
 
 Budget alerts (50% / 90% / 100% of soft cap) use **Mac banner + Voice 3 + email + iMessage**, not Discord.
 
@@ -884,22 +1317,29 @@ Preferred entry points (listen → interpret → speak via `Bolt_Voice`):
 ```bash
 bolt day --decide          # content kickoff → queue decide (default morning)
 bolt day                   # same brief; TTY offers decide (default Yes)
+bolt voice status          # Mic / STT / TTS / LLM readiness (soft-fail friendly)
+bolt voice status --probe  # Also timed-open the mic (optional; can be slow)
 bolt voice                 # mic in, spoken replies out (free Google STT)
-bolt voice --text          # type in, still speaks (Siri Voice 3)
+bolt voice --text          # type in, still speaks (Siri Voice 3) — stranger-safe
 bolt talk "what's next?"   # one-shot spoken Q&A
 bolt say "Clips are ready" # TTS only
-bolt briefing --speak      # write briefing + speak short summary
+bolt briefing --speak      # write briefing + speak a short summary
 bolt morning               # Good Morning Bolt spoken *business* briefing
 bolt stats                 # social performance readiness
 ```
+
+Mic listen needs SpeechRecognition + PortAudio + macOS mic permission. If the
+mic is missing, `bolt voice` **soft-fails** (exit 1, clear hint) — use
+`bolt voice --text`. STT defaults to free Google; Whisper only with
+`BOLT_USE_WHISPER=true`. TTS defaults to macOS Voice 3.
 
 Same engine under the hood (`Core/bolt_live_voice.py` → `Bolt_Conversation`):
 
 ```bash
 PYTHONPATH=Core python3 -m Bolt_Conversation
 PYTHONPATH=Core python3 -m Bolt_Conversation --text
+PYTHONPATH=Core python3 -m Bolt_Conversation status
 PYTHONPATH=Core python3 Core/bolt_live_voice.py --once "What should I do next?"
-PYTHONPATH=Core python3 -m Bolt_Conversation --status
 PYTHONPATH=Core python3 -m Bolt_Conversation --clear
 ```
 
@@ -909,11 +1349,11 @@ PYTHONPATH=Core python3 -m Bolt_Conversation --clear
 | `bolt day --decide` | Same brief, then `queue decide` (default morning path) |
 | `bolt day --voice` | Same brief, then voice loop |
 | `bolt stats` | TikTok/YouTube token readiness + recent outcomes |
-| `bolt voice` | Voice-mode conversation loop (mic + TTS) |
-| `bolt voice --text` | Text input, spoken replies |
+| `bolt voice status` | Mic / STT / TTS / LLM readiness (also `--status`; add `--probe` for timed mic open) |
+| `bolt voice` | Voice-mode conversation loop (mic + TTS); soft-fails if mic unavailable |
+| `bolt voice --text` | Text input, spoken replies (works without mic) |
 | `bolt talk "…"` / `--once "…"` | One question, one spoken answer, exit |
 | `bolt say "…"` | Speak a line only (no LLM) |
-| `bolt voice --status` | Print conversation / STT / TTS / LLM status |
 | `bolt voice --clear` | Wipe conversation history |
 
 ### Natural language intents (no exact CLI required)
@@ -1032,6 +1472,7 @@ These names perform the same actions as their primary commands:
 | `queue reject` | `dontpost`, `dont-post`, `hold-clip` |
 | `queue mark-posted` | `mark-posted`, `markposted` |
 | `tiktok-post` | `post-ui`, `tiktok_post`, `tiktok-ui` |
+| `gemini` | `gemini-status`, `gemini_status` |
 | `vods` | `vod_download` |
 | `send` | `notify` |
 | `layout` | `check_layout` |
@@ -1043,7 +1484,12 @@ These names perform the same actions as their primary commands:
 | `week` | `this-week`, `week-card` |
 | `setup` | (routes to `Core/launch.py`) |
 | `menubar` | `menu-bar`, `menu_bar`, `menu` |
+| `amazon` | `amazon-review`, `review-plan` |
 | `search` | `web-search`, `websearch` |
+| `obs` | `obs-status`, `stream-monitor` |
+| `streamlabs` | `streamlabs-status`, `slabs`, `streamlabs-monitor` |
+| `chat` | `twitch-chat`, `chat-status`, `bolt-chat` |
+| `brain` | `brain-status`, `brain_status`, `brain-controller` |
 
 ---
 

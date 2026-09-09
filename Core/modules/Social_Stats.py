@@ -12,6 +12,16 @@ Does not invent APIs — uses:
 TikTok Open API is paused by default (``TIKTOK_API_ENABLED=false``) after
 repeat developer-app denials. YouTube stays on. TikTok views go in via
 ``bolt log_perf``. Re-enable later with ``TIKTOK_API_ENABLED=true``.
+
+Soft-fail convention (matches OBS / voice / VOD):
+  - ``status()`` never raises; always returns a dict
+  - Missing YouTube token → ``Social stats unavailable: …`` hint (exit 0 on status)
+  - Sync soft-fails with the same prefix instead of a traceback
+  - ``bolt stats status [--json] [--probe]`` for readiness / optional live ping
+
+READY means the CLI + learning-store path works for a stranger (YouTube when
+tokened; TikTok paused → manual ``bolt log_perf``). Real TikTok API pull stays
+gated by ``TIKTOK_API_ENABLED`` (see PARTIAL publish).
 """
 
 from __future__ import annotations
@@ -211,24 +221,161 @@ def recent_outcomes_summary(limit: int = 5) -> str:
         return f"(could not read outcomes: {exc})"
 
 
-def print_status() -> None:
+def status(*, probe: bool = False) -> Dict[str, Any]:
+    """
+    Social stats readiness. Never raises; never hangs.
+
+    ready = at least one auto-pull platform can run (YouTube OAuth/API key, or
+    TikTok when API enabled + tokened). TikTok paused alone does not block ready
+    when YouTube is configured. Status / log_perf always usable regardless.
+    """
+    try:
+        t = tiktok_ready()
+        y = youtube_ready()
+        outcomes_path = _REPO / "Data" / "performance_outcomes.jsonl"
+        tiktok_paused = bool(t.get("paused"))
+        youtube_ok = bool(y.get("ready"))
+        tiktok_ok = (not tiktok_paused) and bool(t.get("ready"))
+        ready = youtube_ok or tiktok_ok
+
+        if youtube_ok and tiktok_paused:
+            hint = (
+                "YouTube ready (TikTok API paused — use bolt log_perf for TT/X). "
+                "Try: bolt stats youtube --dry-run / bolt stats sync"
+            )
+        elif youtube_ok and tiktok_ok:
+            hint = (
+                "YouTube + TikTok ready. "
+                "Try: bolt stats --dry-run / bolt stats sync"
+            )
+        elif tiktok_ok and not youtube_ok:
+            hint = (
+                "TikTok ready; YouTube needs bolt youtube_token "
+                "(or YOUTUBE_API_KEY + YOUTUBE_HANDLE). "
+                "Try: bolt stats tiktok --dry-run"
+            )
+        elif tiktok_paused:
+            hint = (
+                "Social stats unavailable for auto-pull: YouTube needs "
+                "bolt youtube_token (or YOUTUBE_API_KEY + handle). "
+                "TikTok API paused — bolt log_perf after you post."
+            )
+        else:
+            hint = (
+                "Social stats unavailable: set YouTube "
+                "(bolt youtube_token) and/or enable TikTok "
+                "(TIKTOK_API_ENABLED=true + bolt tiktok_token). "
+                "Manual path: bolt log_perf"
+            )
+
+        info: Dict[str, Any] = {
+            "ready": ready,
+            "youtube_ready": youtube_ok,
+            "tiktok_ready": tiktok_ok,
+            "tiktok_paused": tiktok_paused,
+            "youtube": y,
+            "tiktok": t,
+            "outcomes_file": str(outcomes_path),
+            "outcomes_summary": recent_outcomes_summary(3),
+            "manual_path": "bolt log_perf",
+            "hint": hint,
+        }
+
+        if probe:
+            info["probe_ok"] = False
+            info["probe_detail"] = ""
+            if youtube_ok:
+                try:
+                    from modules.Performance_Sync import sync_youtube_stats
+
+                    r = sync_youtube_stats(
+                        limit=1,
+                        min_age_hours=0.0,
+                        dry_run=True,
+                        feed_learning=False,
+                    )
+                    if r.get("ok"):
+                        info["probe_ok"] = True
+                        n = int(r.get("fetched") or 0)
+                        info["probe_detail"] = (
+                            f"ok — YouTube dry-run fetched {n} video(s)"
+                        )
+                        info["hint"] = info["probe_detail"]
+                    else:
+                        err = r.get("error") or "YouTube dry-run failed"
+                        info["probe_detail"] = f"Social stats unavailable: {err}"
+                        info["hint"] = info["probe_detail"]
+                except Exception as exc:
+                    info["probe_detail"] = (
+                        f"Social stats unavailable: YouTube probe failed ({exc})"
+                    )
+                    info["hint"] = info["probe_detail"]
+            elif tiktok_ok:
+                info["probe_detail"] = (
+                    "TikTok token present but probe uses YouTube dry-run; "
+                    "try: bolt stats tiktok --dry-run"
+                )
+            else:
+                info["probe_detail"] = hint
+        return info
+    except Exception as exc:
+        return {
+            "ready": False,
+            "youtube_ready": False,
+            "tiktok_ready": False,
+            "tiktok_paused": True,
+            "youtube": {},
+            "tiktok": {},
+            "outcomes_file": str(_REPO / "Data" / "performance_outcomes.jsonl"),
+            "outcomes_summary": "",
+            "manual_path": "bolt log_perf",
+            "hint": f"Social stats unavailable: status failed ({exc})",
+            "error": str(exc),
+        }
+
+
+def print_status(*, as_json: bool = False, probe: bool = False) -> int:
+    """Print readiness (or JSON). Always exit 0 — soft-fail informational."""
+    import json
+
+    info = status(probe=probe)
+    if as_json:
+        print(json.dumps(info, indent=2, default=str))
+        return 0
+
     print("\n  Social stats readiness")
     print("  " + "─" * 40)
-    for block in (tiktok_ready(), youtube_ready()):
+    flag_overall = "✓" if info.get("ready") else "○"
+    print(f"  {flag_overall}  overall ready: {bool(info.get('ready'))}")
+    if info.get("hint"):
+        print(f"      → {info['hint']}")
+    if probe:
+        pok = info.get("probe_ok")
+        pflag = "✓" if pok else "○"
+        print(f"  {pflag}  probe: {info.get('probe_detail') or '(none)'}")
+    print()
+    for block in (info.get("tiktok") or tiktok_ready(), info.get("youtube") or youtube_ready()):
+        if not isinstance(block, dict) or not block:
+            continue
         if block.get("paused"):
             flag = "–"
         else:
-            flag = "✓" if block["ready"] else "○"
-        print(f"  {flag}  {block['platform'].title()}")
+            flag = "✓" if block.get("ready") else "○"
+        print(f"  {flag}  {str(block.get('platform', '?')).title()}")
         for k, v in block.items():
             if k in ("platform", "ready", "next_step", "pause_reason"):
                 continue
             print(f"      {k}: {v}")
-        print(f"      → {block['next_step']}")
+        if block.get("next_step"):
+            print(f"      → {block['next_step']}")
+        if block.get("pause_reason"):
+            print(f"      pause: {block['pause_reason']}")
     print()
-    print(f"  Outcomes: {recent_outcomes_summary(3)}")
+    print(f"  Outcomes: {info.get('outcomes_summary') or recent_outcomes_summary(3)}")
     print()
     print("  Pull into learning store (Data/performance_outcomes.jsonl):")
+    print("    bolt stats status --json      # machine-readable readiness")
+    print("    bolt stats status --probe     # optional YouTube dry-run ping")
     print("    bolt stats youtube --dry-run  # YouTube (automatic)")
     print("    bolt stats sync               # live write (skips paused TikTok)")
     print("    bolt log_perf                 # TikTok / X views after you post")
@@ -237,6 +384,7 @@ def print_status() -> None:
     print("    bolt youtube_token            # YouTube Data API readonly")
     print("    TikTok API paused             # TIKTOK_API_ENABLED=true to resume")
     print()
+    return 0
 
 
 def run_sync(
@@ -297,21 +445,42 @@ def run_sync(
 
     if plat in ("youtube", "yt", "shorts", "both", "all"):
         print("\n  ── YouTube sync ──")
-        r = sync_youtube_stats(
-            limit=limit,
-            min_age_hours=min_age_hours,
-            dry_run=dry_run,
-            feed_learning=not dry_run,
-            shorts_only=shorts_only or plat == "shorts",
-        )
-        results.append({"platform": "youtube", **r})
-        if json_out:
-            print(json.dumps(r, indent=2, default=str))
-        else:
-            print_sync_report(r)
-        if not r.get("ok"):
+        y = youtube_ready()
+        if not y.get("ready"):
+            msg = (
+                "Social stats unavailable: "
+                + str(y.get("next_step") or "bolt youtube_token")
+            )
+            print(f"  {msg}")
+            results.append(
+                {
+                    "platform": "youtube",
+                    "ok": False,
+                    "skipped": True,
+                    "error": msg,
+                    "fetched": 0,
+                }
+            )
+            if json_out:
+                print(json.dumps(results[-1], indent=2, default=str))
             ok_all = False
-            print(f"  → {youtube_ready()['next_step']}")
+        else:
+            r = sync_youtube_stats(
+                limit=limit,
+                min_age_hours=min_age_hours,
+                dry_run=dry_run,
+                feed_learning=not dry_run,
+                shorts_only=shorts_only or plat == "shorts",
+            )
+            results.append({"platform": "youtube", **r})
+            if json_out:
+                print(json.dumps(r, indent=2, default=str))
+            else:
+                print_sync_report(r)
+            if not r.get("ok"):
+                ok_all = False
+                err = r.get("error") or y.get("next_step") or "YouTube sync failed"
+                print(f"  → Social stats unavailable: {err}")
 
     return 0 if ok_all else 1
 
@@ -325,6 +494,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             """bolt stats — social performance pull
 
   bolt stats                 # readiness + recent outcomes
+  bolt stats status [--json] [--probe]
   bolt stats --dry-run       # YouTube (TikTok API paused)
   bolt stats youtube [--dry-run] [--shorts-only] …
   bolt stats sync            # live write (skips paused TikTok)
@@ -332,12 +502,14 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 YouTube: bolt youtube_token   (or YOUTUBE_API_KEY)
 TikTok API is paused. Set TIKTOK_API_ENABLED=true to resume.
+Missing tokens soft-fail with "Social stats unavailable: …".
 """
         )
         return 0
 
     dry = "--dry-run" in args or "--dry" in args
     json_out = "--json" in args
+    probe = "--probe" in args
     shorts = "--shorts-only" in args
     limit = 50
     min_age = 24.0
@@ -362,7 +534,8 @@ TikTok API is paused. Set TIKTOK_API_ENABLED=true to resume.
         if not a.startswith("-") and i not in value_taken
     ]
     if not positionals:
-        if dry or json_out or shorts or "--limit" in args or "--min-age-hours" in args:
+        # Bare --json / --probe → status (not sync). Sync needs a verb or --dry-run.
+        if dry or shorts or "--limit" in args or "--min-age-hours" in args:
             return run_sync(
                 "both",
                 dry_run=True,
@@ -371,13 +544,11 @@ TikTok API is paused. Set TIKTOK_API_ENABLED=true to resume.
                 shorts_only=shorts,
                 json_out=json_out,
             )
-        print_status()
-        return 0
+        return print_status(as_json=json_out, probe=probe)
 
     cmd = positionals[0].lower()
     if cmd in ("status", "check", "ready"):
-        print_status()
-        return 0
+        return print_status(as_json=json_out, probe=probe)
     if cmd in ("sync", "pull", "all"):
         return run_sync(
             "both",

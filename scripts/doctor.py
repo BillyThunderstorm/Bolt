@@ -454,9 +454,10 @@ def collect_titles(config: dict, ollama: dict[str, Any]) -> list[Check]:
         _check(
             "titles",
             "title trainer",
-            "info",
-            "no trainer or A/B loop exists. Preview/edit: bolt queue title. "
-            "Performance: bolt stats / bolt log_perf. Unit tests cover Title_Generator.",
+            "live",
+            "bolt titles status|train|ab — learns from Data/performance_outcomes.jsonl "
+            "into Data/viral_titles_model.json. Preview/edit still: bolt queue title. "
+            "Performance: bolt stats / bolt log_perf.",
         )
     )
     return checks
@@ -745,7 +746,193 @@ def collect_integrations(config: dict) -> list[Check]:
             "integrations",
             "discord",
             "live" if discord else "disabled",
-            "DISCORD_WEBHOOK_URL set" if discord else "unset (Bolt alerts use Mac/iMessage/email)",
+            "DISCORD_WEBHOOK_URL set" if discord else "unset (optional; bolt discord status — not a bot; alerts use Mac/iMessage/email)",
+        )
+    )
+
+    learn_dir = REPO_ROOT / "Data" / "learning"
+    learn_chapters = (
+        [p for p in learn_dir.glob("*.md") if p.name != "_TEMPLATE.md"]
+        if learn_dir.is_dir()
+        else []
+    )
+    checks.append(
+        _check(
+            "integrations",
+            "learning",
+            "live" if learn_chapters else "disabled",
+            (
+                f"{len(learn_chapters)} chapter note(s); bolt learning status"
+                if learn_chapters
+                else "no Data/learning chapters (optional study log; bolt learning status)"
+            ),
+        )
+    )
+
+    req_doc = REPO_ROOT / "Docs" / "requirements" / "creator-domains-requirements.md"
+    instr_doc = (
+        REPO_ROOT / ".github" / "instructions" / "creator-domains.instructions.md"
+    )
+    domains_ok = (
+        req_doc.is_file()
+        and instr_doc.is_file()
+        and req_doc.stat().st_size > 0
+        and instr_doc.stat().st_size > 0
+    )
+    checks.append(
+        _check(
+            "integrations",
+            "creator-domains",
+            "live" if domains_ok else "disabled",
+            (
+                "requirements + instructions present; bolt domains status"
+                if domains_ok
+                else "missing creator-domains docs (optional spec browser; bolt domains status)"
+            ),
+        )
+    )
+
+
+    # Cloudflare Pages (William-specific PARTIAL — soft-fail via bolt pages)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Cloudflare_Pages import status as _pages_status
+
+        _ps = _pages_status()
+        pages_ready = bool(_ps.get("ready"))
+        pages_detail = (
+            f"wrangler+auth+path ready; bolt pages status"
+            if pages_ready
+            else (
+                (_ps.get("hint") or "Pages unavailable: not ready")
+                + " (optional William deploy; bolt pages status)"
+            )
+        )
+        # Truncate long soft-fail hints for doctor table
+        if len(pages_detail) > 160:
+            pages_detail = pages_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "cloudflare-pages",
+                "live" if pages_ready else "disabled",
+                pages_detail,
+            )
+        )
+    except Exception as _pages_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "cloudflare-pages",
+                "disabled",
+                f"Pages unavailable: doctor import failed ({_pages_exc})",
+            )
+        )
+
+    # License readiness (PARTIAL — soft-fail via bolt license)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Bolt_License import status as _license_status
+
+        _ls = _license_status()
+        lic_ready = bool(_ls.get("ready"))
+        lic_detail = (
+            f"LICENSE set ({_ls.get('detected_spdx') or 'custom'}); bolt license status"
+            if lic_ready
+            else (
+                (_ls.get("hint") or "License unavailable: not ready")
+                + " (optional; bolt license status)"
+            )
+        )
+        if len(lic_detail) > 160:
+            lic_detail = lic_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "license",
+                "live" if lic_ready else "disabled",
+                lic_detail,
+            )
+        )
+    except Exception as _lic_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "license",
+                "disabled",
+                f"License unavailable: doctor import failed ({_lic_exc})",
+            )
+        )
+
+
+    # Mac .app assemble (PARTIAL — soft-fail via bolt mac-app)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Bolt_Mac_App import status as _macapp_status
+
+        _ms = _macapp_status()
+        mac_ready = bool(_ms.get("ready"))
+        mac_detail = (
+            f"dist/Bolt.app valid; bolt mac-app status"
+            if mac_ready
+            else (
+                (_ms.get("hint") or "Mac app unavailable: not ready")
+                + " (optional; bolt mac-app status)"
+            )
+        )
+        if len(mac_detail) > 160:
+            mac_detail = mac_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "mac-app",
+                "live" if mac_ready else "disabled",
+                mac_detail,
+            )
+        )
+    except Exception as _mac_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "mac-app",
+                "disabled",
+                f"Mac app unavailable: doctor import failed ({_mac_exc})",
+            )
+        )
+
+
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.FFmpeg_Bin import ffmpeg_bin
+    except Exception:
+        ffmpeg_bin = None
+    ffmpeg_path = ""
+    ffmpeg_ok = False
+    if ffmpeg_bin is not None:
+        try:
+            ffmpeg_path = ffmpeg_bin()
+            ffmpeg_ok = bool(ffmpeg_path)
+            # PATH ffmpeg can exist and still fail to launch (broken dylib).
+            import subprocess as _sp
+
+            probe = _sp.run(
+                [ffmpeg_path, "-version"], capture_output=True, timeout=5
+            )
+            ffmpeg_ok = probe.returncode == 0
+        except Exception:
+            ffmpeg_ok = False
+    checks.append(
+        _check(
+            "integrations",
+            "ffmpeg",
+            "live" if ffmpeg_ok else "broken",
+            f"using {ffmpeg_path}" if ffmpeg_ok else "ffmpeg will not launch — clip cuts fail",
+            found=ffmpeg_path,
+            fix="" if ffmpeg_ok else "install ffmpeg-full or set BOLT_FFMPEG to a working binary",
         )
     )
     return checks

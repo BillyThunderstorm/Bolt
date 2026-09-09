@@ -141,5 +141,70 @@ class NexusCreatorRoutingTests(unittest.TestCase):
         gemini.assert_not_called()
 
 
+    def test_status_reports_ready_when_ollama_up(self):
+        with patch.dict(
+            os.environ,
+            {
+                "XAI_API_KEY": "xai-test",
+                "GEMINI_API_KEY": "",
+                "NEXUS_ALLOW_PAID": "false",
+                "NEXUS_USE_GEMINI": "false",
+            },
+            clear=False,
+        ):
+            nexus = NexusCreator()
+            with patch.object(nexus, "_is_ollama_healthy", return_value=True):
+                info = nexus.status()
+        self.assertTrue(info["ready"])
+        self.assertTrue(info["ollama_ok"])
+        self.assertIn("hint", info)
+
+    def test_status_not_ready_without_providers(self):
+        with patch.dict(
+            os.environ,
+            {
+                "XAI_API_KEY": "",
+                "GEMINI_API_KEY": "",
+                "NEXUS_ALLOW_PAID": "false",
+                "NEXUS_USE_GEMINI": "false",
+            },
+            clear=False,
+        ):
+            nexus = NexusCreator()
+            with patch.object(nexus, "_is_ollama_healthy", return_value=False):
+                info = nexus.status()
+        self.assertFalse(info["ready"])
+        self.assertFalse(info["ollama_ok"])
+        self.assertTrue(str(info.get("hint", "")).startswith("LLM unavailable:") or "Ollama" in info.get("hint", ""))
+
+    def test_consult_no_provider_soft_fails_with_error(self):
+        with patch.dict(
+            os.environ,
+            {
+                "XAI_API_KEY": "",
+                "GEMINI_API_KEY": "",
+                "NEXUS_ALLOW_PAID": "false",
+                "NEXUS_USE_GEMINI": "false",
+            },
+            clear=False,
+        ):
+            nexus = NexusCreator()
+            with (
+                patch.object(nexus, "_is_ollama_healthy", return_value=False),
+                patch.object(
+                    nexus, "_enrich_with_vector_memory", return_value="ctx"
+                ),
+            ):
+                result = nexus.consult(
+                    "test topic",
+                    task_type="general",
+                    complexity="medium",
+                    allow_paid=False,
+                )
+        self.assertEqual(result["provider"], "none")
+        self.assertEqual(result["advice"], "")
+        self.assertTrue(str(result.get("error", "")).startswith("LLM unavailable:"))
+
+
 if __name__ == "__main__":
     unittest.main()

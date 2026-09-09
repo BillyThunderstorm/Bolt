@@ -1,0 +1,10 @@
+=== X package (paste into compose) ===
+
+POST
+Mouse: Pending — keep testing until a clear call. (affiliate link; honest opinion) #tech
+
+UPLOAD URL
+https://x.com/compose/post
+
+NEXT STEP
+Paste post_text + hashtags into the X compose UI. If the review has a video, attach it from your phone/desktop X client after the text is composed. After it's posted, run: bolt manage mark-posted "Mouse" --platforms x --where <post_url>

@@ -76,6 +76,239 @@ def load_brain() -> str:
     return brain
 
 
+
+def _skincare_products_from_config(config: dict) -> list:
+    """Resolve product list for Skincare_Analyzer (config override or catalog)."""
+    explicit = config.get("skincare_products")
+    if isinstance(explicit, list) and explicit:
+        return explicit
+
+    products = []
+    try:
+        from modules.Content_Manager import list_items
+
+        # Prefer active work; fall back to recent posted skincare items.
+        items = list_items(lane="skincare", status="testing") or []
+        if not items:
+            items = list_items(lane="skincare", status="drafting") or []
+        if not items:
+            items = list_items(lane="skincare", status="ready") or []
+        if not items:
+            items = list_items(lane="skincare") or []
+        for item in items[:5]:
+            name = (item.get("name") or "").strip()
+            if not name:
+                continue
+            ingredients = item.get("ingredients") or []
+            if isinstance(ingredients, str):
+                ingredients = [s.strip() for s in ingredients.split(",") if s.strip()]
+            products.append(
+                {
+                    "name": name,
+                    "ingredients": list(ingredients) if isinstance(ingredients, list) else [],
+                    "type": item.get("type") or item.get("category") or "product",
+                    "asin": item.get("asin") or "",
+                }
+            )
+    except Exception:
+        pass
+    return products
+
+
+def _tech_source_from_config(config: dict) -> tuple:
+    """Resolve (url, query, params) for AI_Analyzer (config override or catalog)."""
+    url = (config.get("tech_url") or config.get("tech_source_url") or "").strip()
+    query = (config.get("tech_query") or config.get("tech_focus") or "").strip()
+    params = config.get("tech_params")
+    if not isinstance(params, list) or not params:
+        params = ["Performance", "Cost", "Features"]
+
+    if url and query:
+        return url, query, params
+
+    try:
+        from modules.Content_Manager import list_items
+
+        items = list_items(lane="tech", status="testing") or []
+        if not items:
+            items = list_items(lane="tech", status="drafting") or []
+        if not items:
+            items = list_items(lane="tech", status="ready") or []
+        if not items:
+            items = list_items(lane="tech") or []
+        if items:
+            item = items[0]
+            asin = (item.get("asin") or "").strip()
+            item_url = (item.get("url") or item.get("where") or "").strip()
+            if not url:
+                if item_url.startswith("http"):
+                    url = item_url
+                elif asin:
+                    url = f"https://www.amazon.com/dp/{asin}"
+            if not query:
+                name = (item.get("name") or "tech product").strip()
+                query = f"Review angle and talking points for {name}"
+    except Exception:
+        pass
+
+    return url, query, params
+
+
+def _review_links_from_config(config: dict) -> list:
+    """Resolve ASIN/URL list for Amazon_Analyzer (config override or catalog)."""
+    for key in ("review_products", "amazon_asins", "product_links", "review_asins"):
+        explicit = config.get(key)
+        if isinstance(explicit, list) and explicit:
+            out = [str(x).strip() for x in explicit if str(x).strip()]
+            if out:
+                return out
+        if isinstance(explicit, str) and explicit.strip():
+            return [explicit.strip()]
+
+    single = (
+        config.get("review_asin")
+        or config.get("amazon_asin")
+        or config.get("amazon_url")
+        or config.get("product_url")
+        or ""
+    )
+    single = str(single).strip()
+    if single:
+        return [single]
+
+    links = []
+    try:
+        from modules.Content_Manager import list_items
+
+        items = list_items(lane="tech", status="testing") or []
+        if not items:
+            items = list_items(lane="tech", status="drafting") or []
+        if not items:
+            items = list_items(lane="tech", status="ready") or []
+        if not items:
+            items = list_items(lane="tech") or []
+        for item in items[:5]:
+            asin = (item.get("asin") or "").strip()
+            url = (item.get("url") or item.get("where") or "").strip()
+            if url.startswith("http"):
+                links.append(url)
+            elif asin:
+                links.append(asin)
+    except Exception:
+        pass
+    return links
+
+
+def _run_content_type_analyzers(content_type: str, config: dict, game: str) -> dict | None:
+    """Best-effort skincare / tech / Amazon-review enrichment. Never raises into the clip pipeline."""
+    ctype = (content_type or "gaming").strip().lower()
+    if ctype not in ("skincare", "tech", "review"):
+        return None
+
+    platform = (
+        config.get("target_platform")
+        or config.get("default_platform")
+        or "tiktok"
+    )
+
+    try:
+        if ctype == "skincare":
+            products = _skincare_products_from_config(config)
+            if not products:
+                notify(
+                    "Skincare analyzer skipped — no products in config/catalog",
+                    level="info",
+                    reason="Set config skincare_products or add a skincare item via bolt manage.",
+                )
+                return None
+            from modules.Skincare_Analyzer import generate_review_content
+
+            goal = (
+                config.get("skincare_goal")
+                or config.get("review_angle")
+                or f"Honest skincare review content for {game}"
+            )
+            notify(
+                f"Skincare analyzer — {len(products)} product(s) for: {goal}",
+                level="info",
+            )
+            report = generate_review_content(
+                product_list=products,
+                review_angle=str(goal),
+                target_platform=str(platform),
+            )
+            status = (report or {}).get("status", "unknown")
+            notify(
+                f"Skincare analyzer finished ({status})",
+                level="success" if status in ("Success", "Partial") else "warning",
+            )
+            return report
+
+        if ctype == "tech":
+            url, query, params = _tech_source_from_config(config)
+            if not url:
+                notify(
+                    "Tech analyzer skipped — no tech_url / catalog ASIN",
+                    level="info",
+                    reason="Set config tech_url or add a tech catalog item with an ASIN.",
+                )
+                return None
+            from modules.AI_Analyzer import generate_tech_content
+
+            notify(f"Tech analyzer — {url}", level="info")
+            report = generate_tech_content(
+                url=url,
+                query=query or f"Tech talking points for {game}",
+                params=list(params),
+                target_platform=str(platform),
+            )
+            status = (report or {}).get("status", "unknown")
+            notify(
+                f"Tech analyzer finished ({status})",
+                level="success" if status in ("Success", "Partial") else "warning",
+            )
+            return report
+
+        # review — Amazon product review plan (fetch page + Nexus advice)
+        links = _review_links_from_config(config)
+        if not links:
+            notify(
+                "Amazon review analyzer skipped — no ASINs/URLs in config/catalog",
+                level="info",
+                reason="Set config review_products / review_asin, or add a tech catalog item with an ASIN.",
+            )
+            return None
+        from modules.Amazon_Analyzer import generate_comparison_content
+
+        focus = (
+            config.get("review_angle")
+            or config.get("comparison_focus")
+            or f"Honest Amazon product review for {game}"
+        )
+        notify(
+            f"Amazon review analyzer — {len(links)} product(s) for: {focus}",
+            level="info",
+        )
+        report = generate_comparison_content(
+            product_links=links,
+            comparison_focus=str(focus),
+            target_platform=str(platform),
+        )
+        status = (report or {}).get("status", "unknown")
+        notify(
+            f"Amazon review analyzer finished ({status})",
+            level="success" if status in ("Success", "Partial") else "warning",
+        )
+        return report
+    except Exception as e:
+        notify(
+            f"Content analyzer skipped ({ctype}): {e}",
+            level="warning",
+            reason="Clip pipeline continues without skincare/tech/review enrichment.",
+        )
+        return None
+
+
 # ── 2. Process a single recording through the full pipeline ───────────────────
 
 def process_recording(
@@ -276,6 +509,21 @@ def _process_recording_body(
     # so templates/AI can prepend "15 KILL STREAK — …". Missing pytesseract /
     # tesseract = warn + continue with empty stats (same degrade pattern as Whisper).
     content_type = config.get("content_type", "gaming")
+    content_analysis = None
+    if str(content_type).lower() in ("skincare", "tech", "review"):
+        # Best-effort lane enrichment — never blocks titles/clips.
+        try:
+            content_analysis = _run_content_type_analyzers(
+                str(content_type), config, game
+            )
+        except Exception as e:
+            notify(
+                f"Content analyzer hook failed: {e}",
+                level="warning",
+                reason="Pipeline continues without analyzer enrichment.",
+            )
+            content_analysis = None
+
     clip_titles = {}
     notify("Step 3/6 — Generating titles…", level="info")
 
@@ -322,6 +570,8 @@ def _process_recording_body(
                     "creator_brain": creator_brain,
                     "config": config,
                     "on_screen_stats": on_screen_stats,
+                    "content_type": content_type,
+                    "content_analysis": content_analysis,
                 },
             )
             clip_titles[clip.output_file] = {
@@ -467,11 +717,11 @@ def _guess_trigger(clip_path: str, highlights: list) -> str:
         return getattr(first, "trigger", None) or getattr(first, "type", "highlight")
     return "highlight"
 
-def _start_chat_bot(creator_brain: str):
-    """Start Bolt's Twitch chat bot in a background thread."""
+def _start_chat_bot(creator_brain: str, config: dict = None):
+    """Start Bolt's Twitch chat bot in a background thread (respects use_twitch)."""
     try:
         from modules.Bolt_Chat import start_chat_bot
-        return start_chat_bot(brain=creator_brain)
+        return start_chat_bot(brain=creator_brain, config=config or {})
     except Exception as exc:
         notify(f"Chat bot failed to start: {exc}", level="warning")
         return None
@@ -508,7 +758,7 @@ def main():
     intelligence = ThinkLearnDecideEngine(config)
     
     # Batch process is not a live stream — skip Twitch chat warmup.
-    chat_bot = None if mode == "process" else _start_chat_bot(creator_brain)
+    chat_bot = None if mode == "process" else _start_chat_bot(creator_brain, config)
 
     if mode == "process":
         from modules.Watcher import list_pending_recordings

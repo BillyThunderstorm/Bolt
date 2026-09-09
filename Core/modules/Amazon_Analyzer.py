@@ -5,9 +5,10 @@ Amazon_Analyzer.py — Product review/comparison content (Gemini-powered)
 Processes product links and review context to generate structured content
 plans for Amazon reviews, unboxings, and comparison videos.
 
-Wired into the Bolt pipeline when --content-type review is used.
-Uses real web content fetching + Gemini (via Nexus Creator) instead of
-placeholder/mock data.
+Wired into the Bolt pipeline when --content-type review is used
+(`bolt recordings … --content-type review`). Also: `bolt amazon <ASIN|URL>`.
+Uses real web content fetching + Nexus (Ollama / optional paid) instead of
+placeholder/mock data. Fetch or Nexus failure = warn + Partial / continue.
 
 Key Functions:
 1. fetch_product_details: Fetch real product info from a URL
@@ -17,43 +18,108 @@ Key Functions:
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
+import sys
 from typing import Any, Dict, List, Optional
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 
 
+def _looks_blocked(raw: str, title: str) -> Optional[str]:
+    """Detect Amazon bot-check / soft-block pages. Never raises."""
+    blob = f"{title}\n{raw[:8000]}".lower()
+    markers = (
+        ("robot check", "Amazon unavailable: robot check / captcha page"),
+        ("enter the characters you see", "Amazon unavailable: captcha challenge"),
+        ("api-services-support@amazon.com", "Amazon unavailable: automated access blocked"),
+        ("sorry, we just need to make sure you're not a robot",
+         "Amazon unavailable: robot check / captcha page"),
+        ("to discuss automated access to amazon data",
+         "Amazon unavailable: automated access blocked"),
+    )
+    for needle, msg in markers:
+        if needle in blob:
+            return msg
+    # Very short HTML with no product signals → likely interstitial
+    if len(raw) < 2500 and "asin" not in blob and "dp/" not in blob:
+        if "amazon" in blob:
+            return "Amazon unavailable: page too thin (likely block or redirect)"
+    return None
+
+
+def _failure_payload(
+    *,
+    asin: Optional[str],
+    url: str,
+    error: str,
+    title: str = "Failed to fetch product page",
+) -> Dict[str, Any]:
+    return {
+        "ok": False,
+        "asin": (asin or "").strip().upper() or "Unknown",
+        "title": title,
+        "price": "Unknown",
+        "rating": None,
+        "reviews_count": None,
+        "key_features": [],
+        "source_url": url,
+        "error": error[:240],
+    }
+
+
 def fetch_product_details(product_url_or_asin: str) -> Dict[str, Any]:
     """
-    Fetch real product details from a URL or ASIN.
-    Handles Amazon URLs, bare ASINs, and other product URLs.
+    Fetch real product details from a URL or ASIN (HTML scrape — no PA-API).
 
-    Note: Amazon's API requires credentials. For now we fetch the
-    product page and extract what we can. For Amazon ASINs, we construct
-    the URL and fetch it. Rate limiting is handled by capping request frequency.
+    Soft-fails: never raises. On network / captcha / parse failure returns
+    ``ok=False`` + ``error`` (prefix ``Amazon unavailable:`` when blocked).
+    Callers (store verify, review pipeline) keep going.
     """
+    raw_in = (product_url_or_asin or "").strip()
+    if not raw_in:
+        return _failure_payload(
+            asin=None,
+            url="",
+            error="Amazon unavailable: empty ASIN/URL",
+        )
+
     # Determine if it's an ASIN or URL
-    if product_url_or_asin.startswith("http"):
-        url = product_url_or_asin
+    if raw_in.startswith("http"):
+        url = raw_in
         asin = _extract_asin(url)
     else:
-        asin = product_url_or_asin
+        asin = raw_in.upper()
         url = f"https://www.amazon.com/dp/{asin}"
 
     try:
         req = Request(url, headers={
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                           "AppleWebKit/537.36 (KHTML, like Gecko) "
-                          "Chrome/120.0.0.0 Safari/537.36"
+                          "Chrome/120.0.0.0 Safari/537.36",
+            "Accept-Language": "en-US,en;q=0.9",
         })
         with urlopen(req, timeout=15) as resp:
             raw = resp.read().decode("utf-8", errors="replace")
 
         # Extract title
         title_match = re.search(r'<title[^>]*>(.*?)</title>', raw, re.IGNORECASE | re.DOTALL)
-        title = title_match.group(1).strip() if title_match else "Unknown Product"
+        title = title_match.group(1).strip() if title_match else ""
         title = re.sub(r'\s*-\s*Amazon\.com\s*$', '', title)
+        title = re.sub(r'\s+', ' ', title).strip()
+
+        blocked = _looks_blocked(raw, title)
+        if blocked:
+            return _failure_payload(asin=asin, url=url, error=blocked, title=title or "Blocked")
+
+        if not title or title.lower() in {"amazon.com", "amazon"}:
+            return _failure_payload(
+                asin=asin,
+                url=url,
+                error="Amazon unavailable: no product title on page",
+                title="Unknown Product",
+            )
 
         # Extract price (Amazon shows it in various places)
         price_match = re.search(r'"price"\s*:\s*"\$?([\d.,]+)"', raw)
@@ -78,6 +144,7 @@ def fetch_product_details(product_url_or_asin: str) -> Dict[str, Any]:
                 features.append(clean)
 
         return {
+            "ok": True,
             "asin": asin or "Unknown",
             "title": title,
             "price": price,
@@ -86,19 +153,34 @@ def fetch_product_details(product_url_or_asin: str) -> Dict[str, Any]:
             "key_features": features if features else ["Features not extracted"],
             "source_url": url,
             "fetched_chars": len(raw),
+            "error": None,
         }
 
     except Exception as e:
-        return {
-            "asin": asin or "Unknown",
-            "title": "Failed to fetch product page",
-            "price": "Unknown",
-            "rating": None,
-            "reviews_count": None,
-            "key_features": [],
-            "source_url": url,
-            "error": str(e)[:200],
-        }
+        return _failure_payload(
+            asin=asin,
+            url=url,
+            error=f"Amazon unavailable: {type(e).__name__}: {e}",
+        )
+
+
+def status() -> Dict[str, Any]:
+    """
+    Store / ASIN-verify readiness. Never raises.
+    HTML scrape only (no PA-API). ready=True means the helper is callable;
+    a live Amazon fetch may still soft-fail when Amazon blocks bots.
+    """
+    return {
+        "ready": True,
+        "method": "html_scrape",
+        "pa_api": False,
+        "hint": (
+            "ASIN verify via HTML scrape (no PA-API). "
+            "bolt store add --asin B0… verifies by default; Amazon blocks → "
+            "soft-fail (item still saved, verify_status=error). "
+            "Review content path: bolt amazon <ASIN> --fetch-only"
+        ),
+    }
 
 
 def _extract_asin(url: str) -> Optional[str]:
@@ -207,13 +289,91 @@ def generate_comparison_content(
     return analyze_product_review(product_links, comparison_focus, target_platform)
 
 
-if __name__ == "__main__":
-    # Example usage
-    test_products = ["B08N5WRWNW"]  # Example ASIN
-    test_focus = "Best budget wireless headphones for content creators"
+def main(argv: Optional[list[str]] = None) -> int:
+    """CLI: `bolt amazon <ASIN|URL> […]` — fetch + optional Nexus review plan."""
+    parser = argparse.ArgumentParser(
+        prog="bolt amazon",
+        description=(
+            "Amazon product fetch + review content plan (Amazon_Analyzer). "
+            "Same enrichment bot.py runs for --content-type review."
+        ),
+    )
+    parser.add_argument(
+        "products",
+        nargs="+",
+        help="One or more ASINs or product URLs",
+    )
+    parser.add_argument(
+        "--focus",
+        "-f",
+        default="Honest product review for content creators",
+        help="Comparison / review angle (default: honest product review)",
+    )
+    parser.add_argument(
+        "--platform",
+        "-p",
+        default="tiktok",
+        help="Target platform for captions (default: tiktok)",
+    )
+    parser.add_argument(
+        "--fetch-only",
+        action="store_true",
+        help="Only fetch product page details (skip Nexus advice)",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print full JSON report",
+    )
+    args = parser.parse_args(argv)
 
-    report = analyze_product_review(test_products, test_focus)
-    print("\n==========================================")
-    print("🛒 PRODUCT REVIEW REPORT:")
-    print(json.dumps(report, indent=2, default=str)[:2000])
-    print("==========================================")
+    if args.fetch_only:
+        rows = [fetch_product_details(p) for p in args.products]
+        if args.json:
+            print(json.dumps(rows, indent=2, default=str))
+        else:
+            for d in rows:
+                title = d.get("title") or "Unknown"
+                price = d.get("price") or "?"
+                err = d.get("error")
+                flag = "✓" if d.get("ok") else "○"
+                print(f"{flag}  {d.get('asin', '?')}  {title}  |  {price}")
+                if err:
+                    print(f"     {err}")
+        # Exit 0 even on fetch errors — soft-fail (page blocks are common).
+        return 0
+
+    report = generate_comparison_content(
+        product_links=list(args.products),
+        comparison_focus=str(args.focus),
+        target_platform=str(args.platform),
+    )
+    if args.json:
+        print(json.dumps(report, indent=2, default=str))
+    else:
+        status = (report or {}).get("status", "unknown")
+        print(f"\n=== Amazon review plan ({status}) ===\n")
+        products = (report or {}).get("products") or []
+        for d in products:
+            print(
+                f"- {d.get('asin', '?')}: {d.get('title', 'Unknown')} "
+                f"| {d.get('price', '?')}"
+            )
+            if d.get("error"):
+                print(f"  ⚠️  fetch: {d['error']}")
+        advice = (report or {}).get("nexus_advice") or ""
+        if advice:
+            print("\n--- Nexus advice ---\n")
+            print(advice[:4000])
+        elif (report or {}).get("error"):
+            print(f"\n⚠️  {(report or {}).get('error')}")
+        else:
+            print(
+                "\n(no Nexus advice — start Ollama, or set NEXUS_ALLOW_PAID "
+                "+ XAI_API_KEY; fetch results above still usable)"
+            )
+    return 0 if (report or {}).get("status") in ("Success", "Partial") else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
