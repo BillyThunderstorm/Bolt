@@ -55,6 +55,7 @@ load_dotenv(REPO_ROOT / ".env")
 
 from modules import twitch_auth
 from modules.Config_Loader import load_config
+from modules.Twitch_Stats import find_yt_dlp, status as vod_status
 
 try:
     import requests
@@ -147,10 +148,14 @@ def is_vod_processed(vod_id: str, log: dict) -> bool:
 def download_vod(vod_url: str, output_path: Path) -> bool:
     """Download a Twitch VOD using yt-dlp."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    # Resolve yt-dlp from the same Python env that's running this script
-    yt_dlp_bin = str(Path(sys.executable).parent / "yt-dlp")
-    if not Path(yt_dlp_bin).exists():
-        yt_dlp_bin = "yt-dlp"  # Fall back to PATH lookup
+    yt_dlp_bin = find_yt_dlp()
+    if not yt_dlp_bin:
+        print(
+            "  ✗  VOD unavailable: yt-dlp not found in venv or PATH "
+            "(brew install yt-dlp / pip install yt-dlp). "
+            "Check: bolt vods status"
+        )
+        return False
     cmd = [
         yt_dlp_bin,
         "--no-progress",
@@ -304,25 +309,50 @@ def process_vod(vod: dict, config: dict, create_twitch: bool = False) -> dict:
     return {"vod_id": vod_id, "status": "processed"}
 
 
-def main():
+def main(argv: Optional[list] = None):
+    raw = list(argv) if argv is not None else sys.argv[1:]
+
+    # Optional: bolt auto_clip_twitch status → same readiness as bolt vods status
+    if raw and raw[0] in ("status",):
+        import json as _json
+        sp = argparse.ArgumentParser(prog="bolt auto_clip_twitch status")
+        sp.add_argument("--json", action="store_true")
+        sp.add_argument("--probe", action="store_true")
+        sargs = sp.parse_args(raw[1:])
+        info = vod_status(probe=sargs.probe)
+        if sargs.json:
+            print(_json.dumps(info, indent=2))
+        else:
+            print("ready:", info["ready"])
+            print("channel:", info["channel"])
+            print("yt_dlp_found:", info["yt_dlp_found"])
+            print("yt_dlp_path:", info["yt_dlp_path"])
+            print("ffmpeg_found:", info["ffmpeg_found"])
+            if info.get("hint"):
+                print("hint:", info["hint"])
+            if sargs.probe:
+                print("probe_ok:", info.get("probe_ok"))
+                print("probe_detail:", info.get("probe_detail"))
+        return 0
+
     parser = argparse.ArgumentParser(description="Auto-clip Twitch VODs with Bolt")
     parser.add_argument("--all", action="store_true", help="Process all unprocessed VODs")
     parser.add_argument("--list", action="store_true", help="List VODs and status")
     parser.add_argument("--vod", type=str, help="Process a specific VOD by ID")
     parser.add_argument("--twitch-clips", action="store_true",
                         help="Also create Twitch clips (requires user OAuth)")
-    args = parser.parse_args()
+    args = parser.parse_args(raw)
 
     print("\n  ⚡️  Bolt — Auto-Clip Twitch VODs")
     print(f"  Channel: {CHANNEL_LOGIN}\n")
 
     if not CHANNEL_LOGIN:
-        print("  ✗  TWITCH_CHANNEL not set in .env")
+        print("  ✗  VOD unavailable: TWITCH_CHANNEL not set in .env")
         sys.exit(1)
 
     user_id = get_channel_user_id()
     if not user_id:
-        print(f"  ✗  Could not find Twitch user ID for {CHANNEL_LOGIN}")
+        print(f"  ✗  VOD unavailable: Could not find Twitch user ID for {CHANNEL_LOGIN}")
         sys.exit(1)
 
     print(f"  Channel ID: {user_id}")
@@ -333,6 +363,15 @@ def main():
     if args.list:
         cmd_list(user_id)
         return
+
+    # Download paths need yt-dlp (list/status do not)
+    if not find_yt_dlp():
+        print(
+            "  ✗  VOD unavailable: yt-dlp not found in venv or PATH "
+            "(brew install yt-dlp / pip install yt-dlp). "
+            "Check: bolt vods status"
+        )
+        sys.exit(1)
 
     # ── Process specific VOD ─────────────────────────────────────────────────
     if args.vod:
@@ -380,4 +419,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

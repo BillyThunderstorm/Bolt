@@ -72,12 +72,22 @@ MIN_PROFILES_FOR_SCORING = 3
 # ── Audio profile extraction ──────────────────────────────────────────────────
 
 
+try:
+    from modules.FFmpeg_Bin import ffmpeg_bin
+except ImportError:
+    from FFmpeg_Bin import ffmpeg_bin
+
+_RECORDINGS_DIR = PROJECT_ROOT / "media" / "Recordings"
+_VIDEO_EXTS = {".mp4", ".mkv", ".mov", ".avi"}
+_LATEST_ALIASES = {"recordings", "recording", "latest", "last"}
+
+
 def _run_ffmpeg_audio(video_path: str, out_path: str) -> bool:
     """Extract mono 22050Hz audio from a video. Returns True on success."""
     try:
         r = subprocess.run(
             [
-                "ffmpeg", "-y",
+                ffmpeg_bin(), "-y",
                 "-i", video_path,
                 "-vn",          # no video
                 "-ac", "1",     # mono
@@ -86,7 +96,7 @@ def _run_ffmpeg_audio(video_path: str, out_path: str) -> bool:
                 out_path,
             ],
             capture_output=True,
-            timeout=60,
+            timeout=300,
         )
         return r.returncode == 0 and Path(out_path).exists() \
                and Path(out_path).stat().st_size > 0
@@ -171,8 +181,64 @@ def extract_audio_profile(
 
 
 def _has_ffmpeg() -> bool:
-    from shutil import which
-    return which("ffmpeg") is not None
+    try:
+        bin_path = ffmpeg_bin()
+        r = subprocess.run([bin_path, "-version"], capture_output=True, timeout=5)
+        return r.returncode == 0
+    except Exception:
+        return False
+
+
+def _latest_recording(folder: Path) -> Optional[Path]:
+    if not folder.is_dir():
+        return None
+    files = [
+        p for p in folder.iterdir()
+        if p.is_file()
+        and p.suffix.lower() in _VIDEO_EXTS
+        and "-vertical" not in p.stem.lower()
+    ]
+    if not files:
+        files = [
+            p for p in folder.iterdir()
+            if p.is_file() and p.suffix.lower() in _VIDEO_EXTS
+        ]
+    if not files:
+        return None
+    return max(files, key=lambda p: p.stat().st_mtime)
+
+
+def _resolve_recording_path(raw: str) -> Tuple[Optional[Path], str]:
+    """Turn a CLI arg into a real video file. `<recording>` is a placeholder."""
+    text = (raw or "").strip()
+    if not text or (text.startswith("<") and text.endswith(">")):
+        return None, (
+            "`<recording>` in the docs is a placeholder — don't type the brackets.\n"
+            "  bolt anomaly latest\n"
+            "  bolt anomaly media/Recordings/2026-09-06_00-44-30.mkv"
+        )
+    key = text.lower().rstrip("/")
+    if key in _LATEST_ALIASES or key in ("media/recordings", "media/Recordings"):
+        latest = _latest_recording(_RECORDINGS_DIR)
+        if latest is None:
+            return None, f"no video files in {_RECORDINGS_DIR}"
+        return latest, ""
+    path = Path(text).expanduser()
+    candidates = [path]
+    if not path.is_absolute():
+        candidates.extend([Path.cwd() / path, PROJECT_ROOT / path, _RECORDINGS_DIR / path])
+    for cand in candidates:
+        if cand.is_file():
+            return cand.resolve(), ""
+        if cand.is_dir():
+            latest = _latest_recording(cand)
+            if latest is None:
+                return None, f"no video files in {cand}"
+            return latest, ""
+    return None, (
+        f"no file at {text!r}. Pass a real path or `latest`.\n"
+        f"  bolt anomaly latest"
+    )
 
 
 def _has_librosa() -> bool:
@@ -423,7 +489,12 @@ def _main() -> int:
     parser = argparse.ArgumentParser(
         description="Score a recording against the historical baseline."
     )
-    parser.add_argument("recording_path")
+    parser.add_argument(
+        "recording_path",
+        nargs="?",
+        default="latest",
+        help="Video file, or 'latest' / 'recordings' for the newest file in media/Recordings",
+    )
     parser.add_argument("--game", default="unknown")
     parser.add_argument(
         "--no-save", "--dry-run", action="store_true",
@@ -439,14 +510,30 @@ def _main() -> int:
     )
     args = parser.parse_args()
 
-    profile = extract_audio_profile(args.recording_path)
+    resolved, resolve_err = _resolve_recording_path(args.recording_path)
+    if resolved is None:
+        print(resolve_err)
+        return 1
+
+    recording = str(resolved)
+    if recording != args.recording_path:
+        print(f"Using {recording}")
+
+    profile = extract_audio_profile(recording)
     if profile is None:
-        print(f"Could not extract profile from {args.recording_path}.")
-        print("Check that the file exists, ffmpeg is on PATH, and librosa is installed.")
+        print(f"Could not extract profile from {recording}.")
+        if not resolved.exists():
+            print("The file is missing.")
+        elif not _has_librosa():
+            print("librosa is not installed in Bolt's venv (`uv sync`).")
+        elif not _has_ffmpeg():
+            print("ffmpeg will not launch. PATH ffmpeg is broken; install ffmpeg-full or set BOLT_FFMPEG.")
+        else:
+            print("ffmpeg could not pull audio (timeout, no audio track, or a corrupt file).")
         return 1
 
     if not args.no_save:
-        save_profile(args.recording_path, args.game, profile)
+        save_profile(recording, args.game, profile)
 
     historical = load_profiles(args.game)
     baseline = fit_baseline(historical, game=args.game)
@@ -459,7 +546,7 @@ def _main() -> int:
         )
         sys.stdout.write("\n")
     else:
-        print(f"Recording: {args.recording_path}")
+        print(f"Recording: {recording}")
         print(f"Game:      {args.game}")
         print(f"Profile:   {profile}")
         print(f"Baseline:  n={report.baseline_size}")

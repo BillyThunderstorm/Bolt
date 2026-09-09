@@ -137,6 +137,13 @@ MANAGER_COMMANDS = {
     "morning",
     "good-morning",
     "goodmorning",
+    # Catalog paste packages (Content_Manager youtube-pkg / x-pkg)
+    "youtube-pkg",
+    "yt-pkg",
+    "youtube_pkg",
+    "x-pkg",
+    "twitter-pkg",
+    "x_pkg",
 }
 
 HELP_TEXT = """
@@ -155,17 +162,56 @@ Script subcommands (each maps to scripts/X.py):
                           Generate daily briefing; --send writes Reminders + alert
   thumbnails [args]       Generate JPG thumbnails for clips
   calendar                Generate ICS calendar feeds
-  nexus "<question>"      Ask Nexus for content strategy advice
+  nexus [status|"<question>"]
+                          Nexus advice (Ollama free; --paid = Grok)
+                          status [--json|--probe]; soft-fail LLM unavailable:
+                          aliases: advice, nexus-status, nexus_status
   performance             Run a performance baseline
-  site [--push]           Write site-data.json
+  site [--push]           Write site-data.json (local; --push soft-fails)
+  sites [status]            Sites + storage cron readiness (--json|--probe; soft-fail)
+                          aliases: site-status, sites-status, storage-cron
   weekly                  Generate weekly performance insights
   log_perf [args]         Log a clip's performance
-  vods                    Download Twitch VOD samples
+  vods [status]             Twitch VOD samples / readiness (status --json|--probe; soft-fail)
   twitch_token            Get a Twitch chat token
   twitch_bot_token        Get a Twitch bot chat token
   tiktok_token            Get a TikTok OAuth token (needs video.list for stats)
   youtube_token           Get a YouTube OAuth token (Data API readonly)
   drive-auth              One-time Google Drive/Docs consent (Daily Log writes)
+  drive [status|push]     Drive/Docs Daily Log readiness (status --json|--probe; soft-fail)
+                          aliases: drive-status, gdrive, handbook
+  gcal-auth               One-time Google Calendar consent (briefing)
+  gmail-auth              One-time Gmail read consent (briefing)
+  gcal [status|today]     Calendar token readiness / today's events (no browser)
+  gmail [status]          Gmail token readiness (no browser)
+  gemini [status|ask "…"] Optional Gemini REST client (Nexus last resort; soft-fail)
+                          status [--json|--probe]; aliases: gemini-status
+  obs [status]              OBS WebSocket readiness (Stream_Monitor; soft-fail)
+                          status [--json|--probe]; aliases: obs-status, stream-monitor
+  streamlabs [status]       Streamlabs Socket API readiness (soft-fail)
+                          status [--json|--probe]; aliases: streamlabs-status, slabs
+  discord [status|test|send]  Optional Discord webhook alerts (not a bot; soft-fail)
+                          status [--json|--probe]; test; send "msg"
+                          aliases: discord-status, webhook, notify-discord
+  learning [status|list|show]  Browse Data/learning study notes (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; show <slug>
+                          aliases: learn, notes, study-notes
+  domains [status|list|show]   Browse creator-domain requirements (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; show <slug|N>
+                          aliases: domain, creator-domains, creator_domains
+  pages [status|list|deploy]   Cloudflare Pages deploy readiness (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; deploy [project] [--dry-run]
+                          aliases: cloudflare-pages, cf-pages, pages-status
+  license [status|list|show|set]  Repo LICENSE / README placeholder (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; show; set <spdx> [--dry-run]
+                          aliases: licence, SPDX, license-status
+  mac-app [status|list|build]  Local macOS .app assemble (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; build [--dry-run]
+                          aliases: macapp, bolt-app, app-bundle, app-status
+  chat [status|connect]     Twitch chat readiness / connect (Bolt_Chat; soft-fail)
+                          status [--json|--probe]; connect [--force][--voice]
+                          aliases: twitch-chat, chat-status, bolt-chat
+  brain [status|test]   Legacy Brain_Controller readiness (compat; Think_Learn_Decide is canonical; soft-fail)
   sync_tiktok_stats       Pull TikTok views/likes into performance log
   sync_youtube_stats      Pull YouTube/Shorts views/likes into performance log
   send "<msg>"            Send an SMS / email notification
@@ -177,36 +223,53 @@ Script subcommands (each maps to scripts/X.py):
   filter_backlog          Move low-scoring clips to media/clips/_low_score/
   watch                   Watch the recordings folder for new files
   layout [--quiet|--json] Report any files misplaced at the repo root (no moves)
+  merge-py [status|run|--dry-run|--list] [-o PATH]
+                          Concatenate local .py sources → Data/merged_bot.py
+                          (aliases: merge_py, merge-sources). Soft-fail.
+                          Bare `bolt merge-py` = status; write: bolt merge-py run
+  titles [status|train|ab]  Local title A/B trainer (AI_Title_Generator; soft-fail)
+                          status [--json]; train [--dry-run] [--days N];
+                          ab "base title" [--game NAME] [--json]
+                          aliases: title-train, train-titles
 
 Content manager / creator business (Core/modules/Content_Manager.py):
-  manage add|list|note|draft|next|status
-  store add|list|feature-next
+  manage add|list|note|draft|next|status|youtube-pkg|x-pkg
+  store add|list|feature-next|status
   social status|package|queue
   sponsors find|pitch|log|next
   business lesson|next
   advance next
   morning [--quiet]       Good Morning Bolt spoken daily briefing
+  youtube-pkg "Name" [--json] [--save]
+                          Catalog YouTube Studio paste package (manual by design)
+                          (aliases: yt-pkg). Same as: bolt manage youtube-pkg
+  x-pkg "Name" [--json] [--save]
+                          Catalog X compose paste package (manual by design)
+                          (aliases: twitter-pkg). Same as: bolt manage x-pkg
 
 Voice (listen → interpret → speak via Core/bolt_live_voice.py):
-  voice [--text|--status|--clear|--once "…"]
-                          Hands-free conversation (mic + TTS)
+  voice [status|--text|--status|--clear|--once "…"]
+                          Hands-free conversation (mic + TTS); status = readiness
+                          Mic missing → soft-fail + hint; use --text without mic
   talk ["prompt"]         Alias for voice (optional one-shot prompt)
   say "message"           Speak a line out loud via Bolt_Voice
   briefing --speak        Generate daily briefing and speak a short summary
   storage [monitor|rotate|optimize|status]
                           Disk + media folder health (fixed paths under media/)
-                          status=sizes only; monitor=alerts; rotate/optimize=cleanup
+                          status=sizes + sites/cron readiness (advisory);
+                          monitor=alerts; rotate/optimize=cleanup
   budget | api-usage      xAI spend this month, soft cap, budget mode
   day [--decide|--voice|--quiet|--open|--process]
                           Morning kickoff; --decide → queue decide (default offer on TTY)
   week [show|set|done|paper|rotate|ban]
                           This week / last week / do not suggest (read before any plan)
                           paper [--open]  one-page fridge sheet (goal + checkboxes)
-  stats [status|sync|tiktok|youtube] [--dry-run]
+  stats [status|sync|tiktok|youtube] [--dry-run] [--json] [--probe]
                           Social performance pull readiness + TikTok/YouTube sync
   analytics [--days N] [--top N]
                           Summarize clip performance from Data/performance_outcomes.jsonl
-  anomaly <recording> [--game NAME] [--no-save|--dry-run] [--z N] [--json]
+  anomaly latest [--game NAME] [--no-save|--dry-run] [--z N] [--json]
+                          anomaly media/Recordings/FILE.mkv
                           Score a recording vs historical audio baseline (Anomaly_Detector)
                           (aliases: anomalies, anomaly-detect)
   predict --game G --trigger T [--platform P] [--days N] [--json]
@@ -214,8 +277,9 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
   predict --queue [--limit N] [--days N] [--json]
                           Predict for ready queue clips (Peak_Hour_Notifier insight)
                           (aliases: forecast, views-predict)
-  multi [status|plan|show] …
-                          Multi-platform manual posting plans (Data/multi_platform_queue.json)
+  multi [status|plan|show|publish] …
+                          Multi-platform plans + honest auto-upload soft-fail
+                          (Kick/IG unavailable:; Data/multi_platform_queue.json)
                           (aliases: platforms, multi-publish)
   enhance [--dry-run] [--limit N]
                           Smart_Trim → Text_Overlay on media/vertical_clips/
@@ -227,6 +291,10 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
                           (aliases: menu-bar, menu_bar). Install: uv sync --extra menubar
   ocr <clip> [--verbose]  Extract on-screen game-stat text via Video_Intelligence
                           (aliases: video-ocr, extract-stats). Needs pytesseract + tesseract.
+  amazon <ASIN|URL> […] [--focus …] [--platform tiktok] [--fetch-only] [--json]
+                          Amazon product fetch + review plan (Amazon_Analyzer)
+                          (aliases: amazon-review, review-plan). Same path as
+                          bolt recordings --content-type review.
   search "question" [--raw|--long|--json] [--limit N]
                           Live DuckDuckGo web search (+ optional LLM summary)
                           (aliases: web-search, websearch). Powers !Bolt chat search.
@@ -263,7 +331,8 @@ Post queue / peak posting (Core/modules/Peak_Hour_Notifier.py):
                           Hold a clip and record the reason
   tiktok-post [--demo|--live]
                           Compliant Post-to-TikTok web UI (audit demo)
-                          (aliases: post-ui, tiktok_post)
+  tiktok-post status      Token / API readiness (no server; demo is valid)
+                          (aliases: post-ui, tiktok_post, tiktok-ui)
 
 Built-in subcommands (not script passthroughs):
   setup                   Finite setup check (config + keys); exits when done
@@ -425,6 +494,49 @@ if os.getenv("BOLT_BUDGET_TEST_ALERT") == "1":
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
+    # Built-in: sites / storage-cron readiness (local write + scripts + crontab advisory)
+    if subcommand in (
+        "sites",
+        "site-status",
+        "sites-status",
+        "storage-cron",
+        "storage_cron",
+    ) or (
+        subcommand == "site"
+        and (
+            (
+                [a for a in rest if not a.startswith("-")]
+                and [a for a in rest if not a.startswith("-")][0].lower()
+                in ("status", "check", "ready")
+            )
+            or (
+                rest
+                and not any(a in ("--push", "--path") for a in rest)
+                and all(a in ("--json", "--probe") for a in rest)
+            )
+        )
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        site_args = list(rest)
+        if subcommand in (
+            "site-status",
+            "sites-status",
+            "storage-cron",
+            "storage_cron",
+        ) and not site_args:
+            site_args = ["status"]
+        # Flag-only --json/--probe → status verb for Sites_Storage
+        if site_args and all(a.startswith("-") for a in site_args):
+            site_args = ["status"] + site_args
+        if not site_args:
+            site_args = ["status"]
+        cmd = [py, "-m", "modules.Sites_Storage"] + site_args
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
     # Built-in: storage monitor / rotation / optimization (canonical media/ paths)
     if subcommand in ("storage", "disk", "media-rotation", "storage-monitor"):
         action = rest[0] if rest else "status"
@@ -449,11 +561,20 @@ print(f"  Disk: {{100*u.used/u.total:.0f}}% used, {{u.free/1024**3:.1f}}GB free"
 '''
             cmd = [py, "-c", script]
             rc = subprocess.call(cmd, cwd=str(REPO_ROOT))
-            # Speak a short storage line when auto-speak is on
+            # Sites / storage cron readiness (advisory; soft-fail)
             env = os.environ.copy()
             env["PYTHONPATH"] = f"{CORE_DIR}" + (
                 f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
             )
+            sites_summary = """
+try:
+    from modules.Sites_Storage import print_status
+    print_status(as_json=False, probe=False)
+except Exception as exc:
+    print(f\"  (sites/storage cron status skipped: {exc})\")
+"""
+            subprocess.call([py, "-c", sites_summary], cwd=str(REPO_ROOT), env=env)
+            # Speak a short storage line when auto-speak is on
             speak_script = '''
 try:
     from modules.Intent_Router import _action_storage
@@ -492,9 +613,9 @@ except Exception:
         elif subcommand == "manage":
             cm_args = rest if rest else ["status"]
         elif subcommand == "store":
-            # store add|list|feature-next -> store-add|store-list|store-feature-next
+            # store add|list|feature-next|status|status -> store-add|…
             if not rest:
-                cm_args = ["store-list"]
+                cm_args = ["store-status"]
             else:
                 action, *tail = rest
                 mapping = {
@@ -502,6 +623,8 @@ except Exception:
                     "list": "store-list",
                     "feature-next": "store-feature-next",
                     "feature": "store-feature-next",
+                    "status": "store-status",
+                    "verify-status": "store-status",
                 }
                 cm_args = [mapping.get(action, action)] + tail
         elif subcommand == "social":
@@ -539,6 +662,10 @@ except Exception:
                 cm_args = [mapping.get(action, action)] + tail
         elif subcommand == "advance":
             cm_args = ["advance-next"] + rest
+        elif subcommand in ("youtube-pkg", "yt-pkg", "youtube_pkg"):
+            cm_args = ["youtube-pkg"] + rest
+        elif subcommand in ("x-pkg", "twitter-pkg", "x_pkg"):
+            cm_args = ["x-pkg"] + rest
         else:
             cm_args = [subcommand] + rest
 
@@ -759,6 +886,23 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
+    # Built-in: Amazon product review plan (Amazon_Analyzer)
+    if subcommand in (
+        "amazon",
+        "amazon-review",
+        "amazon_review",
+        "review-plan",
+        "review_plan",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Amazon_Analyzer"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+
     # Built-in: live web search (Bolt_Search → DuckDuckGo)
     if subcommand in ("search", "web-search", "web_search", "websearch"):
         env = os.environ.copy()
@@ -776,6 +920,363 @@ print('System is fully upgraded.')
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
         cmd = [py, "-m", "modules.Google_Drive_Handbook"] + (rest if rest else ["auth"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    if subcommand in (
+        "drive",
+        "drive-status",
+        "drive_status",
+        "gdrive",
+        "handbook",
+        "google-drive",
+        "google_drive",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        # Aliases that imply status: drive-status / drive_status
+        if subcommand in ("drive-status", "drive_status") and (
+            not rest or rest[0].startswith("-")
+        ):
+            mod_args = ["status"] + rest
+        else:
+            mod_args = rest if rest else ["status"]
+        cmd = [py, "-m", "modules.Google_Drive_Handbook"] + mod_args
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: Google Calendar consent / status (briefing)
+    if subcommand in (
+        "gcal-auth",
+        "gcal_auth",
+        "calendar-auth",
+        "google-calendar-auth",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Google_Calendar"] + (rest if rest else ["auth"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    if subcommand in ("gcal", "google-calendar", "google_calendar"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Google_Calendar"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: Gmail consent / status (briefing)
+    if subcommand in ("gmail-auth", "gmail_auth", "google-gmail-auth"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Gmail_Briefing"] + (rest if rest else ["auth"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    if subcommand in ("gmail",):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Gmail_Briefing"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: Nexus status aliases (soft-fail readiness surface)
+    if subcommand in ("nexus-status", "nexus_status"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Nexus_Creator", "status"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: optional Gemini REST client (Nexus last resort; soft-fail)
+    if subcommand in ("gemini", "gemini-status", "gemini_status"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        # gemini-status / gemini_status → force status when no args
+        if subcommand in ("gemini-status", "gemini_status") and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Gemini_Client"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+
+    # Built-in: OBS WebSocket readiness (Stream_Monitor; soft-fail)
+    if subcommand in ("obs", "obs-status", "obs_status", "stream-monitor", "stream_monitor"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in ("obs-status", "obs_status") and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Stream_Monitor"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: Streamlabs Socket API readiness (Streamlabs_Monitor; soft-fail)
+    if subcommand in (
+        "streamlabs",
+        "streamlabs-status",
+        "streamlabs_status",
+        "slabs",
+        "streamlabs-monitor",
+        "streamlabs_monitor",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "streamlabs-status",
+            "streamlabs_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Streamlabs_Monitor"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+
+
+    # Built-in: optional Discord webhook alerts (notifier; soft-fail; NOT a Discord bot)
+    if subcommand in (
+        "discord",
+        "discord-status",
+        "discord_status",
+        "webhook",
+        "discord-webhook",
+        "discord_webhook",
+        "notify-discord",
+        "notify_discord",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "discord-status",
+            "discord_status",
+        ) and not rest:
+            rest = ["status"]
+        # Bare `bolt discord` → status (safe; no POST)
+        cmd = [py, "-m", "modules.notifier"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: Twitch chat readiness / connect (Bolt_Chat; soft-fail)
+    if subcommand in (
+        "chat",
+        "twitch-chat",
+        "twitch_chat",
+        "chat-status",
+        "chat_status",
+        "bolt-chat",
+        "bolt_chat",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in ("chat-status", "chat_status") and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Bolt_Chat"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: legacy Brain_Controller readiness (compat; Think_Learn_Decide canonical; soft-fail)
+    if subcommand in (
+        "brain",
+        "brain-status",
+        "brain_status",
+        "brain-controller",
+        "brain_controller",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in ("brain-status", "brain_status") and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Brain_Controller"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+
+
+
+    # Built-in: local LLM study notes browser (Learning_Notes; soft-fail; study log only)
+    if subcommand in (
+        "learning",
+        "learn",
+        "notes",
+        "study-notes",
+        "study_notes",
+        "learning-notes",
+        "learning_notes",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "notes",
+            "study-notes",
+            "study_notes",
+        ) and not rest:
+            rest = ["list"]
+        # Bare `bolt learning` / `bolt learn` → status (safe)
+        cmd = [py, "-m", "modules.Learning_Notes"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: creator-domain requirements browser (Creator_Domains; soft-fail; spec only)
+    if subcommand in (
+        "domains",
+        "domain",
+        "creator-domains",
+        "creator_domains",
+        "creator-domain",
+        "creator_domain",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        # Bare `bolt domains` / aliases → status (safe)
+        cmd = [py, "-m", "modules.Creator_Domains"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+
+    # Built-in: Cloudflare Pages deploy readiness (Cloudflare_Pages; soft-fail; William-specific PARTIAL)
+    if subcommand in (
+        "pages",
+        "cloudflare-pages",
+        "cloudflare_pages",
+        "cf-pages",
+        "cf_pages",
+        "pages-status",
+        "pages_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "pages-status",
+            "pages_status",
+        ) and not rest:
+            rest = ["status"]
+        # Bare `bolt pages` / aliases → status (safe; no deploy)
+        cmd = [py, "-m", "modules.Cloudflare_Pages"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: repo license readiness (Bolt_License; soft-fail; PARTIAL)
+    if subcommand in (
+        "license",
+        "licence",
+        "spdx",
+        "SPDX",
+        "license-status",
+        "license_status",
+        "licence-status",
+        "licence_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "license-status",
+            "license_status",
+            "licence-status",
+            "licence_status",
+        ) and not rest:
+            rest = ["status"]
+        # Bare `bolt license` / aliases → status (safe; set needs explicit SPDX)
+        cmd = [py, "-m", "modules.Bolt_License"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+
+    # Built-in: local macOS .app assemble (Bolt_Mac_App; soft-fail; PARTIAL)
+    if subcommand in (
+        "mac-app",
+        "mac_app",
+        "macapp",
+        "bolt-app",
+        "bolt_app",
+        "app-bundle",
+        "app_bundle",
+        "app-status",
+        "app_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "app-status",
+            "app_status",
+        ) and not rest:
+            rest = ["status"]
+        # Bare `bolt mac-app` / aliases → status (safe; build is explicit)
+        cmd = [py, "-m", "modules.Bolt_Mac_App"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: local title A/B trainer (AI_Title_Generator; soft-fail)
+    if subcommand in (
+        "titles",
+        "title",
+        "title-train",
+        "title_train",
+        "train-titles",
+        "train_titles",
+        "ab-titles",
+        "ab_titles",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        # Bare `bolt titles` → status (safe)
+        if not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.AI_Title_Generator"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: merge local .py sources into one dump (Core/merge_py.py; soft-fail)
+    if subcommand in (
+        "merge-py",
+        "merge_py",
+        "mergepy",
+        "merge-sources",
+        "merge_sources",
+    ):
+        env = os.environ.copy()
+        merge_script = CORE_DIR / "merge_py.py"
+        if not merge_script.exists():
+            print(f"Merge unavailable: missing {merge_script}", file=sys.stderr)
+            return 0
+        # Bare `bolt merge-py` → status (safe; write needs explicit run)
+        if not rest:
+            rest = ["status"]
+        cmd = [py, str(merge_script)] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 

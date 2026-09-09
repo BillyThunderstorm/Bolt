@@ -28,6 +28,11 @@ if str(_PATHS_DIR) not in sys.path:
 from _paths import CLIPS_DIR
 
 try:
+    from modules.FFmpeg_Bin import ffmpeg_bin, ffprobe_bin
+except ImportError:
+    from FFmpeg_Bin import ffmpeg_bin, ffprobe_bin
+
+try:
     from modules.notifier import notify
 except ImportError:
 
@@ -60,8 +65,8 @@ except ImportError:
 
     def load_config():
         return {
-            "clips_folder": "clips",
-            "vertical_clips_folder": "vertical_clips",
+            "clips_folder": "media/clips",
+            "vertical_clips_folder": "media/vertical_clips",
             "pad_before": 12.0,
             "pad_after": 20.0,
             "min_clip_duration": 10.0,
@@ -307,7 +312,7 @@ def _cut_clip_ffmpeg(source: str, output: str, start: float, duration: float) ->
     Returns (success: bool, error_message: str | None).
     """
     cmd = [
-        "ffmpeg",
+        ffmpeg_bin(),
         "-y",
         "-i",
         source,  # input FIRST — then seek (slower but audio stays in sync)
@@ -341,7 +346,7 @@ def _cut_clip_ffmpeg(source: str, output: str, start: float, duration: float) ->
 def _get_duration(filepath: str) -> float:
     """Return video duration in seconds via ffprobe, or 0 on failure."""
     cmd = [
-        "ffprobe",
+        ffprobe_bin(),
         "-v",
         "error",
         "-show_entries",

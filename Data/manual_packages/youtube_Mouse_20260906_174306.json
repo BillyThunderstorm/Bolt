@@ -1,0 +1,19 @@
+{
+  "platform": "youtube",
+  "platform_status": "manual_assisted",
+  "handle": "TBD",
+  "title": "Mouse \u2014 honest review",
+  "description": "Its cute, lightweight, easy to charge and connect, and very affordable.\n\nWhat worked:\nIts cute, lightweight, easy to charge and connect, and very affordable.\n\nWhat got in the way:\nCall out friction honestly when logged.\n\nWho it's for:\nGamers and tech buyers who want practical takes, not hype.\n\nVerdict: Pending \u2014 keep testing until a clear call.\n\nBuy it: https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20\n\nIncludes affiliate links. As an Amazon Associate I earn from qualifying purchases. Honest opinion only.\n\n#shorts  #review  #tech  #honest",
+  "tags": [
+    "gaming",
+    "tech review",
+    "honest review",
+    "tech",
+    "mouse",
+    "pending"
+  ],
+  "affiliate_link": "https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20",
+  "category_suggestion": "Science & Technology",
+  "upload_url": "https://studio.youtube.com/channel/upload",
+  "next_step": "Paste the title, description, and tags into the YouTube upload UI. After the video is live, run: bolt manage mark-posted \"Mouse\" --platforms youtube_shorts --where <video_url>"
+}

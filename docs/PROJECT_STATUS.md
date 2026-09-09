@@ -19,7 +19,7 @@ What is active now:
 - Clip ranking tiers + recency-weighted learned boost
 - Title generation and subtitles
 - Vertical clip formatting
-- OBS, Twitch, Streamlabs, and Discord integration
+- OBS, Twitch, Streamlabs integration; optional Discord **webhook** alerts (`bolt discord`, not a bot); local study-note browser (`bolt learning`, PARTIAL study log); creator-domain spec browser (`bolt domains`, PARTIAL — not a runtime); Cloudflare Pages deploy CLI (`bolt pages`, PARTIAL William-specific — not stranger-ready)
 - **Twitch VOD auto-clipping** — downloads VODs and runs full clip pipeline automatically
 - **Highlight reel compiler** — stitches best clips into a VOD for Twitch upload
 - macOS voice alerts
@@ -120,12 +120,13 @@ bolt advance next
 ### Pipeline / legacy entry points
 ```bash
 python3 -m pip install -r Docs/requirements.txt
-python3 Core/src/launch.py
+# Prefer: bolt launch / bolt setup (canonical). Core/src/launch.py is a compat shim → Core/launch.py.
+python3 Core/src/launch.py --setup-only   # legacy path; forwards to Core/launch.py (finite)
 python3 -m unittest discover -s Data/tests -t .
 python3 -m modules.Bolt_Chat
 python3 -m modules.Bolt_Conversation
 python3 -m modules.Bolt_Voice "say this out loud"
-# Prefer: bolt recordings | bolt briefing | bolt highlights | bolt test
+# Prefer: bolt recordings | bolt briefing | bolt highlights | bolt test | bolt launch | bolt setup
 ```
 
 ## Calendar Feeds
@@ -577,9 +578,16 @@ Or add to cron for auto-updates every 15 minutes:
 ```
 
 ### Redeploying Sites
+
+CLI readiness (PARTIAL): `bolt pages status` / `list` / `deploy --dry-run` (soft-fail `Pages unavailable:` without wrangler/CF auth). William-specific — not stranger-ready.
+
 ```bash
 wrangler pages deploy /tmp/sites/bolt  --project-name=bolt-fortress
 wrangler pages deploy /tmp/sites/main   --project-name=billythunderstorm
 wrangler pages deploy /tmp/sites/live   --project-name=billythunderstorm-live
 cd /tmp/sites/bolt-api-worker && wrangler deploy
 ```
+
+- License tooling is PARTIAL via `bolt license` (status/list/show/set; soft-fail `License unavailable:`; does not auto-pick SPDX).
+- Mac `.app` packaging is PARTIAL via `bolt mac-app` (status/list/build; soft-fail `Mac app unavailable:`; not notarized / not iOS; prefer `bolt menubar`).
+- Shells / IDEA queue (9 Sep 2026 ~4:43 PM CT): **drained** — no gray IDEA or red SHELL items left in `Docs/READINESS.md` (TikTok publish stays PARTIAL / skipped while API paused).

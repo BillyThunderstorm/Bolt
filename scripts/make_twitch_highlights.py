@@ -308,20 +308,56 @@ def compile_highlight_reel(clips: list[dict], output_path: Path,
 # (no extra dir needed — OUTPUT_DIR already defined above)
 
 
-def main():
+def main(argv=None):
+    raw = list(argv) if argv is not None else sys.argv[1:]
+    if raw and raw[0] == "status":
+        from modules.Twitch_Stats import status as vod_status
+        import json as _json
+        sp = argparse.ArgumentParser(prog="bolt highlights status")
+        sp.add_argument("--json", action="store_true")
+        sp.add_argument("--probe", action="store_true")
+        sargs = sp.parse_args(raw[1:])
+        info = vod_status(probe=sargs.probe)
+        info = dict(info)
+        info["clips_dir"] = str(CLIPS_DIR)
+        info["clips_count"] = len(list_clips())
+        if info["clips_count"] == 0 and not info.get("hint"):
+            info["hint"] = (
+                f"Highlight reel unavailable: no clips in {CLIPS_DIR} "
+                "(run bolt recordings first)."
+            )
+        elif info["clips_count"] == 0:
+            info["hint"] = (
+                f"Highlight reel unavailable: no clips in {CLIPS_DIR} "
+                "(run bolt recordings first). " + (info.get("hint") or "")
+            )
+        if sargs.json:
+            print(_json.dumps(info, indent=2))
+        else:
+            print("ready:", info["ready"])
+            print("clips_dir:", info["clips_dir"])
+            print("clips_count:", info["clips_count"])
+            print("yt_dlp_found:", info["yt_dlp_found"])
+            if info.get("hint"):
+                print("hint:", info["hint"])
+        return 0
+
     parser = argparse.ArgumentParser(description="Compile Twitch highlight VOD from clips")
     parser.add_argument("--count", type=int, default=10, help="Number of clips to include (default: 10)")
     parser.add_argument("--game", type=str, help="Filter clips by game keyword")
     parser.add_argument("--list", action="store_true", help="List top clips by score")
     parser.add_argument("--output", type=str, help="Custom output filename")
-    args = parser.parse_args()
+    args = parser.parse_args(raw)
 
     print("\n  ⚡️  Bolt — Twitch Highlight Reel Compiler\n")
 
     clips = list_clips()
 
     if not clips:
-        print("  ✗ No clips found in clips/ directory")
+        print(
+            f"  ✗  Highlight reel unavailable: no clips in {CLIPS_DIR} "
+            f"(run bolt recordings or bolt auto_clip_twitch first)."
+        )
         sys.exit(1)
 
     # Filter by game if specified
@@ -373,4 +409,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

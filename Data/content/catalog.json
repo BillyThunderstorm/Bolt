@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-08-23T16:08:00",
+  "updated_at": "2026-09-07T20:49:29",
   "preferred_lanes": [
     "game",
     "tech"
@@ -65,19 +65,19 @@
           "what_it_is": "Mouse (tech)",
           "why_tested": "Real-world game/tech testing for honest creator reviews.",
           "first_impression": "Its cute, lightweight, easy to charge and connect, and very affordable.",
-          "what_worked": "Its cute, lightweight, easy to charge and connect, and very affordable.",
+          "what_worked": "Its cute, lightweight, easy to charge and connect, and very affordable. | Corrected: review was Amazon-only (not social). Silent social default removed from CLI. | Corrected to Amazon-only ship (no social). | Amazon review title: Its nice. Reviewed May 24, 2026. Color: Rose Gold. Verified Purchase. Product: TENMOS Wireless Bluetooth Mouse. Its fine. Not bad. Kind of goes to sleep after about a minute. Battery gets low a little quicker than I expected, but charging it takes maybe an hour or so. Its good enough that if I saw this company [print cut off]",
           "what_got_in_the_way": "Call out friction honestly when logged.",
           "who_it_is_for": "Gamers and tech buyers who want practical takes, not hype.",
-          "verdict": "Pending — keep testing until a clear call."
+          "verdict": "4 stars on Amazon — Its nice."
         },
-        "script": "Hook: I've been testing the Mouse — honest take.\nWhat it is: Mouse (tech)\nDemo notes: Its cute, lightweight, easy to charge and connect, and very affordable.\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: Pending — keep testing until a clear call.\nAffiliate: https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20\nDisclosure: honest opinion; links may earn commission.",
+        "script": "Hook: I've been testing the Mouse — honest take.\nWhat it is: Mouse (tech)\nDemo notes: Its cute, lightweight, easy to charge and connect, and very affordable. | Corrected: review was Amazon-only (not social). Silent social default removed from CLI. | Corrected to Amazon-only ship (no social). | Amazon review title: Its nice. Reviewed May 24, 2026. Color: Rose Gold. Verified Purchase. Product: TENMOS Wireless Bluetooth Mouse. Its fine. Not bad. Kind of goes to sleep after about a minute. Battery gets low a little quicker than I expected, but charging it takes maybe an hour or so. Its good enough that if I saw this company [print cut off]\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: 4 stars on Amazon — Its nice.\nAffiliate: https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20\nDisclosure: honest opinion; links may earn commission.",
         "affiliate_link": "https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20",
         "platforms": [
           "tiktok",
           "youtube_shorts",
           "x"
         ],
-        "created_at": "2026-08-12T12:54:01"
+        "created_at": "2026-09-06T17:43:17"
       },
       "marked_ready_at": "2026-08-12T12:56:32",
       "posted_at": "2026-08-12T12:57:11",
@@ -922,6 +922,30 @@
         "youtube_shorts"
       ],
       "posted_where": "https://www.youtube.com/watch?v=gYqRPoCkIy0"
+    },
+    {
+      "id": "bolt-verify-smoke",
+      "name": "Bolt Verify Smoke",
+      "lane": "tech",
+      "status": "testing",
+      "asin": "B00TESTXXX",
+      "started_at": "2026-09-07",
+      "created_at": "2026-09-07T20:48:56",
+      "notes_log": [],
+      "verdict": null,
+      "priority": 10
+    },
+    {
+      "id": "temp-noverify",
+      "name": "Temp NoVerify",
+      "lane": "tech",
+      "status": "testing",
+      "asin": "B00TEMPXXXX",
+      "started_at": "2026-09-07",
+      "created_at": "2026-09-07T20:49:29",
+      "notes_log": [],
+      "verdict": null,
+      "priority": 10
     }
   ]
 }

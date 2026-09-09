@@ -47,8 +47,9 @@ CHUNK_SIZE = 64 * 1024 * 1024  # 64 MB
 # Used by the Post UI when no live token is available (demo / film mode).
 MOCK_CREATOR_INFO = {
     "creator_avatar_url": "",
-    "creator_username": "demo_creator",
-    "creator_nickname": "Demo Creator",
+    # Unmistakably fake — never looks like a real TikTok account.
+    "creator_username": "bolt_demo_not_real",
+    "creator_nickname": "[DEMO] Bolt Audit Mock",
     "privacy_level_options": [
         "PUBLIC_TO_EVERYONE",
         "MUTUAL_FOLLOW_FRIENDS",
@@ -60,6 +61,10 @@ MOCK_CREATOR_INFO = {
     "max_video_post_duration_sec": 600,
     "can_post": True,
     "demo": True,
+    "auth_hint": (
+        "Demo mock — not a real TikTok account. "
+        "Live: set TIKTOK_API_ENABLED=true and run `bolt tiktok_token`."
+    ),
 }
 
 
@@ -119,8 +124,20 @@ class TikTokPublisher:
 
         if not self.token:
             if allow_mock:
-                return {"success": True, "data": dict(MOCK_CREATOR_INFO), "mock": True}
-            return {"success": False, "error": "TIKTOK_ACCESS_TOKEN not set"}
+                return {
+                    "success": True,
+                    "data": dict(MOCK_CREATOR_INFO),
+                    "mock": True,
+                    "auth_hint": MOCK_CREATOR_INFO.get("auth_hint"),
+                }
+            return {
+                "success": False,
+                "error": "TIKTOK_ACCESS_TOKEN not set",
+                "auth_hint": (
+                    "Run `bolt tiktok_token` after TIKTOK_API_ENABLED=true "
+                    "(Content Posting API must be approved)."
+                ),
+            }
 
         try:
             resp = requests.post(
@@ -134,6 +151,7 @@ class TikTokPublisher:
                     "data": dict(MOCK_CREATOR_INFO),
                     "mock": True,
                     "warning": str(exc),
+                    "auth_hint": MOCK_CREATOR_INFO.get("auth_hint"),
                 }
             return {"success": False, "error": str(exc)}
 
@@ -157,6 +175,7 @@ class TikTokPublisher:
                     "data": dict(MOCK_CREATOR_INFO),
                     "mock": True,
                     "warning": err.get("message") or code,
+                    "auth_hint": MOCK_CREATOR_INFO.get("auth_hint"),
                 }
             return {
                 "success": False,

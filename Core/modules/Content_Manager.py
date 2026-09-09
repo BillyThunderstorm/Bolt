@@ -13,7 +13,7 @@ Local-first system of record for:
 
 CLI (via bolt or python -m modules.Content_Manager):
   manage add|list|note|draft|next|status
-  store add|list|feature-next
+  store add|list|feature-next|status
   social status|package|queue
   sponsors find|pitch|log|next
   business lesson|next
@@ -38,6 +38,7 @@ from uuid import uuid4
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = REPO_ROOT / "Data"
 CONTENT_DIR = DATA_DIR / "content"
+MANUAL_PACKAGES_DIR = DATA_DIR / "manual_packages"
 BUSINESS_DIR = DATA_DIR / "business"
 DOCS_REVIEWS = REPO_ROOT / "Docs" / "reviews"
 BRIEFINGS_DIR = REPO_ROOT / "Docs" / "briefings" / "daily"
@@ -1643,15 +1644,20 @@ def next_actions(limit: int = 3) -> List[Dict[str, str]]:
     return actions[:limit]
 
 
-def store_add(name: str, asin: str = "", category: str = "tech", notes: str = "",
-              verify: bool = False) -> Dict[str, Any]:
+def store_add(
+    name: str,
+    asin: str = "",
+    category: str = "tech",
+    notes: str = "",
+    verify: Optional[bool] = None,
+) -> Dict[str, Any]:
     """Add or update a storefront item.
 
-    If `verify` is True, calls `Amazon_Analyzer.fetch_product_details(asin)`
-    to confirm the ASIN resolves to a real Amazon product before saving.
-    On any network/HTTP error or missing product data, the item is still
-    saved but `verify_error` is recorded on the item so the operator
-    can fix the ASIN later.
+    When an ASIN is present, verify defaults to True: calls
+    ``Amazon_Analyzer.fetch_product_details(asin)`` (HTML scrape, no PA-API).
+    Network / captcha / parse failures **never block** the save — they set
+    ``verify_status`` + ``verify_error`` (often ``Amazon unavailable: …``)
+    so the operator can fix the ASIN later. Pass ``verify=False`` to skip.
     """
     data = load_storefront()
     asin = asin.strip().upper()
@@ -1668,23 +1674,50 @@ def store_add(name: str, asin: str = "", category: str = "tech", notes: str = ""
         "added_at": _now_iso(),
     }
 
-    # Optional: verify the ASIN resolves to a real product. Network failures
-    # are recorded but never block the add.
-    if verify and asin:
+    # Default: verify when ASIN present. Soft-fail — never blocks the add.
+    do_verify = bool(asin) if verify is None else bool(verify)
+    if do_verify and asin:
         item["verify_status"] = "pending"
         try:
             from modules.Amazon_Analyzer import fetch_product_details
+
             details = fetch_product_details(asin)
-            title = details.get("title") if isinstance(details, dict) else None
-            if title and "Unknown" not in str(title):
-                item["verified_title"] = title
-                item["verify_status"] = "ok"
+            if not isinstance(details, dict):
+                item["verify_status"] = "error"
+                item["verify_error"] = "Amazon unavailable: empty verify response"
+            elif details.get("error") or details.get("ok") is False:
+                item["verify_status"] = "error"
+                item["verify_error"] = str(
+                    details.get("error")
+                    or "Amazon unavailable: fetch soft-failed"
+                )[:240]
+                title = details.get("title")
+                if title and title not in (
+                    "Failed to fetch product page",
+                    "Unknown Product",
+                    "Blocked",
+                ):
+                    item["verified_title"] = title  # may still be a block page title
             else:
-                item["verify_status"] = "no_match"
-                item["verify_error"] = "Amazon did not return a product title for this ASIN"
+                title = (details.get("title") or "").strip()
+                bad = (
+                    not title
+                    or title in ("Unknown Product", "Failed to fetch product page", "Blocked")
+                    or "unknown product" in title.lower()
+                )
+                if bad:
+                    item["verify_status"] = "no_match"
+                    item["verify_error"] = (
+                        "Amazon did not return a product title for this ASIN"
+                    )
+                else:
+                    item["verified_title"] = title
+                    item["verify_status"] = "ok"
+                    if details.get("price"):
+                        item["verified_price"] = details.get("price")
         except Exception as exc:  # network / import / parse
             item["verify_status"] = "error"
-            item["verify_error"] = f"{type(exc).__name__}: {exc}"
+            item["verify_error"] = f"Amazon unavailable: {type(exc).__name__}: {exc}"
 
     # de-dupe by asin or name
     items = data.setdefault("items", [])
@@ -1701,6 +1734,44 @@ def store_add(name: str, asin: str = "", category: str = "tech", notes: str = ""
     except Exception:
         pass
     return item
+
+
+def store_status() -> Dict[str, Any]:
+    """Storefront + ASIN-verify readiness. Never raises."""
+    summary = store_summary()
+    missing = store_missing_asins()
+    try:
+        from modules.Amazon_Analyzer import status as amazon_status
+
+        amz = amazon_status()
+    except Exception as exc:
+        amz = {
+            "ready": False,
+            "hint": f"Amazon unavailable: {type(exc).__name__}: {exc}",
+        }
+    items = store_list()
+    verify_counts = {"ok": 0, "error": 0, "no_match": 0, "pending": 0, "unset": 0}
+    for it in items:
+        st = (it.get("verify_status") or "").strip().lower()
+        if st in verify_counts:
+            verify_counts[st] += 1
+        else:
+            verify_counts["unset"] += 1
+    return {
+        "ready": bool(amz.get("ready", True)),
+        "storefront": summary,
+        "missing_asins": [
+            {"name": i.get("name"), "id": i.get("id")} for i in missing[:20]
+        ],
+        "missing_asin_count": len(missing),
+        "verify_counts": verify_counts,
+        "amazon": amz,
+        "hint": amz.get("hint")
+        or (
+            'bolt store add --name "…" --asin B0…  '
+            "(verifies by default; soft-fails if Amazon blocks)"
+        ),
+    }
 
 
 def store_list() -> List[Dict[str, Any]]:
@@ -1934,90 +2005,268 @@ def build_x_package(name: str) -> Dict[str, Any]:
 
 
 def youtube_readiness() -> Dict[str, Any]:
-    """What M12 needs to switch from manual_assisted to real API
-    upload. Right now YouTube is always 'manual' because the OAuth
-    app review hasn't been done. This helper reports the gap and
-    lists the next steps."""
+    """Manual paste packages are the intended YouTube surface today.
+
+    ``ready`` reflects that path (Studio paste). API upload remains a
+    separate, not-ready check pending OAuth app review — do not treat
+    ``ready`` as "YouTube Data API upload works".
+    """
     return {
-        "ready": False,  # always — until we build a real YouTube publisher
+        "ready": True,  # manual paste packages — intended product surface
+        "mode": "manual_assisted",
+        "api_upload_ready": False,
         "checks": [
+            {
+                "name": "manual upload package generator",
+                "ok": True,
+                "detail": (
+                    "READY for paste into YouTube Studio. "
+                    "`bolt youtube-pkg NAME` (or `bolt manage youtube-pkg`) "
+                    "emits title, description, and tags."
+                ),
+            },
             {
                 "name": "YouTube Data API v3 OAuth app",
                 "ok": False,
                 "detail": (
-                    "Not yet implemented. Until then, `bolt manage youtube-pkg` "
-                    "generates a paste-ready upload package."
+                    "Not implemented / pending app review. API upload is "
+                    "not available; use the manual package path."
                 ),
-            },
-            {
-                "name": "manual upload package generator",
-                "ok": True,
-                "detail": "Available now as `bolt manage youtube-pkg NAME`.",
             },
         ],
         "next_steps": [
-            "Use `bolt manage youtube-pkg \"ITEM\"` to generate the title, "
-            "description, and tags to paste into the YouTube upload UI.",
-            "After the upload is live, run `bolt manage mark-posted \"ITEM\" "
-            "--platforms youtube_shorts --where <video_url>` to record it.",
-            "If/when you want a real API publisher: create a Google Cloud "
-            "project, enable YouTube Data API v3, set up OAuth consent screen, "
-            "get client_id/secret into .env, then build Core/modules/YouTube_Publisher.py "
-            "modeled on modules/TikTok_Publisher.py.",
+            "Use `bolt youtube-pkg ITEM` (or `bolt manage youtube-pkg`) "
+            "to generate paste-ready title, description, and tags.",
+            "Paste into https://studio.youtube.com/channel/upload, then run "
+            "`bolt manage mark-posted ITEM --platforms youtube_shorts "
+            "--where <video_url>`.",
+            "API upload later (optional): Google Cloud project + YouTube "
+            "Data API v3 OAuth, then a YouTube_Publisher modeled on "
+            "TikTok_Publisher — not claimed ready today.",
         ],
     }
 
 
 def x_readiness() -> Dict[str, Any]:
-    """Same shape as youtube_readiness, for X."""
+    """Same shape as youtube_readiness: manual compose paste is ready;
+    X API upload is not."""
     return {
-        "ready": False,
+        "ready": True,  # manual paste packages — intended product surface
+        "mode": "manual_assisted",
+        "api_upload_ready": False,
         "checks": [
+            {
+                "name": "manual post package generator",
+                "ok": True,
+                "detail": (
+                    "READY for paste into X compose. "
+                    "`bolt x-pkg NAME` (or `bolt manage x-pkg`) emits a "
+                    "280-char post body + hashtags."
+                ),
+            },
             {
                 "name": "X API v2 OAuth app",
                 "ok": False,
                 "detail": (
-                    "Not yet implemented. Until then, `bolt manage x-pkg` "
-                    "generates a paste-ready post body."
+                    "Not implemented / pending app review. API upload is "
+                    "not available; use the manual package path."
                 ),
-            },
-            {
-                "name": "manual post package generator",
-                "ok": True,
-                "detail": "Available now as `bolt manage x-pkg NAME`.",
             },
         ],
         "next_steps": [
-            "Use `bolt manage x-pkg \"ITEM\"` to generate the 280-char post body.",
-            "After the post is live, run `bolt manage mark-posted \"ITEM\" "
-            "--platforms x --where <post_url>` to record it.",
-            "For real API upload later: get an X developer app, set "
-            "X_API_KEY/X_API_SECRET/X_BEARER_TOKEN in .env, and build "
-            "Core/modules/X_Publisher.py.",
+            "Use `bolt x-pkg ITEM` (or `bolt manage x-pkg`) to generate "
+            "the paste-ready post body.",
+            "Paste into https://x.com/compose/post, then run "
+            "`bolt manage mark-posted ITEM --platforms x "
+            "--where <post_url>`.",
+            "API upload later (optional): X developer app + tokens and an "
+            "X_Publisher — not claimed ready today.",
         ],
     }
 
 
+def format_youtube_package_text(pkg: Dict[str, Any]) -> str:
+    """Human paste-ready plain text for YouTube Studio."""
+    tags = pkg.get("tags") or []
+    tags_line = ", ".join(str(t) for t in tags) if tags else "(none)"
+    lines = [
+        "=== YouTube package (paste into Studio) ===",
+        "",
+        "TITLE",
+        pkg.get("title") or "",
+        "",
+        "DESCRIPTION",
+        pkg.get("description") or "",
+        "",
+        "TAGS",
+        tags_line,
+        "",
+        "UPLOAD URL",
+        pkg.get("upload_url") or "https://studio.youtube.com/channel/upload",
+        "",
+        "NEXT STEP",
+        pkg.get("next_step") or "",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def format_x_package_text(pkg: Dict[str, Any]) -> str:
+    """Human paste-ready plain text for X compose UI."""
+    tags = pkg.get("hashtags") or []
+    tags_line = " ".join(str(t) for t in tags) if tags else ""
+    body = (pkg.get("post_text") or "").rstrip()
+    if tags_line:
+        composed = f"{body} {tags_line}".strip()
+    else:
+        composed = body
+    lines = [
+        "=== X package (paste into compose) ===",
+        "",
+        "POST",
+        composed,
+        "",
+        "UPLOAD URL",
+        pkg.get("upload_url") or "https://x.com/compose/post",
+        "",
+        "NEXT STEP",
+        pkg.get("next_step") or "",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def save_manual_package(
+    platform: str,
+    name: str,
+    pkg: Dict[str, Any],
+    *,
+    text: str,
+    also_json: bool = True,
+) -> Dict[str, str]:
+    """Write paste package under Data/manual_packages/. Returns paths."""
+    MANUAL_PACKAGES_DIR.mkdir(parents=True, exist_ok=True)
+    safe = re.sub(r"[^A-Za-z0-9._-]+", "_", (name or "item").strip())[:80] or "item"
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    base = f"{platform}_{safe}_{stamp}"
+    txt_path = MANUAL_PACKAGES_DIR / f"{base}.txt"
+    txt_path.write_text(text if text.endswith("\n") else text + "\n", encoding="utf-8")
+    out = {"txt": str(txt_path)}
+    if also_json:
+        json_path = MANUAL_PACKAGES_DIR / f"{base}.json"
+        json_path.write_text(
+            json.dumps(pkg, indent=2, default=str) + "\n", encoding="utf-8"
+        )
+        out["json"] = str(json_path)
+    return out
+
+
 def social_package(name: str, platforms: Optional[List[str]] = None) -> Dict[str, Any]:
+    """Build an approval-gated social queue entry.
+
+    YouTube / YouTube Shorts / X use the rich ``build_*_package`` helpers
+    (paste-ready Studio / compose text). Other platforms keep a short caption.
+    If a rich builder cannot run (e.g. draft missing mid-flight), falls back
+    to the short caption with a clear note.
+    """
     draft = build_draft(name, format="short")
     social = load_social()
     plats = platforms or ["tiktok", "youtube", "x"]
     packages = []
     for p in plats:
-        meta = social.get("platforms", {}).get(p, {})
-        packages.append(
-            {
-                "platform": p,
-                "handle": meta.get("handle", ""),
-                "caption": (
-                    f"{draft['name']}: honest first take. "
-                    f"{draft['shape']['verdict']} "
-                    f"{'Link in bio / description.' if p != 'x' else draft.get('affiliate_link', '')}"
-                )[:220],
-                "upload_mode": meta.get("upload_mode", "manual_assisted"),
-                "requires_approval": REQUIRE_POST_APPROVAL,
-            }
-        )
+        p_norm = (p or "").strip().lower()
+        # social_connections keys use "youtube"; callers may pass youtube_shorts
+        meta_key = "youtube" if p_norm in ("youtube", "youtube_shorts") else p_norm
+        meta = social.get("platforms", {}).get(meta_key, {}) or social.get(
+            "platforms", {}
+        ).get(p_norm, {})
+        weak_caption = (
+            f"{draft['name']}: honest first take. "
+            f"{draft['shape']['verdict']} "
+            f"{'Link in bio / description.' if p_norm != 'x' else draft.get('affiliate_link', '')}"
+        )[:220]
+        base = {
+            "platform": p,
+            "handle": meta.get("handle", ""),
+            "upload_mode": meta.get("upload_mode", "manual_assisted"),
+            "requires_approval": REQUIRE_POST_APPROVAL,
+        }
+
+        if p_norm in ("youtube", "youtube_shorts"):
+            try:
+                rich = build_youtube_package(draft["name"])
+                if meta.get("handle"):
+                    rich = {**rich, "handle": meta.get("handle")}
+                packages.append(
+                    {
+                        **base,
+                        "handle": rich.get("handle") or base["handle"],
+                        "caption": rich.get("title") or weak_caption,
+                        "title": rich.get("title"),
+                        "description": rich.get("description"),
+                        "tags": rich.get("tags"),
+                        "affiliate_link": rich.get("affiliate_link"),
+                        "upload_url": rich.get("upload_url"),
+                        "next_step": rich.get("next_step"),
+                        "package": rich,
+                        "package_source": "build_youtube_package",
+                    }
+                )
+                continue
+            except ValueError as exc:
+                packages.append(
+                    {
+                        **base,
+                        "caption": weak_caption,
+                        "package_note": (
+                            f"Rich YouTube package skipped ({exc}); "
+                            "using short caption fallback."
+                        ),
+                        "package_source": "weak_caption_fallback",
+                    }
+                )
+                continue
+
+        if p_norm == "x":
+            try:
+                rich = build_x_package(draft["name"])
+                if meta.get("handle"):
+                    rich = {**rich, "handle": meta.get("handle")}
+                tags = rich.get("hashtags") or []
+                caption = rich.get("post_text") or weak_caption
+                if tags:
+                    caption = f"{caption} {' '.join(tags)}".strip()[:280]
+                packages.append(
+                    {
+                        **base,
+                        "handle": rich.get("handle") or base["handle"],
+                        "caption": caption,
+                        "post_text": rich.get("post_text"),
+                        "hashtags": tags,
+                        "affiliate_link": rich.get("affiliate_link"),
+                        "upload_url": rich.get("upload_url"),
+                        "next_step": rich.get("next_step"),
+                        "package": rich,
+                        "package_source": "build_x_package",
+                    }
+                )
+                continue
+            except ValueError as exc:
+                packages.append(
+                    {
+                        **base,
+                        "caption": weak_caption,
+                        "package_note": (
+                            f"Rich X package skipped ({exc}); "
+                            "using short caption fallback."
+                        ),
+                        "package_source": "weak_caption_fallback",
+                    }
+                )
+                continue
+
+        packages.append({**base, "caption": weak_caption, "package_source": "weak_caption"})
+
     entry = {
         "id": uuid4().hex[:10],
         "item": draft["name"],
@@ -2029,6 +2278,7 @@ def social_package(name: str, platforms: Optional[List[str]] = None) -> Dict[str
     social.setdefault("queue", []).append(entry)
     save_social(social)
     return entry
+
 
 
 def social_queue() -> List[Dict[str, Any]]:
@@ -2650,7 +2900,7 @@ _CANONICAL_CMDS = [
     "post", "post-dry-run", "tiktok-status", "youtube-pkg", "x-pkg",
     "youtube-status", "x-status", "sponsors-add", "sponsors-enrich",
     "sponsors-pipeline", "sponsors-research", "model-inspect", "model-status",
-    "next", "status", "store-add", "store-list", "store-feature-next",
+    "next", "status", "store-add", "store-list", "store-feature-next", "store-status",
     "social-status", "social-package", "social-queue", "sponsors-find",
     "sponsors-pitch", "sponsors-log", "sponsors-next", "business-lesson",
     "business-next", "advance-next", "morning", "help",
@@ -2968,14 +3218,35 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     p_yt = sub.add_parser(
         "youtube-pkg",
-        help="Build a YouTube-ready upload package (manual-assist, M12)",
+        help="Build a YouTube paste-ready package (Studio; manual by design)",
     )
     p_yt.add_argument("name")
+    p_yt.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine JSON instead of paste-ready plain text",
+    )
+    p_yt.add_argument(
+        "--save",
+        action="store_true",
+        help="Also write .txt (+ .json) under Data/manual_packages/",
+    )
 
     p_x = sub.add_parser(
-        "x-pkg", help="Build an X (Twitter)-ready post body (manual-assist, M12)"
+        "x-pkg",
+        help="Build an X (Twitter) paste-ready post (compose UI; manual by design)",
     )
     p_x.add_argument("name")
+    p_x.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine JSON instead of paste-ready plain text",
+    )
+    p_x.add_argument(
+        "--save",
+        action="store_true",
+        help="Also write .txt (+ .json) under Data/manual_packages/",
+    )
 
     sub.add_parser("youtube-status", help="YouTube publishing readiness")
     sub.add_parser("x-status", help="X publishing readiness")
@@ -3026,8 +3297,23 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_sadd.add_argument("--asin", default="")
     p_sadd.add_argument("--category", default="tech")
     p_sadd.add_argument("--notes", default="")
+    p_sadd.add_argument(
+        "--verify",
+        dest="verify",
+        action="store_true",
+        default=None,
+        help="Force ASIN HTML verify (default when --asin is set)",
+    )
+    p_sadd.add_argument(
+        "--no-verify",
+        dest="verify",
+        action="store_false",
+        help="Skip ASIN HTML verify",
+    )
     sub.add_parser("store-list")
     sub.add_parser("store-feature-next")
+    p_sstat = sub.add_parser("store-status", help="Storefront + ASIN verify readiness")
+    p_sstat.add_argument("--json", action="store_true", help="Print JSON")
 
     # social
     sub.add_parser("social-status")
@@ -3178,12 +3464,41 @@ def main(argv: Optional[List[str]] = None) -> int:
                     print(f"  - {s}")
         elif args.cmd == "youtube-pkg":
             pkg = build_youtube_package(args.name)
-            print(json.dumps(pkg, indent=2, default=str))
+            plain = format_youtube_package_text(pkg)
+            if getattr(args, "save", False):
+                saved = save_manual_package(
+                    "youtube", args.name, pkg, text=plain, also_json=True
+                )
+                print(f"Saved: {saved['txt']}")
+                if saved.get("json"):
+                    print(f"Saved: {saved['json']}")
+                print()
+            if getattr(args, "json", False):
+                print(json.dumps(pkg, indent=2, default=str))
+            else:
+                print(plain)
         elif args.cmd == "x-pkg":
             pkg = build_x_package(args.name)
-            print(json.dumps(pkg, indent=2, default=str))
+            plain = format_x_package_text(pkg)
+            if getattr(args, "save", False):
+                saved = save_manual_package(
+                    "x", args.name, pkg, text=plain, also_json=True
+                )
+                print(f"Saved: {saved['txt']}")
+                if saved.get("json"):
+                    print(f"Saved: {saved['json']}")
+                print()
+            if getattr(args, "json", False):
+                print(json.dumps(pkg, indent=2, default=str))
+            else:
+                print(plain)
         elif args.cmd == "youtube-status":
             st = youtube_readiness()
+            mode = st.get("mode", "manual_assisted")
+            print(
+                f"YouTube readiness: ready={st.get('ready')} "
+                f"mode={mode} api_upload_ready={st.get('api_upload_ready', False)}"
+            )
             for c in st["checks"]:
                 mark = "OK  " if c["ok"] else "MISS"
                 print(f"  [{mark}] {c['name']}: {c['detail']}")
@@ -3193,6 +3508,11 @@ def main(argv: Optional[List[str]] = None) -> int:
                 print(f"  - {s}")
         elif args.cmd == "x-status":
             st = x_readiness()
+            mode = st.get("mode", "manual_assisted")
+            print(
+                f"X readiness: ready={st.get('ready')} "
+                f"mode={mode} api_upload_ready={st.get('api_upload_ready', False)}"
+            )
             for c in st["checks"]:
                 mark = "OK  " if c["ok"] else "MISS"
                 print(f"  [{mark}] {c['name']}: {c['detail']}")
@@ -3382,13 +3702,61 @@ def main(argv: Optional[List[str]] = None) -> int:
             except Exception:
                 pass
         elif args.cmd == "store-add":
-            item = store_add(args.name, args.asin, args.category, args.notes)
+            verify = getattr(args, "verify", None)
+            item = store_add(
+                args.name,
+                args.asin,
+                args.category,
+                args.notes,
+                verify=verify,
+            )
             print(json.dumps(item, indent=2))
+            vs = item.get("verify_status")
+            if vs and vs != "ok":
+                err = item.get("verify_error") or "verify soft-failed"
+                print(
+                    f"\n  ⚠️  ASIN verify: {vs} — {err}\n"
+                    f"     Item saved anyway. Fix ASIN or retry: "
+                    f'bolt store add --name "{item.get("name")}" --asin {item.get("asin")}',
+                    file=sys.stderr,
+                )
+            elif vs == "ok":
+                print(
+                    f"\n  ✓ ASIN verified: {item.get('verified_title', '')[:80]}",
+                    file=sys.stderr,
+                )
         elif args.cmd == "store-list":
             for s in store_list():
-                print(f"  - {s.get('name')} asin={s.get('asin')} {s.get('affiliate_link')}")
+                vs = s.get("verify_status") or "-"
+                print(
+                    f"  - {s.get('name')} asin={s.get('asin')} "
+                    f"verify={vs} {s.get('affiliate_link')}"
+                )
         elif args.cmd == "store-feature-next":
             print(json.dumps(store_feature_next(), indent=2))
+        elif args.cmd == "store-status":
+            info = store_status()
+            if getattr(args, "json", False) is True:
+                print(json.dumps(info, indent=2, default=str))
+            else:
+                sf = info.get("storefront") or {}
+                print("\n  Amazon storefront / ASIN verify")
+                print("  " + "─" * 40)
+                print(
+                    f"  items: {sf.get('total', 0)}  "
+                    f"missing ASINs: {info.get('missing_asin_count', 0)}"
+                )
+                vc = info.get("verify_counts") or {}
+                print(
+                    f"  verify: ok={vc.get('ok', 0)}  "
+                    f"error={vc.get('error', 0)}  "
+                    f"no_match={vc.get('no_match', 0)}  "
+                    f"unset={vc.get('unset', 0)}"
+                )
+                amz = info.get("amazon") or {}
+                print(f"  method: {amz.get('method', 'html_scrape')}  pa_api={amz.get('pa_api', False)}")
+                print(f"  → {info.get('hint')}")
+                print()
         elif args.cmd == "social-status":
             data = social_status()
             for name, meta in data.get("platforms", {}).items():

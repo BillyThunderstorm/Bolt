@@ -16,7 +16,8 @@ Usage (from repo root):
 
 Or via CLI (preferred):
   bolt voice
-  bolt voice --text
+  bolt voice status           # mic / STT / TTS / LLM readiness
+  bolt voice --text           # type in if mic missing (stranger-safe)
   bolt talk "what's next?"
   bolt say "Clips are ready."
 """
@@ -79,16 +80,16 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
-    if "--clear" in args:
+    if "--clear" in args or (args and args[0] == "clear"):
         conv.ConversationMemory().clear()
         print("Conversation history cleared.")
         return 0
 
-    if "--status" in args:
-        # Reuse conversation status printer
-        sys.argv = ["Bolt_Conversation", "--status"]
+    if "--status" in args or (args and args[0] in ("status", "ready")):
         try:
-            # Run the status branch by invoking the module's CLI path
+            if hasattr(conv, "print_voice_status"):
+                return int(conv.print_voice_status(probe_mic=("--probe" in args)) or 0)
+            # Fallback if older conversation module
             mem = conv.ConversationMemory()
             status = conv.provider_status()
             print("\n  Bolt Live Voice Status")
@@ -118,7 +119,16 @@ def main(argv: list[str] | None = None) -> int:
         prompt_args = [
             a
             for a in args
-            if not a.startswith("--") and a not in ("voice", "talk", "live-voice")
+            if not a.startswith("--")
+            and a
+            not in (
+                "voice",
+                "talk",
+                "live-voice",
+                "status",
+                "ready",
+                "clear",
+            )
         ]
         if prompt_args:
             once_prompt = " ".join(prompt_args).strip()
@@ -127,13 +137,22 @@ def main(argv: list[str] | None = None) -> int:
         conv.single_exchange(once_prompt)
         return 0
 
+    if not text_mode and not getattr(conv, "SPEECH_OK", True):
+        try:
+            info = conv.voice_status(probe_mic=False)
+            hint = (info or {}).get("hint") or "Try: bolt voice --text"
+        except Exception:
+            hint = "Install SpeechRecognition / PyAudio, or use: bolt voice --text"
+        print(f"\n  bolt voice: speech recognition unavailable.\n  {hint}\n")
+        return 1
+
     print(
         "\n  Bolt live voice online.\n"
         "  Speak a command (or type with --text). Say 'exit' to quit.\n"
         "  Try: good morning bolt · what's next · queue status · research status\n"
     )
-    conv.conversation_loop(text_mode=text_mode)
-    return 0
+    rc = conv.conversation_loop(text_mode=text_mode)
+    return int(rc or 0)
 
 
 if __name__ == "__main__":

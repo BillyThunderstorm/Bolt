@@ -308,6 +308,11 @@ def _build_title_prompt(
     transcript = str(context.get("transcript") or "").strip()
     memory = str(context.get("memory") or context.get("retrieved_memory") or "").strip()
     on_screen = context.get("on_screen_stats") or []
+    content_type = str(context.get("content_type") or "gaming").strip().lower()
+    analysis = context.get("content_analysis") or {}
+    analysis_advice = ""
+    if isinstance(analysis, dict):
+        analysis_advice = str(analysis.get("nexus_advice") or "").strip()
     details = {
         "trigger": trigger,
         "game": game,
@@ -315,6 +320,7 @@ def _build_title_prompt(
         "kill_count": context.get("kill_count"),
         "window_seconds": context.get("window_seconds"),
         "on_screen_stats": on_screen[:5] if on_screen else [],
+        "content_type": content_type,
     }
     ocr_hint = ""
     if on_screen:
@@ -322,14 +328,30 @@ def _build_title_prompt(
             "\nOn-screen HUD text (from OCR) — prefer weaving the strongest "
             f"stat into titles when it fits: {on_screen[0]!r}.\n"
         )
-    return f"""You write short-form gaming captions for Billy.
+    lane_hint = ""
+    if content_type in ("skincare", "tech") and analysis_advice:
+        lane_hint = (
+            f"\nLane analysis ({content_type}) — use for hooks/angle, "
+            f"do not invent claims beyond this:\n{analysis_advice[:1500]}\n"
+        )
+    elif content_type in ("skincare", "tech"):
+        lane_hint = (
+            f"\nContent lane is {content_type}. Prefer titles that fit that "
+            "niche over pure gaming kill-feed language.\n"
+        )
+    niche_line = {
+        "skincare": "short-form skincare / beauty review captions",
+        "tech": "short-form tech / product review captions",
+        "review": "short-form product review captions",
+    }.get(content_type, "short-form gaming captions")
+    return f"""You write {niche_line} for Billy.
 
 Creator profile:
 {brain[:2500]}
 
 Clip details:
 {json.dumps(details, indent=2)}
-{ocr_hint}
+{ocr_hint}{lane_hint}
 Transcript:
 {transcript[:1200] or "No transcript available."}
 
@@ -342,6 +364,7 @@ Rules:
 - Sound like Billy, not generic marketing copy.
 - Avoid overpromising what is not in the clip.
 - If on_screen_stats are present, lead with the strongest stat when natural.
+- Match the content_type lane when it is skincare or tech.
 - Return only JSON with this shape:
 {{"titles": ["..."], "hashtags": ["#MarvelRivals", "..."]}}
 """

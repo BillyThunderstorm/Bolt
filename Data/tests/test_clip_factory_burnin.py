@@ -18,10 +18,13 @@ for p in (str(MODULES), str(CORE), str(REPO / "scripts")):
 
 from Clip_Factory import (  # noqa: E402
     build_caption_drawtext_filter,
+    choose_vertical_mode,
     format_for_tiktok,
     _escape_drawtext,
     _normalize_caption_text,
+    _vertical_vf,
 )
+from FFmpeg_Bin import ffmpeg_bin  # noqa: E402
 
 
 class TestCaptionFilterBuild(unittest.TestCase):
@@ -63,7 +66,7 @@ class TestFormatForTiktokBurnin(unittest.TestCase):
         cls.src = os.path.join(cls.tmp, "src.mp4")
         # Tiny synthetic 2s 16:9 clip (color + silent audio)
         cmd = [
-            "ffmpeg", "-y",
+            ffmpeg_bin(), "-y",
             "-f", "lavfi", "-i", "color=c=blue:s=1280x720:d=2",
             "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
             "-shortest",
@@ -111,6 +114,28 @@ class TestFormatForTiktokBurnin(unittest.TestCase):
             preset="ultrafast",
         )
         self.assertTrue(os.path.isfile(out), out)
+
+
+class TestVerticalLayoutChoice(unittest.TestCase):
+    def test_720p_crop_becomes_blur_fill(self):
+        self.assertEqual(choose_vertical_mode("crop", 1280, 720), "blur_fill")
+
+    def test_1080p_crop_still_too_thin(self):
+        self.assertEqual(choose_vertical_mode("crop", 1920, 1080), "blur_fill")
+
+    def test_already_vertical_passthrough(self):
+        self.assertEqual(choose_vertical_mode("crop", 1080, 1920), "passthrough")
+
+    def test_tall_but_not_1080_scales(self):
+        self.assertEqual(choose_vertical_mode("crop", 720, 1280), "scale")
+
+    def test_letterbox_respected(self):
+        self.assertEqual(choose_vertical_mode("letterbox", 1280, 720), "letterbox")
+
+    def test_crop_vf_has_no_unsharp(self):
+        vf = _vertical_vf("crop")
+        self.assertNotIn("unsharp", vf)
+        self.assertIn("lanczos", vf)
 
 
 if __name__ == "__main__":

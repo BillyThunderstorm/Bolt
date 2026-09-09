@@ -51,17 +51,17 @@
     "pad_after": 12
   },
   "nexus": {
-    "preferred": "ollama",
+    "preferred": "grok",
     "grok_for_high": true,
-    "budget_mode": "light",
-    "_comment": "SuperGrok+light API: BOLT_LLM_MODE=light, NEXUS_ALLOW_PAID=true, NEXUS_PREFERRED=ollama. Grok only for strategy/research/decisions. SuperGrok app sub \u2260 free API."
+    "budget_mode": "full",
+    "_comment": "Preferred Grok API (xAI). Ollama is fallback. SuperGrok app sub \u2260 free API. Soft cap: BOLT_API_MONTHLY_CAP_USD."
   },
   "llm": {
-    "mode": "light",
-    "preferred": "ollama",
+    "mode": "full",
+    "preferred": "xai",
     "xai_flagship": "grok-4.5",
     "xai_light": "grok-4.3",
-    "_comment": "light = Ollama day-to-day, Grok API for high-value only. Set in .env: BOLT_LLM_MODE, NEXUS_ALLOW_PAID, XAI_API_KEY."
+    "_comment": "full = Grok/xAI preferred for chat + Nexus. Fallback Ollama. Set in .env: BOLT_LLM_PROVIDER=xai, NEXUS_PREFERRED=grok, BOLT_LLM_MODE=full."
   },
   "nexus_enrich_decisions": true,
   "peak_notifications": {
@@ -106,12 +106,16 @@
       "shared_journal": "1paZNFGea-RBAwQ5YMxpuXN8OBRH7R33RAkakYZ23Tfw",
       "daily_log_2026_08_31": "1RwUyRhjPGjpugrHLkUvyQAog09YMadiMebeZCn0dlLQ",
       "archive_word": "138abBq9A-zWY0MZCBeyXxRCuwtsjxjeK",
-      "daily_log_today": "1fMpyZuRfcye4FOLkTfT-cUrHdFBuWY8E9ocXQ-CIFug",
-      "daily_log_today_date": "2026-09-04",
+      "daily_log_today": "1EPMfX2eLauGLQ5Ovb1o9NnoTSo2JhLABdQYMh_ViWKU",
+      "daily_log_today_date": "2026-09-09",
       "daily_log_2026_09_01": "1kQw-ggIqYQQ17Q57IZi_WbcSnbsmOFHABU-6BxdQcR0",
       "daily_log_2026_09_02": "1pKN4-h_xuFu1A-rNSxg35_b8WVBhR--dDXA9OnPJ9JE",
       "daily_log_2026_09_03": "1d_yRmAnJF_697LKHGmXBqmQAaCYsGEDFZRP-McDEuHg",
-      "daily_log_2026_09_04": "1fMpyZuRfcye4FOLkTfT-cUrHdFBuWY8E9ocXQ-CIFug"
+      "daily_log_2026_09_04": "1fMpyZuRfcye4FOLkTfT-cUrHdFBuWY8E9ocXQ-CIFug",
+      "daily_log_2026_09_06": "1e-lH4F9Ja9D7KBju6U-Df8AK1RjoGE8ewg7ycxVSj0s",
+      "daily_log_2026_09_07": "1XJ0v3JvK534PbH_n14UsaWFmQs78Qg5K1tOHRvu_kfc",
+      "daily_log_2026_09_08": "1MexP0T-XzjsX_FX98dX3Z9QzuB7xV2uut_cFvqxR-pI",
+      "daily_log_2026_09_09": "1EPMfX2eLauGLQ5Ovb1o9NnoTSo2JhLABdQYMh_ViWKU"
     },
     "folders": {
       "00_Brand": "1YHZSqjoP7JPNP7NPChdgCRQH80advpHj",

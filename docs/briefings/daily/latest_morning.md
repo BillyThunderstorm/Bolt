@@ -1,106 +1,34 @@
-# Bolt Daily Briefing
+# Good Morning Bolt — 2026-09-09
 
-**Friday, September 04, 2026**
+Creator: William
+Priority lanes: game, tech
+Amazon tag: `billycarter-20`
+Posting: approval required = True
 
-## Queue Status
+## Spoken Briefing
+Good morning, William. Bolt is online. Focus lanes today: games and tech. Items currently testing: 2. Shipped reviews: 20 (last: 2026-08-23T16:08:00). Top test item: Bolt Verify Smoke. Content action: Log day-1 notes for Bolt Verify Smoke. Business action: Draft a sponsor pitch for Secretlab. Bolt advance: Attach ASINs to storefront items you already own. Business lesson: Proof before pitches: one honest game/tech review online beats ten unsent emails. Storefront feature idea: Mouse. Sponsor watchlist: Amazon Influencer / Associates. All social posts still need your approval. Let's make something real today.
 
-**Clips ready to post:** 56
+## Next Actions
+- **content**: Log day-1 notes for Bolt Verify Smoke — No journal yet — reviews need real observations.
+  - `bolt manage note "Bolt Verify Smoke" --day 1 --text "..."`
+- **business**: Draft a sponsor pitch for Secretlab — High AOV chair reviews; needs longer test journal. This is a brand on the sponsor list, not a creator C5.
+  - `bolt sponsors pitch "Secretlab"`
+- **advance**: Ship one content action before the next Bolt feature — Content proof advances the business faster than idle tooling.
+  - `bolt advance next`
 
-- Total tracked: 73 (ready 56 · posted 4 · scrapped 5)
+## Storefront
+All storefront items have drafts. Revisit Mouse with a comparison angle.
+Command: `bolt manage note "Mouse" --text "comparison angle"`
 
----
+## Sponsor Watchlist
+- Amazon Influencer / Associates (fit 10): William already has tag billycarter-20 — primary monetization path.
+- Razer (fit 9): Core gaming peripherals; strong starter review products (mice, pads, headsets).
+- Logitech G (fit 9): Mice, keyboards, headsets — easy first reviews from gear William already uses.
 
-## Storage Status
+## Business Lesson
+Proof before pitches: one honest game/tech review online beats ten unsent emails.
 
-| Directory | Size |
-|-----------|------|
-| Recordings | 47.2GB |
-
----
-
-## Shared Handbook (Google Drive)
-
-Canonical journal / briefing / todo / how-to. Do not duplicate into markdown.
-
-- START HERE: https://docs.google.com/document/d/1u3dRveLkOBsfSpuBXKeFbfj7tVH3EhjZJr-aic5bxjw/edit
-- How-to: https://docs.google.com/document/d/12idgxLR-OzcOyCC6mDQwqmOnZQDuMIZIJCwwMnm_krg/edit
-- Shared Journal: https://docs.google.com/document/d/1paZNFGea-RBAwQ5YMxpuXN8OBRH7R33RAkakYZ23Tfw/edit
-- Today's Daily Log: https://docs.google.com/document/d/1fMpyZuRfcye4FOLkTfT-cUrHdFBuWY8E9ocXQ-CIFug/edit
-- Daily logs (02): https://drive.google.com/drive/folders/1wanq-qUUGc4qF-uqtqnajAwLd877qSQ4
-- Learnings (06): https://drive.google.com/drive/folders/1oPmHtmY28r_fPjr5cYwiYb5BUDdQCWLH
-- Root folder: https://drive.google.com/drive/folders/1GZ93zTznYK97Nv9Do5bidLOd9Im1J1XK
-- Local pointer: `Docs/GOOGLE_DRIVE_HANDBOOK.md`
-
----
-
-## This Week
-
-THIS WEEK
-  Topic: tech
-  Started: 2026-08-30  ·  5d ago
-  Already done: (nothing logged yet)
-LAST WEEK
-  Topic: general product review / Amazon storefront
-  Note: PAUSE. Amazon Influencer rejected 2026-08-24. William is stepping away. Do not ask him to film, post, reapply, or pick a next product. The written Amazon customer reviews and ~5k helpful views still happened — they were buyer reviews, not wasted, just not the Influencer video path.
-DO NOT SUGGEST
-  • snail care as this week's post
-  • Kenny Sebastian
-  • The Verge / Nilay Patel
-  • Gigguk
-  • The Anime Man (Joey Bizinger)
-  • CDawgVA (Connor Colquhoun)
-  • Mother's Basement (Geoff Thew)
-  • YGG Studios / Under the Scope
-  • Hyram (Skincare by Hyram)
-  • James Welsh
-  • Cassandra Bankson
-  • The Budget Dermatologist
-  … +9 more (C5 drops + bans)
-
----
-
-## Memory Notes
-
-- [constraint] Reminder: No content that sells a hyped product as if it works. If Billy already has something that's hyped but doesn't deliver, cover it as an honest review — and pair it with a similar product that actually works. Never skip the dud just because it's trendy, and never recommend the dud. (source: user_profile)
-- [constraint] Reminder: Bolt prioritizes direction-finding over execution. When given a to-do list, push back with 'do we know this is the right list?' before charging ahead. (source: user_profile)
-
----
-
-## Research Notes
-
-- Log: **72** findings · **0** pending C5 · **15** kept · **20** dropped · **0** blocked (C7)
-- Next: This week is already set: tech. Research that lane (`bolt research find` → honest gaming and tech reviewer YouTube creator), not a new career plan.
-
----
-🎯 NEXUS STRATEGY INSIGHT: (grok/grok-4.5)
-**Friday 2026-09-04 — tech week (started Aug 30).**
-
-One next step only: run `bolt day --decide` for a single tech TikTok (clip → hook), review it, and post if it feels right.
-
-That’s the whole move. No Amazon, no leftovers, no new lane.
-
----
-
-## Action Items For Today
-
-1. Review last clip performance and log outcomes
-
----
-
-## Quick Commands
-
-- `bolt recordings` — process new recordings
-- `bolt research` — direction-finding researcher status
-- `bolt research candidates` — C5 review list
-- `bolt manage status` — content manager status
-- `bolt status` — intelligence stack health
-
-
-*Generated by Bolt at 05:00 PM*
-
----
-
-## Comments
-
-Write below this line. The next briefing will surface what you wrote as a note. To change a hard rule (C1–C7), say so in chat or edit `Data/memory/user_profile.json` — comments here do not rewrite the profile.
-
+## Advance Bolt
+Attach ASINs to storefront items you already own
+Affiliate revenue needs tracked links on real reviews.
+`bolt store feature-next`

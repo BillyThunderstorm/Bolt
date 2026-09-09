@@ -7,9 +7,12 @@ import json
 
 
 class LocalVectorDB:
-    """Chroma-backed local memory store. Requires a running Ollama with an
-    embedding model (default: nomic-embed-text). Fails fast when Ollama is
-    unreachable so callers can skip enrichment without hanging for minutes.
+    """Chroma-backed local memory store.
+
+    Useful embeddings require a running Ollama with an embedding model
+    (default: ``nomic-embed-text``). When Ollama is unreachable the DB
+    fails soft: warn + empty/no-op results so callers (Nexus, reindex,
+    Think_Learn_Decide) degrade instead of raising or hanging.
     """
 
     def __init__(self, collection_name: str = "bolt_memory"):
@@ -19,26 +22,16 @@ class LocalVectorDB:
 
         self.ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
         self.embed_model = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
+        self.collection_name = collection_name
 
-        # Fail fast — chromadb's Ollama embedding calls have no useful timeout
-        # and will block the whole pipeline for a long time if Ollama is down.
-        if not self._ollama_reachable():
-            raise RuntimeError(
-                f"Ollama not reachable at {self.ollama_host} "
-                f"(needed for embeddings with model '{self.embed_model}'). "
-                f"Start Ollama or run: ollama pull {self.embed_model}"
-            )
+        self.available = False
+        self.embedding_function = None
+        self.client = None
+        self.collection = None
+        self._unavailable_reason = ""
 
-        self.embedding_function = embedding_functions.OllamaEmbeddingFunction(
-            url=f"{self.ollama_host.rstrip('/')}/api/embeddings",
-            model_name=self.embed_model,
-        )
-
-        self.client = chromadb.PersistentClient(path=str(self.db_path))
-        self.collection = self.client.get_or_create_collection(
-            name=collection_name,
-            embedding_function=self.embedding_function,
-        )
+        # Soft-connect: never raise from __init__ when Ollama is down.
+        self._try_connect(warn=True)
 
     def _ollama_reachable(self, timeout: float = 2.0) -> bool:
         try:
@@ -50,11 +43,58 @@ class LocalVectorDB:
         except Exception:
             return False
 
+    def _try_connect(self, warn: bool = False) -> bool:
+        """Connect to Chroma + Ollama embeddings if possible. Soft on failure."""
+        if self.available and self.collection is not None:
+            return True
+
+        if not self._ollama_reachable():
+            self.available = False
+            self._unavailable_reason = (
+                f"Ollama not reachable at {self.ollama_host} "
+                f"(needed for embeddings with model '{self.embed_model}'). "
+                f"Start Ollama or run: ollama pull {self.embed_model}"
+            )
+            if warn:
+                print(f"⚠️  Vector DB unavailable: {self._unavailable_reason}")
+            return False
+
+        try:
+            self.embedding_function = embedding_functions.OllamaEmbeddingFunction(
+                url=f"{self.ollama_host.rstrip('/')}/api/embeddings",
+                model_name=self.embed_model,
+            )
+            self.client = chromadb.PersistentClient(path=str(self.db_path))
+            self.collection = self.client.get_or_create_collection(
+                name=self.collection_name,
+                embedding_function=self.embedding_function,
+            )
+            self.available = True
+            self._unavailable_reason = ""
+            return True
+        except Exception as e:
+            self.available = False
+            self.embedding_function = None
+            self.client = None
+            self.collection = None
+            self._unavailable_reason = str(e)
+            if warn:
+                print(f"⚠️  Vector DB unavailable: {e}")
+            return False
+
+    def is_available(self) -> bool:
+        """True when Ollama embeddings + Chroma collection are ready."""
+        return self._try_connect(warn=False)
+
     def add_documents(self, documents: list[dict]):
-        """Safely add documents."""
+        """Safely add documents. No-op (warn) when vector backend is down."""
         if not documents:
             print("⚠️  No documents to add.")
-            return
+            return False
+
+        if not self._try_connect(warn=True):
+            print("⚠️  Vector DB: skipping add (Ollama/embeddings unavailable).")
+            return False
 
         ids = []
         texts = []
@@ -70,17 +110,34 @@ class LocalVectorDB:
                 meta = {"source": "unknown"}
             metadatas.append(meta)
 
-        self.collection.add(ids=ids, documents=texts, metadatas=metadatas)
-        print(f"✅ Added {len(documents)} documents to vector DB.")
+        try:
+            self.collection.add(ids=ids, documents=texts, metadatas=metadatas)
+            print(f"✅ Added {len(documents)} documents to vector DB.")
+            return True
+        except Exception as e:
+            self.available = False
+            print(f"⚠️  Vector DB add failed (soft): {e}")
+            return False
 
     def search(self, query: str, n_results: int = 10, filter: dict = None):
+        """Semantic search. Returns [] (warn) when vector backend is down."""
+        if not self._try_connect(warn=True):
+            print("⚠️  Vector DB: search returned empty (Ollama/embeddings unavailable).")
+            return []
+
         kwargs = {
             "query_texts": [query],
             "n_results": n_results,
         }
         if filter:
             kwargs["where"] = filter
-        results = self.collection.query(**kwargs)
+        try:
+            results = self.collection.query(**kwargs)
+        except Exception as e:
+            self.available = False
+            print(f"⚠️  Vector DB search failed (soft): {e}")
+            return []
+
         if not results or not results.get("ids") or not results["ids"][0]:
             return []
         return [
@@ -94,7 +151,17 @@ class LocalVectorDB:
         ]
 
     def refresh_from_memory(self):
-        """Rebuild from memory files — fixed paths for your layout."""
+        """Rebuild from memory files — fixed paths for your layout.
+
+        Soft-fails (warn, no raise) when Ollama is down; does not hang.
+        """
+        if not self._try_connect(warn=True):
+            print(
+                "⚠️  Vector DB refresh skipped: Ollama/embeddings unavailable. "
+                f"({self._unavailable_reason or 'see warning above'})"
+            )
+            return False
+
         memory_dirs = [
             self.repo_root / "Data" / "memory",
             self.repo_root / "Data" / "content",
@@ -138,8 +205,12 @@ class LocalVectorDB:
                     print(f"Skipped {md_file}: {e}")
 
         print(f"Found {len(documents)} documents to index.")
-        self.add_documents(documents)
-        print("✅ Vector DB refresh complete.")
+        ok = self.add_documents(documents)
+        if ok:
+            print("✅ Vector DB refresh complete.")
+        else:
+            print("⚠️  Vector DB refresh incomplete (embeddings unavailable or add failed).")
+        return bool(ok)
 
     def _guess_lane(self, path: Path) -> str:
         name = str(path).lower()
@@ -154,11 +225,15 @@ class LocalVectorDB:
         return "general"
 
 
-# Quick test
+# Quick test / `bolt reindex` entrypoint
 if __name__ == "__main__":
-    try:
-        db = LocalVectorDB()
-        db.refresh_from_memory()
-    except RuntimeError as e:
-        print(f"❌ Vector DB: {e}")
+    db = LocalVectorDB()
+    if not db.is_available():
+        print(
+            f"❌ Vector DB soft-fail: {db._unavailable_reason or 'Ollama unavailable'}. "
+            "Useful embeddings still need Ollama + nomic-embed-text; "
+            "callers should degrade (empty search / skip enrich)."
+        )
         raise SystemExit(1)
+    ok = db.refresh_from_memory()
+    raise SystemExit(0 if ok else 1)

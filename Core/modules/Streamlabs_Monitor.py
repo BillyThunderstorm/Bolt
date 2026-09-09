@@ -12,7 +12,7 @@ Requirements
 
 .env keys
 ---------
-    STREAMLABS_SOCKET_TOKEN   <your socket token from streamlabs.com/dashboard#/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6Ijk3Nzk3RURFOTNFNTlFRDQ2Q0U5NDUzNDY0M0UxODUzQUUwNjBGNTg3MThGMkMzQkZDOTNENTkxMDY3QUIxODY0QTQxOUQxQjBCQ0JFREJFMTM2QUIzOTk2RDM5MDQ0QTlEQzBFNUMzMzRDODNGMEFBRkQ1N0Q2OUFFQTI3M0JGNzk4OUUwNDUyOTMwQjUxRUY1Q0EzMTZGNEQyNDU1NEQwMEVERUI1Nzg4RUY2RjNBQUY3MTIxNjIzQjgyQ0EwRjcwRjdGMDYyRTg3NzFCMzhEODU1RUI5OUQ2QjdEMUUyRTA0NTFFNUI3OEYxOUYxRDlFQ0JFQ0QyODciLCJyZWFkX29ubHkiOnRydWUsInByZXZlbnRfbWFzdGVyIjp0cnVlLCJ0d2l0Y2hfaWQiOiI0NDE1OTg3NjUiLCJzdHJlYW1sYWJzX2lkIjoiNzMwNTA1MDg2OTk4MzA4NDU0NCIsInlvdXR1YmVfaWQiOiJVQzBfenZIQ25pMEVidFplRWFobnFvMVEiLCJ0aWt0b2tfaWQiOiI1ZWFjNjFlNy02ZGY5LTVhNDktODE2My0zMTQ2Zjc5NzZhOWQiLCJraWNrX2lkIjoiODY2NTc3NTciLCJ0d2l0dGVyX2lkIjoiMTk3NDgzMDY5OTU4MTQ3Mjc2OCJ9.aypktgnX5ZtCjgn6EWRYQvzMGF3huh5tycrQD5DMejAsettings/api-settings>
+    STREAMLABS_SOCKET_TOKEN   <socket token from streamlabs.com/dashboard → Settings → API Settings → Socket API>
     MIN_RAID_SIZE             5     (minimum raiders to trigger a clip)
     MIN_BITS                  100   (minimum bits to trigger a clip)
     MIN_DONATION_USD          1.00  (minimum $ donation to trigger a clip)
@@ -20,6 +20,11 @@ Requirements
 Usage (standalone test)
 -----------------------
     python -m modules.Streamlabs_Monitor
+
+CLI
+---
+    bolt streamlabs status [--json] [--probe]
+    Soft-fail when socketio / token missing (folder-watch still works).
 """
 
 import os
@@ -27,7 +32,7 @@ import json
 import time
 import threading
 import logging
-from typing import Callable, Optional
+from typing import Any, Callable, Dict, Optional
 
 try:
     import socketio as sio_lib
@@ -277,10 +282,222 @@ class StreamlabsMonitor:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Standalone test
+# Readiness / CLI (bolt streamlabs)
 # ══════════════════════════════════════════════════════════════════════════════
 
-if __name__ == "__main__":
+def _reload_token() -> str:
+    """Re-read STREAMLABS_SOCKET_TOKEN (dotenv may load after import)."""
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv(override=False)
+    except Exception:
+        pass
+    return (os.getenv("STREAMLABS_SOCKET_TOKEN") or "").strip()
+
+
+def status(*, probe: bool = False) -> Dict[str, Any]:
+    """
+    Streamlabs Socket API readiness. Never raises; never hangs on network
+    unless probe=True (short connect, hard timeout).
+
+    ready = python-socketio installed + STREAMLABS_SOCKET_TOKEN set.
+    Live socket only reported when probe=True.
+    Soft-fail: missing token / socketio → clear "Streamlabs unavailable:" hint.
+    Folder-watch / clip pipeline still works without Streamlabs.
+    """
+    token = _reload_token()
+    token_set = bool(token)
+    # JWT-ish socket tokens are long; treat very short values as incomplete.
+    token_looks_ok = token_set and len(token) >= 20
+
+    info: Dict[str, Any] = {
+        "ready": bool(_SIO_OK and token_looks_ok),
+        "socketio_installed": bool(_SIO_OK),
+        "token_set": token_set,
+        "token_looks_ok": token_looks_ok,
+        "url": STREAMLABS_URL,
+        "min_raid_size": MIN_RAID_SIZE,
+        "min_bits": MIN_BITS,
+        "min_donation_usd": MIN_DONATION,
+        "hint": "",
+    }
+
+    if not _SIO_OK:
+        info["hint"] = (
+            "Streamlabs unavailable: python-socketio not installed "
+            "(uv sync / pip install 'python-socketio[client]'). "
+            "Folder-watch clips still work."
+        )
+    elif not token_set:
+        info["hint"] = (
+            "Streamlabs unavailable: set STREAMLABS_SOCKET_TOKEN in .env "
+            "(streamlabs.com/dashboard → Settings → API Settings → Socket API). "
+            "Optional — folder-watch still works."
+        )
+    elif not token_looks_ok:
+        info["hint"] = (
+            "Streamlabs unavailable: STREAMLABS_SOCKET_TOKEN looks too short — "
+            "paste the full Socket API token from the Streamlabs dashboard."
+        )
+    else:
+        info["hint"] = (
+            "Token + socketio ready. Live events need a valid Socket API token. "
+            "Try: bolt streamlabs status --probe"
+        )
+
+    if probe:
+        p = probe_streamlabs(timeout=5.0)
+        info["probe_ok"] = bool(p.get("ok"))
+        info["probe_detail"] = p.get("detail") or ""
+        if p.get("ok"):
+            info["hint"] = p["detail"]
+        elif info["ready"]:
+            info["hint"] = p.get("detail") or info["hint"]
+        elif p.get("detail"):
+            info["hint"] = p["detail"]
+
+    return info
+
+
+def probe_streamlabs(*, timeout: float = 5.0) -> Dict[str, Any]:
+    """
+    Short Socket.IO connect probe. Never hangs longer than timeout.
+    Does not leave a background listener running.
+    """
+    result: Dict[str, Any] = {"ok": False, "detail": ""}
+    if not _SIO_OK:
+        result["detail"] = "Streamlabs unavailable: python-socketio not installed"
+        return result
+    token = _reload_token()
+    if not token:
+        result["detail"] = "Streamlabs unavailable: STREAMLABS_SOCKET_TOKEN missing"
+        return result
+    if len(token) < 20:
+        result["detail"] = "Streamlabs unavailable: STREAMLABS_SOCKET_TOKEN looks incomplete"
+        return result
+
+    connected = {"ok": False, "err": ""}
+
+    def _run():
+        client = None
+        try:
+            client = sio_lib.Client(
+                reconnection=False,
+                logger=False,
+                engineio_logger=False,
+            )
+
+            @client.event
+            def connect():
+                connected["ok"] = True
+
+            @client.event
+            def connect_error(data):
+                connected["err"] = str(data)[:200]
+
+            url = f"{STREAMLABS_URL}?token={token}"
+            client.connect(url, transports=["websocket"], wait_timeout=max(1.0, timeout - 0.5))
+            # Brief settle, then disconnect
+            deadline = time.time() + 1.5
+            while time.time() < deadline and not connected["ok"]:
+                time.sleep(0.1)
+        except Exception as exc:
+            connected["err"] = str(exc)[:200]
+        finally:
+            if client is not None:
+                try:
+                    client.disconnect()
+                except Exception:
+                    pass
+
+    t = threading.Thread(target=_run, name="streamlabs-probe", daemon=True)
+    t.start()
+    t.join(timeout=timeout + 1.0)
+    if t.is_alive():
+        result["detail"] = (
+            f"Streamlabs unavailable: probe timed out after {timeout:.0f}s "
+            "(token may be invalid or network blocked)"
+        )
+        return result
+    if connected["ok"]:
+        result["ok"] = True
+        result["detail"] = "ok — connected to Streamlabs Socket API (probe disconnected)"
+        return result
+    err = connected["err"] or "could not connect"
+    result["detail"] = f"Streamlabs unavailable: {err}"
+    return result
+
+
+def _cli_status(*, as_json: bool = False, probe: bool = False) -> int:
+    info = status(probe=probe)
+    if as_json:
+        print(json.dumps(info, indent=2))
+        return 0
+    print("\n  Streamlabs Socket API readiness")
+    print("  " + "─" * 40)
+    flag = "✓" if info.get("ready") else "○"
+    print(f"  {flag}  ready: {bool(info.get('ready'))}")
+    if info.get("hint"):
+        print(f"      → {info['hint']}")
+    print(f"  {'✓' if info.get('socketio_installed') else '○'}  python-socketio: {bool(info.get('socketio_installed'))}")
+    print(f"  {'✓' if info.get('token_set') else '○'}  STREAMLABS_SOCKET_TOKEN set: {bool(info.get('token_set'))}")
+    print(f"      token_looks_ok: {bool(info.get('token_looks_ok'))}")
+    print(f"      thresholds: raid>={info.get('min_raid_size')} bits>={info.get('min_bits')} donation>=${info.get('min_donation_usd')}")
+    if probe:
+        pflag = "✓" if info.get("probe_ok") else "○"
+        print(f"  {pflag}  probe: {info.get('probe_detail') or '(none)'}")
+    print()
+    print("  Try:")
+    print("    bolt streamlabs status")
+    print("    bolt streamlabs status --json")
+    print("    bolt streamlabs status --probe   # short live connect (needs valid token)")
+    print("  Note: optional — folder-watch / bolt recordings still work without Streamlabs.")
+    print()
+    return 0  # soft-fail informational
+
+
+def _cli_help() -> int:
+    print(
+        """bolt streamlabs — Streamlabs Socket API readiness
+
+  bolt streamlabs                 # readiness (default)
+  bolt streamlabs status [--json] [--probe]
+
+Soft-fail: missing python-socketio / STREAMLABS_SOCKET_TOKEN never hangs.
+Live donations/raids/subs need a Socket API token from the Streamlabs dashboard.
+Folder-watch clip pipeline still works without Streamlabs.
+Aliases: streamlabs-status, slabs, streamlabs-monitor
+"""
+    )
+    return 0
+
+
+def main(argv=None) -> int:
+    import sys
+
+    args = list(argv) if argv is not None else sys.argv[1:]
+    # Default / legacy standalone listen mode when --listen is passed
+    if args and args[0] in ("-h", "--help", "help"):
+        return _cli_help()
+    if args and args[0] in ("listen", "--listen", "run"):
+        return _cli_listen()
+    if not args or args[0] in ("status", "ready", "check") or args[0] in ("--json", "--probe"):
+        rest = args[1:] if args and args[0] in ("status", "ready", "check") else args
+        as_json = "--json" in rest
+        probe = "--probe" in rest
+        unknown = [a for a in rest if a not in ("--json", "--probe")]
+        if unknown:
+            print(f"Unknown status flag(s): {' '.join(unknown)}", file=sys.stderr)
+            return 2
+        return _cli_status(as_json=as_json, probe=probe)
+    print(f"Unknown arg: {args[0]}", file=sys.stderr)
+    _cli_help()
+    return 2
+
+
+def _cli_listen() -> int:
+    """Legacy: connect and print highlights until Ctrl+C."""
     logging.basicConfig(level=logging.INFO)
 
     def my_highlight(event_type, label, data):
@@ -289,16 +506,20 @@ if __name__ == "__main__":
 
     monitor = StreamlabsMonitor(on_highlight=my_highlight)
     ok = monitor.start()
-
     if not ok:
-        print("\nStreamlabs monitor could not start.")
-        print("Make sure STREAMLABS_SOCKET_TOKEN is set in your .env file.")
-    else:
-        print("\nListening for Streamlabs events. Press Ctrl+C to stop.\n")
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            pass
-        finally:
-            monitor.stop()
+        print("\nStreamlabs unavailable: monitor could not start.")
+        print("Set STREAMLABS_SOCKET_TOKEN in .env, or: bolt streamlabs status")
+        return 1
+    print("\nListening for Streamlabs events. Press Ctrl+C to stop.\n")
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        monitor.stop()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

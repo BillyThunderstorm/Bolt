@@ -26,11 +26,12 @@ Usage:
 """
 
 import os
+import sys
 import json
 import time
 import requests
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -40,6 +41,132 @@ load_dotenv()
 TWITCH_AUTH_URL = "https://id.twitch.tv/oauth2/token"
 TWITCH_API_BASE = "https://api.twitch.tv/helix"
 TOKEN_CACHE_FILE = Path(__file__).resolve().parents[2] / "Data" / "twitch_stats_token_cache.json"
+
+
+
+
+# ── Tool / readiness helpers (never raise) ─────────────────────────────────────
+
+
+def find_yt_dlp() -> Optional[str]:
+    """
+    Resolve yt-dlp: venv sibling of sys.executable first, then PATH.
+    Returns absolute path or bare command name found on PATH, else None.
+    """
+    import shutil
+    import sys
+
+    venv_bin = Path(sys.executable).resolve().parent / "yt-dlp"
+    if venv_bin.is_file() and os.access(venv_bin, os.X_OK):
+        return str(venv_bin)
+    which = shutil.which("yt-dlp")
+    return which
+
+
+def find_ffmpeg() -> Optional[str]:
+    """Resolve ffmpeg on PATH (never raises)."""
+    import shutil
+
+    return shutil.which("ffmpeg")
+
+
+def _env_creds() -> Dict[str, str]:
+    return {
+        "client_id": (os.getenv("TWITCH_CLIENT_ID", "") or "").strip(),
+        "client_secret": (os.getenv("TWITCH_CLIENT_SECRET", "") or "").strip(),
+        "channel": (os.getenv("TWITCH_CHANNEL", "") or "").strip().lower(),
+    }
+
+
+def status(*, probe: bool = False, channel: Optional[str] = None) -> Dict[str, Any]:
+    """
+    VOD / highlight-reel surface readiness. Never raises; never hangs.
+    ready = Twitch client id+secret + channel present (tools ready for list/download).
+    Helix reachability only checked when probe=True (informational if ready).
+    """
+    env = _env_creds()
+    ch = (channel or env["channel"] or "").strip().lower()
+    client_id_set = bool(env["client_id"])
+    client_secret_set = bool(env["client_secret"])
+    channel_set = bool(ch)
+    yt = find_yt_dlp()
+    ff = find_ffmpeg()
+
+    ready = client_id_set and client_secret_set and channel_set
+
+    info: Dict[str, Any] = {
+        "ready": ready,
+        "client_id_set": client_id_set,
+        "client_secret_set": client_secret_set,
+        "channel_set": channel_set,
+        "channel": ch or None,
+        "yt_dlp_found": bool(yt),
+        "yt_dlp_path": yt,
+        "ffmpeg_found": bool(ff),
+        "ffmpeg_path": ff,
+        "hint": "",
+    }
+
+    if not client_id_set or not client_secret_set:
+        missing = []
+        if not client_id_set:
+            missing.append("TWITCH_CLIENT_ID")
+        if not client_secret_set:
+            missing.append("TWITCH_CLIENT_SECRET")
+        info["hint"] = (
+            "VOD unavailable: set "
+            + " + ".join(missing)
+            + " in .env (https://dev.twitch.tv/console). "
+            "Also TWITCH_CHANNEL. yt-dlp optional on PATH for full VOD download."
+        )
+    elif not channel_set:
+        info["hint"] = (
+            "VOD unavailable: set TWITCH_CHANNEL in .env "
+            "(channel login, e.g. thunderstormbilly)."
+        )
+    elif not yt:
+        info["hint"] = (
+            "Creds ready for Helix list; yt-dlp not found in venv or PATH "
+            "(brew install yt-dlp or pip install yt-dlp). "
+            "Sample downloads via ffmpeg still need ffmpeg. Try: bolt vods status --probe"
+        )
+    elif not ff:
+        info["hint"] = (
+            "Creds + yt-dlp ready; ffmpeg not on PATH "
+            "(needed for samples / merge). Try: bolt vods status --probe"
+        )
+    else:
+        info["hint"] = (
+            f"Configured for #{ch}. List/download: bolt vods / bolt auto_clip_twitch. "
+            "Highlight reel: bolt highlights (needs media/clips/). "
+            "Try: bolt vods status --probe"
+        )
+
+    if probe:
+        info["probe_ok"] = False
+        info["probe_detail"] = ""
+        if not ready:
+            info["probe_detail"] = info["hint"] or "VOD unavailable: missing creds/channel"
+        else:
+            try:
+                ts, err = TwitchStats.try_create(channel=ch)
+                if ts is None:
+                    info["probe_detail"] = f"VOD unavailable: {err}"
+                else:
+                    user = ts.get_user()
+                    if "error" in user:
+                        info["probe_detail"] = f"VOD unavailable: {user['error']}"
+                    else:
+                        info["probe_ok"] = True
+                        info["probe_detail"] = (
+                            f"ok — Helix reachable for "
+                            f"{user.get('display_name', ch)} (id={user.get('id')})"
+                        )
+                        info["hint"] = info["probe_detail"]
+            except Exception as exc:
+                info["probe_detail"] = f"VOD unavailable: Helix probe failed ({exc})"
+
+    return info
 
 
 # ── Main class ─────────────────────────────────────────────────────────────────
@@ -74,6 +201,22 @@ class TwitchStats:
                 "Get it from: https://dev.twitch.tv/console → Your App → Manage → Client Secret\n"
                 "Add: TWITCH_CLIENT_SECRET=your_secret_here"
             )
+
+    @classmethod
+    def try_create(
+        cls, channel: str = None
+    ) -> Tuple[Optional["TwitchStats"], Optional[str]]:
+        """
+        Soft-fail constructor for status / CLI paths.
+        Returns (instance, None) on success, or (None, reason) without raising.
+        """
+        try:
+            return cls(channel=channel), None
+        except EnvironmentError as e:
+            msg = str(e).split("\n", 1)[0].strip() or str(e)
+            return None, msg
+        except Exception as e:
+            return None, str(e)
 
     # ── Token management ───────────────────────────────────────────────────────
 
@@ -369,5 +512,45 @@ class TwitchStats:
 # ── Run directly for quick test ────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    stats = TwitchStats()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Twitch Helix stats / VOD readiness")
+    parser.add_argument(
+        "cmd",
+        nargs="?",
+        default="summary",
+        help="summary (default) | status",
+    )
+    parser.add_argument("--json", action="store_true")
+    parser.add_argument("--probe", action="store_true")
+    args = parser.parse_args()
+
+    if args.cmd in ("status", "vod-status", "vod_status"):
+        info = status(probe=args.probe)
+        if args.json:
+            print(json.dumps(info, indent=2))
+        else:
+            for k in (
+                "ready",
+                "client_id_set",
+                "client_secret_set",
+                "channel_set",
+                "channel",
+                "yt_dlp_found",
+                "yt_dlp_path",
+                "ffmpeg_found",
+                "ffmpeg_path",
+                "hint",
+            ):
+                if k in info:
+                    print(f"{k}: {info[k]}")
+            if args.probe:
+                print("probe_ok:", info.get("probe_ok"))
+                print("probe_detail:", info.get("probe_detail"))
+        raise SystemExit(0)
+
+    stats, err = TwitchStats.try_create()
+    if stats is None:
+        print(f"VOD unavailable: {err}", file=sys.stderr)
+        raise SystemExit(1)
     stats.print_summary()

@@ -19,6 +19,23 @@ Stream Deck scene buttons still switch the **main** 16:9 scene. Aitum follows th
 - Vertical backtrack folder: `recordings/`
 - Overlay HTML: `bolt overlay` → `http://127.0.0.1:8766/` (same Counter source; hidden on vertical until you show it)
 
+## Why vertical clips looked like VHS
+
+Bolt was not "bad at clipping." Three OBS + encode settings stacked:
+
+1. **Twitch output is 1280×720.** Canvas is 1080p, but `OutputCX/CY` is 720p. Center-cropping that to 9:16 is a ~405px-wide strip, then upscaled to 1080×1920. Motion looks analog.
+2. **Aitum vertical recordings are ~160 kbps.** `recording_match_main` is on and `record_encoder` is empty, so the native 1080×1920 file is unusable. A good 9:16 clip is 20–40 Mbps (see `media/vertical_clips/Wow.mp4`).
+3. **Game Sound and Elgato Game are both in the mix.** `Game` (capture card) is at full volume on every track. `Game Sound` is at ~25%. Same audio twice = hollow / late game audio.
+
+Bolt-side fix (2026-09-08): no unsharp, 720p sources use blur-fill instead of crop, already-9:16 files are not recropped, clip cuts use a working ffmpeg.
+
+OBS still needs a one-time change before the next recording:
+
+- **Vertical Gaming is missing the Game source.** Native `*-vertical*` files are black. In OBS, Vertical Scenes → Vertical Gaming → add **Game**, scale/crop it to fill 1080×1920, lock it. Turn **Game Sound** back on for that scene (it is currently hidden).
+- Aitum Vertical → Recording: **uncheck Match main**, set encoder (Apple VT H.264), quality/bitrate around 12–16 Mbps
+- OBS Settings → Video: keep canvas 1920×1080; if you want crop-style TikToks later, record at 1080p not 720p (stream can stay 720p)
+- Mixer (horizontal): mute **Game** audio (keep the picture) **or** mute **Game Sound** — not both live
+
 ## If OBS will not stay open
 
 On macOS 27, OBS 32.2.2 crashes in Chromium (`CreateBrowserSync`) if the Twitch Chat / Info / Stats / Feed **docks** restore at launch. Safe Mode does not help — those docks are first-party.

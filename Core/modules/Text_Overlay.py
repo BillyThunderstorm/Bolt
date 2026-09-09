@@ -19,22 +19,18 @@ Outputs to media/vertical_clips_final/ by default.
 """
 
 import os
-import shutil
 import subprocess
 from pathlib import Path
 
-# ── ffmpeg path resolution ─────────────────────────────────────────────────────
-# The default homebrew ffmpeg is built without libfreetype, so the drawtext
-# filter is missing. ffmpeg-full (keg-only) has it. We prefer ffmpeg-full when
-# available, falling back to whatever ffmpeg is on PATH.
-_FFMPEG_FULL = "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg"
+try:
+    from modules.FFmpeg_Bin import ffmpeg_bin
+except ImportError:
+    from FFmpeg_Bin import ffmpeg_bin
 
 
 def _ffmpeg_binary() -> str:
-    """Return the best available ffmpeg path (prefer ffmpeg-full for drawtext)."""
-    if os.path.isfile(_FFMPEG_FULL) and os.access(_FFMPEG_FULL, os.X_OK):
-        return _FFMPEG_FULL
-    return shutil.which("ffmpeg") or "ffmpeg"
+    """Return a ffmpeg that actually launches (prefer ffmpeg-full for drawtext)."""
+    return ffmpeg_bin()
 
 
 try:

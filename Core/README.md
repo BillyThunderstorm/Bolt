@@ -27,7 +27,10 @@ Purpose and architecture: [`SYSTEM_README.pages`](SYSTEM_README.pages) and [`../
 **Bolt is not**
 
 - An auto-poster that skips review
-- A Discord-first bot
+- A Discord-first bot (optional **webhook** alerts only — `bolt discord`; not a bot)
+- A shipping curriculum product (`Data/learning/` is a personal study log; browse via `bolt learning`)
+- A multi-domain runtime engine (creator-domain specs are browsable via `bolt domains`; PARTIAL discoverability only)
+- A stranger-ready Cloudflare Pages product (`bolt pages` is PARTIAL William-specific deploy soft-fail only)
 - A gaming-only clip factory
 - Calendar theater or fake productivity
 - A system that treats every saved moment as post-worthy
@@ -162,7 +165,7 @@ Light mode by default (`BOLT_LLM_MODE=light`).
 - **Grok API** only for high-value strategy / research / decisions
 - SuperGrok subscription is app/web chat only — it does **not** cover the API
 - Soft cap **$35/month** → force local when hit (`bolt budget`)
-- Alerts via Mac banner + **Voice 3** + iMessage + email. **No Discord.**
+- Alerts via Mac banner + **Voice 3** + iMessage + email by default. Optional Discord **webhooks** via `bolt discord` / Peak_Hour (not a Discord bot).
 
 STT is free Google by default. Whisper/OpenAI speech-in stays off unless both flags are set on purpose.
 
@@ -211,3 +214,6 @@ Mac automation installer: `python3 scripts/install_mac_automation.py` (launchd w
 | Tests / verify | `bolt verify` then `bolt test` |
 
 *Last updated: August 17, 2026 — evening Reminders briefing, Voice 3 alerts, Shortcuts, do-and-notify except financial.*
+
+- License tooling is PARTIAL via `bolt license` (status/list/show/set; soft-fail `License unavailable:`; does not auto-pick SPDX).
+- Mac `.app` packaging is PARTIAL via `bolt mac-app` (status/list/build; soft-fail `Mac app unavailable:`; thin local wrapper — not notarized / not iOS; prefer `bolt menubar`).

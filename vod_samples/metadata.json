@@ -1,0 +1,28 @@
+[
+  {
+    "id": "2865166953",
+    "title": "The Blood of Dawnwalker",
+    "created_at": "2026-09-04",
+    "duration": "5m40s",
+    "duration_seconds": 340,
+    "view_count": 2,
+    "url": "https://www.twitch.tv/videos/2865166953",
+    "sample_start_seconds": 60,
+    "sample_duration_seconds": 300,
+    "sample_path": "/Users/carter/developer/Bolt/vod_samples/2865166953.mp4",
+    "download_ok": false
+  },
+  {
+    "id": "2865147408",
+    "title": "The Blood of Dawnwalker",
+    "created_at": "2026-09-04",
+    "duration": "22m40s",
+    "duration_seconds": 1360,
+    "view_count": 1,
+    "url": "https://www.twitch.tv/videos/2865147408",
+    "sample_start_seconds": 608,
+    "sample_duration_seconds": 300,
+    "sample_path": "/Users/carter/developer/Bolt/vod_samples/2865147408.mp4",
+    "download_ok": false
+  }
+]

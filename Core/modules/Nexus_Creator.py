@@ -12,11 +12,19 @@ Paid Grok is gated by ``LLM_Budget`` (BOLT_LLM_MODE) plus:
   - ``consult(..., allow_paid=True)``, or
   - CLI ``bolt nexus "…" --paid``
 
-Recommended "SuperGrok + light API" plan:
-  BOLT_LLM_MODE=light
-  NEXUS_ALLOW_PAID=true
-  NEXUS_PREFERRED=ollama
-  → Grok only for strategy/decision/research; Ollama otherwise.
+Soft-fail convention matches LLM_Handler / Gemini_Client: when no provider
+is available, ``consult`` returns empty ``advice`` plus
+``error="LLM unavailable: …"`` (never raises for missing Ollama / keys).
+
+CLI (via ``bolt nexus`` or ``python -m modules.Nexus_Creator``)::
+
+    bolt nexus status
+    bolt nexus status --json
+    bolt nexus status --probe
+    bolt nexus "How should I title this clip?" [--paid]
+
+READY means routing + soft-fail status/consult are usable; useful advice
+still needs Ollama *or* paid Grok / Gemini opt-in configured.
 
 Note: SuperGrok *subscription* (app/web) ≠ free ``XAI_API_KEY`` usage.
 """
@@ -25,7 +33,7 @@ import os
 import json
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from dotenv import load_dotenv
 
@@ -297,6 +305,105 @@ Focus: this week's topic only. Do not invent a new career plan or rotate lanes u
             timeout=float(os.getenv("NEXUS_TIMEOUT_SEC", "45")),
         )
 
+
+    def status(self, *, probe: bool = False) -> dict[str, Any]:
+        """Provider readiness. Never raises; probe only hits a live model when True."""
+        ollama_ok = self._is_ollama_healthy()
+        has_xai = bool((self.xai_api_key or "").strip())
+        has_gemini = bool((self.gemini_key or "").strip())
+        paid_default = bool(self.allow_paid_default)
+        gemini_opt_in = bool(self.use_gemini)
+
+        # READY for useful advice if any configured path can answer.
+        ready = ollama_ok or (has_xai and paid_default) or (gemini_opt_in and has_gemini)
+
+        if ollama_ok:
+            hint = "Ollama reachable — free path ready for bolt nexus \"…\"."
+        elif has_xai and paid_default:
+            hint = "Ollama down; paid Grok path allowed (NEXUS_ALLOW_PAID). Use bolt nexus \"…\" --paid if needed."
+        elif has_xai and not paid_default:
+            hint = (
+                "Ollama down. XAI_API_KEY is set but NEXUS_ALLOW_PAID=false — "
+                "start Ollama, or use bolt nexus \"…\" --paid / set NEXUS_ALLOW_PAID=true."
+            )
+        elif gemini_opt_in and has_gemini:
+            hint = "Ollama/Grok unavailable; Gemini opt-in is on (NEXUS_USE_GEMINI=true)."
+        elif has_gemini and not gemini_opt_in:
+            hint = (
+                "No free provider. Start Ollama, enable paid Grok "
+                "(NEXUS_ALLOW_PAID=true + XAI_API_KEY), or set NEXUS_USE_GEMINI=true."
+            )
+        else:
+            hint = (
+                "LLM unavailable: start Ollama (preferred), or configure "
+                "XAI_API_KEY + NEXUS_ALLOW_PAID / NEXUS_USE_GEMINI."
+            )
+
+        info: dict[str, Any] = {
+            "ready": ready,
+            "ollama_ok": ollama_ok,
+            "ollama_model": self.ollama_model,
+            "ollama_base_url": self.ollama_base_url,
+            "has_xai_key": has_xai,
+            "allow_paid_default": paid_default,
+            "grok_model": self.grok_model,
+            "has_gemini_key": has_gemini,
+            "nexus_use_gemini": gemini_opt_in,
+            "gemini_model": self.gemini_model,
+            "preferred_provider": self.preferred_provider,
+            "hint": hint,
+        }
+
+        if probe:
+            if ollama_ok:
+                result = self.consult(
+                    "Reply with OK",
+                    task_type="general",
+                    complexity="medium",
+                    allow_paid=False,
+                    force_provider="ollama",
+                )
+                advice = (result.get("advice") or "").strip()
+                err = (result.get("error") or "").strip()
+                info["probe_provider"] = result.get("provider")
+                info["probe_ok"] = bool(advice) and not (err.startswith("LLM unavailable"))
+                info["probe_detail"] = (advice or err or "(empty)")[:240]
+            elif has_xai and paid_default:
+                result = self.consult(
+                    "Reply with OK",
+                    task_type="general",
+                    complexity="medium",
+                    allow_paid=True,
+                    force_provider="grok",
+                )
+                advice = (result.get("advice") or "").strip()
+                err = (result.get("error") or "").strip()
+                info["probe_provider"] = result.get("provider")
+                info["probe_ok"] = bool(advice) and not (err.startswith("LLM unavailable"))
+                info["probe_detail"] = (advice or err or "(empty)")[:240]
+            elif gemini_opt_in and has_gemini:
+                result = self.consult(
+                    "Reply with OK",
+                    task_type="general",
+                    complexity="medium",
+                    allow_paid=False,
+                    force_provider="gemini",
+                )
+                advice = (result.get("advice") or "").strip()
+                err = (result.get("error") or "").strip()
+                info["probe_provider"] = result.get("provider")
+                info["probe_ok"] = bool(advice) and not (err.startswith("LLM unavailable"))
+                info["probe_detail"] = (advice or err or "(empty)")[:240]
+            else:
+                info["probe_ok"] = False
+                info["probe_provider"] = "none"
+                info["probe_detail"] = (
+                    "LLM unavailable: no provider to probe "
+                    "(start Ollama or configure paid/Gemini)"
+                )
+
+        return info
+
     def consult(
         self,
         topic: str,
@@ -312,16 +419,18 @@ Focus: this week's topic only. Do not invent a new career plan or rotate lanes u
         )
 
         if provider == "none":
-            print(
-                "Nexus: no provider available "
-                "(start Ollama, set NEXUS_ALLOW_PAID=true for Grok, "
+            msg = (
+                "LLM unavailable: no Nexus provider "
+                "(start Ollama, set NEXUS_ALLOW_PAID=true + XAI_API_KEY for Grok, "
                 "or NEXUS_USE_GEMINI=true for Google as last resort)"
             )
+            print(f"Nexus: {msg}")
             return {
                 "advice": "",
                 "provider": "none",
                 "model": "",
                 "task_type": task_type,
+                "error": msg,
             }
 
         system = self._build_system_prompt()
@@ -338,6 +447,7 @@ Focus: this week's topic only. Do not invent a new career plan or rotate lanes u
                         "provider": "fallback",
                         "model": "",
                         "task_type": task_type,
+                        "error": advice if advice.startswith("LLM unavailable") else f"LLM unavailable: {advice}",
                     }
                 model = self.gemini_model
             else:
@@ -414,11 +524,13 @@ Focus: this week's topic only. Do not invent a new career plan or rotate lanes u
                     )
                 except Exception:
                     pass
+            err = f"LLM unavailable: {provider} failed: {str(e)[:160]}"
             return {
                 "advice": "",
                 "provider": "fallback",
                 "model": "",
                 "task_type": task_type,
+                "error": err,
             }
 
     def _log_advice(
@@ -451,10 +563,96 @@ Focus: this week's topic only. Do not invent a new career plan or rotate lanes u
         )
 
 
-if __name__ == "__main__":
+def _cli_status(*, as_json: bool = False, probe: bool = False) -> int:
+    import json
     import sys
 
-    nexus = NexusCreator()
-    topic = sys.argv[1] if len(sys.argv) > 1 else "Test query"
-    result = nexus.consult(topic)
-    print(result["advice"])
+    info = NexusCreator().status(probe=probe)
+    if as_json:
+        print(json.dumps(info, indent=2))
+        return 0
+    print("ready:", info["ready"])
+    print("ollama_ok:", info["ollama_ok"])
+    print("ollama_model:", info["ollama_model"])
+    print("has_xai_key:", info["has_xai_key"])
+    print("allow_paid_default:", info["allow_paid_default"])
+    print("has_gemini_key:", info["has_gemini_key"])
+    print("nexus_use_gemini:", info["nexus_use_gemini"])
+    print("preferred_provider:", info["preferred_provider"])
+    if info.get("hint"):
+        print("hint:", info["hint"])
+    if probe:
+        print("probe_ok:", info.get("probe_ok"))
+        print("probe_provider:", info.get("probe_provider"))
+        print("probe_detail:", info.get("probe_detail"))
+    return 0 if info.get("ready") else 1
+
+
+def _cli_help() -> int:
+    print('Usage: bolt nexus [status|"question"] [--paid] [--task-type T] [--complexity high|medium]')
+    print("  status [--json] [--probe]  Provider readiness (Ollama / paid Grok / Gemini opt-in)")
+    print('  "question"                 Ask consult(); soft-fails with error LLM unavailable:')
+    print()
+    print("  bolt nexus status")
+    print("  bolt nexus status --probe")
+    print('  bolt nexus "How should I title this clip?"')
+    print('  bolt nexus "strategy tip" --paid')
+    print()
+    print("Free path = Ollama. Paid Grok needs XAI_API_KEY + --paid or NEXUS_ALLOW_PAID=true.")
+    print("Gemini only when NEXUS_USE_GEMINI=true.")
+    return 0
+
+
+def main(argv=None) -> int:
+    import sys
+
+    args = list(sys.argv[1:] if argv is None else argv)
+    if not args or args[0] in ("-h", "--help", "help"):
+        return _cli_help()
+
+    if args[0] in ("status", "ready", "check") or args[0] in ("--json", "--probe"):
+        rest = args[1:] if args[0] in ("status", "ready", "check") else args
+        as_json = "--json" in rest
+        probe = "--probe" in rest
+        unknown = [a for a in rest if a not in ("--json", "--probe")]
+        if unknown:
+            print(f"Unknown status flag(s): {' '.join(unknown)}", file=sys.stderr)
+            return 2
+        return _cli_status(as_json=as_json, probe=probe)
+
+    # First non-flag token is the question; flags may follow.
+    topic = args[0]
+    task_type = "general"
+    complexity = "medium"
+    allow_paid = "--paid" in args
+    if "--task-type" in args:
+        idx = args.index("--task-type") + 1
+        if idx < len(args):
+            task_type = args[idx]
+    if "--complexity" in args:
+        idx = args.index("--complexity") + 1
+        if idx < len(args):
+            complexity = args[idx]
+
+    result = NexusCreator().consult(
+        topic,
+        task_type=task_type,
+        complexity=complexity,
+        allow_paid=True if allow_paid else None,
+    )
+    advice = (result.get("advice") or "").strip()
+    err = (result.get("error") or "").strip()
+    print("\n=== Nexus Advice ===\n")
+    print(advice or err or "(no advice — start Ollama, or use --paid for Grok API)")
+    print(
+        f"\nProvider: {result.get('provider', 'unknown')} | "
+        f"Model: {result.get('model', 'unknown')}"
+        + (" | paid allowed" if allow_paid else " | free path")
+    )
+    if err and not advice:
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

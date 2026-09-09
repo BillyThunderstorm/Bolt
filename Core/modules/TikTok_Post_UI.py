@@ -9,8 +9,10 @@ Serves a local web UI that implements TikTok Content Sharing Guidelines:
   - publish only after explicit consent; status polling notice
 
 Usage:
-  bolt tiktok-post              # open UI (demo mode if no token)
-  bolt tiktok-post --live       # require real token (no mock creator)
+  bolt tiktok-post              # open UI (demo mock if no token — labeled clearly)
+  bolt tiktok-post --demo       # force mock creator (audit film mode)
+  bolt tiktok-post --live       # require real token (fails soft if missing)
+  bolt tiktok-post status       # token / API readiness (no server)
   bolt tiktok-post --port 8787
 
 Environment:
@@ -96,6 +98,11 @@ PAGE_HTML = r"""<!DOCTYPE html>
   }
   header .badge.demo { color: var(--warn); border-color: #6a5520; }
   header .badge.live { color: var(--ok); border-color: #1e5c40; }
+  .auth-hint {
+    display: none; margin: 0 0 12px; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid #6a5520; background: #1a1608; color: var(--warn); font-size: 13px;
+  }
+  .auth-hint.show { display: block; }
   main {
     max-width: 1100px; margin: 0 auto; padding: 20px;
     display: grid; grid-template-columns: 1.05fr 1fr; gap: 18px;
@@ -223,6 +230,7 @@ PAGE_HTML = r"""<!DOCTYPE html>
       </div>
     </div>
     <p class="hint">Posting as this TikTok account (from creator_info). <span class="req-tag">1a</span></p>
+    <div class="auth-hint" id="authHint"></div>
 
     <label for="title">Title / caption <span class="req-tag">2a · 5b</span></label>
     <textarea id="title" maxlength="2200" placeholder="Edit before posting…"></textarea>
@@ -445,11 +453,28 @@ async function loadAll() {
     setStatus("err", "creator_info failed: " + (cr.error || "unknown"));
     $("modeBadge").textContent = "error";
     $("modeBadge").className = "badge";
+    if (cr.auth_hint) {
+      const ah = $("authHint");
+      ah.textContent = cr.auth_hint;
+      ah.className = "auth-hint show";
+    }
     return;
   }
   state.mock = !!cr.mock;
   $("modeBadge").textContent = state.mock ? "DEMO (mock creator)" : "LIVE token";
   $("modeBadge").className = "badge " + (state.mock ? "demo" : "live");
+  const hint = cr.auth_hint || (cr.data && cr.data.auth_hint) || "";
+  const ah = $("authHint");
+  if (state.mock && hint) {
+    ah.textContent = hint;
+    ah.className = "auth-hint show";
+  } else if (!cr.success && cr.auth_hint) {
+    ah.textContent = cr.auth_hint;
+    ah.className = "auth-hint show";
+  } else {
+    ah.textContent = "";
+    ah.className = "auth-hint";
+  }
   applyCreator(cr.data);
 
   const cl = await fetch("/api/clips").then(r => r.json());
@@ -628,6 +653,84 @@ def _mark_queue_posted(clip_id: str, share_url: Optional[str] = None) -> None:
         pass
 
 
+AUTH_HINT_LIVE = (
+    "Live Post UI needs a TikTok access token. "
+    "Set TIKTOK_API_ENABLED=true, then run `bolt tiktok_token` "
+    "(Content Posting API scopes must be approved)."
+)
+AUTH_HINT_DEMO = (
+    "Demo mock — not a real TikTok account. "
+    "Publish stays a dry-run. For live: "
+    "TIKTOK_API_ENABLED=true + `bolt tiktok_token`."
+)
+
+
+def post_ui_status() -> dict:
+    """Token / API readiness for the Post-to-TikTok UI (never opens a browser)."""
+    api_enabled = False
+    api_note = ""
+    try:
+        from modules.TikTok_Auth import tiktok_api_enabled
+
+        api_enabled = bool(tiktok_api_enabled())
+        api_note = "TIKTOK_API_ENABLED=true" if api_enabled else "TIKTOK_API_ENABLED=false (paused)"
+    except Exception as exc:
+        api_note = f"TikTok_Auth unavailable: {exc}"
+
+    token = ""
+    token_source = "none"
+    try:
+        from modules.TikTok_Publisher import TikTokPublisher
+
+        pub = TikTokPublisher()
+        token = (pub.token or "").strip()
+        if token:
+            token_source = "loaded"
+    except Exception as exc:
+        token_source = f"error: {exc}"
+
+    has_token = bool(token)
+    if not api_enabled:
+        mode = "demo-only"
+        ready_live = False
+        hint = (
+            "TikTok Content Posting API is paused. "
+            "Use `bolt tiktok-post` / `--demo` for the audit-compliant dry-run UI. "
+            "Live publish stays blocked until TIKTOK_API_ENABLED=true + approved app."
+        )
+    elif not has_token:
+        mode = "demo-fallback"
+        ready_live = False
+        hint = AUTH_HINT_LIVE
+    else:
+        mode = "live-ready"
+        ready_live = True
+        hint = "Token present; `bolt tiktok-post --live` can query real creator_info."
+
+    return {
+        "api_enabled": api_enabled,
+        "api_note": api_note,
+        "has_token": has_token,
+        "token_source": token_source,
+        "ready_live": ready_live,
+        "recommended_mode": "live" if ready_live else "demo",
+        "mode": mode,
+        "auth_hint": hint,
+    }
+
+
+def _cli_status() -> int:
+    info = post_ui_status()
+    print("Bolt — Post-to-TikTok UI status")
+    print(f"  API:          {info['api_note']}")
+    print(f"  Token:        {'yes' if info['has_token'] else 'no'} ({info['token_source']})")
+    print(f"  Live ready:   {'yes' if info['ready_live'] else 'no'}")
+    print(f"  Recommended:  bolt tiktok-post" + (" --live" if info["ready_live"] else " --demo"))
+    print(f"  Hint:         {info['auth_hint']}")
+    # Exit 0 always — status is informational (demo path is valid).
+    return 0
+
+
 def create_app(*, force_demo: bool = False, live_required: bool = False):
     from flask import Flask, jsonify, request, Response, send_file
 
@@ -639,6 +742,10 @@ def create_app(*, force_demo: bool = False, live_required: bool = False):
     def index():
         return Response(PAGE_HTML, mimetype="text/html")
 
+    @app.get("/api/status")
+    def api_status_ready():
+        return jsonify(post_ui_status())
+
     @app.get("/api/creator_info")
     def api_creator_info():
         from modules.TikTok_Publisher import TikTokPublisher
@@ -647,9 +754,16 @@ def create_app(*, force_demo: bool = False, live_required: bool = False):
         if app.config["FORCE_DEMO"]:
             # still construct publisher; force mock path
             pub = TikTokPublisher(access_token="")
-            return jsonify(pub.query_creator_info(allow_mock=True))
+            result = pub.query_creator_info(allow_mock=True)
+            result.setdefault("auth_hint", AUTH_HINT_DEMO)
+            return jsonify(result)
         pub = TikTokPublisher()
-        return jsonify(pub.query_creator_info(allow_mock=allow_mock))
+        result = pub.query_creator_info(allow_mock=allow_mock)
+        if result.get("mock"):
+            result.setdefault("auth_hint", AUTH_HINT_DEMO)
+        elif not result.get("success"):
+            result.setdefault("auth_hint", AUTH_HINT_LIVE)
+        return jsonify(result)
 
     @app.get("/api/clips")
     def api_clips():
@@ -773,6 +887,12 @@ def create_app(*, force_demo: bool = False, live_required: bool = False):
 
 
 def main(argv: Optional[list[str]] = None) -> int:
+    raw = list(argv) if argv is not None else None
+    # `bolt tiktok-post status` — readiness only, never starts Flask.
+    probe = raw if raw is not None else sys.argv[1:]
+    if probe and probe[0] in ("status", "token-status", "ready"):
+        return _cli_status()
+
     parser = argparse.ArgumentParser(
         description="Bolt Post-to-TikTok UI (audit-compliant export screen)"
     )
@@ -797,13 +917,21 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Do not open a browser tab",
     )
-    args = parser.parse_args(argv)
+    args = parser.parse_args(raw)
 
     force_demo = args.demo or os.getenv("BOLT_TIKTOK_POST_DEMO", "").strip() in {
         "1",
         "true",
         "yes",
     }
+
+    info = post_ui_status()
+    if args.live and not force_demo and not info["ready_live"]:
+        print("bolt tiktok-post --live: not ready.", file=sys.stderr)
+        print(f"  {info['auth_hint']}", file=sys.stderr)
+        print("  Or use demo (dry-run): bolt tiktok-post --demo", file=sys.stderr)
+        return 1
+
     app = create_app(force_demo=force_demo, live_required=args.live)
 
     url = f"http://{args.host}:{args.port}/"
@@ -814,11 +942,18 @@ def main(argv: Optional[list[str]] = None) -> int:
     print("  Bolt — Post to TikTok UI")
     print(f"  → {url}")
     if force_demo:
-        print("  Mode: DEMO (mock creator_info; publish is dry-run)")
+        print("  Mode: DEMO (mock creator — not a real account; publish is dry-run)")
+        print(f"  Hint: {AUTH_HINT_DEMO}")
     elif args.live:
-        print("  Mode: LIVE (token required; real publish)")
+        print("  Mode: LIVE (token required; real creator_info + publish)")
     else:
-        print("  Mode: auto (live creator if token works, else demo mock)")
+        # Auto: prefer live when ready, else honest demo mock.
+        if info["ready_live"]:
+            print("  Mode: auto → LIVE (token present)")
+        else:
+            print("  Mode: auto → DEMO mock (not a real TikTok account; dry-run publish)")
+            print(f"  Hint: {info['auth_hint']}")
+    print("  Status anytime: bolt tiktok-post status")
     print("  Printable audit worksheet:")
     print("    Docs/guides/TIKTOK_AUDIT_DEMO_PRINTABLE.html")
     print("  Ctrl+C to stop.")

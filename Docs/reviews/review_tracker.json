@@ -508,6 +508,20 @@
       "status": "posted",
       "asin": "",
       "added_at": "2026-08-23T16:08:00"
+    },
+    {
+      "name": "Bolt Verify Smoke",
+      "lane": "tech",
+      "status": "testing",
+      "asin": "B00TESTXXX",
+      "added_at": "2026-09-07T20:48:56"
+    },
+    {
+      "name": "Temp NoVerify",
+      "lane": "tech",
+      "status": "testing",
+      "asin": "B00TEMPXXXX",
+      "added_at": "2026-09-07T20:49:29"
     }
   ],
   "settings": {},

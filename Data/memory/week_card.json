@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-30T18:19:02",
+  "updated_at": "2026-09-09T06:51:43",
   "this_week": {
-    "topic": "tech",
+    "topic": "pop culture",
     "note": "",
-    "started": "2026-08-30",
+    "started": "2026-09-09",
     "done": []
   },
   "last_week": {
-    "topic": "general product review / Amazon storefront",
-    "note": "PAUSE. Amazon Influencer rejected 2026-08-24. William is stepping away. Do not ask him to film, post, reapply, or pick a next product. The written Amazon customer reviews and ~5k helpful views still happened \u2014 they were buyer reviews, not wasted, just not the Influencer video path.",
-    "started": "2026-08-24",
+    "topic": "tech",
+    "note": "",
+    "started": "2026-08-30",
     "done": []
   },
   "do_not_suggest": [

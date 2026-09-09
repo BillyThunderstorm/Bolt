@@ -117,6 +117,7 @@ Use `memory/content/` for broad creator growth:
 The best memory entry is specific: date, platform, content idea, result, and lesson.
 
 ## Recent Notes
+- [2026-09-09] This week is: pop culture
 - [2026-09-03] OBS Thunderstone now has Aitum Vertical at 1080×1920. Horizontal scenes are linked (Gaming → Vertical Gaming, plus Starting Soon / Chatting / BRB / Offline). Twitch stays 16:9. Vertical record/backtrack is the 9:16 path. Notes: `Docs/guides/OBS_VERTICAL.md`, `App/overlay/theme/README.md`.
 - [2026-09-01] Item 12 shipped: conversation / briefing comments write week + mission via Intent_Router (same functions as `bolt week` / `bolt mission update`). Say “I’m ready to continue”, “this shipped: …”, “hours: 6, budget 40”. This week is **tech** (not paused). Amazon pause is last week only.
 - [2026-09-01] Base44 `App/BoltApp` removed. It was a todo template, not a website or Mac/iOS app. Real surfaces: `bolt` CLI, overlay, Drive handbook.
@@ -137,6 +138,7 @@ The best memory entry is specific: date, platform, content idea, result, and les
 - [2026-08-24] This week is: tech
 - [2026-08-23] This week (beauty / skincare) done: Posted facial steamer review on YouTube (https://www.youtube.com/watch?v=gYqRPoCkIy0, 713 views as of 2026-08-21)
 - [2026-08-23] Facial steamer review already posted on YouTube this week (https://www.youtube.com/watch?v=gYqRPoCkIy0 — 713 views / 5 likes as of 2026-08-21). The Aug 17 week-start note was a plan, not an open to-do. Do not tell William to film or post the steamer again. Snail care is optional leftover, not required.
+- [2026-09-08] Vertical clip VHS look was real: 720p crop+unsharp, Aitum vertical record ~160kbps, Game + Game Sound both in the mix. Clip_Factory now blur-fills 720p instead of cropping, skips unsharp, uses a working ffmpeg. OBS still needs Aitum "Match main" off and one game-audio source, not two.
 - [2026-08-18] Held clip 1976be1d (Test): not ready
 - [2026-08-18] Held clip 59eb0958 (Ready clip): bad hook
 - [2026-08-18] Held clip 872c1b19 (Test): not ready

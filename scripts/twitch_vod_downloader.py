@@ -77,7 +77,12 @@ from _paths import REPO_ROOT, DATA_DIR, CLIPS_DIR, LOGS_DIR, CONFIG_FILE  # noqa
 PROJECT_ROOT = REPO_ROOT
 ROOT = REPO_ROOT
 
-from modules.Twitch_Stats import TwitchStats  # noqa: E402
+from modules.Twitch_Stats import (  # noqa: E402
+    TwitchStats,
+    status as vod_status,
+    find_yt_dlp,
+    find_ffmpeg,
+)
 
 
 HLS_PLAYLIST_TEMPLATE = "https://usher.ttvnw.net/vod/{video_id}.m3u8"
@@ -209,16 +214,16 @@ def list_videos(
     limit: int,
 ) -> list:
     """List VODs for a channel via Twitch Helix."""
-    try:
-        ts = TwitchStats(channel=channel)
-    except EnvironmentError as e:
-        print(f"[error] {e}", file=sys.stderr)
+    ts, err = TwitchStats.try_create(channel=channel)
+    if ts is None:
+        print(f"VOD unavailable: {err}", file=sys.stderr)
         sys.exit(1)
 
     user = ts.get_user()
     user_id = user.get("id")
     if not user_id:
-        print(f"[error] Could not resolve user_id for channel '{channel}'", file=sys.stderr)
+        detail = user.get("error") or f"Could not resolve user_id for channel '{channel}'"
+        print(f"VOD unavailable: {detail}", file=sys.stderr)
         sys.exit(1)
     print(f"Channel: {user.get('display_name')} (id={user_id})")
     print(f"Fetching up to {limit} {video_type}(s)...")
@@ -227,7 +232,55 @@ def list_videos(
     return videos
 
 
-def main() -> int:
+def _cli_status(*, as_json: bool = False, probe: bool = False, channel: str | None = None) -> int:
+    """Print VOD readiness; always exit 0 (soft-fail informational)."""
+    info = vod_status(probe=probe, channel=channel)
+    if as_json:
+        print(json.dumps(info, indent=2))
+        return 0
+    print("ready:", info["ready"])
+    print("client_id_set:", info["client_id_set"])
+    print("client_secret_set:", info["client_secret_set"])
+    print("channel_set:", info["channel_set"])
+    print("channel:", info["channel"])
+    print("yt_dlp_found:", info["yt_dlp_found"])
+    print("yt_dlp_path:", info["yt_dlp_path"])
+    print("ffmpeg_found:", info["ffmpeg_found"])
+    print("ffmpeg_path:", info["ffmpeg_path"])
+    if info.get("hint"):
+        print("hint:", info["hint"])
+    if probe:
+        print("probe_ok:", info.get("probe_ok"))
+        print("probe_detail:", info.get("probe_detail"))
+    return 0
+
+
+def main(argv: list | None = None) -> int:
+    raw = list(argv) if argv is not None else sys.argv[1:]
+
+    # status subcommand / flags (bolt vods status [--json] [--probe])
+    if raw and raw[0] in ("status", "vod-status", "vod_status"):
+        status_argv = raw[1:]
+        sp = argparse.ArgumentParser(prog="bolt vods status")
+        sp.add_argument("--json", action="store_true")
+        sp.add_argument("--probe", action="store_true")
+        sp.add_argument("--channel", default=None)
+        sargs = sp.parse_args(status_argv)
+        return _cli_status(as_json=sargs.json, probe=sargs.probe, channel=sargs.channel)
+
+    # Bare flags: bolt vods --json / --probe (treat as status)
+    if raw and all(
+        a in ("--json", "--probe", "--help", "-h")
+        or a.startswith("--channel")
+        for a in raw
+    ) and any(a in ("--json", "--probe") for a in raw):
+        sp = argparse.ArgumentParser(prog="bolt vods status")
+        sp.add_argument("--json", action="store_true")
+        sp.add_argument("--probe", action="store_true")
+        sp.add_argument("--channel", default=None)
+        sargs = sp.parse_args(raw)
+        return _cli_status(as_json=sargs.json, probe=sargs.probe, channel=sargs.channel)
+
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -277,7 +330,24 @@ def main() -> int:
 
     sample_seconds = args.sample_minutes * 60
 
-    channel = args.channel or TwitchStats().channel
+    if args.channel:
+        channel = args.channel.strip().lower()
+    else:
+        ts, err = TwitchStats.try_create()
+        if ts is None:
+            print(f"VOD unavailable: {err}", file=sys.stderr)
+            return 1
+        channel = ts.channel
+
+    # Soft hint if yt-dlp missing (list/dry-run still OK; full auto_clip needs it)
+    if not args.dry_run and not find_yt_dlp() and not find_ffmpeg():
+        print(
+            "VOD unavailable: neither yt-dlp nor ffmpeg found on PATH "
+            "(need one to download samples).",
+            file=sys.stderr,
+        )
+        return 1
+
     videos = list_videos(channel, args.type, args.limit)
     if not videos:
         print("Nothing to do.")
@@ -360,4 +430,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))

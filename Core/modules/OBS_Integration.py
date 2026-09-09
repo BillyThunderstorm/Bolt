@@ -6,9 +6,11 @@ Keeps old-style imports working:
 
 All real OBS logic (including audio-spike detection + replay buffer saves)
 lives in Stream_Monitor.py.
+
+CLI: ``bolt obs status`` / ``bolt obs status --probe`` (soft-fail).
 """
 
-from modules.Stream_Monitor import StreamMonitor
+from modules.Stream_Monitor import StreamMonitor, probe_obs, status
 
 _monitor = None
 
@@ -43,4 +45,6 @@ __all__ = [
     "get_obs_monitor",
     "mark_highlight",
     "save_replay_buffer",
+    "status",
+    "probe_obs",
 ]

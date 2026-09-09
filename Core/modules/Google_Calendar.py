@@ -5,27 +5,31 @@ modules/Google_Calendar.py -- Google Calendar integration for Bolt
 Connects Bolt to your Google Calendar so the daily briefing knows
 what's actually on your schedule.
 
-How the auth flow works (important to understand):
-  1. First run: opens a browser window asking you to sign in to Google
-     and approve access. This happens ONCE.
-  2. After you approve, Google gives Bolt a token that gets saved to
-     Data/google_token.json on your machine.
-  3. Every run after that: Bolt uses the saved token. No browser needed.
-  4. If the token expires, it auto-refreshes silently using the refresh
-     token embedded in the file.
+Same OAuth *app* as Gmail_Briefing.py / Google_Drive_Handbook.py
+(`Core/credentials.json`). Calendar scope is stored in its own token
+file under Data/.
+
+Non-interactive callers (`bolt briefing` / `bolt morning` /
+format_for_briefing / module imports) never open a browser.
+First-time consent: `bolt gcal-auth`.
 
 What this module does:
   - get_todays_events()     -> list of events happening today
   - get_upcoming_events(n)  -> next N events from now
   - format_for_briefing()   -> plain-English summary for the daily briefing
+  - authorize()             -> interactive browser consent once
+  - status()                -> credentials/token readiness (no browser)
 
-Run directly to test:
-    python3 -m modules.Google_Calendar
+Run directly (default: status, never opens a browser):
+    python3 -m modules.Google_Calendar [auth|status|today]
 """
 
-import os
-from pathlib import Path
+from __future__ import annotations
+
+import json
+import sys
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
 try:
     from .notifier import notify
@@ -58,11 +62,12 @@ if _LEGACY_TOKEN.exists() and not TOKEN_PATH.exists():
 # -- Auth ----------------------------------------------------------------------
 
 
-def _get_service():
+def _get_service(interactive: bool = False):
+    """Return calendar service or None. Never opens a browser unless interactive."""
     try:
+        from google.auth.transport.requests import Request
         from google.oauth2.credentials import Credentials
         from google_auth_oauthlib.flow import InstalledAppFlow
-        from google.auth.transport.requests import Request
         from googleapiclient.discovery import build
     except ImportError:
         notify(
@@ -73,11 +78,6 @@ def _get_service():
         return None
 
     if not CREDENTIALS.exists():
-        notify(
-            "credentials.json not found",
-            level="error",
-            reason=f"Expected at: {CREDENTIALS}",
-        )
         return None
 
     creds = None
@@ -87,35 +87,34 @@ def _get_service():
         try:
             creds = Credentials.from_authorized_user_file(str(TOKEN_PATH), SCOPES)
         except Exception:
-            TOKEN_PATH.unlink(missing_ok=True)
+            creds = None
+
+    if creds and creds.valid:
+        pass
+    elif creds and creds.expired and creds.refresh_token:
+        try:
+            creds.refresh(Request())
+            TOKEN_PATH.write_text(creds.to_json(), encoding="utf-8")
+            notify(
+                "Google Calendar token refreshed",
+                level="success",
+                reason="Auto-renewed silently. No action needed.",
+            )
+        except Exception as exc:
+            notify(f"Calendar token refresh failed: {exc}", level="warning")
             creds = None
 
     if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            try:
-                creds.refresh(Request())
-                notify(
-                    "Google Calendar token refreshed",
-                    level="success",
-                    reason="Auto-renewed silently. No action needed.",
-                )
-            except Exception as e:
-                notify(
-                    f"Token refresh failed: {e} -- re-authenticating", level="warning"
-                )
-                creds = None
-
-        if not creds or not creds.valid:
-            notify(
-                "Opening browser for Google Calendar auth...",
-                level="info",
-                reason="This only happens once. Sign in and click Allow.",
-            )
-            flow = InstalledAppFlow.from_client_secrets_file(str(CREDENTIALS), SCOPES)
-            creds = flow.run_local_server(port=0)
-
-        with open(TOKEN_PATH, "w") as f:
-            f.write(creds.to_json())
+        if not interactive:
+            return None
+        notify(
+            "Opening browser for Google Calendar auth...",
+            level="info",
+            reason="This only happens once. Sign in and click Allow.",
+        )
+        flow = InstalledAppFlow.from_client_secrets_file(str(CREDENTIALS), SCOPES)
+        creds = flow.run_local_server(port=0)
+        TOKEN_PATH.write_text(creds.to_json(), encoding="utf-8")
         notify(
             "Google Calendar token saved",
             level="success",
@@ -125,11 +124,69 @@ def _get_service():
     return build("calendar", "v3", credentials=creds)
 
 
+def authorize() -> int:
+    """Interactive consent for Calendar read-only. Run from a real Terminal."""
+    if not CREDENTIALS.exists():
+        print(
+            f"Calendar skipped (no Core/credentials.json). "
+            f"Expected: {CREDENTIALS}"
+        )
+        print("Place the OAuth client JSON there, then re-run `bolt gcal-auth`.")
+        return 1
+    service = _get_service(interactive=True)
+    if not service:
+        print("Calendar auth failed.")
+        return 1
+    print(f"Google Calendar authorized. Token: {TOKEN_PATH}")
+    return 0
+
+
+def status() -> dict:
+    """Return readiness info without opening a browser."""
+    creds_ok = CREDENTIALS.exists()
+    token_ok = TOKEN_PATH.exists()
+    ready = False
+    detail: dict = {
+        "credentials_path": str(CREDENTIALS),
+        "credentials_exists": creds_ok,
+        "token_path": str(TOKEN_PATH),
+        "token_exists": token_ok,
+        "ready": False,
+    }
+    if not creds_ok or not token_ok:
+        return detail
+    service = _get_service(interactive=False)
+    ready = service is not None
+    detail["ready"] = ready
+    return detail
+
+
+def _cli_status() -> int:
+    info = status()
+    print("credentials.json:", info["credentials_exists"], info["credentials_path"])
+    print("calendar_token:", info["token_exists"], info["token_path"])
+    if TOKEN_PATH.exists():
+        try:
+            data = json.loads(TOKEN_PATH.read_text(encoding="utf-8"))
+            print("token_keys:", sorted(data.keys()))
+            scopes = data.get("scopes") or data.get("scope") or []
+            if isinstance(scopes, str):
+                scopes = scopes.split()
+            print("scopes:", list(scopes))
+            print("has_refresh_token:", bool(data.get("refresh_token")))
+            print("has_access_token:", bool(data.get("token") or data.get("access_token")))
+            print("size_bytes:", TOKEN_PATH.stat().st_size)
+        except Exception as exc:
+            print("token_read_error:", exc)
+    print("ready:", info["ready"])
+    return 0
+
+
 # -- Core functions ------------------------------------------------------------
 
 
 def get_todays_events() -> list:
-    service = _get_service()
+    service = _get_service(interactive=False)
     if not service:
         return []
 
@@ -160,7 +217,7 @@ def get_todays_events() -> list:
 
 
 def get_upcoming_events(count: int = 5) -> list:
-    service = _get_service()
+    service = _get_service(interactive=False)
     if not service:
         return []
 
@@ -185,8 +242,16 @@ def get_upcoming_events(count: int = 5) -> list:
 
 
 def format_for_briefing() -> str:
+    """Briefing line. Soft-fails when unauthorized — never pretends empty day."""
     if not CREDENTIALS.exists():
-        return f"Calendar unavailable: credentials.json not found at {CREDENTIALS}."
+        return (
+            f"Calendar skipped (no Core/credentials.json). "
+            f"Place OAuth client at {CREDENTIALS}, then run `bolt gcal-auth` once."
+        )
+
+    service = _get_service(interactive=False)
+    if not service:
+        return "Calendar skipped (not authorized). Run `bolt gcal-auth` once."
 
     events = get_todays_events()
     today_str = datetime.now().strftime("%A %B %d").replace(" 0", " ")
@@ -252,15 +317,24 @@ def _fmt_time(iso_str: str) -> str:
         return iso_str
 
 
-# -- CLI test ------------------------------------------------------------------
+# -- CLI -----------------------------------------------------------------------
 
 if __name__ == "__main__":
-    print("\nGoogle_Calendar.py -- test run\n")
-    print(format_for_briefing())
-    print()
-    upcoming = get_upcoming_events(3)
-    if upcoming:
-        print("Next 3 upcoming events:")
-        for e in upcoming:
-            print(f"  {e['start']} -- {e['title']}")
-    print()
+    args = [a for a in sys.argv[1:] if a]
+    # Default status — never open a browser on bare `python -m …`
+    cmd = args[0] if args else "status"
+    if cmd in ("auth", "authorize", "login"):
+        raise SystemExit(authorize())
+    if cmd in ("status", "token-status"):
+        raise SystemExit(_cli_status())
+    if cmd in ("today", "briefing", "events"):
+        print(format_for_briefing())
+        raise SystemExit(0)
+    if cmd in ("-h", "--help", "help"):
+        print("Usage: python3 -m modules.Google_Calendar [auth|status|today]")
+        print("  auth    One-time browser consent (or: bolt gcal-auth)")
+        print("  status  Credentials/token readiness (default; no browser)")
+        print("  today   Print format_for_briefing() (no browser)")
+        raise SystemExit(0)
+    print(f"Unknown arg: {cmd}")
+    raise SystemExit(2)

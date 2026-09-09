@@ -17,7 +17,7 @@ import base64
 import hashlib
 import threading
 from pathlib import Path
-from typing import Optional, Callable
+from typing import Any, Callable, Dict, Optional
 
 try:
     from modules.notifier import notify
@@ -110,7 +110,8 @@ class StreamMonitor:
             notify(
                 "websocket-client not installed — OBS monitoring disabled",
                 level="warning",
-                reason="Install with: pip3 install websocket-client",
+                reason="Install with: uv sync (or pip install websocket-client). "
+                "Check readiness: bolt obs status. Folder-watch still works.",
             )
             return
 
@@ -405,3 +406,277 @@ class StreamMonitor:
                 return scenes.get(scene_name)
         except Exception:
             return None
+
+
+# ── Readiness / CLI (bolt obs) ────────────────────────────────────────────────
+
+
+def _load_obs_settings() -> Dict[str, Any]:
+    """Host/port/password/use_obs from config.json + env. Never raises."""
+    cfg: Dict[str, Any] = {}
+    cfg_path = Path(__file__).resolve().parent.parent / "config.json"
+    try:
+        with open(cfg_path, encoding="utf-8") as fh:
+            raw = json.load(fh)
+            if isinstance(raw, dict):
+                cfg = raw
+    except Exception:
+        cfg = {}
+
+    host = str(cfg.get("obs_host") or os.getenv("OBS_HOST") or "localhost").strip()
+    try:
+        port = int(cfg.get("obs_port") or os.getenv("OBS_PORT") or 4455)
+    except (TypeError, ValueError):
+        port = 4455
+    password = (os.getenv("OBS_PASSWORD") or "").strip()
+    use_obs = bool(cfg.get("use_obs_integration", True))
+    return {
+        "host": host,
+        "port": port,
+        "password_set": bool(password),
+        "password": password,
+        "use_obs_integration": use_obs,
+        "config_path": str(cfg_path),
+    }
+
+
+def probe_obs(
+    *,
+    host: Optional[str] = None,
+    port: Optional[int] = None,
+    password: Optional[str] = None,
+    timeout: float = 2.0,
+) -> Dict[str, Any]:
+    """
+    Short live check against OBS WebSocket 5.x.
+    Soft-fails: never hangs past timeout; never raises to callers.
+    """
+    settings = _load_obs_settings()
+    host = (host or settings["host"]).strip() or "localhost"
+    port = int(port if port is not None else settings["port"])
+    if password is None:
+        password = settings["password"]
+    password = password or ""
+
+    result: Dict[str, Any] = {
+        "ok": False,
+        "reachable": False,
+        "hello": False,
+        "authenticated": False,
+        "auth_required": None,
+        "detail": "",
+        "host": host,
+        "port": port,
+    }
+
+    if not HAS_WEBSOCKET:
+        result["detail"] = (
+            "OBS unavailable: websocket-client not installed "
+            "(uv sync / pip install websocket-client)"
+        )
+        return result
+
+    import socket
+
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            result["reachable"] = True
+    except OSError as exc:
+        result["detail"] = (
+            f"OBS unavailable: nothing listening on {host}:{port} ({exc}). "
+            "Open OBS → Tools → WebSocket Server Settings → Enable."
+        )
+        return result
+
+    # Brief WS Hello + Identify (OBS WebSocket 5.x)
+    try:
+        ws = websocket.create_connection(
+            f"ws://{host}:{port}",
+            timeout=timeout,
+        )
+    except Exception as exc:
+        result["detail"] = f"OBS unavailable: TCP open but WebSocket failed ({exc})"
+        return result
+
+    try:
+        ws.settimeout(timeout)
+        raw = ws.recv()
+        msg = json.loads(raw)
+        if msg.get("op") != 0:
+            result["detail"] = f"OBS unavailable: unexpected Hello op={msg.get('op')}"
+            return result
+        result["hello"] = True
+        data = msg.get("d") or {}
+        auth = data.get("authentication")
+        result["auth_required"] = bool(auth)
+
+        auth_str = ""
+        if auth:
+            if not password:
+                result["detail"] = (
+                    "OBS unavailable: WebSocket auth required — set OBS_PASSWORD in .env "
+                    "(same password as OBS WebSocket Server Settings)"
+                )
+                return result
+            secret = base64.b64encode(
+                hashlib.sha256((password + auth["salt"]).encode()).digest()
+            ).decode()
+            auth_str = base64.b64encode(
+                hashlib.sha256((secret + auth["challenge"]).encode()).digest()
+            ).decode()
+
+        identify = {
+            "op": 1,
+            "d": {
+                "rpcVersion": 1,
+                "eventSubscriptions": 0,  # status probe — no event flood
+            },
+        }
+        if auth_str:
+            identify["d"]["authentication"] = auth_str
+        ws.send(json.dumps(identify))
+        raw2 = ws.recv()
+        msg2 = json.loads(raw2)
+        op2 = msg2.get("op")
+        if op2 == 2:
+            result["authenticated"] = True
+            result["ok"] = True
+            result["detail"] = f"connected to OBS WebSocket at {host}:{port}"
+        else:
+            # op 3 = Identify error
+            err = (msg2.get("d") or {}).get("message") or msg2
+            result["detail"] = f"OBS unavailable: Identify failed (op={op2}): {err}"
+    except Exception as exc:
+        result["detail"] = f"OBS unavailable: probe interrupted ({exc})"
+    finally:
+        try:
+            ws.close()
+        except Exception:
+            pass
+    return result
+
+
+def status(*, probe: bool = False) -> Dict[str, Any]:
+    """
+    OBS WebSocket readiness. Never raises.
+    ready = client installed + use_obs_integration (folder-watch still works without OBS).
+    Live connection only reported when probe=True.
+    """
+    settings = _load_obs_settings()
+    info: Dict[str, Any] = {
+        "ready": bool(HAS_WEBSOCKET and settings["use_obs_integration"]),
+        "has_websocket_client": bool(HAS_WEBSOCKET),
+        "use_obs_integration": settings["use_obs_integration"],
+        "host": settings["host"],
+        "port": settings["port"],
+        "password_set": settings["password_set"],
+        "hint": "",
+    }
+
+    if not HAS_WEBSOCKET:
+        info["ready"] = False
+        info["hint"] = (
+            "Install websocket-client (uv sync). Folder-watch still works without OBS."
+        )
+    elif not settings["use_obs_integration"]:
+        info["ready"] = False
+        info["hint"] = (
+            "use_obs_integration is false in Core/config.json — "
+            "folder-watch only. Set true + OBS_PASSWORD to enable live OBS."
+        )
+    elif not settings["password_set"]:
+        info["hint"] = (
+            "OBS_PASSWORD not set — probe may fail if OBS requires auth. "
+            "Folder-watch still works. Try: bolt obs status --probe"
+        )
+    else:
+        info["hint"] = (
+            "Client configured. Live connect needs OBS open with WebSocket enabled. "
+            "Try: bolt obs status --probe"
+        )
+
+    if probe:
+        p = probe_obs(
+            host=settings["host"],
+            port=settings["port"],
+            password=settings["password"],
+        )
+        info["probe_ok"] = bool(p.get("ok"))
+        info["probe_reachable"] = bool(p.get("reachable"))
+        info["probe_authenticated"] = bool(p.get("authenticated"))
+        info["probe_auth_required"] = p.get("auth_required")
+        info["probe_detail"] = p.get("detail") or ""
+        if p.get("ok"):
+            info["hint"] = p["detail"]
+        elif info["ready"]:
+            # Soft-fail: still "ready" as a surface; live OBS just unavailable
+            info["hint"] = p.get("detail") or info["hint"]
+
+    return info
+
+
+def _cli_status(*, as_json: bool = False, probe: bool = False) -> int:
+    info = status(probe=probe)
+    if as_json:
+        print(json.dumps(info, indent=2))
+        return 0
+    print("ready:", info["ready"])
+    print("has_websocket_client:", info["has_websocket_client"])
+    print("use_obs_integration:", info["use_obs_integration"])
+    print(f"endpoint: {info['host']}:{info['port']}")
+    print("password_set:", info["password_set"])
+    if info.get("hint"):
+        print("hint:", info["hint"])
+    if probe:
+        print("probe_ok:", info.get("probe_ok"))
+        print("probe_reachable:", info.get("probe_reachable"))
+        print("probe_authenticated:", info.get("probe_authenticated"))
+        print("probe_auth_required:", info.get("probe_auth_required"))
+        print("probe_detail:", info.get("probe_detail"))
+    # Soft-fail exit: status always 0; probe failure is informational
+    return 0
+
+
+def _cli_help() -> int:
+    print("Usage: bolt obs [status]")
+    print("  status [--json] [--probe]  OBS WebSocket readiness (default)")
+    print()
+    print("  bolt obs")
+    print("  bolt obs status")
+    print("  bolt obs status --probe")
+    print("  bolt obs status --json --probe")
+    print()
+    print("Soft-fail: missing OBS / password / websocket-client never hangs.")
+    print("Folder-watch (bolt launch / bolt recordings) still works without OBS.")
+    print("Config: Core/config.json use_obs_integration, obs_host, obs_port + OBS_PASSWORD.")
+    return 0
+
+
+def main(argv: Optional[list] = None) -> int:
+    import sys
+
+    args = list(argv) if argv is not None else sys.argv[1:]
+    if not args:
+        return _cli_status()
+
+    cmd = args[0]
+    if cmd in ("-h", "--help", "help"):
+        return _cli_help()
+
+    if cmd in ("status", "ready", "check") or cmd in ("--json", "--probe"):
+        rest = args[1:] if cmd in ("status", "ready", "check") else args
+        as_json = "--json" in rest
+        probe = "--probe" in rest
+        unknown = [a for a in rest if a not in ("--json", "--probe")]
+        if unknown:
+            print(f"Unknown status flag(s): {' '.join(unknown)}", file=sys.stderr)
+            return 2
+        return _cli_status(as_json=as_json, probe=probe)
+
+    print(f"Unknown arg: {cmd}", file=sys.stderr)
+    _cli_help()
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
