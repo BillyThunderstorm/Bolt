@@ -23,7 +23,7 @@ Bolt does **not** use Docker, Testcontainers, or Dev Containers. Those were left
 | 🔵 Progress | `Data/content/manager-progress.md` |
 | 🔵 Business | `Data/business/` |
 | 🟢 Commands | `Core/modules/BOLT_COMMANDS.md` |
-| 🟢 Status | `Docs/PROJECT_STATUS.md` |
+| 🟢 Status | `Docs/BOLT_NOW.md` (living) · stubs/archive under `Docs/archive/status/` |
 
 ## Mission
 
@@ -52,6 +52,10 @@ Clip everything from Twitch, but do not treat every saved moment as post-worthy.
 - a visible before/after, setup, test, result, or verdict
 - a moment that fits the learning-in-public story
 
+## Communication
+
+William often mistypes commands. Bolt hears through typos toward known commands and intents (`queue`, `briefing`, `morning`, `day`) and says so (`Taking that as …` / `running 'queue' (you typed 'queu')`). Post, approve, hold, and send stay exact-match only. `bolt word` is the explicit lookup; conversation should not wait for it.
+
 ## Voice Rules
 
 Bolt should avoid hype-machine creator language. The preferred voice is direct, honest, specific, and grounded in real experience.
@@ -75,6 +79,7 @@ Avoid generic excitement, fake certainty, and empty motivational language.
 | `modules/Memory_Index.py` | Local searchable memory index |
 | `modules/Post_Queue.py` | Queue state and posting readiness |
 | `modules/Title_Generator.py` | Local/template title generation with optional AI support |
+| `modules/Word_Lookup.py` | Dictionary / spellcheck / thesaurus (`bolt word`) |
 | `modules/Multi_Publisher.py` | Manual posting packets and platform plans |
 | `data/performance_outcomes.jsonl` | Reusable lessons from posted content |
 | `data/memory_index.json` | Built retrieval index; refresh after memory changes |
@@ -117,6 +122,8 @@ Use `memory/content/` for broad creator growth:
 The best memory entry is specific: date, platform, content idea, result, and lesson.
 
 ## Recent Notes
+- [2026-09-10] `bolt vods` sample download was listing Helix VODs then failing: it spawned PATH `ffmpeg` against the unsigned usher HLS URL (403 / dyld crash on missing libx265). PATH ffmpeg can exist and still not run. Fix: yt-dlp + `FFmpeg_Bin.working_ffmpeg()` (ffmpeg-full), `bolt vods list` for dry-run. Public VODs do not need `TWITCH_USER_TOKEN`. Check: `bolt vods status`.
+
 - [2026-09-09] This week is: pop culture
 - [2026-09-03] OBS Thunderstone now has Aitum Vertical at 1080×1920. Horizontal scenes are linked (Gaming → Vertical Gaming, plus Starting Soon / Chatting / BRB / Offline). Twitch stays 16:9. Vertical record/backtrack is the 9:16 path. Notes: `Docs/guides/OBS_VERTICAL.md`, `App/overlay/theme/README.md`.
 - [2026-09-01] Item 12 shipped: conversation / briefing comments write week + mission via Intent_Router (same functions as `bolt week` / `bolt mission update`). Say “I’m ready to continue”, “this shipped: …”, “hours: 6, budget 40”. This week is **tech** (not paused). Amazon pause is last week only.

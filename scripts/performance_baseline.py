@@ -26,8 +26,8 @@ from _paths import REPO_ROOT, DATA_DIR, CLIPS_DIR, LOGS_DIR, CONFIG_FILE  # noqa
 PROJECT_ROOT = REPO_ROOT
 ROOT = REPO_ROOT
 
-# Configuration
-RESULTS_DIR = Path("logs/performance")
+# Configuration (repo-rooted — never CWD-relative after reorg)
+RESULTS_DIR = REPO_ROOT / "logs" / "performance"
 RESULTS_FILE = RESULTS_DIR / f"baseline_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
 
@@ -132,10 +132,14 @@ def check_system_resources() -> dict:
 
 def run_baseline() -> dict:
     """Run full performance baseline."""
-    # Change to project root directory
-    project_root = Path(__file__).parent.parent
+    # Repo root + Core on path (post-reorg layout)
+    project_root = REPO_ROOT
     os.chdir(project_root)
-    sys.path.insert(0, str(project_root))
+    core_dir = project_root / "Core"
+    if str(core_dir) not in sys.path:
+        sys.path.insert(0, str(core_dir))
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
 
     print("=" * 60)
     print("Bolt Performance Baseline")
@@ -172,18 +176,19 @@ def run_baseline() -> dict:
         else:
             print(f"{result['import_time_sec']:.4f}s")
 
-    # Scripts to test
+    # Scripts to test (Core/ after Jul 2026 reorg; legacy root names skipped)
     scripts = [
-        "launch.py",
-        "bot.py",
+        "Core/launch.py",
+        "Core/bot.py",
     ]
 
     print()
     print("Testing script startup times...")
     for script in scripts:
-        if Path(script).exists():
+        path = Path(script)
+        if path.exists():
             print(f"  Checking {script}...", end=" ")
-            result = measure_startup_time(script)
+            result = measure_startup_time(str(path))
             results["script_startup"].append(result)
             if result["error"]:
                 print(f"ERROR: {result['error']}")
@@ -191,6 +196,7 @@ def run_baseline() -> dict:
                 print(f"{result['syntax_check_sec']:.4f}s")
         else:
             print(f"  Skipping {script} (not found)")
+            results["notes"].append(f"missing {script}")
 
     # Summary
     print()

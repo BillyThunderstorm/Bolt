@@ -1,6 +1,6 @@
 # Bolt Creator OS — Google Drive handbook (pointer)
 
-This is a **local pointer**, not a second handbook. The live journal, briefing, todo, and how-to live in Google Drive so William and Bolt share one copy.
+This is a **local pointer**, not a second handbook. Drive holds the shared journal, daily logs, and how-to handbook. **Status / plan / future** lives locally in `Docs/BOLT_NOW.md`.
 
 Canonical IDs are also in `Core/config.json` → `google_drive_handbook`. Do not put Google OAuth secrets in the repo.
 
@@ -11,6 +11,7 @@ Canonical IDs are also in `Core/config.json` → `google_drive_handbook`. Do not
 | Root folder **Bolt Creator OS** | https://drive.google.com/drive/folders/1GZ93zTznYK97Nv9Do5bidLOd9Im1J1XK |
 | START HERE | https://docs.google.com/document/d/1u3dRveLkOBsfSpuBXKeFbfj7tVH3EhjZJr-aic5bxjw/edit |
 | How-to handbook (native Google Doc, in `00_Brand`) | https://docs.google.com/document/d/12idgxLR-OzcOyCC6mDQwqmOnZQDuMIZIJCwwMnm_krg/edit |
+| **Bolt NOW** (status / short-term plan / future) | Local only: `Docs/BOLT_NOW.md` (not Drive) |
 | Shared Journal (in `02_Daily_Operations`) | https://docs.google.com/document/d/1paZNFGea-RBAwQ5YMxpuXN8OBRH7R33RAkakYZ23Tfw/edit |
 | 2026-08-31 Daily Log | https://docs.google.com/document/d/1RwUyRhjPGjpugrHLkUvyQAog09YMadiMebeZCn0dlLQ/edit |
 | Original Word file (archive, in `00_Brand`) | https://drive.google.com/file/d/138abBq9A-zWY0MZCBeyXxRCuwtsjxjeK/view |

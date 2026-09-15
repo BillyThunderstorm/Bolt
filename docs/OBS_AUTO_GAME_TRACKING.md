@@ -16,9 +16,10 @@ When you switch scenes in OBS, Bolt automatically updates `config.json` with the
 
 | File | Purpose |
 |------|---------|
-| `configs/scene_game_mapping.json` | Maps OBS scene names → game titles |
-| `modules/Stream_Monitor.py` | Updated with scene change detection |
-| `scripts/update_game_from_obs.py` | Standalone runner for game tracking |
+| `Data/configs/scene_game_mapping.json` | Maps OBS scene names → game titles |
+| `Core/modules/Stream_Monitor.py` | Scene change detection + READY `bolt obs` |
+| `scripts/update_game_from_obs.py` | Engine: scene→`Core/config.json` game update |
+| `Core/modules/OBS_Game_Tracker.py` | Soft-fail CLI (`bolt obs-game`) — PARTIAL |
 
 ---
 
@@ -26,7 +27,7 @@ When you switch scenes in OBS, Bolt automatically updates `config.json` with the
 
 ### 1. Edit the Scene Mapping
 
-Open `configs/scene_game_mapping.json` and add your OBS scenes:
+Open `Data/configs/scene_game_mapping.json` and add your OBS scenes:
 
 ```json
 {
@@ -45,12 +46,24 @@ Open `configs/scene_game_mapping.json` and add your OBS scenes:
 
 ### 2. Start the Game Tracker
 
-**Option A: Run standalone**
+**Preferred: soft-fail CLI (PARTIAL)**
+```bash
+bolt obs-game status            # readiness (engine + mapping + config)
+bolt obs-game status --json     # machine-readable
+bolt obs-game status --probe    # short OBS WebSocket probe (soft-fail, no hang)
+bolt obs-game list              # checklist rows
+bolt obs-game run --once        # dry readiness (no long connect)
+bolt obs-game run               # foreground loop (Ctrl+C stops)
+bolt obs-game run --background  # spawn via scripts/start_obs_game_tracker.py
+```
+Soft-fail prefix: `Game tracker unavailable:`. Distinct from READY `bolt obs` (WebSocket status).
+
+**Option A: Run standalone engine**
 ```bash
 python3 scripts/update_game_from_obs.py
 ```
 
-**Option B: Add to launch.py** (recommended)
+**Option B: Add to launch.py** (optional)
 
 Add this to `launch.py` after OBS connects:
 ```python
@@ -92,7 +105,7 @@ If you switch to a scene that's **not** in the mapping:
 
 ```
 ℹ Scene changed to 'New Game' (no game mapping)
-→ Add 'New Game' to configs/scene_game_mapping.json to enable auto-tracking.
+→ Add 'New Game' to Data/configs/scene_game_mapping.json to enable auto-tracking.
 ```
 
 Bolt keeps the current game setting — it doesn't guess.
@@ -125,7 +138,7 @@ monitor = StreamMonitor(
 |-------|-----|
 | Scene changes not detected | Check OBS WebSocket is enabled (Tools → WebSocket Server Settings) |
 | Wrong game being set | Verify scene name matches exactly (check for spaces, capitalization) |
-| Config not updating | Check file permissions on config.json |
+| Config not updating | Check file permissions on Core/config.json |
 | No notifications | Ensure OBS_PASSWORD is set in .env |
 
 ---

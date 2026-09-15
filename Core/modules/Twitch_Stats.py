@@ -64,10 +64,22 @@ def find_yt_dlp() -> Optional[str]:
 
 
 def find_ffmpeg() -> Optional[str]:
-    """Resolve ffmpeg on PATH (never raises)."""
-    import shutil
+    """
+    Resolve a working ffmpeg binary (never raises).
 
-    return shutil.which("ffmpeg")
+    PATH's ``ffmpeg`` can exist and still fail to launch (broken Homebrew
+    dylib). Prefer ``FFmpeg_Bin`` (ffmpeg-full, then a binary that answers
+    ``-version``). Returns None when nothing actually starts.
+    """
+    try:
+        from modules.FFmpeg_Bin import working_ffmpeg
+
+        return working_ffmpeg()
+    except Exception:
+        import shutil
+
+        which = shutil.which("ffmpeg")
+        return which
 
 
 def _env_creds() -> Dict[str, str]:
@@ -132,8 +144,10 @@ def status(*, probe: bool = False, channel: Optional[str] = None) -> Dict[str, A
         )
     elif not ff:
         info["hint"] = (
-            "Creds + yt-dlp ready; ffmpeg not on PATH "
-            "(needed for samples / merge). Try: bolt vods status --probe"
+            "Creds + yt-dlp ready; no working ffmpeg "
+            "(PATH ffmpeg is often a broken Homebrew dylib). "
+            "Need ffmpeg-full or BOLT_FFMPEG for samples. "
+            "Try: brew install ffmpeg-full   or   bolt vods status --probe"
         )
     else:
         info["hint"] = (

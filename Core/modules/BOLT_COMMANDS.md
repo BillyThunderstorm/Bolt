@@ -61,6 +61,14 @@ Quick health check:
 
 ```bash
 bolt budget                      # mode, soft cap, alert channels
+bolt alerts                      # Mac/Voice/email/iMessage readiness (PARTIAL)
+bolt checklist                   # Pre-stream voice checklist readiness (PARTIAL)
+bolt reminders                   # Apple Reminders.app delivery readiness (PARTIAL)
+bolt photo-ocr                   # Photo/handwriting OCR readiness (PARTIAL)
+bolt word                        # Dictionary / spellcheck / thesaurus (READY)
+bolt compress                    # HandBrake clip compress readiness (PARTIAL)
+bolt performance                 # Local import/startup baseline readiness (PARTIAL)
+bolt filter-backlog               # Clip backlog score filter readiness (PARTIAL)
 PYTHONPATH=Core python3 -m modules.LLM_Handler
 bolt gemini status               # optional Gemini REST client (soft-fail; Nexus opt-in separate)
 bolt obs status                 # OBS WebSocket readiness (soft-fail; folder-watch still works)
@@ -85,6 +93,7 @@ bolt help                         # Show the CLI command summary
 bolt version                      # Show the repository and Python in use
 bolt verify                       # Check required files, folders, config, and environment
 bolt doctor [--json]              # Live vs mocked vs stale path / missing key
+bolt health [status|list|run]     # Lightweight health smoke (PARTIAL; soft-fail; prefer doctor)
 bolt merge-py [status|run] [--dry-run|--list] [-o PATH]
                                       # Concatenate local .py → Data/merged_bot.py
                                       # aliases: merge_py, merge-sources; soft-fail
@@ -132,6 +141,20 @@ bolt checkup [--open] [--json]        # Refresh Data/Bolt_data.js; --open → Ap
                                       # (aliases: dashboard, checkup-dashboard)
 bolt menubar                          # macOS menu bar (App/app.py via rumps)
 bolt mac-app                          # local dist/Bolt.app assemble (PARTIAL; not notarized)
+bolt mac-auto                         # launchd/cron/Shortcuts status (PARTIAL; William-specific)
+bolt icloud                           # iCloud Drive multi-Mac sync status (PARTIAL; William-specific)
+bolt game-config                      # Per-game sensitivity profiles (PARTIAL; soft-fail)
+bolt error-recovery                  # Pipeline retry/quarantine (PARTIAL; soft-fail)
+bolt memsearch                       # Phase 4 semantic memory search (PARTIAL; soft-fail)
+bolt alerts                            # Mac/Voice/email/iMessage alerts (PARTIAL; not Discord)
+bolt checklist                          # Pre-stream voice checklist (PARTIAL; mic/STT gated)
+bolt reminders                          # Apple Reminders.app delivery (PARTIAL; Darwin/TCC gated)
+bolt photo-ocr                          # Photo/handwriting OCR → editable .txt (PARTIAL)
+                                      # Soft-fail; distinct from bolt ocr (video HUD)
+bolt compress                          # HandBrake clip compress (PARTIAL)
+bolt performance                       # Local import/startup baseline (PARTIAL)
+                                      # Soft-fail; logs/performance/ via performance_baseline.py
+                                      # Soft-fail; media/clips via compress_videos.sh
                                       # (aliases: menu-bar, menu_bar). Needs: uv sync --extra menubar
 bolt ocr <clip> [--verbose]           # On-screen game-stat OCR (Video_Intelligence)
                                       # Feeds titles in bot.py Step C; aliases: video-ocr, extract-stats
@@ -155,6 +178,12 @@ bolt store feature-next           # Next storefront feature candidate
 bolt search "question" [--raw|--long|--json] [--limit N]
                                       # Live DuckDuckGo web search (+ optional LLM summary)
                                       # Aliases: web-search, websearch. Powers !Bolt chat search.
+bolt word [status|define|spell|syn|ant|check] [word]
+                                      # Dictionary / spellcheck / thesaurus (READY)
+                                      # Local spell: /usr/share/dict/words + Data/word_extras.txt
+                                      # Define/syn: free no-key APIs (soft-fail)
+                                      # Aliases: dict, dictionary, define, spell, spellcheck, thesaurus
+                                      # Distinct from bolt search (DuckDuckGo)
 bolt overlay [--port 8766]            # OBS overlay server (Stream Deck kill/win + cam frame)
                                       # Thunderstone also has Aitum Vertical 1080x1920; see Docs/guides/OBS_VERTICAL.md
 
@@ -162,6 +191,13 @@ bolt obs [status] [--json] [--probe]
                                       # OBS WebSocket readiness (Stream_Monitor)
                                       # Soft-fail when OBS closed / no password / no websocket-client
                                       # Aliases: obs-status, stream-monitor
+bolt obs-game [status|list|run] [--json] [--probe]
+                                      # OBS scene→Core/config.json game auto-update (PARTIAL)
+                                      # Soft-fail prefix: Game tracker unavailable:
+                                      # status (default) / list / run [--once|--background]
+                                      # Distinct from READY bolt obs (WebSocket status/monitor)
+                                      # Aliases: obs_game, game-tracker, game_tracker,
+                                      #   obs-game-tracker, obs_game_tracker, obs-game-status
 bolt streamlabs [status] [--json] [--probe]
                                       # Streamlabs Socket API readiness (donations/raids/subs)
                                       # Soft-fail without STREAMLABS_SOCKET_TOKEN / python-socketio
@@ -177,19 +213,25 @@ bolt brain [status|test] [--json]
                                       # Aliases: brain-status, brain_status, brain-controller
 bolt launch                       # Start live mode (folder watch + optional OBS)
 bolt launch --no-checklist        # Live mode without the pre-stream voice checklist
+bolt checklist status             # Pre-stream checklist readiness (PARTIAL; soft-fail)
+bolt reminders status             # Apple Reminders readiness (PARTIAL; soft-fail)
+bolt photo-ocr status             # Photo/handwriting OCR readiness (PARTIAL; soft-fail)
+bolt compress status               # HandBrake clip compress readiness (PARTIAL; soft-fail)
+bolt performance status          # Local import/startup baseline readiness (PARTIAL; soft-fail)
 bolt status                       # Check the decision engine, vector DB, and Nexus
 bolt intelligence                 # Alias for `status`
 bolt budget                       # xAI spend / soft cap / alert channel status
 bolt api-usage                    # Alias for budget
 bolt budget --test-alert          # Test Mac + email + iMessage alerts
+bolt alerts status               # Preferred alert channels (PARTIAL; soft-fail)
+bolt alerts test                 # Soft-fail fan-out test (same module)
 bolt storage status               # media/ sizes + disk free + sites/cron readiness
 bolt storage monitor|rotate|optimize
 bolt sites status                 # scripts + crontab advisory (no crontab install)
 bolt test                         # Run the full test suite
 bolt test <unittest-arguments>    # Run selected unittest targets
-bolt layout                       # Report misplaced root files; never moves them
-bolt layout --quiet               # Print only the layout summary
-bolt layout --json                # Return the layout report as JSON
+bolt layout status|list|run     # PARTIAL soft-fail Layout unavailable:
+bolt migrate-layout status|list|run  # PARTIAL soft-fail Migrate unavailable:
 ```
 
 | Command | What it does |
@@ -197,6 +239,7 @@ bolt layout --json                # Return the layout report as JSON
 | `bolt verify` | Files, folders, config keys, `.env`, module imports |
 | `bolt doctor` | Live vs mocked vs stale path / missing key (alias: `audit`) |
 | `bolt layout` | Misplaced files at the repo root only |
+| `bolt migrate-layout` | Plan/apply layout moves (`_layout_rules`); dry-run default |
 
 ## Direction-finding researcher
 
@@ -734,7 +777,8 @@ bolt titles ab "your title" [--game "Hades 2"] [--json]
 | `bolt titles train --dry-run` | Show category averages without writing |
 | `bolt titles ab "…"` | Propose A/B title variants (optionally keep base as A) |
 
-Aliases: `title-train`, `train-titles`. After posting, `bolt log_perf` / `bolt stats` then `bolt titles train`.
+Aliases: `title-train`, `train-titles`. After posting, `bolt watch status               # Folder watch readiness (PARTIAL)
+bolt log-perf` / `bolt stats` then `bolt titles train`.
 
 
 ## Recordings, clips, and highlights
@@ -755,9 +799,17 @@ bolt auto_clip_twitch --vod <vod-id>
 bolt auto_clip_twitch --twitch-clips
 bolt highlights [--count 10] [--game "Game Name"] [--list] [--output /path/to/reel.mp4]
 bolt thumbnails [directory ...] [--strategy smart|first|middle] [--width 1280] [--force] [--dry-run] [--save-state]
-bolt clip_dedupe [--dry-run] [--scan <directory>] [--check <file>] [--clear]
-bolt filter_backlog
-bolt watch
+bolt clip-dedupe                            # status (PARTIAL soft-fail; SHA256)
+bolt clip-dedupe run [--dry-run] [--scan DIR] [--check FILE]
+bolt filter-backlog                         # status (PARTIAL soft-fail)
+bolt make-highlights                       # status (PARTIAL soft-fail; former SHELL)
+bolt make-highlights run [--list][--count N]
+bolt reprocess                             # status (PARTIAL soft-fail; former SHELL)
+bolt reprocess run [--dry-run]
+bolt health                                # status (PARTIAL soft-fail; former SHELL)
+bolt health run [--dry-run]
+bolt watch                              # status (PARTIAL soft-fail)
+bolt watch run [--once] [--folder PATH]  # start loop (prefer bolt launch)
 ```
 
 `recordings` defaults to **`latest`** (not `all`) and gaming content. Same-stem
@@ -806,11 +858,16 @@ floor, min gap, candidate cap). Tune in `Core/config.json` under `highlight` and
 | `bolt auto_clip_twitch --list` | Show which VODs are unprocessed, without running anything |
 | `bolt auto_clip_twitch --vod <id>` | Process a single named VOD by ID |
 | `bolt auto_clip_twitch --twitch-clips` | Pull Twitch's own Clip API highlights for the latest VOD |
-| `bolt highlights` | Compile the top clips into a Twitch highlight reel |
+| `bolt highlights` | Compile the top clips into a Twitch highlight reel (READY thin SCRIPT_MAP → `make_twitch_highlights.py`; soft-fail status is `bolt make-highlights`) |
 | `bolt thumbnails [dir…]` | Generate JPG thumbnails for clips in the given directories |
-| `bolt clip_dedupe` | Run duplicate detection across the clips folder (writes to `Data/seen_clips.json`) |
-| `bolt filter_backlog` | Move low-scoring clips to `media/clips/_low_score/` |
-| `bolt watch` | Watch the recordings folder for new files and trigger the pipeline |
+| `bolt clip-dedupe` | SHA256 media hash scan (**PARTIAL**; soft-fail `Hash dedupe unavailable:`) — `status` / `list` / `run [--dry-run]`; writes `Data/media_hash_db.json`; aliases `clip_dedupe`, `hash-dedupe`, `dedupe-status`, `sha-dedupe`; **distinct from** READY pipeline `Clip_Deduplicator` (`Data/seen_clips.json`) |
+| `bolt filter-backlog` | Clip backlog score filter (**PARTIAL**; soft-fail `Backlog unavailable:`) — `status` / `list` / `run [--dry-run]`; aliases `filter_backlog`, `backlog-filter` |
+| `bolt make-highlights` | Local highlight reel stitch (**PARTIAL**; soft-fail `Highlights unavailable:`) — `status` / `list` / `run [--list][--count N]`; aliases `make_highlights`, `stitch-highlights`; engine `make_twitch_highlights.py` (READY thin compile stays `bolt highlights`) |
+| `bolt reprocess` | Vertical rebuild + multi-platform queue (**PARTIAL**; soft-fail `Reprocess unavailable:`) — `status` / `list` / `run [--dry-run]`; aliases `reprocess_clips`, `reprocess-clips`, `reprocess-status`, `vertical-reprocess`, `tiktok-reprocess`; engine `reprocess_clips.py` (no TikTok auto-upload; distinct from READY `bolt recordings` / `enhance` / `multi`) |
+| `bolt health` | Lightweight post-reorg health smoke (**PARTIAL**; soft-fail `Health check unavailable:`) — `status` / `list` / `run [--dry-run]`; aliases `health-check`, `health_check`, `health-status`, `system-health`; engine `health_check.py` (prefer READY `bolt doctor` / `bolt verify`) |
+| `bolt watch` / `status` | Folder watch readiness (PARTIAL; soft-fail `Watch unavailable:`) |
+| `bolt watch list` | Checklist + pending recordings (`Data/processed_recordings.json`) |
+| `bolt watch run` | Start folder watch loop (prefer `bolt launch` for live mode) |
 
 ## Streamlabs Socket API
 
@@ -883,15 +940,25 @@ bolt vods status --probe          # also ping Helix (informational if ready)
 
 Needs `TWITCH_CLIENT_ID` + `TWITCH_CLIENT_SECRET` + `TWITCH_CHANNEL` in `.env`.
 `ready` = those three present. yt-dlp is resolved from the Bolt venv first, then PATH
-(`brew install yt-dlp` is fine). Missing creds / channel print `VOD unavailable: …`
-and exit 1 on download/list (no traceback). Status always exits 0.
+(`brew install yt-dlp` is fine). ffmpeg must **actually start** — Homebrew's PATH
+`ffmpeg` often exists and then crashes on a missing dylib; Bolt uses `ffmpeg-full`
+via `FFmpeg_Bin` (`BOLT_FFMPEG` override). Missing creds / channel / tools print
+`VOD unavailable: …` and exit 1 on download (no traceback). Status always exits 0.
 
-Download / sample (existing flags still work when not asking for status):
+Do not type the docs' `<channel>` brackets — zsh treats `<` as a redirect.
+
+Download / sample. Public archives go through yt-dlp (signed playlist). A Twitch
+user token is **not** required for those. Raw ffmpeg HLS is a fallback and often
+403s. `--user-token` is only for subscriber-only VODs / that fallback.
 
 ```bash
-bolt vods [--channel <channel>] [--type archive|highlight|upload] [--limit 10] [--sample-minutes 5]
-          [--output-dir <directory>] [--metadata-file <file>] [--dry-run] [--skip-existing]
-          [--user-token <token>]
+bolt vods status
+bolt vods list --limit 10
+bolt vods --dry-run --limit 10
+bolt vods download --limit 3 --sample-minutes 5
+bolt vods --channel itssimplybilly --type archive --limit 10 --sample-minutes 5
+          [--output-dir directory] [--metadata-file file] [--skip-existing]
+          [--user-token token]
 bolt twitch_token
 bolt twitch_bot_token
 bolt tiktok_token [--client-key <key>] [--client-secret <secret>] [--redirect-uri <uri>]
@@ -909,12 +976,130 @@ Token commands are interactive and may open a browser or prompt for credentials.
 
 | Command | What it does |
 |---------|--------------|
-| `bolt vods status` | Creds / channel / yt-dlp / ffmpeg readiness (`--json` / `--probe`) |
-| `bolt vods` | Download Twitch VOD samples for a channel with type/limit/sample filters |
+| `bolt vods status` | Creds / channel / yt-dlp / **working** ffmpeg readiness (`--json` / `--probe`) |
+| `bolt vods list` | List recent VODs and planned sample windows (no download). Alias: `--dry-run` |
+| `bolt vods` / `bolt vods download` | Download VOD samples via yt-dlp + ffmpeg-full (not raw HLS) |
 | `bolt twitch_token` | Get an OAuth token for the Twitch chat account (interactive) |
 | `bolt twitch_bot_token` | Get an OAuth token for the Bolt bot account (interactive) |
 | `bolt tiktok_token` | Get a TikTok OAuth token; include `video.list` scope for stats sync |
 | `bolt youtube_token` | Get a Google/YouTube OAuth token (`youtube.readonly`) for stats sync |
+
+
+
+
+
+## ICS calendar (`bolt calendar`) — PARTIAL
+
+Local RFC 5545 feeds under `Data/calendar/` via soft-fail CLI. Prefix: `Calendar unavailable:`.
+
+| Command | Purpose |
+|---------|---------|
+| `bolt calendar status` | Readiness (`--json` / `--probe`) |
+| `bolt calendar list` | Engine + output dir + feed files |
+| `bolt calendar run` | Write four `.ics` feeds |
+| `bolt calendar run --dry-run` | Plan feeds without write |
+| `bolt calendar run --days 14` | Limit scheduled_posts lookahead |
+
+Aliases: `ics`, `ics-calendar`, `ics_calendar`, `generate-calendar`, `generate_calendar`, `calendar-status`.
+
+**Distinct from** READY Google Calendar OAuth (`bolt gcal` / `bolt gcal-auth`). Stay PARTIAL (subscribe/host optional). Thumbnails stay READY via `bolt thumbnails`.
+
+Former thin SCRIPT_MAP: `bolt calendar` → `scripts/generate_calendar.py`.
+
+## Refresh memory (`bolt refresh-memory`) — PARTIAL
+
+Rebuild `Data/memory_index.json` via soft-fail CLI. Prefix: `Memory refresh unavailable:`.
+
+| Command | Purpose |
+|---------|---------|
+| `bolt refresh-memory status` | Readiness (`--json` / `--probe`) |
+| `bolt refresh-memory list` | Engine + sources + index meta |
+| `bolt refresh-memory run` | Rebuild index |
+| `bolt refresh-memory run --dry-run` | Count entries without write |
+
+Aliases: `refresh_memory`, `memory-refresh`, `memory_refresh`, `refresh-index`, `refresh_index`, `refresh-memory-status`.
+
+**Distinct from** READY in-process `Memory_Index.retrieve_memory` used by briefings and **PARTIAL `bolt memsearch`** (semantic retrieve CLI). Stay PARTIAL (data-source gated).
+
+Former thin SCRIPT_MAP: `bolt refresh_memory` → `scripts/refresh_memory_index.py`.
+
+## Long-term memory (`bolt memory`) — PARTIAL
+
+Soft-fail CLI around `Core/modules/Bolt_Memory.py` (Phase 4 long-term memory store).
+Prefix: `Bolt memory unavailable:`. **PARTIAL** — LLM-gated `recall`; Phase 4 incomplete.
+**Distinct from** READY in-process `Memory_Index.retrieve_memory` (briefings),
+**PARTIAL `bolt refresh-memory`** (index rebuild → `Data/memory_index.json`), and
+**PARTIAL `bolt memsearch`** (semantic retrieve CLI over the same index).
+
+```bash
+bolt memory                         # status (default; safe)
+bolt memory status [--json] [--probe]
+bolt memory list [--json]
+bolt memory remember "fact" [--section "Recent Notes"]
+bolt memory remember --fact "..." 
+bolt memory recall "question"
+bolt memory load [--json]
+bolt memory-status                  # alias → status
+```
+
+| Command | Purpose |
+|---------|---------|
+| `bolt memory` / `status` | Readiness: Data/MEMORY.md + people/projects/context/glossary/memory; openai pkg; OPENAI_API_KEY (redacted); Memory_Index import |
+| `bolt memory list` | Rows for each memory path + soft-fail note |
+| `bolt memory remember` | Append fact to MEMORY.md (local write; soft-fail on IO error) |
+| `bolt memory recall` | LLM recall via OpenAI (soft-fail if openai/key/API missing) |
+| `bolt memory load` | Dump `load_all_memory` summary (local; no LLM) |
+
+Aliases: `bolt-memory`, `bolt_memory`, `memory-status`, `memory_status`, `long-term-memory`, `ltm`.
+
+Stay PARTIAL (Phase 4 incomplete). Engines already used by Intent_Router / Week_Card / Brain_Controller / Peak_Hour.
+
+## Folder watch (`bolt watch`) — PARTIAL
+
+Soft-fail CLI around `Core/modules/Watcher.py` (former thin SCRIPT_MAP `scripts/Watcher.py`). Soft-fail prefix: `Watch unavailable:`. **PARTIAL** — long-running / media gated. **Prefer READY `bolt launch`** for live mode and **`bolt recordings`** for one-shot process.
+
+```bash
+bolt watch                         # status (default; safe)
+bolt watch status [--json] [--probe]
+bolt watch list [--json] [--limit N]
+bolt watch run [--once] [--folder PATH]
+bolt watch-status                  # alias → status
+```
+
+| Command | What it does |
+|---|---|
+| `bolt watch` / `status` | Soft-fail readiness (engine / recordings folder / processed log) |
+| `bolt watch list` | Checklist + pending recording paths |
+| `bolt watch run` | Start watch loop (Ctrl+C to stop); `--once` prints pending only |
+
+Aliases: `watch-status`, `folder-watch`, `watch-folder`. Engine persists processed names to `Data/processed_recordings.json`.
+
+## Log perf — manual learning logger (`bolt log-perf`)
+
+PARTIAL soft-fail CLI around `scripts/log_clip_performance.py` (former thin SCRIPT_MAP `log_perf`).
+Writes `Data/performance_outcomes.jsonl` + `Data/clip_history.json` for Clip_Ranker.
+**Distinct from READY `bolt stats`** (YouTube/TikTok API pull). While TikTok API is paused, this is the TT/X manual path.
+
+```bash
+bolt log-perf                         # status (default)
+bolt log-perf status [--json] [--probe]
+bolt log-perf list [--json]           # readiness checklist
+bolt log-perf run --list              # recent logged rows
+bolt log-perf run --trigger ace --views 15000 --likes 1200
+bolt log-perf run                      # interactive prompt
+bolt log_perf --trigger ace --views 15000   # back-compat (flags ⇒ run)
+```
+
+Soft-fail: `Log perf unavailable:`. Aliases: `log_perf`, `log-performance`, `log_performance`, `perf-log`, `log-perf-status`.
+
+| Command | What it does |
+|---|---|
+| `bolt log-perf` / `status` | Soft-fail readiness (engine / Clip_Ranker / outcomes file) |
+| `bolt log-perf list` | Checklist of logger gates |
+| `bolt log-perf run …` | Log views/likes (or `--list` recent rows / interactive) |
+
+Stay PARTIAL — manual learning input, not stranger-ready API sync.
+
 
 ## Platform stats sync (auto learning loop)
 
@@ -922,7 +1107,7 @@ Pull real views/likes from TikTok or YouTube into `Data/performance_outcomes.jso
 (and clip history on first sight of each video). Preferred surface is **`bolt stats`**
 (wraps the same Performance_Sync path as the older script aliases).
 
-Missing YouTube tokens soft-fail with `Social stats unavailable: …` (status exits 0). While TikTok API is paused, use `bolt log_perf` for TT/X views.
+Missing YouTube tokens soft-fail with `Social stats unavailable: …` (status exits 0). While TikTok API is paused, use PARTIAL `bolt log-perf` for TT/X views (soft-fail `Log perf unavailable:`).
 
 ```bash
 # Readiness + recent outcomes (default)
@@ -980,12 +1165,22 @@ bolt gemini ask "one sentence tip for TikTok titles"
 # Aliases: gemini-status, gemini_status. Nexus opt-in unchanged (NEXUS_USE_GEMINI=false).
 bolt search "question" [--raw|--long|--json] [--limit N]
 # Live DuckDuckGo (ddgs); summarizes for chat. --raw = hits only.
+bolt word                                  # status (default; READY)
+bolt word honest                           # spelling + definition + synonyms
+bolt word define honest
+bolt spell recieve
+bolt word check "this sentance"
+bolt thesaurus honest
 bolt performance
 bolt log_perf --trigger <trigger> --views <count> [--likes <count>] [--clip <file>]
               [--game "Game Name"] [--platform TikTok] [--note "text"]
 bolt log_perf --list
 bolt doctor [--json]
-bolt weekly [--print] [--send] [--days <number>]
+bolt weekly                                 # status (default; PARTIAL soft-fail)
+bolt weekly status [--json] [--probe] [--days N]
+bolt weekly list [--json]
+bolt weekly run [--print] [--send] [--days N] [--dry-run] [--json]
+bolt weekly --print|--send [--days N]        # legacy flags (same as run)
 ```
 
 Running `bolt log_perf` without performance values starts its interactive prompt.
@@ -1001,11 +1196,20 @@ use `log_perf` for manual entry or platforms without API pull (e.g. X).
 | `bolt gemini status --probe` | Optional live ping (quota only when key set) |
 | `bolt gemini ask "…"` | Direct `ask_gemini`; exit 1 if reply starts with `LLM unavailable:` |
 | `bolt search "question"` | Live web search (DuckDuckGo via `ddgs`) + optional LLM summary |
-| `bolt performance` | Run a performance baseline / snapshot of recent clip outcomes |
-| `bolt log_perf …` | Manually log a clip's views/likes back to the ranker so it learns |
-| `bolt log_perf --list` | Show recent performance-log entries (most recent first) |
+| `bolt word` / `status` | Dictionary / spellcheck / thesaurus readiness — local word list; **READY**. Aliases: `dict`, `spell`, `thesaurus`. Distinct from `bolt search`. |
+| `bolt word honest` | Full card: spelling + definition + synonyms/antonyms |
+| `bolt spell recieve` | Local spellcheck (edit-distance suggestions). `check` for a phrase |
+| `bolt thesaurus honest` | Synonyms via Datamuse (soft-fail if offline) |
+| `bolt performance status` | Local import/startup baseline readiness — `--json` / `--probe`; soft-fail `Baseline unavailable:`; **PARTIAL** (local diagnostic). Aliases: `baseline`, `perf-baseline`, `performance-baseline`. Distinct from `bolt analytics` / `bolt stats`. |
+| `bolt performance list` | Checklist + recent `logs/performance/baseline_*.json` |
+| `bolt performance run` | Soft-fail run engine → `logs/performance/`; `--dry-run` prints plan only |
+| `bolt log-perf` / `status` | Soft-fail readiness for the manual learning logger (PARTIAL) |
+| `bolt log-perf run …` | Manually log a clip's views/likes back to the ranker so it learns |
+| `bolt log-perf run --list` | Show recent performance-log entries (most recent first) |
 | `bolt doctor` | Audit live vs mocked vs stale paths / missing keys |
-| `bolt weekly` | Generate (and optionally send) the weekly performance insights |
+| `bolt weekly status` | Weekly insights readiness — `--json` / `--probe`; soft-fail `Weekly unavailable:`; **PARTIAL** (Memory/Nexus/alerts gated). Aliases: `monthly`, `week-insights`, `weekly-analysis`. Distinct from `bolt analytics` / `bolt briefing` / `bolt stats`. |
+| `bolt weekly list` | Checklist + recent `Data/weekly_reports/weekly_*.md` |
+| `bolt weekly run` | Soft-fail generate → print + save under `Data/weekly_reports/`; `--send` via Bolt_Alerts; `--dry-run` |
 | `bolt learning status` | Browse local `Data/learning/` study notes readiness — `--json` / `--probe`; soft-fail `Learning unavailable:`; **study log only** (not product architecture). Aliases: `learn`, `notes`, `study-notes`. |
 | `bolt learning list` | List chapter markdown stems/titles under `Data/learning/` (ignores `_TEMPLATE.md`) |
 | `bolt learning show <slug>` | Print one chapter (`ch01`, stem, or unique substring); soft-fail if missing/ambiguous |
@@ -1016,6 +1220,28 @@ use `log_perf` for manual entry or platforms without API pull (e.g. X).
 | `bolt pages list` | List known Pages projects + worker (`bolt-fortress` / `billythunderstorm` / `billythunderstorm-live` / `bolt-api-worker`) and `/tmp/sites` path presence |
 | `bolt pages deploy [project]` | Soft-fail wrangler pages deploy (needs auth + staging tree); `--dry-run` prints command only |
 | `bolt license status` | Repo LICENSE / README placeholder — `--json` / `--probe`; soft-fail `License unavailable:`; **PARTIAL** (does not auto-pick SPDX). Aliases: `licence`, `spdx`, `license-status`. |
+
+## Weekly analysis (`bolt weekly`)
+
+Weekly performance insights from `Data/performance_outcomes.jsonl` + memory + optional Nexus. Soft-fail prefix: `Weekly unavailable:`. **PARTIAL** — Memory/Nexus/alerts gated; local markdown still saves under `Data/weekly_reports/`. Distinct from READY `bolt analytics` / `bolt briefing` / `bolt stats`.
+
+```bash
+bolt weekly                               # status (default; safe)
+bolt weekly status [--json] [--probe] [--days N]
+bolt weekly list [--json]
+bolt weekly run [--print] [--send] [--days N] [--dry-run] [--json]
+bolt weekly --print [--days N]            # legacy → run
+bolt weekly --send [--days N]             # legacy → run + Bolt_Alerts
+```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt weekly` / `status` | Readiness (`ready` = engine + writable reports dir) |
+| `bolt weekly status --json` | Machine-readable readiness dict |
+| `bolt weekly list` | Checklist + recent saved reports |
+| `bolt weekly run` | Generate, print, and save markdown report |
+
+Aliases: `monthly`, `week-insights`, `weekly-analysis`, `weekly-status`. Engine: `scripts/weekly_analysis.py`.
 
 ## Learning notes (`bolt learning`)
 
@@ -1083,8 +1309,11 @@ bolt gmail-auth                  # One-time browser Allow for Gmail read (briefi
                                   # aliases: gmail_auth, google-gmail-auth
 bolt gcal status                 # Calendar credentials/token readiness (no browser)
 bolt gmail status                # Gmail credentials/token readiness (no browser)
-bolt calendar [--output-dir <directory>] [--days 30] [--dry-run]
-bolt refresh_memory              # Rebuild Data/memory_index.json
+bolt calendar status                 # PARTIAL soft-fail ICS feeds
+bolt calendar run [--dry-run] [--days 30] [--output-dir DIR]
+bolt refresh-memory status       # PARTIAL soft-fail memory index rebuild
+bolt memory status              # PARTIAL soft-fail long-term memory store
+bolt memsearch status           # PARTIAL soft-fail Phase 4 semantic memory search
 bolt refresh_vector_db           # Rebuild Data/vector_db/ for Nexus (needs Ollama)
 bolt vector_db                   # Alias for refresh_vector_db
 bolt reindex                     # Alias for refresh_vector_db
@@ -1125,8 +1354,10 @@ bolt reindex
 
 Reply path for briefings: see **How to reply to Bolt** above. Write-intent lines
 under `## Comments` are applied on the next `bolt briefing`; leftover is a note.
-| `bolt calendar` | Generate ICS calendar feeds for scheduled posts |
-| `bolt refresh_memory` | Rebuild the clip memory index (`Data/memory_index.json`) |
+| `bolt calendar` | PARTIAL soft-fail ICS feeds under `Data/calendar/` (see section) |
+| `bolt refresh-memory` | PARTIAL soft-fail rebuild of `Data/memory_index.json` (see section) |
+| `bolt memory` | PARTIAL soft-fail long-term memory store (see section) |
+| `bolt memsearch` | PARTIAL soft-fail Phase 4 semantic search over memory (see section) |
 | `bolt refresh_vector_db` | Rebuild the vector DB used by Nexus for retrieval (`Data/vector_db/`); soft-fails if Ollama down |
 | `bolt vector_db` | Alias: same as `refresh_vector_db` |
 | `bolt reindex` | Alias: same as `refresh_vector_db` |
@@ -1134,21 +1365,26 @@ under `## Comments` are applied on the next `bolt briefing`; leftover is a note.
 | `bolt site` | Write `Data/site-data.json` for the web dashboard (local only) |
 | `bolt site --push` | Write + soft-fail git push (`Sites unavailable:` if remote/git fails) |
 
-## Notifications
+## SMS/email notify (`bolt send`) — PARTIAL
+
+Soft-fail SMS/email notify. Prefers `Bolt_Alerts.notify` (same path as weekly `--send` /
+`bolt alerts`). Falls back to `scripts/send_notification.py`. Prefix: `Notify unavailable:`.
 
 ```bash
-bolt send "message" [--subject "subject"] [--sms-only|--email-only]
+bolt send                            # status (default; safe)
+bolt send status [--json] [--probe]
+bolt send list [--json]
+bolt send "message" [--subject "…"] [--sms-only|--email-only]
 ```
 
 `bolt notify` is an alias for `bolt send`.
 
-| Command | What it does |
-|---------|--------------|
-| `bolt send "msg"` | Send an SMS / email notification (config in `Data/configs/storage_alerts.env`) |
-| `bolt send "msg" --sms-only` | Force phone path (iMessage on Mac for AT&T; email-to-SMS where still alive) |
-| `bolt send "msg" --email-only` | Force email, ignore phone |
-| `bolt send "msg" --subject "…"` | Override the email subject line |
+Config: `Data/configs/storage_alerts.env`.
 
+**Distinct from** PARTIAL `bolt alerts` (Mac/Voice/email/iMessage) and PARTIAL
+`bolt discord` (webhooks). Stay PARTIAL (SMTP/phone gated).
+
+Former thin SCRIPT_MAP: `bolt send` / `bolt notify` → `scripts/send_notification.py`.
 
 
 ## Cloudflare Pages (`bolt pages`)
@@ -1243,26 +1479,272 @@ bolt discord send "hello"         # soft-fail send
 | `bolt discord test` | Same as a soft-fail test ping |
 | `bolt discord send "…"` | Soft-fail webhook POST |
 
-Aliases: `discord-status`, `webhook`, `notify-discord`. Env: `DISCORD_WEBHOOK_URL` (primary), optional `CAPTAIN_HOOK_WEBHOOK_URL` / `DISCORD_WEBHOOK_URLS`. Budget alerts stay Mac / Voice 3 / email / iMessage (`Bolt_Alerts`; `BOLT_ALERT_DISCORD` defaults off).
+Aliases: `discord-status`, `webhook`, `notify-discord`. Env: `DISCORD_WEBHOOK_URL` (primary), optional `CAPTAIN_HOOK_WEBHOOK_URL` / `DISCORD_WEBHOOK_URLS`. Budget alerts stay Mac / Voice 3 / email / iMessage (`bolt alerts` / `Bolt_Alerts`; `BOLT_ALERT_DISCORD` defaults off).
 
 
 Budget alerts (50% / 90% / 100% of soft cap) use **Mac banner + Voice 3 + email + iMessage**, not Discord.
 
 Spoken alerts always use Siri **Voice 3** (`say -v "Voice 3"`, `Bolt_VOICE`). The same voice is used for `bolt say`, briefings, and Mac banners.
 
-## Mac automation (launchd, Reminders, Shortcuts)
+## Mac / Voice / email / iMessage alerts (`bolt alerts`)
 
-Evening inbox is Apple Reminders, not SMS. Only financial work stays fully manual; everything else is do-and-notify (Bolt acts, then leaves an alert or a file link to review/revise).
+Preferred budget/system fan-out via `Core/modules/Bolt_Alerts.py`. **Not a Discord bot.** Soft-fail prefix: `Alerts unavailable:`.
 
 ```bash
-# Reinstall login watcher + 17:00 briefing cron + Shortcuts
-python3 scripts/install_mac_automation.py            # all
-python3 scripts/install_mac_automation.py launchd    # Core/launch.py live --no-checklist
-python3 scripts/install_mac_automation.py cron       # 17:00 bolt briefing --send
-python3 scripts/install_mac_automation.py shortcuts  # import dialogs
-
-bolt briefing --send                                 # Reminders + Voice 3 + banner + email
+bolt alerts                            # status (default; safe)
+bolt alerts status [--json] [--probe]
+bolt alerts list [--json]
+bolt alerts test [--json]
+bolt alerts send "…" [--json]
 ```
+
+| Command | What it does |
+|---|---|
+| `bolt alerts` / `status` | Channel readiness (`ready` if Mac banner **or** SMTP email/SMS path works) |
+| `bolt alerts list` | Checklist (osascript / say / SMTP / ALERT_* / Discord-off) |
+| `bolt alerts status --probe` | Mac banner only (no SMS/email spam) |
+| `bolt alerts test` | Soft-fail fan-out (Mac + SMS + email when configured) |
+| `bolt alerts send "…"` | Soft-fail notify |
+
+Aliases: `alert`, `alert-status`, `notify-alerts`, `bolt-alerts`. Config: `Data/configs/storage_alerts.env` (template `storage_alerts.example.env`). `bolt budget --test-alert` and `bolt send` still use the same module. Discord webhooks: `bolt discord`.
+
+
+## Apple Reminders (`bolt reminders`)
+
+Evening / briefing inbox via `Core/modules/Apple_Reminders.py` (also used by `bolt briefing --send`). Soft-fail prefix: `Reminders unavailable:`. **PARTIAL** — macOS Reminders.app / JXA / TCC permission gated; not stranger-ready. Do not claim READY for the delivery channel alone (local briefing markdown stays READY).
+
+```
+bolt reminders                            # status (default; safe)
+bolt reminders status [--json] [--probe]
+bolt reminders list [--json]
+bolt reminders test [--json]
+bolt reminders send "message" [--json]
+```
+
+| Command | What it does |
+|---------|----------------|
+| `bolt reminders` / `status` | Darwin + osascript + list name (`BOLT_REMINDERS_LIST`, default `Bolt`) |
+| `bolt reminders list` | Checklist of tooling / list / briefing wiring |
+| `bolt reminders status --probe` | Soft list open-count via JXA (permission may prompt once) |
+| `bolt reminders test` | Soft-fail write a tiny test reminder |
+| `bolt reminders send "…"` | Soft-fail create one action reminder |
+
+Aliases: `reminder`, `reminders-status`, `apple-reminders`, `remind`. Full briefing fan-out remains `bolt briefing --send` (Reminders + Voice 3 + banner + email).
+
+
+## Filter backlog (`bolt filter-backlog`)
+
+Clip backlog score filter via `Core/modules/Filter_Backlog.py` (wraps `scripts/Filter_Backlog.py`). Soft-fail prefix: `Backlog unavailable:`. **PARTIAL** — Clip_Ranker / media layout gated; moves low-scoring `media/clips/*.mp4` into `media/clips/_low_score/`. **Distinct from READY `bolt recordings` / `bolt queue`**.
+
+```bash
+bolt filter-backlog                         # status (default; safe)
+bolt filter-backlog status [--json] [--probe]
+bolt filter-backlog list [--json]
+bolt filter-backlog run [--dry-run] [--threshold N] [--game NAME] [--json]
+```
+
+| Command | What it does |
+|---|---|
+| `bolt filter-backlog` / `status` | Script + Clip_Ranker + `media/clips` readiness |
+| `bolt filter-backlog list` | Checklist + mp4 / `_low_score` counts |
+| `bolt filter-backlog run` | Soft-fail score + move (use `--dry-run` first) |
+
+Aliases: `filter_backlog`, `backlog-filter`, `filter-backlog-status`, `filter-clips`. Engine: `scripts/Filter_Backlog.py`.
+
+## Make highlights (`bolt make-highlights`)
+
+Local stitch of top `media/clips` into one reel. Soft-fail prefix: `Highlights unavailable:`. **PARTIAL** — ffmpeg/media gated. Former SHELL `scripts/make_highlights.py` (IndentationError Twitch Helix paste) now forwards to `scripts/make_twitch_highlights.py`. Distinct from READY `bolt vods` (Helix). READY thin compile alias remains `bolt highlights`.
+
+```bash
+bolt make-highlights                         # status (default; safe)
+bolt make-highlights status [--json] [--probe]
+bolt make-highlights list [--json]
+bolt make-highlights run [--list] [--count N] [--game NAME] [--output PATH] [--dry-run] [--json]
+```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt make-highlights` / `status` | Readiness (`ready` = engine + ffmpeg + clips dir) |
+| `bolt make-highlights status --json` | Machine-readable readiness dict |
+| `bolt make-highlights list` | Checklist + engine `--list` preview |
+| `bolt make-highlights run` | Soft-fail stitch (or `--list` / `--dry-run` preview) |
+
+Aliases: `make_highlights`, `make-highlights-status`, `stitch-highlights`, `highlight-stitch`. Engine: `scripts/make_twitch_highlights.py`.
+
+
+## Reprocess clips (`bolt reprocess`)
+
+Rebuild 9:16 verticals from existing `media/clips` and rewrite `Data/multi_platform_queue.json` for manual upload. Soft-fail prefix: `Reprocess unavailable:`. **PARTIAL** — ffmpeg/media gated. Former SHELL `scripts/reprocess_clips.py` (wrong PROJECT_ROOT under `scripts/`, legacy `clips/` / `vertical_clips/` / `data/` paths). Does **not** auto-upload to TikTok. Distinct from READY `bolt recordings` / `bolt enhance` / `bolt multi` and Clip_Factory `process_recording` vertical path.
+
+```bash
+bolt reprocess                               # status (default; safe)
+bolt reprocess status [--json] [--probe]
+bolt reprocess list [--json]
+bolt reprocess run [--dry-run] [--json]
+```
+
+| Command | What it does |
+|---|---|
+| `bolt reprocess` / `status` | Readiness (`ready` = engine + ffmpeg + clips dir + Clip_Factory) |
+| `bolt reprocess status --json` | Machine-readable readiness dict |
+| `bolt reprocess list` | Checklist of gates |
+| `bolt reprocess run` | Soft-fail invoke engine (or `--dry-run` listing) |
+
+Aliases: `reprocess_clips`, `reprocess-clips`, `reprocess-status`, `vertical-reprocess`, `tiktok-reprocess`. Engine: `scripts/reprocess_clips.py`.
+
+## Legacy health check (`bolt health`)
+
+Lightweight post-reorg path + import smoke. Soft-fail prefix: `Health check unavailable:`. **PARTIAL** — prefer READY `bolt doctor` / `bolt verify` for the full live/mocked/stale audit. Former SHELL `scripts/health_check.py` (pre-reorg CWD-relative `config.json` / `bot.py` / `clips/` / `vertical_clips/` / `data/` / `modules/` paths). Optional deps/env gated.
+
+```bash
+bolt health                                  # status (default; safe)
+bolt health status [--json] [--probe]
+bolt health list [--json]
+bolt health run [--dry-run] [--json]
+```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt health` / `status` | Readiness (`ready` = fixed engine + Core paths) |
+| `bolt health status --json` | Machine-readable readiness dict |
+| `bolt health list` | Checklist of post-reorg gates |
+| `bolt health run` | Soft-fail invoke engine smoke (or `--dry-run`) |
+
+Aliases: `health-check`, `health_check`, `health-status`, `system-health`. Engine: `scripts/health_check.py` (via `scripts/_paths.py`). Prefer: `bolt doctor`.
+
+
+
+## Word lookup (`bolt word`)
+
+Dictionary, spellcheck, and thesaurus via `Core/modules/Word_Lookup.py`. **READY.** Local spell uses `/usr/share/dict/words` plus `Data/word_extras.txt` (offline). Definitions and synonyms/antonyms use Datamuse (free, no key). dictionaryapi.dev is an optional phonetic/example extra. Network lookups soft-fail with `Word lookup unavailable:` and still print local spelling. **Distinct from READY `bolt search`** (DuckDuckGo).
+
+```
+bolt word                                 # status (default; safe)
+bolt word status [--json] [--probe]
+bolt word list [--json]
+bolt word honest                          # spelling + definition + synonyms
+bolt word define honest [--json]
+bolt spell recieve [--json]
+bolt word check "this sentance" [--json]
+bolt thesaurus honest [--json]
+bolt word ant honest [--json]
+```
+
+| Command | What it does |
+|---------|--------------|
+| `bolt word` / `status` | Local word-list readiness (`ready` = system dict or extras loaded) |
+| `bolt word list` | Checklist of spell / dictionary / thesaurus pieces |
+| `bolt word <word>` | Full card: spelling + definition + synonyms + antonyms |
+| `bolt word define <word>` | Definition only (network; soft-fail) |
+| `bolt spell <word\|phrase>` | Local spellcheck; a phrase runs `check` |
+| `bolt word check "…"` | Flag misspellings in a caption or title |
+| `bolt thesaurus <word>` | Synonyms (Datamuse; soft-fail if offline) |
+
+Aliases: `dict`, `dictionary`, `define`, `spell`, `spellcheck`, `thesaurus`, `synonym`, `syn`. Voice: "define honest", "how do you spell recieve", "synonym for honest". Add extra words in `Data/word_extras.txt`.
+
+**Hear-through (conversation + CLI):** Bolt uses the same local spelling toward known commands and intent words. `bolt queu` runs `queue` (and prints that it did). In voice/text, "show the posting queu" is taken as queue status. Post / approve / hold / send are **not** auto-run from a typo — say those clearly.
+
+## Photo OCR (`bolt photo-ocr`)
+
+Photo / handwriting OCR → editable `.txt` via `Core/modules/Photo_OCR.py` (wraps `scripts/ocr_to_editable.py`). Soft-fail prefix: `Photo OCR unavailable:`. **PARTIAL** — Darwin Apple Vision and/or Tesseract gated; William utility — not stranger-ready. **Distinct from READY `bolt ocr`** (Video_Intelligence HUD OCR on clips).
+
+```
+bolt photo-ocr                            # status (default; safe)
+bolt photo-ocr status [--json] [--probe]
+bolt photo-ocr list [--json]
+bolt photo-ocr run <images…> [--open] [--stdout] [-o PATH] [--json]
+```
+
+| Command | What it does |
+|---------|----------------|
+| `bolt photo-ocr` / `status` | Script present + Darwin Vision and/or tesseract on PATH |
+| `bolt photo-ocr list` | Checklist of tooling / engines / default out dir |
+| `bolt photo-ocr status --probe` | Light Vision import check (same as best-effort status on Darwin) |
+| `bolt photo-ocr run …` | Soft-fail OCR → `~/Documents/Bolt OCR/` (or `-o` / `--stdout`); `--open` → TextEdit |
+
+Aliases: `photo_ocr`, `photo-ocr-status`, `ocr-photos`, `ocr_photos`, `vision-ocr`. Advanced fallback: `python3 scripts/ocr_to_editable.py photo.jpg --open`.
+
+## Video compress (`bolt compress`)
+
+HandBrake clip compression via `Core/modules/Video_Compress.py` (wraps `scripts/compress_videos.sh`, paths fixed to `media/clips`). Soft-fail prefix: `Compress unavailable:`. **PARTIAL** — HandBrakeCLI gated; William cron / storage glue — not stranger-ready. Also reachable via `bolt storage optimize` (may `--skip-compress`).
+
+```text
+bolt compress                             # status (default; safe)
+bolt compress status [--json] [--probe]
+bolt compress list [--json]
+bolt compress run [--dry-run] [--json]
+```
+
+| Command | What it does |
+|---|---|
+| `bolt compress` / `status` | Script present + HandBrakeCLI on PATH + `media/clips` |
+| `bolt compress list` | Checklist (HandBrake / ffmpeg / clips / crontab mention) |
+| `bolt compress run` | Soft-fail invoke `scripts/compress_videos.sh` |
+| `bolt compress run --dry-run` | List candidate MP4s (>5 min old, not in `originals_backup`) |
+
+Aliases: `video-compress`, `handbrake`, `compress-videos`, `compress_videos`. Advanced: `bash scripts/compress_videos.sh` (or cron `scripts/media_processing/compress_videos.sh` symlink).
+
+
+## Performance baseline (`bolt performance`)
+
+Local import/startup baseline via `Core/modules/Performance_Baseline.py` (wraps `scripts/performance_baseline.py`, paths fixed to `Core/launch.py` + `Core/bot.py`). Soft-fail prefix: `Baseline unavailable:`. **PARTIAL** — local diagnostic / optimization tooling — not stranger-ready product surface. **Distinct from READY `bolt analytics`** (outcomes summary) and **READY `bolt stats`** / `performance-sync` (social pull).
+
+```text
+bolt performance                          # status (default; safe)
+bolt performance status [--json] [--probe]
+bolt performance list [--json]
+bolt performance run [--dry-run] [--json]
+```
+
+| Command | What it does |
+|---------|----------------|
+| `bolt performance` / `status` | Script + Core + writable `logs/performance/` |
+| `bolt performance list` | Checklist + recent baseline JSON files |
+| `bolt performance status --probe` | Same readiness (psutil presence noted) |
+| `bolt performance run` | Soft-fail measure imports/startup → `logs/performance/baseline_*.json` |
+
+Aliases: `baseline`, `perf-baseline`, `performance-baseline`, `baseline-status`. Raw: `python3 scripts/performance_baseline.py`.
+
+## Pre-stream voice checklist (`bolt checklist`)
+
+Pre-stream session tasks via `Core/modules/Voice_Checklist.py` (also used by `bolt launch`). Soft-fail prefix: `Checklist unavailable:`. **PARTIAL** — mic/STT/permission gated; William session tasks. Do not claim READY.
+
+```
+bolt checklist                            # status (default; safe)
+bolt checklist status [--json] [--probe]
+bolt checklist list [--json]
+bolt checklist run [--keyboard|--text] [--timeout N] [--json]
+```
+
+| Command | What it does |
+|---------|----------------|
+| `bolt checklist` / `status` | Module + tasks file/defaults + SpeechRecognition/PyAudio + launch wiring |
+| `bolt checklist list` | Session tasks from `Core/session_tasks.json` (else DEFAULT_TASKS) |
+| `bolt checklist status --probe` | Optional timed mic open (never hangs status) |
+| `bolt checklist run --keyboard` | Interactive keyboard path (needs TTY); bare `run` soft-fails non-interactive |
+
+Aliases: `checklist-status`, `voice-checklist`, `prestream`, `pre-stream`. Skip on launch: `bolt launch --no-checklist` or `skip_checklist` in `Core/config.json`. Progress: `logs/checklist_progress.json`.
+
+## Mac automation (`bolt mac-auto`)
+
+William-specific macOS glue: launchd login watcher, 17:00 briefing cron, Apple Shortcuts.
+**PARTIAL** — soft-fail `Mac automation unavailable:`. **Not stranger-ready.**
+Evening inbox is Apple Reminders, not SMS.
+
+```bash
+bolt mac-auto                            # status (default; safe)
+bolt mac-auto status [--json] [--probe]
+bolt mac-auto list [--json]
+bolt mac-auto install [launchd|cron|shortcuts|all] [--dry-run] [--json]
+```
+
+| Command | What it does |
+|---|---|
+| `bolt mac-auto` / `status` | Darwin + install script + plist / cron marks / signed Shortcuts |
+| `bolt mac-auto list` | Checklist (launchd / cron / shortcuts / reminders) |
+| `bolt mac-auto install …` | Soft-fail wrapper around install script (`--dry-run` prints only) |
+
+Aliases: `mac_auto`, `mac-automation`, `automation`, `shortcuts-status`, `launchd-status`.
 
 | Piece | What it does |
 |---|---|
@@ -1277,8 +1759,136 @@ bolt briefing --send                                 # Reminders + Voice 3 + ban
 Siri: open a shortcut → ⓘ → Add to Siri. Re-import signed files from `scripts/macos_shortcuts/signed/` if a shortcut is missing.
 
 ```bash
+bolt briefing --send                                 # Reminders + Voice 3 + banner + email
+
+# Advanced fallback (same installer `bolt mac-auto install` wraps)
+python3 scripts/install_mac_automation.py            # all
+python3 scripts/install_mac_automation.py launchd    # Core/launch.py live --no-checklist
+python3 scripts/install_mac_automation.py cron       # 17:00 bolt briefing --send
+python3 scripts/install_mac_automation.py shortcuts  # import dialogs
+
+# Advanced fallback (prefer: bolt photo-ocr run photo.jpg --open)
 python3 scripts/ocr_to_editable.py photo.jpg --open
 ```
+
+## Per-game sensitivity profiles (`bolt game-config`)
+
+Soft-fail CLI around `Core/modules/Game_Config.py` (built-in per-game highlight profiles +
+`Data/configs/game_configs.json` overrides). Soft-fail prefix: `Game config unavailable:`.
+**PARTIAL** — profiles William-tuned; overrides optional. **Distinct from** PARTIAL
+`bolt obs-game` (OBS scene→`Core/config.json` game) and READY `bolt obs`.
+
+```bash
+bolt game-config                         # status (default; safe)
+bolt game-config status [--json] [--probe]
+bolt game-config list [--json]
+bolt game-config show [game]             # merged defaults+builtin+override
+bolt game-config set <game> KEY=VALUE …  # write Data/configs/game_configs.json
+bolt game-config-status                  # alias → status
+```
+
+| Command | What it does |
+|---|---|
+| `bolt game-config` / `status` | Readiness: builtin count + custom overrides path + current `Core/config.json` game |
+| `bolt game-config list` | Builtin profiles + override checklist |
+| `bolt game-config show` | Print merged config (current game if omitted) |
+| `bolt game-config set` | Merge KEY=VALUE overrides (`--no-merge` replaces) |
+
+Aliases: `game_config`, `gameconfig`, `games`, `game-profiles`, `game_profiles`, `game-config-status`.
+
+Former unnamed IDEA: Docs/AI_Guide.md + CWD-relative `game_configs.json` / `config.json` (fixed to `Data/configs/` + `Core/config.json`).
+
+## Error recovery / quarantine (`bolt error-recovery`)
+
+Soft-fail CLI around `Core/modules/Error_Recovery.py` (pipeline `with_retry` + `ErrorTracker`
+record/quarantine/session summary + optional Discord threshold alert). Soft-fail prefix:
+`Error recovery unavailable:`. **PARTIAL** — not wired into bot.py; quarantine at
+`Data/quarantine/` (was CWD-relative `quarantine/`). **Distinct from** PARTIAL
+`bolt discord` (webhook) and PARTIAL `bolt alerts` (Mac/Voice/email/iMessage) — this
+surface is pipeline retry/quarantine.
+
+```bash
+bolt error-recovery                         # status (default; safe)
+bolt error-recovery status [--json] [--probe]
+bolt error-recovery list [--json]
+bolt error-recovery run [--json] [--dry-run] [--probe]
+bolt error-recovery summary                 # alias of run
+bolt error-recovery-status                  # alias → status
+bolt recovery status                        # alias
+```
+
+| Command | What it does |
+|---|---|
+| `bolt error-recovery` / `status` | Readiness: module + MAX_ERRORS_BEFORE_ALERT + webhook present (redacted) + quarantine path/count + API importable |
+| `bolt error-recovery list` | Quarantine files (if any) + tracker config checklist |
+| `bolt error-recovery run` | Print tracker session summary; `--dry-run` skips summary; `--probe` runs `with_retry(lambda: True)` |
+
+Aliases: `error_recovery`, `error-recovery-status`, `recovery`, `quarantine`, `error-tracker`, `error_tracker`.
+
+Public API (in-process): `with_retry`, `ErrorTracker`, `get_tracker`, `record_error`, `session_summary`.
+
+Former IDEA: Docs/AI_Guide.md "Failure handling helpers" + CWD-relative `quarantine/` (fixed to `Data/quarantine/`).
+
+
+## Memory search (`bolt memsearch`) — PARTIAL
+
+Soft-fail CLI around `Core/modules/Memory_Search.py` wrapping
+`Memory_Index.retrieve_memory` / `format_retrieved_context` (hybrid vector+keyword
+over `Data/memory_index.json`). Soft-fail prefix: `Memory search unavailable:`.
+**PARTIAL** — index/data gated; not stranger-ready as a full Phase 4 product.
+**Distinct from** READY `bolt search` (`Bolt_Search` — live web / DuckDuckGo),
+PARTIAL `bolt memory` (LLM recall/remember), and PARTIAL `bolt refresh-memory`
+(index rebuild only).
+
+Owns the Phase 4 memory-search IDEA formerly mis-labeled on `Bolt_Search.py` in
+Docs/AI_Guide.md (filename was reused for READY web search).
+
+```bash
+bolt memsearch                              # status (default; safe)
+bolt memsearch status [--json] [--probe]
+bolt memsearch list [--json]
+bolt memsearch run "pop culture" [--limit 5] [--refresh] [--dry-run] [--json]
+bolt memsearch search "…"                   # alias of run
+bolt memsearch query "…"                    # alias of run
+bolt memsearch-status                       # alias → status
+bolt memory-search status                   # alias
+```
+
+| Command | What it does |
+|---|---|
+| `bolt memsearch` / `status` | Readiness: Memory_Index import + index file/entry count + retrieve/format API |
+| `bolt memsearch list` | Checklist rows (module, import, index, entries, retrieve API) |
+| `bolt memsearch run` | Hybrid retrieve + formatted context; `--refresh` rebuilds first; `--dry-run` counts without full text |
+
+Aliases: `memory-search`, `memory_search`, `mem-search`, `mem_search`, `search-memory`, `search_memory`, `memsearch-status`, `memsearch_status`.
+
+Stay PARTIAL — not READY / not stranger-ready Phase 4 product.
+
+Former IDEA: Docs/AI_Guide.md `Bolt_Search.py ← Phase 4 - semantic search over memory (WIP)`.
+
+## iCloud Drive multi-Mac sync (`bolt icloud`)
+
+**PARTIAL** — soft-fail `iCloud unavailable:`. **Not stranger-ready.** William multi-Mac glue (Docs/AI_Guide.md). Distinct from PARTIAL `bolt mac-auto` (launchd/cron/Shortcuts).
+
+```bash
+bolt icloud                              # status (default; safe)
+bolt icloud status [--json] [--probe]
+bolt icloud list [--json]
+bolt icloud run [--dry-run|--apply] [--script move|shared|setup] [--json]
+```
+
+| Command | What it does |
+|---|---|
+| `bolt icloud` / `status` | Darwin + iCloud Drive folder + `scripts/move_to_icloud.sh` readiness |
+| `bolt icloud list` | Checklist (engines, iCloud Bolt copy, repo under iCloud, legacy shared hop) |
+| `bolt icloud run` | Dry-run by default; `--apply` runs helper (interactive confirm; skips `recordings/`) |
+
+Aliases: `icloud-sync`, `icloud_sync`, `move-to-icloud`, `move_to_icloud`, `icloud-status`, `icloud_status`.
+
+Preferred engine: `scripts/move_to_icloud.sh`. Legacy: `migrate_to_shared.sh`, `setup_icloud.sh`.
+
+Stay PARTIAL — Darwin / iCloud Drive gated; does not claim stranger-ready or auto-sync magic.
+
 
 ## Default morning flow (daily driver)
 
@@ -1450,10 +2060,12 @@ These names perform the same actions as their primary commands:
 | `highlights` | `twitch_highlights` |
 | `briefing` | `briefings` |
 | `nexus` | `advice` |
-| `weekly` | `monthly` |
+| `weekly` | `monthly`, `week-insights`, `weekly-analysis`, `weekly-status` |
 | `log_perf` | `log_performance` |
 | `sync_tiktok_stats` | `sync_tiktok`, `tiktok_stats` |
 | `sync_youtube_stats` | `sync_youtube`, `youtube_stats` |
+| `refresh-memory` | `refresh_memory`, `memory-refresh`, `refresh-index` |
+| `calendar` | `ics`, `ics-calendar`, `generate-calendar`, `calendar-status` |
 | `stats` | `social-stats`, `performance-sync` |
 | `budget` | `api-usage`, `api_usage`, `xai-usage`, `llm-budget` |
 | `day` | `today`, `kickoff`, `start-day`, `morning-flow` |
@@ -1475,7 +2087,14 @@ These names perform the same actions as their primary commands:
 | `gemini` | `gemini-status`, `gemini_status` |
 | `vods` | `vod_download` |
 | `send` | `notify` |
-| `layout` | `check_layout` |
+| `layout` / `check-layout` / `layout-status` | `Layout_Check` (PARTIAL soft-fail) |
+| `migrate-layout` / `migrate_layout` / `layout-migrate` / `migrate-status` | `Migrate_Layout` (PARTIAL soft-fail) |
+| `game-config` / `game_config` / `games` / `game-profiles` / `game-config-status` | `Game_Config` (PARTIAL soft-fail) |
+| `error-recovery` / `error_recovery` / `recovery` / `quarantine` / `error-tracker` / `error-recovery-status` | `Error_Recovery` (PARTIAL soft-fail) |
+| `layout` (legacy thin) | `check_layout` |
+| `filter-backlog` | `filter_backlog`, `backlog-filter`, `filter-clips` |
+| `make-highlights` | `make_highlights`, `make-highlights-status`, `stitch-highlights`, `highlight-stitch` |
+| `reprocess` | `reprocess_clips`, `reprocess-clips`, `reprocess-status`, `vertical-reprocess`, `tiktok-reprocess` |
 | `refresh_vector_db` | `vector_db`, `reindex` |
 | `status` | `intelligence` |
 | `doctor` | `audit` |
@@ -1495,3 +2114,52 @@ These names perform the same actions as their primary commands:
 
 *Canonical path: `Core/modules/BOLT_COMMANDS.md` — this is the only BOLT_COMMANDS
 file in the repo. Prefer editing this markdown over duplicate Pages copies.*
+
+## `bolt personality` — Bolt persona loader (PARTIAL)
+
+Gemini persona chat loader wrapping `scripts/load_bolt_personality.py` + `Data/context/bolt-personality.md`.
+
+```bash
+bolt personality status
+bolt personality list
+bolt personality run
+```
+
+Aliases: `personality`, `bolt-personality`, `personality-status`, `persona`, `load-personality`, `load_personality`.
+
+Soft-fail prefix: `Personality unavailable:`.
+
+Distinct from READY `bolt gemini` / `nexus` / Twitch `bolt chat` personality layer. Stay PARTIAL while persona/Gemini gates remain.
+
+Module: `Core/modules/Bolt_Personality.py`.
+
+## layout / check-layout (PARTIAL)
+
+Repo-root layout audit via `Core/modules/Layout_Check.py` (wraps `scripts/check_layout.py` + `_layout_rules.py`). Soft-fail prefix: `Layout unavailable:`. **PARTIAL** — report-only; never moves files; William allow-list gated. **Distinct from READY `bolt doctor` / `bolt verify`**.
+
+```bash
+bolt layout status [--json] [--probe]
+bolt layout list
+bolt layout run [--quiet] [--json]
+bolt layout-status          # alias → status
+bolt check-layout list      # alias
+```
+
+Aliases: `layout`, `check-layout`, `check_layout`, `layout-status`.
+
+## migrate-layout (PARTIAL)
+
+Repo-root layout drift migrator via `Core/modules/Migrate_Layout.py` (wraps `scripts/migrate_layout.py` + `_layout_rules.py`). Soft-fail prefix: `Migrate unavailable:`. **PARTIAL** — dry-run by default; `--apply` performs moves; William layout glue gated. **Companion to PARTIAL `bolt layout`** (report-only, never moves). **Distinct from READY `bolt doctor` / `bolt verify`**.
+
+```bash
+bolt migrate-layout status [--json] [--probe]
+bolt migrate-layout list
+bolt migrate-layout run                 # dry-run plan (safe default)
+bolt migrate-layout run --apply         # actually move
+bolt migrate-layout run --apply --yes   # conflicts fatal (no prompt)
+bolt migrate-status                     # alias → status
+bolt layout-migrate list                # alias
+```
+
+Aliases: `migrate-layout`, `migrate_layout`, `layout-migrate`, `migrate-status`.
+

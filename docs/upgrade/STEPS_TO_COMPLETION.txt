@@ -1,33 +1,9 @@
-+------------------+
-|   Start Here     |
-+------------------+
-         |
-         v
-+------------------+
-|  Analyze Storage |
-+------------------+
-         |
-         v
-+------------------+
-|  Cleanup Files   |
-+------------------+
-         |
-         v
-+------------------+
-|  Organize Files  |
-+------------------+
-         |
-         v
-+------------------+
-|  Verify System   |
-+------------------+
-         |
-         v
-+------------------+
-|  Plan Next Upgrade|
-+------------------+
-         |
-         v
-+------------------+
-|    End / Next    |
-+------------------+
+# STEPS TO COMPLETION
+
+**Archived 2026-09-14.** Living status / short-term plan / future:
+
+→ [`Docs/BOLT_NOW.md`](../BOLT_NOW.md)
+
+Historical copy: [`Docs/archive/status/STEPS_TO_COMPLETION.txt`](../archive/status/STEPS_TO_COMPLETION.txt)
+
+Do not grow this stub. Update Bolt NOW instead.

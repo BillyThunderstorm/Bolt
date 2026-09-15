@@ -56,19 +56,20 @@ Bolt/
 │   ├── Post_Queue.py         ← Background peak-hour checker, wraps Peak_Hour_Notifier
 │   ├── Bolt_Chat.py          ← Twitch chat bot with AI personality (Phase 3)
 │   ├── Bolt_Voice.py         ← TTS spoken alerts for highlights/raids/subs (Phase 3)
-│   ├── Bolt_Memory.py        ← Phase 4 - long-term memory store (WIP)
-│   ├── Bolt_Search.py        ← Phase 4 - semantic search over memory (WIP)
-│   ├── Brain_Controller.py   ← Phase 4 - central decision engine (WIP, NOT yet
-│   │                          wired into bot.py). Has its own tier constants
-│   │                          (TIER_1_THRESHOLD=80, TIER_2_THRESHOLD=50) that
-│   │                          must be reconciled with Clip_Ranker's tiers
-│   │                          (discard<60, queue>=80) before wiring it in
+│   ├── Bolt_Memory.py        ← Phase 4 - long-term memory store (PARTIAL via bolt memory)
+│   ├── Bolt_Search.py        ← READY live web search via bolt search (DuckDuckGo / ddgs)
+│   ├── Memory_Search.py      ← Phase 4 - semantic search over memory (PARTIAL via bolt memsearch)
+│   ├── Memory_Index.py       ← hybrid vector+keyword index (retrieve used by briefings + memsearch)
+│   ├── Brain_Controller.py   ← READY soft-fail CLI via bolt brain (compat only;
+│   │                          Think_Learn_Decide is canonical in bot.py). Tier
+│   │                          constants still need reconcile before any re-wire
+│   │                          (TIER_1=80/TIER_2=50 vs Clip_Ranker discard<60/queue>=80)
 │   ├── Think_Learn_Decide.py ← Phase 4 - intelligence layer used by bot.py
 │   │                          to gate which clips proceed through the queue
 │   ├── Checkup_Writer.py     ← Generates Bolt_Checkup.html from runtime state
 │   ├── Watcher.py            ← Watches recordings/ for new files
-│   ├── Error_Recovery.py     ← Failure handling helpers
-│   ├── Game_Config.py        ← Per-game tuning profiles
+│   ├── Error_Recovery.py     ← Failure handling helpers (PARTIAL via bolt error-recovery)
+│   ├── Game_Config.py        ← Per-game tuning profiles (PARTIAL via bolt game-config)
 │   ├── notifier.py           ← Terminal notifications with reasons
 │   └── (others)              ← misc support
 │
@@ -119,7 +120,9 @@ Bolt is designed to sync across Macs via iCloud Drive. Here's how it works:
 **To move Bolt into iCloud (run once on your main Mac):**
 ```bash
 cd /path/to/Bolt
-bash scripts/move_to_icloud.sh
+bolt icloud status          # PARTIAL soft-fail readiness
+bolt icloud run --dry-run   # show what would run
+bash scripts/move_to_icloud.sh   # or: bolt icloud run --apply
 ```
 This copies everything *except* `recordings/` (too large for iCloud) into your iCloud Drive. iCloud then syncs it automatically to your other MacBook.
 
@@ -150,7 +153,7 @@ python3 launch.py            # go
 | Phase 1 | Dashboard + personality shell | ✅ Done (Bolt_Checkup.html in docs/) |
 | Phase 2 | Live API connections | ✅ Done |
 | Phase 3 | Voice + personality layer | 🔄 Almost there (Apr 28 2026) - env verified via `--check`, TWITCH_BOT_TOKEN active, LLM via `LLM_Handler`. Still needs live `!Bolt hi` test in chat to confirm twitchio connection works. |
-| Phase 4 | Self-improving memory | 🔄 Started - Bolt_Memory.py / Bolt_Search.py / Brain_Controller.py / Think_Learn_Decide.py scaffolded, NOT yet integrated |
+| Phase 4 | Self-improving memory | 🔄 Started - Bolt_Memory.py CLI PARTIAL via `bolt memory`; Memory_Search.py CLI PARTIAL via `bolt memsearch` (semantic retrieve over Memory_Index); Bolt_Search.py is READY web search (not memory); Brain_Controller.py READY via `bolt brain` (compat; Think_Learn_Decide canonical in bot.py); motion-detection IDEA still deferred (no engine); 15 Sep ~2:40 AM CT soft-fail hunt empty (same as 15 Sep ~12:51 AM CT; 14 Sep ~8:41 PM / ~6:40 PM / ~4:51 PM / ~3:18 PM / ~1:01 PM / ~10:40 AM / ~9:12 AM / ~6:42 AM) |
 | Quality Gating | Hard confidence + tier system | ✅ Done Apr 28 2026 |
 | Performance Loop | log_clip_performance.py CLI + sync_tiktok_stats.py (TikTok API) | ✅ Manual log Apr 28 2026; auto TikTok pull Aug 2026 (needs video.list token) |
 

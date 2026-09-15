@@ -385,18 +385,25 @@ class StreamMonitor:
             notify(
                 f"Scene changed to '{scene_name}' (no game mapping)",
                 level="info",
-                reason=f"Add '{scene_name}' to configs/scene_game_mapping.json to enable auto-tracking.",
+                reason=f"Add '{scene_name}' to Data/configs/scene_game_mapping.json to enable auto-tracking.",
             )
 
     def _get_game_for_scene(self, scene_name: str) -> Optional[str]:
         """
         Load scene-to-game mapping and return the game title for this scene.
         Returns None if no mapping exists.
+
+        Post-reorg path: Data/configs/scene_game_mapping.json (preferred).
+        Falls back to legacy repo-root configs/ or Core/configs/ if present.
         """
-        mapping_file = (
-            Path(__file__).parent.parent / "configs" / "scene_game_mapping.json"
-        )
-        if not mapping_file.exists():
+        repo = Path(__file__).resolve().parents[2]
+        candidates = [
+            repo / "Data" / "configs" / "scene_game_mapping.json",
+            repo / "configs" / "scene_game_mapping.json",
+            Path(__file__).resolve().parent.parent / "configs" / "scene_game_mapping.json",
+        ]
+        mapping_file = next((c for c in candidates if c.is_file()), None)
+        if mapping_file is None:
             return None
 
         try:

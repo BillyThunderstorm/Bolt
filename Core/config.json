@@ -1,5 +1,5 @@
 {
-  "game": "007 First Light",
+  "game": "Wolverine",
   "highlight_sensitivity": 0.45,
   "max_clips_per_session": 5,
   "max_highlight_candidates": 12,
@@ -106,8 +106,8 @@
       "shared_journal": "1paZNFGea-RBAwQ5YMxpuXN8OBRH7R33RAkakYZ23Tfw",
       "daily_log_2026_08_31": "1RwUyRhjPGjpugrHLkUvyQAog09YMadiMebeZCn0dlLQ",
       "archive_word": "138abBq9A-zWY0MZCBeyXxRCuwtsjxjeK",
-      "daily_log_today": "1EPMfX2eLauGLQ5Ovb1o9NnoTSo2JhLABdQYMh_ViWKU",
-      "daily_log_today_date": "2026-09-09",
+      "daily_log_today": "1cwmARgNoFvIwsD5wpeWrAjA_LAlDPXRYoFQyuccIeQQ",
+      "daily_log_today_date": "2026-09-14",
       "daily_log_2026_09_01": "1kQw-ggIqYQQ17Q57IZi_WbcSnbsmOFHABU-6BxdQcR0",
       "daily_log_2026_09_02": "1pKN4-h_xuFu1A-rNSxg35_b8WVBhR--dDXA9OnPJ9JE",
       "daily_log_2026_09_03": "1d_yRmAnJF_697LKHGmXBqmQAaCYsGEDFZRP-McDEuHg",
@@ -115,7 +115,13 @@
       "daily_log_2026_09_06": "1e-lH4F9Ja9D7KBju6U-Df8AK1RjoGE8ewg7ycxVSj0s",
       "daily_log_2026_09_07": "1XJ0v3JvK534PbH_n14UsaWFmQs78Qg5K1tOHRvu_kfc",
       "daily_log_2026_09_08": "1MexP0T-XzjsX_FX98dX3Z9QzuB7xV2uut_cFvqxR-pI",
-      "daily_log_2026_09_09": "1EPMfX2eLauGLQ5Ovb1o9NnoTSo2JhLABdQYMh_ViWKU"
+      "daily_log_2026_09_09": "1EPMfX2eLauGLQ5Ovb1o9NnoTSo2JhLABdQYMh_ViWKU",
+      "daily_log_2026_09_10": "1ZNGnubNrYGQ_kb2L_jKR1Dk00dMRUr4nv9vKpMwSAKM",
+      "daily_log_2026_09_11": "1WyipZY0tVAZ-fU6f9fm8zun6YaRtS0dg6_VtDRAUuZ0",
+      "daily_log_2026_09_12": "1EONNKlbr9_yZC_WBWXQxC_dAf1OPmPM5lfkMlqBNCJo",
+      "daily_log_2026_09_13": "1ny1lPoWWhZnmaH1B3sa3HmLDkiXYfFfNmdotshJe4DE",
+      "daily_log_2026_09_05": "1HRA4zb-mlDK1d6CWhrZaCJ_ZrXZ58x4JcDIwNiicrL8",
+      "daily_log_2026_09_14": "1cwmARgNoFvIwsD5wpeWrAjA_LAlDPXRYoFQyuccIeQQ"
     },
     "folders": {
       "00_Brand": "1YHZSqjoP7JPNP7NPChdgCRQH80advpHj",
@@ -126,6 +132,7 @@
       "05_Ready_To_Post": "1tTOf1h3b_PEU3VQjX_zAJAfkvCqJNFSU",
       "06_Learnings": "1oPmHtmY28r_fPjr5cYwiYb5BUDdQCWLH",
       "07_Code_And_System": "1KElSeoxBkUJTyDx8CBIm-BH1_XxSjDzy"
-    }
+    },
+    "local_bolt_now": "Docs/BOLT_NOW.md"
   }
 }

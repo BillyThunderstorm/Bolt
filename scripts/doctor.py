@@ -374,15 +374,39 @@ def collect_paths() -> list[Check]:
     except Exception as exc:
         checks.append(_check("paths", "bolt memory import", "broken", str(exc)[:160]))
 
+    layout_check = REPO_ROOT / "scripts" / "check_layout.py"
+    if layout_check.exists():
+        checks.append(
+            _check(
+                "paths",
+                "check_layout.py",
+                "info",
+                "PARTIAL via bolt layout (report-only soft-fail; never moves; prefer this doctor for full audit).",
+                found=_rel(layout_check),
+            )
+        )
+
     health_check = REPO_ROOT / "scripts" / "health_check.py"
     if health_check.exists():
         checks.append(
             _check(
                 "paths",
-                "legacy health_check.py",
+                "health_check.py",
                 "info",
-                "pre-reorg CWD paths; not wired to the CLI. Use bolt doctor.",
+                "PARTIAL via bolt health (post-reorg _paths); prefer this doctor for full audit.",
                 found=_rel(health_check),
+            )
+        )
+
+    clip_dedupe_script = REPO_ROOT / "scripts" / "clip_deduplicator.py"
+    if clip_dedupe_script.exists():
+        checks.append(
+            _check(
+                "paths",
+                "clip_deduplicator.py",
+                "info",
+                "PARTIAL via bolt clip-dedupe (SHA256; fixed parents[3]; not pipeline pHash). Layout audit PARTIAL via bolt layout (report-only soft-fail; never moves).",
+                found=_rel(clip_dedupe_script),
             )
         )
 
@@ -457,7 +481,7 @@ def collect_titles(config: dict, ollama: dict[str, Any]) -> list[Check]:
             "live",
             "bolt titles status|train|ab — learns from Data/performance_outcomes.jsonl "
             "into Data/viral_titles_model.json. Preview/edit still: bolt queue title. "
-            "Performance: bolt stats / bolt log_perf.",
+            "Performance: bolt stats / bolt log-perf (PARTIAL soft-fail).",
         )
     )
     return checks
@@ -657,7 +681,7 @@ def collect_social() -> list[Check]:
                 "social",
                 "tiktok",
                 "disabled",
-                tiktok.get("next_step") or "TikTok API paused; log_perf after posting",
+                tiktok.get("next_step") or "TikTok API paused; bolt log-perf after posting",
             )
         )
     elif tiktok.get("ready"):
@@ -746,7 +770,7 @@ def collect_integrations(config: dict) -> list[Check]:
             "integrations",
             "discord",
             "live" if discord else "disabled",
-            "DISCORD_WEBHOOK_URL set" if discord else "unset (optional; bolt discord status — not a bot; alerts use Mac/iMessage/email)",
+            "DISCORD_WEBHOOK_URL set" if discord else "unset (optional; bolt discord status — not a bot; preferred alerts: bolt alerts status)",
         )
     )
 
@@ -903,6 +927,886 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
+
+    # Mac automation launchd/cron/Shortcuts (PARTIAL — soft-fail via bolt mac-auto)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Mac_Automation import status as _macauto_status
+
+        _ma = _macauto_status()
+        ma_ready = bool(_ma.get("ready"))
+        ma_detail = (
+            f"launchd/cron/shortcuts pieces ok; bolt mac-auto status"
+            if ma_ready
+            else (
+                (_ma.get("hint") or _ma.get("error") or "Mac automation unavailable: not ready")
+                + " (optional; bolt mac-auto status)"
+            )
+        )
+        if len(ma_detail) > 160:
+            ma_detail = ma_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "mac-automation",
+                "live" if ma_ready else "disabled",
+                ma_detail,
+            )
+        )
+    except Exception as _ma_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "mac-automation",
+                "disabled",
+                f"Mac automation unavailable: doctor import failed ({_ma_exc})",
+            )
+        )
+
+
+    # Apple Reminders delivery (PARTIAL — soft-fail via bolt reminders)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Apple_Reminders import status as _reminders_status
+
+        _rem = _reminders_status()
+        rem_ready = bool(_rem.get("ready"))
+        rem_detail = (
+            f"Reminders tooling ok; bolt reminders status"
+            if rem_ready
+            else (
+                (_rem.get("hint") or _rem.get("error") or "Reminders unavailable: not ready")
+                + " (optional; bolt reminders status)"
+            )
+        )
+        if len(rem_detail) > 160:
+            rem_detail = rem_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "apple-reminders",
+                "live" if rem_ready else "disabled",
+                rem_detail,
+            )
+        )
+    except Exception as _rem_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "apple-reminders",
+                "disabled",
+                f"Reminders unavailable: doctor import failed ({_rem_exc})",
+            )
+        )
+
+    # Photo / handwriting OCR (PARTIAL — soft-fail via bolt photo-ocr)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Photo_OCR import status as _photo_ocr_status
+
+        _poc = _photo_ocr_status()
+        poc_ready = bool(_poc.get("ready"))
+        poc_detail = (
+            f"Photo OCR tooling ok; bolt photo-ocr status"
+            if poc_ready
+            else (
+                (_poc.get("hint") or _poc.get("error") or "Photo OCR unavailable: not ready")
+                + " (optional; bolt photo-ocr status)"
+            )
+        )
+        if len(poc_detail) > 160:
+            poc_detail = poc_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "photo-ocr",
+                "live" if poc_ready else "disabled",
+                poc_detail,
+            )
+        )
+    except Exception as _poc_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "photo-ocr",
+                "disabled",
+                f"Photo OCR unavailable: doctor import failed ({_poc_exc})",
+            )
+        )
+
+    # HandBrake clip compression (PARTIAL — soft-fail via bolt compress)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Video_Compress import status as _compress_status
+
+        _vc = _compress_status()
+        vc_ready = bool(_vc.get("ready"))
+        vc_detail = (
+            f"Compress tooling ok; bolt compress status"
+            if vc_ready
+            else (
+                (_vc.get("hint") or _vc.get("error") or "Compress unavailable: not ready")
+                + " (optional; bolt compress status)"
+            )
+        )
+        if len(vc_detail) > 160:
+            vc_detail = vc_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "video-compress",
+                "live" if vc_ready else "disabled",
+                vc_detail,
+            )
+        )
+    except Exception as _vc_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "video-compress",
+                "disabled",
+                f"Compress unavailable: doctor import failed ({_vc_exc})",
+            )
+        )
+
+
+
+
+    # Performance baseline (PARTIAL — soft-fail via bolt performance)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Performance_Baseline import status as _baseline_status
+
+        _bl = _baseline_status()
+        bl_ready = bool(_bl.get("ready"))
+        bl_detail = (
+            f"Baseline tooling ok; bolt performance status"
+            if bl_ready
+            else (
+                (_bl.get("hint") or _bl.get("error") or "Baseline unavailable: not ready")
+                + " (optional; bolt performance status)"
+            )
+        )
+        if len(bl_detail) > 160:
+            bl_detail = bl_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "performance-baseline",
+                "live" if bl_ready else "disabled",
+                bl_detail,
+            )
+        )
+    except Exception as _bl_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "performance-baseline",
+                "disabled",
+                f"Baseline unavailable: doctor import failed ({_bl_exc})",
+            )
+        )
+
+
+
+
+    # Weekly analysis (PARTIAL — soft-fail via bolt weekly)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Weekly_Analysis import status as _weekly_status
+
+        _wk = _weekly_status()
+        wk_ready = bool(_wk.get("ready"))
+        wk_detail = (
+            f"Weekly tooling ok; bolt weekly status"
+            if wk_ready
+            else (
+                (_wk.get("hint") or _wk.get("error") or "Weekly unavailable: not ready")
+                + " (optional; bolt weekly status)"
+            )
+        )
+        if len(wk_detail) > 160:
+            wk_detail = wk_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "weekly-analysis",
+                "live" if wk_ready else "disabled",
+                wk_detail,
+            )
+        )
+    except Exception as _wk_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "weekly-analysis",
+                "disabled",
+                f"Weekly unavailable: doctor import failed ({_wk_exc})",
+            )
+        )
+
+
+    # Clip backlog score filter (PARTIAL — soft-fail via bolt filter-backlog)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Filter_Backlog import status as _filter_status
+
+        _fb = _filter_status()
+        fb_ready = bool(_fb.get("ready"))
+        fb_detail = (
+            f"Backlog filter tooling ok; bolt filter-backlog status"
+            if fb_ready
+            else (
+                (_fb.get("hint") or _fb.get("error") or "Backlog unavailable: not ready")
+                + " (optional; bolt filter-backlog status)"
+            )
+        )
+        if len(fb_detail) > 160:
+            fb_detail = fb_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "filter-backlog",
+                "live" if fb_ready else "disabled",
+                fb_detail,
+            )
+        )
+    except Exception as _fb_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "filter-backlog",
+                "disabled",
+                f"Backlog unavailable: doctor import failed ({_fb_exc})",
+            )
+        )
+
+    # Local highlight reel stitch (PARTIAL — soft-fail via bolt make-highlights)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Make_Highlights import status as _mh_status
+
+        _mh = _mh_status()
+        mh_ready = bool(_mh.get("ready"))
+        mh_detail = (
+            f"Highlights tooling ok; bolt make-highlights status"
+            if mh_ready
+            else (
+                (_mh.get("hint") or _mh.get("error") or "Highlights unavailable: not ready")
+                + " (optional; bolt make-highlights status)"
+            )
+        )
+        if len(mh_detail) > 160:
+            mh_detail = mh_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "make-highlights",
+                "live" if mh_ready else "disabled",
+                mh_detail,
+            )
+        )
+    except Exception as _mh_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "make-highlights",
+                "disabled",
+                f"Highlights unavailable: doctor import failed ({_mh_exc})",
+            )
+        )
+
+    # Vertical reprocess + multi-platform queue (PARTIAL — soft-fail via bolt reprocess)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Reprocess_Clips import status as _rp_status
+
+        _rp = _rp_status()
+        rp_ready = bool(_rp.get("ready"))
+        rp_detail = (
+            f"Reprocess tooling ok; bolt reprocess status"
+            if rp_ready
+            else (
+                (_rp.get("hint") or _rp.get("error") or "Reprocess unavailable: not ready")
+                + " (optional; bolt reprocess status)"
+            )
+        )
+        if len(rp_detail) > 160:
+            rp_detail = rp_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "reprocess",
+                "live" if rp_ready else "disabled",
+                rp_detail,
+            )
+        )
+    except Exception as _rp_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "reprocess",
+                "disabled",
+                f"Reprocess unavailable: doctor import failed ({_rp_exc})",
+            )
+        )
+
+    # Lightweight health smoke (PARTIAL — soft-fail via bolt health; prefer this doctor)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Health_Check import status as _hc_status
+
+        _hc = _hc_status()
+        hc_ready = bool(_hc.get("ready"))
+        hc_detail = (
+            f"Health smoke ok; bolt health status (prefer bolt doctor)"
+            if hc_ready
+            else (
+                (_hc.get("hint") or _hc.get("error") or "Health check unavailable: not ready")
+                + " (optional; bolt health status)"
+            )
+        )
+        if len(hc_detail) > 160:
+            hc_detail = hc_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "health",
+                "live" if hc_ready else "disabled",
+                hc_detail,
+            )
+        )
+    except Exception as _hc_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "health",
+                "disabled",
+                f"Health check unavailable: doctor import failed ({_hc_exc})",
+            )
+        )
+
+
+
+
+
+
+    # SMS/email notify CLI (PARTIAL — soft-fail via bolt send; prefers Bolt_Alerts)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Send_Notify import status as _send_status
+
+        _sn = _send_status()
+        sn_ready = bool(_sn.get("ready"))
+        sn_detail = (
+            "send/notify ok; bolt send status (Bolt_Alerts / send_notification)"
+            if sn_ready
+            else (
+                (_sn.get("hint") or _sn.get("error") or "Notify unavailable: not ready")
+                + " (optional; bolt send status)"
+            )
+        )
+        if len(sn_detail) > 160:
+            sn_detail = sn_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "send_notify",
+                "live" if sn_ready else "disabled",
+                sn_detail,
+            )
+        )
+    except Exception as _sn_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "send_notify",
+                "disabled",
+                f"Notify unavailable: doctor import failed ({_sn_exc})",
+            )
+        )
+
+    # Local ICS calendar feeds (PARTIAL — soft-fail via bolt calendar; not bolt gcal)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.ICS_Calendar import status as _ics_status
+
+        _ics = _ics_status()
+        ics_ready = bool(_ics.get("ready"))
+        ics_detail = (
+            f"ICS calendar ok; bolt calendar status (Data/calendar/*.ics)"
+            if ics_ready
+            else (
+                (_ics.get("hint") or _ics.get("error") or "Calendar unavailable: not ready")
+                + " (optional; bolt calendar status)"
+            )
+        )
+        if len(ics_detail) > 160:
+            ics_detail = ics_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "ics_calendar",
+                "live" if ics_ready else "disabled",
+                ics_detail,
+            )
+        )
+    except Exception as _ics_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "ics_calendar",
+                "disabled",
+                f"Calendar unavailable: doctor import failed ({_ics_exc})",
+            )
+        )
+
+    # Memory index rebuild CLI (PARTIAL — soft-fail via bolt refresh-memory; not briefing retrieve)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Refresh_Memory import status as _rm_status
+
+        _rm = _rm_status()
+        rm_ready = bool(_rm.get("ready"))
+        rm_detail = (
+            f"Memory refresh ok; bolt refresh-memory status (Data/memory_index.json)"
+            if rm_ready
+            else (
+                (_rm.get("hint") or _rm.get("error") or "Memory refresh unavailable: not ready")
+                + " (optional; bolt refresh-memory status)"
+            )
+        )
+        if len(rm_detail) > 160:
+            rm_detail = rm_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "refresh_memory",
+                "live" if rm_ready else "disabled",
+                rm_detail,
+            )
+        )
+    except Exception as _rm_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "refresh_memory",
+                "disabled",
+                f"Memory refresh unavailable: doctor import failed ({_rm_exc})",
+            )
+        )
+
+    # Long-term memory store (PARTIAL — soft-fail via bolt memory; not refresh-memory / briefing retrieve)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Bolt_Memory import status as _bm_status
+
+        _bm = _bm_status()
+        bm_ready = bool(_bm.get("ready"))
+        bm_detail = (
+            "Bolt memory ok; bolt memory status (Data/MEMORY.md + memory dirs)"
+            if bm_ready
+            else (
+                (_bm.get("hint") or _bm.get("error") or "Bolt memory unavailable: not ready")
+                + " (optional; bolt memory status)"
+            )
+        )
+        if len(bm_detail) > 160:
+            bm_detail = bm_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "bolt_memory",
+                "live" if bm_ready else "disabled",
+                bm_detail,
+            )
+        )
+    except Exception as _bm_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "bolt_memory",
+                "disabled",
+                f"Bolt memory unavailable: doctor import failed ({_bm_exc})",
+            )
+        )
+
+    # Folder watch CLI (PARTIAL — soft-fail via bolt watch; prefer bolt launch)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Folder_Watch import status as _fw_status
+
+        _fw = _fw_status()
+        fw_ready = bool(_fw.get("ready"))
+        fw_detail = (
+            f"Folder watch ok; bolt watch status (Data/processed_recordings.json)"
+            if fw_ready
+            else (
+                (_fw.get("hint") or _fw.get("error") or "Watch unavailable: not ready")
+                + " (optional; bolt watch status)"
+            )
+        )
+        if len(fw_detail) > 160:
+            fw_detail = fw_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "folder_watch",
+                "live" if fw_ready else "disabled",
+                fw_detail,
+            )
+        )
+    except Exception as _fw_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "folder_watch",
+                "disabled",
+                f"Watch unavailable: doctor import failed ({_fw_exc})",
+            )
+        )
+
+    # OBS scene→config game tracker (PARTIAL — soft-fail via bolt obs-game; not bolt obs)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.OBS_Game_Tracker import status as _ogt_status
+
+        _ogt = _ogt_status()
+        ogt_ready = bool(_ogt.get("ready"))
+        ogt_detail = (
+            f"OBS game tracker ok; bolt obs-game status (Data/configs/scene_game_mapping.json)"
+            if ogt_ready
+            else (
+                (_ogt.get("hint") or _ogt.get("error") or "Game tracker unavailable: not ready")
+                + " (optional; bolt obs-game status)"
+            )
+        )
+        if len(ogt_detail) > 160:
+            ogt_detail = ogt_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "obs_game_tracker",
+                "live" if ogt_ready else "disabled",
+                ogt_detail,
+            )
+        )
+    except Exception as _ogt_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "obs_game_tracker",
+                "disabled",
+                f"Game tracker unavailable: doctor import failed ({_ogt_exc})",
+            )
+        )
+
+    # Dictionary / spellcheck / thesaurus (READY — local spell via bolt word)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Word_Lookup import status as _word_status
+
+        _wl = _word_status()
+        wl_ready = bool(_wl.get("ready"))
+        wl_detail = (
+            f"Word lookup ok; bolt word status ({_wl.get('word_count') or 0} words)"
+            if wl_ready
+            else (
+                (_wl.get("hint") or _wl.get("error") or "Word lookup unavailable: not ready")
+                + " (optional; bolt word status)"
+            )
+        )
+        if len(wl_detail) > 160:
+            wl_detail = wl_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "word-lookup",
+                "live" if wl_ready else "disabled",
+                wl_detail,
+            )
+        )
+    except Exception as _wl_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "word-lookup",
+                "disabled",
+                f"Word lookup unavailable: doctor import failed ({_wl_exc})",
+            )
+        )
+
+    # iCloud Drive multi-Mac sync (PARTIAL — soft-fail via bolt icloud; not bolt mac-auto)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.ICloud_Sync import status as _icl_status
+
+        _icl = _icl_status()
+        icl_ready = bool(_icl.get("ready"))
+        icl_detail = (
+            "iCloud sync ok; bolt icloud status (scripts/move_to_icloud.sh)"
+            if icl_ready
+            else (
+                (_icl.get("hint") or _icl.get("error") or "iCloud unavailable: not ready")
+                + " (optional; bolt icloud status)"
+            )
+        )
+        if len(icl_detail) > 160:
+            icl_detail = icl_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "icloud_sync",
+                "live" if icl_ready else "disabled",
+                icl_detail,
+            )
+        )
+    except Exception as _icl_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "icloud_sync",
+                "disabled",
+                f"iCloud unavailable: doctor import failed ({_icl_exc})",
+            )
+        )
+
+    # Per-game sensitivity profiles (PARTIAL — soft-fail via bolt game-config; not bolt obs-game)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Game_Config import status as _gc_status
+
+        _gc = _gc_status()
+        gc_ready = bool(_gc.get("ready"))
+        gc_detail = (
+            "Game config ok; bolt game-config status "
+            f"(builtin={_gc.get('builtin_profile_count')})"
+            if gc_ready
+            else (
+                (_gc.get("hint") or _gc.get("error") or "Game config unavailable: not ready")
+                + " (optional; bolt game-config status)"
+            )
+        )
+        if len(gc_detail) > 160:
+            gc_detail = gc_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "game_config",
+                "live" if gc_ready else "disabled",
+                gc_detail,
+            )
+        )
+    except Exception as _gc_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "game_config",
+                "disabled",
+                f"Game config unavailable: doctor import failed ({_gc_exc})",
+            )
+        )
+
+    # Error recovery / quarantine (PARTIAL — soft-fail via bolt error-recovery; not discord/alerts)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Error_Recovery import status as _er_status
+
+        _er = _er_status()
+        er_ready = bool(_er.get("ready"))
+        er_detail = (
+            "Error recovery ok; bolt error-recovery status "
+            f"(quarantine={_er.get('quarantine_count', 0)})"
+            if er_ready
+            else (
+                (_er.get("hint") or _er.get("error") or "Error recovery unavailable: not ready")
+                + " (optional; bolt error-recovery status)"
+            )
+        )
+        if len(er_detail) > 160:
+            er_detail = er_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "error_recovery",
+                "live" if er_ready else "disabled",
+                er_detail,
+            )
+        )
+    except Exception as _er_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "error_recovery",
+                "disabled",
+                f"Error recovery unavailable: doctor import failed ({_er_exc})",
+            )
+        )
+
+    # Phase 4 semantic memory search (PARTIAL — soft-fail via bolt memsearch; not web search / LLM memory)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Memory_Search import status as _ms_status
+
+        _ms = _ms_status()
+        ms_ready = bool(_ms.get("ready"))
+        ms_detail = (
+            "Memory search ok; bolt memsearch status "
+            f"(entries={_ms.get('index_entry_count', 0)})"
+            if ms_ready
+            else (
+                (_ms.get("hint") or _ms.get("error") or "Memory search unavailable: not ready")
+                + " (optional; bolt memsearch status)"
+            )
+        )
+        if len(ms_detail) > 160:
+            ms_detail = ms_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "memsearch",
+                "live" if ms_ready else "disabled",
+                ms_detail,
+            )
+        )
+    except Exception as _ms_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "memsearch",
+                "disabled",
+                f"Memory search unavailable: doctor import failed ({_ms_exc})",
+            )
+        )
+
+    # Manual clip performance logger (PARTIAL — soft-fail via bolt log-perf; not bolt stats)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Log_Perf import status as _lp_status
+
+        _lp = _lp_status()
+        lp_ready = bool(_lp.get("ready"))
+        lp_detail = (
+            f"Log perf ok; bolt log-perf status (Data/performance_outcomes.jsonl)"
+            if lp_ready
+            else (
+                (_lp.get("hint") or _lp.get("error") or "Log perf unavailable: not ready")
+                + " (optional; bolt log-perf status)"
+            )
+        )
+        if len(lp_detail) > 160:
+            lp_detail = lp_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "log_perf",
+                "live" if lp_ready else "disabled",
+                lp_detail,
+            )
+        )
+    except Exception as _lp_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "log_perf",
+                "disabled",
+                f"Log perf unavailable: doctor import failed ({_lp_exc})",
+            )
+        )
+
+    # SHA256 hash dedupe (PARTIAL — soft-fail via bolt clip-dedupe; not pipeline pHash)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Hash_Dedupe import status as _hd_status
+
+        _hd = _hd_status()
+        hd_ready = bool(_hd.get("ready"))
+        hd_detail = (
+            f"Hash dedupe ok; bolt clip-dedupe status (Data/media_hash_db.json)"
+            if hd_ready
+            else (
+                (_hd.get("hint") or _hd.get("error") or "Hash dedupe unavailable: not ready")
+                + " (optional; bolt clip-dedupe status)"
+            )
+        )
+        if len(hd_detail) > 160:
+            hd_detail = hd_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "hash_dedupe",
+                "live" if hd_ready else "disabled",
+                hd_detail,
+            )
+        )
+    except Exception as _hd_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "hash_dedupe",
+                "disabled",
+                f"Hash dedupe unavailable: doctor import failed ({_hd_exc})",
+            )
+        )
+
+    # Gemini persona loader (PARTIAL — soft-fail via bolt personality; not READY gemini/nexus/chat)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Bolt_Personality import status as _bp_status
+
+        _bp = _bp_status()
+        bp_ready = bool(_bp.get("ready"))
+        bp_detail = (
+            f"Personality ok; bolt personality status (Data/context/bolt-personality.md)"
+            if bp_ready
+            else (
+                (_bp.get("hint") or _bp.get("error") or "Personality unavailable: not ready")
+                + " (optional; bolt personality status)"
+            )
+        )
+        if len(bp_detail) > 160:
+            bp_detail = bp_detail[:157] + "..."
+        checks.append(
+            _check(
+                "integrations",
+                "personality",
+                "live" if bp_ready else "disabled",
+                bp_detail,
+            )
+        )
+    except Exception as _bp_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "personality",
+                "disabled",
+                f"Personality unavailable: doctor import failed ({_bp_exc})",
+            )
+        )
 
     try:
         if str(CORE_DIR) not in sys.path:

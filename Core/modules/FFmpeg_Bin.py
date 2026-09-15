@@ -60,6 +60,17 @@ def ffmpeg_bin() -> str:
     return which or "ffmpeg"
 
 
+def working_ffmpeg() -> Optional[str]:
+    """Absolute path to an ffmpeg that actually starts, else None.
+
+    ``shutil.which("ffmpeg")`` is not enough — Homebrew's PATH binary
+    often exists and then aborts on a missing dylib. Callers that spawn
+    ffmpeg (VOD samples, yt-dlp ``--ffmpeg-location``) must use this.
+    """
+    path = ffmpeg_bin()
+    return path if path and _works(path) else None
+
+
 @lru_cache(maxsize=1)
 def ffprobe_bin() -> str:
     env = (os.environ.get("BOLT_FFPROBE") or "").strip()

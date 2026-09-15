@@ -306509,6 +306509,312 @@
           "aspect_ratio": "9:16"
         }
       ]
+    },
+    {
+      "queue_id": "8290abe1",
+      "created_at": "2026-09-10T01:32:01.717735",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2870015967_clip01_audio_spike_7331_tiktok.mp4",
+          "caption": "007 First Light just hit with that audio spike.\n\n#007FirstLight #JamesBondGame #GamingClip #Gameplay #AudioSpike",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2870015967_clip01_audio_spike_7331_tiktok.mp4",
+          "title": "007 First Light just hit with that audio spike.",
+          "description": "007 First Light just hit with that audio spike.\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBondGame #GamingClip #Gameplay #AudioSpike #TikTokGaming #NewRelease #ActionGaming",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2870015967_clip01_audio_spike_7331_tiktok.mp4",
+          "caption": "007 First Light just hit with that audio spike.\n\n#007FirstLight #JamesBondGame #GamingClip #Gameplay #AudioSpike #TikTokGaming #NewRelease #ActionGaming",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2870015967_clip01_audio_spike_7331_tiktok.mp4",
+          "title": "007 First Light just hit with that audio spike.",
+          "description": "Highlight from the stream: 2870015967_clip01_audio_spike_7331_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "b0c26d7f",
+      "created_at": "2026-09-10T12:39:29.019748",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip06_audio_spike_1092_tiktok.mp4",
+          "caption": "Hit that perfect 100 in 007 First Light.\n\n#007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-11T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip06_audio_spike_1092_tiktok.mp4",
+          "title": "Hit that perfect 100 in 007 First Light.",
+          "description": "Hit that perfect 100 in 007 First Light.\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming #BondGame #Gameplay",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip06_audio_spike_1092_tiktok.mp4",
+          "caption": "Hit that perfect 100 in 007 First Light.\n\n#007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming #BondGame #Gameplay #Shorts",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip06_audio_spike_1092_tiktok.mp4",
+          "title": "Hit that perfect 100 in 007 First Light.",
+          "description": "Highlight from the stream: 2865147408_clip06_audio_spike_1092_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "e4c695e2",
+      "created_at": "2026-09-10T12:39:53.469736",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip07_audio_spike_1174_tiktok.mp4",
+          "caption": "Hit that perfect 100 in 007 First Light.\n\n#007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-11T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip07_audio_spike_1174_tiktok.mp4",
+          "title": "Hit that perfect 100 in 007 First Light.",
+          "description": "Hit that perfect 100 in 007 First Light.\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming #BondGame #Gameplay",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip07_audio_spike_1174_tiktok.mp4",
+          "caption": "Hit that perfect 100 in 007 First Light.\n\n#007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming #BondGame #Gameplay #Shorts",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip07_audio_spike_1174_tiktok.mp4",
+          "title": "Hit that perfect 100 in 007 First Light.",
+          "description": "Highlight from the stream: 2865147408_clip07_audio_spike_1174_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "04996124",
+      "created_at": "2026-09-10T12:40:19.126472",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip08_audio_spike_1236_tiktok.mp4",
+          "caption": "Hit that perfect 100 in 007 First Light.\n\n#007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-11T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip08_audio_spike_1236_tiktok.mp4",
+          "title": "Hit that perfect 100 in 007 First Light.",
+          "description": "Hit that perfect 100 in 007 First Light.\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming #BondGame #Gameplay",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip08_audio_spike_1236_tiktok.mp4",
+          "caption": "Hit that perfect 100 in 007 First Light.\n\n#007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming #BondGame #Gameplay #Shorts",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip08_audio_spike_1236_tiktok.mp4",
+          "title": "Hit that perfect 100 in 007 First Light.",
+          "description": "Highlight from the stream: 2865147408_clip08_audio_spike_1236_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "174d7bad",
+      "created_at": "2026-09-10T12:40:44.660792",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip09_audio_spike_1298_tiktok.mp4",
+          "caption": "Hit that perfect 100 in 007 First Light.\n\n#007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-11T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip09_audio_spike_1298_tiktok.mp4",
+          "title": "Hit that perfect 100 in 007 First Light.",
+          "description": "Hit that perfect 100 in 007 First Light.\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming #BondGame #Gameplay",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip09_audio_spike_1298_tiktok.mp4",
+          "caption": "Hit that perfect 100 in 007 First Light.\n\n#007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming #BondGame #Gameplay #Shorts",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip09_audio_spike_1298_tiktok.mp4",
+          "title": "Hit that perfect 100 in 007 First Light.",
+          "description": "Highlight from the stream: 2865147408_clip09_audio_spike_1298_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
+    },
+    {
+      "queue_id": "050ea88e",
+      "created_at": "2026-09-10T12:41:00.618104",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "label": "TikTok",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T19:00:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip10_audio_spike_1351_tiktok.mp4",
+          "caption": "Hit that perfect 100 in 007 First Light.\n\n#007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming",
+          "instructions": "Upload manually to TikTok with original game audio or a current trending sound.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "youtube_shorts",
+          "label": "YouTube Shorts",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-11T08:20:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip10_audio_spike_1351_tiktok.mp4",
+          "title": "Hit that perfect 100 in 007 First Light.",
+          "description": "Hit that perfect 100 in 007 First Light.\n\nDaily gaming highlights.\n\n#Shorts #Gaming #007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming #BondGame #Gameplay",
+          "instructions": "Upload manually as a YouTube Short; keep the vertical file and original audio.",
+          "max_duration_seconds": 60,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "instagram_reels",
+          "label": "Instagram Reels",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T17:40:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip10_audio_spike_1351_tiktok.mp4",
+          "caption": "Hit that perfect 100 in 007 First Light.\n\n#007FirstLight #JamesBond #GamingClip #Score100 #ActionGaming #BondGame #Gameplay #Shorts",
+          "instructions": "Upload manually as a Reel; use the same vertical clip and adjust cover frame in-app.",
+          "max_duration_seconds": 90,
+          "aspect_ratio": "9:16"
+        },
+        {
+          "platform": "kick",
+          "label": "Kick",
+          "status": "manual_upload_ready",
+          "scheduled_for": "2026-09-10T19:10:00-04:00",
+          "clip_path": "/Users/carter/developer/Bolt/media/vertical_clips/2865147408_clip10_audio_spike_1351_tiktok.mp4",
+          "title": "Hit that perfect 100 in 007 First Light.",
+          "description": "Highlight from the stream: 2865147408_clip10_audio_spike_1351_tiktok.mp4",
+          "instructions": "Share manually on Kick or use this metadata beside the stream clip.",
+          "aspect_ratio": "9:16"
+        }
+      ]
     }
   ]
 }

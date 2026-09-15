@@ -493,7 +493,7 @@ def _run_setup_wizard():
     # ── Step 2: Sensitivity ───────────────────────────────────────────────────
     print("\nSTEP 2 — Highlight sensitivity")
     print("  Controls how easily a moment is flagged as a highlight.")
-    print("  You can fine-tune this per-game later in game_configs.json.\n")
+    print("  You can fine-tune this per-game later (`bolt game-config` / Data/configs/game_configs.json).\n")
     sensitivity = ""
     while sensitivity not in ["1", "2", "3"]:
         sensitivity = (

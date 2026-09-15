@@ -33,12 +33,23 @@ Usage anywhere in Bolt:
 
     # Just load the full memory context (for injecting into other prompts)
     context = load_all_memory()
+
+CLI (PARTIAL soft-fail via ``bolt memory``):
+  status [--json] [--probe]
+  list   [--json]
+  remember "fact" [--section "Recent Notes"]
+  recall "question"
+  load   [--json]
+
+Soft-fail prefix: ``Bolt memory unavailable:``. Stay PARTIAL — LLM-gated
+recall; Phase 4 incomplete. Distinct from READY briefing retrieve and
+PARTIAL ``bolt refresh-memory`` (index rebuild).
 """
 
 import os
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 try:
     from dotenv import load_dotenv
@@ -67,6 +78,7 @@ PEOPLE_DIR = MEMORY_ROOT / "people"
 PROJECTS_DIR = MEMORY_ROOT / "projects"
 CONTEXT_DIR = MEMORY_ROOT / "context"
 CONTENT_DIR = MEMORY_ROOT / "content"
+MEMORY_DIR = MEMORY_ROOT / "memory"
 
 try:
     from modules.Memory_Index import (
@@ -445,58 +457,496 @@ def _retrieve_briefing_memory(query: str = "", limit: int = 5) -> list:
     return hits[:limit]
 
 
-# ── CLI — test from terminal ───────────────────────────────────────────────────
+# ── Soft-fail CLI (PARTIAL — bolt memory) ─────────────────────────────────────
+# Soft-fail prefix for status/list/remember/recall/load. Existing recall /
+# remember / load_all_memory APIs above stay unchanged for in-process callers.
+
+_SOFT = "Bolt memory unavailable:"
+
+
+def _soft(msg: str) -> str:
+    if msg.startswith(_SOFT):
+        return msg
+    return f"{_SOFT} {msg}"
+
+
+def _iso() -> str:
+    from datetime import timezone
+
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _openai_pkg_present() -> bool:
+    try:
+        import openai  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
+def _openai_key_meta() -> Dict[str, Any]:
+    raw = os.getenv("OPENAI_API_KEY", "") or ""
+    present = bool(raw.strip())
+    if not present:
+        return {"present": False, "redacted": ""}
+    # Redact: show first 4 + last 2 if long enough, else ***
+    s = raw.strip()
+    if len(s) >= 10:
+        redacted = f"{s[:4]}…{s[-2:]}"
+    else:
+        redacted = "***"
+    return {"present": True, "redacted": redacted}
+
+
+def _dir_meta(path: Path) -> Dict[str, Any]:
+    meta: Dict[str, Any] = {
+        "path": str(path),
+        "exists": path.exists(),
+        "is_dir": path.is_dir() if path.exists() else False,
+        "md_count": 0,
+        "size_hint": 0,
+    }
+    if path.is_dir():
+        try:
+            mds = list(path.glob("*.md"))
+            meta["md_count"] = len(mds)
+            meta["size_hint"] = sum(f.stat().st_size for f in mds if f.is_file())
+        except Exception:
+            pass
+    elif path.is_file():
+        try:
+            meta["size_hint"] = int(path.stat().st_size)
+        except Exception:
+            pass
+    return meta
+
+
+def status(*, probe: bool = False) -> Dict[str, Any]:
+    """Never raises. ready=True when hot cache or any memory dir exists."""
+    hot = _dir_meta(MEMORY_FILE)
+    hot["exists"] = MEMORY_FILE.is_file()
+    people = _dir_meta(PEOPLE_DIR)
+    projects = _dir_meta(PROJECTS_DIR)
+    context = _dir_meta(CONTEXT_DIR)
+    glossary = _dir_meta(GLOSSARY)
+    glossary["exists"] = GLOSSARY.is_file()
+    mem_dir = _dir_meta(MEMORY_DIR)
+    content = _dir_meta(CONTENT_DIR)
+
+    any_store = bool(
+        hot["exists"]
+        or people.get("is_dir")
+        or projects.get("is_dir")
+        or context.get("is_dir")
+        or glossary["exists"]
+        or mem_dir.get("is_dir")
+        or content.get("is_dir")
+    )
+
+    key_meta = _openai_key_meta()
+    openai_pkg = _openai_pkg_present()
+    mi_ok = retrieve_memory is not None
+
+    info: Dict[str, Any] = {
+        "checked_at": _iso(),
+        "ready": bool(any_store),
+        "partial": True,
+        "readiness": "PARTIAL",
+        "soft_fail_prefix": _SOFT,
+        "cli": "bolt memory",
+        "module": str(Path(__file__).resolve()),
+        "memory_root": str(MEMORY_ROOT),
+        "hot_cache": hot,
+        "people": people,
+        "projects": projects,
+        "context": context,
+        "glossary": glossary,
+        "memory_dir": mem_dir,
+        "content": content,
+        "any_store": any_store,
+        "openai_pkg": openai_pkg,
+        "openai_api_key_present": key_meta["present"],
+        "openai_api_key_redacted": key_meta["redacted"],
+        "memory_index_import": mi_ok,
+        "probe": bool(probe),
+        "probe_ok": None,
+        "probe_load_chars": None,
+        "error": "",
+        "hint": (
+            "local Data/MEMORY.md + people/projects/context/glossary/memory · "
+            "recall is LLM-gated (OPENAI_API_KEY) · distinct from READY "
+            "briefing retrieve + PARTIAL bolt refresh-memory · stay PARTIAL"
+        ),
+        "is_stranger_ready": False,
+    }
+
+    if not any_store:
+        info["error"] = _soft(
+            "no local memory store yet (Data/MEMORY.md or people|projects|"
+            "context|glossary|memory|content)"
+        )
+        info["ready"] = False
+
+    if probe:
+        try:
+            # Optional import openai (does not require key for import)
+            if openai_pkg:
+                import openai  # noqa: F401
+
+            blob = load_all_memory()
+            info["probe_load_chars"] = len(blob or "")
+            info["probe_ok"] = True
+        except Exception as exc:
+            info["probe_ok"] = False
+            info["error"] = _soft(str(exc) or type(exc).__name__)
+    return info
+
+
+def list_items() -> List[Dict[str, Any]]:
+    st = status(probe=False)
+    rows: List[Dict[str, Any]] = []
+    for key in (
+        "hot_cache",
+        "people",
+        "projects",
+        "context",
+        "glossary",
+        "memory_dir",
+        "content",
+    ):
+        meta = st.get(key) or {}
+        ok = bool(meta.get("exists") or meta.get("is_dir"))
+        detail = meta.get("path") or key
+        if meta.get("md_count"):
+            detail = f"{detail} md={meta['md_count']}"
+        elif meta.get("size_hint"):
+            detail = f"{detail} bytes={meta['size_hint']}"
+        rows.append({"id": key, "ok": ok, "detail": detail})
+    rows.append(
+        {
+            "id": "openai_pkg",
+            "ok": bool(st.get("openai_pkg")),
+            "detail": "openai package" + (" installed" if st.get("openai_pkg") else " missing"),
+        }
+    )
+    rows.append(
+        {
+            "id": "openai_api_key",
+            "ok": bool(st.get("openai_api_key_present")),
+            "detail": (
+                f"OPENAI_API_KEY present ({st.get('openai_api_key_redacted')})"
+                if st.get("openai_api_key_present")
+                else "OPENAI_API_KEY missing"
+            ),
+        }
+    )
+    rows.append(
+        {
+            "id": "memory_index_import",
+            "ok": bool(st.get("memory_index_import")),
+            "detail": "Memory_Index import "
+            + ("ok" if st.get("memory_index_import") else "unavailable"),
+        }
+    )
+    rows.append(
+        {
+            "id": "soft_fail",
+            "ok": True,
+            "detail": (
+                f"prefix {_SOFT!r}; stay PARTIAL; distinct from READY "
+                "briefing retrieve + PARTIAL bolt refresh-memory"
+            ),
+        }
+    )
+    return rows
+
+
+def try_remember(
+    fact: str,
+    section: str = "Recent Notes",
+) -> Dict[str, Any]:
+    """Wrap remember(); soft-fail on write failure. Never raises."""
+    out: Dict[str, Any] = {
+        "ok": False,
+        "error": "",
+        "fact": fact,
+        "section": section,
+        "path": str(MEMORY_FILE),
+    }
+    if not (fact or "").strip():
+        out["error"] = _soft("empty fact")
+        return out
+    try:
+        ok = bool(remember(fact.strip(), section=section or "Recent Notes"))
+        out["ok"] = ok
+        if not ok:
+            out["error"] = _soft("write failed")
+        return out
+    except Exception as exc:
+        out["ok"] = False
+        out["error"] = _soft(str(exc) or type(exc).__name__)
+        return out
+
+
+def try_recall(question: str, *, quiet: bool = True) -> Dict[str, Any]:
+    """Wrap recall(); soft-fail when openai/key/API missing. Never raises."""
+    out: Dict[str, Any] = {
+        "ok": False,
+        "error": "",
+        "question": question,
+        "answer": "",
+    }
+    if not (question or "").strip():
+        out["error"] = _soft("empty question")
+        print(out["error"])
+        return out
+
+    if not _openai_pkg_present():
+        out["error"] = _soft("openai package not installed")
+        print(out["error"])
+        return out
+
+    if not (os.getenv("OPENAI_API_KEY", "") or "").strip():
+        out["error"] = _soft("OPENAI_API_KEY not set in .env")
+        print(out["error"])
+        return out
+
+    try:
+        answer = recall(question.strip(), quiet=quiet)
+        # Existing recall() returns error strings instead of raising
+        if isinstance(answer, str) and (
+            answer.startswith("openai package")
+            or answer.startswith("OPENAI_API_KEY")
+            or answer.startswith("Recall failed:")
+        ):
+            out["error"] = _soft(answer)
+            print(out["error"])
+            return out
+        out["ok"] = True
+        out["answer"] = answer or ""
+        return out
+    except Exception as exc:
+        out["error"] = _soft(str(exc) or type(exc).__name__)
+        print(out["error"])
+        return out
+
+
+def try_load(*, truncate: int = 0) -> Dict[str, Any]:
+    """Dump load_all_memory summary. Local, no LLM. Never raises."""
+    out: Dict[str, Any] = {
+        "ok": False,
+        "error": "",
+        "chars": 0,
+        "text": "",
+        "truncated": False,
+    }
+    try:
+        blob = load_all_memory() or ""
+        out["chars"] = len(blob)
+        if truncate and truncate > 0 and len(blob) > truncate:
+            out["text"] = blob[:truncate] + "\n… [truncated]"
+            out["truncated"] = True
+        else:
+            out["text"] = blob
+        out["ok"] = True
+        return out
+    except Exception as exc:
+        out["error"] = _soft(str(exc) or type(exc).__name__)
+        return out
+
+
+def _print_status(info: Dict[str, Any], as_json: bool) -> int:
+    import json as _json
+
+    if as_json:
+        print(_json.dumps(info, indent=2))
+    else:
+        ready = "yes" if info.get("ready") else "no"
+        print(f"bolt-memory readiness: {info.get('readiness')}  ready={ready}")
+        print(f"  root:    {info.get('memory_root')}")
+        hot = info.get("hot_cache") or {}
+        print(f"  MEMORY.md: present={hot.get('exists')}  path={hot.get('path')}")
+        for label, key in (
+            ("people", "people"),
+            ("projects", "projects"),
+            ("context", "context"),
+            ("glossary", "glossary"),
+            ("memory/", "memory_dir"),
+            ("content", "content"),
+        ):
+            meta = info.get(key) or {}
+            present = meta.get("exists") or meta.get("is_dir")
+            extra = ""
+            if meta.get("md_count"):
+                extra = f" md={meta['md_count']}"
+            print(f"  {label}: present={bool(present)}{extra}")
+        print(f"  openai pkg: {info.get('openai_pkg')}")
+        print(
+            f"  OPENAI_API_KEY: present={info.get('openai_api_key_present')}"
+            + (
+                f" ({info.get('openai_api_key_redacted')})"
+                if info.get("openai_api_key_present")
+                else ""
+            )
+        )
+        print(f"  Memory_Index import: {info.get('memory_index_import')}")
+        if info.get("probe"):
+            print(
+                f"  probe_ok: {info.get('probe_ok')}  "
+                f"load_chars={info.get('probe_load_chars')}"
+            )
+        if info.get("error"):
+            print(f"  {info['error']}")
+        else:
+            print(f"  hint: {info.get('hint')}")
+    return 0
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    import argparse
+    import json as _json
+    import sys as _sys
+
+    argv = list(_sys.argv[1:] if argv is None else argv)
+
+    # Back-compat: legacy flags → new actions
+    if argv and argv[0] not in (
+        "status",
+        "list",
+        "remember",
+        "recall",
+        "load",
+        "-h",
+        "--help",
+    ):
+        if argv[0] == "--load":
+            argv = ["load"] + argv[1:]
+        elif argv[0] == "--remember":
+            argv = ["remember"] + argv[1:]
+        elif argv[0] in ("--refresh-index", "--search"):
+            # Legacy ops kept as soft messages — use bolt refresh-memory / search
+            print(
+                _soft(
+                    f"legacy flag {argv[0]!r} retired here — "
+                    "use bolt refresh-memory / bolt search"
+                )
+            )
+            return 0
+        elif argv[0].startswith("-") and argv[0] not in ("--json", "--probe"):
+            # Unknown bare flag
+            pass
+        elif not argv[0].startswith("-"):
+            # Bare question → recall (legacy default)
+            argv = ["recall"] + argv
+
+    parser = argparse.ArgumentParser(
+        prog="bolt memory",
+        description="Bolt long-term memory store (PARTIAL; soft-fail).",
+    )
+    parser.add_argument(
+        "action",
+        nargs="?",
+        default="status",
+        choices=["status", "list", "remember", "recall", "load"],
+        help="status (default) | list | remember | recall | load",
+    )
+    parser.add_argument("--json", action="store_true", help="JSON output")
+    parser.add_argument(
+        "--probe",
+        action="store_true",
+        help="status only: import openai + load_all_memory length",
+    )
+    parser.add_argument(
+        "--fact",
+        default="",
+        help="remember: fact text (alt to positional)",
+    )
+    parser.add_argument(
+        "--section",
+        default="Recent Notes",
+        help="remember: MEMORY.md section (default: Recent Notes)",
+    )
+    parser.add_argument(
+        "--truncate",
+        type=int,
+        default=4000,
+        help="load: max chars to print (0 = full; default 4000)",
+    )
+    parser.add_argument(
+        "rest",
+        nargs="*",
+        help="remember/recall: fact or question text",
+    )
+    args = parser.parse_args(argv)
+
+    if args.action == "status":
+        return _print_status(status(probe=args.probe), args.json)
+
+    if args.action == "list":
+        rows = list_items()
+        if args.json:
+            print(_json.dumps({"items": rows, "soft_fail_note": _SOFT}, indent=2))
+        else:
+            for r in rows:
+                mark = "OK" if r["ok"] else "NO"
+                print(f"[{mark}] {r['id']}: {r['detail']}")
+            print(f"(soft-fail prefix: {_SOFT!r})")
+        return 0
+
+    if args.action == "remember":
+        fact = (args.fact or "").strip()
+        if not fact:
+            fact = " ".join(args.rest).strip()
+        result = try_remember(fact, section=args.section)
+        if args.json:
+            print(_json.dumps(result, indent=2))
+        else:
+            if result.get("ok"):
+                print(f"✓ Saved to {result.get('path')}: {fact[:120]}")
+            else:
+                print(result.get("error") or _soft("remember failed"))
+        return 0
+
+    if args.action == "recall":
+        question = " ".join(args.rest).strip()
+        result = try_recall(question, quiet=True)
+        if args.json:
+            print(_json.dumps(result, indent=2))
+        else:
+            if result.get("ok"):
+                print(result.get("answer") or "")
+            # error already printed by try_recall
+        return 0
+
+    if args.action == "load":
+        trunc = 0 if args.json and args.truncate == 4000 else args.truncate
+        # For --json default to full text unless --truncate explicitly set;
+        # keep truncate for human print.
+        if args.json:
+            result = try_load(truncate=0)
+            payload = {
+                "ok": result.get("ok"),
+                "chars": result.get("chars"),
+                "error": result.get("error"),
+                "text": result.get("text"),
+            }
+            print(_json.dumps(payload, indent=2))
+        else:
+            result = try_load(truncate=args.truncate)
+            if result.get("error") and not result.get("ok"):
+                print(result["error"])
+                return 0
+            trunc_note = " truncated" if result.get("truncated") else ""
+            print(f"(chars={result.get('chars')}{trunc_note})")
+            print(result.get("text") or "")
+        return 0
+
+    print(_soft(f"unknown action {args.action!r}"))
+    return 0
+
 
 if __name__ == "__main__":
-    import sys
+    import sys as _sys
 
-    print("\n  🤖  Bolt Memory System")
-    print(f"  Memory root: {MEMORY_ROOT}")
-    print(f"  MEMORY.md exists: {MEMORY_FILE.exists()}")
-    print()
-
-    if "--load" in sys.argv:
-        print("  Full memory context:\n")
-        print(load_all_memory())
-        sys.exit(0)
-
-    if "--refresh-index" in sys.argv:
-        if refresh_memory_index is None:
-            print("  Memory index module is not available")
-            sys.exit(1)
-        payload = refresh_memory_index()
-        print(f"  Indexed {payload['entry_count']} memory entries")
-        sys.exit(0)
-
-    if "--search" in sys.argv:
-        idx = sys.argv.index("--search")
-        query = " ".join(sys.argv[idx + 1 :]).strip()
-        if not query:
-            print("  Usage: python -m modules.Bolt_Memory --search 'your query'")
-            sys.exit(1)
-        print(retrieve_context(query))
-        sys.exit(0)
-
-    if "--remember" in sys.argv:
-        idx = sys.argv.index("--remember")
-        if idx + 1 < len(sys.argv):
-            fact = sys.argv[idx + 1]
-            success = remember(fact)
-            print(f"  {'✓ Saved' if success else '✗ Failed'}: {fact}")
-        else:
-            print("  Usage: python -m modules.Bolt_Memory --remember 'your fact here'")
-        sys.exit(0)
-
-    # Default: ask a question
-    question = " ".join(a for a in sys.argv[1:] if not a.startswith("--"))
-    if question:
-        print(f"  Question: {question}")
-        print(f"  Answer:   {recall(question)}")
-    else:
-        print("  Usage:")
-        print("    python -m modules.Bolt_Memory 'What game is Billy playing?'")
-        print("    python -m modules.Bolt_Memory --load")
-        print("    python -m modules.Bolt_Memory --refresh-index")
-        print("    python -m modules.Bolt_Memory --search 'best Marvel Rivals clips'")
-        print("    python -m modules.Bolt_Memory --remember 'Phase 3 is complete'")
-    print()
+    _sys.exit(main())
