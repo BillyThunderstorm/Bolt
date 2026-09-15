@@ -70,6 +70,18 @@ class WriteIntentTests(unittest.TestCase):
         ir.try_handle_intent("let's do gaming this week")
         self.assertEqual(wc.load()["this_week"]["topic"], "gaming")
 
+    def test_define_intent_uses_word_lookup(self):
+        with patch("modules.Word_Lookup.spoken_lookup", return_value="honest, adjective: truthful.") as mocked:
+            reply = ir.try_handle_intent("define honest")
+        mocked.assert_called_once()
+        self.assertIn("honest", reply.lower())
+
+    def test_spell_intent_uses_word_lookup(self):
+        with patch("modules.Word_Lookup.spoken_spell", return_value="receive is the usual spelling.") as mocked:
+            reply = ir.try_handle_intent("how do you spell recieve")
+        mocked.assert_called_once()
+        self.assertIn("receive", reply.lower())
+
     def test_whats_this_week_is_status_not_a_write(self):
         wc.set_week("tech")
         with patch.object(ir, "_write_week_set") as mocked:
@@ -129,6 +141,39 @@ class WriteIntentTests(unittest.TestCase):
 
     def test_chat_falls_through(self):
         self.assertIsNone(ir.try_handle_intent("Just chatting about games"))
+
+
+class TypoHearThroughTests(unittest.TestCase):
+    def setUp(self):
+        ir._VOCAB_CACHE = None
+        ir._intent_vocab()
+
+    def tearDown(self):
+        ir._VOCAB_CACHE = None
+
+    def test_queue_typo_routes(self):
+        repaired, changes = ir._repair_for_intent("show me the posting queu")
+        self.assertIn(("queu", "queue"), changes)
+        self.assertIs(ir._match_action(repaired), ir._action_queue)
+        fake = lambda: "Queue is ready."
+        table = ((("posting queue", "show the queue", "queue status"), fake),)
+        with patch.object(ir, "_INTENT_TABLE", table):
+            reply = ir.try_handle_intent("show me the posting queu")
+        self.assertIn("taking that as", reply.lower())
+        self.assertIn("queue is ready", reply.lower())
+
+    def test_post_typo_does_not_auto_run(self):
+        with patch.object(ir, "_action_post_next", return_value="POSTED") as mocked:
+            reply = ir.try_handle_intent("post nw")
+        mocked.assert_not_called()
+        self.assertIsNotNone(reply)
+        self.assertIn("clearly", reply.lower())
+
+    def test_exact_post_now_still_matches(self):
+        self.assertIs(ir._match_action("post now"), ir._action_post_next)
+
+    def test_normal_chat_still_falls_through(self):
+        self.assertIsNone(ir.try_handle_intent("just chatting about games"))
 
 
 if __name__ == "__main__":

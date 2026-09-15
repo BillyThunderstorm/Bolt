@@ -1,0 +1,56 @@
+# Extra words for bolt word / spellcheck.
+# One word per line. # comments are ignored.
+# System dictionary (/usr/share/dict/words) is the base list.
+# Add creator, game, and product terms that the OS list misses.
+
+tiktok
+twitch
+youtube
+shorts
+vod
+vods
+simplybilly
+billy
+william
+randy
+bolt
+grok
+ollama
+nexus
+obs
+ffmpeg
+streamlabs
+streamdeck
+nvidia
+logitech
+gameplay
+streamer
+asin
+skincare
+storefront
+affiliate
+supergrok
+huggingface
+chromadb
+handbrake
+tesseract
+rumps
+aitum
+thunderstone
+warzone
+fortnite
+overwatch
+valorant
+minecraft
+roblox
+cosrx
+cerave
+theordinary
+logitech
+corsair
+elgato
+streamdeck
+replay
+clipfactory
+postnow
+dontpost

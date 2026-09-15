@@ -1,26 +1,78 @@
 #!/usr/bin/env python3
 """
 Hash-based Duplicate Detection for Bolt
+=======================================
 Detects duplicate media files using SHA256 hashing to prevent re-processing
-and identify existing duplicates in the clips/recordings directories.
+and identify existing duplicates in media/clips and media/Recordings.
+
+Post-reorg fix (11 Sep 2026): was ``parents[3]`` → ``/Users/carter`` with
+legacy bare ``clips/`` / ``recordings/`` paths (every default scan missed
+the real media tree). Now uses ``scripts/_paths.py``.
+
+Soft-fail CLI wrapper (PARTIAL):
+  bolt clip-dedupe status|list|run
+
+Distinct from READY pipeline ``Core/modules/Clip_Deduplicator.py`` (pHash
+during ``process_recording`` → ``Data/seen_clips.json``). This tool writes
+``Data/media_hash_db.json``.
+
+Usage:
+  python3 scripts/clip_deduplicator.py
+  python3 scripts/clip_deduplicator.py --dry-run
+  python3 scripts/clip_deduplicator.py --scan media/clips
+  python3 scripts/clip_deduplicator.py --check path/to/file.mp4
+  python3 scripts/clip_deduplicator.py --clear-db
 """
+
+from __future__ import annotations
 
 import hashlib
 import json
 import os
 import sys
-from datetime import datetime
 from pathlib import Path
 
-# Configuration
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-CLIPS_DIR = PROJECT_ROOT / "clips"
-RECORDINGS_DIR = PROJECT_ROOT / "recordings"
-HASH_DB_PATH = PROJECT_ROOT / "Data" / "media_hash_db.json"
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+from _paths import (  # noqa: E402
+    REPO_ROOT,
+    DATA_DIR,
+    CLIPS_DIR,
+    RECORDINGS_DIR,
+    MEDIA_DIR,
+)
+
+# Backward-compatible aliases
+PROJECT_ROOT = REPO_ROOT
+HASH_DB_PATH = DATA_DIR / "media_hash_db.json"
 DRY_RUN = False
 
 
-def calculate_hash(file_path: Path, chunk_size: int = 8192) -> str:
+def _resolve_clips_dir() -> Path:
+    modern = CLIPS_DIR
+    legacy = REPO_ROOT / "clips"
+    if modern.is_dir():
+        return modern
+    if legacy.is_dir():
+        return legacy
+    return modern
+
+
+def _resolve_recordings_dir() -> Path:
+    modern = RECORDINGS_DIR
+    legacy_lower = MEDIA_DIR / "recordings"
+    legacy_root = REPO_ROOT / "recordings"
+    if modern.is_dir():
+        return modern
+    if legacy_lower.is_dir():
+        return legacy_lower
+    if legacy_root.is_dir():
+        return legacy_root
+    return modern
+
+
+def calculate_hash(file_path: Path, chunk_size: int = 8192):
     """Calculate SHA256 hash of a file."""
     sha256_hash = hashlib.sha256()
     try:
@@ -63,21 +115,22 @@ def scan_directory(
 
     print(f"\nScanning {directory}...")
 
-    # Default media extensions
     if file_extensions is None:
         file_extensions = (".mp4", ".mov", ".mkv", ".avi", ".jpg", ".jpeg", ".png")
 
     for file_path in directory.rglob("*"):
         if file_path.is_file() and file_path.suffix.lower() in file_extensions:
             results["scanned"] += 1
-            rel_path = str(file_path.relative_to(directory.parent))
+            try:
+                rel_path = str(file_path.relative_to(REPO_ROOT))
+            except ValueError:
+                rel_path = str(file_path)
             file_hash = calculate_hash(file_path)
 
             if file_hash is None:
                 results["errors"].append(str(file_path))
                 continue
 
-            # Check if this hash already exists
             if file_hash in hash_db["files"]:
                 existing_path = hash_db["files"][file_hash]
                 if existing_path != rel_path:
@@ -120,10 +173,11 @@ def find_duplicates(directories: list) -> dict:
         all_results["duplicate_files"].extend(results["duplicates"])
         all_results["by_directory"][str(directory)] = results
 
-    # Save updated hash database
     if not DRY_RUN:
         save_hash_db(hash_db)
         print(f"\nHash database saved to: {HASH_DB_PATH}")
+    else:
+        print(f"\n[dry-run] would save hash database to: {HASH_DB_PATH}")
 
     return all_results
 
@@ -136,7 +190,10 @@ def check_file_for_duplicates(file_path: Path, hash_db: dict = None) -> bool:
     file_hash = calculate_hash(file_path)
     if file_hash and file_hash in hash_db["files"]:
         existing = hash_db["files"][file_hash]
-        rel_path = str(file_path)
+        try:
+            rel_path = str(file_path.resolve().relative_to(REPO_ROOT))
+        except ValueError:
+            rel_path = str(file_path)
         if existing != rel_path:
             print(f"Duplicate detected: {file_path.name}")
             print(f"  Original: {existing}")
@@ -148,7 +205,6 @@ def main():
     """Main entry point."""
     global DRY_RUN
 
-    # Parse arguments
     dirs_to_scan = []
     i = 1
     while i < len(sys.argv):
@@ -160,27 +216,34 @@ def main():
             dirs_to_scan.append(Path(sys.argv[i + 1]))
             i += 1
         elif arg == "--check" and i + 1 < len(sys.argv):
-            # Check a single file
             file_to_check = Path(sys.argv[i + 1])
             hash_db = load_hash_db()
             is_dup = check_file_for_duplicates(file_to_check, hash_db)
             sys.exit(0 if not is_dup else 1)
-        elif arg == "--clear-db":
+        elif arg in ("--clear-db", "--clear"):
             if Path(HASH_DB_PATH).exists():
                 os.remove(HASH_DB_PATH)
                 print(f"Hash database cleared: {HASH_DB_PATH}")
+            else:
+                print(f"No hash database at: {HASH_DB_PATH}")
             sys.exit(0)
         i += 1
 
-    # Default directories if none specified
+    clips = _resolve_clips_dir()
+    recordings = _resolve_recordings_dir()
     if not dirs_to_scan:
-        dirs_to_scan = [CLIPS_DIR, RECORDINGS_DIR]
+        dirs_to_scan = [clips, recordings]
 
     print("=" * 60)
-    print("Bolt Duplicate Detection")
+    print("Bolt Duplicate Detection (SHA256 hash scan)")
     print("=" * 60)
+    print(f"Repo root: {REPO_ROOT}")
     print(f"Scan directories: {[str(d) for d in dirs_to_scan]}")
     print(f"Hash database: {HASH_DB_PATH}")
+    print(
+        "Note: pipeline pHash dedupe is Core/modules/Clip_Deduplicator.py "
+        f"→ Data/seen_clips.json (distinct from this tool)."
+    )
     print()
 
     results = find_duplicates([str(d) for d in dirs_to_scan])
@@ -194,21 +257,14 @@ def main():
 
     if results["total_duplicates"] > 0:
         print("\nDuplicate files:")
-        for dup in results["duplicate_files"][:20]:  # Show first 20
+        for dup in results["duplicate_files"][:20]:
             print(f"  - {dup['file']}")
             print(f"    Duplicate of: {dup['duplicate_of']}")
+        if results["total_duplicates"] > 20:
+            print(f"  ... and {results['total_duplicates'] - 20} more")
 
-        if len(results["duplicate_files"]) > 20:
-            print(f"  ... and {len(results['duplicate_files']) - 20} more")
-
-    print()
-    if DRY_RUN:
-        print("No changes made (dry run)")
-    else:
-        print("Hash database updated with new file hashes")
-
-    return 0 if results["total_duplicates"] == 0 else 1
+    return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main() or 0)

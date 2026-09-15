@@ -10,6 +10,8 @@ Design goals:
   - Prefer high-value, low-risk actions (status, next, morning, queue)
   - Return a short spoken-friendly string the conversation layer can use
   - Fall through (return None) when the message is just normal chat
+  - Hear-through typos toward known intent words (queue, briefing, …)
+    using Word_Lookup.repair_tokens; posting/approve/hold stay exact-match only
   - Write intents (ready / week set / shipped / mission check-in) call the
     same Week_Card and Command_Center functions as the CLI — conversation
     is a front-end, not a second brain
@@ -633,6 +635,50 @@ def _write_checkin(soft: str) -> Optional[str]:
     return f"Saved {bits} on the latest mission."
 
 
+_DEFINE_RE = re.compile(
+    r"^(?:please\s+)?(?:define|look up|lookup|dictionary)\s+(?:the word\s+)?(?P<word>.+?)\s*$",
+    re.I,
+)
+_MEANING_RE = re.compile(
+    r"^(?:what(?:'s| is|s)\s+(?:the\s+)?(?:meaning|definition)\s+of|what does)\s+(?P<word>.+?)(?:\s+mean)?\s*\??$",
+    re.I,
+)
+_SPELL_RE = re.compile(
+    r"^(?:please\s+)?(?:how do (?:you|i) spell|spell ?check|check spelling(?: of)?)\s+(?P<word>.+?)\s*\??$",
+    re.I,
+)
+_SPELL_WORD_RE = re.compile(
+    r"^(?:please\s+)?spell\s+(?P<word>[A-Za-z][A-Za-z'\-]+)\s*\??$",
+    re.I,
+)
+_SYN_RE = re.compile(
+    r"^(?:please\s+)?(?:synonyms? for|another word for|thesaurus(?: for)?)\s+(?P<word>.+?)\s*\??$",
+    re.I,
+)
+
+
+def _try_word_intent(user_text: str) -> Optional[str]:
+    """Dictionary / spell / thesaurus — same module as ``bolt word``."""
+    soft = _soft(user_text)
+    if not soft:
+        return None
+    try:
+        from modules.Word_Lookup import spoken_lookup, spoken_spell, spoken_syn
+    except Exception as exc:
+        return f"Word lookup unavailable: {exc}"
+
+    m = _DEFINE_RE.match(soft) or _MEANING_RE.match(soft)
+    if m:
+        return spoken_lookup(_payload(m.group("word")))
+    m = _SPELL_RE.match(soft) or _SPELL_WORD_RE.match(soft)
+    if m:
+        return spoken_spell(_payload(m.group("word")))
+    m = _SYN_RE.match(soft)
+    if m:
+        return spoken_syn(_payload(m.group("word")))
+    return None
+
+
 def _try_write_intent(user_text: str) -> Optional[str]:
     """Map a single reply onto week set / done / mission check-in / remember."""
     soft = _soft(user_text)
@@ -892,6 +938,128 @@ _INTENT_TABLE: Tuple[Tuple[Tuple[str, ...], Callable[[], str]], ...] = (
     ),
 )
 
+# Typo hear-through may NOT auto-run these — posting/hold must be said clearly.
+_MUTATING_ACTIONS = frozenset(
+    {
+        _action_approve_next,
+        _action_hold_next,
+        _action_post_next,
+        _action_queue_clean,
+    }
+)
+
+_STOPWORDS = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "i",
+        "me",
+        "my",
+        "you",
+        "we",
+        "it",
+        "is",
+        "am",
+        "are",
+        "to",
+        "of",
+        "in",
+        "on",
+        "for",
+        "and",
+        "or",
+        "do",
+        "how",
+        "what",
+        "whats",
+        "when",
+        "where",
+        "who",
+        "with",
+        "this",
+        "that",
+        "be",
+        "at",
+        "as",
+        "if",
+        "so",
+        "up",
+        "out",
+        "just",
+        "about",
+        "please",
+    }
+)
+
+_VOCAB_CACHE: Optional[List[str]] = None
+
+
+def _intent_vocab() -> List[str]:
+    """Words from live intents + word-lookup verbs. Cached."""
+    global _VOCAB_CACHE
+    if _VOCAB_CACHE is not None:
+        return _VOCAB_CACHE
+    words: set[str] = {
+        "define",
+        "dictionary",
+        "spell",
+        "spellcheck",
+        "synonym",
+        "synonyms",
+        "thesaurus",
+        "meaning",
+        "briefing",
+        "queue",
+        "mission",
+        "research",
+        "budget",
+        "storage",
+        "morning",
+        "status",
+        "approve",
+        "week",
+        "day",
+        "bolt",
+    }
+    for phrases, _action in _INTENT_TABLE:
+        for phrase in phrases:
+            for tok in phrase.split():
+                if tok not in _STOPWORDS and len(tok) > 2:
+                    words.add(tok)
+    _VOCAB_CACHE = sorted(words)
+    return _VOCAB_CACHE
+
+
+def _repair_for_intent(text: str) -> Tuple[str, List[Tuple[str, str]]]:
+    """Correct misspellings toward intent/command words. Never raises."""
+    try:
+        from modules.Word_Lookup import repair_tokens
+    except Exception:
+        return text, []
+    try:
+        return repair_tokens(text, _intent_vocab(), max_dist=2, skip_known_words=True)
+    except Exception:
+        return text, []
+
+
+def suggest_repair(user_text: str) -> Optional[str]:
+    """Repaired utterance for the LLM fallback, or None if nothing changed."""
+    text = _normalize(user_text)
+    if not text:
+        return None
+    repaired, changes = _repair_for_intent(text)
+    if changes and repaired != text:
+        return repaired
+    return None
+
+
+def _match_action(text: str):
+    for phrases, action in _INTENT_TABLE:
+        if _match_any(text, phrases):
+            return action
+    return None
+
 
 def try_handle_intent(user_text: str) -> Optional[str]:
     """
@@ -924,17 +1092,48 @@ def try_handle_intent(user_text: str) -> Optional[str]:
     if write_reply is not None:
         return write_reply
 
+    try:
+        word_reply = _try_word_intent(raw)
+    except Exception as exc:
+        return f"I recognized that word request but failed while looking it up: {exc}"
+    if word_reply is not None:
+        return word_reply
+
     text = _normalize(raw)
     if not text:
         return None
 
-    for phrases, action in _INTENT_TABLE:
-        if _match_any(text, phrases):
-            try:
-                return action()
-            except Exception as exc:
-                return f"I recognized that request but failed while running it: {exc}"
-    return None
+    action = _match_action(text)
+    if action is not None:
+        try:
+            return action()
+        except Exception as exc:
+            return f"I recognized that request but failed while running it: {exc}"
+
+    repaired, changes = _repair_for_intent(text)
+    if not changes or repaired == text:
+        return None
+
+    try:
+        word_repaired = _try_word_intent(repaired)
+    except Exception:
+        word_repaired = None
+    if word_repaired is not None:
+        return f"Taking that as {repaired}. {word_repaired}"
+
+    action = _match_action(repaired)
+    if action is None:
+        return None
+    if action in _MUTATING_ACTIONS:
+        return (
+            "I think you meant a posting action. "
+            "Say post now, or approve next, clearly if that's what you want."
+        )
+    try:
+        result = action()
+    except Exception as exc:
+        return f"I recognized that request but failed while running it: {exc}"
+    return f"Taking that as {repaired}. {result}"
 
 
 if __name__ == "__main__":

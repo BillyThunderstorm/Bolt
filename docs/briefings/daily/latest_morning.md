@@ -1,12 +1,12 @@
 # Bolt Daily Briefing
 
-**Wednesday, September 09, 2026**
+**Monday, September 14, 2026**
 
 ## Queue Status
 
-**Clips ready to post:** 56
+**Clips ready to post:** 62
 
-- Total tracked: 73 (ready 56 · posted 4 · scrapped 5)
+- Total tracked: 79 (ready 62 · posted 4 · scrapped 5)
 
 ---
 
@@ -20,23 +20,23 @@
 
 ## Today's Calendar
 
-Calendar (Wednesday September 9): Nothing scheduled today -- open schedule.
+Calendar (Monday September 14): Nothing scheduled today -- open schedule.
 
 ---
 
 ## Important Gmail
 
 Important unread Gmail items:
-- [BillyThunderstorm/Bolt] Run failed: Bolt Python CI - main (6ff9a72) — ThunderstormBilly <notifications@github.com>
-  Why it matters: [BillyThunderstorm/Bolt] Bolt Python CI workflow run Bolt Python CI: All jobs have failed View workflow run Status Job Annotations Bolt P...
+- Bigger bounties, more earnings — "Amazon Influencer & Associates Program" <store-news@amazon.com>
+  Why it matters: Higher commissions on Prime, Audible &amp; more.͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏...
+- We found something you might like — "Amazon.com" <store-news@amazon.com>
+  Why it matters: How about another look? Keep shopping your recent finds on Amazon.͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌...
 - You have no events scheduled today. — Google Calendar <calendar-notification@google.com>
-  Why it matters: Google Calendar William Carter, you have no events scheduled today Wed Sep 9, 2026 You are receiving this email at the account billycarte...
-- You still have two complimentary gifts — "Amazon.com" <store-news@amazon.com>
-  Why it matters: ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏...
-- William Carter IV, ever wonder if your reviews are getting noticed? — "Amazon.com Reviews" <customer-reviews-messages@amazon.com>
-  Why it matters: Amazon Amazon They are! Keep it up by reviewing more products. Videos are especially helpful. 5374 12 Views Hearts What did you think of...
-- The_Scarlet_Sage posted: Oh I’m so happy — TikTok <notification@service.tiktok.com>
-  Why it matters: SimplyBilly, you are friends on TikTok ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌...
+  Why it matters: Google Calendar William Carter, you have no events scheduled today Mon Sep 14, 2026 You are receiving this email at the account billycart...
+- Security alert — Google <no-reply@accounts.google.com>
+  Why it matters: You allowed OpenAI access to some of your Google Account data billycarteriv@gmail.com If you didn&#39;t allow OpenAI access to some of yo...
+- Veolia | North America is hiring a Account Associate — LinkedIn Job Alerts <jobalerts-noreply@linkedin.com>
+  Why it matters: Veolia | North America Account Associate: Company DescriptionVeolia Group is a global… ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏...
 
 ---
 
@@ -47,7 +47,7 @@ Canonical journal / briefing / todo / how-to. Do not duplicate into markdown.
 - START HERE: https://docs.google.com/document/d/1u3dRveLkOBsfSpuBXKeFbfj7tVH3EhjZJr-aic5bxjw/edit
 - How-to: https://docs.google.com/document/d/12idgxLR-OzcOyCC6mDQwqmOnZQDuMIZIJCwwMnm_krg/edit
 - Shared Journal: https://docs.google.com/document/d/1paZNFGea-RBAwQ5YMxpuXN8OBRH7R33RAkakYZ23Tfw/edit
-- Today's Daily Log: https://docs.google.com/document/d/1EPMfX2eLauGLQ5Ovb1o9NnoTSo2JhLABdQYMh_ViWKU/edit
+- Today's Daily Log: https://docs.google.com/document/d/1cwmARgNoFvIwsD5wpeWrAjA_LAlDPXRYoFQyuccIeQQ/edit
 - Daily logs (02): https://drive.google.com/drive/folders/1wanq-qUUGc4qF-uqtqnajAwLd877qSQ4
 - Learnings (06): https://drive.google.com/drive/folders/1oPmHtmY28r_fPjr5cYwiYb5BUDdQCWLH
 - Root folder: https://drive.google.com/drive/folders/1GZ93zTznYK97Nv9Do5bidLOd9Im1J1XK
@@ -59,7 +59,7 @@ Canonical journal / briefing / todo / how-to. Do not duplicate into markdown.
 
 THIS WEEK
   Topic: pop culture
-  Started: 2026-09-09  ·  0d ago
+  Started: 2026-09-09  ·  5d ago
   Already done: (nothing logged yet)
 LAST WEEK
   Topic: tech
@@ -76,13 +76,12 @@ DO NOT SUGGEST
   • James Welsh
   • Cassandra Bankson
   • The Budget Dermatologist
-  … +9 more (C5 drops + bans)
+  … +11 more (C5 drops + bans)
 
 ---
 
 ## Memory Notes
 
-- [decision_event] classify · queue (source: unified_memory)
 - [constraint] Reminder: No content that sells a hyped product as if it works. If Billy already has something that's hyped but doesn't deliver, cover it as an honest review — and pair it with a similar product that actually works. Never skip the dud just because it's trendy, and never recommend the dud. (source: user_profile)
 - [constraint] Reminder: Bolt prioritizes direction-finding over execution. When given a to-do list, push back with 'do we know this is the right list?' before charging ahead. (source: user_profile)
 
@@ -90,23 +89,23 @@ DO NOT SUGGEST
 
 ## Research Notes
 
-- Log: **72** findings · **0** pending C5 · **15** kept · **20** dropped · **0** blocked (C7)
+- Log: **80** findings · **0** pending C5 · **17** kept · **22** dropped · **0** blocked (C7)
 - Next: This week is already set: pop culture. Research that lane (`bolt research find` → honest pop culture film TV reviewer YouTube creator), not a new career plan.
 
 ---
 🎯 NEXUS STRATEGY INSIGHT: (grok/grok-4.5)
-**Wednesday, 2026-09-09 — Pop culture week**
+**Monday 2026-09-14 — continue pop culture week.**
 
-One next step only: pick a single TV/film moment you’ve actually watched recently and turn it into one short TikTok hook (reaction or “hot take in 15 seconds”), then stop. Don’t research, don’t batch, don’t touch tech or last week’s leftovers.
+One next step only:  
+Pick **one** TV/film moment you already have on hand (or can grab fast), cut a short TikTok-ready hook clip, then run `bolt day --decide` → review → post when you’re ready. Approval still required.
 
-When that’s drafted or filmed, we review before anything else.
+That’s the whole move for this morning. No tech leftovers, no new lane, no extra list.
 
 ---
 
 ## Action Items For Today
 
 1. Review last clip performance and log outcomes
-2. Follow up on recent decision: classify
 
 ---
 

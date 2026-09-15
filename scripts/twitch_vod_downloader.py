@@ -35,16 +35,14 @@ will pick them up via Twitch_Stats.
 
 Usage
 -----
-    # Download the 10 most recent broadcasts, 5-minute samples
-    python3 scripts/twitch_vod_downloader.py --type archive --limit 10 \\
-        --sample-minutes 5 --output-dir /tmp/vod_samples
+    bolt vods status                  # creds / yt-dlp / working ffmpeg
+    bolt vods list --limit 10         # list VODs, no download
+    bolt vods --dry-run --limit 10    # same
+    bolt vods download --limit 3 --sample-minutes 5
+    bolt vods --limit 3               # same (download is the default)
 
-    # Download saved highlights (highlights are kept forever; archives
-    # expire after 14-60 days depending on your partner status)
-    python3 scripts/twitch_vod_downloader.py --type highlight --limit 5
-
-    # Dry run — list VODs without downloading
-    python3 scripts/twitch_vod_downloader.py --limit 10 --dry-run
+    # Don't type docs <brackets> — zsh treats < as a redirect.
+    bolt vods --channel itssimplybilly --dry-run
 """
 
 from __future__ import annotations
@@ -58,10 +56,6 @@ import sys
 import time
 from pathlib import Path
 from typing import Optional
-
-# Repo-root-relative imports
-REPO_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO_ROOT / "Core"))
 
 # Post-reorg path bootstrap. Adds the script's own dir to sys.path so
 # `from _paths import …` works in both direct invocation and `from
@@ -133,39 +127,102 @@ def derive_sample_start(duration_seconds: int, sample_seconds: int) -> int:
     return max(earliest, min(midpoint, latest))
 
 
-def download_sample(
+def ytdlp_sample_cmd(
+    yt_dlp: str,
+    video_id: str,
+    output_path: Path,
+    start_seconds: int,
+    sample_seconds: int,
+    ffmpeg_path: Optional[str] = None,
+) -> list[str]:
+    """Build the yt-dlp argv for a timed VOD sample (no network)."""
+    url = f"https://www.twitch.tv/videos/{video_id}"
+    end = start_seconds + max(1, sample_seconds)
+    cmd = [
+        yt_dlp,
+        "--no-progress",
+        "--no-update",
+        "--force-keyframes-at-cuts",
+        "--download-sections",
+        f"*{start_seconds}-{end}",
+        "-f",
+        "best[height<=480]/best[height<=720]/best",
+        "--merge-output-format",
+        "mp4",
+        "-o",
+        str(output_path),
+        url,
+    ]
+    if ffmpeg_path:
+        loc = Path(ffmpeg_path)
+        ffmpeg_loc = str(loc.parent) if loc.is_file() else str(loc)
+        cmd[1:1] = ["--ffmpeg-location", ffmpeg_loc]
+    return cmd
+
+
+def _file_ok(path: Path) -> bool:
+    return path.exists() and path.stat().st_size >= 1024
+
+
+def _download_via_ytdlp(
+    video_id: str,
+    output_path: Path,
+    sample_seconds: int,
+    start_seconds: int,
+    ffmpeg_path: str,
+) -> bool:
+    yt = find_yt_dlp()
+    if not yt:
+        return False
+    cmd = ytdlp_sample_cmd(
+        yt, video_id, output_path, start_seconds, sample_seconds, ffmpeg_path
+    )
+    print(
+        f"  [yt-dlp] {video_id}  {start_seconds}s+{sample_seconds}s → {output_path.name}",
+        flush=True,
+    )
+    try:
+        r = subprocess.run(cmd, timeout=600)
+    except subprocess.TimeoutExpired:
+        print(f"  [warn] yt-dlp timed out for {video_id}", file=sys.stderr)
+        return False
+    except Exception as e:
+        print(f"  [warn] yt-dlp failed for {video_id}: {e}", file=sys.stderr)
+        return False
+    if r.returncode != 0:
+        print(
+            f"  [warn] yt-dlp returned {r.returncode} for {video_id}",
+            file=sys.stderr,
+        )
+        return False
+    return _file_ok(output_path)
+
+
+def _download_via_ffmpeg(
     video_id: str,
     output_path: Path,
     sample_seconds: int,
     start_seconds: int,
     user_token: Optional[str] = None,
+    ffmpeg_path: Optional[str] = None,
 ) -> bool:
     """
-    Download a sample window of a Twitch VOD via ffmpeg.
-
-    Uses the HLS playlist URL. ffmpeg handles the segment fetching
-    internally and we copy the resulting mp4 to disk. We copy the
-    codec (no re-encode) so it's fast and lossless.
-
-    If `user_token` is provided it's appended to the HLS URL as
-    ?token=... — Twitch's VOD CDN requires a User Access Token to
-    authorize downloads. The App Access Token (used for the Helix
-    listing API) is not sufficient.
-
-    Returns True on success, False otherwise.
+    Last-resort HLS grab. Twitch's unsigned usher URL often 403s;
+    yt-dlp is the working path because it fetches a signed playlist.
     """
+    ff = ffmpeg_path or find_ffmpeg() or "ffmpeg"
     url = HLS_PLAYLIST_TEMPLATE.format(video_id=video_id)
     if user_token:
         sep = "&" if "?" in url else "?"
         url = f"{url}{sep}token={user_token}"
 
     cmd = [
-        "ffmpeg", "-y",
+        ff, "-y",
         "-ss", str(start_seconds),
         "-i", url,
         "-t", str(sample_seconds),
-        "-c", "copy",          # no re-encode
-        "-bsf:v", "h264_mp4toannexb",  # HLS -> MP4 fixup
+        "-c", "copy",
+        "-bsf:v", "h264_mp4toannexb",
         "-f", "mp4",
         str(output_path),
     ]
@@ -173,21 +230,22 @@ def download_sample(
         r = subprocess.run(
             cmd,
             capture_output=True,
-            timeout=600,  # 10 min — HLS download can be slow
+            timeout=600,
         )
         if r.returncode != 0:
             err = r.stderr.decode(errors="ignore")
-            # 403 from the VOD CDN means the App Access Token isn't
-            # sufficient — Twitch's VOD endpoints require a User Access
-            # Token for the channel owner (with `channel:read` scope).
             if "403" in err or "Forbidden" in err:
                 print(
-                    "  [warn] VOD CDN returned 403. The Helix App Access Token\n"
-                    "         can list VODs but not download them. You need a\n"
-                    "         User Access Token (channel owner, with\n"
-                    "         'channel:read' or 'videos:read' scope) passed via\n"
-                    "         --user-token. See:\n"
-                    "         https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/",
+                    "  [warn] VOD CDN returned 403 on the raw HLS URL.\n"
+                    "         Use yt-dlp (bolt vods status) instead of a\n"
+                    "         User Access Token for public VODs. For\n"
+                    "         subscriber-only VODs, pass --user-token.",
+                    file=sys.stderr,
+                )
+            elif "Library not loaded" in err or "dyld" in err:
+                print(
+                    "  [warn] ffmpeg on PATH is broken (missing dylib). "
+                    "Bolt wants ffmpeg-full. Try: brew install ffmpeg-full",
                     file=sys.stderr,
                 )
             else:
@@ -197,15 +255,59 @@ def download_sample(
                     file=sys.stderr,
                 )
             return False
-        if not output_path.exists() or output_path.stat().st_size < 1024:
-            return False
-        return True
+        return _file_ok(output_path)
     except subprocess.TimeoutExpired:
         print(f"  [warn] ffmpeg timed out for {video_id}", file=sys.stderr)
         return False
     except Exception as e:
         print(f"  [warn] ffmpeg failed for {video_id}: {e}", file=sys.stderr)
         return False
+
+
+def download_sample(
+    video_id: str,
+    output_path: Path,
+    sample_seconds: int,
+    start_seconds: int,
+    user_token: Optional[str] = None,
+) -> bool:
+    """
+    Download a sample window of a Twitch VOD.
+
+    Prefer yt-dlp with a working ffmpeg (FFmpeg_Bin / ffmpeg-full). yt-dlp
+    fetches a signed Twitch playlist, so public VODs do not need
+    TWITCH_USER_TOKEN. Raw ffmpeg HLS is a fallback and often 403s.
+
+    Returns True on success, False otherwise.
+    """
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    ffmpeg_path = find_ffmpeg()
+    if find_yt_dlp() and ffmpeg_path:
+        if _download_via_ytdlp(
+            video_id, output_path, sample_seconds, start_seconds, ffmpeg_path
+        ):
+            return True
+        print(
+            "  [warn] yt-dlp sample failed; trying ffmpeg HLS fallback…",
+            file=sys.stderr,
+            flush=True,
+        )
+    if ffmpeg_path:
+        return _download_via_ffmpeg(
+            video_id,
+            output_path,
+            sample_seconds,
+            start_seconds,
+            user_token=user_token,
+            ffmpeg_path=ffmpeg_path,
+        )
+    print(
+        "VOD unavailable: need yt-dlp and a working ffmpeg "
+        "(PATH ffmpeg is often a broken Homebrew dylib; "
+        "brew install ffmpeg-full). Check: bolt vods status",
+        file=sys.stderr,
+    )
+    return False
 
 
 def list_videos(
@@ -268,6 +370,12 @@ def main(argv: list | None = None) -> int:
         sargs = sp.parse_args(status_argv)
         return _cli_status(as_json=sargs.json, probe=sargs.probe, channel=sargs.channel)
 
+    # bolt vods list → dry-run listing (no download)
+    if raw and raw[0] in ("list", "ls"):
+        raw = ["--dry-run"] + raw[1:]
+    elif raw and raw[0] in ("download", "get", "pull", "sample"):
+        raw = raw[1:]
+
     # Bare flags: bolt vods --json / --probe (treat as status)
     if raw and all(
         a in ("--json", "--probe", "--help", "-h")
@@ -282,6 +390,7 @@ def main(argv: list | None = None) -> int:
         return _cli_status(as_json=sargs.json, probe=sargs.probe, channel=sargs.channel)
 
     parser = argparse.ArgumentParser(
+        prog="bolt vods",
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -320,10 +429,11 @@ def main(argv: list | None = None) -> int:
     )
     parser.add_argument(
         "--user-token", default=os.environ.get("TWITCH_USER_TOKEN"),
-        help="Twitch User Access Token (channel owner). Required for VOD downloads — "
-             "the App Access Token is not enough. Generate one with channel:read scope.",
+        help="Twitch User Access Token (channel owner). Only needed for the "
+             "ffmpeg HLS fallback / subscriber-only VODs. Public archives "
+             "download via yt-dlp without this.",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(raw)
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     metadata_path = args.metadata_file or (args.output_dir / "metadata.json")
@@ -339,14 +449,29 @@ def main(argv: list | None = None) -> int:
             return 1
         channel = ts.channel
 
-    # Soft hint if yt-dlp missing (list/dry-run still OK; full auto_clip needs it)
-    if not args.dry_run and not find_yt_dlp() and not find_ffmpeg():
-        print(
-            "VOD unavailable: neither yt-dlp nor ffmpeg found on PATH "
-            "(need one to download samples).",
-            file=sys.stderr,
-        )
-        return 1
+    # Dry-run / list still OK without tools. Downloads need yt-dlp + working ffmpeg.
+    yt = find_yt_dlp()
+    ff = find_ffmpeg()
+    if not args.dry_run:
+        if not yt:
+            print(
+                "VOD unavailable: yt-dlp not found in venv or PATH "
+                "(brew install yt-dlp / pip install yt-dlp). "
+                "Check: bolt vods status",
+                file=sys.stderr,
+            )
+            return 1
+        if not ff:
+            print(
+                "VOD unavailable: no working ffmpeg. Homebrew's PATH ffmpeg "
+                "often exists and then crashes (missing dylib). "
+                "Install ffmpeg-full or set BOLT_FFMPEG. "
+                "Check: bolt vods status",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"downloader: yt-dlp ({yt})", flush=True)
+        print(f"ffmpeg: {ff}", flush=True)
 
     videos = list_videos(channel, args.type, args.limit)
     if not videos:
@@ -390,12 +515,15 @@ def main(argv: list | None = None) -> int:
             out_file = Path(meta["sample_path"])
             if args.skip_existing and out_file.exists() and out_file.stat().st_size > 0:
                 print(f"  [skip] {v['id']} (already exists)")
+                meta["download_ok"] = True
+                meta["skipped"] = True
                 new_meta.append(meta)
                 continue
             print(
                 f"  [download] {v['id']} | "
                 f"{v.get('title', '')[:50]} | "
-                f"sample {start}s..{start + meta['sample_duration_seconds']}s"
+                f"sample {start}s..{start + meta['sample_duration_seconds']}s",
+                flush=True,
             )
             ok = download_sample(
                 v["id"],
@@ -425,6 +553,14 @@ def main(argv: list | None = None) -> int:
         print(f"\nWrote metadata for {len(merged)} VOD(s) to {metadata_path}")
         ok_count = sum(1 for m in new_meta if m.get("download_ok"))
         print(f"Downloaded {ok_count} / {len(new_meta)} sample(s) to {args.output_dir}")
+        if new_meta and ok_count == 0:
+            print(
+                "VOD unavailable: every sample failed. "
+                "Public VODs need yt-dlp + a working ffmpeg (ffmpeg-full), "
+                "not the raw usher HLS URL. Check: bolt vods status",
+                file=sys.stderr,
+            )
+            return 1
 
     return 0
 

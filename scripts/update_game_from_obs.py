@@ -3,7 +3,7 @@
 scripts/update_game_from_obs.py — Wire up OBS scene changes to update config.json
 
 This script:
-1. Loads the scene-to-game mapping from configs/scene_game_mapping.json
+1. Loads the scene-to-game mapping from Data/configs/scene_game_mapping.json
 2. Starts the Stream_Monitor with a callback that updates config.json
 3. Runs in the background while you stream
 
@@ -31,17 +31,22 @@ from pathlib import Path
 _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
-from _paths import REPO_ROOT, DATA_DIR, CLIPS_DIR, LOGS_DIR, CONFIG_FILE  # noqa: E402
+from _paths import (  # noqa: E402
+    REPO_ROOT,
+    DATA_DIR,
+    CLIPS_DIR,
+    LOGS_DIR,
+    CONFIG_FILE,
+    CONFIG_DIR,
+)
 
 # Backward-compatible aliases for code that uses `ROOT` / `PROJECT_ROOT`.
+# Do NOT overwrite ROOT / CONFIG_FILE after _paths — post-reorg layout.
 PROJECT_ROOT = REPO_ROOT
 ROOT = REPO_ROOT
 
-ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT))
-
-CONFIG_FILE = ROOT / "config.json"
-MAPPING_FILE = ROOT / "configs" / "scene_game_mapping.json"
+# Scene→game mapping lives under Data/configs/ (not repo-root configs/).
+MAPPING_FILE = CONFIG_DIR / "scene_game_mapping.json"
 
 logger = logging.getLogger("bolt.obs_game_tracker")
 
@@ -141,6 +146,10 @@ def main():
     except KeyboardInterrupt:
         print("\nStopping OBS game tracker...")
         monitor.stop()
+
+
+# Docs / launch.py import this name
+start_game_tracker = main
 
 
 if __name__ == "__main__":

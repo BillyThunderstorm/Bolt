@@ -84,9 +84,15 @@ SUBCOMMANDS: dict[str, str] = {
     "briefings": "daily_briefing.py",
     "thumbnails": "generate_thumbnails.py",
     "calendar": "generate_calendar.py",
+    "ics": "generate_calendar.py",
+    "ics-calendar": "generate_calendar.py",
+    "ics_calendar": "generate_calendar.py",
+    "generate-calendar": "generate_calendar.py",
+    "generate_calendar": "generate_calendar.py",
+    "calendar-status": "generate_calendar.py",
+    "calendar_status": "generate_calendar.py",
     "nexus": "nexus_advice.py",
     "advice": "nexus_advice.py",
-    "performance": "performance_baseline.py",
     "site": "site_data_writer.py",
     "weekly": "weekly_analysis.py",
     "monthly": "weekly_analysis.py",
@@ -109,17 +115,83 @@ SUBCOMMANDS: dict[str, str] = {
     "overlays": "overlay_server.py",
     "send": "send_notification.py",
     "notify": "send_notification.py",
+    "send-notify": "send_notification.py",
+    "send_notify": "send_notification.py",
+    "send-status": "send_notification.py",
+    "send_status": "send_notification.py",
+    "notify-status": "send_notification.py",
+    "notify_status": "send_notification.py",
     "refresh_memory": "refresh_memory_index.py",
+    "refresh-memory": "refresh_memory_index.py",
+    "memory-refresh": "refresh_memory_index.py",
+    "memory_refresh": "refresh_memory_index.py",
+    "refresh-index": "refresh_memory_index.py",
+    "refresh_index": "refresh_memory_index.py",
+    # Long-term memory store (Bolt_Memory; soft-fail CLI — special-handler preferred)
+    "memory": "modules/Bolt_Memory.py",
+    "bolt-memory": "modules/Bolt_Memory.py",
+    "bolt_memory": "modules/Bolt_Memory.py",
+    "memory-status": "modules/Bolt_Memory.py",
+    "memory_status": "modules/Bolt_Memory.py",
+    "long-term-memory": "modules/Bolt_Memory.py",
+    "ltm": "modules/Bolt_Memory.py",
     "refresh_vector_db": "modules/Local_Vector_DB.py",
     "vector_db": "modules/Local_Vector_DB.py",
     "reindex": "modules/Local_Vector_DB.py",
     "filter_backlog": "Filter_Backlog.py",
     "watch": "Watcher.py",
+    "obs-game": "update_game_from_obs.py",
+    "obs_game": "update_game_from_obs.py",
+    "game-tracker": "update_game_from_obs.py",
+    "game_tracker": "update_game_from_obs.py",
+    "icloud": "move_to_icloud.sh",
+    "icloud-sync": "move_to_icloud.sh",
+    "icloud_sync": "move_to_icloud.sh",
+    "move-to-icloud": "move_to_icloud.sh",
+    "move_to_icloud": "move_to_icloud.sh",
+    "icloud-status": "move_to_icloud.sh",
+    "icloud_status": "move_to_icloud.sh",
+    # Per-game sensitivity profiles (Game_Config; soft-fail CLI — special-handler preferred)
+    "game-config": "modules/Game_Config.py",
+    "game_config": "modules/Game_Config.py",
+    "gameconfig": "modules/Game_Config.py",
+    "games": "modules/Game_Config.py",
+    "game-profiles": "modules/Game_Config.py",
+    "game_profiles": "modules/Game_Config.py",
+    "game-config-status": "modules/Game_Config.py",
+    "game_config_status": "modules/Game_Config.py",
+    # Error recovery / quarantine (Error_Recovery; soft-fail CLI — special-handler preferred)
+    "error-recovery": "modules/Error_Recovery.py",
+    "error_recovery": "modules/Error_Recovery.py",
+    "error-recovery-status": "modules/Error_Recovery.py",
+    "error_recovery_status": "modules/Error_Recovery.py",
+    "recovery": "modules/Error_Recovery.py",
+    "quarantine": "modules/Error_Recovery.py",
+    "error-tracker": "modules/Error_Recovery.py",
+    "error_tracker": "modules/Error_Recovery.py",
+    # Phase 4 semantic memory search (Memory_Search; soft-fail CLI — special-handler preferred)
+    "memsearch": "modules/Memory_Search.py",
+    "memory-search": "modules/Memory_Search.py",
+    "memory_search": "modules/Memory_Search.py",
+    "mem-search": "modules/Memory_Search.py",
+    "mem_search": "modules/Memory_Search.py",
+    "search-memory": "modules/Memory_Search.py",
+    "search_memory": "modules/Memory_Search.py",
+    "memsearch-status": "modules/Memory_Search.py",
+    "memsearch_status": "modules/Memory_Search.py",
     "bot_with_twitch": "bot_with_twitch.py",
     "clip_dedupe": "clip_deduplicator.py",
     "make_highlights": "make_highlights.py",
     "layout": "check_layout.py",
     "check_layout": "check_layout.py",
+    "check-layout": "check_layout.py",
+    "layout-status": "check_layout.py",
+    "migrate-layout": "migrate_layout.py",
+    "migrate_layout": "migrate_layout.py",
+    "layout-migrate": "migrate_layout.py",
+    "layout_migrate": "migrate_layout.py",
+    "migrate-status": "migrate_layout.py",
+    "migrate_status": "migrate_layout.py",
     "enhance": "enhance_clips.py",
     "enhance_clips": "enhance_clips.py",
     "smart_trim": "enhance_clips.py",
@@ -161,18 +233,55 @@ Script subcommands (each maps to scripts/X.py):
   briefing [--print|--speak|--send]
                           Generate daily briefing; --send writes Reminders + alert
   thumbnails [args]       Generate JPG thumbnails for clips
-  calendar                Generate ICS calendar feeds
+  calendar [status|list|run]  Local ICS feeds (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--dry-run|--days N]
+                          aliases: ics, ics-calendar, generate-calendar, calendar-status
+                          (former thin SCRIPT_MAP; distinct from READY bolt gcal)
   nexus [status|"<question>"]
                           Nexus advice (Ollama free; --paid = Grok)
                           status [--json|--probe]; soft-fail LLM unavailable:
                           aliases: advice, nexus-status, nexus_status
-  performance             Run a performance baseline
+  performance [status|list|run]  Local import/startup baseline (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--dry-run]
+                          aliases: baseline, perf-baseline, performance-baseline
   site [--push]           Write site-data.json (local; --push soft-fails)
   sites [status]            Sites + storage cron readiness (--json|--probe; soft-fail)
                           aliases: site-status, sites-status, storage-cron
-  weekly                  Generate weekly performance insights
-  log_perf [args]         Log a clip's performance
-  vods [status]             Twitch VOD samples / readiness (status --json|--probe; soft-fail)
+  weekly [status|list|run] Weekly performance insights (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--print|--send|--days N]
+                          aliases: monthly, week-insights, weekly-analysis
+  filter-backlog [status|list|run]  Clip backlog score filter (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--dry-run]
+                          aliases: filter_backlog, backlog-filter, filter-backlog-status
+  make-highlights [status|list|run]  Local highlight reel stitch (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--list][--count N]
+                          aliases: make_highlights, make-highlights-status, stitch-highlights
+                          (former SHELL make_highlights.py → engine make_twitch_highlights)
+  reprocess [status|list|run]  Vertical rebuild + multi-platform queue (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--dry-run]
+                          aliases: reprocess_clips, reprocess-clips, reprocess-status,
+                          vertical-reprocess, tiktok-reprocess
+                          (former SHELL wrong PROJECT_ROOT; no TikTok auto-upload)
+  health [status|list|run]  Lightweight post-reorg health smoke (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--dry-run]
+                          aliases: health-check, health_check, health-status, system-health
+                          (former SHELL pre-reorg CWD paths; prefer bolt doctor)
+  clip-dedupe [status|list|run]  SHA256 media hash scan (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--dry-run]
+                          aliases: clip_dedupe, hash-dedupe, dedupe-status, sha-dedupe
+                          (former thin SCRIPT_MAP parents[3] wrong root; not pipeline pHash)
+  personality [status|list|run]  Gemini persona chat loader (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--dry-run|--once TEXT]
+                          aliases: bolt-personality, personality-status, persona,
+                          load-personality, load_personality
+                          (former SHELL parents[3] wrong root; not READY gemini/nexus/chat)
+  log-perf [status|list|run]  Manual clip performance log (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--trigger|--views|--list]
+                          aliases: log_perf, log-performance, log_performance, perf-log
+                          (former thin SCRIPT_MAP; distinct from READY bolt stats)
+  vods [status|list|download]
+                          Twitch VOD samples (yt-dlp + working ffmpeg)
+                          status --json|--probe; list = dry-run; soft-fail
   twitch_token            Get a Twitch chat token
   twitch_bot_token        Get a Twitch bot chat token
   tiktok_token            Get a TikTok OAuth token (needs video.list for stats)
@@ -208,21 +317,82 @@ Script subcommands (each maps to scripts/X.py):
   mac-app [status|list|build]  Local macOS .app assemble (PARTIAL; soft-fail)
                           status [--json|--probe]; list; build [--dry-run]
                           aliases: macapp, bolt-app, app-bundle, app-status
+  mac-auto [status|list|install]  Mac launchd/cron/Shortcuts (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; install [step] [--dry-run]
+                          aliases: mac_auto, mac-automation, automation, shortcuts-status, launchd-status
+  alerts [status|list|test|send]  Mac/Voice/email/iMessage alerts (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; test; send "msg"
+                          aliases: alert, alert-status, notify-alerts, bolt-alerts
+  checklist [status|list|run]  Pre-stream voice checklist (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--keyboard|--text]
+                          aliases: checklist-status, voice-checklist, prestream, pre-stream
+  reminders [status|list|test|send]  Apple Reminders.app delivery (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; test; send "msg"
+                          aliases: reminder, reminders-status, apple-reminders, remind
+  photo-ocr [status|list|run]  Photo/handwriting OCR → .txt (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run <images…> [--open] [--stdout] [-o PATH]
+                          aliases: photo_ocr, photo-ocr-status, ocr-photos, ocr_photos, vision-ocr
+  compress [status|list|run]  HandBrake clip compress (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--dry-run]
+                          aliases: video-compress, handbrake, compress-videos, compress_videos
   chat [status|connect]     Twitch chat readiness / connect (Bolt_Chat; soft-fail)
                           status [--json|--probe]; connect [--force][--voice]
                           aliases: twitch-chat, chat-status, bolt-chat
   brain [status|test]   Legacy Brain_Controller readiness (compat; Think_Learn_Decide is canonical; soft-fail)
   sync_tiktok_stats       Pull TikTok views/likes into performance log
   sync_youtube_stats      Pull YouTube/Shorts views/likes into performance log
-  send "<msg>"            Send an SMS / email notification
-  refresh_memory          Rebuild the clip memory index (Data/memory_index.json)
+  send [status|list|send|run]  SMS/email notify (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; send "msg" [--sms-only|--email-only]
+                          aliases: notify, send-notify, send-status, notify-status
+                          (former thin SCRIPT_MAP; prefers Bolt_Alerts; distinct from bolt alerts/discord)
+  refresh-memory [status|list|run]  Memory index rebuild (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--dry-run]
+                          aliases: refresh_memory, memory-refresh, refresh-index
+                          (former thin SCRIPT_MAP; distinct from READY briefing retrieve)
+  memory [status|list|remember|recall|load]  Long-term memory store (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; remember "fact"; recall "q"; load
+                          aliases: bolt-memory, bolt_memory, memory-status, long-term-memory, ltm
+                          (former IDEA Phase 4 Bolt_Memory; distinct from READY briefing retrieve
+                          + PARTIAL bolt refresh-memory)
   refresh_vector_db        Rebuild the Vector DB for Nexus
                           (alias: vector_db, reindex) — lives in Core/modules/
   vector_db                Short alias for refresh_vector_db
   reindex                  Short alias for refresh_vector_db
   filter_backlog          Move low-scoring clips to media/clips/_low_score/
-  watch                   Watch the recordings folder for new files
-  layout [--quiet|--json] Report any files misplaced at the repo root (no moves)
+  watch [status|list|run]   Folder watch readiness (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--once|--folder PATH]
+                          aliases: watch-status, folder-watch, watch-folder
+                          (former thin SCRIPT_MAP; prefer bolt launch for live)
+  obs-game [status|list|run]  OBS scene→config game tracker (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--once|--background]
+                          aliases: obs_game, game-tracker, game_tracker, obs-game-tracker, obs_game_tracker, obs-game-status, obs_game_status
+                          (former thin IDEA update_game_from_obs; distinct from READY bolt obs)
+  icloud [status|list|run]  iCloud Drive multi-Mac sync (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--dry-run|--apply] [--script move|shared|setup]
+                          aliases: icloud-sync, iCloud, move-to-icloud, icloud-status
+                          (former unnamed IDEA scripts/move_to_icloud.sh; distinct from PARTIAL bolt mac-auto)
+  game-config [status|list|show|set]  Per-game sensitivity profiles (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; show [game]; set <game> KEY=VALUE …
+                          aliases: game_config, gameconfig, games, game-profiles, game-config-status
+                          (former unnamed IDEA Core/modules/Game_Config.py; distinct from PARTIAL bolt obs-game)
+  error-recovery [status|list|run]  Pipeline retry/quarantine (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--dry-run|--probe|--json]
+                          aliases: error_recovery, recovery, quarantine, error-tracker, error-recovery-status
+                          (former IDEA Core/modules/Error_Recovery.py; distinct from PARTIAL bolt discord / alerts)
+  memsearch [status|list|run]  Phase 4 semantic search over memory (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run|search|query "…" [--limit N] [--refresh] [--dry-run]
+                          aliases: memory-search, mem-search, search-memory, memory_search, memsearch-status
+                          (former IDEA Phase 4 memory-search; distinct from READY bolt search web
+                          + PARTIAL bolt memory / bolt refresh-memory)
+  layout [status|list|run]  Repo-root layout audit (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--quiet|--json]
+                          aliases: check-layout, check_layout, layout-status
+                          (former thin SCRIPT_MAP; report-only — never moves)
+  migrate-layout [status|list|run]
+                          Layout drift migrator (PARTIAL; soft-fail)
+                          status [--json|--probe]; list; run [--apply|--yes|--dry-run|--json]
+                          aliases: migrate_layout, layout-migrate, migrate-status
+                          (dry-run default; companion to bolt layout; never apply on status)
   merge-py [status|run|--dry-run|--list] [-o PATH]
                           Concatenate local .py sources → Data/merged_bot.py
                           (aliases: merge_py, merge-sources). Soft-fail.
@@ -298,6 +468,14 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
   search "question" [--raw|--long|--json] [--limit N]
                           Live DuckDuckGo web search (+ optional LLM summary)
                           (aliases: web-search, websearch). Powers !Bolt chat search.
+  word [status|list|define|spell|syn|ant|check] [word]
+                          Dictionary / spellcheck / thesaurus (READY)
+                          status [--json|--probe]; list; word → full card
+                          local spell (/usr/share/dict/words + Data/word_extras.txt)
+                          define/syn: free no-key APIs (soft-fail)
+                          aliases: dict, dictionary, define, spell, spellcheck,
+                          thesaurus, synonym. Distinct from bolt search.
+                          Unknown commands hear-through typos (safe ones auto-run).
   overlay [--port 8766]   OBS overlay server (Stream Deck kill/win + cam frame)
 
 Direction-finding researcher (Core/modules/Researcher.py):
@@ -345,6 +523,134 @@ Setup:
   Add to your shell rc (so you can just type 'bolt <thing>'):
     alias bolt='/Users/carter/developer/Bolt/.venv/bin/bolt'
 """
+
+
+# Posting / notify — suggest on typo, never auto-run from a misspelling.
+_CLI_DANGEROUS = frozenset(
+    {
+        "postnow",
+        "post-now",
+        "approve",
+        "send",
+        "notify",
+        "dontpost",
+        "dont-post",
+        "hold-clip",
+        "mark-posted",
+        "markposted",
+        "publish",
+    }
+)
+
+_TYPO_GUARD = False
+
+
+def _all_cli_names() -> list[str]:
+    """Names Bolt actually answers to (scripts + builtins + help harvest)."""
+    names = set(SUBCOMMANDS)
+    names.update(MANAGER_COMMANDS)
+    names.update(
+        {
+            "help",
+            "version",
+            "launch",
+            "test",
+            "setup",
+            "day",
+            "today",
+            "week",
+            "voice",
+            "talk",
+            "say",
+            "queue",
+            "approve",
+            "postnow",
+            "post-now",
+            "dontpost",
+            "analytics",
+            "anomaly",
+            "predict",
+            "multi",
+            "ocr",
+            "amazon",
+            "search",
+            "word",
+            "dict",
+            "spell",
+            "thesaurus",
+            "mission",
+            "research",
+            "budget",
+            "storage",
+            "menubar",
+            "checkup",
+            "enhance",
+            "doctor",
+            "verify",
+        }
+    )
+    for line in HELP_TEXT.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        token = stripped.split()[0].strip("`\"'")
+        folded = token.replace("-", "").replace("_", "")
+        if (
+            token
+            and token[0].isalpha()
+            and token == token.lower()
+            and folded.isalnum()
+        ):
+            names.add(token)
+    return sorted(names)
+
+
+def _closest_command(token: str, names: list[str]) -> list[tuple[str, int]]:
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Word_Lookup import closest_in
+
+        return list(closest_in(token, names, limit=4, max_dist=2) or [])
+    except Exception:
+        return []
+
+
+def _resolve_unknown_subcommand(token: str) -> tuple[str | None, list[str]]:
+    """Unique safe match → (name, suggestions). Else (None, suggestions)."""
+    raw = (token or "").strip()
+    if not raw:
+        return None, []
+    names = _all_cli_names()
+    folded = raw.lower().replace("_", "").replace("-", "")
+    if len(folded) >= 4:
+        prefixes: list[str] = []
+        seen: set[str] = set()
+        for name in names:
+            nf = name.replace("_", "").replace("-", "")
+            if nf.startswith(folded):
+                key = name.replace("_", "-")
+                if key not in seen:
+                    seen.add(key)
+                    prefixes.append(name)
+        if len(prefixes) == 1:
+            return prefixes[0], prefixes
+        if len(prefixes) > 1:
+            return None, prefixes[:4]
+    hits = _closest_command(raw, names)
+    if not hits:
+        return None, []
+    suggestions = [name for name, _dist in hits]
+    best, dist = hits[0]
+    unique = len(hits) == 1 or hits[1][1] > dist
+    if (
+        unique
+        and dist <= 2
+        and best.lower() not in _CLI_DANGEROUS
+        and not (dist == 2 and len(folded) < 6)
+    ):
+        return best, suggestions
+    return None, suggestions
 
 
 def find_script(name: str) -> Path | None:
@@ -913,6 +1219,80 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
+    # Built-in: dictionary / spellcheck / thesaurus (Word_Lookup; READY)
+    # Local spell always; define/syn use free no-key APIs (soft-fail).
+    # Distinct from READY bolt search (DuckDuckGo).
+    if subcommand in (
+        "word",
+        "words",
+        "dict",
+        "dictionary",
+        "define",
+        "spell",
+        "spellcheck",
+        "spell-check",
+        "spell_check",
+        "thesaurus",
+        "synonym",
+        "synonyms",
+        "syn",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        verb_aliases = {
+            "define": "define",
+            "spell": "spell",
+            "spellcheck": "spell",
+            "spell-check": "spell",
+            "spell_check": "spell",
+            "thesaurus": "syn",
+            "synonym": "syn",
+            "synonyms": "syn",
+            "syn": "syn",
+            "dict": "lookup",
+            "dictionary": "lookup",
+        }
+        known = {
+            "status",
+            "ready",
+            "list",
+            "ls",
+            "checklist",
+            "define",
+            "definition",
+            "meaning",
+            "dict",
+            "spell",
+            "spellcheck",
+            "spelling",
+            "check",
+            "proof",
+            "proofread",
+            "syn",
+            "synonym",
+            "synonyms",
+            "thesaurus",
+            "ant",
+            "antonym",
+            "antonyms",
+            "lookup",
+            "look",
+            "help",
+        }
+        verb = verb_aliases.get(subcommand)
+        if verb:
+            if not rest or rest[0].startswith("-"):
+                rest = ["status"] if not rest else rest
+            elif rest[0].lower() not in known:
+                rest = [verb] + rest
+        elif not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Word_Lookup"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
     # Built-in: Google Drive/Docs consent for Daily Log writes
     if subcommand in ("drive-auth", "drive_auth"):
         env = os.environ.copy()
@@ -1238,6 +1618,756 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
+
+    # Built-in: Mac automation launchd/cron/Shortcuts (Mac_Automation; soft-fail; PARTIAL)
+    if subcommand in (
+        "mac-auto",
+        "mac_auto",
+        "mac-automation",
+        "mac_automation",
+        "automation",
+        "shortcuts-status",
+        "shortcuts_status",
+        "launchd-status",
+        "launchd_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "shortcuts-status",
+            "shortcuts_status",
+            "launchd-status",
+            "launchd_status",
+        ) and not rest:
+            rest = ["status"]
+        # Bare `bolt mac-auto` / aliases → status (safe; install is explicit)
+        cmd = [py, "-m", "modules.Mac_Automation"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: SMS/email notify (Send_Notify; soft-fail; PARTIAL)
+    # Former thin SCRIPT_MAP send/notify -> scripts/send_notification.py
+    # (no soft-fail status/list/run). Prefers Bolt_Alerts.notify (same path as
+    # weekly --send / bolt alerts). Distinct from PARTIAL bolt alerts (full
+    # Mac/Voice surface) and PARTIAL bolt discord (webhooks).
+    if subcommand in (
+        "send",
+        "notify",
+        "send-notify",
+        "send_notify",
+        "send-status",
+        "send_status",
+        "notify-status",
+        "notify_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "send-status",
+            "send_status",
+            "notify-status",
+            "notify_status",
+        ) and not rest:
+            rest = ["status"]
+        if not rest:
+            rest = ["status"]
+        elif rest[0] not in ("status", "list", "send", "run", "-h", "--help") and rest[0].startswith("-"):
+            if rest[0] in ("--json", "--probe"):
+                rest = ["status"] + rest
+            else:
+                rest = ["send"] + rest
+        elif rest[0] not in ("status", "list", "send", "run", "-h", "--help"):
+            rest = ["send"] + rest
+        cmd = [py, "-m", "modules.Send_Notify"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+    # Built-in: Mac/Voice/email/iMessage alerts (Bolt_Alerts; soft-fail; PARTIAL)
+    if subcommand in (
+        "alerts",
+        "alert",
+        "alert-status",
+        "alert_status",
+        "notify-alerts",
+        "notify_alerts",
+        "bolt-alerts",
+        "bolt_alerts",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "alert-status",
+            "alert_status",
+        ) and not rest:
+            rest = ["status"]
+        # Bare `bolt alerts` / aliases → status (safe; test/send are explicit)
+        cmd = [py, "-m", "modules.Bolt_Alerts"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: pre-stream voice checklist (Voice_Checklist; soft-fail; PARTIAL)
+    if subcommand in (
+        "checklist",
+        "checklist-status",
+        "checklist_status",
+        "voice-checklist",
+        "voice_checklist",
+        "prestream",
+        "pre-stream",
+        "pre_stream",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "checklist-status",
+            "checklist_status",
+        ) and not rest:
+            rest = ["status"]
+        # Bare `bolt checklist` / aliases → status (safe; run is explicit)
+        cmd = [py, "-m", "modules.Voice_Checklist"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: Apple Reminders delivery (Apple_Reminders; soft-fail; PARTIAL)
+    if subcommand in (
+        "reminders",
+        "reminder",
+        "reminders-status",
+        "reminders_status",
+        "apple-reminders",
+        "apple_reminders",
+        "remind",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "reminders-status",
+            "reminders_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Apple_Reminders"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: weekly performance insights (Weekly_Analysis; soft-fail; PARTIAL)
+    if subcommand in (
+        "weekly",
+        "monthly",
+        "week-insights",
+        "week_insights",
+        "weekly-analysis",
+        "weekly_analysis",
+        "weekly-status",
+        "weekly_status",
+        "week-analysis",
+        "week_analysis",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "weekly-status",
+            "weekly_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Weekly_Analysis"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: local performance baseline (Performance_Baseline; soft-fail; PARTIAL)
+    # NOTE: do NOT catch "performance-sync" — that stays bolt stats.
+    if subcommand in (
+        "performance",
+        "baseline",
+        "perf-baseline",
+        "perf_baseline",
+        "performance-baseline",
+        "performance_baseline",
+        "baseline-status",
+        "baseline_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "baseline-status",
+            "baseline_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Performance_Baseline"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: clip backlog score filter (Filter_Backlog; soft-fail; PARTIAL)
+    if subcommand in (
+        "filter-backlog",
+        "filter_backlog",
+        "filter-backlog-status",
+        "filter_backlog_status",
+        "backlog-filter",
+        "backlog_filter",
+        "filter-clips",
+        "filter_clips",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "filter-backlog-status",
+            "filter_backlog_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Filter_Backlog"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: local highlight reel stitch (Make_Highlights; soft-fail; PARTIAL)
+    # Former SHELL scripts/make_highlights.py (IndentationError Helix paste).
+    if subcommand in (
+        "make-highlights",
+        "make_highlights",
+        "make-highlights-status",
+        "make_highlights_status",
+        "stitch-highlights",
+        "stitch_highlights",
+        "highlight-stitch",
+        "highlight_stitch",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "make-highlights-status",
+            "make_highlights_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Make_Highlights"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: vertical reprocess + multi-platform queue (Reprocess_Clips; soft-fail; PARTIAL)
+    # Former SHELL scripts/reprocess_clips.py (wrong PROJECT_ROOT under scripts/).
+    if subcommand in (
+        "reprocess",
+        "reprocess_clips",
+        "reprocess-clips",
+        "reprocess-status",
+        "reprocess_status",
+        "vertical-reprocess",
+        "vertical_reprocess",
+        "tiktok-reprocess",
+        "tiktok_reprocess",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "reprocess-status",
+            "reprocess_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Reprocess_Clips"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+
+
+
+
+
+    # Built-in: local ICS calendar feeds (ICS_Calendar; soft-fail; PARTIAL)
+    # Former thin SCRIPT_MAP calendar → scripts/generate_calendar.py
+    # (no soft-fail status/list/run). Distinct from READY bolt gcal OAuth.
+    # Thumbnails stay READY via bolt thumbnails.
+    if subcommand in (
+        "calendar",
+        "ics",
+        "ics-calendar",
+        "ics_calendar",
+        "generate-calendar",
+        "generate_calendar",
+        "calendar-status",
+        "calendar_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "calendar-status",
+            "calendar_status",
+        ) and not rest:
+            rest = ["status"]
+        if not rest:
+            rest = ["status"]
+        elif rest[0] not in ("status", "list", "run", "-h", "--help") and rest[0].startswith("-"):
+            rest = ["run"] + rest
+        cmd = [py, "-m", "modules.ICS_Calendar"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: long-term memory store (Bolt_Memory; soft-fail; PARTIAL)
+    # Former IDEA / Phase 4 Core/modules/Bolt_Memory.py (engines recall/remember/
+    # load_all_memory existed; no soft-fail status/list/recall/remember CLI).
+    # Distinct from READY Memory_Index.retrieve_memory (briefing) and PARTIAL
+    # bolt refresh-memory (index rebuild → Data/memory_index.json).
+    if subcommand in (
+        "memory",
+        "bolt-memory",
+        "bolt_memory",
+        "memory-status",
+        "memory_status",
+        "long-term-memory",
+        "ltm",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "memory-status",
+            "memory_status",
+        ) and not rest:
+            rest = ["status"]
+        if not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Bolt_Memory"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: memory index rebuild (Refresh_Memory; soft-fail; PARTIAL)
+    # Former thin SCRIPT_MAP refresh_memory → scripts/refresh_memory_index.py
+    # (no soft-fail status/list/run). Distinct from READY briefing retrieve
+    # via Memory_Index.retrieve_memory (in-process).
+    if subcommand in (
+        "refresh-memory",
+        "refresh_memory",
+        "memory-refresh",
+        "memory_refresh",
+        "refresh-index",
+        "refresh_index",
+        "refresh-memory-status",
+        "refresh_memory_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "refresh-memory-status",
+            "refresh_memory_status",
+        ) and not rest:
+            rest = ["status"]
+        if not rest:
+            rest = ["status"]
+        elif rest[0] not in ("status", "list", "run", "-h", "--help") and rest[0].startswith("-"):
+            rest = ["run"] + rest
+        cmd = [py, "-m", "modules.Refresh_Memory"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: folder watch readiness (Folder_Watch; soft-fail; PARTIAL)
+    # Former thin SCRIPT_MAP watch → scripts/Watcher.py (no soft-fail status/list/run).
+    # Distinct from READY bolt launch (live) / bolt recordings (one-shot).
+    if subcommand in (
+        "watch",
+        "watch-status",
+        "watch_status",
+        "folder-watch",
+        "folder_watch",
+        "watch-folder",
+        "watch_folder",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "watch-status",
+            "watch_status",
+        ) and not rest:
+            rest = ["status"]
+        if not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Folder_Watch"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: OBS scene→config.json game tracker (OBS_Game_Tracker; soft-fail; PARTIAL)
+    # Former thin/IDEA scripts/update_game_from_obs.py (no soft-fail status/list/run).
+    # Distinct from READY bolt obs (WebSocket status/monitor).
+    if subcommand in (
+        "obs-game",
+        "obs_game",
+        "game-tracker",
+        "game_tracker",
+        "obs-game-tracker",
+        "obs_game_tracker",
+        "obs-game-status",
+        "obs_game_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "obs-game-status",
+            "obs_game_status",
+        ) and not rest:
+            rest = ["status"]
+        if not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.OBS_Game_Tracker"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: iCloud Drive multi-Mac sync (ICloud_Sync; soft-fail; PARTIAL)
+    # Former unnamed IDEA Docs/AI_Guide.md + scripts/move_to_icloud.sh /
+    # migrate_to_shared.sh / setup_icloud.sh (no soft-fail status/list/run).
+    # Distinct from PARTIAL bolt mac-auto (launchd/cron/Shortcuts). William glue.
+    if subcommand in (
+        "icloud",
+        "icloud-sync",
+        "icloud_sync",
+        "iCloud",
+        "move-to-icloud",
+        "move_to_icloud",
+        "icloud-status",
+        "icloud_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "icloud-status",
+            "icloud_status",
+        ) and not rest:
+            rest = ["status"]
+        if not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.ICloud_Sync"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: per-game sensitivity profiles (Game_Config; soft-fail; PARTIAL)
+    # Former unnamed IDEA Docs/AI_Guide.md + Core/modules/Game_Config.py
+    # (built-in profiles existed; CWD-relative game_configs.json / config.json;
+    # no soft-fail status/list/show/set CLI). Distinct from PARTIAL bolt obs-game
+    # (OBS scene→Core/config.json game) and READY bolt obs.
+    if subcommand in (
+        "game-config",
+        "game_config",
+        "gameconfig",
+        "games",
+        "game-profiles",
+        "game_profiles",
+        "game-config-status",
+        "game_config_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "game-config-status",
+            "game_config_status",
+        ) and not rest:
+            rest = ["status"]
+        if not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Game_Config"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: pipeline retry/quarantine (Error_Recovery; soft-fail; PARTIAL)
+    # Former IDEA Docs/AI_Guide.md + Core/modules/Error_Recovery.py
+    # (with_retry / ErrorTracker / quarantine existed; CWD-relative quarantine/;
+    # no soft-fail status/list/run CLI; not wired into bot.py). Distinct from
+    # PARTIAL bolt discord (webhook) and PARTIAL bolt alerts (Mac/Voice fan-out).
+    if subcommand in (
+        "error-recovery",
+        "error_recovery",
+        "error-recovery-status",
+        "error_recovery_status",
+        "recovery",
+        "quarantine",
+        "error-tracker",
+        "error_tracker",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "error-recovery-status",
+            "error_recovery_status",
+        ) and not rest:
+            rest = ["status"]
+        if not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Error_Recovery"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: Phase 4 semantic memory search (Memory_Search; soft-fail; PARTIAL)
+    # Former IDEA Docs/AI_Guide.md "Bolt_Search.py ← Phase 4 - semantic search over
+    # memory (WIP)" — filename was reused for READY web search `bolt search`; the
+    # memory-search IDEA itself had no soft-fail CLI. Wraps Memory_Index.retrieve_memory.
+    # Distinct from READY bolt search (web), PARTIAL bolt memory (LLM), PARTIAL
+    # bolt refresh-memory (rebuild).
+    if subcommand in (
+        "memsearch",
+        "memory-search",
+        "memory_search",
+        "mem-search",
+        "mem_search",
+        "search-memory",
+        "search_memory",
+        "memsearch-status",
+        "memsearch_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "memsearch-status",
+            "memsearch_status",
+        ) and not rest:
+            rest = ["status"]
+        if not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Memory_Search"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: manual clip performance logger (Log_Perf; soft-fail; PARTIAL)
+    # Former thin SCRIPT_MAP log_perf / log_clip_performance.py (no soft-fail status).
+    # Distinct from READY bolt stats (Social_Stats / Performance_Sync API pull).
+    if subcommand in (
+        "log-perf",
+        "log_perf",
+        "log-performance",
+        "log_performance",
+        "perf-log",
+        "perf_log",
+        "log-perf-status",
+        "log_perf_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "log-perf-status",
+            "log_perf_status",
+        ) and not rest:
+            rest = ["status"]
+        # Bare → status; engine flags without action → run
+        if not rest:
+            rest = ["status"]
+        elif rest[0] not in ("status", "list", "run", "-h", "--help") and rest[0].startswith("-"):
+            rest = ["run"] + rest
+        cmd = [py, "-m", "modules.Log_Perf"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+
+    # Built-in: repo-root layout audit (Layout_Check; soft-fail; PARTIAL)
+    # Former thin SCRIPT_MAP layout/check_layout (no soft-fail status/list/run).
+    # Report-only — never moves files. Distinct from READY bolt doctor / verify.
+    if subcommand in (
+        "layout",
+        "check-layout",
+        "check_layout",
+        "layout-status",
+        "layout_status",
+        "layout-check",
+        "layout_check",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "layout-status",
+            "layout_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Layout_Check"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: repo-root layout migrator (Migrate_Layout; soft-fail; PARTIAL)
+    # Companion to PARTIAL bolt layout (report-only). Dry-run default; --apply moves.
+    # Former thin/IDEA scripts/migrate_layout.py (no soft-fail status/list/run).
+    # Distinct from READY bolt doctor / bolt verify. Stay PARTIAL (William glue).
+    if subcommand in (
+        "migrate-layout",
+        "migrate_layout",
+        "layout-migrate",
+        "layout_migrate",
+        "migrate-status",
+        "migrate_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "migrate-status",
+            "migrate_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Migrate_Layout"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: lightweight health smoke (Health_Check; soft-fail; PARTIAL)
+    # Former SHELL scripts/health_check.py (pre-reorg CWD paths). Prefer bolt doctor.
+    if subcommand in (
+        "health",
+        "health-check",
+        "health_check",
+        "health-status",
+        "health_status",
+        "system-health",
+        "system_health",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "health-status",
+            "health_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Health_Check"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: SHA256 hash dedupe scan (Hash_Dedupe; soft-fail; PARTIAL)
+    # Former thin SCRIPT_MAP clip_dedupe (parents[3] wrong root). Distinct from
+    # READY pipeline Clip_Deduplicator (pHash / Data/seen_clips.json).
+    if subcommand in (
+        "clip-dedupe",
+        "clip_dedupe",
+        "hash-dedupe",
+        "hash_dedupe",
+        "dedupe-status",
+        "dedupe_status",
+        "sha-dedupe",
+        "sha_dedupe",
+        "hash-dedupe-status",
+        "hash_dedupe_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "dedupe-status",
+            "dedupe_status",
+            "hash-dedupe-status",
+            "hash_dedupe_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Hash_Dedupe"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: Gemini persona chat loader (Bolt_Personality; soft-fail; PARTIAL)
+    # Former SHELL scripts/load_bolt_personality.py (parents[3] wrong root).
+    # Distinct from READY bolt gemini / nexus / chat (Twitch IRC personality).
+    if subcommand in (
+        "personality",
+        "bolt-personality",
+        "bolt_personality",
+        "personality-status",
+        "personality_status",
+        "persona",
+        "load-personality",
+        "load_personality",
+        "load-bolt-personality",
+        "load_bolt_personality",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "personality-status",
+            "personality_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Bolt_Personality"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: Photo / handwriting OCR (Photo_OCR; soft-fail; PARTIAL)
+    if subcommand in (
+        "photo-ocr",
+        "photo_ocr",
+        "photo-ocr-status",
+        "photo_ocr_status",
+        "ocr-photos",
+        "ocr_photos",
+        "vision-ocr",
+        "vision_ocr",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "photo-ocr-status",
+            "photo_ocr_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Photo_OCR"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: HandBrake clip compression (Video_Compress; soft-fail; PARTIAL)
+    if subcommand in (
+        "compress",
+        "video-compress",
+        "video_compress",
+        "handbrake",
+        "compress-videos",
+        "compress_videos",
+        "compress-status",
+        "compress_status",
+    ):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand in (
+            "compress-status",
+            "compress_status",
+        ) and not rest:
+            rest = ["status"]
+        cmd = [py, "-m", "modules.Video_Compress"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
     # Built-in: local title A/B trainer (AI_Title_Generator; soft-fail)
     if subcommand in (
         "titles",
@@ -1283,6 +2413,36 @@ print('System is fully upgraded.')
     # Script passthrough
     script = find_script(subcommand)
     if script is None:
+        global _TYPO_GUARD
+        if not _TYPO_GUARD:
+            resolved, suggestions = _resolve_unknown_subcommand(subcommand)
+            if resolved and resolved != subcommand:
+                print(
+                    f"bolt: running '{resolved}' (you typed '{subcommand}')",
+                    file=sys.stderr,
+                )
+                _TYPO_GUARD = True
+                try:
+                    sys.argv[1] = resolved
+                    return main()
+                finally:
+                    _TYPO_GUARD = False
+            print(f"bolt: unknown subcommand '{subcommand}'", file=sys.stderr)
+            if suggestions:
+                print(
+                    "  did you mean: " + ", ".join(suggestions),
+                    file=sys.stderr,
+                )
+            else:
+                print(
+                    "  Run 'bolt help' for commands, or 'bolt word' to look one up.",
+                    file=sys.stderr,
+                )
+            print(
+                "  Run 'bolt help' for the full list of subcommands.",
+                file=sys.stderr,
+            )
+            return 2
         print(f"bolt: unknown subcommand '{subcommand}'", file=sys.stderr)
         print(f"  Run 'bolt help' for the full list of subcommands.", file=sys.stderr)
         return 2

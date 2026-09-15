@@ -1,7 +1,8 @@
-"""Thin wrapper so `bolt watch` uses Core/modules/Watcher.py.
+"""Thin wrapper so `bolt watch` / direct script runs use soft-fail Folder_Watch.
 
-The real watcher (processed-log, newest-pending, mark-after-yield) lives
-in Core. This file only bootstraps sys.path.
+The real watcher library (processed-log, newest-pending, mark-after-yield) lives
+in Core/modules/Watcher.py. Soft-fail CLI is Core/modules/Folder_Watch.py
+(status/list/run). Prefer `bolt launch` for live mode.
 """
 
 from __future__ import annotations
@@ -35,5 +36,6 @@ __all__ = [
 
 
 if __name__ == "__main__":
-    for path in watch_folder():
-        print(path)
+    from modules.Folder_Watch import main
+
+    raise SystemExit(main())

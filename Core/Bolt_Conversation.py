@@ -275,12 +275,15 @@ VOICE CONVERSATION RULES (STRICT):
 - NEVER invent fake project plans, dictionaries, or multi-section reports.
 - If Billy asks to run a Bolt command (bolt day, queue decide, etc.), say one sentence
   directing him — real commands are handled by the intent system before you reply.
+- William often mistypes commands. If you see a spelling guess, treat that as the
+  intended command name and answer in one sentence. Do not invent a briefing or queue.
+- Never guess a post / approve / hold from a typo. Ask him to say it clearly.
 - Maintain cheerful, accidentally-sarcastic energy even with hard truths.
 - One clear next step. If you don't know, say so cheerfully.
 - Plain spoken English only.
 
 Real system phrases (morning, bolt day, queue, approve next, storage, budget) may already
-be handled before you see them. Do not re-invent those.
+be handled before you see them, including near-miss spellings. Do not re-invent those.
 """
 
 
@@ -603,19 +606,31 @@ def generate_response(user_text: str, memory: ConversationMemory) -> str:
     2. Otherwise use LLM_Handler (Grok/OpenAI) with personality + history.
     """
     # Intent path first — real actions beat pure chat when the user clearly wants one
+    # (includes typo hear-through for queue/briefing/etc.)
     if INTENT_OK:
         handled = try_handle_intent(user_text)
         if handled is not None:
             return handled
 
+    llm_text = user_text
+    if INTENT_OK:
+        try:
+            from modules.Intent_Router import suggest_repair
+
+            guessed = suggest_repair(user_text)
+        except Exception:
+            guessed = None
+        if guessed:
+            llm_text = f"{user_text}\n(Bolt spelling guess: {guessed})"
+
     system_prompt = build_system_prompt()
-    retrieved = _retrieved_memory_block(user_text)
+    retrieved = _retrieved_memory_block(llm_text)
     if retrieved:
         system_prompt = f"{system_prompt}\n\n{retrieved}\n"
 
     try:
         reply = ask_llm(
-            user_text,
+            llm_text,
             system=system_prompt,
             # Don't feed a long polluted history into every free-form turn
             history=memory.as_openai_messages()[-6:],

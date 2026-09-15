@@ -25,11 +25,9 @@ if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 from _paths import REPO_ROOT, DATA_DIR, CLIPS_DIR, LOGS_DIR, CONFIG_FILE  # noqa: E402
 
-# Backward-compatible aliases for code that uses `ROOT` / `PROJECT_ROOT`.
+# Backward-compatible aliases — do NOT overwrite ROOT after _paths.
 PROJECT_ROOT = REPO_ROOT
 ROOT = REPO_ROOT
-
-ROOT = Path(__file__).parent.parent
 
 
 def main():
@@ -40,20 +38,20 @@ def main():
         print(f"Error: Tracker script not found at {tracker_script}")
         sys.exit(1)
 
+    log_file = LOGS_DIR / "obs_game_tracker.log"
     print("Starting OBS game tracker in background...")
     print(f"  Script: {tracker_script}")
-    print(f"  Log: {ROOT}/logs/obs_game_tracker.log")
+    print(f"  Log: {log_file}")
     print()
     print("The tracker will:")
     print("  • Watch for OBS scene changes")
-    print("  • Auto-update config.json with the current game")
+    print("  • Auto-update Core/config.json with the current game")
     print("  • Run silently in the background")
     print()
     print("To stop: kill the process or restart OBS")
     print()
 
     # Start as background process
-    log_file = ROOT / "logs" / "obs_game_tracker.log"
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
     with open(log_file, "w") as log:

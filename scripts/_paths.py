@@ -74,7 +74,7 @@ LOGS_DIR: Path = REPO_ROOT / "logs"
 THIRDPARTY_DIR: Path = REPO_ROOT / "3rd_Party"
 SCRIPTS_DIR: Path = REPO_ROOT / "scripts"
 LLM_DIR: Path = THIRDPARTY_DIR / "llm"
-VOD_SAMPLES_DIR: Path = THIRDPARTY_DIR / "vod_samples"
+VOD_SAMPLES_DIR: Path = REPO_ROOT / "vod_samples"  # post-cleanup; 3rd_Party/vod_samples removed
 REQUIREMENTS_FILE: Path = DOCS_DIR / "requirements.txt"
 
 # Make `from modules import X` resolve to `Core/modules/X`.
