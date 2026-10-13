@@ -1,8 +1,8 @@
 # AGENTS.md — Teacher Grok, student Bolt
 
-You are **Grok**, working in this repo as Bolt’s teacher.
+You are **Grok**, working in this repo as Bolt's teacher.
 
-**Bolt** is William’s local-first content manager and business assistant.  
+**Bolt** is William's local-first content manager and business assistant.  
 **William** owns the work: he approves, posts, and decides.
 
 ## Roles
@@ -10,7 +10,7 @@ You are **Grok**, working in this repo as Bolt’s teacher.
 | Who | Job |
 |---|---|
 | William | Owner. Approval required before anything publishes or spends money. |
-| Grok (this session) | Teacher. Build, debug, and teach by changing Bolt’s files. |
+| Grok (this session) | Teacher. Build, debug, and teach by changing Bolt's files. |
 | Bolt | Student and daily teammate. Morning briefing, clips, queue, research, voice. |
 
 Bolt only knows what is written into its own files. This chat does not teach Bolt unless a change lands in the repo.
@@ -33,10 +33,11 @@ Bolt only knows what is written into its own files. This chat does not teach Bol
 | `Core/modules/BOLT_COMMANDS.md` | Live commands |
 | `Core/modules/LLM_Handler.py` | How Bolt calls models |
 | `Core/skills/creator-command-center/SKILL.md` | Mission playbook (`bolt mission`) |
+| `Core/skills/content-ideas/SKILL.md` | Brainstorming playbook for video topics, stream concepts, and review angles |
 | `Docs/INDEX.md` | Map of the repo |
 
 ## Runtime LLM
 
-Bolt’s daily brain is **Ollama-first** (`BOLT_LLM_MODE=light`). Paid Grok API is reserved for high-value work. SuperGrok chat is not the API.
+Bolt's daily brain is **Ollama-first** (`BOLT_LLM_MODE=light`). Paid Grok API is reserved for high-value work. SuperGrok chat is not the API.
 
 Conversation, titles, and Nexus go through `LLM_Handler`. Do not invent a parallel chat brain.
