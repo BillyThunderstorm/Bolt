@@ -101,3 +101,6 @@ Docs/reviews/inbox/*
 !Docs/reviews/inbox/.gitkeep
 Docs/reviews/imported/*
 !Docs/reviews/imported/.gitkeep
+
+# Twitch app token cache (secret, regenerated automatically)
+Data/twitch_stats_token_cache.json
