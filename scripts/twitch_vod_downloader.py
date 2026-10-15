@@ -155,7 +155,7 @@ def ytdlp_sample_cmd(
     ]
     if ffmpeg_path:
         loc = Path(ffmpeg_path)
-        ffmpeg_loc = str(loc.parent) if loc.is_file() else str(loc)
+        ffmpeg_loc = str(loc.parent) if loc.is_file() or loc.name.startswith("ffmpeg") else str(loc)
         cmd[1:1] = ["--ffmpeg-location", ffmpeg_loc]
     return cmd
 
