@@ -122,6 +122,8 @@ Use `memory/content/` for broad creator growth:
 The best memory entry is specific: date, platform, content idea, result, and lesson.
 
 ## Recent Notes
+- [2026-10-15] Held clip 0a2c43fc (Test): not ready
+- [2026-10-15] Held clip b26c654d (Ready clip): bad hook
 - [2026-09-10] `bolt vods` sample download was listing Helix VODs then failing: it spawned PATH `ffmpeg` against the unsigned usher HLS URL (403 / dyld crash on missing libx265). PATH ffmpeg can exist and still not run. Fix: yt-dlp + `FFmpeg_Bin.working_ffmpeg()` (ffmpeg-full), `bolt vods list` for dry-run. Public VODs do not need `TWITCH_USER_TOKEN`. Check: `bolt vods status`.
 
 - [2026-09-09] This week is: pop culture
