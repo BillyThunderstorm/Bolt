@@ -21,6 +21,7 @@ CLI (`bolt mission` / `bolt command-center` / `bolt ccc`):
 
 from __future__ import annotations
 
+import os
 import json
 import re
 from datetime import datetime
@@ -221,9 +222,19 @@ def format_checkin() -> str:
     return "\n".join(lines)
 
 
+def _bump_mtime_past_others(path: Path) -> None:
+    """Make the newest mission sort first even when coarse filesystem clocks tie."""
+    others = [p.stat().st_mtime_ns for p in MISSIONS_DIR.glob("*.md") if p != path]
+    newest = max(others, default=0)
+    mine = path.stat().st_mtime_ns
+    if mine <= newest:
+        bumped = newest + 1_000_000  # +1 ms
+        os.utime(path, ns=(bumped, bumped))
+
+
 def list_missions(limit: int = 20) -> List[Path]:
     _ensure_missions_dir()
-    files = sorted(MISSIONS_DIR.glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True)
+    files = sorted(MISSIONS_DIR.glob("*.md"), key=lambda p: (p.stat().st_mtime_ns, p.name), reverse=True)
     return files[:limit]
 
 
@@ -1521,6 +1532,7 @@ def start_mission(
         use_nexus=use_nexus,
     )
     path.write_text(md, encoding="utf-8")
+    _bump_mtime_past_others(path)
     notify(
         f"Mission saved: {path}",
         level="success",

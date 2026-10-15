@@ -132,7 +132,12 @@ def _word_list() -> Tuple[Set[str], str]:
         try:
             with path.open(encoding="utf-8", errors="ignore") as fh:
                 for line in fh:
-                    token = line.strip().lower()
+                    entry = line.strip()
+                    # Skip all-caps abbreviations (NW, TV, ...) so typos like
+                    # "nw" are not treated as real words.
+                    if len(entry) > 1 and entry.isupper():
+                        continue
+                    token = entry.lower()
                     if token and token.isascii() and token.isalpha():
                         words.add(token)
             source = str(path)
