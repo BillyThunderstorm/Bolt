@@ -2115,21 +2115,20 @@ These names perform the same actions as their primary commands:
 *Canonical path: `Core/modules/BOLT_COMMANDS.md` — this is the only BOLT_COMMANDS
 file in the repo. Prefer editing this markdown over duplicate Pages copies.*
 
-## `bolt personality` — Bolt persona loader (PARTIAL)
+## `bolt personality` — Bolt system prompt
 
-Gemini persona chat loader wrapping `scripts/load_bolt_personality.py` + `Data/context/bolt-personality.md`.
+William's persona in `Data/context/bolt-personality.md`, loaded by `scripts/load_bolt_personality.py`. Voice and Twitch chat use the same text. `run` talks through `LLM_Handler` (Ollama first). Not a Gemini chat.
 
 ```bash
 bolt personality status
 bolt personality list
 bolt personality run
+bolt personality run --once "Hey Bolt, I have an idea"
 ```
 
 Aliases: `personality`, `bolt-personality`, `personality-status`, `persona`, `load-personality`, `load_personality`.
 
-Soft-fail prefix: `Personality unavailable:`.
-
-Distinct from READY `bolt gemini` / `nexus` / Twitch `bolt chat` personality layer. Stay PARTIAL while persona/Gemini gates remain.
+Soft-fail prefix: `Personality unavailable:` (missing file, or no model answered).
 
 Module: `Core/modules/Bolt_Personality.py`.
 

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-09T06:51:43",
+  "updated_at": "2026-10-11T20:49:49",
   "this_week": {
-    "topic": "pop culture",
-    "note": "",
-    "started": "2026-09-09",
+    "topic": "product testing",
+    "note": "Reset 2026-10-11: single lane, every test = detailed assessment. Plan: Data/business/product-testing-plan.md",
+    "started": "2026-10-11",
     "done": []
   },
   "last_week": {
-    "topic": "tech",
+    "topic": "gaming / tech",
     "note": "",
-    "started": "2026-08-30",
+    "started": "2026-10-11",
     "done": []
   },
   "do_not_suggest": [

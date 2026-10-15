@@ -2726,7 +2726,48 @@ def advance_next() -> Dict[str, str]:
     return steps[idx]
 
 
+def _build_focused_morning(BF) -> Dict[str, Any]:
+    """Short single-lane morning (Core/config.json briefing_focus)."""
+    steps = BF.todays_steps()
+    spoken = (
+        f"Good morning, {CREATOR_NAME}. Today's product-testing step: {steps[0]} "
+        "Posts still need your approval."
+    )
+    md_lines = [
+        f"# Good Morning Bolt — {date.today().isoformat()}",
+        "",
+        "## Spoken Briefing",
+        spoken,
+        "",
+        "## Product Testing Today",
+    ] + [f"- {s}" for s in steps]
+    warn = BF.storage_warning()
+    if warn:
+        md_lines += ["", "## Storage", warn]
+    md_lines += ["", "Plan: `Data/business/product-testing-plan.md`", ""]
+    briefing_md = "\n".join(md_lines)
+    path = BRIEFINGS_DIR / f"morning_{date.today().isoformat()}.md"
+    path.write_text(briefing_md, encoding="utf-8")
+    (BRIEFINGS_DIR / "latest_morning.md").write_text(briefing_md, encoding="utf-8")
+    if BF.drive_push_allowed():
+        try:
+            from modules.Google_Drive_Handbook import push_briefing_to_daily_log
+
+            push_briefing_to_daily_log(briefing_md, interactive=False)
+        except Exception as exc:
+            print(f"Drive Daily Log skipped ({exc}).")
+    return {"spoken": spoken, "spoken_voice": spoken, "actions": [], "path": str(path),
+            "steps": steps}
+
+
 def build_morning_briefing() -> Dict[str, Any]:
+    try:
+        from modules import Briefing_Focus as BF
+
+        if BF.enabled():
+            return _build_focused_morning(BF)
+    except ImportError:
+        pass
     actions = next_actions(limit=3)
     testing = list_items(status="testing")
     store = store_feature_next()

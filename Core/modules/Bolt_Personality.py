@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 """
-Bolt_Personality.py — Gemini persona chat loader (PARTIAL)
-==========================================================
-Soft-fail CLI for the former SHELL/thin dead-end
-``scripts/load_bolt_personality.py`` (wrong ``parents[3]`` → ``/Users/carter``
-looking for missing ``/Users/carter/Bolt_Personality.txt``).
+Bolt_Personality.py — Bolt persona loader
+=========================================
+Loads William's system prompt (``Data/context/bolt-personality.md``) and
+talks through ``LLM_Handler`` (Ollama first). Not a Gemini chat.
+
+The old wrapper gated ``bolt personality run`` on ``google.genai`` and
+``GEMINI_API_KEY``. That was the wrong brain. The prompt was never a
+Gemini feature.
 
 Soft-fail prefix: ``Personality unavailable:``.
-Stay PARTIAL — distinct from READY ``bolt gemini`` / ``bolt nexus`` /
-``bolt chat`` (Twitch IRC personality).
-
-Canonical persona: ``Data/context/bolt-personality.md``.
-``ready=True`` when engine present + canonical markdown exists (Gemini key
-gates chat/run only).
 
 Public API:
   status() / list_items() / try_run() / print_status() / main()
@@ -20,7 +17,6 @@ Public API:
 
 from __future__ import annotations
 
-import importlib.util
 import json
 import os
 import subprocess
@@ -37,7 +33,6 @@ _PATHS = _REPO / "scripts" / "_paths.py"
 _CANON = _REPO / "Data" / "context" / "bolt-personality.md"
 _FALLBACK_TXT = _REPO / "Docs" / "scratch" / "reviews" / "Bolt_Personality.txt"
 _FALLBACK_ROOT = _REPO / "Bolt_Personality.txt"
-_PAGES = _REPO / "Core" / "Bolt_Personality.pages"
 
 
 def _utc_now() -> str:
@@ -50,51 +45,48 @@ def _soft(msg: str) -> str:
     return f"{_SOFT} {msg}"
 
 
-def _load_dotenv() -> None:
+def _engine_text() -> str:
+    if not _ENGINE.is_file():
+        return ""
     try:
-        from dotenv import load_dotenv
-
-        load_dotenv(_REPO / ".env", override=False)
-        load_dotenv(override=False)
+        return _ENGINE.read_text(encoding="utf-8", errors="ignore")
     except Exception:
-        pass
+        return ""
 
 
 def _engine_stale() -> bool:
     """True if engine still assigns project root via parents[3]."""
-    if not _ENGINE.is_file():
-        return False
-    try:
-        text = _ENGINE.read_text(encoding="utf-8", errors="ignore")
-    except Exception:
+    text = _engine_text()
+    if not text:
         return False
     if "from _paths import" in text:
         return False
     return "parents[3]" in text
 
 
-def _genai_available() -> bool:
-    try:
-        return importlib.util.find_spec("google.genai") is not None
-    except Exception:
+def _engine_uses_llm_handler() -> bool:
+    text = _engine_text()
+    if "ask_llm" not in text:
         return False
+    if "google.genai" in text or "GEMINI_API_KEY" in text:
+        return False
+    return True
 
 
-def _gemini_key() -> str:
-    _load_dotenv()
-    return (os.environ.get("GEMINI_API_KEY") or "").strip()
+def _loaded_prompt() -> str:
+    scripts = str(_REPO / "scripts")
+    if scripts not in sys.path:
+        sys.path.insert(0, scripts)
+    try:
+        from load_bolt_personality import load_bolt_personality
 
-
-def _redact_key(key: str) -> str:
-    if not key:
+        return load_bolt_personality() or ""
+    except Exception:
         return ""
-    if len(key) <= 8:
-        return "***"
-    return f"{key[:4]}…{key[-4:]}"
 
 
 def status(*, probe: bool = False) -> Dict[str, Any]:
-    """Readiness for persona file + Gemini chat loader (PARTIAL)."""
+    """Readiness for the persona file wired into LLM_Handler."""
     try:
         engine_ok = _ENGINE.is_file()
         stale = _engine_stale()
@@ -102,50 +94,49 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         canon_ok = _CANON.is_file()
         fb_txt_ok = _FALLBACK_TXT.is_file()
         fb_root_ok = _FALLBACK_ROOT.is_file()
-        pages_ok = _PAGES.is_file()
-        genai_ok = _genai_available()
-        key = _gemini_key()
-        key_ok = bool(key)
+        uses_llm = _engine_uses_llm_handler()
+        prompt = _loaded_prompt() if engine_ok and not stale else ""
+        prompt_ok = bool(prompt) and "client.chat.completions.create" not in prompt
 
         out: Dict[str, Any] = {
             "checked_at": _utc_now(),
             "ready": False,
-            "partial": True,
-            "readiness": "PARTIAL",
+            "partial": False,
+            "readiness": "READY",
             "soft_fail_prefix": _SOFT,
             "engine_path": str(_ENGINE),
             "engine_present": engine_ok,
             "engine_stale_parents3": stale,
+            "engine_uses_llm_handler": uses_llm,
             "paths_helper_present": paths_ok,
             "personality_path": str(_CANON),
             "personality_present": canon_ok,
+            "prompt_loaded": prompt_ok,
+            "prompt_chars": len(prompt),
             "fallback_txt_path": str(_FALLBACK_TXT),
             "fallback_txt_present": fb_txt_ok,
             "fallback_root_path": str(_FALLBACK_ROOT),
             "fallback_root_present": fb_root_ok,
-            "pages_path": str(_PAGES),
-            "pages_present": pages_ok,
-            "google_genai_available": genai_ok,
-            "gemini_api_key_present": key_ok,
-            "gemini_api_key_redacted": _redact_key(key) if key_ok else "",
             "cli": "bolt personality",
             "note": (
-                "Gemini persona chat loader over Data/context/bolt-personality.md. "
-                "Distinct from READY bolt gemini / bolt nexus / bolt chat "
-                "(Twitch IRC personality). Former SHELL parents[3] wrong root."
+                "William's persona in Data/context/bolt-personality.md is the "
+                "system prompt for voice, Twitch chat, and `bolt personality run`. "
+                "Replies use LLM_Handler (Ollama first). Not Gemini."
             ),
-            "is_stranger_ready": False,
+            "is_stranger_ready": True,
             "probe": bool(probe),
             "error": "",
             "hint": "",
         }
 
         if not engine_ok:
+            out["readiness"] = "MISSING"
             out["error"] = _soft(f"engine missing ({_ENGINE})")
             out["hint"] = out["error"]
             return out
 
         if stale:
+            out["readiness"] = "BROKEN"
             out["error"] = _soft(
                 "engine still uses parents[3] / missing Bolt_Personality.txt root"
             )
@@ -153,25 +144,38 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
             return out
 
         if not paths_ok:
+            out["readiness"] = "BROKEN"
             out["error"] = _soft("scripts/_paths.py missing")
             out["hint"] = out["error"]
             return out
 
-        if not canon_ok:
+        if not uses_llm:
+            out["readiness"] = "BROKEN"
             out["error"] = _soft(
-                f"canonical personality missing ({_CANON})"
+                "personality chat is not on LLM_Handler "
+                "(still looks like a Gemini gate)"
             )
             out["hint"] = out["error"]
             return out
 
-        # ready when engine + canonical md present (key gates chat/run only)
+        if not canon_ok and not prompt_ok:
+            out["readiness"] = "MISSING"
+            out["error"] = _soft(f"canonical personality missing ({_CANON})")
+            out["hint"] = out["error"]
+            return out
+
+        if not prompt_ok:
+            out["readiness"] = "BROKEN"
+            out["error"] = _soft("personality file loaded empty")
+            out["hint"] = out["error"]
+            return out
+
         out["ready"] = True
-        hint_bits = ["ok — run: bolt personality run (needs google.genai + GEMINI_API_KEY)"]
-        if not genai_ok:
-            hint_bits.append("google.genai not installed (chat soft-fails)")
-        if not key_ok:
-            hint_bits.append("GEMINI_API_KEY missing (chat soft-fails)")
-        out["hint"] = "; ".join(hint_bits)
+        out["hint"] = (
+            "ok — persona is the system prompt "
+            f"({len(prompt)} chars). "
+            "bolt personality run uses LLM_Handler, not Gemini."
+        )
 
         if probe and engine_ok:
             try:
@@ -202,8 +206,8 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         return {
             "checked_at": _utc_now(),
             "ready": False,
-            "partial": True,
-            "readiness": "PARTIAL",
+            "partial": False,
+            "readiness": "BROKEN",
             "soft_fail_prefix": _SOFT,
             "error": _soft(f"status failed ({exc})"),
             "hint": _soft(f"status failed ({exc})"),
@@ -225,29 +229,23 @@ def list_items(*, as_json: bool = False) -> int:
             ),
             ("scripts/_paths.py", bool(info.get("paths_helper_present"))),
             (
-                f"canonical Data/context/bolt-personality.md",
+                "canonical Data/context/bolt-personality.md",
                 bool(info.get("personality_present")),
             ),
+            ("prompt text loads (draft example stripped)", bool(info.get("prompt_loaded"))),
             (
-                f"fallback Docs/scratch/reviews/Bolt_Personality.txt",
-                bool(info.get("fallback_txt_present")),
+                "chat uses LLM_Handler (not Gemini)",
+                bool(info.get("engine_uses_llm_handler")),
             ),
-            (
-                f"fallback repo-root Bolt_Personality.txt",
-                bool(info.get("fallback_root_present")),
-            ),
-            ("google.genai available (chat gate)", bool(info.get("google_genai_available"))),
-            ("GEMINI_API_KEY present (chat gate)", bool(info.get("gemini_api_key_present"))),
             ("soft-fail CLI (bolt personality)", True),
-            ("distinct from READY gemini/nexus/chat", True),
-            ("stay PARTIAL (not stranger-ready)", True),
         ]
+        readiness = info.get("readiness") or "BROKEN"
         if as_json:
             print(
                 json.dumps(
                     {
-                        "ok": True,
-                        "readiness": "PARTIAL",
+                        "ok": bool(info.get("ready")),
+                        "readiness": readiness,
                         "items": [{"name": n, "ok": ok} for n, ok in rows],
                         "hint": info.get("hint"),
                         "error": info.get("error"),
@@ -257,17 +255,12 @@ def list_items(*, as_json: bool = False) -> int:
             )
             return 0
         print(
-            "Bolt personality (PARTIAL — Gemini persona file; not Twitch chat)",
+            "Bolt personality (system prompt via LLM_Handler; not Gemini)",
             flush=True,
         )
         for name, ok in rows:
             mark = "OK" if ok else "--"
             print(f"  [{mark}] {name}", flush=True)
-        if info.get("gemini_api_key_redacted"):
-            print(
-                f"  key redact: {info.get('gemini_api_key_redacted')}",
-                flush=True,
-            )
         if info.get("hint"):
             print(f"  → {info['hint']}", flush=True)
         print("  (run: bolt personality run | status | list)", flush=True)
@@ -290,60 +283,13 @@ def try_run(
     """Soft-fail invoke load_bolt_personality.py (never raises; never hangs)."""
     try:
         info = status(probe=False)
-        if not info.get("engine_present"):
-            msg = info.get("error") or _soft("engine script missing")
+        readiness = info.get("readiness") or "BROKEN"
+        if not info.get("ready"):
+            msg = info.get("error") or _soft("personality not ready")
             if as_json:
                 print(
                     json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
-                        indent=2,
-                    )
-                )
-            else:
-                print(msg, file=sys.stderr)
-            return 0
-        if info.get("engine_stale_parents3"):
-            msg = info.get("error") or _soft("engine still uses parents[3]")
-            if as_json:
-                print(
-                    json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
-                        indent=2,
-                    )
-                )
-            else:
-                print(msg, file=sys.stderr)
-            return 0
-        if not info.get("personality_present"):
-            msg = info.get("error") or _soft("canonical personality missing")
-            if as_json:
-                print(
-                    json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
-                        indent=2,
-                    )
-                )
-            else:
-                print(msg, file=sys.stderr)
-            return 0
-        if not info.get("google_genai_available"):
-            msg = _soft("google.genai not installed (pip/uv: google-genai)")
-            if as_json:
-                print(
-                    json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
-                        indent=2,
-                    )
-                )
-            else:
-                print(msg, file=sys.stderr)
-            return 0
-        if not info.get("gemini_api_key_present"):
-            msg = _soft("GEMINI_API_KEY missing (chat gated)")
-            if as_json:
-                print(
-                    json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
+                        {"ok": False, "error": msg, "readiness": readiness},
                         indent=2,
                     )
                 )
@@ -362,7 +308,7 @@ def try_run(
                         {
                             "ok": True,
                             "dry_run": True,
-                            "readiness": "PARTIAL",
+                            "readiness": readiness,
                             "cmd": argv[1:],
                             "hint": "dry-run → would exec engine (no chat)",
                         },
@@ -374,18 +320,16 @@ def try_run(
             return 0
 
         # Never hang in non-interactive contexts without a one-shot prompt.
-        has_once = any(
-            a in ("--once", "--prompt", "-q") for a in (extra or [])
-        )
+        has_once = any(a in ("--once", "--prompt", "-q") for a in (extra or []))
         if not sys.stdin.isatty() and not has_once:
             msg = _soft(
                 "non-interactive run would hang — use a TTY or "
-                "`bolt personality run --once \"…\"`"
+                '`bolt personality run --once "…"`'
             )
             if as_json:
                 print(
                     json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
+                        {"ok": False, "error": msg, "readiness": readiness},
                         indent=2,
                     )
                 )
@@ -404,12 +348,10 @@ def try_run(
                     {
                         "ok": rc == 0,
                         "exit_code": rc,
-                        "readiness": "PARTIAL",
+                        "readiness": readiness,
                         "cmd": argv[1:],
                         "error": "" if rc == 0 else _soft(f"engine exit {rc}"),
-                        "hint": (
-                            "distinct from READY bolt gemini / nexus / chat"
-                        ),
+                        "hint": "persona chat via LLM_Handler (not Gemini)",
                     },
                     indent=2,
                 )
@@ -418,11 +360,7 @@ def try_run(
     except Exception as exc:
         msg = _soft(f"run failed ({exc})")
         if as_json:
-            print(
-                json.dumps(
-                    {"ok": False, "error": msg, "readiness": "PARTIAL"}, indent=2
-                )
-            )
+            print(json.dumps({"ok": False, "error": msg}, indent=2))
         else:
             print(msg, file=sys.stderr)
         return 0
@@ -435,27 +373,17 @@ def print_status(*, as_json: bool = False, probe: bool = False) -> int:
             print(json.dumps(info, indent=2))
             return 0
         ready = bool(info.get("ready"))
-        print("Bolt personality (PARTIAL)")
+        print("Bolt personality")
         print(f"  ready: {ready}")
         print(f"  engine: {info.get('engine_path')}")
         print(f"  stale_parents3: {info.get('engine_stale_parents3')}")
         print(
             f"  personality: {info.get('personality_path')} "
-            f"present={info.get('personality_present')}"
+            f"present={info.get('personality_present')} "
+            f"chars={info.get('prompt_chars')}"
         )
-        print(
-            f"  google.genai: {info.get('google_genai_available')} "
-            f"GEMINI_API_KEY: {info.get('gemini_api_key_present')}"
-            + (
-                f" ({info.get('gemini_api_key_redacted')})"
-                if info.get("gemini_api_key_redacted")
-                else ""
-            )
-        )
-        print(
-            "  readiness: PARTIAL (persona file loader; "
-            "not READY gemini/nexus/chat)"
-        )
+        print(f"  llm_handler: {info.get('engine_uses_llm_handler')} (not Gemini)")
+        print(f"  readiness: {info.get('readiness')}")
         if info.get("error"):
             print(f"  error: {info['error']}")
         if info.get("hint"):
@@ -464,11 +392,7 @@ def print_status(*, as_json: bool = False, probe: bool = False) -> int:
     except Exception as exc:
         msg = _soft(f"status print failed ({exc})")
         if as_json:
-            print(
-                json.dumps(
-                    {"ready": False, "error": msg, "readiness": "PARTIAL"}, indent=2
-                )
-            )
+            print(json.dumps({"ready": False, "error": msg}, indent=2))
         else:
             print(msg, file=sys.stderr)
         return 0
@@ -478,7 +402,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in ("-h", "--help", "help"):
         print(
-            """bolt personality — Gemini persona chat loader (PARTIAL)
+            """bolt personality — Bolt's system prompt (LLM_Handler, not Gemini)
 
   bolt personality                         # status (default)
   bolt personality status [--json] [--probe]
@@ -486,10 +410,9 @@ def main(argv: Optional[List[str]] = None) -> int:
   bolt personality run [--dry-run] [--json] [--once "…"]
 
 Soft-fail: "Personality unavailable:".
-Engine: scripts/load_bolt_personality.py (fixed via scripts/_paths.py).
+Engine: scripts/load_bolt_personality.py
 Canonical: Data/context/bolt-personality.md
-Distinct from READY bolt gemini / bolt nexus / bolt chat (Twitch).
-Stay PARTIAL (key/genai gated chat; not stranger-ready claim).
+Voice and Twitch chat load the same prompt.
 Aliases: bolt-personality, personality-status, persona, load-personality, load_personality.
 """
         )

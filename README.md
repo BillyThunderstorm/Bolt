@@ -20,6 +20,7 @@ Bolt is intentionally personal and opinionated. It is designed around an actual 
 ## Core Features
 
 ### Clip & Media Pipeline
+
 - Recording and VOD watching
 - Audio-spike highlight detection with confidence gating and deduplication
 - Clip generation, AI titles, subtitles, vertical formatting
@@ -29,6 +30,7 @@ Bolt is intentionally personal and opinionated. It is designed around an actual 
 - Storage optimization (compression, rotation, deduplication)
 
 ### Creator Operations
+
 - Product/catalog tracking across lanes (tech/gaming, skincare/beauty, general product testing, etc.)
 - Status workflow: testing → drafting → ready → posted
 - Notes, drafts, performance logging
@@ -36,6 +38,7 @@ Bolt is intentionally personal and opinionated. It is designed around an actual 
 - Social packaging with explicit approval gates
 
 ### Intelligence Layer
+
 - Memory-aware daily and weekly briefings
 - Local vector memory index
 - Researcher role with keep/drop/maybe decisions
@@ -44,6 +47,7 @@ Bolt is intentionally personal and opinionated. It is designed around an actual 
 - Multi-provider LLM (Grok / OpenAI / Ollama) with budget controls
 
 ### Voice & Interfaces
+
 - Hands-free voice conversation (mic → STT → LLM → TTS)
 - “Good Morning Bolt” spoken briefings
 - Twitch chat personality with persistent memory

@@ -61,6 +61,10 @@ def _extract_section(briefing: str, heading: str) -> str:
 
 class DailyBriefingMemoryTests(unittest.TestCase):
     def setUp(self):
+        # Legacy full-briefing path; focused mode is covered by briefing_focus config.
+        _env = patch.dict("os.environ", {"BOLT_BRIEFING_FOCUS": "0"})
+        _env.start()
+        self.addCleanup(_env.stop)
         # generate_briefing() otherwise hits live Nexus/Grok on every test.
         self.nexus_patch = patch("modules.Nexus_Creator.NexusCreator")
         mock_cls = self.nexus_patch.start()
