@@ -34,6 +34,7 @@ Everything else (TWITCH_CHANNEL, XAI_API_KEY / OPENAI_API_KEY) is already in .en
 """
 
 import os
+import sys
 import json
 import time
 import random
@@ -418,6 +419,22 @@ def local_memory_recall(query: str, limit: int = 2, max_chars: int = 360) -> str
 # ── LLM-powered responses (via LLM_Handler) ───────────────────────────────────
 
 
+def _load_personality_text() -> str:
+    """System prompt from Data/context/bolt-personality.md. Not Gemini."""
+    try:
+        scripts = Path(__file__).resolve().parents[2] / "scripts"
+        if str(scripts) not in sys.path:
+            sys.path.insert(0, str(scripts))
+        from load_bolt_personality import load_bolt_personality
+
+        text = load_bolt_personality()
+        if text:
+            return text
+    except Exception:
+        pass
+    return "Use cheerful, innocent energy."
+
+
 def _ask_llm(prompt: str, brain: str, memory: SessionMemory) -> Optional[str]:
     """
     Generate a Bolt response using LLM_Handler (OpenAI or xAI/Grok).
@@ -432,13 +449,10 @@ def _ask_llm(prompt: str, brain: str, memory: SessionMemory) -> Optional[str]:
     if not LLM_OK:
         return None
 
-    # Load personality guide into context
-    personality_path = Path("memory/context/bolt-personality.md")
-    try:
-        with open(personality_path, "r", encoding="utf-8") as pf:
-            _personality_text = pf.read()
-    except FileNotFoundError:
-        _personality_text = "Use cheerful, innocent energy."
+    # William's persona. Canonical file is Data/context/bolt-personality.md.
+    # The old relative path memory/context/bolt-personality.md never existed
+    # here, so chat used to fall back to a one-line stub.
+    _personality_text = _load_personality_text()
 
     system_prompt = f"""You are Bolt — Billy's AI producer, running behind the scenes of his Twitch stream.
 

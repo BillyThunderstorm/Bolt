@@ -243,4 +243,4 @@ Mac automation (PARTIAL): `bolt mac-auto` status/list/install (soft-fail `Mac au
 | `bolt memory` | PARTIAL | Long-term memory store (`Bolt_Memory`); soft-fail `Bolt memory unavailable:` |
 | `bolt memsearch` | PARTIAL | Phase 4 semantic memory search (`Memory_Search`); soft-fail `Memory search unavailable:` |
 | `bolt log-perf` | PARTIAL | Manual learning logger (`Log_Perf`); soft-fail `Log perf unavailable:` |
-| `bolt personality` | PARTIAL | Persona loader (`Bolt_Personality`); soft-fail `Personality unavailable:` |
+| `bolt personality` | READY | System prompt (`Data/context/bolt-personality.md` via `LLM_Handler`, not Gemini); soft-fail `Personality unavailable:` |

@@ -240,11 +240,27 @@ def _retrieved_memory_block(query: str, limit: int = 4) -> str:
     return "Retrieved memory for this question:\n" + "\n".join(lines)
 
 
+def _personality_text() -> str:
+    """William's persona via scripts/load_bolt_personality.py. Not Gemini."""
+    try:
+        scripts = _REPO_ROOT / "scripts"
+        if str(scripts) not in sys.path:
+            sys.path.insert(0, str(scripts))
+        from load_bolt_personality import load_bolt_personality
+
+        text = load_bolt_personality()
+        if text:
+            return text
+    except Exception:
+        pass
+    return _load_file(PERSONALITY_FILE, "Use cheerful, innocent energy.")
+
+
 def build_system_prompt() -> str:
     """
     Assemble the full system prompt from personality guide + brain + identity.
     """
-    personality = _load_file(PERSONALITY_FILE, "Use cheerful, innocent energy.")
+    personality = _personality_text()
     brain = _load_file(BRAIN_FILE, "Billy is a content creator.")
     try:
         from modules.Week_Card import format_prompt

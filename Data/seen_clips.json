@@ -887,5 +887,19 @@
     "timestamp": 1351.0,
     "phash": null,
     "added": 1789061935.4481611
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-10-01_19-16-50_clip01_audio_spike_20.mp4",
+    "size": 9178864,
+    "timestamp": 20.5,
+    "phash": null,
+    "added": 1790900308.148242
+  },
+  {
+    "path": "/Users/carter/developer/Bolt/media/clips/2026-10-01_19-18-50_clip01_audio_spike_115.mp4",
+    "size": 31694628,
+    "timestamp": 115.5,
+    "phash": null,
+    "added": 1790900998.6182349
   }
 ]

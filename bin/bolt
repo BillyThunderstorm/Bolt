@@ -270,11 +270,11 @@ Script subcommands (each maps to scripts/X.py):
                           status [--json|--probe]; list; run [--dry-run]
                           aliases: clip_dedupe, hash-dedupe, dedupe-status, sha-dedupe
                           (former thin SCRIPT_MAP parents[3] wrong root; not pipeline pHash)
-  personality [status|list|run]  Gemini persona chat loader (PARTIAL; soft-fail)
+  personality [status|list|run]  Bolt system prompt (LLM_Handler; not Gemini)
                           status [--json|--probe]; list; run [--dry-run|--once TEXT]
                           aliases: bolt-personality, personality-status, persona,
                           load-personality, load_personality
-                          (former SHELL parents[3] wrong root; not READY gemini/nexus/chat)
+                          (Data/context/bolt-personality.md; soft-fail if file or model missing)
   log-perf [status|list|run]  Manual clip performance log (PARTIAL; soft-fail)
                           status [--json|--probe]; list; run [--trigger|--views|--list]
                           aliases: log_perf, log-performance, log_performance, perf-log
@@ -609,7 +609,9 @@ def _closest_command(token: str, names: list[str]) -> list[tuple[str, int]]:
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
-        from modules.Word_Lookup import closest_in
+        from importlib import import_module
+
+        closest_in = import_module("modules.Word_Lookup").closest_in
 
         return list(closest_in(token, names, limit=4, max_dist=2) or [])
     except Exception:
@@ -2292,9 +2294,8 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: Gemini persona chat loader (Bolt_Personality; soft-fail; PARTIAL)
-    # Former SHELL scripts/load_bolt_personality.py (parents[3] wrong root).
-    # Distinct from READY bolt gemini / nexus / chat (Twitch IRC personality).
+    # Built-in: Bolt system prompt (Bolt_Personality). LLM_Handler, not Gemini.
+    # Canonical: Data/context/bolt-personality.md. Soft-fail if file or model missing.
     if subcommand in (
         "personality",
         "bolt-personality",

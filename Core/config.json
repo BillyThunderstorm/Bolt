@@ -106,8 +106,8 @@
       "shared_journal": "1paZNFGea-RBAwQ5YMxpuXN8OBRH7R33RAkakYZ23Tfw",
       "daily_log_2026_08_31": "1RwUyRhjPGjpugrHLkUvyQAog09YMadiMebeZCn0dlLQ",
       "archive_word": "138abBq9A-zWY0MZCBeyXxRCuwtsjxjeK",
-      "daily_log_today": "1cwmARgNoFvIwsD5wpeWrAjA_LAlDPXRYoFQyuccIeQQ",
-      "daily_log_today_date": "2026-09-14",
+      "daily_log_today": "17mqf7ByyCtUiCgvWUDsZVPbz3GLCALHZxL6G5iX5PY0",
+      "daily_log_today_date": "2026-10-15",
       "daily_log_2026_09_01": "1kQw-ggIqYQQ17Q57IZi_WbcSnbsmOFHABU-6BxdQcR0",
       "daily_log_2026_09_02": "1pKN4-h_xuFu1A-rNSxg35_b8WVBhR--dDXA9OnPJ9JE",
       "daily_log_2026_09_03": "1d_yRmAnJF_697LKHGmXBqmQAaCYsGEDFZRP-McDEuHg",
@@ -121,7 +121,19 @@
       "daily_log_2026_09_12": "1EONNKlbr9_yZC_WBWXQxC_dAf1OPmPM5lfkMlqBNCJo",
       "daily_log_2026_09_13": "1ny1lPoWWhZnmaH1B3sa3HmLDkiXYfFfNmdotshJe4DE",
       "daily_log_2026_09_05": "1HRA4zb-mlDK1d6CWhrZaCJ_ZrXZ58x4JcDIwNiicrL8",
-      "daily_log_2026_09_14": "1cwmARgNoFvIwsD5wpeWrAjA_LAlDPXRYoFQyuccIeQQ"
+      "daily_log_2026_09_14": "1cwmARgNoFvIwsD5wpeWrAjA_LAlDPXRYoFQyuccIeQQ",
+      "daily_log_2026_09_26": "1VFyIqDLc_D32peL_zGjjfJY2kXvhktuAf7e9Grma6PI",
+      "daily_log_2026_09_27": "1ScJWqVT2DqaSb65AWl5oT60w2nefWSA0rixl53Krx2Y",
+      "daily_log_2026_09_28": "1xAJurkzDAERzolK581qkjdFmI3LoJjOrz9hbPhKDJ5M",
+      "daily_log_2026_09_30": "1I6CddpGqSVu-FA_eYwxbFyJDo10BHi1ExAlRiK_jvWY",
+      "daily_log_2026_10_01": "1MlyxR-vD5ionC50aFj_P7y-DiMJM4AwetI2u4v-vfEw",
+      "daily_log_2026_10_02": "1KiYIQn1AtB-42zpoqYXE8LIIzBQspT1vsfLMs-MF5cM",
+      "daily_log_2026_10_05": "1GnrvZx3tIKt7ND_DRs3eD3o8gEPZInA6X16gVH5j8TU",
+      "daily_log_2026_10_07": "1YlNc0oo2VRuZRwvoLFbKdSjnlf5J9Qc4SV289Ot9_hE",
+      "daily_log_2026_10_11": "11k8jMqONrJgEb5YP4R3eW4LVOmrCNA6DdELO05qlkgY",
+      "daily_log_2026_10_12": "1tpafVRlnNoJMK_YsXRTsAllBe0lroIQ_sfCB9g3rK1M",
+      "daily_log_2026_10_14": "1fWJ40wqXzGQo5R747oACzEFaZ4d_UnK_mseBTF4PMbI",
+      "daily_log_2026_10_15": "17mqf7ByyCtUiCgvWUDsZVPbz3GLCALHZxL6G5iX5PY0"
     },
     "folders": {
       "00_Brand": "1YHZSqjoP7JPNP7NPChdgCRQH80advpHj",
@@ -134,5 +146,23 @@
       "07_Code_And_System": "1KElSeoxBkUJTyDx8CBIm-BH1_XxSjDzy"
     },
     "local_bolt_now": "Docs/BOLT_NOW.md"
+  },
+  "briefing_focus": {
+    "enabled": true,
+    "lane": "tech",
+    "storage_warn_pct": 95,
+    "hide": [
+      "queue",
+      "clip_actions",
+      "week_text",
+      "storefront",
+      "sponsors",
+      "do_not_suggest",
+      "gmail",
+      "research_c5",
+      "nexus",
+      "memory_notes"
+    ],
+    "_note": "Set enabled=false to restore the old full briefing. BOLT_NO_DRIVE_PUSH=1 skips the Drive push."
   }
 }

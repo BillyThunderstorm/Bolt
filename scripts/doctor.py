@@ -1772,7 +1772,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # Gemini persona loader (PARTIAL — soft-fail via bolt personality; not READY gemini/nexus/chat)
+    # Persona system prompt (LLM_Handler via bolt personality; not a Gemini gate)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))

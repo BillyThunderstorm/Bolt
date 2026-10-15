@@ -522,6 +522,13 @@
       "status": "testing",
       "asin": "B00TEMPXXXX",
       "added_at": "2026-09-07T20:49:29"
+    },
+    {
+      "name": "computer mouse",
+      "lane": "tech",
+      "status": "testing",
+      "asin": "",
+      "added_at": "2026-10-12T14:59:21"
     }
   ],
   "settings": {},
