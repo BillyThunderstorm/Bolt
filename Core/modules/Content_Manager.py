@@ -1588,7 +1588,14 @@ def next_actions(limit: int = 3) -> List[Dict[str, str]]:
                 break
 
     if not any(a["type"] == "content" for a in actions):
-        if not items:
+        # list_items() can rank a posted item first. Only move work that is
+        # still open: preferred lane first, then any lane. Posted, shelved,
+        # and archived stay off this suggestion.
+        open_statuses = ("idea", "queued", "testing", "drafting")
+        open_items = [i for i in items if i.get("status") in open_statuses]
+        preferred = [i for i in open_items if i.get("lane") in PREFERRED_LANES]
+        top = (preferred or open_items or [None])[0]
+        if top is None:
             actions.append(
                 {
                     "type": "content",
@@ -1598,7 +1605,6 @@ def next_actions(limit: int = 3) -> List[Dict[str, str]]:
                 }
             )
         else:
-            top = items[0]
             actions.append(
                 {
                     "type": "content",
