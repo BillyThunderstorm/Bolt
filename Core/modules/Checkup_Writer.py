@@ -380,6 +380,42 @@ def _ranking_scores(rankings: list) -> dict:
     return lookup
 
 
+# Filename suffixes Bolt already uses, plus a vertical-folder fallback.
+# Vertical clips are the TikTok export (media/vertical_clips/).
+_PLATFORM_SUFFIXES = (
+    ("_tiktok", "TikTok"),
+    ("_youtube", "YouTube"),
+    ("_shorts", "Shorts"),
+    ("_reels", "Reels"),
+)
+
+
+def _infer_platform(clip_path: str, explicit) -> str:
+    """Use an explicit platform, else guess from the filename or folder."""
+    if isinstance(explicit, list):
+        explicit = ", ".join(str(part) for part in explicit if str(part).strip())
+    text = str(explicit or "").strip()
+    if text:
+        return text
+    if not clip_path:
+        return ""
+    path = Path(clip_path)
+    stem = path.stem.lower()
+    for suffix, label in _PLATFORM_SUFFIXES:
+        if stem.endswith(suffix):
+            return label
+    for part in path.parts[:-1]:
+        token = part.lower()
+        if token == "vertical" or token.startswith("vertical"):
+            return "TikTok"
+    return ""
+
+
+def _listed_status(raw: str) -> str:
+    """Card pill: ready stays ready. Every other still-open row is queued."""
+    return "ready" if raw == "ready" else "queued"
+
+
 def _clip_score(item: dict, lookup: dict):
     score = _as_score(item.get("score"))
     if score is not None:
@@ -410,27 +446,36 @@ def _morning_clips() -> dict:
         if status in ("posted", "scrapped"):
             continue
         clip_path = str(item.get("clip_path") or item.get("path") or item.get("file") or "")
-        platform = item.get("platform") or ""
-        if isinstance(platform, list):
-            platform = ", ".join(str(part) for part in platform if part)
         postable.append(
             {
                 "title": str(item.get("title") or "Untitled clip"),
                 "score": _clip_score(item, lookup),
                 "file": Path(clip_path).name if clip_path else "",
-                "platform": str(platform),
+                "platform": _infer_platform(clip_path, item.get("platform")),
+                "status": _listed_status(status),
             }
         )
-    postable.sort(key=lambda row: row["score"] if row["score"] is not None else -1, reverse=True)
-    top = postable[:3]
+
+    def _by_score(row: dict):
+        return row["score"] if row["score"] is not None else -1
+
+    ready = [row for row in postable if row["status"] == "ready"]
+    queued = [row for row in postable if row["status"] != "ready"]
+    ready.sort(key=_by_score, reverse=True)
+    queued.sort(key=_by_score, reverse=True)
+    top = (ready + queued)[:3]
+    summary = (
+        f"Ready {counts['ready']} · In queue {counts['other']} · Posted {counts['posted']}"
+    )
     if not top:
         return {
             "empty": True,
             "hint": "Queue is empty. Run the clip pipeline / `bolt checkup` after processing.",
             "counts": counts,
+            "summary": summary,
             "clips": [],
         }
-    return {"empty": False, "hint": "", "counts": counts, "clips": top}
+    return {"empty": False, "hint": "", "counts": counts, "summary": summary, "clips": top}
 
 
 def _candidate_pick(entry: dict) -> dict:

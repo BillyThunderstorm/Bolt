@@ -12,29 +12,37 @@
     {
       "title": "Sample headset take",
       "score": 64,
-      "clip_path": "media/clips/sample_headset.mp4",
-      "status": "ready",
-      "platform": "YouTube"
+      "clip_path": "media/clips/sample_headset_youtube.mp4",
+      "status": "ready"
     },
     {
       "title": "Sample quiet lobby",
-      "score": 41,
-      "clip_path": "media/clips/sample_lobby.mp4",
-      "status": "ready",
-      "platform": "X"
+      "score": 95,
+      "clip_path": "media/vertical_clips/sample_lobby.mp4",
+      "status": "queued"
     },
     {
       "title": "Sample unscored angle",
-      "clip_path": "media/clips/sample_unscored.mp4",
-      "status": "ready",
-      "platform": "TikTok"
+      "clip_path": "media/clips/sample_unscored_shorts.mp4",
+      "status": "review"
+    },
+    {
+      "title": "Sample reels take",
+      "score": 30,
+      "clip_path": "media/clips/sample_reels.mp4",
+      "status": "holding"
+    },
+    {
+      "title": "Sample plain take",
+      "score": 20,
+      "clip_path": "media/clips/sample_plain.mp4",
+      "status": "queued"
     },
     {
       "title": "Sample already posted",
       "score": 99,
-      "clip_path": "media/clips/sample_posted.mp4",
-      "status": "posted",
-      "platform": "TikTok"
+      "clip_path": "media/clips/sample_posted_tiktok.mp4",
+      "status": "posted"
     },
     {
       "title": "Sample scrapped take",
