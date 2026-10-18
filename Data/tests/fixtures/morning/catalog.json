@@ -1,0 +1,27 @@
+{
+  "_sample": true,
+  "_note": "SAMPLE DATA — not William's catalog. Fixture for the Good Morning Bolt card only.",
+  "version": 1,
+  "preferred_lanes": ["game", "tech"],
+  "items": [
+    {
+      "id": "sample-headset",
+      "name": "Sample Headset",
+      "lane": "tech",
+      "status": "testing",
+      "asin": "",
+      "notes_log": []
+    },
+    {
+      "id": "sample-mouse",
+      "name": "Sample Mouse",
+      "lane": "game",
+      "status": "testing",
+      "asin": "",
+      "notes_log": [
+        {"day": 1, "text": "SAMPLE note — clicks are light"},
+        {"day": 2, "text": "SAMPLE note — still testing"}
+      ]
+    }
+  ]
+}

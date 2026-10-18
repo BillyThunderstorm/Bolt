@@ -1,0 +1,11 @@
+{
+  "_sample": true,
+  "_note": "SAMPLE DATA — not real clip rankings. Fixture for the Good Morning Bolt card only.",
+  "rankings": [
+    {
+      "title": "Sample unscored angle",
+      "clip_path": "media/clips/sample_unscored_shorts.mp4",
+      "score": 42
+    }
+  ]
+}
