@@ -1,0 +1,46 @@
+{
+  "_sample": true,
+  "_note": "SAMPLE DATA — not William's post queue. Fixture for the Good Morning Bolt card only.",
+  "clips": [
+    {
+      "title": "Sample clutch round",
+      "score": 88,
+      "clip_path": "media/clips/sample_clutch.mp4",
+      "status": "ready",
+      "platform": "TikTok"
+    },
+    {
+      "title": "Sample headset take",
+      "score": 64,
+      "clip_path": "media/clips/sample_headset.mp4",
+      "status": "ready",
+      "platform": "YouTube"
+    },
+    {
+      "title": "Sample quiet lobby",
+      "score": 41,
+      "clip_path": "media/clips/sample_lobby.mp4",
+      "status": "ready",
+      "platform": "X"
+    },
+    {
+      "title": "Sample unscored angle",
+      "clip_path": "media/clips/sample_unscored.mp4",
+      "status": "ready",
+      "platform": "TikTok"
+    },
+    {
+      "title": "Sample already posted",
+      "score": 99,
+      "clip_path": "media/clips/sample_posted.mp4",
+      "status": "posted",
+      "platform": "TikTok"
+    },
+    {
+      "title": "Sample scrapped take",
+      "score": 10,
+      "clip_path": "media/clips/sample_scrap.mp4",
+      "status": "scrapped"
+    }
+  ]
+}

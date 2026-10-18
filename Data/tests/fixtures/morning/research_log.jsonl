@@ -1,0 +1,5 @@
+{"_sample": true, "_note": "SAMPLE DATA — not a real research finding.", "finding_type": "candidate_creator", "name": "Sample Kept Creator", "platform": "YouTube", "c5_verdict": "fits", "gate": {"verdict": "cleared"}}
+{"_sample": true, "_note": "SAMPLE DATA — not a real research finding.", "finding_type": "candidate_creator", "name": "Sample Maybe Creator", "platform": "Twitch", "c5_verdict": "maybe", "gate": {"verdict": "cleared"}}
+{"_sample": true, "_note": "SAMPLE DATA — not a real research finding.", "finding_type": "candidate_creator", "name": "Sample Pending Creator", "platform": "TikTok", "gate": {"verdict": "cleared"}}
+{"_sample": true, "_note": "SAMPLE DATA — not a real research finding.", "finding_type": "candidate_creator", "name": "Sample Dropped Creator", "platform": "YouTube", "c5_verdict": "no", "gate": {"verdict": "cleared"}}
+{"_sample": true, "_note": "SAMPLE DATA — not a real research finding.", "finding_type": "candidate_creator", "name": "Sample Blocked Creator", "platform": "X", "gate": {"verdict": "blocked_c7"}}

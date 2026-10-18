@@ -115,6 +115,56 @@
       display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between;
     }
     code { color: var(--accent); }
+    .morning-head {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+    }
+    .morning-head img {
+      width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+    }
+    .morning-head h2 {
+      margin: 0; color: var(--text); text-transform: none; letter-spacing: -0.02em;
+      font-size: 1.15rem;
+    }
+    .morning-grid {
+      display: grid; gap: 12px; grid-template-columns: 1fr;
+    }
+    @media (min-width: 900px) {
+      .morning-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .morning .block {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .morning .block h3 {
+      margin: 0 0 8px; font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--muted); font-weight: 600;
+    }
+    .morning .title { font-weight: 650; }
+    .morning ul { margin: 6px 0 0; padding-left: 18px; }
+    .morning li { margin: 4px 0; }
+    .muted-line { color: var(--muted); font-size: 0.9rem; margin: 0; }
+    .pill {
+      display: inline-block; padding: 2px 8px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 650; white-space: nowrap;
+    }
+    .pill.good { color: var(--ready); background: rgba(61,214,140,0.12); }
+    .pill.mid { color: var(--partial); background: rgba(245,197,66,0.12); }
+    .pill.bad { color: var(--shell); background: rgba(255,107,107,0.12); }
+    .stale {
+      color: var(--partial); font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.06em; margin-left: 6px;
+    }
+    .clip-row, .action-row {
+      display: flex; justify-content: space-between; gap: 10px;
+      align-items: flex-start; margin-top: 8px;
+    }
+    .morning-foot {
+      margin-top: 14px; color: var(--muted); font-size: 0.85rem;
+      display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between;
+    }
+    .morning a { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -130,6 +180,8 @@
     <div id="error" class="empty" style="display:none"></div>
 
     <div id="dash" style="display:none">
+      <section class="panel morning" id="morning" hidden></section>
+
       <div class="grid" id="stats"></div>
 
       <div class="panel">
@@ -171,6 +223,7 @@
       dash.style.display = "block";
       document.getElementById("generated").textContent =
         "Updated " + (data.generated_at || "unknown");
+      renderMorning(data);
 
       function fmt(n) {
         if (n === null || n === undefined) return "—";
@@ -254,6 +307,169 @@
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;")
           .replace(/"/g, "&quot;");
+      }
+
+      function renderMorning(data) {
+        var el = document.getElementById("morning");
+        if (!el) return;
+        if (!data || !data.morning || typeof data.morning !== "object") {
+          el.hidden = true;
+          return;
+        }
+        var morning = data.morning;
+        el.hidden = false;
+        var lanes = Array.isArray(morning.lanes) ? morning.lanes.join(", ") : "";
+        var html = "";
+        html += '<div class="morning-head">';
+        html += '<img src="assets/menu_bar_icon.png" alt="" />';
+        html += "<div><h2>⚡ Good Morning Bolt</h2>";
+        html += '<div class="meta">' + escapeHtml(morning.greeting || "Good morning") ;
+        if (morning.date) html += " · " + escapeHtml(morning.date);
+        if (lanes) html += " · " + escapeHtml(lanes);
+        html += "</div></div></div>";
+        html += '<div class="morning-grid">';
+        html += morningBlock("Today's mission", renderMission(morning.mission));
+        html += morningBlock("Next clips to post", renderClips(morning.clips));
+        html += morningBlock("Research picks", renderResearch(morning.research));
+        html += morningBlock("Next actions", renderActions(morning.actions));
+        html += "</div>";
+        html += '<div class="morning-foot"><span>' +
+          escapeHtml(morning.footer || "All posts still need your approval.") +
+          "</span>";
+        if (morning.briefing_href) {
+          html += '<a href="' + escapeHtml(morning.briefing_href) +
+            '">Spoken briefing</a>';
+        }
+        html += "</div>";
+        el.innerHTML = html;
+      }
+
+      function morningBlock(title, body) {
+        return '<div class="block"><h3>' + escapeHtml(title) + "</h3>" + body + "</div>";
+      }
+
+      function couldntRead(label) {
+        return '<p class="muted-line">Couldn\'t read ' + escapeHtml(label) + ".</p>";
+      }
+
+      function renderMission(section) {
+        try {
+          if (!section || section.error) return couldntRead("mission");
+          if (section.empty) return '<p class="muted-line">' + escapeHtml(section.hint || "No mission yet. Run `bolt mission`.") + "</p>";
+          var html = '<div class="title">' + escapeHtml(section.title || "Mission");
+          if (section.stale) html += '<span class="stale">stale</span>';
+          html += "</div>";
+          if (section.date) html += '<div class="sub">' + escapeHtml(section.date) + "</div>";
+          var actions = section.actions || [];
+          if (actions.length) {
+            html += "<ul>";
+            actions.forEach(function (line) {
+              html += "<li>" + escapeHtml(line) + "</li>";
+            });
+            html += "</ul>";
+          }
+          html += commandHtml(section.command);
+          return html;
+        } catch (err) {
+          return couldntRead("mission");
+        }
+      }
+
+      function renderClips(section) {
+        try {
+          if (!section || section.error) return couldntRead("clips");
+          if (section.empty) return '<p class="muted-line">' + escapeHtml(section.hint || "Queue is empty. Run the clip pipeline / `bolt checkup` after processing.") + "</p>";
+          var counts = section.counts || {};
+          var html = '<div class="sub">Ready ' + escapeHtml(counts.ready || 0) +
+            " · Posted " + escapeHtml(counts.posted || 0) + "</div>";
+          (section.clips || []).forEach(function (clip) {
+            html += '<div class="clip-row"><div><div>' + escapeHtml(clip.title || "Untitled clip") +
+              "</div>";
+            var meta = clip.file || "";
+            if (clip.platform) meta += (meta ? " · " : "") + clip.platform;
+            if (meta) html += '<div class="sub">' + escapeHtml(meta) + "</div>";
+            html += "</div>" + scorePill(clip.score) + "</div>";
+          });
+          return html;
+        } catch (err) {
+          return couldntRead("clips");
+        }
+      }
+
+      function scorePill(score) {
+        if (score === null || score === undefined || score === "") return "";
+        var n = Number(score);
+        var cls = "bad";
+        if (n >= 75) cls = "good";
+        else if (n >= 50) cls = "mid";
+        var label = (Math.round(n * 10) / 10).toString();
+        return '<span class="pill ' + cls + '">' + escapeHtml(label) + "</span>";
+      }
+
+      function renderResearch(section) {
+        try {
+          if (!section || section.error) return couldntRead("research");
+          if (section.empty) return '<p class="muted-line">' + escapeHtml(section.hint || "No research picks yet. `bolt research find`") + "</p>";
+          var counts = section.counts || {};
+          var html = '<div class="sub">Kept ' + escapeHtml(counts.kept || 0) +
+            " · Dropped " + escapeHtml(counts.dropped || 0) +
+            " · Pending C5 " + escapeHtml(counts.pending_c5 || 0) +
+            " · Blocked C7 " + escapeHtml(counts.blocked_c7 || 0) + "</div>";
+          html += pickList("Kept", section.kept);
+          html += pickList("Pending", section.pending);
+          return html;
+        } catch (err) {
+          return couldntRead("research");
+        }
+      }
+
+      function pickList(label, rows) {
+        if (!rows || !rows.length) return "";
+        var html = '<div class="sub" style="margin-top:8px">' + escapeHtml(label) + "</div><ul>";
+        rows.forEach(function (row) {
+          var line = row.name || "";
+          if (row.platform) line += " · " + row.platform;
+          if (row.verdict && row.verdict !== "fits" && row.verdict !== "pending") {
+            line += " · " + row.verdict;
+          }
+          html += "<li>" + escapeHtml(line) + "</li>";
+        });
+        html += "</ul>";
+        return html;
+      }
+
+      function renderActions(section) {
+        try {
+          if (!section || section.error) return couldntRead("next actions");
+          if (section.empty) return '<p class="muted-line">' + escapeHtml(section.hint || "Nothing queued. `bolt manage add …`") + "</p>";
+          var html = '<div class="sub">Testing: ' + escapeHtml(section.testing || 0) + "</div>";
+          (section.items || []).forEach(function (action) {
+            html += '<div class="action-row"><div><div>' + escapeHtml(action.title || "") +
+              "</div>";
+            if (action.why) html += '<div class="sub">' + escapeHtml(action.why) + "</div>";
+            html += commandHtml(action.command);
+            html += "</div></div>";
+          });
+          if (section.advance && section.advance.title) {
+            html += '<div class="sub" style="margin-top:8px">Advance</div>';
+            html += "<div>" + escapeHtml(section.advance.title) + "</div>";
+            html += commandHtml(section.advance.command);
+          }
+          if (section.lesson) {
+            html += '<div class="sub" style="margin-top:8px">' + escapeHtml(section.lesson) + "</div>";
+          }
+          return html;
+        } catch (err) {
+          return couldntRead("next actions");
+        }
+      }
+
+      function commandHtml(command) {
+        if (!command) return "";
+        var lines = String(command).split("\n").filter(function (line) { return line.trim(); });
+        return lines.map(function (line) {
+          return "<div><code>" + escapeHtml(line.trim()) + "</code></div>";
+        }).join("");
       }
     })();
   </script>
