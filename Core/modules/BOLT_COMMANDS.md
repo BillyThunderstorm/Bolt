@@ -139,6 +139,7 @@ bolt enhance [--dry-run] [--limit N]
                                       # Writes media/vertical_clips_trimmed/ then media/vertical_clips_final/
 bolt checkup [--open] [--json]        # Refresh Data/Bolt_data.js; --open → App/Bolt_Checkup.html
                                       # (aliases: dashboard, checkup-dashboard)
+                                      # Dashboard opens with the Good Morning Bolt card (local data only)
 bolt menubar                          # macOS menu bar (App/app.py via rumps)
 bolt mac-app                          # local dist/Bolt.app assemble (PARTIAL; not notarized)
 bolt mac-auto                         # launchd/cron/Shortcuts status (PARTIAL; William-specific)
