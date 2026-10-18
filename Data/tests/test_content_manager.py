@@ -551,6 +551,62 @@ class ContentManagerTests(unittest.TestCase):
         self.assertGreaterEqual(len(actions), 1)
         self.assertIn(actions[0]["type"], {"content", "business", "advance"})
 
+    def test_next_actions_skips_posted_item_that_sorts_first(self):
+        # No testing rows, so list_items() orders preferred lanes by name.
+        # The alphabetically first preferred-lane item is already posted.
+        # Shelved and archived rows that sort ahead of the open draft must
+        # stay out of the suggestion, and a non-preferred idea must not
+        # jump ahead of that preferred-lane draft.
+        cm.add_item("7KEYS Retro Typewriter Keyboard", lane="tech", status="posted")
+        cm.add_item("Arcade Stick", lane="game", status="shelved")
+        cm.add_item("Archive Pad", lane="tech", status="idea")
+        cm.add_item("Wireless Desk Mic", lane="tech", status="drafting")
+        cm.add_item("Face Serum", lane="skincare", status="idea")
+        catalog = cm.load_catalog()
+        for row in catalog["items"]:
+            if row["name"] == "Archive Pad":
+                row["status"] = "archived"
+        cm.save_catalog(catalog)
+
+        actions = cm.next_actions()
+        content = next(a for a in actions if a["type"] == "content")
+        self.assertNotIn("7KEYS", content["title"])
+        self.assertNotIn("(posted)", content["title"])
+        self.assertNotIn("Arcade Stick", content["title"])
+        self.assertNotIn("Archive Pad", content["title"])
+        self.assertNotIn("Face Serum", content["title"])
+        self.assertEqual(
+            content["title"], "Move Wireless Desk Mic forward (drafting)"
+        )
+        self.assertEqual(
+            content["command"], 'bolt manage draft "Wireless Desk Mic" --format short'
+        )
+
+    def test_next_actions_only_posted_asks_to_add_item(self):
+        cm.add_item("7KEYS Retro Typewriter Keyboard", lane="tech", status="posted")
+        cm.add_item("Old Mouse", lane="game", status="posted")
+
+        actions = cm.next_actions()
+        content = next(a for a in actions if a["type"] == "content")
+        self.assertEqual(content["title"], "Add first game or tech item to the catalog")
+        self.assertEqual(
+            content["command"],
+            'bolt manage add "Your headset" --lane tech --status testing',
+        )
+        self.assertNotIn("7KEYS", content["title"])
+        self.assertNotIn("(posted)", content["title"])
+
+    def test_next_actions_uses_other_lane_when_preferred_are_closed(self):
+        cm.add_item("7KEYS Retro Typewriter Keyboard", lane="tech", status="posted")
+        cm.add_item("Face Serum", lane="skincare", status="queued", notes="Scent is light")
+
+        actions = cm.next_actions()
+        content = next(a for a in actions if a["type"] == "content")
+        self.assertEqual(content["title"], "Move Face Serum forward (queued)")
+        self.assertEqual(
+            content["command"], 'bolt manage draft "Face Serum" --format short'
+        )
+
     def test_business_action_is_sponsor_pitch_not_creator_research(self):
         actions = cm.next_actions()
         biz = next((a for a in actions if a["type"] == "business"), None)
