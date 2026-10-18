@@ -152,6 +152,12 @@
     .pill.good { color: var(--ready); background: rgba(61,214,140,0.12); }
     .pill.mid { color: var(--partial); background: rgba(245,197,66,0.12); }
     .pill.bad { color: var(--shell); background: rgba(255,107,107,0.12); }
+    .pill.status {
+      margin-left: 6px; font-weight: 600; text-transform: lowercase;
+      color: var(--muted); background: rgba(255,255,255,0.06);
+    }
+    .pill.status.ready { color: var(--ready); background: rgba(61,214,140,0.12); }
+    .pill.status.queued { color: var(--partial); background: rgba(245,197,66,0.12); }
     .stale {
       color: var(--partial); font-size: 0.75rem; text-transform: uppercase;
       letter-spacing: 0.06em; margin-left: 6px;
@@ -380,11 +386,16 @@
           if (!section || section.error) return couldntRead("clips");
           if (section.empty) return '<p class="muted-line">' + escapeHtml(section.hint || "Queue is empty. Run the clip pipeline / `bolt checkup` after processing.") + "</p>";
           var counts = section.counts || {};
-          var html = '<div class="sub">Ready ' + escapeHtml(counts.ready || 0) +
-            " · Posted " + escapeHtml(counts.posted || 0) + "</div>";
+          var summary = section.summary || (
+            "Ready " + (counts.ready || 0) +
+            " · In queue " + (counts.other || 0) +
+            " · Posted " + (counts.posted || 0)
+          );
+          var html = '<div class="sub">' + escapeHtml(summary) + "</div>";
           (section.clips || []).forEach(function (clip) {
+            var state = clip.status === "ready" ? "ready" : "queued";
             html += '<div class="clip-row"><div><div>' + escapeHtml(clip.title || "Untitled clip") +
-              "</div>";
+              ' <span class="pill status ' + state + '">' + escapeHtml(state) + "</span></div>";
             var meta = clip.file || "";
             if (clip.platform) meta += (meta ? " · " : "") + clip.platform;
             if (meta) html += '<div class="sub">' + escapeHtml(meta) + "</div>";

@@ -106,27 +106,32 @@ def test_morning_shape_from_sample_fixtures(monkeypatch, tmp_path):
     clips = morning["clips"]
     assert clips["empty"] is False
     assert clips["counts"] == {
-        "total": 6,
-        "ready": 4,
+        "total": 8,
+        "ready": 2,
         "posted": 1,
         "scrapped": 1,
-        "other": 0,
+        "other": 4,
     }
+    assert clips["summary"] == "Ready 2 · In queue 4 · Posted 1"
     titles = [clip["title"] for clip in clips["clips"]]
+    # Ready clips first (by score), then queued, even when a queued score is higher.
     assert titles == [
         "Sample clutch round",
         "Sample headset take",
-        "Sample unscored angle",
+        "Sample quiet lobby",
     ]
+    assert [clip["status"] for clip in clips["clips"]] == ["ready", "ready", "queued"]
     assert clips["clips"][0]["score"] == 88
     assert clips["clips"][0]["file"] == "sample_clutch.mp4"
     assert clips["clips"][0]["platform"] == "TikTok"
-    # Score filled from the sample rankings file, not the queue row.
-    assert clips["clips"][2]["score"] == 42
-    assert clips["clips"][2]["file"] == "sample_unscored.mp4"
+    assert clips["clips"][1]["score"] == 64
+    assert clips["clips"][1]["file"] == "sample_headset_youtube.mp4"
+    assert clips["clips"][1]["platform"] == "YouTube"
+    assert clips["clips"][2]["score"] == 95
+    assert clips["clips"][2]["file"] == "sample_lobby.mp4"
+    assert clips["clips"][2]["platform"] == "TikTok"
     assert "Sample already posted" not in titles
     assert "Sample scrapped take" not in titles
-    assert "Sample quiet lobby" not in titles
 
     research = morning["research"]
     assert research["empty"] is False
@@ -152,6 +157,89 @@ def test_morning_shape_from_sample_fixtures(monkeypatch, tmp_path):
     assert "bolt manage note" in actions["items"][0]["command"]
     assert actions["advance"]["command"]
     assert actions["lesson"]
+
+
+def test_clip_status_order_and_platform_inference(monkeypatch, tmp_path):
+    """Ready clips list before queued ones, and a missing platform is inferred or omitted."""
+    _isolate(monkeypatch, tmp_path)
+    queue = {
+        "_sample": True,
+        "_note": "SAMPLE DATA — clip order and platform inference only.",
+        "clips": [
+            {
+                "title": "Low ready tiktok",
+                "score": 10,
+                "status": "ready",
+                "clip_path": "media/clips/low_tiktok.mp4",
+            },
+            {
+                "title": "High queued youtube",
+                "score": 99,
+                "status": "queued",
+                "clip_path": "media/clips/high_youtube.mp4",
+            },
+            {
+                "title": "Plain ready",
+                "score": 50,
+                "status": "ready",
+                "clip_path": "media/clips/plain_clip.mp4",
+            },
+            {
+                "title": "Shorts review",
+                "score": 40,
+                "status": "review",
+                "clip_path": "media/clips/cut_shorts.mp4",
+            },
+            {
+                "title": "Reels hold",
+                "score": 30,
+                "status": "holding",
+                "clip_path": "media/clips/cut_reels.mp4",
+            },
+            {
+                "title": "Posted high",
+                "score": 100,
+                "status": "posted",
+                "clip_path": "media/clips/posted_tiktok.mp4",
+            },
+            {
+                "title": "Scrapped",
+                "score": 5,
+                "status": "scrapped",
+                "clip_path": "media/vertical_clips/scrap.mp4",
+            },
+        ],
+    }
+    (tmp_path / "ready_to_post.json").write_text(json.dumps(queue), encoding="utf-8")
+    rankings = {
+        "_sample": True,
+        "_note": "SAMPLE DATA",
+        "rankings": [
+            {"clip_path": "media/clips/cut_shorts.mp4", "score": 77},
+        ],
+    }
+    (tmp_path / "rankings.json").write_text(json.dumps(rankings), encoding="utf-8")
+
+    assert cw._infer_platform("media/clips/a_tiktok.mp4", "") == "TikTok"
+    assert cw._infer_platform("media/clips/a_youtube.mp4", None) == "YouTube"
+    assert cw._infer_platform("media/clips/a_shorts.mp4", "") == "Shorts"
+    assert cw._infer_platform("media/clips/a_reels.mp4", "") == "Reels"
+    assert cw._infer_platform("media/vertical_clips/plain.mp4", "") == "TikTok"
+    assert cw._infer_platform("vertical/plain.mp4", "") == "TikTok"
+    assert cw._infer_platform("media/clips/plain_clip.mp4", "") == ""
+    assert cw._infer_platform("media/vertical_clips/a_youtube.mp4", "") == "YouTube"
+    assert cw._infer_platform("media/clips/plain_clip.mp4", "X") == "X"
+
+    clips = cw.gather_morning()["clips"]
+    assert clips["summary"] == "Ready 2 · In queue 3 · Posted 1"
+    assert clips["counts"]["ready"] == 2
+    assert clips["counts"]["other"] == 3
+    assert clips["counts"]["posted"] == 1
+    assert [(c["title"], c["status"], c["platform"], c["score"]) for c in clips["clips"]] == [
+        ("Plain ready", "ready", "", 50),
+        ("Low ready tiktok", "ready", "TikTok", 10),
+        ("High queued youtube", "queued", "YouTube", 99),
+    ]
 
 
 def test_morning_empty_when_sources_missing(monkeypatch, tmp_path):
