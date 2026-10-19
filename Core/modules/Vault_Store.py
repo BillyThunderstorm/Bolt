@@ -837,7 +837,22 @@ class VaultStore:
         shutil.move(str(path), str(dest))
         return parked
 
+    def _refresh_timeline(self) -> None:
+        """Keep the plan chart in this same undo step. Overview must not block the save."""
+        if self._txn is None:
+            return
+        try:
+            from modules.Vault_Overview import refresh_inside
+        except Exception:
+            return
+        try:
+            refresh_inside(self)
+        except Exception:
+            return
+
     def _commit(self) -> None:
+        if self._txn is not None and self._txn.files:
+            self._refresh_timeline()
         txn = self._txn
         self._txn = None
         if txn is None or not txn.files:
