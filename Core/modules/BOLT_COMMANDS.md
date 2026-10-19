@@ -630,6 +630,28 @@ Typical flow:
 
 `bolt manage youtube-pkg` is for catalog **product reviews** only (Mouse, etc.). For gameplay clips, use `bolt queue package`.
 
+## Clip review board
+
+Local board for the ranked queue. It does **not** approve, post, or mark posted. Public auto-posting stays on; Keep must not trigger it.
+
+```bash
+bolt review                          # http://127.0.0.1:8767 and open a browser
+bolt review --no-open                # print the URL only
+bolt review --port 8767
+```
+
+| Control | What it does |
+|---------|--------------|
+| Keep | Records taste via `learn_from_feedback("queue_clip", accepted=True)`. Status and `auto_post` stay unchanged. |
+| Toss | `reject_next_clip(reason, clip_id)` — hold, `Data/post_rejections.jsonl`, and the existing learning path. A reason is required. |
+| Undo | `unhold_clip(clip_id)` puts a held clip back on the queue. |
+
+Opened as a file (`App/Clip_Review.html`), the page is read-only. Toss copies `bolt dontpost <id> "<reason>"`. Undo copies `bolt queue unhold <id>`. Keep has no safe shell command — use `bolt review`.
+
+Thumbnails are the `.jpg` `bolt thumbnails` writes next to a clip. Paths in the queue may be absolute Mac paths; the board resolves them inside the repo and will not serve a file outside it.
+
+Checkup shows a Clip review card from `Bolt_DATA.review` after `bolt checkup`. Ranking does **not** read keep/toss yet. That is a later upgrade.
+
 ## Post-to-TikTok web UI
 
 Local browser screen for a compliant TikTok export. Demo mode is safe without a token.

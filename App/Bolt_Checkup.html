@@ -171,6 +171,8 @@
       display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between;
     }
     .morning a { color: var(--accent); }
+    .review-card .top-list { margin: 8px 0 0; padding-left: 18px; }
+    .review-card li { margin: 4px 0; }
   </style>
 </head>
 <body>
@@ -187,6 +189,7 @@
 
     <div id="dash" style="display:none">
       <section class="panel morning" id="morning" hidden></section>
+      <section class="panel morning review-card" id="review-card" hidden></section>
 
       <div class="grid" id="stats"></div>
 
@@ -230,6 +233,7 @@
       document.getElementById("generated").textContent =
         "Updated " + (data.generated_at || "unknown");
       renderMorning(data);
+      renderReview(data);
 
       function fmt(n) {
         if (n === null || n === undefined) return "—";
@@ -347,6 +351,52 @@
             '">Spoken briefing</a>';
         }
         html += "</div>";
+        el.innerHTML = html;
+      }
+
+      function renderReview(data) {
+        var el = document.getElementById("review-card");
+        if (!el) return;
+        var review = data && data.review;
+        if (!review || typeof review !== "object") {
+          el.hidden = true;
+          return;
+        }
+        el.hidden = false;
+        if (review.error) {
+          el.innerHTML = '<div class="morning-head"><img src="assets/menu_bar_icon.png" alt="" />' +
+            '<div><h2>Clip review</h2></div></div>' +
+            '<p class="muted-line">Couldn\'t read the clip queue.</p>';
+          return;
+        }
+        var counts = review.counts || {};
+        var summary = "Ready " + (counts.ready || 0) +
+          " · Held " + (counts.held || 0) +
+          " · Posted " + (counts.posted || 0) +
+          " · Scrapped " + (counts.scrapped || 0);
+        var html = '<div class="morning-head"><img src="assets/menu_bar_icon.png" alt="" />';
+        html += "<div><h2>Clip review</h2>";
+        html += '<div class="meta">' + escapeHtml(summary) + "</div></div></div>";
+        if (review.empty) {
+          html += '<p class="muted-line">' + escapeHtml(review.hint || "No clips in the queue yet.") + "</p>";
+        } else if (review.hint) {
+          html += '<p class="muted-line">' + escapeHtml(review.hint) + "</p>";
+        }
+        var top = review.top || [];
+        if (top.length) {
+          html += '<ul class="top-list">';
+          top.forEach(function (clip) {
+            var line = clip.title || "Untitled clip";
+            if (clip.status) line += " · " + clip.status;
+            html += "<li>" + escapeHtml(line);
+            if (clip.score !== null && clip.score !== undefined && clip.score !== "") {
+              html += " " + scorePill(clip.score);
+            }
+            html += "</li>";
+          });
+          html += "</ul>";
+        }
+        html += '<p class="muted-line">Run <code>bolt review</code> to keep/toss.</p>';
         el.innerHTML = html;
       }
 
