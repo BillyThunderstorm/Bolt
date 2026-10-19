@@ -114,3 +114,6 @@ Data/twitch_stats_token_cache.json
 media/output/motion/
 media/output/wraps/
 media/output/releases/
+
+# Google Drive Desktop temp uploads (never commit)
+.tmp.driveupload/
