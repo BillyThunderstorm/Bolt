@@ -1,0 +1,5 @@
+SAMPLE DATA — not William's clips.
+
+The .mp4 files in media/clips/ are tiny placeholders so the review board can
+see that a file exists. The .jpg files are generated sample thumbnails for
+the same stems. Nothing here is a real recording or a real queue row.
