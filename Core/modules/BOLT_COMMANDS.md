@@ -819,6 +819,18 @@ bolt voice --text
 
 "yes" saves the whole list. "only 1 and 3" or "just 2" saves those. "no" or "none" saves nothing. "undo that" parks the notes from that save together.
 
+Filing uses rules first (review → Product Testing, podcast → Creator HQ, and the rest of the area table), then a correction William already taught, then a product name that matches an existing note title. Two matches means Inbox. The preview names related notes, and yes writes those as wikilinks.
+
+```bash
+bolt voice --text
+# add task film the K&F short by Friday
+# no, put that in Product Testing
+# yes
+# no, that's Personal
+```
+
+"no" alone cancels. "no, put that in …" or "no, that's …" changes the area and Bolt reuses that word next time. Tasks stay in `10 Bolt/Tasks/`. Notes and pages move to the area folder; the old file is parked, not deleted. `BOLT_VAULT_FILING_AI=on` lets the model pick when the rules are unsure (`auto` asks only if a provider is already reachable, `off` stays local). Corrections live in `BOLT_VAULT_FILING_PATH` or `Data/memory/vault_filing_memory.json`.
+
 Budget knobs, all optional: `BOLT_CHAT_THINK` (default on), `BOLT_CHAT_THINK_PAID` (`auto`, `on`, `off`), `BOLT_CHAT_REPLY_TASK` (default `chat`, so everyday replies stay on the light-mode model), `BOLT_CHAT_HISTORY_TURNS` (default 12), `BOLT_CHAT_MAX_TOKENS_TEXT`, `BOLT_CHAT_MAX_TOKENS_VOICE`.
 
 ## Obsidian vault (`bolt vault`)

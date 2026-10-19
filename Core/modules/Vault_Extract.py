@@ -14,8 +14,8 @@ from datetime import date
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
-from modules.Vault_Capture import choose_area
 from modules.Vault_Dates import When, now_ct, parse_when, speak_when
+from modules.Vault_Filing import pick_area, remember_saved, with_related_body
 from modules.Vault_Pending import clear_pending, register_applier, save_pending
 from modules.Vault_Store import VaultError, VaultStore, resolve_area, vault_exists
 
@@ -80,7 +80,11 @@ def speak_batch(items: List[Dict[str, Any]]) -> str:
         kind = "page" if item.get("type") == "page" else "task"
         due = item.get("due") or ""
         when = f", due {_speak_due(str(due))}" if due else ""
-        bits.append(f"{index}, {item.get('title')}, {kind} in {item.get('area')}{when}")
+        related = item.get("related") or []
+        related_bit = ""
+        if related:
+            related_bit = ", related " + ", ".join(f"[[{name}]]" for name in related)
+        bits.append(f"{index}, {item.get('title')}, {kind} in {item.get('area')}{when}{related_bit}")
     listed = ". ".join(bits)
     return (
         f"I found {len(items)}. {listed}. "
@@ -105,12 +109,13 @@ def apply_batch(pending: Dict[str, Any]) -> str:
                 "kind": item.get("type") or "task",
                 "area": item.get("area") or "",
                 "due": item.get("due") or "",
-                "body": item.get("body") or "",
+                "body": with_related_body(str(item.get("body") or ""), list(item.get("related") or [])),
                 "source": "chat",
                 "status": "inbox",
             }
         )
     notes = VaultStore().add_many(specs)
+    remember_saved([{"rel": note.rel, "title": note.title, "type": note.kind or "note"} for note in notes])
     clear_pending()
     names = ", ".join(note.title for note in notes)
     return f"Saved {len(notes)}: {names}."
@@ -158,13 +163,15 @@ def _items_from_model(raw: str, *, want_tasks: bool, want_page: bool) -> List[Di
             title = _tidy(str(row.get("title") or ""))
             if not title:
                 continue
+            area, related = _area(str(row.get("area") or ""), title)
             items.append(
                 {
                     "type": "task",
                     "title": title,
                     "due": _due(str(row.get("due") or "")),
-                    "area": _area(str(row.get("area") or ""), title),
+                    "area": area,
                     "body": "",
+                    "related": related,
                 }
             )
     if want_page and isinstance(data.get("page"), dict):
@@ -172,13 +179,15 @@ def _items_from_model(raw: str, *, want_tasks: bool, want_page: bool) -> List[Di
         title = _tidy(str(page.get("title") or ""))
         body = str(page.get("body") or "").strip()
         if title:
+            area, related = _area(str(page.get("area") or ""), title + " " + body)
             items.append(
                 {
                     "type": "page",
                     "title": title,
                     "due": "",
-                    "area": _area(str(page.get("area") or ""), title + " " + body),
+                    "area": area,
                     "body": body,
+                    "related": related,
                 }
             )
     return items
@@ -212,14 +221,15 @@ def _due(raw: str) -> str:
     return found.iso_date if found else ""
 
 
-def _area(raw: str, fallback_text: str) -> str:
+def _area(raw: str, fallback_text: str) -> tuple[str, List[str]]:
+    decision = pick_area(fallback_text)
     text = (raw or "").strip()
     if text and text.lower() not in ("null", "none", "empty"):
         try:
-            return resolve_area(text)
+            return resolve_area(text), decision.related
         except VaultError:
             pass
-    return choose_area(fallback_text)
+    return decision.area, decision.related
 
 
 def _speak_due(iso: str) -> str:
