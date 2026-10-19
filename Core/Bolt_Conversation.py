@@ -256,51 +256,11 @@ def _personality_text() -> str:
     return _load_file(PERSONALITY_FILE, "Use cheerful, innocent energy.")
 
 
-def build_system_prompt() -> str:
-    """
-    Assemble the full system prompt from personality guide + brain + identity.
-    """
-    personality = _personality_text()
-    brain = _load_file(BRAIN_FILE, "Billy is a content creator.")
-    try:
-        from modules.Week_Card import format_prompt
+def build_system_prompt(text_mode: bool = False, query: str = "") -> str:
+    """Personality, brain, week, and (when asking) vault notes. Partner-shaped."""
+    from modules.Chat_Partner import assemble_from_files
 
-        week = format_prompt()
-    except Exception:
-        week = ""
-
-    return f"""You are Bolt — Billy's AI teammate and voice companion.
-
-Your personality guide:
----
-{personality}
----
-
-You work for Billy, a self-taught content creator. Here's his profile:
----
-{brain}
----
-
-{week}
-
-CURRENT MODE: Voice conversation (spoken aloud via TTS).
-
-VOICE CONVERSATION RULES (STRICT):
-- Keep responses to 1-3 short plain sentences. Billy is listening, not reading a doc.
-- NEVER use markdown: no # headers, no **bold**, no bullet lists, no tables, no code fences.
-- NEVER invent fake project plans, dictionaries, or multi-section reports.
-- If Billy asks to run a Bolt command (bolt day, queue decide, etc.), say one sentence
-  directing him — real commands are handled by the intent system before you reply.
-- William often mistypes commands. If you see a spelling guess, treat that as the
-  intended command name and answer in one sentence. Do not invent a briefing or queue.
-- Never guess a post / approve / hold from a typo. Ask him to say it clearly.
-- Maintain cheerful, accidentally-sarcastic energy even with hard truths.
-- One clear next step. If you don't know, say so cheerfully.
-- Plain spoken English only.
-
-Real system phrases (morning, bolt day, queue, approve next, storage, budget) may already
-be handled before you see them, including near-miss spellings. Do not re-invent those.
-"""
+    return assemble_from_files(text_mode=text_mode, query=query)
 
 
 # ── Speech Input ──────────────────────────────────────────────────────────────
@@ -614,15 +574,15 @@ def _strip_for_speech(text: str) -> str:
     return t
 
 
-def generate_response(user_text: str, memory: ConversationMemory) -> str:
+def generate_response(
+    user_text: str, memory: ConversationMemory, *, text_mode: bool = False
+) -> str:
     """
     Generate a response.
 
-    1. Try Intent_Router for high-value system actions (morning, next, status...).
-    2. Otherwise use LLM_Handler (Grok/OpenAI) with personality + history.
+    1. Intent router only when the message is a clear command.
+    2. Otherwise Bolt thinks, then answers with week, memory, and vault context.
     """
-    # Intent path first — real actions beat pure chat when the user clearly wants one
-    # (includes typo hear-through for queue/briefing/etc.)
     if INTENT_OK:
         handled = try_handle_intent(user_text)
         if handled is not None:
@@ -639,26 +599,14 @@ def generate_response(user_text: str, memory: ConversationMemory) -> str:
         if guessed:
             llm_text = f"{user_text}\n(Bolt spelling guess: {guessed})"
 
-    system_prompt = build_system_prompt()
-    retrieved = _retrieved_memory_block(llm_text)
-    if retrieved:
-        system_prompt = f"{system_prompt}\n\n{retrieved}\n"
-
     try:
-        reply = ask_llm(
+        from modules.Chat_Partner import compose_reply
+
+        return compose_reply(
             llm_text,
-            system=system_prompt,
-            # Don't feed a long polluted history into every free-form turn
-            history=memory.as_openai_messages()[-6:],
-            max_tokens=120,
-            temperature=0.85,
-            task_type="chat",
-            complexity="medium",
+            memory.as_openai_messages(),
+            text_mode=text_mode,
         )
-        if reply.startswith("LLM unavailable"):
-            notify("LLM unavailable — using fallback response", level="warning", reason=reply)
-            return "Oh no! My brain is offline right now! That's a problem! Haha!"
-        return _strip_for_speech(reply)
     except Exception as exc:
         notify("LLM response failed", level="warning", reason=str(exc))
         return "Oops! My thoughts got tangled! Let's try that again!"
@@ -701,10 +649,7 @@ def conversation_loop(text_mode: bool = False) -> int:
     memory = ConversationMemory()
 
     greeting = (
-        "Hey William! Bolt is listening. "
-        "Say bolt day for your kickoff, queue decide for clips, "
-        "or approve next to greenlight a post. "
-        "For full video review, use bolt queue decide in the terminal."
+        "Hey William. I'm here. Tell me what you're working on, or what's stuck."
     )
     print(f"\n  🤖  {greeting}\n")
     speak_response(greeting)
@@ -738,7 +683,7 @@ def conversation_loop(text_mode: bool = False) -> int:
             except Exception:
                 pass
 
-            reply = generate_response(user_input, memory)
+            reply = generate_response(user_input, memory, text_mode=text_mode)
             memory.add("assistant", reply)
 
             print(f"  Bolt: {reply}\n")
@@ -759,7 +704,7 @@ def conversation_loop(text_mode: bool = False) -> int:
     return 0
 
 
-def single_exchange(prompt: str):
+def single_exchange(prompt: str, text_mode: bool = False):
     """Process one prompt and exit — useful for scripts and shortcuts."""
     memory = ConversationMemory()
     memory.add("user", prompt)
@@ -773,7 +718,7 @@ def single_exchange(prompt: str):
     except Exception:
         pass
 
-    reply = generate_response(prompt, memory)
+    reply = generate_response(prompt, memory, text_mode=text_mode)
     memory.add("assistant", reply)
     print(reply)
     if not already_spoke:
