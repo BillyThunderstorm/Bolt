@@ -1,116 +1,80 @@
 # Bolt
 
-**Local-first AI content manager, producer, and business assistant for creators.**
+Bolt is Billy Carter’s local-first creator operations system: a Python CLI and companion local interfaces for product testing, media processing, research, planning, and review.
 
-Bolt handles the technical and operational side of content creation so you can stay focused on creating. It is built for real workflows around streaming, short-form video, product testing, and multi-platform publishing.
+It is a personal project, not a hosted SaaS product. It keeps creator data and generated media on the local machine, while treating paid model calls and publishing as explicit, reviewable actions.
 
-Think of it as a personal producer that runs locally on your machine.
+## What works today
 
-## What Bolt Does
+- Product-testing workflow: catalog items, daily notes, drafts, assessments, and manual posting plans.
+- Media workflow: recordings/VODs → highlight candidates → clips, vertical renders, captions where available, and review queues.
+- Creator operations: daily/weekly briefings, missions, research, local memory, and cost-aware LLM routing.
+- Local integrations: optional OBS, Twitch, Google services, voice, macOS notifications, and Apple Reminders.
+- Post-stream helpers: game freshness, motion detection, wrap packages, release packages, and per-game clip settings.
 
-- **Automated Clip Pipeline** — Watches recordings and Twitch VODs, detects highlights, generates clips, titles, subtitles, vertical formats, thumbnails, and ranked queues.
-- **Content Manager OS** — Tracks products across testing lanes, manages notes/drafts/status, and supports social packaging with human approval gates.
-- **Direction-Finding Researcher** — Profile-driven research loop that helps answer “what should I be known for?” before production ramps.
-- **Creator Command Center** — Turns goals into printable mission briefings with real constraints (time, budget, assets).
-- **Voice & Conversation** — Hands-free voice engine, daily spoken briefings, Twitch chat personality with memory, and natural-language command routing.
-- **Integrations** — OBS, Twitch, Streamlabs, Discord, Google Calendar/Gmail, local memory index, storage optimization, and multi-provider LLM support (xAI/Grok preferred, OpenAI, local Ollama).
+The live command reference is [Core/modules/BOLT_COMMANDS.md](Core/modules/BOLT_COMMANDS.md). Capability maturity and prerequisites are tracked in [Docs/READINESS.md](Docs/READINESS.md).
 
-Bolt is intentionally personal and opinionated. It is designed around an actual creator’s constraints, night-owl schedule, and long-term brand direction rather than generic automation.
+## Quick start
 
-## Core Features
-
-### Clip & Media Pipeline
-
-- Recording and VOD watching
-- Audio-spike highlight detection with confidence gating and deduplication
-- Clip generation, AI titles, subtitles, vertical formatting
-- Thumbnail generation with smart frame selection
-- Ranking tiers + recency-weighted learning
-- Highlight reel compilation
-- Storage optimization (compression, rotation, deduplication)
-
-### Creator Operations
-
-- Product/catalog tracking across lanes (tech/gaming, skincare/beauty, general product testing, etc.)
-- Status workflow: testing → drafting → ready → posted
-- Notes, drafts, performance logging
-- Sponsor/affiliate prospecting support
-- Social packaging with explicit approval gates
-
-### Intelligence Layer
-
-- Memory-aware daily and weekly briefings
-- Local vector memory index
-- Researcher role with keep/drop/maybe decisions
-- Creator Command Center mission system
-- Intent routing so natural language maps to real actions
-- Multi-provider LLM (Grok / OpenAI / Ollama) with budget controls
-
-### Voice & Interfaces
-
-- Hands-free voice conversation (mic → STT → LLM → TTS)
-- “Good Morning Bolt” spoken briefings
-- Twitch chat personality with persistent memory
-- Single CLI entry point (`bolt <command>`)
-- Runtime doctor / verify / audit tools
-
-## Quick Start
+Requirements: Python 3.11 or 3.12 and [uv](https://docs.astral.sh/uv/). macOS is recommended for the optional voice, OBS, and Apple integrations.
 
 ```bash
-# Clone
 git clone https://github.com/BillyThunderstorm/Bolt.git
 cd Bolt
-
-# Install (uv recommended)
 uv sync
 
-# Or with pip
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r Docs/requirements.txt   # or use the locked environment
+# Optional feature groups
+uv sync --extra subtitles
+uv sync --extra ocr
+uv sync --extra menubar
 
-# Configure
 cp .env.example .env
-# Edit .env with your keys (Twitch, xAI/OpenAI, etc.)
+# Add only the credentials you plan to use; never commit .env.
 
-# Verify installation
-bolt verify
-# or
-bolt doctor
-Common Commands
-Bashbolt help                    # Full command list
-bolt morning                 # Spoken daily briefing
-bolt manage next             # Next content manager actions
-bolt research status         # Researcher status
-bolt mission start "..."     # Create a mission
-bolt recordings              # Process recordings
-bolt briefing                # Generate briefing
-See Core/modules/BOLT_COMMANDS.md for the complete reference.
-Project Structure (High Level)
-textBolt/
-├── Core/                 # Main application code & modules
-├── Data/                 # Memory, catalogs, queues, state
-├── Docs/                 # Guides, status, architecture
-├── bin/bolt              # Primary CLI entry point
-├── scripts/              # Utility & maintenance scripts
-├── media/                # Clips, verticals, samples
-└── ...
-Requirements
+uv run bolt verify
+uv run bolt doctor
+uv run bolt help
+```
 
-Python 3.11 or 3.12
-macOS recommended (voice, OBS, local integrations)
-Optional: OBS Studio, Twitch account, xAI / OpenAI / Ollama keys
+If you use pip instead, install the dependencies declared in `pyproject.toml`; this repository does not maintain a separate `requirements.txt`.
 
-Philosophy
-Bolt is local-first. Your data, memory, and pipelines stay on your machine. Cloud LLMs are used only when you choose them, with budget controls and local fallbacks available.
-It prioritizes reliability (per-clip failure isolation, quality gates, verification tools) and real creator constraints over flashy demos.
-Status
-Actively developed. See docs/PROJECT_STATUS.md and docs/upgrade/ for current build state and roadmaps.
-License
-[Add your preferred license here — e.g. MIT, or Private]
-Author
-Built by Billy Carter (@SimplyBilly_)
+## Everyday commands
 
-Navy veteran • Independent developer • Content creator
+```bash
+uv run bolt day --decide      # daily briefing and queue review
+uv run bolt manage next       # next product-testing actions
+uv run bolt game status       # current game freshness and drift check
+uv run bolt wrap --dry-run    # preview a post-stream package
+uv run bolt memory recall "what should I do next?"
+uv run bolt doctor            # installation/integration diagnostics
+```
 
-Bolt is a personal tooling project. It is not a commercial product.
+## Safety and publishing
+
+- William approves purchases and publishing.
+- TikTok API auto-publishing is paused; use the manual review and logging flow.
+- Secrets, credentials, tokens, generated media, and runtime state stay out of Git.
+- Optional integrations soft-fail with a clear status rather than blocking local work.
+
+## Project map
+
+- [Docs/INDEX.md](Docs/INDEX.md) — documentation map
+- [Docs/BOLT_NOW.md](Docs/BOLT_NOW.md) — living status and next steps
+- [Docs/READINESS.md](Docs/READINESS.md) — ready vs. partial capabilities
+- [Core/bolt_brain.md](Core/bolt_brain.md) — creator context
+- [Data/MEMORY.md](Data/MEMORY.md) — current operating memory
+- [AGENTS.md](AGENTS.md) — repository operating rules
+
+## Status
+
+Actively developed. The current focus is product testing: complete three detailed assessments of products already owned, with a short-form deliverable for each. See [Docs/BOLT_NOW.md](Docs/BOLT_NOW.md) for the current plan.
+
+## License
+
+No license has been selected yet. Do not reuse or redistribute this repository until a license is added.
+
+## Author
+
+Built by Billy Carter (@SimplyBilly_).
+
+Navy veteran · independent developer · content creator
