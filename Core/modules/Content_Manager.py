@@ -2732,6 +2732,16 @@ def advance_next() -> Dict[str, str]:
     return steps[idx]
 
 
+def _vault_due_line() -> str:
+    # Imported here so morning briefing still runs when the vault module is broken.
+    try:
+        from modules.Vault_Overview import due_line
+
+        return due_line("today")
+    except Exception:
+        return ""
+
+
 def _build_focused_morning(BF) -> Dict[str, Any]:
     """Short single-lane morning (Core/config.json briefing_focus)."""
     steps = BF.todays_steps()
@@ -2739,6 +2749,9 @@ def _build_focused_morning(BF) -> Dict[str, Any]:
         f"Good morning, {CREATOR_NAME}. Today's product-testing step: {steps[0]} "
         "Posts still need your approval."
     )
+    vault_due = _vault_due_line()
+    if vault_due:
+        spoken = f"{spoken} {vault_due}"
     md_lines = [
         f"# Good Morning Bolt — {date.today().isoformat()}",
         "",
@@ -2750,6 +2763,8 @@ def _build_focused_morning(BF) -> Dict[str, Any]:
     warn = BF.storage_warning()
     if warn:
         md_lines += ["", "## Storage", warn]
+    if vault_due:
+        md_lines += ["", "## Vault Today", vault_due]
     md_lines += ["", "Plan: `Data/business/product-testing-plan.md`", ""]
     briefing_md = "\n".join(md_lines)
     path = BRIEFINGS_DIR / f"morning_{date.today().isoformat()}.md"
@@ -2802,6 +2817,9 @@ def build_morning_briefing() -> Dict[str, Any]:
     if sponsors:
         lines.append(f"Sponsor watchlist: {sponsors[0]['name']}.")
     lines.append("All social posts still need your approval. Let's make something real today.")
+    vault_due = _vault_due_line()
+    if vault_due:
+        lines.append(vault_due)
 
     spoken = " ".join(lines)
     # Shorter voice line for TTS (full `spoken` stays in the markdown).
@@ -2818,6 +2836,8 @@ def build_morning_briefing() -> Dict[str, Any]:
         voice_bits.append(f"Business: {biz['title']}.")
     voice_bits.append(f"Advance Bolt: {advance['title']}.")
     voice_bits.append("All posts still need your approval.")
+    if vault_due:
+        voice_bits.append(vault_due)
     spoken_voice = " ".join(voice_bits)
 
     md_lines = [
