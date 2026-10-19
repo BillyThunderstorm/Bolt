@@ -25,14 +25,81 @@
     body {
       margin: 0;
       min-height: 100vh;
+      overflow-x: clip;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      background:
-        radial-gradient(1200px 600px at 10% -10%, rgba(110,168,255,0.18), transparent 60%),
-        radial-gradient(900px 500px at 100% 0%, rgba(61,214,140,0.12), transparent 55%),
-        var(--bg);
       color: var(--text);
+      background:
+        radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.45) 100%),
+        radial-gradient(1200px 600px at 10% -10%, rgba(110, 168, 255, 0.16), transparent 60%),
+        radial-gradient(820px 520px at 100% 0%, rgba(255, 196, 150, 0.11), transparent 58%),
+        radial-gradient(640px 420px at 78% 108%, rgba(96, 64, 150, 0.20), transparent 62%),
+        linear-gradient(185deg, #070b16 0%, #0b0f17 36%, #0c1020 70%, #080712 100%);
     }
-    .wrap { max-width: 1280px; margin: 0 auto; padding: 22px 16px 40px; }
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      background-image:
+        radial-gradient(1px 1px at 12px 22px, rgba(255, 255, 255, 0.78) 50%, transparent 52%),
+        radial-gradient(1.2px 1.2px at 78px 64px, rgba(255, 236, 214, 0.72) 50%, transparent 52%),
+        radial-gradient(1px 1px at 140px 28px, rgba(255, 255, 255, 0.5) 50%, transparent 52%),
+        radial-gradient(1px 1px at 36px 118px, rgba(200, 214, 255, 0.68) 50%, transparent 52%),
+        radial-gradient(1.5px 1.5px at 168px 96px, rgba(255, 244, 224, 0.82) 50%, transparent 52%),
+        radial-gradient(1px 1px at 104px 150px, rgba(255, 255, 255, 0.42) 50%, transparent 52%),
+        radial-gradient(1px 1px at 188px 46px, rgba(255, 220, 200, 0.58) 50%, transparent 52%);
+      background-size: 210px 176px;
+      animation: star-twinkle 6.8s ease-in-out infinite;
+    }
+    body::after {
+      background-image:
+        radial-gradient(ellipse 460px 260px at 72% 16%, rgba(255, 214, 170, 0.42), transparent 72%),
+        radial-gradient(ellipse 340px 230px at 62% 24%, rgba(186, 156, 255, 0.32), transparent 74%),
+        radial-gradient(ellipse 280px 190px at 84% 30%, rgba(255, 170, 196, 0.30), transparent 72%),
+        radial-gradient(ellipse 240px 160px at 18% 78%, rgba(120, 160, 255, 0.18), transparent 74%),
+        radial-gradient(22px 22px at 74% 15%, rgba(255, 236, 210, 0.55), transparent 70%),
+        radial-gradient(14px 14px at 67% 21%, rgba(255, 214, 230, 0.42), transparent 72%),
+        radial-gradient(18px 18px at 82% 23%, rgba(214, 196, 255, 0.48), transparent 70%),
+        radial-gradient(1.2px 1.2px at 70% 11%, #fff 50%, transparent 52%),
+        radial-gradient(2px 2px at 74% 15%, rgba(255, 246, 224, 0.96) 50%, transparent 52%),
+        radial-gradient(1.3px 1.3px at 78% 12%, #fff 50%, transparent 52%),
+        radial-gradient(1px 1px at 72% 19%, rgba(255, 230, 200, 0.92) 50%, transparent 52%),
+        radial-gradient(2.2px 2.2px at 81% 18%, rgba(255, 236, 214, 0.96) 50%, transparent 52%),
+        radial-gradient(1px 1px at 66% 16%, #fff 50%, transparent 52%),
+        radial-gradient(1.5px 1.5px at 76% 23%, rgba(255, 220, 190, 0.9) 50%, transparent 52%),
+        radial-gradient(1px 1px at 84% 15%, rgba(226, 216, 255, 0.92) 50%, transparent 52%),
+        radial-gradient(1.8px 1.8px at 69% 25%, #fff 50%, transparent 52%),
+        radial-gradient(1px 1px at 88% 21%, rgba(255, 244, 230, 0.84) 50%, transparent 52%),
+        radial-gradient(1.2px 1.2px at 63% 21%, rgba(255, 255, 255, 0.8) 50%, transparent 52%),
+        radial-gradient(2px 2px at 79% 27%, rgba(255, 214, 180, 0.94) 50%, transparent 52%),
+        radial-gradient(1px 1px at 73% 30%, #fff 50%, transparent 52%),
+        radial-gradient(1.4px 1.4px at 86% 26%, rgba(255, 230, 210, 0.88) 50%, transparent 52%),
+        radial-gradient(1px 1px at 67% 29%, rgba(206, 216, 255, 0.82) 50%, transparent 52%),
+        radial-gradient(1.6px 1.6px at 77% 8%, rgba(255, 250, 240, 0.92) 50%, transparent 52%),
+        radial-gradient(1px 1px at 82% 33%, rgba(255, 255, 255, 0.76) 50%, transparent 52%),
+        radial-gradient(1.1px 1.1px at 71% 34%, rgba(255, 228, 200, 0.7) 50%, transparent 52%),
+        radial-gradient(1.5px 1.5px at 16% 24%, rgba(255, 255, 255, 0.82) 50%, transparent 52%),
+        radial-gradient(1px 1px at 34% 42%, rgba(255, 236, 214, 0.64) 50%, transparent 52%),
+        radial-gradient(1.8px 1.8px at 11% 66%, #fff 50%, transparent 52%),
+        radial-gradient(1px 1px at 48% 74%, rgba(255, 255, 255, 0.52) 50%, transparent 52%),
+        radial-gradient(1.2px 1.2px at 91% 70%, rgba(255, 220, 200, 0.72) 50%, transparent 52%),
+        radial-gradient(1px 1px at 7% 38%, rgba(198, 210, 255, 0.74) 50%, transparent 52%),
+        radial-gradient(1.6px 1.6px at 42% 11%, rgba(255, 255, 255, 0.76) 50%, transparent 52%),
+        radial-gradient(1px 1px at 56% 52%, rgba(255, 236, 220, 0.5) 50%, transparent 52%);
+      animation: star-twinkle 10.4s ease-in-out infinite;
+      animation-delay: -4.2s;
+    }
+    .wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 22px 16px 40px;
+      position: relative;
+      z-index: 1;
+    }
     header {
       display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
       gap: 12px; margin-bottom: 16px;
@@ -68,20 +135,41 @@
     .board {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 14px;
+      gap: 52px;
+      padding: 28px 8px 36px;
     }
     @media (min-width: 880px) {
       .board { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
     .clip-card {
-      background: linear-gradient(180deg, var(--panel-2), var(--panel));
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      position: relative;
+      isolation: isolate;
       min-width: 0;
+      padding: 96px 13% 72px;
+      border: none;
+      background: transparent;
+      color: #2c1a22;
+      box-shadow: none;
+      animation: cloud-float 7.4s ease-in-out infinite;
     }
-    .clip-card.done { opacity: 0.72; }
+    .clip-card:nth-child(6n + 1) { animation-duration: 7.2s; animation-delay: -0.6s; }
+    .clip-card:nth-child(6n + 2) { animation-duration: 8.6s; animation-delay: -2.8s; }
+    .clip-card:nth-child(6n + 3) { animation-duration: 6.5s; animation-delay: -4.4s; }
+    .clip-card:nth-child(6n + 4) { animation-duration: 9.2s; animation-delay: -1.5s; }
+    .clip-card:nth-child(6n + 5) { animation-duration: 7.8s; animation-delay: -5.1s; }
+    .clip-card:nth-child(6n + 6) { animation-duration: 8.9s; animation-delay: -3.3s; }
+    .clip-card::before {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      pointer-events: none;
+      background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20641%20901%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22c%22%20cx%3D%2250%25%22%20cy%3D%2248%25%22%20r%3D%2260%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ffe6d0%22%20stop-opacity%3D%220.90%22%2F%3E%3Cstop%20offset%3D%220.7%22%20stop-color%3D%22%23ffd0c2%22%20stop-opacity%3D%220.88%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ffc0b2%22%20stop-opacity%3D%220.85%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Cpath%20fill%3D%22url%28%23c%29%22%20d%3D%22M%20212.0%200.0%20C%20217.8%20-2.1%20225.4%200.0%20232.1%200.0%20C%20238.8%200.0%20245.5%200.0%20252.2%200.0%20C%20258.9%200.0%20265.6%200.0%20272.2%200.0%20C%20278.9%200.0%20285.6%200.0%20292.3%200.0%20C%20299.0%200.0%20305.7%200.0%20312.4%200.0%20C%20319.1%200.0%20325.8%200.0%20332.5%200.0%20C%20339.2%200.0%20345.9%200.0%20352.6%200.0%20C%20359.3%200.0%20366.0%200.0%20372.7%200.0%20C%20379.3%200.0%20386.0%200.0%20392.7%200.0%20C%20399.4%200.0%20406.1%200.0%20412.8%200.0%20C%20419.5%200.0%20426.9%20-1.6%20432.9%200.0%20C%20438.9%201.6%20443.9%205.9%20448.9%209.9%20C%20453.8%2013.8%20458.5%2018.8%20462.7%2023.7%20C%20466.9%2028.5%20470.5%2033.8%20474.0%2039.0%20C%20477.6%2044.3%20481.0%2049.5%20484.0%2055.0%20C%20487.0%2060.5%20487.9%2067.9%20491.8%2071.8%20C%20495.8%2075.8%20502.2%2076.8%20507.8%2078.8%20C%20513.5%2080.9%20519.9%2082.0%20525.8%2084.0%20C%20531.6%2086.0%20537.4%2088.2%20543.0%2091.0%20C%20548.5%2093.8%20553.7%2097.4%20558.9%20100.9%20C%20564.2%20104.5%20569.4%20108.0%20574.3%20112.3%20C%20579.2%20116.6%20584.2%20121.6%20588.5%20126.5%20C%20592.8%20131.4%20596.4%20136.6%20599.9%20141.9%20C%20603.3%20147.1%20606.4%20152.6%20609.1%20158.1%20C%20611.9%20163.7%20614.1%20169.4%20616.3%20175.3%20C%20618.4%20181.1%20620.7%20186.8%20622.0%20193.0%20C%20623.3%20199.1%20623.6%20205.7%20624.1%20212.1%20C%20624.7%20218.6%20625.2%20225.4%20625.0%20231.9%20C%20624.8%20238.4%20624.2%20244.9%20623.0%20251.1%20C%20621.8%20257.3%20619.8%20263.2%20618.0%20269.1%20C%20616.2%20275.1%20614.5%20281.1%20612.0%20286.7%20C%20609.5%20292.4%20603.8%20297.4%20603.0%20303.1%20C%20602.2%20308.7%20605.8%20314.6%20607.0%20320.7%20C%20608.2%20326.8%20609.7%20333.1%20610.0%20339.5%20C%20610.3%20345.9%20609.8%20352.8%20609.0%20359.2%20C%20608.2%20365.5%20606.8%20371.7%20605.0%20377.6%20C%20603.2%20383.5%20596.8%20389.7%20598.0%20394.8%20C%20599.2%20399.8%20607.5%20403.3%20611.9%20407.9%20C%20616.4%20412.6%20621.2%20417.5%20624.7%20422.7%20C%20628.2%20428.0%20630.8%20433.6%20633.0%20439.4%20C%20635.2%20445.1%20636.8%20451.2%20638.0%20457.4%20C%20639.2%20463.6%20640.0%20470.2%20640.0%20476.6%20C%20640.0%20483.0%20639.3%20489.7%20638.0%20495.9%20C%20636.7%20502.0%20634.6%20507.9%20632.0%20513.5%20C%20629.4%20519.1%20626.1%20524.4%20622.4%20529.6%20C%20618.7%20534.7%20614.3%20540.0%20609.6%20544.4%20C%20605.0%20548.8%20597.8%20551.8%20594.4%20556.0%20C%20591.0%20560.2%20589.0%20564.2%20589.3%20569.3%20C%20589.6%20574.4%20594.2%20580.6%20596.0%20586.6%20C%20597.8%20592.5%20599.3%20598.6%20600.0%20605.0%20C%20600.7%20611.4%20600.6%20618.6%20599.9%20625.1%20C%20599.3%20631.5%20597.8%20637.6%20596.0%20643.5%20C%20594.2%20649.5%20590.2%20655.1%20589.2%20660.8%20C%20588.2%20666.5%20589.2%20672.0%20590.0%20677.9%20C%20590.8%20683.8%20593.2%20690.0%20594.0%20696.3%20C%20594.8%20702.7%20595.3%20709.6%20595.0%20716.0%20C%20594.7%20722.4%20593.5%20728.7%20592.0%20734.8%20C%20590.5%20740.9%20588.5%20746.7%20586.0%20752.4%20C%20583.5%20758.1%20580.8%20763.6%20577.2%20768.8%20C%20573.6%20774.0%20569.0%20779.0%20564.4%20783.6%20C%20559.8%20788.2%20554.8%20792.7%20549.6%20796.4%20C%20544.4%20800.1%20539.0%20803.1%20533.3%20805.7%20C%20527.7%20808.3%20521.9%20810.4%20515.9%20812.0%20C%20509.8%20813.6%20503.5%20814.7%20497.1%20815.0%20C%20490.6%20815.3%20483.7%20814.8%20477.4%20814.0%20C%20471.0%20813.2%20464.0%20809.7%20459.0%20810.0%20C%20453.9%20810.3%20450.0%20811.8%20447.0%20815.6%20C%20444.0%20819.5%20443.5%20827.5%20441.0%20833.2%20C%20438.5%20838.9%20435.8%20844.4%20432.3%20849.7%20C%20428.8%20855.0%20424.6%20860.1%20420.2%20864.8%20C%20415.9%20869.5%20411.1%20874.0%20406.1%20877.9%20C%20401.1%20881.7%20395.7%20885.0%20390.2%20887.8%20C%20384.7%20890.7%20379.0%20893.1%20373.1%20895.0%20C%20367.2%20896.9%20361.0%20898.2%20354.7%20899.0%20C%20348.3%20899.8%20341.4%20900.3%20335.0%20900.0%20C%20328.6%20899.7%20322.2%20898.4%20316.1%20897.1%20C%20310.0%20895.8%20303.9%20894.4%20298.1%20892.0%20C%20292.4%20889.6%20287.1%20886.4%20281.8%20883.0%20C%20276.5%20879.6%20271.2%20875.7%20266.5%20871.5%20C%20261.7%20867.2%20257.3%20862.4%20253.4%20857.4%20C%20249.5%20852.4%20246.7%20845.2%20243.0%20841.6%20C%20239.3%20838.1%20236.1%20835.8%20231.3%20836.0%20C%20226.5%20836.2%20220.0%20841.0%20214.1%20843.0%20C%20208.2%20845.0%20202.3%20846.8%20196.1%20848.0%20C%20189.9%20849.2%20183.3%20849.8%20176.8%20850.0%20C%20170.3%20850.2%20163.4%20850.0%20157.2%20849.0%20C%20150.9%20848.0%20145.0%20846.0%20139.1%20844.1%20C%20133.2%20842.2%20127.2%20840.4%20121.7%20837.7%20C%20116.1%20835.0%20110.9%20831.4%20105.7%20827.7%20C%20100.6%20824.1%2095.3%20820.1%2090.6%20815.6%20C%2086.0%20811.2%2081.8%20805.9%2078.0%20800.8%20C%2074.2%20795.7%2070.8%20790.4%2068.0%20784.9%20C%2065.2%20779.3%2062.8%20773.6%2061.0%20767.7%20C%2059.2%20761.8%2058.0%20755.5%2057.0%20749.3%20C%2056.0%20743.0%2055.0%20736.4%2055.0%20730.0%20C%2055.0%20723.6%2056.0%20717.0%2057.0%20710.8%20C%2058.0%20704.5%2061.4%20698.2%2061.0%20692.3%20C%2060.6%20686.5%2056.8%20681.4%2054.7%20675.7%20C%2052.6%20670.0%2049.9%20664.3%2048.3%20658.3%20C%2046.7%20652.2%2045.5%20646.0%2045.0%20639.5%20C%2044.5%20633.1%2044.7%20626.0%2045.4%20619.6%20C%2046.0%20613.2%2047.4%20607.1%2049.0%20601.0%20C%2050.6%20595.0%2056.0%20588.3%2055.0%20583.4%20C%2054.0%20578.6%2047.5%20576.1%2043.1%20572.1%20C%2038.6%20568.0%2032.8%20563.9%2028.3%20559.3%20C%2023.8%20554.6%2019.4%20549.6%2016.0%20544.3%20C%2012.6%20539.0%2010.0%20533.4%207.7%20527.7%20C%205.3%20521.9%203.3%20516.1%202.0%20509.9%20C%200.7%20503.8%200.0%20497.1%200.0%20490.7%20C%200.0%20484.2%200.8%20477.6%202.0%20471.4%20C%203.2%20465.2%204.8%20459.2%207.0%20453.4%20C%209.2%20447.6%2011.9%20442.0%2015.3%20436.7%20C%2018.6%20431.5%2022.9%20426.3%2027.3%20421.7%20C%2031.8%20417.0%2040.0%20413.8%2042.1%20408.9%20C%2044.2%20403.9%2041.0%20397.9%2040.0%20392.1%20C%2039.0%20386.2%2036.8%20380.0%2036.0%20373.6%20C%2035.2%20367.3%2034.7%20360.4%2035.0%20354.0%20C%2035.3%20347.6%2036.7%20341.3%2038.0%20335.1%20C%2039.3%20329.0%2040.8%20322.9%2043.0%20317.1%20C%2045.2%20311.4%2051.2%20306.1%2051.5%20300.5%20C%2051.7%20295.0%2046.8%20289.5%2044.7%20283.7%20C%2042.6%20277.9%2040.5%20272.1%2039.0%20266.0%20C%2037.5%20259.9%2036.7%20253.6%2036.0%20247.1%20C%2035.3%20240.7%2034.9%20234.0%2035.0%20227.5%20C%2035.1%20221.0%2035.9%20214.5%2036.8%20208.2%20C%2037.7%20201.8%2038.9%20195.6%2040.4%20189.6%20C%2042.0%20183.5%2043.9%20177.6%2046.1%20171.9%20C%2048.4%20166.1%2050.9%20160.4%2054.0%20155.0%20C%2057.1%20149.6%2060.9%20144.5%2064.6%20139.4%20C%2068.4%20134.2%2072.3%20129.0%2076.7%20124.3%20C%2081.2%20119.5%2086.2%20114.9%2091.2%20110.8%20C%2096.2%20106.6%20101.3%20102.8%20106.6%2099.4%20C%20111.9%2096.0%20117.3%2092.9%20122.8%2090.2%20C%20128.4%2087.4%20134.3%2085.3%20140.0%2083.0%20C%20145.6%2080.7%20152.7%2080.3%20156.7%2076.3%20C%20160.7%2072.4%20161.3%2064.8%20164.0%2059.3%20C%20166.7%2053.7%20169.7%2048.2%20173.1%2042.9%20C%20176.5%2037.7%20180.4%2032.6%20184.4%2027.6%20C%20188.5%2022.5%20192.6%2017.4%20197.2%2012.8%20C%20201.8%208.2%20206.2%202.1%20212.0%200.0%20Z%22%2F%3E%3C%2Fsvg%3E") center / 100% 100% no-repeat;
+      filter: drop-shadow(0 0 10px rgba(255, 190, 110, 0.7));
+    }
+    .clip-card::after { content: none; }
+    .clip-card > * { position: relative; z-index: 1; }
+    .clip-card.done { opacity: 0.88; }
     .thumb {
       width: calc(200px * 9 / 16);
       height: 200px;
@@ -111,19 +199,20 @@
     .title-row, .meta-row, .actions {
       display: flex; justify-content: space-between; gap: 8px; align-items: flex-start;
     }
+    .title-row { min-width: 0; }
     .title-row h2 {
       margin: 0; font-size: 1rem; font-weight: 650; letter-spacing: -0.01em;
-      word-break: break-word;
+      min-width: 0; flex: 1 1 auto; overflow-wrap: anywhere;
     }
     .meta-row { margin-top: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-start; }
     .filename {
       display: block; margin-top: 8px; color: var(--muted); font-size: 0.78rem;
-      word-break: break-all;
+      max-width: 100%; overflow-wrap: anywhere; word-break: break-word;
     }
     code { color: var(--accent); }
     .pill {
       display: inline-block; padding: 2px 8px; border-radius: 999px;
-      font-size: 0.78rem; font-weight: 650; white-space: nowrap;
+      font-size: 0.78rem; font-weight: 650; white-space: nowrap; flex-shrink: 0;
     }
     .pill.good { color: var(--ready); background: rgba(61,214,140,0.12); }
     .pill.mid { color: var(--partial); background: rgba(245,197,66,0.12); }
@@ -144,6 +233,100 @@
     .keep { color: var(--ready); border: 1px solid var(--ready); }
     .toss, .confirm { color: var(--shell); border: 1px solid var(--shell); }
     .keep:disabled, .toss:disabled, .confirm:disabled { opacity: 0.4; cursor: default; }
+    .chip:focus-visible,
+    .text-btn:focus-visible,
+    .keep:focus-visible,
+    .toss:focus-visible,
+    .confirm:focus-visible,
+    .undo:focus-visible,
+    .reason-input:focus-visible {
+      outline: 2px solid #fffaf3;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px #6a3d12;
+    }
+    header h1,
+    header .meta,
+    .counts,
+    .banner,
+    .empty,
+    .tip,
+    footer {
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    }
+    .clip-card .thumb { color: var(--text); }
+    .clip-card .placeholder { color: #c5d0e0; }
+    .clip-card .placeholder .mark { color: #d7e6ff; }
+    .clip-card .trigger,
+    .clip-card .meta,
+    .clip-card .filename,
+    .clip-card code {
+      color: #5c3d4c;
+    }
+    .clip-card .hold,
+    .clip-card .result.held { color: #7a4e00; }
+    .clip-card .result.kept { color: #0b6a3c; }
+    .clip-card .error-line { color: #9d1c32; }
+    .clip-card .pill.status,
+    .clip-card .pill.status.queued {
+      color: #5c4452;
+      background: rgba(44, 26, 34, 0.08);
+    }
+    .clip-card .pill.good,
+    .clip-card .pill.status.ready {
+      color: #0b6a3c;
+      background: rgba(11, 106, 60, 0.14);
+    }
+    .clip-card .pill.mid,
+    .clip-card .pill.status.held {
+      color: #7a4e00;
+      background: rgba(180, 120, 20, 0.18);
+    }
+    .clip-card .pill.bad {
+      color: #9d1c32;
+      background: rgba(157, 28, 50, 0.12);
+    }
+    .clip-card .keep {
+      color: #0b6a3c;
+      border-color: #0b6a3c;
+      background: rgba(236, 255, 244, 0.92);
+    }
+    .clip-card .toss,
+    .clip-card .confirm {
+      color: #9d1c32;
+      border-color: #9d1c32;
+      background: rgba(255, 240, 242, 0.92);
+    }
+    .clip-card .undo {
+      color: #163f86;
+      background: rgba(22, 63, 134, 0.1);
+      border-radius: 999px;
+      padding: 2px 8px;
+    }
+    .clip-card .chip,
+    .clip-card .text-btn {
+      background: rgba(255, 250, 246, 0.7);
+      color: #3f2a34;
+      border-color: rgba(63, 42, 52, 0.32);
+    }
+    .clip-card .chip.active {
+      color: #6a3d12;
+      border-color: rgba(122, 78, 0, 0.7);
+      background: rgba(255, 214, 160, 0.78);
+    }
+    .clip-card .reason-input {
+      background: rgba(255, 250, 246, 0.88);
+      color: #2c1a22;
+      border-color: rgba(74, 42, 36, 0.38);
+    }
+    .clip-card .reason-input::placeholder { color: #6e5360; }
+    .clip-card .keep:disabled,
+    .clip-card .toss:disabled,
+    .clip-card .confirm:disabled {
+      opacity: 1;
+      color: #3e4650;
+      border-color: #5c6672;
+      background: rgba(255, 250, 246, 0.5);
+    }
     .toss-panel { margin-top: 10px; }
     .reasons { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
     .reason-input, .note-line {
@@ -169,9 +352,27 @@
     }
     @media (max-width: 520px) {
       .wrap { padding: 16px 12px 32px; }
+      .board { padding: 28px 10px 36px; gap: 56px; }
       .thumb { height: 220px; width: calc(220px * 9 / 16); }
       .actions, .toss-actions { flex-direction: column; }
       .keep, .toss, .confirm, .text-btn { width: 100%; }
+      .clip-card .undo { width: auto; }
+    }
+    @keyframes cloud-float {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(0, -8px, 0); }
+    }
+    @keyframes star-twinkle {
+      0%, 100% { opacity: 0.78; }
+      45% { opacity: 1; }
+      72% { opacity: 0.68; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .clip-card,
+      body::before,
+      body::after {
+        animation: none;
+      }
     }
   </style>
 </head>
