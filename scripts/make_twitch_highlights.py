@@ -13,8 +13,10 @@ Usage:
   python3 make_twitch_highlights.py --list              → show top clips by score
   python3 make_twitch_highlights.py --output custom.mp4 → custom output path
 
-Output: a single MP4 file (use --output to choose where; default lands
-in the current working directory).
+Output: a single MP4 at media/output/YYYY-MM-DD_highlight_reel.mp4
+(--output NAME lands under media/output/; an absolute path is used as-is).
+Uses the working ffmpeg from FFmpeg_Bin (ffmpeg-full), not a broken PATH
+ffmpeg. Problems print ``Highlights unavailable: …`` and exit 1 (no stack).
 """
 
 from __future__ import annotations
@@ -23,8 +25,10 @@ import argparse
 import json
 import os
 import random
+import shutil
 import subprocess
 import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -54,6 +58,43 @@ SEEN_CLIPS_FILE = DATA_DIR / "seen_clips.json"
 # default output lands at media/output/ (was highlight_reels/ at the root).
 OUTPUT_DIR = MEDIA_DIR / "output"
 TITLE_FONT = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+SOFT = "Highlights unavailable:"
+
+
+def _ffmpeg() -> Optional[str]:
+    """Working ffmpeg (FFmpeg_Bin prefers ffmpeg-full), else None."""
+    try:
+        from modules.FFmpeg_Bin import working_ffmpeg
+
+        return working_ffmpeg()
+    except Exception:
+        return shutil.which("ffmpeg")
+
+
+def _ffprobe() -> str:
+    try:
+        from modules.FFmpeg_Bin import ffprobe_bin
+
+        return ffprobe_bin()
+    except Exception:
+        return shutil.which("ffprobe") or "ffprobe"
+
+
+def _concat_line(path: Path) -> str:
+    """One concat-demuxer line; escapes apostrophes in the path."""
+    return "file '" + str(path.resolve()).replace("'", "'\\''") + "'\n"
+
+
+def has_audio(path: str) -> bool:
+    try:
+        result = subprocess.run(
+            [_ffprobe(), "-v", "error", "-select_streams", "a",
+             "-show_entries", "stream=index", "-of", "csv=p=0", path],
+            capture_output=True, text=True, timeout=10,
+        )
+        return bool(result.stdout.strip())
+    except Exception:
+        return False
 
 # ── Helpers ─────────────────────────────────────────────────────────────────────
 
@@ -61,7 +102,7 @@ def get_clip_duration(path: str) -> float:
     """Get clip duration in seconds via ffprobe."""
     try:
         result = subprocess.run(
-            ["ffprobe", "-v", "quiet", "-show_entries", "format=duration",
+            [_ffprobe(), "-v", "quiet", "-show_entries", "format=duration",
              "-of", "csv=p=0", path],
             capture_output=True, text=True, timeout=10
         )
@@ -146,7 +187,8 @@ def filter_by_game(clips: list[dict], game: str) -> list[dict]:
 
 
 def make_title_card(title: str, subtitle: str, duration: float = 3.0,
-                    width: int = 1920, height: int = 1080) -> str:
+                    width: int = 1920, height: int = 1080,
+                    out_path: Optional[str] = None) -> str:
     """Create a title card PNG for the video."""
     from PIL import Image, ImageDraw, ImageFont
 
@@ -174,7 +216,7 @@ def make_title_card(title: str, subtitle: str, duration: float = 3.0,
     draw.text(((width - sw) // 2, (height // 2) + 20), subtitle, font=sub_font,
               fill=(180, 180, 180))
 
-    out_path = str(OUTPUT_DIR / "_title_card.png")
+    out_path = out_path or str(OUTPUT_DIR / "_title_card.png")
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     img.save(out_path)
     return out_path
@@ -207,32 +249,51 @@ def make_clip_intro(clip_name: str, index: int, total: int,
                           radius=10, fill=(0, 0, 0, 200))
     draw.text((x, y), text, font=font, fill=(255, 255, 255, 255))
 
-    out_path = str(PROJECT_DIR / "highlight_reels" / f"_intro_{index}.png")
+    out_path = str(OUTPUT_DIR / f"_intro_{index}.png")
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     img.save(out_path)
     return out_path
 
 
 def compile_highlight_reel(clips: list[dict], output_path: Path,
                            title: str, subtitle: str) -> bool:
-    """Stitch clips together into a highlight reel video."""
+    """Stitch clips together into a highlight reel video (never raises)."""
     if not clips:
-        print("  ✗ No clips to compile")
+        print(f"  ✗  {SOFT} no clips to compile")
+        return False
+    ff = _ffmpeg()
+    if not ff:
+        print(f"  ✗  {SOFT} no working ffmpeg (brew install ffmpeg-full, "
+              "or set BOLT_FFMPEG)")
         return False
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    work = Path(tempfile.mkdtemp(prefix="_highlights_", dir=output_path.parent))
+    try:
+        return _compile(ff, clips, output_path, title, subtitle, work)
+    except subprocess.TimeoutExpired as exc:
+        print(f"  ✗  {SOFT} ffmpeg timed out after {exc.timeout:.0f}s")
+        return False
+    except Exception as exc:
+        print(f"  ✗  {SOFT} {exc}")
+        return False
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
 
-    # Create title card
-    title_card = make_title_card(title, subtitle)
 
-    # Build the ffmpeg concat: title card → clips with transitions
-    # We'll use the concat demuxer with a file list
-    list_file = output_path.parent / "_concat_list.txt"
-
-    # First, create the title card as a 3-second video with silent audio
-    title_video = output_path.parent / "_title_video.mp4"
+def _compile(ff: str, clips: list[dict], output_path: Path,
+             title: str, subtitle: str, work: Path) -> bool:
+    # Title card → 3 s video with silent stereo audio (PIL text; plain card
+    # if Pillow is missing).
+    title_video = work / "title.mp4"
     print("  🎬  Creating title card…")
-    subprocess.run([
-        "ffmpeg", "-y", "-loop", "1", "-i", title_card,
+    try:
+        card = make_title_card(title, subtitle, out_path=str(work / "title.png"))
+        card_in = ["-loop", "1", "-i", card]
+    except Exception:
+        card_in = ["-f", "lavfi", "-i", "color=c=0x0a0a0f:s=1920x1080:r=30"]
+    result = subprocess.run([
+        ff, "-y", *card_in,
         "-f", "lavfi", "-t", "3", "-i", "anullsrc=channel_layout=stereo:sample_rate=48000",
         "-t", "3", "-c:v", "libx264", "-preset", "fast", "-crf", "20",
         "-pix_fmt", "yuv420p", "-r", "30",
@@ -240,67 +301,77 @@ def compile_highlight_reel(clips: list[dict], output_path: Path,
         "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2",
         "-shortest",
         str(title_video)
-    ], capture_output=True, text=True, timeout=30)
+    ], capture_output=True, text=True, timeout=60)
+    segments = [title_video] if result.returncode == 0 and title_video.exists() else []
+    if not segments:
+        print(f"  ⚠️  Title card failed (continuing without): {result.stderr[-300:]}")
 
-    # Scale each clip to 1920x1080 and write to temp files
-    scaled_clips = []
+    # Normalise every clip to 1920x1080 / 30 fps / yuv420p / AAC 48 kHz stereo
+    # so the concat never sees mismatched codecs, sizes or a missing audio track.
     for i, clip in enumerate(clips, 1):
         print(f"  🎬  Scaling clip {i}/{len(clips)}: {clip['name'][:50]}…")
-        scaled_path = output_path.parent / f"_scaled_{i:02d}.mp4"
-        if scaled_path.exists():
-            scaled_path.unlink()
-        # Scale to fit 1920x1080 with padding (letterbox)
-        result = subprocess.run([
-            "ffmpeg", "-y", "-i", clip["path"],
-            "-vf", "scale=1920:1080:force_original_aspect_ratio=decrease,"
-                   "pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black",
-            "-c:v", "libx264", "-preset", "fast", "-crf", "20",
-            "-r", "30", "-pix_fmt", "yuv420p",
-            "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2",
-            str(scaled_path)
-        ], capture_output=True, text=True, timeout=120)
+        scaled_path = work / f"scaled_{i:02d}.mp4"
+        audio_in: list[str] = []
+        audio_map = ["-map", "0:a:0"]
+        if not has_audio(clip["path"]):
+            audio_in = ["-f", "lavfi", "-i",
+                        "anullsrc=channel_layout=stereo:sample_rate=48000"]
+            audio_map = ["-map", "1:a:0", "-shortest"]
+        try:
+            result = subprocess.run([
+                ff, "-y", "-i", clip["path"], *audio_in,
+                "-map", "0:v:0", *audio_map,
+                "-vf", "scale=1920:1080:force_original_aspect_ratio=decrease,"
+                       "pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+                "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+                "-r", "30", "-pix_fmt", "yuv420p",
+                "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2",
+                str(scaled_path)
+            ], capture_output=True, text=True,
+                timeout=max(120, int((clip.get("duration") or 0) * 6)))
+        except subprocess.TimeoutExpired:
+            print(f"  ⚠️  Scaling timed out for clip {i}; skipping")
+            continue
 
-        if not scaled_path.exists() or scaled_path.stat().st_size < 1000:
+        if (result.returncode != 0 or not scaled_path.exists()
+                or scaled_path.stat().st_size < 1000):
             print(f"  ⚠️  Scaling failed for clip {i}: {result.stderr[-300:]}")
             continue
-        scaled_clips.append(scaled_path)
+        segments.append(scaled_path)
 
-    # Write concat list (use absolute paths)
+    if not any(seg != title_video for seg in segments):
+        print(f"  ✗  {SOFT} every clip failed to scale (see warnings above)")
+        return False
+
+    list_file = work / "concat_list.txt"
     with open(list_file, "w") as f:
-        f.write(f"file '{title_video.resolve()}'\n")
-        for sc in scaled_clips:
-            f.write(f"file '{sc.resolve()}'\n")
+        for seg in segments:
+            f.write(_concat_line(seg))
 
-    # Concat all videos
-    print(f"  🎬  Concatenating {len(scaled_clips) + 1} segments…")
+    # Never report a stale reel from an earlier run as success.
+    output_path.unlink(missing_ok=True)
+    print(f"  🎬  Concatenating {len(segments)} segments…")
     result = subprocess.run([
-        "ffmpeg", "-y", "-f", "concat", "-safe", "0",
+        ff, "-y", "-f", "concat", "-safe", "0",
         "-i", str(list_file),
         "-c:v", "libx264", "-preset", "fast", "-crf", "20",
         "-c:a", "aac", "-b:a", "128k",
+        "-movflags", "+faststart",
         str(output_path)
-    ], capture_output=True, text=True, timeout=600)
+    ], capture_output=True, text=True, timeout=1800)
 
-    # Cleanup temp files
-    title_video.unlink(missing_ok=True)
-    list_file.unlink(missing_ok=True)
-    for sc in scaled_clips:
-        sc.unlink(missing_ok=True)
-    Path(title_card).unlink(missing_ok=True)
-
-    if output_path.exists():
+    duration = get_clip_duration(str(output_path)) if output_path.exists() else 0.0
+    if result.returncode == 0 and duration > 0:
         size_mb = output_path.stat().st_size / (1024 * 1024)
-        duration = get_clip_duration(str(output_path))
         print(f"\n  ✅  Highlight reel created!")
         print(f"     📁 {output_path}")
         print(f"     ⏱️  {duration:.0f}s ({duration/60:.1f} min)")
         print(f"     💾 {size_mb:.1f} MB")
         return True
-    else:
-        print(f"  ✗  Failed to create highlight reel")
-        if result.stderr:
-            print(f"     {result.stderr[:500]}")
-        return False
+    print(f"  ✗  {SOFT} ffmpeg concat failed")
+    if result.stderr:
+        print(f"     {result.stderr.strip()[-500:]}")
+    return False
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
@@ -351,19 +422,26 @@ def main(argv=None):
 
     print("\n  ⚡️  Bolt — Twitch Highlight Reel Compiler\n")
 
+    if args.count < 1:
+        print(f"  ✗  {SOFT} --count must be 1 or more")
+        return 1
+
     clips = list_clips()
 
     if not clips:
         print(
-            f"  ✗  Highlight reel unavailable: no clips in {CLIPS_DIR} "
+            f"  ✗  {SOFT} no clips in {CLIPS_DIR} "
             f"(run bolt recordings or bolt auto_clip_twitch first)."
         )
-        sys.exit(1)
+        return 1
 
     # Filter by game if specified
     if args.game:
         clips = filter_by_game(clips, args.game)
         print(f"  Filtered to {len(clips)} clips matching '{args.game}'")
+        if not clips:
+            print(f"  ✗  {SOFT} no clips match --game {args.game!r}")
+            return 1
 
     if args.list:
         print(f"  Top {min(args.count, len(clips))} clips by score:\n")
@@ -372,7 +450,7 @@ def main(argv=None):
         for i, c in enumerate(clips[:args.count], 1):
             print(f"  {i:<4} {c['score']:>7.0f} {c['duration']:>7.0f}s  {c['name'][:45]}")
         print()
-        return
+        return 0
 
     # Select top N clips
     selected = clips[:args.count]
@@ -389,7 +467,7 @@ def main(argv=None):
 
     # Output path
     if args.output:
-        output_path = OUTPUT_DIR / args.output
+        output_path = OUTPUT_DIR / args.output  # absolute --output wins
     else:
         filename = f"{datetime.now().strftime('%Y-%m-%d')}_highlight_reel.mp4"
         output_path = OUTPUT_DIR / filename
@@ -406,6 +484,8 @@ def main(argv=None):
         print(f"     3. Select: {output_path}")
         print(f"     4. Title: {title} — {subtitle}")
         print(f"     5. Set visibility to Public\n")
+        return 0
+    return 1
 
 
 if __name__ == "__main__":

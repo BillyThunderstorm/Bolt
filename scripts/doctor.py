@@ -1188,7 +1188,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # Local highlight reel stitch (PARTIAL — soft-fail via bolt make-highlights)
+    # Local highlight reel stitch (READY — soft-fail via bolt make-highlights)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1197,7 +1197,7 @@ def collect_integrations(config: dict) -> list[Check]:
         _mh = _mh_status()
         mh_ready = bool(_mh.get("ready"))
         mh_detail = (
-            f"Highlights tooling ok; bolt make-highlights status"
+            f"Highlights ok ({_mh.get('mp4_count', 0)} clips); bolt make-highlights run → media/output/"
             if mh_ready
             else (
                 (_mh.get("hint") or _mh.get("error") or "Highlights unavailable: not ready")
@@ -1224,7 +1224,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # Vertical reprocess + multi-platform queue (PARTIAL — soft-fail via bolt reprocess)
+    # Vertical reprocess + multi-platform queue (READY — soft-fail via bolt reprocess)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1233,7 +1233,10 @@ def collect_integrations(config: dict) -> list[Check]:
         _rp = _rp_status()
         rp_ready = bool(_rp.get("ready"))
         rp_detail = (
-            f"Reprocess tooling ok; bolt reprocess status"
+            (
+                f"READY — {_rp.get('vertical_count', 0)} vertical(s) built, "
+                f"{_rp.get('pending_count', 0)} to build; bolt reprocess run"
+            )
             if rp_ready
             else (
                 (_rp.get("hint") or _rp.get("error") or "Reprocess unavailable: not ready")
@@ -1373,7 +1376,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # Memory index rebuild CLI (PARTIAL — soft-fail via bolt refresh-memory; not briefing retrieve)
+    # Memory index rebuild CLI (READY 18 Oct 2026 — bolt refresh-memory; not briefing retrieve)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1382,7 +1385,10 @@ def collect_integrations(config: dict) -> list[Check]:
         _rm = _rm_status()
         rm_ready = bool(_rm.get("ready"))
         rm_detail = (
-            f"Memory refresh ok; bolt refresh-memory status (Data/memory_index.json)"
+            (
+                f"Memory refresh READY; index {_rm.get('index_entry_count')} entries, "
+                + ("stale — bolt refresh-memory run" if _rm.get("index_stale") else "up to date")
+            )
             if rm_ready
             else (
                 (_rm.get("hint") or _rm.get("error") or "Memory refresh unavailable: not ready")
@@ -1409,16 +1415,18 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # Long-term memory store (PARTIAL — soft-fail via bolt memory; not refresh-memory / briefing retrieve)
+    # Long-term memory (READY — bolt memory; recall via LLM_Handler, remember local)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
         from modules.Bolt_Memory import status as _bm_status
 
         _bm = _bm_status()
-        bm_ready = bool(_bm.get("ready"))
+        bm_ready = bool(_bm.get("ready")) and bool(_bm.get("recall_ready"))
         bm_detail = (
-            "Bolt memory ok; bolt memory status (Data/MEMORY.md + memory dirs)"
+            "Bolt memory ok; recall via "
+            + (" → ".join(_bm.get("recall_usable_providers") or []) or "?")
+            + " (bolt memory recall \"q\")"
             if bm_ready
             else (
                 (_bm.get("hint") or _bm.get("error") or "Bolt memory unavailable: not ready")
@@ -1514,6 +1522,32 @@ def collect_integrations(config: dict) -> list[Check]:
                 "obs_game_tracker",
                 "disabled",
                 f"Game tracker unavailable: doctor import failed ({_ogt_exc})",
+            )
+        )
+
+    # Game freshness (READY — bolt game status/refresh; stale config game warning; drift check lives in bolt game status)
+    try:
+        if str(CORE_DIR) not in sys.path:
+            sys.path.insert(0, str(CORE_DIR))
+        from modules.Game_Refresh import freshness as _gr_fresh
+
+        _gf = _gr_fresh()
+        checks.append(
+            _check(
+                "integrations",
+                "game_freshness",
+                "fallback" if _gf.get("stale") else "live",
+                f"game={_gf.get('game')!r}: {_gf.get('reason')}"[:160],
+                fix=_gf.get("fix") or "",
+            )
+        )
+    except Exception as _gf_exc:
+        checks.append(
+            _check(
+                "integrations",
+                "game_freshness",
+                "disabled",
+                f"Game refresh unavailable: doctor import failed ({_gf_exc})",
             )
         )
 
@@ -1663,7 +1697,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # Phase 4 semantic memory search (PARTIAL — soft-fail via bolt memsearch; not web search / LLM memory)
+    # Memory search (READY — bolt memsearch; not web search / LLM memory)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1672,8 +1706,10 @@ def collect_integrations(config: dict) -> list[Check]:
         _ms = _ms_status()
         ms_ready = bool(_ms.get("ready"))
         ms_detail = (
-            "Memory search ok; bolt memsearch status "
-            f"(entries={_ms.get('index_entry_count', 0)})"
+            "Memory search ok; bolt memsearch \"words\" "
+            f"(entries={_ms.get('index_entry_count', 0)}"
+            + ("; index stale, next run rebuilds" if _ms.get("index_stale") else "")
+            + ")"
             if ms_ready
             else (
                 (_ms.get("hint") or _ms.get("error") or "Memory search unavailable: not ready")

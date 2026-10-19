@@ -254,12 +254,12 @@ Script subcommands (each maps to scripts/X.py):
   filter-backlog [status|list|run]  Clip backlog score filter (PARTIAL; soft-fail)
                           status [--json|--probe]; list; run [--dry-run]
                           aliases: filter_backlog, backlog-filter, filter-backlog-status
-  make-highlights [status|list|run]  Local highlight reel stitch (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--list][--count N]
+  make-highlights [status|list|run]  Local highlight reel stitch (READY; soft-fail)
+                          status [--json|--probe]; list; run [--list][--count N] → media/output/
                           aliases: make_highlights, make-highlights-status, stitch-highlights
                           (former SHELL make_highlights.py → engine make_twitch_highlights)
-  reprocess [status|list|run]  Vertical rebuild + multi-platform queue (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--dry-run]
+  reprocess [status|list|run]  Vertical rebuild + merged multi-platform queue (READY; soft-fail)
+                          status [--json|--probe]; list; run [NAME] [--dry-run] [--force] [--limit N]
                           aliases: reprocess_clips, reprocess-clips, reprocess-status,
                           vertical-reprocess, tiktok-reprocess
                           (former SHELL wrong PROJECT_ROOT; no TikTok auto-upload)
@@ -346,15 +346,15 @@ Script subcommands (each maps to scripts/X.py):
                           status [--json|--probe]; list; send "msg" [--sms-only|--email-only]
                           aliases: notify, send-notify, send-status, notify-status
                           (former thin SCRIPT_MAP; prefers Bolt_Alerts; distinct from bolt alerts/discord)
-  refresh-memory [status|list|run]  Memory index rebuild (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--dry-run]
+  refresh-memory [status|list|run]  Memory index rebuild (READY; atomic + verified)
+                          status [--json|--probe]; list; run [--dry-run|--if-stale]
                           aliases: refresh_memory, memory-refresh, refresh-index
                           (former thin SCRIPT_MAP; distinct from READY briefing retrieve)
-  memory [status|list|remember|recall|load]  Long-term memory store (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; remember "fact"; recall "q"; load
+  memory [status|list|remember|recall|load]  Long-term memory (READY)
+                          recall "q" [--provider xai|ollama|openai] — answers from Data/ memory
+                          + current game via Grok → Ollama → OpenAI; remember "fact"; load
                           aliases: bolt-memory, bolt_memory, memory-status, long-term-memory, ltm
-                          (former IDEA Phase 4 Bolt_Memory; distinct from READY briefing retrieve
-                          + PARTIAL bolt refresh-memory)
+                          (distinct from READY bolt memsearch word search + bolt refresh-memory)
   refresh_vector_db        Rebuild the Vector DB for Nexus
                           (alias: vector_db, reindex) — lives in Core/modules/
   vector_db                Short alias for refresh_vector_db
@@ -368,6 +368,21 @@ Script subcommands (each maps to scripts/X.py):
                           status [--json|--probe]; list; run [--once|--background]
                           aliases: obs_game, game-tracker, game_tracker, obs-game-tracker, obs_game_tracker, obs-game-status, obs_game_status
                           (former thin IDEA update_game_from_obs; distinct from READY bolt obs)
+  game [status|refresh|set|unpin|history]  Current game freshness (READY; follows Twitch)
+                          status [--json]; refresh [--dry-run|--no-twitch]; set "<Game>" [--pin]
+                          stale warning after game_stale_days (default 7); hooks: launch + obs-game stream start
+                          aliases: game-refresh, game_refresh, game-status, game_status
+  motion [status|<video>]   Visual motion/high-action scoring (READY; soft-fail)
+                          run <video> [--top N] [--json] [--out FILE]; OpenCV frame diff (ffmpeg fallback)
+                          aliases: motion-detect, motion_detect, motion-status
+  wrap [run|status|list]    Post-stream wrap: latest VOD → highlights (+motion) → clips/reel/captions (READY)
+                          run [--vod FILE] [--dry-run] [--top N] [--no-captions] [--no-motion] [--json]
+                          → media/output/wraps/YYYY-MM-DD_<vod>_wrap/ (purple Finder tag)
+                          aliases: stream-wrap, post-stream, wrap-status
+  release [status|<folder>] Package finished songs for DistroKid/TuneCore/CD Baby (READY; no upload)
+                          run <folder> [--artist NAME] [--title NAME] [--cover FILE] [--dry-run] [--json]
+                          → WAV 44.1k/16-bit + metadata.csv/json + CHECKLIST.md
+                          aliases: song-release, music-release, release-status
   icloud [status|list|run]  iCloud Drive multi-Mac sync (PARTIAL; soft-fail)
                           status [--json|--probe]; list; run [--dry-run|--apply] [--script move|shared|setup]
                           aliases: icloud-sync, iCloud, move-to-icloud, icloud-status
@@ -380,11 +395,11 @@ Script subcommands (each maps to scripts/X.py):
                           status [--json|--probe]; list; run [--dry-run|--probe|--json]
                           aliases: error_recovery, recovery, quarantine, error-tracker, error-recovery-status
                           (former IDEA Core/modules/Error_Recovery.py; distinct from PARTIAL bolt discord / alerts)
-  memsearch [status|list|run]  Phase 4 semantic search over memory (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run|search|query "…" [--limit N] [--refresh] [--dry-run]
+  memsearch [status|list|run]  Search Bolt's local memory (READY; auto-rebuilds stale index)
+                          status [--json|--probe]; list; run|search|query "…" [--limit N] [--refresh|--no-refresh] [--dry-run]
                           aliases: memory-search, mem-search, search-memory, memory_search, memsearch-status
                           (former IDEA Phase 4 memory-search; distinct from READY bolt search web
-                          + PARTIAL bolt memory / bolt refresh-memory)
+                          + READY bolt memory / bolt refresh-memory)
   layout [status|list|run]  Repo-root layout audit (PARTIAL; soft-fail)
                           status [--json|--probe]; list; run [--quiet|--json]
                           aliases: check-layout, check_layout, layout-status
@@ -1838,7 +1853,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: local highlight reel stitch (Make_Highlights; soft-fail; PARTIAL)
+    # Built-in: local highlight reel stitch (Make_Highlights; soft-fail; READY)
     # Former SHELL scripts/make_highlights.py (IndentationError Helix paste).
     if subcommand in (
         "make-highlights",
@@ -1863,7 +1878,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: vertical reprocess + multi-platform queue (Reprocess_Clips; soft-fail; PARTIAL)
+    # Built-in: vertical reprocess + multi-platform queue (Reprocess_Clips; soft-fail; READY)
     # Former SHELL scripts/reprocess_clips.py (wrong PROJECT_ROOT under scripts/).
     if subcommand in (
         "reprocess",
@@ -1925,7 +1940,8 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: long-term memory store (Bolt_Memory; soft-fail; PARTIAL)
+    # Built-in: long-term memory store (Bolt_Memory; soft-fail; READY 18 Oct 2026 —
+    # recall via LLM_Handler Grok → Ollama → OpenAI, safe dated remember)
     # Former IDEA / Phase 4 Core/modules/Bolt_Memory.py (engines recall/remember/
     # load_all_memory existed; no soft-fail status/list/recall/remember CLI).
     # Distinct from READY Memory_Index.retrieve_memory (briefing) and PARTIAL
@@ -1954,7 +1970,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: memory index rebuild (Refresh_Memory; soft-fail; PARTIAL)
+    # Built-in: memory index rebuild (Refresh_Memory; soft-fail; READY 18 Oct 2026)
     # Former thin SCRIPT_MAP refresh_memory → scripts/refresh_memory_index.py
     # (no soft-fail status/list/run). Distinct from READY briefing retrieve
     # via Memory_Index.retrieve_memory (in-process).
@@ -2037,6 +2053,48 @@ print('System is fully upgraded.')
         if not rest:
             rest = ["status"]
         cmd = [py, "-m", "modules.OBS_Game_Tracker"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: game freshness / motion / wrap / release (soft-fail; motion + game + wrap + release READY 18 Oct 2026)
+    # 18 Oct 2026: Game_Refresh (stale config game fix), Motion_Detector (former
+    # deferred IDEA), Bolt_Wrap (post-stream pipeline), Song_Release (distributor
+    # package). Bare `bolt wrap` runs the pipeline; the others default to status.
+    _NEW_FEATURES = {
+        "game": ("modules.Game_Refresh", "status", ()),
+        "game-refresh": ("modules.Game_Refresh", "refresh", ()),
+        "game_refresh": ("modules.Game_Refresh", "refresh", ()),
+        "game-status": ("modules.Game_Refresh", "status", ()),
+        "game_status": ("modules.Game_Refresh", "status", ()),
+        "motion": ("modules.Motion_Detector", "status", ("status", "list", "run")),
+        "motion-detect": ("modules.Motion_Detector", "status", ("status", "list", "run")),
+        "motion_detect": ("modules.Motion_Detector", "status", ("status", "list", "run")),
+        "motion-status": ("modules.Motion_Detector", "status", ("status", "list", "run")),
+        "wrap": ("modules.Bolt_Wrap", "run", ("status", "list", "run")),
+        "stream-wrap": ("modules.Bolt_Wrap", "run", ("status", "list", "run")),
+        "post-stream": ("modules.Bolt_Wrap", "run", ("status", "list", "run")),
+        "wrap-status": ("modules.Bolt_Wrap", "status", ("status", "list", "run")),
+        "release": ("modules.Song_Release", "status", ("status", "list", "run")),
+        "song-release": ("modules.Song_Release", "status", ("status", "list", "run")),
+        "music-release": ("modules.Song_Release", "status", ("status", "list", "run")),
+        "release-status": ("modules.Song_Release", "status", ("status", "list", "run")),
+    }
+    if subcommand in _NEW_FEATURES:
+        _mod, _default, _actions = _NEW_FEATURES[subcommand]
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        if subcommand.endswith("-status") or subcommand.endswith("_status"):
+            rest = ["status"] + [r for r in rest if r != "status"]
+        elif not rest:
+            rest = [_default]
+        elif _actions and rest[0] not in _actions and rest[0] not in ("-h", "--help"):
+            # `bolt motion clip.mp4`, `bolt release ~/Songs`, `bolt wrap --dry-run`
+            rest = ["run"] + rest
+        elif not _actions and rest[0].startswith("-") and rest[0] not in ("-h", "--help"):
+            rest = [_default] + rest
+        cmd = [py, "-m", _mod] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
@@ -2129,11 +2187,11 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: Phase 4 semantic memory search (Memory_Search; soft-fail; PARTIAL)
+    # Built-in: memory search (Memory_Search; READY 18 Oct 2026; soft-fail on errors)
     # Former IDEA Docs/AI_Guide.md "Bolt_Search.py ← Phase 4 - semantic search over
     # memory (WIP)" — filename was reused for READY web search `bolt search`; the
     # memory-search IDEA itself had no soft-fail CLI. Wraps Memory_Index.retrieve_memory.
-    # Distinct from READY bolt search (web), PARTIAL bolt memory (LLM), PARTIAL
+    # Distinct from READY bolt search (web), READY bolt memory (LLM), PARTIAL
     # bolt refresh-memory (rebuild).
     if subcommand in (
         "memsearch",

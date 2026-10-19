@@ -169,6 +169,22 @@ def main():
     else:
         _run_voice_checklist(config)
 
+    # ── Step 4b: Refresh current game (stream start) ─────────────────────────
+    # config.json `game` once sat stale for a month. Re-resolve it every live
+    # launch (Twitch → pinned Live Scene → keep) and warn if unconfirmed.
+    if not batch_process:
+        try:
+            from modules.Game_Refresh import refresh as _game_refresh
+
+            _gr = _game_refresh(source="stream_start")
+            notify(
+                f"Game: {_gr.get('game')!r} (via {_gr.get('resolved_via')})",
+                level="warning" if _gr.get("warning") else "info",
+                reason=_gr.get("warning") or "Confirmed at stream start (bolt game status).",
+            )
+        except Exception as _gr_exc:
+            notify(f"Game refresh skipped: {_gr_exc}", level="warning")
+
     # ── Step 5: Launch OBS if needed ─────────────────────────────────────────
     obs_connected = False
     if batch_process:

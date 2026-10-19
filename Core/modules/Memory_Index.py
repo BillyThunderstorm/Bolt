@@ -18,6 +18,7 @@ Why start here:
 from __future__ import annotations
 
 import json
+import os
 import math
 import re
 from collections import Counter
@@ -546,7 +547,19 @@ def refresh_memory_index(
         "entries": entry_payloads,
     }
     out_file.parent.mkdir(parents=True, exist_ok=True)
-    out_file.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    # Atomic write: build next to the target, then swap in. An interrupted
+    # rebuild used to leave a truncated index that briefings/memsearch read
+    # as empty.
+    tmp_file = out_file.with_name(f".{out_file.name}.{os.getpid()}.tmp")
+    try:
+        tmp_file.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        os.replace(tmp_file, out_file)
+    finally:
+        if tmp_file.exists():
+            try:
+                tmp_file.unlink()
+            except OSError:
+                pass
     return payload
 
 

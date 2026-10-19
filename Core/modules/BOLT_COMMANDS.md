@@ -146,7 +146,7 @@ bolt mac-auto                         # launchd/cron/Shortcuts status (PARTIAL; 
 bolt icloud                           # iCloud Drive multi-Mac sync status (PARTIAL; William-specific)
 bolt game-config                      # Per-game sensitivity profiles (PARTIAL; soft-fail)
 bolt error-recovery                  # Pipeline retry/quarantine (PARTIAL; soft-fail)
-bolt memsearch                       # Phase 4 semantic memory search (PARTIAL; soft-fail)
+bolt memsearch "words"               # search Bolt's local memory (READY; auto-rebuilds stale index)
 bolt alerts                            # Mac/Voice/email/iMessage alerts (PARTIAL; not Discord)
 bolt checklist                          # Pre-stream voice checklist (PARTIAL; mic/STT gated)
 bolt reminders                          # Apple Reminders.app delivery (PARTIAL; Darwin/TCC gated)
@@ -199,6 +199,13 @@ bolt obs-game [status|list|run] [--json] [--probe]
                                       # Distinct from READY bolt obs (WebSocket status/monitor)
                                       # Aliases: obs_game, game-tracker, game_tracker,
                                       #   obs-game-tracker, obs_game_tracker, obs-game-status
+bolt game [status|refresh|set|unpin|history] [--json]
+                                      # Current game freshness (READY; Game_Refresh)
+                                      # Stale warning after game_stale_days (default 7)
+                                      # Aliases: game-refresh, game-status
+bolt motion <video> [--top N] [--fast] [--json]   # Visual high-action windows (READY)
+bolt wrap [--vod FILE] [--dry-run]    # Post-stream wrap: VOD → clips/reel/captions (READY)
+bolt release <folder> --artist NAME   # Package songs for DistroKid/TuneCore/CD Baby (READY; no upload)
 bolt streamlabs [status] [--json] [--probe]
                                       # Streamlabs Socket API readiness (donations/raids/subs)
                                       # Soft-fail without STREAMLABS_SOCKET_TOKEN / python-socketio
@@ -825,10 +832,10 @@ bolt thumbnails [directory ...] [--strategy smart|first|middle] [--width 1280] [
 bolt clip-dedupe                            # status (PARTIAL soft-fail; SHA256)
 bolt clip-dedupe run [--dry-run] [--scan DIR] [--check FILE]
 bolt filter-backlog                         # status (PARTIAL soft-fail)
-bolt make-highlights                       # status (PARTIAL soft-fail; former SHELL)
-bolt make-highlights run [--list][--count N]
-bolt reprocess                             # status (PARTIAL soft-fail; former SHELL)
-bolt reprocess run [--dry-run]
+bolt make-highlights                       # status (READY; soft-fail; former SHELL)
+bolt make-highlights run [--list][--count N]   # → media/output/YYYY-MM-DD_highlight_reel.mp4
+bolt reprocess                             # status (READY; soft-fail)
+bolt reprocess run [NAME] [--dry-run] [--force]   # → media/vertical_clips + merged queue
 bolt health                                # status (PARTIAL soft-fail; former SHELL)
 bolt health run [--dry-run]
 bolt watch                              # status (PARTIAL soft-fail)
@@ -885,8 +892,8 @@ floor, min gap, candidate cap). Tune in `Core/config.json` under `highlight` and
 | `bolt thumbnails [dir…]` | Generate JPG thumbnails for clips in the given directories |
 | `bolt clip-dedupe` | SHA256 media hash scan (**PARTIAL**; soft-fail `Hash dedupe unavailable:`) — `status` / `list` / `run [--dry-run]`; writes `Data/media_hash_db.json`; aliases `clip_dedupe`, `hash-dedupe`, `dedupe-status`, `sha-dedupe`; **distinct from** READY pipeline `Clip_Deduplicator` (`Data/seen_clips.json`) |
 | `bolt filter-backlog` | Clip backlog score filter (**PARTIAL**; soft-fail `Backlog unavailable:`) — `status` / `list` / `run [--dry-run]`; aliases `filter_backlog`, `backlog-filter` |
-| `bolt make-highlights` | Local highlight reel stitch (**PARTIAL**; soft-fail `Highlights unavailable:`) — `status` / `list` / `run [--list][--count N]`; aliases `make_highlights`, `stitch-highlights`; engine `make_twitch_highlights.py` (READY thin compile stays `bolt highlights`) |
-| `bolt reprocess` | Vertical rebuild + multi-platform queue (**PARTIAL**; soft-fail `Reprocess unavailable:`) — `status` / `list` / `run [--dry-run]`; aliases `reprocess_clips`, `reprocess-clips`, `reprocess-status`, `vertical-reprocess`, `tiktok-reprocess`; engine `reprocess_clips.py` (no TikTok auto-upload; distinct from READY `bolt recordings` / `enhance` / `multi`) |
+| `bolt make-highlights` | Local highlight reel stitch (**READY**; soft-fail `Highlights unavailable:`) — `status` / `list` / `run [--list][--count N]`; aliases `make_highlights`, `stitch-highlights`; engine `make_twitch_highlights.py` (READY thin compile stays `bolt highlights`) |
+| `bolt reprocess` | Vertical rebuild + multi-platform queue (**READY**; soft-fail `Reprocess unavailable:`) — `status` / `list` / `run [NAME] [--dry-run] [--force] [--limit N]`; aliases `reprocess_clips`, `reprocess-clips`, `reprocess-status`, `vertical-reprocess`, `tiktok-reprocess`; engine `reprocess_clips.py` (no TikTok auto-upload; distinct from READY `bolt recordings` / `enhance` / `multi`) |
 | `bolt health` | Lightweight post-reorg health smoke (**PARTIAL**; soft-fail `Health check unavailable:`) — `status` / `list` / `run [--dry-run]`; aliases `health-check`, `health_check`, `health-status`, `system-health`; engine `health_check.py` (prefer READY `bolt doctor` / `bolt verify`) |
 | `bolt watch` / `status` | Folder watch readiness (PARTIAL; soft-fail `Watch unavailable:`) |
 | `bolt watch list` | Checklist + pending recordings (`Data/processed_recordings.json`) |
@@ -1029,53 +1036,57 @@ Aliases: `ics`, `ics-calendar`, `ics_calendar`, `generate-calendar`, `generate_c
 
 Former thin SCRIPT_MAP: `bolt calendar` → `scripts/generate_calendar.py`.
 
-## Refresh memory (`bolt refresh-memory`) — PARTIAL
+## Refresh memory (`bolt refresh-memory`) — READY
 
-Rebuild `Data/memory_index.json` via soft-fail CLI. Prefix: `Memory refresh unavailable:`.
+**READY (18 Oct 2026).** Rebuild `Data/memory_index.json` (local, no keys). Writes atomically (temp + swap), re-reads the file to verify the entry count, and prints before/after counts + time. `status` shows whether the index is stale vs the newest memory source (same check as `bolt memsearch`). Soft-fail prefix: `Memory refresh unavailable:`.
 
 | Command | Purpose |
 |---------|---------|
-| `bolt refresh-memory status` | Readiness (`--json` / `--probe`) |
-| `bolt refresh-memory list` | Engine + sources + index meta |
+| `bolt refresh-memory status` | Readiness + freshness (`--json` / `--probe`) |
+| `bolt refresh-memory list` | Engine + sources + index meta + fresh/stale |
 | `bolt refresh-memory run` | Rebuild index |
 | `bolt refresh-memory run --dry-run` | Count entries without write |
+| `bolt refresh-memory run --if-stale` | Rebuild only when stale (else reports up to date) |
 
 Aliases: `refresh_memory`, `memory-refresh`, `memory_refresh`, `refresh-index`, `refresh_index`, `refresh-memory-status`.
 
-**Distinct from** READY in-process `Memory_Index.retrieve_memory` used by briefings and **PARTIAL `bolt memsearch`** (semantic retrieve CLI). Stay PARTIAL (data-source gated).
+**Distinct from** READY in-process `Memory_Index.retrieve_memory` used by briefings and **READY `bolt memsearch`** (search CLI; rebuilds the index itself when stale). No sources → valid empty index + note.
 
 Former thin SCRIPT_MAP: `bolt refresh_memory` → `scripts/refresh_memory_index.py`.
 
-## Long-term memory (`bolt memory`) — PARTIAL
+## Long-term memory (`bolt memory`) — READY
 
-Soft-fail CLI around `Core/modules/Bolt_Memory.py` (Phase 4 long-term memory store).
-Prefix: `Bolt memory unavailable:`. **PARTIAL** — LLM-gated `recall`; Phase 4 incomplete.
+`Core/modules/Bolt_Memory.py` — Bolt's long-term memory. **READY (18 Oct 2026 ~11:40 PM CT).**
+Prefix: `Bolt memory unavailable:`.
 **Distinct from** READY in-process `Memory_Index.retrieve_memory` (briefings),
-**PARTIAL `bolt refresh-memory`** (index rebuild → `Data/memory_index.json`), and
-**PARTIAL `bolt memsearch`** (semantic retrieve CLI over the same index).
+**READY `bolt refresh-memory`** (index rebuild → `Data/memory_index.json`), and
+**READY `bolt memsearch`** (word search over the same index, no LLM).
 
 ```bash
 bolt memory                         # status (default; safe)
 bolt memory status [--json] [--probe]
 bolt memory list [--json]
+bolt memory recall "what game am I streaming?"          # answer from memory
+bolt memory recall --provider ollama "question"         # pin xai|grok|ollama|openai
+bolt memory recall --no-search --json "question"
+bolt memory "question"                                  # bare text → recall
 bolt memory remember "fact" [--section "Recent Notes"]
-bolt memory remember --fact "..." 
-bolt memory recall "question"
+bolt memory remember --fact "..."
 bolt memory load [--json]
 bolt memory-status                  # alias → status
 ```
 
 | Command | Purpose |
 |---------|---------|
-| `bolt memory` / `status` | Readiness: Data/MEMORY.md + people/projects/context/glossary/memory; openai pkg; OPENAI_API_KEY (redacted); Memory_Index import |
-| `bolt memory list` | Rows for each memory path + soft-fail note |
-| `bolt memory remember` | Append fact to MEMORY.md (local write; soft-fail on IO error) |
-| `bolt memory recall` | LLM recall via OpenAI (soft-fail if openai/key/API missing) |
-| `bolt memory load` | Dump `load_all_memory` summary (local; no LLM) |
+| `bolt memory` / `status` | Memory paths + recall readiness: budget mode, provider order (e.g. xai → ollama → openai), XAI_API_KEY / Ollama / OPENAI_API_KEY (redacted) |
+| `bolt memory list` | Rows for each memory path + each provider |
+| `bolt memory recall` | Answers from Data/ memory + live state (today, current game from `Core/config.json`) + matched `bolt memsearch` hits, via `LLM_Handler` (follows `BOLT_LLM_MODE`; falls through providers). Grok/OpenAI get the full tree (`BOLT_MEMORY_CLOUD_CHARS`, default 60000); Ollama gets a trimmed prompt (`BOLT_MEMORY_LOCAL_CHARS`, default 9000). Prints which provider/model answered. No provider → soft-fail with what to set |
+| `bolt memory remember` | Dated fact at the top of the exact `## section` (created if missing); same-day duplicates skipped; verified temp write copied into place (Finder tags kept); refreshes the memory index |
+| `bolt memory load` | Dump `load_all_memory` (local; no LLM) |
 
 Aliases: `bolt-memory`, `bolt_memory`, `memory-status`, `memory_status`, `long-term-memory`, `ltm`.
 
-Stay PARTIAL (Phase 4 incomplete). Engines already used by Intent_Router / Week_Card / Brain_Controller / Peak_Hour.
+Engines also used in-process by Intent_Router / Week_Card / Brain_Controller / Peak_Hour (`remember`). `LLM_Handler.ask_llm(..., provider=X, fallback=False)` tries only X (default `fallback=True` unchanged).
 
 ## Folder watch (`bolt watch`) — PARTIAL
 
@@ -1334,9 +1345,9 @@ bolt gcal status                 # Calendar credentials/token readiness (no brow
 bolt gmail status                # Gmail credentials/token readiness (no browser)
 bolt calendar status                 # PARTIAL soft-fail ICS feeds
 bolt calendar run [--dry-run] [--days 30] [--output-dir DIR]
-bolt refresh-memory status       # PARTIAL soft-fail memory index rebuild
-bolt memory status              # PARTIAL soft-fail long-term memory store
-bolt memsearch status           # PARTIAL soft-fail Phase 4 semantic memory search
+bolt refresh-memory status       # READY memory index rebuild (run / --if-stale)
+bolt memory status              # READY long-term memory (recall via Grok → Ollama → OpenAI)
+bolt memsearch status           # READY memory search (index freshness + API)
 bolt refresh_vector_db           # Rebuild Data/vector_db/ for Nexus (needs Ollama)
 bolt vector_db                   # Alias for refresh_vector_db
 bolt reindex                     # Alias for refresh_vector_db
@@ -1378,9 +1389,9 @@ bolt reindex
 Reply path for briefings: see **How to reply to Bolt** above. Write-intent lines
 under `## Comments` are applied on the next `bolt briefing`; leftover is a note.
 | `bolt calendar` | PARTIAL soft-fail ICS feeds under `Data/calendar/` (see section) |
-| `bolt refresh-memory` | PARTIAL soft-fail rebuild of `Data/memory_index.json` (see section) |
-| `bolt memory` | PARTIAL soft-fail long-term memory store (see section) |
-| `bolt memsearch` | PARTIAL soft-fail Phase 4 semantic search over memory (see section) |
+| `bolt refresh-memory` | READY rebuild of `Data/memory_index.json` (atomic, verified, `--if-stale`; see section) |
+| `bolt memory` | READY long-term memory: `recall "q"` + `remember "fact"` (see section) |
+| `bolt memsearch` | READY local memory search; auto-rebuilds stale index (see section) |
 | `bolt refresh_vector_db` | Rebuild the vector DB used by Nexus for retrieval (`Data/vector_db/`); soft-fails if Ollama down |
 | `bolt vector_db` | Alias: same as `refresh_vector_db` |
 | `bolt reindex` | Alias: same as `refresh_vector_db` |
@@ -1576,7 +1587,7 @@ Aliases: `filter_backlog`, `backlog-filter`, `filter-backlog-status`, `filter-cl
 
 ## Make highlights (`bolt make-highlights`)
 
-Local stitch of top `media/clips` into one reel. Soft-fail prefix: `Highlights unavailable:`. **PARTIAL** — ffmpeg/media gated. Former SHELL `scripts/make_highlights.py` (IndentationError Twitch Helix paste) now forwards to `scripts/make_twitch_highlights.py`. Distinct from READY `bolt vods` (Helix). READY thin compile alias remains `bolt highlights`.
+Local stitch of top `media/clips` into one reel at `media/output/YYYY-MM-DD_highlight_reel.mp4` (`--output NAME` lands in `media/output/`; an absolute path is used as-is). Soft-fail prefix: `Highlights unavailable:`. **READY** (18 Oct 2026) — every clip is normalised to 1920x1080 / 30 fps / AAC stereo (silent track added if missing) so mixed sources concat cleanly; uses the working ffmpeg from FFmpeg_Bin; zero clips / no ffmpeg soft-fail with what to do. Never moves or deletes source clips. Former SHELL `scripts/make_highlights.py` (IndentationError Twitch Helix paste) now forwards to `scripts/make_twitch_highlights.py`. Distinct from READY `bolt vods` (Helix). READY thin compile alias remains `bolt highlights`.
 
 ```bash
 bolt make-highlights                         # status (default; safe)
@@ -1590,28 +1601,28 @@ bolt make-highlights run [--list] [--count N] [--game NAME] [--output PATH] [--d
 | `bolt make-highlights` / `status` | Readiness (`ready` = engine + ffmpeg + clips dir) |
 | `bolt make-highlights status --json` | Machine-readable readiness dict |
 | `bolt make-highlights list` | Checklist + engine `--list` preview |
-| `bolt make-highlights run` | Soft-fail stitch (or `--list` / `--dry-run` preview) |
+| `bolt make-highlights run` | Stitch top N clips → dated reel in `media/output/` (or `--list` / `--dry-run` preview) |
 
 Aliases: `make_highlights`, `make-highlights-status`, `stitch-highlights`, `highlight-stitch`. Engine: `scripts/make_twitch_highlights.py`.
 
 
 ## Reprocess clips (`bolt reprocess`)
 
-Rebuild 9:16 verticals from existing `media/clips` and rewrite `Data/multi_platform_queue.json` for manual upload. Soft-fail prefix: `Reprocess unavailable:`. **PARTIAL** — ffmpeg/media gated. Former SHELL `scripts/reprocess_clips.py` (wrong PROJECT_ROOT under `scripts/`, legacy `clips/` / `vertical_clips/` / `data/` paths). Does **not** auto-upload to TikTok. Distinct from READY `bolt recordings` / `bolt enhance` / `bolt multi` and Clip_Factory `process_recording` vertical path.
+Rebuild 9:16 verticals from existing `media/clips` into `media/vertical_clips/<stem>_tiktok.mp4` (config `tiktok_style`; output verified portrait; Finder purple) and **merge** manual-upload plans (Multi_Publisher: TikTok / Shorts / Reels / Kick) into `Data/multi_platform_queue.json` — other items kept, no duplicates, reruns don't reschedule, `.bak` first. Soft-fail prefix: `Reprocess unavailable:`. **READY** (18 Oct 2026) — needs a working ffmpeg. Former SHELL `scripts/reprocess_clips.py` (wrong PROJECT_ROOT under `scripts/`, legacy `clips/` / `vertical_clips/` / `data/` paths). Does **not** auto-upload to TikTok. Distinct from READY `bolt recordings` / `bolt enhance` / `bolt multi` and Clip_Factory `process_recording` vertical path.
 
 ```bash
 bolt reprocess                               # status (default; safe)
 bolt reprocess status [--json] [--probe]
 bolt reprocess list [--json]
-bolt reprocess run [--dry-run] [--json]
+bolt reprocess run [NAME ...] [--dry-run] [--force] [--limit N] [--json]
 ```
 
 | Command | What it does |
 |---|---|
-| `bolt reprocess` / `status` | Readiness (`ready` = engine + ffmpeg + clips dir + Clip_Factory) |
+| `bolt reprocess` / `status` | Readiness (`ready` = engine + ffmpeg + clips dir + Clip_Factory) + built / to-build counts |
 | `bolt reprocess status --json` | Machine-readable readiness dict |
 | `bolt reprocess list` | Checklist of gates |
-| `bolt reprocess run` | Soft-fail invoke engine (or `--dry-run` listing) |
+| `bolt reprocess run` | Build missing verticals + merge queue plans (`--dry-run` plan only; `NAME` filters by substring; `--force` rebuilds; `--limit N`) |
 
 Aliases: `reprocess_clips`, `reprocess-clips`, `reprocess-status`, `vertical-reprocess`, `tiktok-reprocess`. Engine: `scripts/reprocess_clips.py`.
 
@@ -1853,14 +1864,18 @@ Public API (in-process): `with_retry`, `ErrorTracker`, `get_tracker`, `record_er
 Former IDEA: Docs/AI_Guide.md "Failure handling helpers" + CWD-relative `quarantine/` (fixed to `Data/quarantine/`).
 
 
-## Memory search (`bolt memsearch`) — PARTIAL
+## Memory search (`bolt memsearch`) — READY
 
 Soft-fail CLI around `Core/modules/Memory_Search.py` wrapping
 `Memory_Index.retrieve_memory` / `format_retrieved_context` (hybrid vector+keyword
 over `Data/memory_index.json`). Soft-fail prefix: `Memory search unavailable:`.
-**PARTIAL** — index/data gated; not stranger-ready as a full Phase 4 product.
+**READY (18 Oct 2026).** Local only (no keys/models). `run` auto-rebuilds the
+index when it is missing or older than any memory source (~0.2 s), keeps only
+hits that contain a real query word (the hashed vector alone matched filenames by
+collision), and ranks by matched-word count then hybrid score. Each hit shows
+when + matched words; no match prints `(no relevant memory found)` + a hint.
 **Distinct from** READY `bolt search` (`Bolt_Search` — live web / DuckDuckGo),
-PARTIAL `bolt memory` (LLM recall/remember), and PARTIAL `bolt refresh-memory`
+READY `bolt memory` (LLM recall/remember), and READY `bolt refresh-memory`
 (index rebuild only).
 
 Owns the Phase 4 memory-search IDEA formerly mis-labeled on `Bolt_Search.py` in
@@ -1870,7 +1885,8 @@ Docs/AI_Guide.md (filename was reused for READY web search).
 bolt memsearch                              # status (default; safe)
 bolt memsearch status [--json] [--probe]
 bolt memsearch list [--json]
-bolt memsearch run "pop culture" [--limit 5] [--refresh] [--dry-run] [--json]
+bolt memsearch "Wolverine"                  # bare words → run
+bolt memsearch run "pop culture" [--limit 5] [--refresh|--no-refresh] [--dry-run] [--json]
 bolt memsearch search "…"                   # alias of run
 bolt memsearch query "…"                    # alias of run
 bolt memsearch-status                       # alias → status
@@ -1879,13 +1895,13 @@ bolt memory-search status                   # alias
 
 | Command | What it does |
 |---|---|
-| `bolt memsearch` / `status` | Readiness: Memory_Index import + index file/entry count + retrieve/format API |
-| `bolt memsearch list` | Checklist rows (module, import, index, entries, retrieve API) |
-| `bolt memsearch run` | Hybrid retrieve + formatted context; `--refresh` rebuilds first; `--dry-run` counts without full text |
+| `bolt memsearch` / `status` | Readiness: Memory_Index import + index file/entry count + freshness (stale vs newest source) + retrieve/format API |
+| `bolt memsearch list` | Checklist rows (module, import, index, entries, freshness, retrieve API) |
+| `bolt memsearch run` | Auto-rebuild if stale → word-matched hits ranked → formatted context (when + matched); `--refresh` forces rebuild, `--no-refresh` skips; `--dry-run` one line per hit |
 
 Aliases: `memory-search`, `memory_search`, `mem-search`, `mem_search`, `search-memory`, `search_memory`, `memsearch-status`, `memsearch_status`.
 
-Stay PARTIAL — not READY / not stranger-ready Phase 4 product.
+Targeted tests: `Data/tests/test_memory_search.py` (temp files only).
 
 Former IDEA: Docs/AI_Guide.md `Bolt_Search.py ← Phase 4 - semantic search over memory (WIP)`.
 
@@ -1912,6 +1928,99 @@ Preferred engine: `scripts/move_to_icloud.sh`. Legacy: `migrate_to_shared.sh`, `
 
 Stay PARTIAL — Darwin / iCloud Drive gated; does not claim stranger-ready or auto-sync magic.
 
+
+## Game freshness (`bolt game`) — READY (18 Oct 2026)
+
+Works end to end on Goddess (promoted PARTIAL → READY 18 Oct 2026). Follows the Twitch category (Live Scene → `__twitch__`): set the game on Twitch before streaming. Soft-fail CLI around `Core/modules/Game_Refresh.py`. Soft-fail prefix: `Game refresh unavailable:`.
+Why: `Core/config.json` `game` sat on "007 First Light" for a month — it only changed on an OBS
+scene switch or a Twitch fetch, and nothing recorded *when* it was last right.
+`Data/configs/game_state.json` now stores `confirmed_at` / `checked_at` / history.
+
+```bash
+bolt game                           # status (default): game, last confirmed, STALE warning,
+                                    #   + Twitch category check → DRIFT warning when unpinned (--no-twitch skips)
+bolt game refresh [--dry-run]       # pinned Live Scene → else Twitch (__twitch__) → else keep + warn
+bolt game set "Wolverine" [--pin]   # manual confirm (+ pin OBS Live Scene mapping)
+bolt game unpin                     # Live Scene → __twitch__ (refresh follows Twitch)
+bolt game history
+```
+
+| Trigger | What happens |
+|---|---|
+| `bolt launch` (live) | Refresh before OBS starts (`source=stream_start`) |
+| `bolt obs-game run` | Refresh at tracker start + on OBS `StreamStateChanged` (stream start) |
+| OBS scene change | Writes + stamps (pinned Live Scene is *checked*, not *confirmed*) |
+| `bolt doctor` / `bolt obs-game status` | `game_freshness` row: FALL when older than `game_stale_days` (default 7; env `BOLT_GAME_STALE_DAYS`) |
+
+`bolt game status` never writes; if config ≠ Twitch category it prints DRIFT + `bolt game refresh`.
+If Twitch's channel category disagrees with a pinned Live Scene, refresh keeps the pin and prints
+the exact `bolt game set "<Game>" --pin` / `bolt game unpin` fix.
+
+## Motion detection (`bolt motion`) — READY (18 Oct 2026)
+
+Works end to end on Goddess (promoted PARTIAL → READY 18 Oct 2026). Wraps `Core/modules/Motion_Detector.py` (former deferred IDEA).
+Needs only ffmpeg (or opencv) + numpy from `uv sync`; missing/corrupt files soft-fail on one line with prefix `Motion unavailable:`.
+Frame differencing on 160×90 grayscale samples (ffmpeg pipe via FFmpeg_Bin; OpenCV fallback),
+cut damping, 4 s windows, robust z-score → top-N high-action windows.
+
+```bash
+bolt motion                                   # status (decoder: ffmpeg/opencv, numpy)
+bolt motion media/Recordings/FILE.mp4         # top 10 windows + report JSON
+bolt motion FILE --top 5 --window 3 --json    # machine output
+bolt motion FILE --fast                       # keyframes only (long VODs; ~8 s for 33 min)
+bolt motion FILE --start 600 --duration 120   # just a slice
+bolt motion list                              # media/output/motion/*_motion.json
+bolt motion FILE --backend opencv             # force the OpenCV decoder
+```
+
+Heuristic: fades/menus can score high. Used by `bolt wrap` to re-rank audio highlights.
+
+## Post-stream wrap (`bolt wrap`) — READY
+
+One command after a stream (`Core/modules/Bolt_Wrap.py`, prefix `Wrap unavailable:`):
+latest VOD → Highlight_Detector (audio) + Motion_Detector → Clip_Generator clips → Whisper captions
+burned with Clip_Factory drawtext → concat reel → dated folder with Finder tags.
+
+```bash
+bolt wrap                         # run on the newest VOD (recordings_folder, wrap_vod_dirs, vod_samples)
+bolt wrap --dry-run               # show VOD + plan, write nothing
+bolt wrap --vod FILE --top 8      # explicit VOD, more clips
+bolt wrap --no-motion --no-captions --no-reel
+bolt wrap status | list
+```
+
+Output: `media/output/wraps/YYYY-MM-DD_<vod>_wrap/` → `clips/*.mp4` (+ sidecar json),
+`captions/*_captioned.mp4` + `.srt` (clips with speech), `<date>_<vod>_highlight_reel.mp4`, `motion.json`,
+`wrap.json`, `WRAP.md`. Finder tags via `xattr` (or `tag` CLI): media **Purple**, md/srt **Blue**,
+json **Orange**. Nothing is posted; the source VOD is never moved or deleted.
+Captions use Whisper: the venv module (`uv sync --extra subtitles`) if present, else an existing
+openai-whisper `whisper` CLI on the Mac (auto-detected; set `WHISPER_CLI=/path/to/whisper` to override).
+`bolt wrap status` shows which backend. No Whisper at all = captions skipped with a note.
+
+## Song release package (`bolt release`) — READY (18 Oct 2026)
+
+`Core/modules/Song_Release.py`, prefix `Release unavailable:`. Packages finished songs for
+DistroKid / TuneCore / CD Baby → Apple Music. **Never uploads.**
+
+```bash
+bolt release                                         # status
+bolt release ~/Music/Weightless --artist "Your Artist Name" \
+     --title "Weightless" --genre Pop --songwriter "Legal Name" --explicit no
+bolt release ~/Music/Weightless --cover art.jpg --dry-run
+bolt release list
+```
+
+Output `media/output/releases/YYYY-MM-DD_<title>_release/`: `audio/NN - Title.wav`
+(44.1 kHz / 16-bit stereo), `cover.jpg|png` (checked ≥ 3000×3000 square, RGB),
+`metadata.csv` / `metadata.json` (ISRC blank → distributor assigns), `CHECKLIST.md`
+(first item: verify Suno plan commercial rights), `release.json` (peaks, warnings).
+Missing art or ffmpeg → warnings; existing 44.1k/16-bit WAVs still package without ffmpeg.
+
+Titles come from file names: track numbers (`01 Sinner`, `10 Break Your Spirit`, `1-01 Take You`),
+hyphen exports (`06-I-Wont-Fold`) and Finder copies (`Song-2`) are cleaned. The same song in two
+formats (`.aif` + `.m4a`) is packaged once, keeping the lossless file. Cover is found as
+`cover|artwork|art|folder|front.*`, an image named after the release, or the only image in the folder.
+Single / EP (≤ 6 tracks) / Album is auto-detected. Default release date = today + 21 days.
 
 ## Default morning flow (daily driver)
 

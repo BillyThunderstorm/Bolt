@@ -1,0 +1,40 @@
+{
+  "game": "God of War Sons of Sparta",
+  "source": "stream_start_twitch",
+  "checked_at": "2026-10-18T14:39:09Z",
+  "confirmed_at": "2026-10-18T14:39:09Z",
+  "confirmed_source": "stream_start_twitch",
+  "changed_at": "2026-10-18T14:39:09Z",
+  "history": [
+    {
+      "at": "2026-10-18T07:18:34Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "Wolverine",
+      "source": "twitch"
+    },
+    {
+      "at": "2026-10-18T07:19:01Z",
+      "game": "Wolverine",
+      "previous": "God of War Sons of Sparta",
+      "source": "manual"
+    },
+    {
+      "at": "2026-10-18T07:19:02Z",
+      "game": "Wolverine",
+      "previous": "Wolverine",
+      "source": "obs_mapping_pin"
+    },
+    {
+      "at": "2026-10-18T07:26:15Z",
+      "game": "Wolverine",
+      "previous": "Wolverine",
+      "source": "obs_mapping_pin"
+    },
+    {
+      "at": "2026-10-18T14:39:09Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "Wolverine",
+      "source": "stream_start_twitch"
+    }
+  ]
+}

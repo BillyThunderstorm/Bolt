@@ -136,13 +136,17 @@ def build_caption_drawtext_filter(
         if end < 0:
             continue
 
-        text_escaped = _escape_drawtext(text)
+        # A straight apostrophe can't be escaped inside ffmpeg's single-quoted
+        # filtergraph values (\' ends the quote and splits the chain →
+        # "Filter not found"). Use the typographic one instead.
+        text_escaped = _escape_drawtext(text.replace("'", "\u2019"))
         # Commas inside enable= must be escaped so they are not filter separators.
         enable = f"between(t\,{start:.3f}\,{end:.3f})"
         drawtext = (
             f"drawtext="
             f"fontfile='{font_escaped}':"
             f"text='{text_escaped}':"
+            f"expansion=none:"  # captions are literal; a bare % must not expand
             f"fontsize=h/22:"
             f"fontcolor=white:"
             f"borderw=3:"
