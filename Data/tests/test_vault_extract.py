@@ -37,6 +37,7 @@ class ExtractTests(unittest.TestCase):
         self.root = Path(self._tmp.name) / "vault"
         self.root.mkdir()
         self.pending = Path(self._tmp.name) / "pending.json"
+        self.filing = Path(self._tmp.name) / "filing.json"
         self.history = Path(self._tmp.name) / "history.json"
         self.history.write_text(
             json.dumps(
@@ -53,6 +54,8 @@ class ExtractTests(unittest.TestCase):
             {
                 "BOLT_VAULT_PATH": str(self.root),
                 "BOLT_PENDING_VAULT_PATH": str(self.pending),
+                "BOLT_VAULT_FILING_PATH": str(self.filing),
+                "BOLT_VAULT_FILING_AI": "off",
                 "BOLT_CHAT_HISTORY_PATH": str(self.history),
             },
         )
