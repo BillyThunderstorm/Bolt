@@ -2,7 +2,7 @@
 name = "bolt"
 version = "0.1.0"
 description = "Bolt — Billy Carter's local-first AI content manager and business assistant."
-# No root README.md yet — omit readme= so hatchling can build the wheel.
+readme = "README.md"
 requires-python = ">=3.11,<3.13"
 
 # ── Author ────────────────────────────────────────────────────────────────────
