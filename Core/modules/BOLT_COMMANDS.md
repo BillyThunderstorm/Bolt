@@ -838,6 +838,17 @@ bolt voice --text
 
 "no" alone cancels. "no, put that in …" or "no, that's …" changes the area and Bolt reuses that word next time. Tasks stay in `10 Bolt/Tasks/`. Notes and pages move to the area folder; the old file is parked, not deleted. `BOLT_VAULT_FILING_AI=on` lets the model pick when the rules are unsure (`auto` asks only if a provider is already reachable, `off` stays local). Corrections live in `BOLT_VAULT_FILING_PATH` or `Data/memory/vault_filing_memory.json`.
 
+The kanban note `10 Bolt/Bolt Board.md` follows task status. Dragging a card in Obsidian wins the next time Bolt reads the board. "move X to Doing" previews first. Tasks Bolt adds show up as cards. Done is the complete lane. A note that is not a kanban board is left alone.
+
+```bash
+bolt voice --text
+# what's on my board?
+# move the K&F short to Doing
+# yes
+```
+
+If two cards match, Bolt asks which number. "undo that" puts the card and the task status back.
+
 Budget knobs, all optional: `BOLT_CHAT_THINK` (default on), `BOLT_CHAT_THINK_PAID` (`auto`, `on`, `off`), `BOLT_CHAT_REPLY_TASK` (default `chat`, so everyday replies stay on the light-mode model), `BOLT_CHAT_HISTORY_TURNS` (default 12), `BOLT_CHAT_MAX_TOKENS_TEXT`, `BOLT_CHAT_MAX_TOKENS_VOICE`.
 
 ## Obsidian vault (`bolt vault`)
