@@ -56,10 +56,13 @@
     }
     body::after {
       background-image:
-        radial-gradient(ellipse 380px 220px at 73% 15%, rgba(255, 214, 170, 0.24), transparent 70%),
-        radial-gradient(ellipse 300px 200px at 63% 22%, rgba(176, 146, 255, 0.18), transparent 72%),
-        radial-gradient(ellipse 250px 170px at 85% 28%, rgba(255, 164, 194, 0.15), transparent 70%),
-        radial-gradient(ellipse 220px 150px at 16% 82%, rgba(110, 150, 255, 0.12), transparent 72%),
+        radial-gradient(ellipse 460px 260px at 72% 16%, rgba(255, 214, 170, 0.42), transparent 72%),
+        radial-gradient(ellipse 340px 230px at 62% 24%, rgba(186, 156, 255, 0.32), transparent 74%),
+        radial-gradient(ellipse 280px 190px at 84% 30%, rgba(255, 170, 196, 0.30), transparent 72%),
+        radial-gradient(ellipse 240px 160px at 18% 78%, rgba(120, 160, 255, 0.18), transparent 74%),
+        radial-gradient(22px 22px at 74% 15%, rgba(255, 236, 210, 0.55), transparent 70%),
+        radial-gradient(14px 14px at 67% 21%, rgba(255, 214, 230, 0.42), transparent 72%),
+        radial-gradient(18px 18px at 82% 23%, rgba(214, 196, 255, 0.48), transparent 70%),
         radial-gradient(1.2px 1.2px at 70% 11%, #fff 50%, transparent 52%),
         radial-gradient(2px 2px at 74% 15%, rgba(255, 246, 224, 0.96) 50%, transparent 52%),
         radial-gradient(1.3px 1.3px at 78% 12%, #fff 50%, transparent 52%),
@@ -132,7 +135,7 @@
       display: grid;
       grid-template-columns: 1fr;
       gap: 32px;
-      padding: 34px 10px 12px;
+      padding: 48px 12px 16px;
     }
     @media (min-width: 880px) {
       .board { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -159,7 +162,7 @@
       position: absolute;
       z-index: 0;
       inset: -8px -12px -10px -12px;
-      border-radius: 46px 52px 42px 38px;
+      border-radius: 40px 56px 48px 34px;
       background:
         radial-gradient(46% 42% at 0% 48%, rgba(255, 238, 230, 0.98) 0%, rgba(255, 206, 196, 0) 72%),
         radial-gradient(44% 40% at 100% 58%, rgba(255, 220, 176, 0.96) 0%, rgba(255, 186, 150, 0) 72%),
@@ -180,16 +183,19 @@
       content: "";
       position: absolute;
       z-index: 0;
-      left: 6%;
-      right: 6%;
-      top: -26px;
-      height: 58px;
+      left: -8px;
+      right: -8px;
+      top: -34px;
+      bottom: -14px;
+      pointer-events: none;
       background:
-        radial-gradient(circle at 16% 72%, rgba(255, 246, 238, 0.98) 0%, rgba(255, 198, 188, 0) 68%),
-        radial-gradient(circle at 40% 40%, rgba(255, 230, 214, 0.97) 0%, rgba(255, 186, 168, 0) 70%),
-        radial-gradient(circle at 66% 62%, rgba(255, 214, 228, 0.96) 0%, rgba(255, 176, 196, 0) 68%),
-        radial-gradient(circle at 88% 74%, rgba(255, 224, 176, 0.96) 0%, rgba(255, 190, 140, 0) 70%);
-      filter: blur(0.3px);
+        radial-gradient(52px 36px at 22% 3%, #fff8f2 0%, #ffd4c6 60%, rgba(255, 212, 198, 0) 76%),
+        radial-gradient(64px 42px at 50% 0%, #ffe9d8 0%, #f6c4d6 58%, rgba(246, 196, 214, 0) 76%),
+        radial-gradient(46px 34px at 78% 4%, #ffe4b8 0%, #ffd0c2 60%, rgba(255, 208, 194, 0) 76%),
+        radial-gradient(34px 46px at 0% 42%, #fff3ea 0%, #ffd0c8 60%, rgba(255, 208, 200, 0) 76%),
+        radial-gradient(32px 44px at 100% 58%, #ffe7c8 0%, #f8c8d6 60%, rgba(248, 200, 214, 0) 76%),
+        radial-gradient(44px 28px at 26% 100%, #ffd8e2 0%, #f4c2d2 60%, rgba(244, 194, 210, 0) 76%),
+        radial-gradient(52px 30px at 72% 101%, #ffe1c2 0%, #ffd0ba 60%, rgba(255, 208, 186, 0) 76%);
     }
     .clip-card > * { position: relative; z-index: 1; }
     .clip-card.done { opacity: 0.88; }
@@ -384,7 +390,7 @@
       50% { transform: translate3d(0, -8px, 0); }
     }
     @keyframes star-twinkle {
-      0%, 100% { opacity: 0.55; }
+      0%, 100% { opacity: 0.78; }
       45% { opacity: 1; }
       72% { opacity: 0.68; }
     }

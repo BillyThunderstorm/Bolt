@@ -176,7 +176,7 @@
     .review-card {
       position: relative;
       isolation: isolate;
-      margin-top: 18px;
+      margin-top: 28px;
       color: #2c1a22;
       border: none;
       background: transparent;
@@ -189,7 +189,7 @@
       position: absolute;
       z-index: 0;
       inset: -8px -12px -10px -12px;
-      border-radius: 46px 52px 42px 38px;
+      border-radius: 40px 56px 48px 34px;
       background:
         radial-gradient(46% 42% at 0% 48%, rgba(255, 238, 230, 0.98) 0%, rgba(255, 206, 196, 0) 72%),
         radial-gradient(44% 40% at 100% 58%, rgba(255, 220, 176, 0.96) 0%, rgba(255, 186, 150, 0) 72%),
@@ -210,16 +210,20 @@
       content: "";
       position: absolute;
       z-index: 0;
-      left: 8%;
-      right: 8%;
-      top: -22px;
-      height: 52px;
+      left: -8px;
+      right: -8px;
+      top: -30px;
+      bottom: -12px;
+      pointer-events: none;
       background:
-        radial-gradient(circle at 18% 72%, rgba(255, 246, 238, 0.98) 0%, rgba(255, 198, 188, 0) 68%),
-        radial-gradient(circle at 42% 40%, rgba(255, 230, 214, 0.97) 0%, rgba(255, 186, 168, 0) 70%),
-        radial-gradient(circle at 68% 62%, rgba(255, 214, 228, 0.96) 0%, rgba(255, 176, 196, 0) 68%),
-        radial-gradient(circle at 88% 74%, rgba(255, 224, 176, 0.96) 0%, rgba(255, 190, 140, 0) 70%);
-      filter: blur(0.3px);
+        radial-gradient(64px 36px at 18% 2%, #fff8f2 0%, #ffd4c6 60%, rgba(255, 212, 198, 0) 76%),
+        radial-gradient(80px 42px at 42% 0%, #ffe9d8 0%, #f6c4d6 58%, rgba(246, 196, 214, 0) 76%),
+        radial-gradient(58px 34px at 68% 3%, #ffe4b8 0%, #ffd0c2 60%, rgba(255, 208, 194, 0) 76%),
+        radial-gradient(70px 38px at 88% 2%, #fff1e6 0%, #ffd6c8 60%, rgba(255, 214, 200, 0) 76%),
+        radial-gradient(36px 48px at 0% 48%, #fff3ea 0%, #ffd0c8 60%, rgba(255, 208, 200, 0) 76%),
+        radial-gradient(36px 48px at 100% 60%, #ffe7c8 0%, #f8c8d6 60%, rgba(248, 200, 214, 0) 76%),
+        radial-gradient(56px 28px at 24% 100%, #ffd8e2 0%, #f4c2d2 60%, rgba(244, 194, 210, 0) 76%),
+        radial-gradient(64px 30px at 74% 101%, #ffe1c2 0%, #ffd0ba 60%, rgba(255, 208, 186, 0) 76%);
     }
     .review-card > * { position: relative; z-index: 1; }
     .review-card h2,
