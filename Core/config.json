@@ -87,11 +87,12 @@
     "discord_enabled": true
   },
   "auto_posting": {
-    "enabled": true,
+    "enabled": false,
     "review_window_minutes": 30,
-    "auto_post_if_deadline_missed": true,
+    "auto_post_if_deadline_missed": false,
     "require_rejection_reason": true,
-    "privacy": "PUBLIC_TO_EVERYONE"
+    "privacy": "PUBLIC_TO_EVERYONE",
+    "_comment": "Publishing requires William's explicit approval. TikTok API auto-publishing is paused."
   },
   "title_generation": {
     "enabled": true
