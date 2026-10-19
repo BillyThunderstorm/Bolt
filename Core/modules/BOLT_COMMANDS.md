@@ -787,6 +787,22 @@ The **canonical** shared journal / briefing / todo / how-to is Google Drive, not
 
 CLI still works: `bolt week set` / `bolt week done` / `bolt mission update latest`.
 
+## Obsidian vault (`bolt vault`)
+
+William's notes live in the Obsidian vault, not in Notion. Bolt reads and writes them only through `Core/modules/Vault_Store.py`.
+
+```bash
+bolt vault                          # status: path, counts, last change
+bolt vault list --kind task
+bolt vault find "K&F"
+bolt vault add "Film K&F short" --area "Product Testing" --due 2026-10-23
+bolt vault undo                     # last change; new notes are parked, not deleted
+```
+
+Path: `BOLT_VAULT_PATH`, or `vault_path` in `Core/config.json`, or `/Users/carter/Documents/Obsidian/Bolt Vault`. Bolt does not create that folder. If the folder is there, Bolt creates any missing `10 Bolt/Tasks/`, `10 Bolt/Calendar/`, `10 Bolt/Bolt Board.md`, `10 Bolt/Plan Timeline.md`, and `10 Bolt/Bolt Activity Log.md`. Files that already exist are updated, never replaced.
+
+Times Bolt says out loud use America/Chicago and the label CT. `10 Bolt/Bolt Calendar.md` is an index, not an event.
+
 ## Title A/B trainer (`bolt titles`)
 
 Local learning loop: read titled rows from `Data/performance_outcomes.jsonl`,
