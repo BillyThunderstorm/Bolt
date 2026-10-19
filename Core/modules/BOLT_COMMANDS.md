@@ -849,6 +849,20 @@ bolt voice --text
 
 If two cards match, Bolt asks which number. "undo that" puts the card and the task status back.
 
+Calendar events are notes in `10 Bolt/Calendar/` for Full Calendar Remastered (`title`, `allDay`, `date`, and `startTime` / `endTime` when it has a clock). `10 Bolt/Bolt Calendar.md` is never an event. A time is spoken in CT and lasts one hour unless the note already has an end time. No clock means all day. "tonight" is 7:00 PM CT.
+
+```bash
+bolt voice --text
+# schedule the K&F short Thursday 7pm
+# yes
+# move the K&F short to Friday
+# yes
+# cancel the K&F short
+# yes
+```
+
+"move X to Doing" still moves the board card. "move X to Friday" moves the event, or the task due date when there is no event. If both match, Bolt asks which number. Cancel keeps the file, clears `date`, and stores the old day in `cancelledDate`. A drag in Obsidian is what the next preview reads.
+
 Budget knobs, all optional: `BOLT_CHAT_THINK` (default on), `BOLT_CHAT_THINK_PAID` (`auto`, `on`, `off`), `BOLT_CHAT_REPLY_TASK` (default `chat`, so everyday replies stay on the light-mode model), `BOLT_CHAT_HISTORY_TURNS` (default 12), `BOLT_CHAT_MAX_TOKENS_TEXT`, `BOLT_CHAT_MAX_TOKENS_VOICE`.
 
 ## Obsidian vault (`bolt vault`)

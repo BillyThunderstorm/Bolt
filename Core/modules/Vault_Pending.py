@@ -100,7 +100,7 @@ def try_pending(text: str) -> Optional[str]:
     pending = load_pending()
     if not pending:
         return None
-    if str(pending.get("kind") or "") == "choose" and _YES.match(soft):
+    if str(pending.get("kind") or "") in ("choose", "pick") and _YES.match(soft):
         return "Say which number you want."
     if _YES.match(soft):
         return _apply(pending)
