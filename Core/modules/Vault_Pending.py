@@ -97,6 +97,14 @@ def try_pending(text: str) -> Optional[str]:
     if _NO.match(soft):
         clear_pending()
         return "Okay, I won't save that."
+    picked = _picked_numbers(soft, pending)
+    if picked is not None:
+        if not picked:
+            clear_pending()
+            return "Okay, I won't save those."
+        chosen = dict(pending)
+        chosen["picked"] = picked
+        return _apply(chosen)
     edited = _edit(pending, soft)
     if edited is not None:
         save_pending(edited)
@@ -107,6 +115,29 @@ def try_pending(text: str) -> Optional[str]:
             "date, or area."
         )
     return None
+
+
+def _picked_numbers(text: str, pending: Dict[str, Any]) -> Optional[list]:
+    """1-based item numbers for a batch preview, or None if this isn't a choice."""
+    if str(pending.get("kind") or "") != "batch":
+        return None
+    count = len(pending.get("items") or [])
+    if count == 0:
+        return None
+    if re.match(r"^(?:all|all of them|save them|save all)[.!]?$", text, re.I):
+        return list(range(1, count + 1))
+    if re.match(r"^(?:none|nothing)[.!]?$", text, re.I):
+        return []
+    if not re.search(r"\d", text):
+        return None
+    if not re.match(r"^(?:only|just|save|numbers?)?\s*[\d\s,and&]+[.!]?$", text, re.I):
+        return None
+    nums = [int(piece) for piece in re.findall(r"\d+", text)]
+    if not nums:
+        return None
+    if any(num < 1 or num > count for num in nums):
+        raise VaultError(f"I numbered {count} things. Say yes, only 1, or no.")
+    return nums
 
 
 def _apply(pending: Dict[str, Any]) -> str:
