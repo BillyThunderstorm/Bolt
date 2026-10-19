@@ -806,6 +806,19 @@ bolt voice --text
 
 "change it to Saturday" edits the preview. "remember:" still goes to memory, not the vault. Unsure tasks land in `00 Inbox`. Times are spoken in CT.
 
+After a conversation, Bolt can pull tasks or a page out of it. That uses a longer planning call (Ollama in light mode unless a paid planning call is allowed). Nothing is written until William picks.
+
+```bash
+bolt voice --text
+# turn this into tasks
+# only 1 and 3
+# make a page from this
+# yes
+# none
+```
+
+"yes" saves the whole list. "only 1 and 3" or "just 2" saves those. "no" or "none" saves nothing. "undo that" parks the notes from that save together.
+
 Budget knobs, all optional: `BOLT_CHAT_THINK` (default on), `BOLT_CHAT_THINK_PAID` (`auto`, `on`, `off`), `BOLT_CHAT_REPLY_TASK` (default `chat`, so everyday replies stay on the light-mode model), `BOLT_CHAT_HISTORY_TURNS` (default 12), `BOLT_CHAT_MAX_TOKENS_TEXT`, `BOLT_CHAT_MAX_TOKENS_VOICE`.
 
 ## Obsidian vault (`bolt vault`)
