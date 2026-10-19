@@ -787,6 +787,21 @@ The **canonical** shared journal / briefing / todo / how-to is Google Drive, not
 
 CLI still works: `bolt week set` / `bolt week done` / `bolt mission update latest`.
 
+## How Bolt talks (`bolt voice` / `bolt voice --text`)
+
+A clear command still runs the real action: "what's this week", "show the queue", "add task …" once that exists. A longer thought that only mentions those words goes to the conversation, not the command.
+
+Bolt thinks first (a private plan William does not hear), then answers like a teammate: it says what it understood, adds an idea or a next step, and can offer to capture a task or page. It does not claim the vault write happened until William says yes.
+
+Voice stays short and spoken. `bolt voice --text` can be longer and keep a little formatting. The running summary of older turns is stored next to the voice history.
+
+```bash
+bolt voice --text
+# I keep meaning to film the K&F short but Thursday clashes with Randy's shift.
+```
+
+Budget knobs, all optional: `BOLT_CHAT_THINK` (default on), `BOLT_CHAT_THINK_PAID` (`auto`, `on`, `off`), `BOLT_CHAT_REPLY_TASK` (default `chat`, so everyday replies stay on the light-mode model), `BOLT_CHAT_HISTORY_TURNS` (default 12), `BOLT_CHAT_MAX_TOKENS_TEXT`, `BOLT_CHAT_MAX_TOKENS_VOICE`.
+
 ## Obsidian vault (`bolt vault`)
 
 William's notes live in the Obsidian vault, not in Notion. Bolt reads and writes them only through `Core/modules/Vault_Store.py`.
