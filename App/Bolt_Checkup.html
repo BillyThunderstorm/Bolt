@@ -178,7 +178,7 @@
       position: relative;
       isolation: isolate;
       overflow: visible;
-      margin: 84px 4px 64px;
+      margin: 52px 0 44px;
       color: #2c1a22;
       border: none;
       border-radius: 0;
@@ -191,46 +191,27 @@
       content: "";
       position: absolute;
       z-index: 0;
-      /* Room for the lobes. A puff whose radius crosses this box clips into a straight side. */
-      inset: -68px -36px -60px -36px;
+      inset: -36px -20px -26px -20px;
       pointer-events: none;
       background:
-        radial-gradient(70px 44px at 6% 58px, rgba(255, 248, 242, 0.82) 0%, rgba(255, 214, 200, 0.76) 54%, transparent 74%),
-        radial-gradient(96px 50px at 18% 66px, rgba(255, 230, 210, 0.8) 0%, rgba(246, 196, 214, 0.74) 52%, transparent 74%),
-        radial-gradient(52px 36px at 30% 52px, rgba(255, 224, 184, 0.78) 0%, rgba(255, 204, 194, 0.72) 54%, transparent 74%),
-        radial-gradient(110px 52px at 44% 68px, rgba(255, 240, 228, 0.8) 0%, rgba(255, 208, 196, 0.74) 52%, transparent 74%),
-        radial-gradient(64px 40px at 58% 54px, rgba(255, 226, 206, 0.78) 0%, rgba(255, 198, 188, 0.72) 54%, transparent 74%),
-        radial-gradient(100px 48px at 72% 64px, rgba(255, 236, 220, 0.8) 0%, rgba(255, 206, 196, 0.74) 52%, transparent 74%),
-        radial-gradient(58px 38px at 86% 56px, rgba(255, 232, 214, 0.78) 0%, rgba(255, 200, 190, 0.72) 54%, transparent 74%),
-        radial-gradient(84px 46px at 96% 62px, rgba(255, 244, 232, 0.8) 0%, rgba(255, 210, 198, 0.74) 54%, transparent 74%),
-        radial-gradient(40px 48px at 52px 42%, rgba(255, 244, 236, 0.8) 0%, rgba(255, 206, 198, 0.74) 54%, transparent 74%),
-        radial-gradient(36px 44px at calc(100% - 50px) 58%, rgba(255, 228, 196, 0.78) 0%, rgba(246, 194, 208, 0.72) 54%, transparent 74%),
-        radial-gradient(64px 38px at 8% calc(100% - 52px), rgba(255, 214, 224, 0.8) 0%, rgba(244, 188, 206, 0.74) 54%, transparent 74%),
-        radial-gradient(90px 42px at 24% calc(100% - 58px), rgba(255, 224, 194, 0.8) 0%, rgba(255, 202, 182, 0.74) 52%, transparent 74%),
-        radial-gradient(48px 32px at 40% calc(100% - 46px), rgba(255, 230, 216, 0.76) 0%, rgba(255, 196, 192, 0.7) 54%, transparent 74%),
-        radial-gradient(100px 44px at 56% calc(100% - 60px), rgba(255, 218, 204, 0.8) 0%, rgba(255, 196, 186, 0.74) 52%, transparent 74%),
-        radial-gradient(56px 34px at 72% calc(100% - 48px), rgba(255, 232, 220, 0.78) 0%, rgba(255, 204, 196, 0.72) 54%, transparent 74%),
-        radial-gradient(86px 40px at 88% calc(100% - 56px), rgba(255, 220, 206, 0.8) 0%, rgba(255, 198, 188, 0.74) 54%, transparent 74%),
-        radial-gradient(ellipse 16% 28% at 22% 48%, rgba(255, 236, 226, 0.74) 0%, transparent 74%),
-        radial-gradient(ellipse 18% 30% at 48% 46%, rgba(255, 228, 214, 0.74) 0%, transparent 74%),
-        radial-gradient(ellipse 16% 26% at 74% 52%, rgba(255, 220, 206, 0.72) 0%, transparent 74%);
-      filter:
-        blur(8px)
-        drop-shadow(0 16px 18px rgba(12, 6, 16, 0.28))
-        drop-shadow(0 0 16px rgba(255, 196, 140, 0.7))
-        drop-shadow(0 0 32px rgba(255, 160, 186, 0.45));
+        radial-gradient(circle 58px at 16% 66px, rgba(255, 236, 210, 0.84) 0%, rgba(255, 206, 196, 0.82) 70%, transparent 88%),
+        radial-gradient(circle 72px at 40% 80px, rgba(255, 228, 196, 0.85) 0%, rgba(255, 198, 188, 0.82) 70%, transparent 88%),
+        radial-gradient(circle 64px at 66% 72px, rgba(255, 232, 206, 0.84) 0%, rgba(246, 196, 206, 0.82) 70%, transparent 88%),
+        radial-gradient(circle 50px at 88% 64px, rgba(255, 226, 204, 0.84) 0%, rgba(255, 200, 192, 0.82) 70%, transparent 88%),
+        radial-gradient(circle 26px at 34px 58%, rgba(255, 220, 206, 0.82) 0%, rgba(255, 196, 190, 0.8) 68%, transparent 86%),
+        radial-gradient(circle 24px at calc(100% - 32px) 62%, rgba(255, 226, 204, 0.82) 0%, rgba(255, 198, 188, 0.8) 68%, transparent 86%),
+        radial-gradient(circle 28px at 32% calc(100% - 34px), rgba(255, 214, 206, 0.82) 0%, rgba(244, 190, 200, 0.8) 68%, transparent 86%),
+        radial-gradient(circle 26px at 74% calc(100% - 32px), rgba(255, 220, 200, 0.82) 0%, rgba(255, 196, 186, 0.8) 68%, transparent 86%);
+      filter: blur(3px) drop-shadow(0 0 8px rgba(255, 196, 120, 0.55));
     }
     .review-card::after {
       content: "";
       position: absolute;
       z-index: 0;
-      inset: 16px 28px 12px 28px;
+      inset: 0;
       pointer-events: none;
-      border-radius: 50%;
-      background:
-        radial-gradient(ellipse 92% 80% at 50% 50%, rgba(255, 248, 244, 0.95) 0%, rgba(255, 232, 220, 0.9) 42%, rgba(255, 214, 206, 0.3) 64%, rgba(255, 214, 206, 0) 78%);
-      backdrop-filter: blur(2px);
-      -webkit-backdrop-filter: blur(2px);
+      border-radius: 28px;
+      background: rgba(255, 244, 236, 0.93);
     }
     .review-card > * { position: relative; z-index: 1; }
     .review-card h2,

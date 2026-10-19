@@ -135,8 +135,8 @@
     .board {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 150px;
-      padding: 100px 70px 88px;
+      gap: 88px;
+      padding: 56px 24px 48px;
     }
     @media (min-width: 880px) {
       .board { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -162,46 +162,26 @@
       content: "";
       position: absolute;
       z-index: 0;
-      /* Room for the lobes. A puff whose radius crosses this box clips into a straight side. */
-      inset: -88px -74px -76px -74px;
+      inset: -42px -28px -30px -28px;
       pointer-events: none;
       background:
-        radial-gradient(64px 46px at 16% 60px, rgba(255, 248, 242, 0.82) 0%, rgba(255, 214, 200, 0.78) 54%, transparent 74%),
-        radial-gradient(90px 54px at 38% 70px, rgba(255, 230, 210, 0.8) 0%, rgba(246, 196, 214, 0.76) 52%, transparent 74%),
-        radial-gradient(48px 36px at 58% 52px, rgba(255, 224, 184, 0.8) 0%, rgba(255, 204, 194, 0.74) 54%, transparent 74%),
-        radial-gradient(78px 50px at 78% 66px, rgba(255, 240, 228, 0.8) 0%, rgba(255, 208, 196, 0.76) 52%, transparent 74%),
-        radial-gradient(56px 42px at 93% 58px, rgba(255, 236, 220, 0.78) 0%, rgba(255, 206, 196, 0.74) 54%, transparent 74%),
-        radial-gradient(72px 50px at 88px 14%, rgba(255, 244, 236, 0.82) 0%, rgba(255, 206, 198, 0.76) 54%, transparent 74%),
-        radial-gradient(40px 34px at 100px 36%, rgba(255, 226, 208, 0.76) 0%, rgba(248, 196, 212, 0.7) 54%, transparent 74%),
-        radial-gradient(84px 62px at 100px 58%, rgba(255, 236, 224, 0.8) 0%, rgba(255, 198, 188, 0.74) 54%, transparent 74%),
-        radial-gradient(48px 40px at 108px 82%, rgba(255, 228, 214, 0.78) 0%, rgba(255, 196, 190, 0.72) 54%, transparent 74%),
-        radial-gradient(80px 56px at calc(100% - 96px) 20%, rgba(255, 228, 196, 0.8) 0%, rgba(255, 196, 184, 0.74) 54%, transparent 74%),
-        radial-gradient(36px 30px at calc(100% - 92px) 42%, rgba(255, 236, 222, 0.76) 0%, rgba(246, 194, 208, 0.7) 54%, transparent 74%),
-        radial-gradient(76px 70px at calc(100% - 92px) 66%, rgba(255, 218, 202, 0.8) 0%, rgba(255, 194, 184, 0.74) 54%, transparent 74%),
-        radial-gradient(52px 36px at calc(100% - 104px) 86%, rgba(255, 232, 216, 0.78) 0%, rgba(255, 200, 192, 0.72) 54%, transparent 74%),
-        radial-gradient(58px 40px at 12% calc(100% - 56px), rgba(255, 214, 224, 0.8) 0%, rgba(244, 188, 206, 0.76) 54%, transparent 74%),
-        radial-gradient(86px 48px at 36% calc(100% - 64px), rgba(255, 224, 194, 0.8) 0%, rgba(255, 202, 182, 0.74) 52%, transparent 74%),
-        radial-gradient(44px 32px at 58% calc(100% - 48px), rgba(255, 230, 216, 0.78) 0%, rgba(255, 196, 192, 0.72) 54%, transparent 74%),
-        radial-gradient(74px 46px at 80% calc(100% - 62px), rgba(255, 218, 204, 0.8) 0%, rgba(255, 196, 186, 0.74) 54%, transparent 74%),
-        radial-gradient(ellipse 28% 18% at 46% 40%, rgba(255, 236, 226, 0.78) 0%, rgba(255, 214, 204, 0.62) 60%, transparent 78%),
-        radial-gradient(ellipse 32% 16% at 58% 62%, rgba(255, 220, 206, 0.72) 0%, transparent 74%);
-      filter:
-        blur(8px)
-        drop-shadow(0 16px 18px rgba(12, 6, 16, 0.28))
-        drop-shadow(0 0 16px rgba(255, 196, 140, 0.7))
-        drop-shadow(0 0 32px rgba(255, 160, 186, 0.45));
+        radial-gradient(circle 56px at 20% 64px, rgba(255, 236, 210, 0.84) 0%, rgba(255, 206, 196, 0.82) 70%, transparent 88%),
+        radial-gradient(circle 74px at 50% 82px, rgba(255, 228, 196, 0.85) 0%, rgba(255, 198, 188, 0.82) 70%, transparent 88%),
+        radial-gradient(circle 60px at 80% 68px, rgba(255, 232, 206, 0.84) 0%, rgba(246, 196, 206, 0.82) 70%, transparent 88%),
+        radial-gradient(circle 32px at 40px 46%, rgba(255, 220, 206, 0.82) 0%, rgba(255, 196, 190, 0.8) 68%, transparent 86%),
+        radial-gradient(circle 30px at calc(100% - 38px) 52%, rgba(255, 226, 204, 0.82) 0%, rgba(255, 198, 188, 0.8) 68%, transparent 86%),
+        radial-gradient(circle 28px at 30% calc(100% - 36px), rgba(255, 214, 206, 0.82) 0%, rgba(244, 190, 200, 0.8) 68%, transparent 86%),
+        radial-gradient(circle 26px at 72% calc(100% - 34px), rgba(255, 220, 200, 0.82) 0%, rgba(255, 196, 186, 0.8) 68%, transparent 86%);
+      filter: blur(3px) drop-shadow(0 0 8px rgba(255, 196, 120, 0.55));
     }
     .clip-card::after {
       content: "";
       position: absolute;
       z-index: 0;
-      inset: 36px 28px 26px 28px;
+      inset: 0;
       pointer-events: none;
-      border-radius: 50%;
-      background:
-        radial-gradient(ellipse 88% 82% at 50% 46%, rgba(255, 248, 244, 0.95) 0%, rgba(255, 232, 220, 0.9) 40%, rgba(255, 214, 206, 0.28) 62%, rgba(255, 214, 206, 0) 76%);
-      backdrop-filter: blur(2px);
-      -webkit-backdrop-filter: blur(2px);
+      border-radius: 32px;
+      background: rgba(255, 244, 236, 0.93);
     }
     .clip-card > * { position: relative; z-index: 1; }
     .clip-card.done { opacity: 0.88; }
@@ -234,19 +214,20 @@
     .title-row, .meta-row, .actions {
       display: flex; justify-content: space-between; gap: 8px; align-items: flex-start;
     }
+    .title-row { min-width: 0; }
     .title-row h2 {
       margin: 0; font-size: 1rem; font-weight: 650; letter-spacing: -0.01em;
-      word-break: break-word;
+      min-width: 0; flex: 1 1 auto; overflow-wrap: anywhere;
     }
     .meta-row { margin-top: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-start; }
     .filename {
       display: block; margin-top: 8px; color: var(--muted); font-size: 0.78rem;
-      word-break: break-all;
+      max-width: 100%; overflow-wrap: anywhere; word-break: break-word;
     }
     code { color: var(--accent); }
     .pill {
       display: inline-block; padding: 2px 8px; border-radius: 999px;
-      font-size: 0.78rem; font-weight: 650; white-space: nowrap;
+      font-size: 0.78rem; font-weight: 650; white-space: nowrap; flex-shrink: 0;
     }
     .pill.good { color: var(--ready); background: rgba(61,214,140,0.12); }
     .pill.mid { color: var(--partial); background: rgba(245,197,66,0.12); }
@@ -385,8 +366,8 @@
       margin-top: 18px; color: var(--muted); font-size: 0.85rem;
     }
     @media (max-width: 520px) {
-      .wrap { padding: 16px 8px 32px; }
-      .board { padding: 96px 68px 84px; gap: 140px; }
+      .wrap { padding: 16px 12px 32px; }
+      .board { padding: 48px 20px 40px; gap: 84px; }
       .thumb { height: 220px; width: calc(220px * 9 / 16); }
       .actions, .toss-actions { flex-direction: column; }
       .keep, .toss, .confirm, .text-btn { width: 100%; }
