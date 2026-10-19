@@ -143,6 +143,7 @@ class BoardTests(unittest.TestCase):
         ir.try_handle_intent("add task film the short by Friday")
         ir.try_handle_intent("yes")
         reply = ir.try_handle_intent("move film the short to Friday")
-        self.assertIsNone(reply)
+        self.assertIn("due", reply.lower())
         note = vs.VaultStore(self.root).read_note("10 Bolt/Tasks/Film the short.md")
         self.assertEqual(note.frontmatter["status"], "inbox")
+        self.assertEqual(note.frontmatter["due"], "2026-10-23")
