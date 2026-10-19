@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Quick capture: add a task or a note, then wait for yes.
 
-No model call. Unsure area means 00 Inbox. Phase 4 teaches the area picker.
+No model call on the capture itself. Area comes from rules, saved corrections, and note titles. Unsure means 00 Inbox.
 """
 
 from __future__ import annotations
@@ -11,8 +11,9 @@ from datetime import date
 from typing import Any, Dict, Optional
 
 from modules.Vault_Dates import When, now_ct, parse_when, speak_when
+from modules.Vault_Filing import pick_area, remember_saved, with_related_body
 from modules.Vault_Pending import clear_pending, register_applier, save_pending
-from modules.Vault_Store import VaultError, VaultStore, resolve_area, vault_exists
+from modules.Vault_Store import VaultError, VaultStore, vault_exists
 
 _ADD_TASK = re.compile(
     r"^(?:please\s+)?(?:add|create|new|make)\s+(?:a\s+)?task\s*[:\-]?\s*(?P<body>.+)$",
@@ -27,14 +28,6 @@ _DUE_TAIL = re.compile(
     re.I,
 )
 
-# First match wins. "review" is product testing, matching the area table in the plan.
-_AREA_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("30 Product Testing", ("assessment", "product test", "unboxing", "review")),
-    ("20 Creator HQ & Content", ("podcast", "pitch", "content idea", "content")),
-    ("40 Career & Creator Plan", ("sprint", "portfolio", "career", "goal")),
-    ("50 Personal", ("habit", "personal")),
-    ("10 Bolt", ("clip", "queue", "post")),
-)
 
 
 def try_capture(text: str) -> Optional[str]:
@@ -71,8 +64,13 @@ def speak_capture(item: Dict[str, Any]) -> str:
             when_bit = f", due {due}"
     else:
         when_bit = ", with no due date"
+    related = item.get("related") or []
+    related_bit = ""
+    if related:
+        names = ", ".join(f"[[{name}]]" for name in related)
+        related_bit = f" Related: {names}."
     return (
-        f"I'll add a {kind}, {title}, in {area}{when_bit}. "
+        f"I'll add a {kind}, {title}, in {area}{when_bit}.{related_bit} "
         "Say yes to save or no to cancel."
     )
 
@@ -90,24 +88,18 @@ def apply_capture(pending: Dict[str, Any]) -> str:
         kind=str(item.get("type") or "task"),
         area=str(item.get("area") or ""),
         due=str(item.get("due") or ""),
-        body=str(item.get("body") or ""),
+        body=with_related_body(str(item.get("body") or ""), list(item.get("related") or [])),
         status="inbox",
         source="chat",
     )
+    remember_saved([{"rel": note.rel, "title": note.title, "type": note.kind or "note"}])
     clear_pending()
     return f"Saved {note.title}. It's in {note.rel}."
 
 
 def choose_area(text: str) -> str:
-    """Keyword area, or Inbox when nothing clearly matches."""
-    folded = (text or "").lower()
-    hits = []
-    for area, words in _AREA_RULES:
-        if any(re.search(rf"\b{re.escape(word)}\b", folded) for word in words):
-            hits.append(area)
-    if len(hits) == 1:
-        return hits[0]
-    return "00 Inbox"
+    """Rules, then corrections and note titles, else Inbox."""
+    return pick_area(text).area
 
 
 def _task_item(body: str) -> Dict[str, Any]:
@@ -115,13 +107,14 @@ def _task_item(body: str) -> Dict[str, Any]:
     title = _tidy(title)
     if not title:
         raise VaultError("What should the task be called?")
-    area = choose_area(body)
+    decision = pick_area(body)
     item: Dict[str, Any] = {
         "type": "task",
         "title": title,
-        "area": area,
+        "area": decision.area,
         "due": when.iso_date if when else "",
         "body": "",
+        "related": decision.related,
         "source": "chat",
     }
     return item
@@ -132,16 +125,14 @@ def _note_item(body: str) -> Dict[str, Any]:
     if not text:
         raise VaultError("What should the note say?")
     title = text if len(text) <= 80 else text[:77].rsplit(" ", 1)[0] + "…"
-    try:
-        area = resolve_area(choose_area(body))
-    except VaultError:
-        area = "00 Inbox"
+    decision = pick_area(body)
     return {
         "type": "note",
         "title": title,
-        "area": area,
+        "area": decision.area,
         "due": "",
         "body": text,
+        "related": decision.related,
         "source": "chat",
     }
 
