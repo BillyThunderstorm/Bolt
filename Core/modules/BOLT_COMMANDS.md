@@ -793,6 +793,19 @@ bolt voice --text
 # I keep meaning to film the K&F short but Thursday clashes with Randy's shift.
 ```
 
+Quick capture waits for yes. Nothing is written on the preview.
+
+```bash
+bolt voice --text
+# add task film the K&F short by Friday
+# yes
+# note: podcast idea about a gear episode
+# no
+# undo that
+```
+
+"change it to Saturday" edits the preview. "remember:" still goes to memory, not the vault. Unsure tasks land in `00 Inbox`. Times are spoken in CT.
+
 Budget knobs, all optional: `BOLT_CHAT_THINK` (default on), `BOLT_CHAT_THINK_PAID` (`auto`, `on`, `off`), `BOLT_CHAT_REPLY_TASK` (default `chat`, so everyday replies stay on the light-mode model), `BOLT_CHAT_HISTORY_TURNS` (default 12), `BOLT_CHAT_MAX_TOKENS_TEXT`, `BOLT_CHAT_MAX_TOKENS_VOICE`.
 
 ## Obsidian vault (`bolt vault`)
