@@ -135,8 +135,8 @@
     .board {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 96px;
-      padding: 92px 8px 52px;
+      gap: 150px;
+      padding: 100px 70px 88px;
     }
     @media (min-width: 880px) {
       .board { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -162,24 +162,29 @@
       content: "";
       position: absolute;
       z-index: 0;
-      inset: -78px -64px -70px -64px;
+      /* Room for the lobes. A puff whose radius crosses this box clips into a straight side. */
+      inset: -88px -74px -76px -74px;
       pointer-events: none;
       background:
-        radial-gradient(128px 86px at 22% 58px, rgba(255, 248, 242, 0.84) 0%, rgba(255, 214, 200, 0.8) 52%, transparent 72%),
-        radial-gradient(156px 102px at 48% 36px, rgba(255, 230, 210, 0.82) 0%, rgba(246, 196, 214, 0.78) 50%, transparent 72%),
-        radial-gradient(96px 72px at 70% 70px, rgba(255, 224, 184, 0.84) 0%, rgba(255, 204, 194, 0.78) 54%, transparent 74%),
-        radial-gradient(118px 80px at 88% 48px, rgba(255, 240, 228, 0.8) 0%, rgba(255, 208, 196, 0.76) 52%, transparent 73%),
-        radial-gradient(150px 150px at 62px 24%, rgba(255, 244, 236, 0.82) 0%, rgba(255, 206, 198, 0.78) 52%, transparent 73%),
-        radial-gradient(96px 84px at 108px 47%, rgba(255, 226, 208, 0.78) 0%, rgba(248, 196, 212, 0.72) 52%, transparent 74%),
-        radial-gradient(168px 156px at 54px 73%, rgba(255, 236, 224, 0.8) 0%, rgba(255, 198, 188, 0.76) 52%, transparent 73%),
-        radial-gradient(146px 142px at calc(100% - 60px) 27%, rgba(255, 228, 196, 0.82) 0%, rgba(255, 196, 184, 0.76) 52%, transparent 74%),
-        radial-gradient(92px 80px at calc(100% - 110px) 50%, rgba(255, 236, 222, 0.76) 0%, rgba(246, 194, 208, 0.7) 50%, transparent 73%),
-        radial-gradient(160px 148px at calc(100% - 52px) 75%, rgba(255, 218, 202, 0.8) 0%, rgba(255, 194, 184, 0.74) 54%, transparent 74%),
-        radial-gradient(110px 78px at 24% calc(100% - 58px), rgba(255, 214, 224, 0.82) 0%, rgba(244, 188, 206, 0.78) 52%, transparent 73%),
-        radial-gradient(148px 96px at 52% calc(100% - 40px), rgba(255, 224, 194, 0.82) 0%, rgba(255, 202, 182, 0.76) 50%, transparent 72%),
-        radial-gradient(100px 72px at 80% calc(100% - 66px), rgba(255, 230, 216, 0.8) 0%, rgba(255, 196, 192, 0.76) 54%, transparent 74%),
-        radial-gradient(ellipse 34% 24% at 50% 40%, rgba(255, 236, 226, 0.8) 0%, rgba(255, 214, 204, 0.68) 58%, transparent 78%),
-        radial-gradient(ellipse 30% 20% at 54% 66%, rgba(255, 220, 206, 0.74) 0%, transparent 74%);
+        radial-gradient(64px 46px at 16% 60px, rgba(255, 248, 242, 0.82) 0%, rgba(255, 214, 200, 0.78) 54%, transparent 74%),
+        radial-gradient(90px 54px at 38% 70px, rgba(255, 230, 210, 0.8) 0%, rgba(246, 196, 214, 0.76) 52%, transparent 74%),
+        radial-gradient(48px 36px at 58% 52px, rgba(255, 224, 184, 0.8) 0%, rgba(255, 204, 194, 0.74) 54%, transparent 74%),
+        radial-gradient(78px 50px at 78% 66px, rgba(255, 240, 228, 0.8) 0%, rgba(255, 208, 196, 0.76) 52%, transparent 74%),
+        radial-gradient(56px 42px at 93% 58px, rgba(255, 236, 220, 0.78) 0%, rgba(255, 206, 196, 0.74) 54%, transparent 74%),
+        radial-gradient(72px 50px at 88px 14%, rgba(255, 244, 236, 0.82) 0%, rgba(255, 206, 198, 0.76) 54%, transparent 74%),
+        radial-gradient(40px 34px at 100px 36%, rgba(255, 226, 208, 0.76) 0%, rgba(248, 196, 212, 0.7) 54%, transparent 74%),
+        radial-gradient(84px 62px at 100px 58%, rgba(255, 236, 224, 0.8) 0%, rgba(255, 198, 188, 0.74) 54%, transparent 74%),
+        radial-gradient(48px 40px at 108px 82%, rgba(255, 228, 214, 0.78) 0%, rgba(255, 196, 190, 0.72) 54%, transparent 74%),
+        radial-gradient(80px 56px at calc(100% - 96px) 20%, rgba(255, 228, 196, 0.8) 0%, rgba(255, 196, 184, 0.74) 54%, transparent 74%),
+        radial-gradient(36px 30px at calc(100% - 92px) 42%, rgba(255, 236, 222, 0.76) 0%, rgba(246, 194, 208, 0.7) 54%, transparent 74%),
+        radial-gradient(76px 70px at calc(100% - 92px) 66%, rgba(255, 218, 202, 0.8) 0%, rgba(255, 194, 184, 0.74) 54%, transparent 74%),
+        radial-gradient(52px 36px at calc(100% - 104px) 86%, rgba(255, 232, 216, 0.78) 0%, rgba(255, 200, 192, 0.72) 54%, transparent 74%),
+        radial-gradient(58px 40px at 12% calc(100% - 56px), rgba(255, 214, 224, 0.8) 0%, rgba(244, 188, 206, 0.76) 54%, transparent 74%),
+        radial-gradient(86px 48px at 36% calc(100% - 64px), rgba(255, 224, 194, 0.8) 0%, rgba(255, 202, 182, 0.74) 52%, transparent 74%),
+        radial-gradient(44px 32px at 58% calc(100% - 48px), rgba(255, 230, 216, 0.78) 0%, rgba(255, 196, 192, 0.72) 54%, transparent 74%),
+        radial-gradient(74px 46px at 80% calc(100% - 62px), rgba(255, 218, 204, 0.8) 0%, rgba(255, 196, 186, 0.74) 54%, transparent 74%),
+        radial-gradient(ellipse 28% 18% at 46% 40%, rgba(255, 236, 226, 0.78) 0%, rgba(255, 214, 204, 0.62) 60%, transparent 78%),
+        radial-gradient(ellipse 32% 16% at 58% 62%, rgba(255, 220, 206, 0.72) 0%, transparent 74%);
       filter:
         blur(8px)
         drop-shadow(0 16px 18px rgba(12, 6, 16, 0.28))
@@ -190,7 +195,7 @@
       content: "";
       position: absolute;
       z-index: 0;
-      inset: 28px 22px 18px 22px;
+      inset: 36px 28px 26px 28px;
       pointer-events: none;
       border-radius: 50%;
       background:
@@ -380,8 +385,8 @@
       margin-top: 18px; color: var(--muted); font-size: 0.85rem;
     }
     @media (max-width: 520px) {
-      .wrap { padding: 16px 12px 32px; }
-      .board { padding: 84px 62px 44px; gap: 56px; }
+      .wrap { padding: 16px 8px 32px; }
+      .board { padding: 96px 68px 84px; gap: 140px; }
       .thumb { height: 220px; width: calc(220px * 9 / 16); }
       .actions, .toss-actions { flex-direction: column; }
       .keep, .toss, .confirm, .text-btn { width: 100%; }
