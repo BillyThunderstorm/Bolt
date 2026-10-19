@@ -25,7 +25,9 @@ import json
 import os
 import re
 from datetime import date, datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+
+from modules.Clip_Ranker import parse_clip_filename
 
 # Post-reorg layout: this file lives at Core/modules/ → repo root is parents[2]
 _REPO = Path(__file__).resolve().parents[2]
@@ -47,6 +49,13 @@ RANKINGS_FILE = DATA_DIR / "rankings.json"
 QUEUE_FILE = DATA_DIR / "ready_to_post.json"
 OUTPUT_FILE = DATA_DIR / "Bolt_data.js"
 HTML_FILE = _REPO / "App" / "Bolt_Checkup.html"
+# Thumbnails and "does this file exist?" checks stay inside this root.
+# `bolt review --fixtures` points it at a sample directory. The live board uses the repo.
+REVIEW_MEDIA_ROOT = _REPO
+
+_VIDEO_SUFFIXES = {".mp4", ".mkv", ".mov", ".webm", ".m4v"}
+_THUMB_SUFFIXES = {".jpg", ".jpeg"}
+_CLOSED_REVIEW_STATUSES = {"posted", "scrapped"}
 
 
 def _count_clips() -> int:
@@ -432,6 +441,277 @@ def _clip_score(item: dict, lookup: dict):
     return None
 
 
+def _path_inside(path: Path, root: Path) -> Path | None:
+    """Resolved path if it stays inside `root` after symlink resolution."""
+    try:
+        resolved = path.resolve()
+        resolved.relative_to(root)
+    except (OSError, ValueError):
+        return None
+    return resolved
+
+
+def _child_inside(parent: Path, name: str, root: Path) -> Path | None:
+    """One path segment under `parent`, case-insensitive, still inside `root`."""
+    if name in ("", ".", "..") or "/" in name or "\\" in name or "\x00" in name:
+        return None
+    chosen: Path | None = None
+    direct = parent / name
+    try:
+        if direct.exists():
+            chosen = direct
+    except OSError:
+        chosen = None
+    if chosen is None:
+        if not parent.is_dir():
+            return None
+        folded = name.casefold()
+        try:
+            for child in parent.iterdir():
+                if child.name.casefold() == folded:
+                    chosen = child
+                    break
+        except OSError:
+            return None
+    if chosen is None or _path_inside(chosen, root) is None:
+        return None
+    return chosen
+
+
+def _walk_inside(root: Path, parts: list[str]) -> Path | None:
+    current = root
+    for part in parts:
+        nxt = _child_inside(current, part, root)
+        if nxt is None:
+            return None
+        current = nxt
+    inside = _path_inside(current, root)
+    if inside is None or not inside.is_file():
+        return None
+    return inside
+
+
+def resolve_clip_in_root(clip_path: str, root: Path | None = None) -> Path | None:
+    """Map a queue path onto a file inside `root`.
+
+    Queue rows often store absolute Mac paths (`/Users/carter/developer/Bolt/media/...`)
+    whose casing may not match this checkout. The lookup uses the `media/`,
+    `clips/`, or `vertical_clips/` suffix and walks case-insensitively.
+    A file that resolves outside `root` is ignored.
+    """
+    base = (root or REVIEW_MEDIA_ROOT).resolve()
+    raw = str(clip_path or "").strip()
+    if not raw or "\x00" in raw:
+        return None
+    direct = Path(raw)
+    if direct.is_absolute():
+        inside = _path_inside(direct, base)
+        if inside is not None and inside.is_file():
+            return inside
+
+    posix = raw.replace("\\", "/")
+    parts = [part for part in PurePosixPath(posix).parts if part not in ("/", "")]
+    lowers = [part.casefold() for part in parts]
+    candidates: list[list[str]] = []
+    for index in range(len(lowers) - 1, -1, -1):
+        if lowers[index] == "media":
+            candidates.append(parts[index:])
+    for index in range(len(lowers) - 1, -1, -1):
+        part = lowers[index]
+        if part in ("clips", "vertical_clips") and (
+            index == 0 or lowers[index - 1] != "media"
+        ):
+            candidates.append(parts[index:])
+    if not posix.startswith("/"):
+        candidates.append(parts)
+
+    seen: set[tuple[str, ...]] = set()
+    for rel in candidates:
+        if not rel or any(part in ("", ".", "..") for part in rel):
+            continue
+        key = tuple(part.casefold() for part in rel)
+        if key in seen:
+            continue
+        seen.add(key)
+        found = _walk_inside(base, rel)
+        if found is not None:
+            return found
+    return None
+
+
+def review_file_exists(clip_path: str, root: Path | None = None) -> bool:
+    """True when the queued video is on disk, including a repo-relative match."""
+    raw = str(clip_path or "").strip()
+    if raw:
+        try:
+            if Path(raw).is_file():
+                return True
+        except OSError:
+            pass
+    found = resolve_clip_in_root(raw, root)
+    return bool(found and found.suffix.lower() in _VIDEO_SUFFIXES)
+
+
+def thumbnail_for_clip(clip_path: str, root: Path | None = None) -> Path | None:
+    """JPG next to the clip, same stem, and only if it stays inside `root`."""
+    base = (root or REVIEW_MEDIA_ROOT).resolve()
+    video = resolve_clip_in_root(clip_path, base)
+    if video is not None:
+        for suffix in (".jpg", ".jpeg"):
+            inside = _path_inside(video.with_suffix(suffix), base)
+            if inside is not None and inside.is_file() and inside.suffix.lower() in _THUMB_SUFFIXES:
+                return inside
+    raw = str(clip_path or "").strip()
+    if not raw:
+        return None
+    for suffix in (".jpg", ".jpeg"):
+        found = resolve_clip_in_root(str(Path(raw).with_suffix(suffix)), base)
+        if found is not None and found.suffix.lower() in _THUMB_SUFFIXES:
+            return found
+    return None
+
+
+def _review_sort_key(clip: dict):
+    score = clip.get("score")
+    numeric = score if isinstance(score, (int, float)) else -1
+    return (0 if clip.get("actionable") else 1, -numeric, str(clip.get("filename") or ""))
+
+
+def _review_counts(clips: list) -> dict:
+    counts = {
+        "total": len(clips),
+        "ready": 0,
+        "held": 0,
+        "posted": 0,
+        "scrapped": 0,
+        "other": 0,
+        "actionable": 0,
+    }
+    for clip in clips:
+        status = str(clip.get("status") or "")
+        if status == "ready":
+            counts["ready"] += 1
+        elif status == "held":
+            counts["held"] += 1
+        elif status == "posted":
+            counts["posted"] += 1
+        elif status == "scrapped":
+            counts["scrapped"] += 1
+        else:
+            counts["other"] += 1
+        if clip.get("actionable"):
+            counts["actionable"] += 1
+    return counts
+
+
+def _review_row(item: dict, lookup: dict) -> dict:
+    clip_path = str(item.get("clip_path") or item.get("path") or item.get("file") or "")
+    filename = Path(clip_path).name if clip_path else ""
+    parsed = parse_clip_filename(clip_path) if clip_path else {}
+    trigger = str(item.get("trigger") or parsed.get("trigger") or "")
+    status = str(item.get("status") or "").lower()
+    tier = str(item.get("tier") or "")
+    score = _clip_score(item, lookup)
+    exists = review_file_exists(clip_path)
+    listed = _listed_status(status)
+    if status == "held":
+        pill = "held"
+    elif status == "ready" and tier == "mid":
+        pill = "queued"
+    elif status in _CLOSED_REVIEW_STATUSES:
+        pill = status
+    else:
+        pill = listed
+    title = str(item.get("title") or "").strip()
+    if not title:
+        title = Path(filename).stem if filename else "Untitled clip"
+    return {
+        "id": str(item.get("id") or ""),
+        "title": title,
+        "score": score,
+        "status": status,
+        "pill": pill,
+        "tier": tier,
+        "trigger": trigger,
+        "clip_index": parsed.get("index"),
+        "platform": _infer_platform(clip_path, item.get("platform")),
+        "filename": filename,
+        "file_exists": exists,
+        "ghost": status not in _CLOSED_REVIEW_STATUSES and not exists,
+        "hold_reason": str(item.get("hold_reason") or ""),
+        "has_thumbnail": thumbnail_for_clip(clip_path) is not None,
+        "hidden_default": status in _CLOSED_REVIEW_STATUSES,
+        "actionable": status == "ready" and exists,
+    }
+
+
+def gather_review() -> dict:
+    """Read-only snapshot of the clip queue for the review board and checkup card.
+
+    Does not call `_ensure_auto_post_plan` or write the queue. Posted and scrapped
+    rows stay in `clips` so the board can reveal them; `top` is the first three
+    still-open rows after the actionable-then-score sort.
+    """
+    footer = "Keep never posts. Posting still needs `bolt approve` / your OK."
+    command = "bolt review"
+    empty_hint = "No clips in the queue yet. Process a recording, then run `bolt queue list`."
+    if not QUEUE_FILE.exists():
+        counts = _review_counts([])
+        return {
+            "empty": True,
+            "hint": empty_hint,
+            "counts": counts,
+            "clips": [],
+            "top": [],
+            "command": command,
+            "footer": footer,
+            "thumbnail_tip": False,
+        }
+    rows = [row for row in _load_queue() if isinstance(row, dict)]
+    lookup = _ranking_scores(_json_rows(_read_json_document(RANKINGS_FILE)))
+    clips = [_review_row(row, lookup) for row in rows]
+    clips.sort(key=_review_sort_key)
+    counts = _review_counts(clips)
+    if not clips:
+        return {
+            "empty": True,
+            "hint": empty_hint,
+            "counts": counts,
+            "clips": [],
+            "top": [],
+            "command": command,
+            "footer": footer,
+            "thumbnail_tip": False,
+        }
+    hint = ""
+    if counts["actionable"] == 0:
+        hint = (
+            f"Nothing to review: {counts['posted']} posted, "
+            f"{counts['scrapped']} scrapped, {counts['held']} held."
+        )
+    top = [
+        {
+            "id": clip["id"],
+            "title": clip["title"],
+            "score": clip["score"],
+            "status": clip["pill"],
+        }
+        for clip in clips
+        if not clip["hidden_default"]
+    ][:3]
+    open_rows = [clip for clip in clips if not clip["hidden_default"]]
+    return {
+        "empty": False,
+        "hint": hint,
+        "counts": counts,
+        "clips": clips,
+        "top": top,
+        "command": command,
+        "footer": footer,
+        "thumbnail_tip": any(not clip["has_thumbnail"] for clip in open_rows),
+    }
+
+
 def _morning_clips() -> dict:
     queue_data = _read_json_document(QUEUE_FILE)
     rank_data = _read_json_document(RANKINGS_FILE)
@@ -688,6 +968,18 @@ def gather_stats() -> dict:
         stats["morning"] = gather_morning()
     except Exception as exc:
         stats["morning"] = {"error": f"{exc.__class__.__name__}: {exc}"[:240]}
+    try:
+        review = gather_review()
+        stats["review"] = {
+            "empty": review["empty"],
+            "hint": review["hint"],
+            "counts": review["counts"],
+            "top": review["top"],
+            "command": review["command"],
+            "footer": review["footer"],
+        }
+    except Exception as exc:
+        stats["review"] = {"error": f"{exc.__class__.__name__}: {exc}"[:240]}
     return stats
 
 
@@ -789,8 +1081,17 @@ def _main(argv=None) -> int:
     else:
         print("\n  Full stats:")
         for k, v in stats.items():
-            if k not in ("api_keys", "top_clip", "phase", "morning"):
+            if k not in ("api_keys", "top_clip", "phase", "morning", "review"):
                 print(f"    {k:20} {v}")
+        review = stats.get("review") or {}
+        if isinstance(review, dict) and review.get("counts"):
+            counts = review["counts"]
+            print(
+                "\n  Clip review: "
+                f"ready {counts.get('ready', 0)} · held {counts.get('held', 0)} · "
+                f"posted {counts.get('posted', 0)}"
+            )
+            print("  Open the board: bolt review")
         morning = stats.get("morning") or {}
         if isinstance(morning, dict) and morning.get("greeting"):
             print(f"\n  {morning['greeting']}")

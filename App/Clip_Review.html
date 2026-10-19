@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Clip review</title>
+  <!-- BOLT_REVIEW_BOOT -->
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --panel: #141a24;
+      --panel-2: #1a2230;
+      --text: #e8eef7;
+      --muted: #8b9bb4;
+      --line: rgba(255,255,255,0.08);
+      --ready: #3dd68c;
+      --partial: #f5c542;
+      --shell: #ff6b6b;
+      --idea: #9aa4b5;
+      --accent: #6ea8ff;
+      --glow: rgba(110,168,255,0.25);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(110,168,255,0.18), transparent 60%),
+        radial-gradient(900px 500px at 100% 0%, rgba(61,214,140,0.12), transparent 55%),
+        var(--bg);
+      color: var(--text);
+    }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 22px 16px 40px; }
+    header {
+      display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+      gap: 12px; margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0; font-size: 1.55rem; letter-spacing: -0.02em;
+      display: flex; align-items: center; gap: 10px;
+    }
+    h1 img { width: 28px; height: 28px; border-radius: 8px; }
+    .meta { color: var(--muted); font-size: 0.92rem; }
+    .banner, .empty, .tip {
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      padding: 14px 16px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .banner { border-style: solid; border-color: rgba(245,197,66,0.45); color: var(--partial); }
+    .tip { font-size: 0.88rem; }
+    .counts { color: var(--text); font-size: 0.95rem; margin-bottom: 10px; }
+    .counts strong { font-weight: 650; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+    .chip, .text-btn, .keep, .toss, .confirm, .undo {
+      font: inherit; cursor: pointer; border-radius: 999px;
+    }
+    .chip, .text-btn {
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      border: 1px solid var(--line);
+      padding: 6px 12px;
+    }
+    .chip.active { color: var(--accent); border-color: rgba(110,168,255,0.55); background: rgba(110,168,255,0.12); }
+    .board {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media (min-width: 880px) {
+      .board { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    .clip-card {
+      background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      min-width: 0;
+    }
+    .clip-card.done { opacity: 0.72; }
+    .thumb {
+      width: calc(200px * 9 / 16);
+      height: 200px;
+      max-width: 100%;
+      margin: 0 auto 12px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .placeholder {
+      text-align: center; color: var(--muted); padding: 12px;
+    }
+    .placeholder .mark { font-size: 1.8rem; color: var(--accent); display: block; }
+    .placeholder .who { margin-top: 6px; font-size: 0.82rem; word-break: break-word; }
+    .ghost-badge, .badge {
+      display: inline-block; padding: 4px 8px; border-radius: 999px;
+      background: rgba(255,107,107,0.15); color: var(--shell);
+      font-weight: 650; font-size: 0.75rem;
+    }
+    .ghost-badge { position: absolute; top: 8px; left: 8px; }
+    .title-row, .meta-row, .actions {
+      display: flex; justify-content: space-between; gap: 8px; align-items: flex-start;
+    }
+    .title-row h2 {
+      margin: 0; font-size: 1rem; font-weight: 650; letter-spacing: -0.01em;
+      word-break: break-word;
+    }
+    .meta-row { margin-top: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-start; }
+    .filename {
+      display: block; margin-top: 8px; color: var(--muted); font-size: 0.78rem;
+      word-break: break-all;
+    }
+    code { color: var(--accent); }
+    .pill {
+      display: inline-block; padding: 2px 8px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 650; white-space: nowrap;
+    }
+    .pill.good { color: var(--ready); background: rgba(61,214,140,0.12); }
+    .pill.mid { color: var(--partial); background: rgba(245,197,66,0.12); }
+    .pill.bad { color: var(--shell); background: rgba(255,107,107,0.12); }
+    .pill.status {
+      margin-right: 6px; font-weight: 600; text-transform: lowercase;
+      color: var(--muted); background: rgba(255,255,255,0.06);
+    }
+    .pill.status.ready { color: var(--ready); background: rgba(61,214,140,0.12); }
+    .pill.status.held { color: var(--partial); background: rgba(245,197,66,0.12); }
+    .pill.status.queued { color: var(--muted); background: rgba(255,255,255,0.06); }
+    .trigger { color: var(--muted); font-size: 0.85rem; }
+    .hold { color: var(--partial); font-size: 0.85rem; margin: 8px 0 0; }
+    .actions { margin-top: 12px; }
+    .keep, .toss, .confirm {
+      background: transparent; padding: 8px 14px; font-weight: 650;
+    }
+    .keep { color: var(--ready); border: 1px solid var(--ready); }
+    .toss, .confirm { color: var(--shell); border: 1px solid var(--shell); }
+    .keep:disabled, .toss:disabled, .confirm:disabled { opacity: 0.4; cursor: default; }
+    .toss-panel { margin-top: 10px; }
+    .reasons { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .reason-input, .note-line {
+      width: 100%; border-radius: 10px; border: 1px solid var(--line);
+      background: rgba(0,0,0,0.25); color: var(--text); font: inherit;
+      padding: 8px 10px;
+    }
+    .toss-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .result { margin: 10px 0 0; font-weight: 650; }
+    .result.kept { color: var(--ready); }
+    .result.held { color: var(--partial); }
+    .undo {
+      background: transparent; color: var(--accent); border: none;
+      padding: 0 0 0 4px; font-weight: 650;
+    }
+    .error-line { color: var(--shell); font-size: 0.85rem; margin: 8px 0 0; }
+    .block h3 {
+      margin: 0 0 8px; font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--muted); font-weight: 600;
+    }
+    footer {
+      margin-top: 18px; color: var(--muted); font-size: 0.85rem;
+    }
+    @media (max-width: 520px) {
+      .wrap { padding: 16px 12px 32px; }
+      .thumb { height: 220px; width: calc(220px * 9 / 16); }
+      .actions, .toss-actions { flex-direction: column; }
+      .keep, .toss, .confirm, .text-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1><img src="assets/menu_bar_icon.png" alt="" /> Clip review</h1>
+        <div class="meta" id="subhead">Ranked queue · local only</div>
+      </div>
+    </header>
+    <div id="banner" class="banner" hidden>
+      Read-only. Run <code>bolt review</code> to keep/toss. Buttons copy commands.
+    </div>
+    <div id="counts" class="counts" hidden></div>
+    <div id="toolbar" class="toolbar" hidden></div>
+    <div id="tip" class="tip" hidden></div>
+    <div id="empty" class="empty" hidden></div>
+    <div id="board" class="board"></div>
+    <footer id="footer">Keep never posts. Posting still needs <code>bolt approve</code> / your OK.</footer>
+  </div>
+  <script>
+    (function () {
+      var REASONS = ["weak hook", "boring", "bad audio", "duplicate", "off-brand"];
+      var state = {
+        board: null,
+        filter: "all",
+        showClosed: false,
+        scoreDir: "desc",
+        readonly: location.protocol === "file:" || !window.BOLT_REVIEW_TOKEN,
+        busy: false
+      };
+
+      var banner = document.getElementById("banner");
+      var countsEl = document.getElementById("counts");
+      var toolbar = document.getElementById("toolbar");
+      var tipEl = document.getElementById("tip");
+      var emptyEl = document.getElementById("empty");
+      var boardEl = document.getElementById("board");
+      var footer = document.getElementById("footer");
+
+      if (state.readonly) {
+        banner.hidden = false;
+        emptyEl.hidden = false;
+        emptyEl.textContent = "No clips in the queue yet. Process a recording, then run `bolt queue list`.";
+        return;
+      }
+
+      boardEl.addEventListener("click", onBoardClick);
+      toolbar.addEventListener("click", onToolbarClick);
+      load();
+
+      function load() {
+        return fetch("/api/clips", { headers: { "Accept": "application/json" } })
+          .then(function (resp) { return readJson(resp); })
+          .then(function (data) {
+            state.board = data;
+            render();
+          })
+          .catch(function (err) {
+            emptyEl.hidden = false;
+            emptyEl.textContent = "";
+            var line = document.createElement("p");
+            line.className = "error-line";
+            line.textContent = err && err.message ? err.message : "Could not load the queue.";
+            emptyEl.appendChild(line);
+          });
+      }
+
+      function readJson(resp) {
+        return resp.json().catch(function () { return {}; }).then(function (data) {
+          if (!resp.ok || data.ok === false) {
+            throw new Error((data && data.error) || "Request failed");
+          }
+          return data;
+        });
+      }
+
+      function post(path, payload) {
+        return fetch(path, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Bolt-Review-Token": window.BOLT_REVIEW_TOKEN
+          },
+          body: JSON.stringify(payload)
+        }).then(readJson);
+      }
+
+      function render() {
+        var board = state.board || { clips: [], counts: {}, empty: true };
+        footer.textContent = board.footer || "Keep never posts. Posting still needs bolt approve / your OK.";
+        renderCounts(board);
+        renderToolbar(board);
+        renderTip(board);
+        var rows = visibleClips(board);
+        boardEl.innerHTML = "";
+        if (!rows.length) {
+          emptyEl.hidden = false;
+          emptyEl.innerHTML = "";
+          emptyEl.appendChild(emptyNode(board));
+        } else {
+          emptyEl.hidden = true;
+          rows.forEach(function (clip) {
+            boardEl.appendChild(cardNode(clip));
+          });
+        }
+      }
+
+      function renderCounts(board) {
+        var counts = board.counts || {};
+        countsEl.hidden = false;
+        countsEl.innerHTML =
+          "<strong>" + num(counts.ready) + "</strong> Ready · " +
+          "<strong>" + num(counts.held) + "</strong> Held · " +
+          "<strong>" + num(counts.posted) + "</strong> Posted · " +
+          "<strong>" + num(counts.scrapped) + "</strong> Scrapped";
+      }
+
+      function renderToolbar(board) {
+        toolbar.hidden = false;
+        var closed = num((board.counts || {}).posted) + num((board.counts || {}).scrapped);
+        toolbar.innerHTML =
+          chip("all", "All") +
+          chip("actionable", "Actionable") +
+          chip("held", "Held") +
+          '<button type="button" class="chip" data-toolbar="score">Score ' +
+            (state.scoreDir === "asc" ? "↑" : "↓") + "</button>" +
+          '<button type="button" class="text-btn" data-toolbar="closed">' +
+            (state.showClosed ? "Hide posted/scrapped" : "Show posted/scrapped (" + closed + ")") +
+          "</button>";
+      }
+
+      function chip(id, label) {
+        var active = state.filter === id ? " active" : "";
+        return '<button type="button" class="chip' + active + '" data-toolbar="filter" data-filter="' +
+          id + '">' + label + "</button>";
+      }
+
+      function renderTip(board) {
+        var open = (board.clips || []).filter(function (clip) { return !clip.hidden_default; });
+        var missing = open.some(function (clip) { return !clip.has_thumbnail; });
+        if (!missing) {
+          tipEl.hidden = true;
+          return;
+        }
+        tipEl.hidden = false;
+        tipEl.innerHTML = "No thumbnail yet. Run <code>bolt thumbnails</code> " +
+          "(<code>python scripts/generate_thumbnails.py</code>, requires ffmpeg).";
+      }
+
+      function visibleClips(board) {
+        var rows = (board.clips || []).slice();
+        rows = rows.filter(function (clip) {
+          if (!state.showClosed && clip.hidden_default) return false;
+          if (state.filter === "actionable") return !!clip.actionable;
+          if (state.filter === "held") return clip.status === "held";
+          return true;
+        });
+        rows.sort(function (a, b) {
+          var as = scoreNum(a);
+          var bs = scoreNum(b);
+          if (state.scoreDir === "asc") {
+            var actionableFirst = (a.actionable ? 0 : 1) - (b.actionable ? 0 : 1);
+            if (actionableFirst) return actionableFirst;
+            return as - bs;
+          }
+          var group = (a.actionable ? 0 : 1) - (b.actionable ? 0 : 1);
+          if (group) return group;
+          return bs - as;
+        });
+        return rows;
+      }
+
+      function emptyNode(board) {
+        var wrap = document.createElement("div");
+        var text = document.createElement("p");
+        text.className = "meta";
+        if (board.empty) {
+          text.textContent = board.hint || "No clips in the queue yet. Process a recording, then run `bolt queue list`.";
+          wrap.appendChild(text);
+          return wrap;
+        }
+        if (state.filter === "actionable") {
+          text.textContent = board.hint || "Nothing to review.";
+          wrap.appendChild(text);
+          var button = document.createElement("button");
+          button.type = "button";
+          button.className = "text-btn";
+          button.setAttribute("data-act", "show-held");
+          button.textContent = "Show held";
+          wrap.appendChild(button);
+          return wrap;
+        }
+        text.textContent = "No clips in this filter.";
+        wrap.appendChild(text);
+        return wrap;
+      }
+
+      function cardNode(clip) {
+        var card = document.createElement("article");
+        card.className = "clip-card";
+        card.setAttribute("data-id", clip.id || "");
+        card.appendChild(thumbNode(clip));
+
+        var titleRow = document.createElement("div");
+        titleRow.className = "title-row";
+        var title = document.createElement("h2");
+        title.textContent = clip.title || "Untitled clip";
+        titleRow.appendChild(title);
+        var score = scorePill(clip.score);
+        if (score) titleRow.appendChild(score);
+        card.appendChild(titleRow);
+
+        var meta = document.createElement("div");
+        meta.className = "meta-row";
+        var pill = document.createElement("span");
+        pill.className = "pill status " + (clip.pill || "queued");
+        pill.textContent = clip.pill || clip.status || "queued";
+        meta.appendChild(pill);
+        if (clip.trigger) {
+          var trigger = document.createElement("span");
+          trigger.className = "trigger";
+          trigger.textContent = clip.trigger;
+          meta.appendChild(trigger);
+        }
+        if (clip.clip_index) {
+          var index = document.createElement("span");
+          index.className = "trigger";
+          index.textContent = "clip " + clip.clip_index;
+          meta.appendChild(index);
+        }
+        if (clip.platform) {
+          var platform = document.createElement("span");
+          platform.className = "trigger";
+          platform.textContent = clip.platform;
+          meta.appendChild(platform);
+        }
+        card.appendChild(meta);
+
+        if (clip.filename) {
+          var file = document.createElement("code");
+          file.className = "filename";
+          file.textContent = clip.filename;
+          card.appendChild(file);
+        }
+        if (clip.status === "held" && clip.hold_reason) {
+          var hold = document.createElement("p");
+          hold.className = "hold";
+          hold.textContent = clip.hold_reason;
+          card.appendChild(hold);
+        }
+        if (clip.ghost) {
+          var ghostNote = document.createElement("p");
+          ghostNote.className = "meta";
+          ghostNote.textContent = "Missing file. `bolt queue clean` scraps ghost rows.";
+          card.appendChild(ghostNote);
+        }
+
+        var actions = document.createElement("div");
+        actions.className = "actions";
+        var keep = document.createElement("button");
+        keep.type = "button";
+        keep.className = "keep";
+        keep.setAttribute("data-act", "keep");
+        keep.textContent = "Keep";
+        if (clip.ghost || !clip.file_exists) keep.disabled = true;
+        var toss = document.createElement("button");
+        toss.type = "button";
+        toss.className = "toss";
+        toss.setAttribute("data-act", "toss");
+        toss.textContent = "Toss";
+        if (clip.status !== "ready") toss.disabled = true;
+        actions.appendChild(keep);
+        actions.appendChild(toss);
+        card.appendChild(actions);
+
+        var panel = document.createElement("div");
+        panel.className = "toss-panel";
+        panel.hidden = true;
+        var reasons = document.createElement("div");
+        reasons.className = "reasons";
+        REASONS.forEach(function (reason) {
+          var button = document.createElement("button");
+          button.type = "button";
+          button.className = "chip";
+          button.setAttribute("data-act", "chip");
+          button.setAttribute("data-reason", reason);
+          button.textContent = reason;
+          reasons.appendChild(button);
+        });
+        panel.appendChild(reasons);
+        var input = document.createElement("input");
+        input.className = "reason-input";
+        input.type = "text";
+        input.placeholder = "Why toss this clip?";
+        input.setAttribute("aria-label", "Toss reason");
+        panel.appendChild(input);
+        var tossActions = document.createElement("div");
+        tossActions.className = "toss-actions";
+        var confirm = document.createElement("button");
+        confirm.type = "button";
+        confirm.className = "confirm";
+        confirm.setAttribute("data-act", "confirm-toss");
+        confirm.textContent = "Toss clip";
+        var cancel = document.createElement("button");
+        cancel.type = "button";
+        cancel.className = "text-btn";
+        cancel.setAttribute("data-act", "cancel-toss");
+        cancel.textContent = "Cancel";
+        tossActions.appendChild(confirm);
+        tossActions.appendChild(cancel);
+        panel.appendChild(tossActions);
+        card.appendChild(panel);
+
+        var result = document.createElement("p");
+        result.className = "result";
+        result.hidden = true;
+        card.appendChild(result);
+        var error = document.createElement("p");
+        error.className = "error-line";
+        error.hidden = true;
+        card.appendChild(error);
+        return card;
+      }
+
+      function thumbNode(clip) {
+        var thumb = document.createElement("div");
+        thumb.className = "thumb";
+        if (clip.has_thumbnail && clip.id) {
+          var img = document.createElement("img");
+          img.alt = "";
+          img.src = "/thumb/" + encodeURIComponent(clip.id);
+          thumb.appendChild(img);
+        } else {
+          var placeholder = document.createElement("div");
+          placeholder.className = "placeholder";
+          var mark = document.createElement("span");
+          mark.className = "mark";
+          mark.textContent = "⚡";
+          var who = document.createElement("div");
+          who.className = "who";
+          who.textContent = clip.trigger || "no trigger";
+          placeholder.appendChild(mark);
+          placeholder.appendChild(who);
+          thumb.appendChild(placeholder);
+        }
+        if (clip.ghost) {
+          var badge = document.createElement("span");
+          badge.className = "ghost-badge";
+          badge.textContent = "ghost";
+          thumb.appendChild(badge);
+        }
+        return thumb;
+      }
+
+      function scorePill(score) {
+        if (score === null || score === undefined || score === "") return null;
+        var n = Number(score);
+        if (!isFinite(n)) return null;
+        var el = document.createElement("span");
+        var cls = "bad";
+        if (n >= 75) cls = "good";
+        else if (n >= 50) cls = "mid";
+        el.className = "pill " + cls;
+        el.textContent = formatScore(n);
+        return el;
+      }
+
+      function onToolbarClick(event) {
+        var button = event.target.closest("[data-toolbar]");
+        if (!button) return;
+        var kind = button.getAttribute("data-toolbar");
+        if (kind === "filter") {
+          state.filter = button.getAttribute("data-filter") || "all";
+        } else if (kind === "score") {
+          state.scoreDir = state.scoreDir === "desc" ? "asc" : "desc";
+        } else if (kind === "closed") {
+          state.showClosed = !state.showClosed;
+        }
+        render();
+      }
+
+      function onBoardClick(event) {
+        var showHeld = event.target.closest("[data-act='show-held']");
+        if (showHeld) {
+          state.filter = "held";
+          render();
+          return;
+        }
+        var button = event.target.closest("[data-act]");
+        if (!button) return;
+        var card = button.closest(".clip-card");
+        if (!card) return;
+        var act = button.getAttribute("data-act");
+        var id = card.getAttribute("data-id") || "";
+        if (act === "toss") {
+          var panel = card.querySelector(".toss-panel");
+          if (panel) panel.hidden = false;
+          return;
+        }
+        if (act === "cancel-toss") {
+          var open = card.querySelector(".toss-panel");
+          if (open) open.hidden = true;
+          return;
+        }
+        if (act === "chip") {
+          var reason = button.getAttribute("data-reason") || "";
+          var input = card.querySelector(".reason-input");
+          if (input) input.value = reason;
+          card.querySelectorAll("[data-act='chip']").forEach(function (chipBtn) {
+            chipBtn.classList.toggle("active", chipBtn === button);
+          });
+          return;
+        }
+        if (act === "confirm-toss") {
+          var reasonInput = card.querySelector(".reason-input");
+          var reasonText = reasonInput ? reasonInput.value.trim() : "";
+          if (!reasonText) {
+            showError(card, "A reason is required.");
+            return;
+          }
+          if (state.readonly) {
+            copyText(dontpostCommand(id, reasonText));
+            showHeldResult(card, reasonText, true);
+            return;
+          }
+          runAction(card, function () {
+            return post("/api/toss", { id: id, reason: reasonText });
+          }, function () {
+            showHeldResult(card, reasonText, false);
+          });
+          return;
+        }
+        if (act === "undo") {
+          if (state.readonly) {
+            copyText("bolt queue unhold " + id);
+            showError(card, "Copied: bolt queue unhold " + id);
+            return;
+          }
+          runAction(card, function () {
+            return post("/api/undo", { id: id });
+          }, function (data) {
+            replaceCard(card, data.clip);
+          });
+          return;
+        }
+        if (act === "keep") {
+          if (state.readonly) {
+            showError(card, "Keep needs bolt review so it does not approve.");
+            return;
+          }
+          runAction(card, function () {
+            return post("/api/keep", { id: id, note: "" });
+          }, function () {
+            card.classList.add("done");
+            hideActions(card);
+            var result = card.querySelector(".result");
+            result.hidden = false;
+            result.className = "result kept";
+            result.textContent = "Kept ✓";
+          });
+        }
+      }
+
+      function runAction(card, request, onOk) {
+        if (state.busy) return;
+        state.busy = true;
+        clearError(card);
+        var buttons = card.querySelectorAll("button");
+        buttons.forEach(function (button) { button.disabled = true; });
+        request().then(function (data) {
+          state.busy = false;
+          if (data && data.clip) updateClip(data.clip);
+          onOk(data);
+        }).catch(function (err) {
+          state.busy = false;
+          buttons.forEach(function (button) { button.disabled = false; });
+          var keep = card.querySelector(".keep");
+          var clip = clipById(card.getAttribute("data-id"));
+          if (keep && clip && (clip.ghost || !clip.file_exists)) keep.disabled = true;
+          var toss = card.querySelector(".toss");
+          if (toss && clip && clip.status !== "ready") toss.disabled = true;
+          showError(card, err && err.message ? err.message : "Request failed.");
+        });
+      }
+
+      function showHeldResult(card, reason, copied) {
+        card.classList.add("done");
+        var pill = card.querySelector(".pill.status");
+        if (pill) {
+          pill.className = "pill status held";
+          pill.textContent = "held";
+        }
+        hideActions(card);
+        var panel = card.querySelector(".toss-panel");
+        if (panel) panel.hidden = true;
+        var result = card.querySelector(".result");
+        result.hidden = false;
+        result.className = "result held";
+        result.textContent = "";
+        result.appendChild(document.createTextNode("Held: " + reason + " · "));
+        if (copied) {
+          result.appendChild(document.createTextNode("Copied command"));
+          return;
+        }
+        var undo = document.createElement("button");
+        undo.type = "button";
+        undo.className = "undo";
+        undo.setAttribute("data-act", "undo");
+        undo.textContent = "Undo";
+        result.appendChild(undo);
+      }
+
+      function hideActions(card) {
+        var actions = card.querySelector(".actions");
+        if (actions) actions.hidden = true;
+      }
+
+      function replaceCard(card, clip) {
+        if (!clip) {
+          render();
+          return;
+        }
+        var fresh = cardNode(clip);
+        card.replaceWith(fresh);
+      }
+
+      function updateClip(clip) {
+        if (!state.board || !clip) return;
+        var clips = state.board.clips || [];
+        var found = false;
+        for (var i = 0; i < clips.length; i += 1) {
+          if (clips[i].id === clip.id) {
+            clips[i] = clip;
+            found = true;
+            break;
+          }
+        }
+        if (!found) return;
+        var counts = {
+          total: clips.length, ready: 0, held: 0, posted: 0,
+          scrapped: 0, other: 0, actionable: 0
+        };
+        clips.forEach(function (row) {
+          if (row.status === "ready") counts.ready += 1;
+          else if (row.status === "held") counts.held += 1;
+          else if (row.status === "posted") counts.posted += 1;
+          else if (row.status === "scrapped") counts.scrapped += 1;
+          else counts.other += 1;
+          if (row.actionable) counts.actionable += 1;
+        });
+        state.board.counts = counts;
+        renderCounts(state.board);
+        renderToolbar(state.board);
+      }
+
+      function clipById(id) {
+        var clips = (state.board && state.board.clips) || [];
+        for (var i = 0; i < clips.length; i += 1) {
+          if (clips[i].id === id) return clips[i];
+        }
+        return null;
+      }
+
+      function showError(card, message) {
+        var line = card.querySelector(".error-line");
+        if (!line) return;
+        line.hidden = false;
+        line.textContent = message;
+      }
+
+      function clearError(card) {
+        var line = card.querySelector(".error-line");
+        if (!line) return;
+        line.hidden = true;
+        line.textContent = "";
+      }
+
+      function dontpostCommand(id, reason) {
+        return "bolt dontpost " + id + " " + doubleQuote(reason);
+      }
+
+      function doubleQuote(text) {
+        return '"' + String(text).replace(/(["\\$`])/g, "\\$1") + '"';
+      }
+
+      function copyText(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).catch(function () { fallbackCopy(text); });
+          return;
+        }
+        fallbackCopy(text);
+      }
+
+      function fallbackCopy(text) {
+        var area = document.createElement("textarea");
+        area.value = text;
+        document.body.appendChild(area);
+        area.select();
+        try { document.execCommand("copy"); } catch (err) { /* file:// may block the clipboard */ }
+        area.remove();
+      }
+
+      function scoreNum(clip) {
+        if (clip.score === null || clip.score === undefined || clip.score === "") return -1;
+        var n = Number(clip.score);
+        return isFinite(n) ? n : -1;
+      }
+
+      function formatScore(n) {
+        if (Math.abs(n - Math.round(n)) < 0.05) return String(Math.round(n));
+        return String(Math.round(n * 10) / 10);
+      }
+
+      function num(value) {
+        var n = Number(value || 0);
+        return isFinite(n) ? n : 0;
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+{
+  "_sample": "SAMPLE",
+  "_note": "SAMPLE DATA — not William's post queue. Fixture for the clip review board only.",
+  "clips": [
+    {
+      "id": "a11ce001",
+      "title": "SAMPLE #007FirstLight",
+      "score": 91,
+      "tier": "queue",
+      "status": "ready",
+      "trigger": "audio_spike",
+      "game": "SAMPLE",
+      "hashtags": ["SAMPLE"],
+      "clip_path": "/Users/carter/developer/Bolt/Media/Clips/SAMPLE2889961274_clip01_audio_spike_132.mp4",
+      "auto_post": {
+        "enabled": true,
+        "status": "scheduled",
+        "scheduled_for": "2026-10-20T19:00:00-04:00",
+        "review_starts_at": "2026-10-20T18:30:00-04:00",
+        "approval_deadline": "2026-10-20T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "privacy": "PUBLIC_TO_EVERYONE"
+      }
+    },
+    {
+      "id": "b22ce002",
+      "title": "SAMPLE clutch audio spike",
+      "score": 76,
+      "tier": "queue",
+      "status": "ready",
+      "trigger": "chat_spike",
+      "game": "SAMPLE",
+      "hashtags": ["SAMPLE"],
+      "clip_path": "/Users/carter/developer/Bolt/media/clips/SAMPLE2889961274_clip02_chat_spike_240.mp4",
+      "auto_post": {
+        "enabled": true,
+        "status": "awaiting_approval",
+        "scheduled_for": "2026-10-21T12:00:00-04:00",
+        "review_starts_at": "2026-10-21T11:30:00-04:00",
+        "approval_deadline": "2026-10-21T12:00:00-04:00",
+        "auto_post_if_deadline_missed": true,
+        "privacy": "PUBLIC_TO_EVERYONE"
+      }
+    },
+    {
+      "id": "c33ce003",
+      "title": "SAMPLE quiet fail",
+      "score": 42,
+      "tier": "queue",
+      "status": "ready",
+      "trigger": "low_energy",
+      "game": "SAMPLE",
+      "hashtags": ["SAMPLE"],
+      "clip_path": "/Users/carter/developer/Bolt/media/clips/SAMPLE2889961274_clip03_low_energy_15.mp4",
+      "auto_post": {
+        "enabled": true,
+        "status": "scheduled",
+        "scheduled_for": "2026-10-20T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true
+      }
+    },
+    {
+      "id": "d44ce004",
+      "title": "SAMPLE held lobby",
+      "score": 70,
+      "tier": "queue",
+      "status": "held",
+      "hold_reason": "boring",
+      "trigger": "audio_spike",
+      "game": "SAMPLE",
+      "hashtags": ["SAMPLE"],
+      "clip_path": "/Users/carter/developer/Bolt/media/clips/SAMPLE2889961274_clip04_audio_spike_88.mp4"
+    },
+    {
+      "id": "e55ce005",
+      "title": "SAMPLE already posted",
+      "score": 99,
+      "tier": "queue",
+      "status": "posted",
+      "trigger": "audio_spike",
+      "game": "SAMPLE",
+      "clip_path": "/Users/carter/developer/Bolt/media/clips/SAMPLE2889961274_clip05_audio_spike_10.mp4"
+    },
+    {
+      "id": "f66ce006",
+      "title": "SAMPLE scrapped take",
+      "score": 12,
+      "tier": "discard",
+      "status": "scrapped",
+      "trigger": "manual_mark",
+      "game": "SAMPLE",
+      "clip_path": "/Users/carter/developer/Bolt/media/clips/SAMPLE2889961274_clip06_manual_mark_3.mp4"
+    },
+    {
+      "id": "g77ce007",
+      "title": "SAMPLE mid-tier rotate",
+      "score": 61,
+      "tier": "mid",
+      "status": "ready",
+      "trigger": "manual_mark",
+      "game": "SAMPLE",
+      "hashtags": ["SAMPLE"],
+      "clip_path": "/Users/carter/developer/Bolt/media/clips/SAMPLE2889961274_clip07_manual_mark_40.mp4",
+      "auto_post": {
+        "enabled": true,
+        "status": "scheduled",
+        "scheduled_for": "2026-10-22T19:00:00-04:00",
+        "auto_post_if_deadline_missed": true
+      }
+    }
+  ]
+}
