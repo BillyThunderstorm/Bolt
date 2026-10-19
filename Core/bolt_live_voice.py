@@ -134,7 +134,7 @@ def main(argv: list[str] | None = None) -> int:
             once_prompt = " ".join(prompt_args).strip()
 
     if once_prompt:
-        conv.single_exchange(once_prompt)
+        conv.single_exchange(once_prompt, text_mode=text_mode)
         return 0
 
     if not text_mode and not getattr(conv, "SPEECH_OK", True):

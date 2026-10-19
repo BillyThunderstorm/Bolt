@@ -41,6 +41,70 @@ def _match_any(text: str, phrases: Tuple[str, ...]) -> bool:
     return any(p in text for p in phrases)
 
 
+# Words that can wrap a real command ("show me the posting queue", "what s this week"
+# after apostrophes are stripped). Anything else means he is talking, not ordering.
+_COMMAND_WRAPPERS = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "please",
+        "bolt",
+        "hey",
+        "hi",
+        "hello",
+        "yo",
+        "ok",
+        "okay",
+        "um",
+        "uh",
+        "can",
+        "could",
+        "would",
+        "will",
+        "you",
+        "me",
+        "my",
+        "i",
+        "we",
+        "show",
+        "give",
+        "tell",
+        "get",
+        "just",
+        "to",
+        "for",
+        "of",
+        "do",
+        "run",
+        "want",
+        "need",
+        "let",
+        "s",
+        "us",
+        "what",
+        "whats",
+        "how",
+        "is",
+        "are",
+        "now",
+    }
+)
+_COMMAND_TRAILING = frozenset({"please", "now", "next", "today", "looking", "thanks"})
+
+
+def _is_clear_command(text: str, phrase: str) -> bool:
+    """True when the phrase is the command, not a word inside a longer thought."""
+    if not phrase or phrase not in text:
+        return False
+    leftover = text.replace(phrase, " ", 1).split()
+    if all(word in _COMMAND_WRAPPERS for word in leftover):
+        return True
+    if leftover and leftover[-1] in _COMMAND_TRAILING:
+        return all(word in _COMMAND_WRAPPERS for word in leftover[:-1])
+    return False
+
+
 def _action_morning() -> str:
     try:
         from modules.Content_Manager import morning, is_good_morning_phrase
@@ -1055,8 +1119,9 @@ def suggest_repair(user_text: str) -> Optional[str]:
 
 
 def _match_action(text: str):
+    """Fire only when the message is a command, not a conversation that mentions one."""
     for phrases, action in _INTENT_TABLE:
-        if _match_any(text, phrases):
+        if any(_is_clear_command(text, phrase) for phrase in phrases):
             return action
     return None
 
