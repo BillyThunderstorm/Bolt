@@ -41,3 +41,9 @@ Bolt only knows what is written into its own files. This chat does not teach Bol
 Bolt's daily brain is **Ollama-first** (`BOLT_LLM_MODE=light`). Paid Grok API is reserved for high-value work. SuperGrok chat is not the API.
 
 Conversation, titles, and Nexus go through `LLM_Handler`. Do not invent a parallel chat brain.
+
+## Cursor Cloud specific instructions
+
+- Install with uv. `scripts/setup.sh` still expects a root `requirements.txt` and a Mac. Python is 3.11.15 (`.python-version`). `uv sync --frozen` installs the default set. Leave the `subtitles`, `ocr`, and `menubar` extras off unless that work needs them.
+- Linux packages the CLI needs: `ffmpeg`, `portaudio19-dev` (so `pyaudio` can build), and `wamerican` (`/usr/share/dict/words` for `bolt word`). Copy `.env.example` to `.env` when `.env` is absent. Empty optional keys are expected.
+- Day-to-day checks: `uv run bolt help`, `uv run bolt memsearch run "product testing"`, `uv run bolt word spell recieve`, `uv run bolt game status`, and `uv run pytest`. `bolt verify` still warns about a few missing doc paths and empty OBS, Twitch, and Discord keys; module imports should pass. `bolt doctor` exits non-zero when Ollama and optional integrations are down; paths, ffmpeg, and memory should report live. Ollama, paid API keys, and macOS-only tools soft-fail.
