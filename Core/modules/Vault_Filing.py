@@ -22,6 +22,7 @@ from modules.Vault_Store import (
     ACTIVITY_REL,
     BOARD_REL,
     CALENDAR_INDEX_REL,
+    CALENDAR_REL,
     TIMELINE_REL,
     VaultError,
     VaultStore,
@@ -307,6 +308,8 @@ def _candidate_notes():
     notes = []
     for note in VaultStore().list_notes():
         if note.rel in _SKIP_RELS or note.rel.startswith("90 Archive"):
+            continue
+        if note.rel == CALENDAR_INDEX_REL or note.rel.startswith(CALENDAR_REL + "/"):
             continue
         notes.append(note)
     return notes
