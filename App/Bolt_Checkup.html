@@ -23,6 +23,7 @@
     body {
       margin: 0;
       min-height: 100vh;
+      overflow-x: clip;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
       background:
         radial-gradient(1200px 600px at 10% -10%, rgba(110,168,255,0.18), transparent 60%),
@@ -176,7 +177,7 @@
     .review-card {
       position: relative;
       isolation: isolate;
-      margin-top: 28px;
+      margin-top: 56px;
       color: #2c1a22;
       border: none;
       background: transparent;
@@ -188,42 +189,43 @@
       content: "";
       position: absolute;
       z-index: 0;
-      inset: -8px -12px -10px -12px;
-      border-radius: 40px 56px 48px 34px;
+      inset: -64px -40px -56px -40px;
+      pointer-events: none;
       background:
-        radial-gradient(46% 42% at 0% 48%, rgba(255, 238, 230, 0.98) 0%, rgba(255, 206, 196, 0) 72%),
-        radial-gradient(44% 40% at 100% 58%, rgba(255, 220, 176, 0.96) 0%, rgba(255, 186, 150, 0) 72%),
-        radial-gradient(38% 34% at 12% 100%, rgba(255, 206, 216, 0.9) 0%, rgba(255, 176, 190, 0) 70%),
-        radial-gradient(42% 36% at 86% 100%, rgba(255, 214, 168, 0.88) 0%, rgba(255, 186, 140, 0) 72%),
-        radial-gradient(92% 72% at 16% 0%, rgba(255, 250, 242, 0.95), transparent 50%),
-        radial-gradient(74% 64% at 92% 8%, rgba(255, 210, 224, 0.78), transparent 54%),
-        radial-gradient(80% 58% at 48% 108%, rgba(244, 170, 146, 0.42), transparent 62%),
-        linear-gradient(168deg, #ffe8f1 0%, #ffd4c2 38%, #f7c4d6 72%, #ffe4c4 100%);
-      box-shadow:
-        0 0 0 1px rgba(255, 236, 214, 0.4),
-        0 16px 34px rgba(16, 6, 14, 0.38),
-        0 0 22px rgba(255, 196, 140, 0.48),
-        0 0 48px rgba(255, 168, 190, 0.24),
-        inset 0 1px 0 rgba(255, 255, 255, 0.78);
+        radial-gradient(150px 96px at 8% 42px, rgba(255, 248, 242, 0.84) 0%, rgba(255, 214, 200, 0.8) 52%, transparent 72%),
+        radial-gradient(190px 110px at 24% 28px, rgba(255, 230, 210, 0.82) 0%, rgba(246, 196, 214, 0.78) 50%, transparent 72%),
+        radial-gradient(120px 84px at 40% 56px, rgba(255, 224, 184, 0.84) 0%, rgba(255, 204, 194, 0.78) 54%, transparent 74%),
+        radial-gradient(210px 120px at 58% 24px, rgba(255, 240, 228, 0.82) 0%, rgba(255, 208, 196, 0.76) 50%, transparent 72%),
+        radial-gradient(140px 90px at 76% 50px, rgba(255, 226, 206, 0.82) 0%, rgba(255, 198, 188, 0.76) 52%, transparent 73%),
+        radial-gradient(160px 100px at 92% 34px, rgba(255, 236, 220, 0.8) 0%, rgba(255, 206, 196, 0.76) 52%, transparent 73%),
+        radial-gradient(100px 130px at 36px 55%, rgba(255, 244, 236, 0.82) 0%, rgba(255, 206, 198, 0.78) 52%, transparent 73%),
+        radial-gradient(110px 140px at calc(100% - 36px) 48%, rgba(255, 228, 196, 0.8) 0%, rgba(246, 194, 208, 0.76) 52%, transparent 73%),
+        radial-gradient(130px 80px at 14% calc(100% - 40px), rgba(255, 214, 224, 0.82) 0%, rgba(244, 188, 206, 0.78) 52%, transparent 73%),
+        radial-gradient(170px 96px at 36% calc(100% - 26px), rgba(255, 224, 194, 0.82) 0%, rgba(255, 202, 182, 0.76) 50%, transparent 72%),
+        radial-gradient(120px 74px at 58% calc(100% - 48px), rgba(255, 230, 216, 0.8) 0%, rgba(255, 196, 192, 0.76) 54%, transparent 74%),
+        radial-gradient(180px 100px at 78% calc(100% - 30px), rgba(255, 218, 204, 0.8) 0%, rgba(255, 196, 186, 0.74) 50%, transparent 72%),
+        radial-gradient(140px 86px at 94% calc(100% - 44px), rgba(255, 232, 220, 0.8) 0%, rgba(255, 204, 196, 0.76) 52%, transparent 73%),
+        radial-gradient(ellipse 22% 46% at 18% 50%, rgba(255, 236, 226, 0.78) 0%, transparent 74%),
+        radial-gradient(ellipse 26% 50% at 42% 48%, rgba(255, 228, 214, 0.78) 0%, transparent 74%),
+        radial-gradient(ellipse 24% 46% at 66% 52%, rgba(255, 220, 206, 0.76) 0%, transparent 74%),
+        radial-gradient(ellipse 20% 42% at 88% 50%, rgba(255, 232, 218, 0.76) 0%, transparent 74%);
+      filter:
+        blur(8px)
+        drop-shadow(0 16px 18px rgba(12, 6, 16, 0.28))
+        drop-shadow(0 0 16px rgba(255, 196, 140, 0.7))
+        drop-shadow(0 0 32px rgba(255, 160, 186, 0.45));
     }
     .review-card::after {
       content: "";
       position: absolute;
       z-index: 0;
-      left: -8px;
-      right: -8px;
-      top: -30px;
-      bottom: -12px;
+      inset: 16px 28px 12px 28px;
       pointer-events: none;
+      border-radius: 50%;
       background:
-        radial-gradient(64px 36px at 18% 2%, #fff8f2 0%, #ffd4c6 60%, rgba(255, 212, 198, 0) 76%),
-        radial-gradient(80px 42px at 42% 0%, #ffe9d8 0%, #f6c4d6 58%, rgba(246, 196, 214, 0) 76%),
-        radial-gradient(58px 34px at 68% 3%, #ffe4b8 0%, #ffd0c2 60%, rgba(255, 208, 194, 0) 76%),
-        radial-gradient(70px 38px at 88% 2%, #fff1e6 0%, #ffd6c8 60%, rgba(255, 214, 200, 0) 76%),
-        radial-gradient(36px 48px at 0% 48%, #fff3ea 0%, #ffd0c8 60%, rgba(255, 208, 200, 0) 76%),
-        radial-gradient(36px 48px at 100% 60%, #ffe7c8 0%, #f8c8d6 60%, rgba(248, 200, 214, 0) 76%),
-        radial-gradient(56px 28px at 24% 100%, #ffd8e2 0%, #f4c2d2 60%, rgba(244, 194, 210, 0) 76%),
-        radial-gradient(64px 30px at 74% 101%, #ffe1c2 0%, #ffd0ba 60%, rgba(255, 208, 186, 0) 76%);
+        radial-gradient(ellipse 92% 80% at 50% 50%, rgba(255, 248, 244, 0.95) 0%, rgba(255, 232, 220, 0.9) 42%, rgba(255, 214, 206, 0.3) 64%, rgba(255, 214, 206, 0) 78%);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
     }
     .review-card > * { position: relative; z-index: 1; }
     .review-card h2,
