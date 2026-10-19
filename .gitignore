@@ -104,3 +104,8 @@ Docs/reviews/imported/*
 
 # Twitch app token cache (secret, regenerated automatically)
 Data/twitch_stats_token_cache.json
+
+# Tiny SAMPLE placeholders for the clip review board. Not recordings.
+!Data/tests/fixtures/review/media/clips/
+!Data/tests/fixtures/review/media/clips/**
+!Data/tests/fixtures/review/media/clips/*.mp4

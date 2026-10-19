@@ -113,6 +113,7 @@ SUBCOMMANDS: dict[str, str] = {
     "youtube_stats": "sync_youtube_stats.py",
     "overlay": "overlay_server.py",
     "overlays": "overlay_server.py",
+    "review": "review_server.py",
     "send": "send_notification.py",
     "notify": "send_notification.py",
     "send-notify": "send_notification.py",
@@ -477,6 +478,8 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
                           thesaurus, synonym. Distinct from bolt search.
                           Unknown commands hear-through typos (safe ones auto-run).
   overlay [--port 8766]   OBS overlay server (Stream Deck kill/win + cam frame)
+  review [--port 8767] [--no-open]
+                          Local clip review board (keep / toss). Keep never posts.
 
 Direction-finding researcher (Core/modules/Researcher.py):
   research [status|questions|candidates|pending|log|add|note|c5|find]
