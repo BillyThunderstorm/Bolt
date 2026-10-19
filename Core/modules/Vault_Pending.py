@@ -89,6 +89,14 @@ def try_pending(text: str) -> Optional[str]:
         except VaultError as exc:
             return str(exc)
 
+    # Before a bare "no", so "no, put that in Product Testing" files instead of canceling.
+    # Imported here: Vault_Filing registers an applier and imports this module.
+    from modules.Vault_Filing import try_correction
+
+    corrected = try_correction(soft)
+    if corrected is not None:
+        return corrected
+
     pending = load_pending()
     if not pending:
         return None
@@ -163,6 +171,10 @@ def _edit(pending: Dict[str, Any], text: str) -> Optional[Dict[str, Any]]:
         item["title"] = _tidy(title_match.group("title"))
         return _with_spoken(pending, item)
     area_match = _AREA.match(text)
+    if area_match:
+        raw_area = area_match.group("area").strip(" .")
+        if raw_area.lower() in {"doing", "done", "this week"} or parse_when(raw_area, now=now_ct()):
+            area_match = None
     if area_match:
         try:
             item["area"] = resolve_area(area_match.group("area"))

@@ -49,12 +49,15 @@ class CaptureTests(unittest.TestCase):
         self.root = Path(self._tmp.name) / "vault"
         self.root.mkdir()
         self.pending = Path(self._tmp.name) / "pending.json"
+        self.filing = Path(self._tmp.name) / "filing.json"
         self.week = Path(self._tmp.name) / "week_card.json"
         self.env = patch.dict(
             os.environ,
             {
                 "BOLT_VAULT_PATH": str(self.root),
                 "BOLT_PENDING_VAULT_PATH": str(self.pending),
+                "BOLT_VAULT_FILING_PATH": str(self.filing),
+                "BOLT_VAULT_FILING_AI": "off",
             },
         )
         self.env.start()

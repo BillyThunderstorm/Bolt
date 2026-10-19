@@ -672,6 +672,40 @@ class VaultStore:
                 made.append(note.rel)
         return [self.read_note(rel) for rel in made]
 
+    def refile_many(self, moves: List[tuple[str, str]]) -> List[VaultNote]:
+        """Set area on each note. Tasks stay in ``10 Bolt/Tasks``. Notes move.
+
+        The old note bytes are parked under ``.bolt/undone/`` when a note moves.
+        """
+        self.require_root()
+        if not moves:
+            return []
+        made: List[str] = []
+        with self.changing("refile notes"):
+            for rel, area in moves:
+                made.append(self._refile_inside(rel, area))
+        return [self.read_note(rel) for rel in made]
+
+    def _refile_inside(self, rel: str, area: str) -> str:
+        """Caller already opened ``changing``."""
+        note = self.read_note(rel)
+        area_name = resolve_area(area)
+        meta = dict(note.frontmatter)
+        meta["area"] = area_name
+        body = note.body if note.body.startswith("\n") or note.body == "" else "\n" + note.body
+        text = dump_frontmatter(meta, body)
+        task = note.kind == "task" or rel.startswith(TASKS_REL + "/")
+        if task or rel.startswith(area_name + "/"):
+            self.write_text(rel, text)
+            self.append_activity("refile", note.title, f"area {area_name}; stayed {rel}")
+            return rel
+        new_rel = self._unique_rel(f"{area_name}/{Path(rel).name}")
+        self.write_text(new_rel, text)
+        self.write_text(rel, self.read_text(rel))
+        self._park(self.checked(rel), rel)
+        self.append_activity("refile", note.title, f"{rel} -> {new_rel}")
+        return new_rel
+
     def update_frontmatter(self, rel: str, updates: Dict[str, Any], *, summary: str) -> VaultNote:
         note = self.read_note(rel)
         meta = dict(note.frontmatter)
