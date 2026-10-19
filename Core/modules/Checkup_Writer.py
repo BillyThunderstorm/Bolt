@@ -54,6 +54,9 @@ HTML_FILE = _REPO / "App" / "Bolt_Checkup.html"
 REVIEW_MEDIA_ROOT = _REPO
 
 _VIDEO_SUFFIXES = {".mp4", ".mkv", ".mov", ".webm", ".m4v"}
+# The review board plays these in a browser. mkv stays a real file for
+# `file_exists` but is not offered as inline video.
+_PLAYABLE_VIDEO_SUFFIXES = {".mp4", ".mov", ".m4v", ".webm"}
 _THUMB_SUFFIXES = {".jpg", ".jpeg"}
 _CLOSED_REVIEW_STATUSES = {"posted", "scrapped"}
 
@@ -552,6 +555,24 @@ def review_file_exists(clip_path: str, root: Path | None = None) -> bool:
     return bool(found and found.suffix.lower() in _VIDEO_SUFFIXES)
 
 
+def playable_video_for_clip(clip_path: str, root: Path | None = None) -> Path | None:
+    """Browser-playable video inside `root`, or None.
+
+    Same root rule as thumbnails: the resolved file must stay inside `root`.
+    """
+    base = (root or REVIEW_MEDIA_ROOT).resolve()
+    video = resolve_clip_in_root(clip_path, base)
+    if video is None or not video.is_file():
+        return None
+    try:
+        video.relative_to(base)
+    except ValueError:
+        return None
+    if video.suffix.lower() not in _PLAYABLE_VIDEO_SUFFIXES:
+        return None
+    return video
+
+
 def thumbnail_for_clip(clip_path: str, root: Path | None = None) -> Path | None:
     """JPG next to the clip, same stem, and only if it stays inside `root`."""
     base = (root or REVIEW_MEDIA_ROOT).resolve()
@@ -640,6 +661,7 @@ def _review_row(item: dict, lookup: dict) -> dict:
         "ghost": status not in _CLOSED_REVIEW_STATUSES and not exists,
         "hold_reason": str(item.get("hold_reason") or ""),
         "has_thumbnail": thumbnail_for_clip(clip_path) is not None,
+        "has_video": playable_video_for_clip(clip_path) is not None,
         "hidden_default": status in _CLOSED_REVIEW_STATUSES,
         "actionable": status == "ready" and exists,
     }
