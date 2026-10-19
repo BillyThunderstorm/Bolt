@@ -1139,6 +1139,18 @@ def try_handle_intent(user_text: str) -> Optional[str]:
     if not raw:
         return None
 
+    # Vault chat confirms before it writes. Imported here so a broken vault
+    # module cannot take down morning, week, and queue.
+    if "\n" not in raw:
+        try:
+            from modules.Vault_Chat import try_vault_chat
+
+            vault_reply = try_vault_chat(raw)
+        except Exception as exc:
+            return f"I recognized a vault request but hit a snag: {exc}"
+        if vault_reply is not None:
+            return vault_reply
+
     if "\n" in raw:
         applied = apply_reply_block(raw)
         if applied["replies"]:
