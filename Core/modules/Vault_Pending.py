@@ -100,6 +100,8 @@ def try_pending(text: str) -> Optional[str]:
     pending = load_pending()
     if not pending:
         return None
+    if str(pending.get("kind") or "") == "choose" and _YES.match(soft):
+        return "Say which number you want."
     if _YES.match(soft):
         return _apply(pending)
     if _NO.match(soft):
@@ -118,6 +120,12 @@ def try_pending(text: str) -> Optional[str]:
         save_pending(edited)
         return str(edited.get("spoken") or "Updated the preview. Say yes to save or no to cancel.")
     if re.match(r"^(?:change|make it|put it|move it|due)\b", soft, re.I):
+        if re.match(
+            r"^(?:please\s+)?move .+ to (?:inbox|this week|doing|done)[.!]?$",
+            soft,
+            re.I,
+        ):
+            return None
         return (
             "I still have that preview. Say yes, no, or tell me the new title, "
             "date, or area."

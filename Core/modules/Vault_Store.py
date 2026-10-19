@@ -655,8 +655,12 @@ class VaultStore:
         if grouped:
             with self.changing(f"add {kind} {title}"):
                 _write()
+                if kind == "task":
+                    self._push_board()
         else:
             _write()
+            if kind == "task":
+                self._push_board()
         return self.read_note(rel) if grouped else VaultNote(rel, title, meta, note_body, self.checked(rel))
 
     def add_many(self, specs: List[Dict[str, Any]]) -> List[VaultNote]:
@@ -670,6 +674,7 @@ class VaultStore:
             for spec in specs:
                 note = self.add_note(grouped=False, **spec)
                 made.append(note.rel)
+            self._push_board()
         return [self.read_note(rel) for rel in made]
 
     def refile_many(self, moves: List[tuple[str, str]]) -> List[VaultNote]:
@@ -684,6 +689,7 @@ class VaultStore:
         with self.changing("refile notes"):
             for rel, area in moves:
                 made.append(self._refile_inside(rel, area))
+            self._push_board()
         return [self.read_note(rel) for rel in made]
 
     def _refile_inside(self, rel: str, area: str) -> str:
@@ -718,7 +724,18 @@ class VaultStore:
         with self.changing(summary):
             self.write_text(rel, text)
             self.append_activity("update", note.title, summary)
+            self._push_board()
         return self.read_note(rel)
+
+    def _push_board(self) -> None:
+        """Refresh kanban cards inside the open change. A bad board module must not block writes."""
+        if self._txn is None:
+            return
+        try:
+            from modules.Vault_Board import push_inside
+        except Exception:
+            return
+        push_inside(self)
 
     def append_activity(self, action: str, note: str, details: str) -> None:
         """Add one activity-log row. Call inside ``changing``."""
