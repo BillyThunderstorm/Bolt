@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Optional
 
 from modules.Vault_Capture import try_capture
+from modules.Vault_Extract import try_extract
 from modules.Vault_Pending import try_pending
 from modules.Vault_Store import VaultError
 
@@ -21,7 +22,11 @@ def try_vault_chat(text: str) -> Optional[str]:
         return str(exc)
     if pending is not None:
         return pending
-    try:
-        return try_capture(text)
-    except VaultError as exc:
-        return str(exc)
+    for handler in (try_extract, try_capture):
+        try:
+            reply = handler(text)
+        except VaultError as exc:
+            return str(exc)
+        if reply is not None:
+            return reply
+    return None

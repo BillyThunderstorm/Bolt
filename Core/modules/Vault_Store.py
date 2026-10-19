@@ -603,8 +603,13 @@ class VaultStore:
         source: str = "cli",
         extra: Optional[Dict[str, Any]] = None,
         folder_rel: str = "",
+        grouped: bool = True,
     ) -> VaultNote:
-        """Create a task, note, or page. Existing files are not overwritten."""
+        """Create a task, note, or page. Existing files are not overwritten.
+
+        ``grouped=False`` writes inside a change the caller already opened,
+        so several notes undo as one step.
+        """
         self.require_root()
         self.ensure_scaffold()
         kind = (kind or "task").strip().lower()
@@ -638,14 +643,34 @@ class VaultStore:
         if body.strip():
             note_body += "\n" + body.strip() + "\n"
         text = dump_frontmatter(meta, note_body)
-        with self.changing(f"add {kind} {title}"):
+
+        def _write() -> None:
             self.write_text(rel, text)
             self.append_activity(
                 f"add {kind}",
                 title,
                 f"{rel}; area {area_name}" + (f"; due {due}" if due else ""),
             )
-        return self.read_note(rel)
+
+        if grouped:
+            with self.changing(f"add {kind} {title}"):
+                _write()
+        else:
+            _write()
+        return self.read_note(rel) if grouped else VaultNote(rel, title, meta, note_body, self.checked(rel))
+
+    def add_many(self, specs: List[Dict[str, Any]]) -> List[VaultNote]:
+        """Create several notes in one undo step."""
+        self.require_root()
+        self.ensure_scaffold()
+        if not specs:
+            return []
+        made: List[str] = []
+        with self.changing("add notes from chat"):
+            for spec in specs:
+                note = self.add_note(grouped=False, **spec)
+                made.append(note.rel)
+        return [self.read_note(rel) for rel in made]
 
     def update_frontmatter(self, rel: str, updates: Dict[str, Any], *, summary: str) -> VaultNote:
         note = self.read_note(rel)
