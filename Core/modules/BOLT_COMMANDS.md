@@ -144,7 +144,7 @@ bolt menubar                          # macOS menu bar (App/app.py via rumps)
 bolt mac-app                          # local dist/Bolt.app assemble (PARTIAL; not notarized)
 bolt mac-auto                         # launchd/cron/Shortcuts status (PARTIAL; William-specific)
 bolt icloud                           # iCloud Drive multi-Mac sync status (PARTIAL; William-specific)
-bolt game-config                      # Per-game sensitivity profiles (PARTIAL; soft-fail)
+bolt game-config                      # Per-game sensitivity profiles used by the clip pipeline (READY)
 bolt error-recovery                  # Pipeline retry/quarantine (PARTIAL; soft-fail)
 bolt memsearch "words"               # search Bolt's local memory (READY; auto-rebuilds stale index)
 bolt alerts                            # Mac/Voice/email/iMessage alerts (PARTIAL; not Discord)
@@ -1807,26 +1807,31 @@ python3 scripts/ocr_to_editable.py photo.jpg --open
 
 ## Per-game sensitivity profiles (`bolt game-config`)
 
-Soft-fail CLI around `Core/modules/Game_Config.py` (built-in per-game highlight profiles +
+CLI around `Core/modules/Game_Config.py` (built-in per-game highlight profiles +
 `Data/configs/game_configs.json` overrides). Soft-fail prefix: `Game config unavailable:`.
-**PARTIAL** — profiles William-tuned; overrides optional. **Distinct from** PARTIAL
-`bolt obs-game` (OBS scene→`Core/config.json` game) and READY `bolt obs`.
+**READY (19 Oct 2026)** — the profile is applied by `bot.py` process_recording (highlight
+sensitivity, clip padding, TikTok style, min score), `bolt wrap` (sensitivity + padding) and the
+live OBS StreamMonitor (spike multiplier). Per key, highest wins: per-game override in
+`Data/configs/game_configs.json` > `Core/config.json` top-level > built-in profile > default.
+The game is `Core/config.json` `game` (follows Twitch via `bolt game`). Each run logs
+`game profile: <game> · overrides …`. **Distinct from** PARTIAL `bolt obs-game`
+(OBS scene→`Core/config.json` game) and READY `bolt obs`.
 
 ```bash
 bolt game-config                         # status (default; safe)
 bolt game-config status [--json] [--probe]
 bolt game-config list [--json]
-bolt game-config show [game]             # merged defaults+builtin+override
+bolt game-config show [game]             # what the pipeline uses + source of each value
 bolt game-config set <game> KEY=VALUE …  # write Data/configs/game_configs.json
 bolt game-config-status                  # alias → status
 ```
 
 | Command | What it does |
 |---|---|
-| `bolt game-config` / `status` | Readiness: builtin count + custom overrides path + current `Core/config.json` game |
+| `bolt game-config` / `status` | Readiness: builtin count + overrides path + current game + `pipeline uses:` line |
 | `bolt game-config list` | Builtin profiles + override checklist |
-| `bolt game-config show` | Print merged config (current game if omitted) |
-| `bolt game-config set` | Merge KEY=VALUE overrides (`--no-merge` replaces) |
+| `bolt game-config show` | What process_recording / wrap / OBS use for a game, each value tagged override / config / builtin / default (current game if omitted) |
+| `bolt game-config set` | Merge KEY=VALUE overrides for one game (`--no-merge` replaces), e.g. `bolt game-config set "God of War Sons of Sparta" pad_after=15` |
 
 Aliases: `game_config`, `gameconfig`, `games`, `game-profiles`, `game_profiles`, `game-config-status`.
 
@@ -2221,7 +2226,7 @@ These names perform the same actions as their primary commands:
 | `send` | `notify` |
 | `layout` / `check-layout` / `layout-status` | `Layout_Check` (PARTIAL soft-fail) |
 | `migrate-layout` / `migrate_layout` / `layout-migrate` / `migrate-status` | `Migrate_Layout` (PARTIAL soft-fail) |
-| `game-config` / `game_config` / `games` / `game-profiles` / `game-config-status` | `Game_Config` (PARTIAL soft-fail) |
+| `game-config` / `game_config` / `games` / `game-profiles` / `game-config-status` | `Game_Config` (READY; used by clip pipeline) |
 | `error-recovery` / `error_recovery` / `recovery` / `quarantine` / `error-tracker` / `error-recovery-status` | `Error_Recovery` (PARTIAL soft-fail) |
 | `layout` (legacy thin) | `check_layout` |
 | `filter-backlog` | `filter_backlog`, `backlog-filter`, `filter-clips` |

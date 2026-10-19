@@ -387,7 +387,7 @@ Script subcommands (each maps to scripts/X.py):
                           status [--json|--probe]; list; run [--dry-run|--apply] [--script move|shared|setup]
                           aliases: icloud-sync, iCloud, move-to-icloud, icloud-status
                           (former unnamed IDEA scripts/move_to_icloud.sh; distinct from PARTIAL bolt mac-auto)
-  game-config [status|list|show|set]  Per-game sensitivity profiles (PARTIAL; soft-fail)
+  game-config [status|list|show|set]  Per-game sensitivity profiles used by clips/wrap/OBS (READY)
                           status [--json|--probe]; list; show [game]; set <game> KEY=VALUE …
                           aliases: game_config, gameconfig, games, game-profiles, game-config-status
                           (former unnamed IDEA Core/modules/Game_Config.py; distinct from PARTIAL bolt obs-game)
@@ -2127,7 +2127,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: per-game sensitivity profiles (Game_Config; soft-fail; PARTIAL)
+    # Built-in: per-game sensitivity profiles (Game_Config; soft-fail; READY 19 Oct 2026)
     # Former unnamed IDEA Docs/AI_Guide.md + Core/modules/Game_Config.py
     # (built-in profiles existed; CWD-relative game_configs.json / config.json;
     # no soft-fail status/list/show/set CLI). Distinct from PARTIAL bolt obs-game

@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19 00:00:00",
+  "generated_at": "2026-10-19 02:00:01",
   "status": {
     "clips_made": 2,
     "vertical_clips": 2,
-    "ready_to_post": 6078,
+    "ready_to_post": 2,
     "recordings_processed": 134,
     "api_keys": {
       "twitch": true,
@@ -14,86 +14,16 @@
   },
   "queue": [
     {
-      "id": "04a51757",
-      "created": "2026-07-07T02:01:05.469158",
-      "title": "Ready clip",
+      "id": "reprocess-2889961274_clip01_audio_spike_132",
+      "created": "2026-10-18T19:38:52.609876",
+      "title": "Wolverine highlight (clip 01)",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "67def313",
-      "created": "2026-07-07T02:01:05.470379",
-      "title": "Ready clip",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "ce65f808",
-      "created": "2026-07-07T02:01:05.471439",
-      "title": "Ready clip",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "faa9b6c0",
-      "created": "2026-07-07T02:01:05.473306",
-      "title": "Ready clip",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "14e26413",
-      "created": "2026-07-07T02:01:14.132815",
-      "title": "Ready clip",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "edbfe8bc",
-      "created": "2026-07-07T02:01:14.134220",
-      "title": "Ready clip",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "510ae450",
-      "created": "2026-07-07T02:01:14.135289",
-      "title": "Ready clip",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "1d44f9f5",
-      "created": "2026-07-07T02:01:14.137277",
-      "title": "Ready clip",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "ccd0ba63",
-      "created": "2026-07-07T02:01:32.893170",
-      "title": "Ready clip",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "0a2a66e6",
-      "created": "2026-07-07T02:01:32.894639",
-      "title": "Ready clip",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "52380dce",
-      "created": "2026-07-07T02:01:32.895717",
-      "title": "Ready clip",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "78ef31cd",
-      "created": "2026-07-07T02:01:32.897550",
-      "title": "Ready clip",
+      "id": "reprocess-2889961274_clip02_audio_spike_182",
+      "created": "2026-10-18T19:38:52.611979",
+      "title": "Wolverine highlight (clip 02)",
       "platforms": 4,
       "status": "manual_upload_ready"
     }

@@ -334,6 +334,14 @@ def run(*, vod: Optional[str] = None, top: int = 5, dry_run: bool = False,
     vlen = _duration(src)
     folder = Path(out).expanduser() if out else wrap_dir_for(src)
     cfg = _config()
+    try:  # per-game profile: game_configs.json override > config.json > built-in
+        _ensure_core()
+        from modules.Game_Config import apply_game_profile, profile_summary
+
+        cfg = apply_game_profile(cfg, cfg.get("game"))
+        log(f"[wrap] {profile_summary(cfg)}")
+    except Exception as exc:
+        res["warnings"].append(f"game profile skipped: {exc}")
     pad_b = float(cfg.get("pad_before", 12.0))
     pad_a = float(cfg.get("pad_after", 20.0))
     res.update({"vod": str(src), "vod_duration_s": round(vlen, 1), "output_dir": str(folder),
@@ -365,7 +373,9 @@ def run(*, vod: Optional[str] = None, top: int = 5, dry_run: bool = False,
     try:
         from modules.Highlight_Detector import detect_highlights
 
-        events = detect_highlights(str(src))
+        _sens = cfg.get("highlight_sensitivity")
+        events = (detect_highlights(str(src), sensitivity=float(_sens)) if _sens is not None
+                  else detect_highlights(str(src)))
         res["steps"].append({"step": "highlights", "ok": True, "events": len(events)})
         log(f"[wrap] audio highlights: {len(events)}")
     except Exception as exc:

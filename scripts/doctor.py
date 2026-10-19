@@ -1623,7 +1623,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # Per-game sensitivity profiles (PARTIAL — soft-fail via bolt game-config; not bolt obs-game)
+    # Per-game sensitivity profiles (READY — used by process_recording / wrap / OBS; bolt game-config)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1632,8 +1632,9 @@ def collect_integrations(config: dict) -> list[Check]:
         _gc = _gc_status()
         gc_ready = bool(_gc.get("ready"))
         gc_detail = (
-            "Game config ok; bolt game-config status "
-            f"(builtin={_gc.get('builtin_profile_count')})"
+            f"Game profile READY for {_gc.get('current_game')} "
+            f"(overrides={_gc.get('custom_override_count')}, builtin={_gc.get('builtin_profile_count')}); "
+            "bolt game-config show"
             if gc_ready
             else (
                 (_gc.get("hint") or _gc.get("error") or "Game config unavailable: not ready")

@@ -371,6 +371,17 @@ def _process_recording_body(
             metadata={"recording_path": recording_path},
         )
 
+    # ── Per-game profile (Game_Config / bolt game-config) ────────────────────
+    # Per key: Data/configs/game_configs.json override > Core/config.json >
+    # built-in profile > default. Never blocks the pipeline.
+    try:
+        from modules.Game_Config import apply_game_profile, profile_summary
+
+        config = apply_game_profile(config, config.get("game"))
+        notify(profile_summary(config), level="info")
+    except Exception as e:
+        notify(f"Game profile skipped: {e}", level="info")
+
     game = config.get("game", "Gaming")
     sensitivity = config.get("highlight_sensitivity", 0.7)
     style = config.get("tiktok_style", "letterbox")
@@ -480,6 +491,8 @@ def _process_recording_body(
         clip_results = generate_clips(
             recording_path,
             highlights,
+            pad_before=float(config.get("pad_before", 12.0)),
+            pad_after=float(config.get("pad_after", 20.0)),
             min_duration=config.get("min_clip_duration", 15),
             max_duration=config.get("max_clip_duration", 60),
         )
