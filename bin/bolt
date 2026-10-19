@@ -435,6 +435,9 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
   week [show|set|done|paper|rotate|ban]
                           This week / last week / do not suggest (read before any plan)
                           paper [--open]  one-page fridge sheet (goal + checkboxes)
+  vault [status|list|find|add|undo]
+                          Obsidian vault (BOLT_VAULT_PATH). Safe writes, backups,
+                          activity log. Never deletes. add writes a task note.
   stats [status|sync|tiktok|youtube] [--dry-run] [--json] [--probe]
                           Social performance pull readiness + TikTok/YouTube sync
   analytics [--days N] [--top N]
@@ -562,6 +565,7 @@ def _all_cli_names() -> list[str]:
             "day",
             "today",
             "week",
+            "vault",
             "voice",
             "talk",
             "say",
@@ -719,6 +723,15 @@ def main() -> int:
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
         cmd = [py, "-m", "modules.Week_Card"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    if subcommand in ("vault", "obsidian", "obsidian-vault"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Vault_Store"] + (rest if rest else ["status"])
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
