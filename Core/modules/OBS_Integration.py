@@ -19,7 +19,14 @@ def get_obs_monitor() -> StreamMonitor:
     """Return (or create) the shared StreamMonitor instance."""
     global _monitor
     if _monitor is None:
-        _monitor = StreamMonitor()
+        spike = None
+        try:  # per-game live spike threshold (bolt game-config)
+            from modules.Game_Config import effective_config
+
+            spike = float(effective_config()["values"]["spike_multiplier"])
+        except Exception:
+            spike = None
+        _monitor = StreamMonitor(spike_multiplier=spike) if spike else StreamMonitor()
     return _monitor
 
 

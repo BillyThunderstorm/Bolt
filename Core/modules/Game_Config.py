@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 """
-Game_Config.py — per-game sensitivity profiles + soft-fail CLI (PARTIAL)
-========================================================================
-Merged priority:
-  Data/configs/game_configs.json (user overrides)
-  > built-in _PROFILES
-  > _DEFAULTS
+Game_Config.py — per-game sensitivity profiles + soft-fail CLI (READY)
+======================================================================
+What the clip pipeline actually uses (``effective_config`` / ``apply_game_profile``),
+per key, highest wins:
+  1. Data/configs/game_configs.json  (your per-game overrides — ``bolt game-config set``)
+  2. Core/config.json top-level      (your global tuning, e.g. pad_before 8)
+  3. built-in _PROFILES              (only fills keys config.json doesn't set)
+  4. _DEFAULTS
+
+Wired into: bot.py process_recording (sensitivity, padding, tiktok style,
+min score), ``bolt wrap`` (sensitivity + padding) and the live OBS StreamMonitor
+(spike_multiplier). The game comes from Core/config.json (follows the Twitch
+category via ``bolt game``) unless a caller passes one.
 
 Soft-fail prefix: ``Game config unavailable:``.
 
@@ -15,12 +22,13 @@ CLI (via ``bolt game-config``):
   show [game] [--json]
   set <game> [--json] KEY=VALUE …
 
-Stay PARTIAL — overrides optional; profiles William-tuned; not stranger-ready.
-Distinct from PARTIAL ``bolt obs-game`` (OBS scene→config game tracker) and
+READY (19 Oct 2026). Overrides optional. Distinct from PARTIAL ``bolt obs-game`` (OBS scene→config game tracker) and
 READY ``bolt obs`` (WebSocket monitor).
 
 Public API (in-process):
-  get_game_config(game_name) → dict
+  get_game_config(game_name) → dict          (raw profile: defaults+builtin+override)
+  effective_config(game, base) → dict        (values + per-key source, as pipeline uses)
+  apply_game_profile(config, game) → dict    (copy of config with the profile applied)
   detect_game() → str
   save_custom_config(game_name, overrides)
 """
@@ -211,6 +219,106 @@ def save_custom_config(game_name: str, overrides: dict) -> Path:
     return dest
 
 
+# Keys the pipeline reads from a game profile.
+PIPELINE_KEYS = (
+    "highlight_sensitivity",
+    "pad_before",
+    "pad_after",
+    "min_clip_score",
+    "tiktok_style",
+    "spike_multiplier",
+    "title_vibe",
+    "game_events_enabled",
+)
+
+
+def _load_core_config() -> dict:
+    try:
+        with open(_CORE_CONFIG, encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def effective_config(game: Optional[str] = None, base: Optional[dict] = None) -> Dict[str, Any]:
+    """What the clip pipeline uses for ``game``. Never raises.
+
+    Per key: per-game override > Core/config.json top-level > built-in > default.
+    Returns {"game", "values", "sources", "has_builtin", "has_override"}.
+    """
+    try:
+        cfg = base if isinstance(base, dict) else _load_core_config()
+        name = (game or "").strip() or str(cfg.get("game") or "").strip() or detect_game()
+        key = name.lower().strip()
+        builtin = _PROFILES.get(key, {})
+        custom = _load_custom()
+        override = custom.get(key) if isinstance(custom.get(key), dict) else {}
+        values: Dict[str, Any] = {}
+        sources: Dict[str, str] = {}
+        for k in PIPELINE_KEYS:
+            if k in override:
+                values[k], sources[k] = override[k], "override"
+            elif k in cfg and cfg.get(k) is not None:
+                values[k], sources[k] = cfg[k], "config"
+            elif k in builtin:
+                values[k], sources[k] = builtin[k], "builtin"
+            else:
+                values[k], sources[k] = _DEFAULTS.get(k), "default"
+        return {
+            "game": name,
+            "values": values,
+            "sources": sources,
+            "has_builtin": bool(builtin),
+            "has_override": bool(override),
+        }
+    except Exception as exc:
+        return {
+            "game": game or "",
+            "values": {k: _DEFAULTS.get(k) for k in PIPELINE_KEYS},
+            "sources": {k: "default" for k in PIPELINE_KEYS},
+            "has_builtin": False,
+            "has_override": False,
+            "error": _soft(str(exc) or type(exc).__name__),
+        }
+
+
+def apply_game_profile(config: Optional[dict], game: Optional[str] = None) -> dict:
+    """Return a COPY of ``config`` with the game's effective profile applied.
+
+    Never raises and never mutates ``config``. Adds ``_game_profile`` with the
+    game, per-key sources and which keys came from per-game overrides.
+    """
+    base = dict(config) if isinstance(config, dict) else {}
+    try:
+        eff = effective_config(game, base)
+        merged = dict(base)
+        merged.update(eff["values"])
+        merged["_game_profile"] = {
+            "game": eff["game"],
+            "sources": eff["sources"],
+            "overrides_applied": sorted(k for k, v in eff["sources"].items() if v == "override"),
+            "builtin_applied": sorted(k for k, v in eff["sources"].items() if v == "builtin"),
+        }
+        return merged
+    except Exception:
+        return base
+
+
+def profile_summary(cfg: dict) -> str:
+    """One-line description of an applied profile for pipeline logs."""
+    info = (cfg or {}).get("_game_profile") or {}
+    if not info:
+        return "game profile: not applied"
+    ov = info.get("overrides_applied") or []
+    bi = info.get("builtin_applied") or []
+    parts = [f"game profile: {info.get('game')}"]
+    parts.append(f"overrides {', '.join(ov)}" if ov else "no per-game overrides")
+    if bi:
+        parts.append(f"built-in {', '.join(bi)}")
+    return " · ".join(parts)
+
+
 def status(*, probe: bool = False) -> Dict[str, Any]:
     """Never raises. ready=True when built-in profiles load (always, unless broken)."""
     try:
@@ -218,6 +326,7 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         custom = _load_custom()
         current = detect_game()
         current_cfg = get_game_config(current)
+        eff = effective_config(current)
         builtin_count = len(_PROFILES)
         custom_count = sum(1 for v in custom.values() if isinstance(v, dict))
 
@@ -231,11 +340,14 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         info: Dict[str, Any] = {
             "checked_at": _iso(),
             "ready": ready,
-            "partial": True,
-            "readiness": "PARTIAL",
+            "partial": not ready,
+            "readiness": "READY" if ready else "PARTIAL",
             "soft_fail_prefix": _SOFT,
             "cli": "bolt game-config",
             "module": str(Path(__file__).resolve()),
+            "pipeline_wired": ["bot.py process_recording", "bolt wrap", "OBS StreamMonitor"],
+            "effective": eff.get("values"),
+            "effective_sources": eff.get("sources"),
             "core_config": str(_CORE_CONFIG),
             "core_config_present": _CORE_CONFIG.is_file(),
             "custom_path": str(custom_path),
@@ -252,9 +364,9 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
             "probe_ok": None,
             "error": "",
             "hint": (
-                "built-in profiles always work · overrides in "
-                "Data/configs/game_configs.json · distinct from PARTIAL "
-                "bolt obs-game (scene→game) · stay PARTIAL"
+                "used by process_recording / bolt wrap / OBS live spikes · "
+                "tune one game: bolt game-config set \"<game>\" pad_after=15 · "
+                "see what applies: bolt game-config show"
             ),
             "is_stranger_ready": False,
             "missing": missing,
@@ -354,7 +466,7 @@ def list_items() -> List[Dict[str, Any]]:
             "id": "soft_fail",
             "ok": True,
             "detail": (
-                f"prefix {_SOFT!r}; stay PARTIAL; distinct from PARTIAL bolt obs-game"
+                f"prefix {_SOFT!r}; READY (used by clip pipeline); distinct from PARTIAL bolt obs-game"
             ),
         }
     )
@@ -386,11 +498,14 @@ def try_show(game: str = "") -> Dict[str, Any]:
             source = "builtin"
         elif has_override:
             source = "override"
+        eff = effective_config(name)
         out.update(
             {
                 "ok": True,
                 "game": name,
                 "config": cfg,
+                "effective": eff.get("values"),
+                "effective_sources": eff.get("sources"),
                 "has_builtin": has_builtin,
                 "has_override": has_override,
                 "source": source,
@@ -480,6 +595,16 @@ def _print_status(info: Dict[str, Any], as_json: bool) -> int:
             f"builtin={info.get('current_has_builtin')}  "
             f"override={info.get('current_has_override')}"
         )
+        eff = info.get("effective") or {}
+        srcs = info.get("effective_sources") or {}
+        if eff:
+            print(
+                "  pipeline uses: "
+                + "  ".join(
+                    f"{k}={eff.get(k)}[{srcs.get(k)}]"
+                    for k in ("highlight_sensitivity", "pad_before", "pad_after", "spike_multiplier")
+                )
+            )
         if info.get("probe"):
             print(
                 f"  probe_ok: {info.get('probe_ok')}  "
@@ -500,7 +625,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     parser = argparse.ArgumentParser(
         prog="bolt game-config",
-        description="Per-game sensitivity profiles (PARTIAL; soft-fail).",
+        description="Per-game sensitivity profiles used by the clip pipeline (READY; soft-fail).",
     )
     parser.add_argument(
         "action",
@@ -552,10 +677,14 @@ def main(argv: Optional[List[str]] = None) -> int:
             if not result.get("ok"):
                 print(result.get("error") or _soft("show failed"))
                 return 0
-            print(f"game: {result.get('game')}  source={result.get('source')}")
-            cfg = result.get("config") or {}
-            for k in sorted(cfg.keys()):
-                print(f"  {k}: {cfg[k]}")
+            print(f"game: {result.get('game')}  profile={result.get('source')}")
+            print("  what the clip pipeline uses (source in brackets):")
+            eff = result.get("effective") or {}
+            srcs = result.get("effective_sources") or {}
+            for k in PIPELINE_KEYS:
+                if k in eff:
+                    print(f"  {k}: {eff[k]}  [{srcs.get(k, '?')}]")
+            print("  order: override (Data/configs/game_configs.json) > Core/config.json > built-in > default")
         return 0
 
     if action == "set":

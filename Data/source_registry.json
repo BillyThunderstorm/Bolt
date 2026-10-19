@@ -1,82 +1,82 @@
 {
-  "generated_at": "2026-10-19T00:00:01.067001",
+  "generated_at": "2026-10-19T02:00:01.111297",
   "sources": [
     {
       "id": "daily_log",
       "path": "/Users/carter/developer/Bolt/logs/daily_log.txt",
       "type": "log",
       "exists": false,
-      "last_seen": "2026-10-19T00:00:01.067080"
+      "last_seen": "2026-10-19T02:00:01.111431"
     },
     {
       "id": "memory_hot",
       "path": "/Users/carter/developer/Bolt/Data/MEMORY.md",
       "type": "markdown",
       "exists": true,
-      "last_seen": "2026-10-19T00:00:01.067098"
+      "last_seen": "2026-10-19T02:00:01.111497"
     },
     {
       "id": "memory_people",
       "path": "/Users/carter/developer/Bolt/Data/people",
       "type": "markdown_dir",
       "exists": true,
-      "last_seen": "2026-10-19T00:00:01.067115"
+      "last_seen": "2026-10-19T02:00:01.111875"
     },
     {
       "id": "memory_projects",
       "path": "/Users/carter/developer/Bolt/Data/projects",
       "type": "markdown_dir",
       "exists": true,
-      "last_seen": "2026-10-19T00:00:01.067239"
+      "last_seen": "2026-10-19T02:00:01.111941"
     },
     {
       "id": "memory_context",
       "path": "/Users/carter/developer/Bolt/Data/context",
       "type": "markdown_dir",
       "exists": true,
-      "last_seen": "2026-10-19T00:00:01.067262"
+      "last_seen": "2026-10-19T02:00:01.111978"
     },
     {
       "id": "memory_content",
       "path": "/Users/carter/developer/Bolt/Data/content",
       "type": "markdown_dir",
       "exists": true,
-      "last_seen": "2026-10-19T00:00:01.067277"
+      "last_seen": "2026-10-19T02:00:01.112267"
     },
     {
       "id": "memory_glossary",
       "path": "/Users/carter/developer/Bolt/Data/glossary.md",
       "type": "markdown",
       "exists": true,
-      "last_seen": "2026-10-19T00:00:01.067289"
+      "last_seen": "2026-10-19T02:00:01.112318"
     },
     {
       "id": "memory_missions",
       "path": "/Users/carter/developer/Bolt/Data/memory",
       "type": "markdown_dir",
       "exists": true,
-      "last_seen": "2026-10-19T00:00:01.067307"
+      "last_seen": "2026-10-19T02:00:01.112559"
     },
     {
       "id": "ready_to_post",
       "path": "/Users/carter/developer/Bolt/Data/ready_to_post.json",
       "type": "json",
       "exists": true,
-      "last_seen": "2026-10-19T00:00:01.067317"
+      "last_seen": "2026-10-19T02:00:01.112917"
     },
     {
       "id": "rankings",
       "path": "/Users/carter/developer/Bolt/Data/rankings.json",
       "type": "json",
       "exists": false,
-      "last_seen": "2026-10-19T00:00:01.067330"
+      "last_seen": "2026-10-19T02:00:01.112962"
     },
     {
       "id": "seen_clips",
       "path": "/Users/carter/developer/Bolt/Data/seen_clips.json",
       "type": "json",
       "exists": true,
-      "last_seen": "2026-10-19T00:00:01.067340"
+      "last_seen": "2026-10-19T02:00:01.113010"
     }
   ]
 }
