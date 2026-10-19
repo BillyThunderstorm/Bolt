@@ -502,6 +502,32 @@ def _entries_from_performance_outcomes(root: Path) -> List[MemoryEntry]:
     return entries
 
 
+def _entries_from_vault() -> List[MemoryEntry]:
+    # Imported here so memory search still runs when the vault module is broken.
+    try:
+        from modules.Vault_Overview import vault_memory_notes
+    except Exception:
+        return []
+    entries: List[MemoryEntry] = []
+    for note in vault_memory_notes():
+        text = (note.body or note.title).strip()
+        if not text:
+            continue
+        entries.append(
+            MemoryEntry(
+                id=f"vault:{note.rel}",
+                source=note.rel,
+                kind="vault_note",
+                title=note.title,
+                text=text,
+                tags=["vault", note.area] if note.area else ["vault"],
+                updated_at=_file_mtime(note.path),
+                metadata={"path": note.rel, "area": note.area},
+            )
+        )
+    return entries
+
+
 def build_memory_entries(project_root: Path = PROJECT_ROOT) -> List[MemoryEntry]:
     entries: List[MemoryEntry] = []
 
@@ -523,6 +549,7 @@ def build_memory_entries(project_root: Path = PROJECT_ROOT) -> List[MemoryEntry]
     entries.extend(_entries_from_clip_history(project_root))
     entries.extend(_entries_from_decision_audit(project_root))
     entries.extend(_entries_from_performance_outcomes(project_root))
+    entries.extend(_entries_from_vault())
     return entries
 
 

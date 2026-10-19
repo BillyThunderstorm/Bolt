@@ -863,6 +863,16 @@ bolt voice --text
 
 "move X to Doing" still moves the board card. "move X to Friday" moves the event, or the task due date when there is no event. If both match, Bolt asks which number. Cancel keeps the file, clears `date`, and stores the old day in `cancelledDate`. A drag in Obsidian is what the next preview reads.
 
+After a confirmed change, Bolt redraws the chart in `10 Bolt/Plan Timeline.md` between `bolt:timeline:start` and `bolt:timeline:end`. The rest of that note stays. Morning briefing adds a due-today line only when the vault has something due. "what's due this week" reads the vault. "what's this week" is still the week card.
+
+```bash
+bolt voice --text
+# what's due today
+# what's due this week
+```
+
+Vault notes are included in memory search. `90 Archive - Notion Templates`, `.bolt`, and `.obsidian` are not.
+
 Budget knobs, all optional: `BOLT_CHAT_THINK` (default on), `BOLT_CHAT_THINK_PAID` (`auto`, `on`, `off`), `BOLT_CHAT_REPLY_TASK` (default `chat`, so everyday replies stay on the light-mode model), `BOLT_CHAT_HISTORY_TURNS` (default 12), `BOLT_CHAT_MAX_TOKENS_TEXT`, `BOLT_CHAT_MAX_TOKENS_VOICE`.
 
 ## Obsidian vault (`bolt vault`)
