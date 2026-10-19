@@ -173,6 +173,76 @@
     .morning a { color: var(--accent); }
     .review-card .top-list { margin: 8px 0 0; padding-left: 18px; }
     .review-card li { margin: 4px 0; }
+    .review-card {
+      position: relative;
+      isolation: isolate;
+      margin-top: 18px;
+      color: #2c1a22;
+      border: none;
+      background: transparent;
+      box-shadow: none;
+      animation: cloud-float 8.4s ease-in-out infinite;
+      animation-delay: -2.2s;
+    }
+    .review-card::before {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      inset: -8px -12px -10px -12px;
+      border-radius: 46px 52px 42px 38px;
+      background:
+        radial-gradient(46% 42% at 0% 48%, rgba(255, 238, 230, 0.98) 0%, rgba(255, 206, 196, 0) 72%),
+        radial-gradient(44% 40% at 100% 58%, rgba(255, 220, 176, 0.96) 0%, rgba(255, 186, 150, 0) 72%),
+        radial-gradient(38% 34% at 12% 100%, rgba(255, 206, 216, 0.9) 0%, rgba(255, 176, 190, 0) 70%),
+        radial-gradient(42% 36% at 86% 100%, rgba(255, 214, 168, 0.88) 0%, rgba(255, 186, 140, 0) 72%),
+        radial-gradient(92% 72% at 16% 0%, rgba(255, 250, 242, 0.95), transparent 50%),
+        radial-gradient(74% 64% at 92% 8%, rgba(255, 210, 224, 0.78), transparent 54%),
+        radial-gradient(80% 58% at 48% 108%, rgba(244, 170, 146, 0.42), transparent 62%),
+        linear-gradient(168deg, #ffe8f1 0%, #ffd4c2 38%, #f7c4d6 72%, #ffe4c4 100%);
+      box-shadow:
+        0 0 0 1px rgba(255, 236, 214, 0.4),
+        0 16px 34px rgba(16, 6, 14, 0.38),
+        0 0 22px rgba(255, 196, 140, 0.48),
+        0 0 48px rgba(255, 168, 190, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.78);
+    }
+    .review-card::after {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      left: 8%;
+      right: 8%;
+      top: -22px;
+      height: 52px;
+      background:
+        radial-gradient(circle at 18% 72%, rgba(255, 246, 238, 0.98) 0%, rgba(255, 198, 188, 0) 68%),
+        radial-gradient(circle at 42% 40%, rgba(255, 230, 214, 0.97) 0%, rgba(255, 186, 168, 0) 70%),
+        radial-gradient(circle at 68% 62%, rgba(255, 214, 228, 0.96) 0%, rgba(255, 176, 196, 0) 68%),
+        radial-gradient(circle at 88% 74%, rgba(255, 224, 176, 0.96) 0%, rgba(255, 190, 140, 0) 70%);
+      filter: blur(0.3px);
+    }
+    .review-card > * { position: relative; z-index: 1; }
+    .review-card h2,
+    .review-card .morning-head h2 { color: #2c1a22; }
+    .review-card .meta,
+    .review-card .muted-line,
+    .review-card li { color: #5c3d4c; }
+    .review-card code { color: #163f86; }
+    .review-card .pill.good { color: #0b6a3c; background: rgba(11, 106, 60, 0.14); }
+    .review-card .pill.mid { color: #7a4e00; background: rgba(180, 120, 20, 0.18); }
+    .review-card .pill.bad { color: #9d1c32; background: rgba(157, 28, 50, 0.12); }
+    .review-card :focus-visible {
+      outline: 2px solid #fffaf3;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px #6a3d12;
+    }
+    @keyframes cloud-float {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(0, -8px, 0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .review-card { animation: none; }
+    }
   </style>
 </head>
 <body>
