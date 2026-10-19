@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-10-13T17:11:34",
+  "generated_at": "2026-10-18T21:40:37",
   "version": 2,
   "vector": {
     "type": "hashed_term_frequency",
     "dimensions": 256
   },
-  "entry_count": 827,
+  "entry_count": 833,
   "entries": [
     {
       "id": "Data/memory/PHASE_1_2_DESIGN.md#phase-1-2-memory-consolidation",
@@ -69948,7 +69948,7 @@
         "markdown",
         "Data"
       ],
-      "updated_at": "2026-10-13T17:11:11",
+      "updated_at": "2026-10-18T02:30:16",
       "metadata": {
         "path": "/Users/carter/developer/Bolt/Data/MEMORY.md"
       },
@@ -70221,7 +70221,7 @@
         "markdown",
         "Data"
       ],
-      "updated_at": "2026-10-13T17:11:11",
+      "updated_at": "2026-10-18T02:30:16",
       "metadata": {
         "path": "/Users/carter/developer/Bolt/Data/MEMORY.md"
       },
@@ -70494,7 +70494,7 @@
         "markdown",
         "Data"
       ],
-      "updated_at": "2026-10-13T17:11:11",
+      "updated_at": "2026-10-18T02:30:16",
       "metadata": {
         "path": "/Users/carter/developer/Bolt/Data/MEMORY.md"
       },
@@ -70767,7 +70767,7 @@
         "markdown",
         "Data"
       ],
-      "updated_at": "2026-10-13T17:11:11",
+      "updated_at": "2026-10-18T02:30:16",
       "metadata": {
         "path": "/Users/carter/developer/Bolt/Data/MEMORY.md"
       },
@@ -71040,7 +71040,7 @@
         "markdown",
         "Data"
       ],
-      "updated_at": "2026-10-13T17:11:11",
+      "updated_at": "2026-10-18T02:30:16",
       "metadata": {
         "path": "/Users/carter/developer/Bolt/Data/MEMORY.md"
       },
@@ -71313,7 +71313,7 @@
         "markdown",
         "Data"
       ],
-      "updated_at": "2026-10-13T17:11:11",
+      "updated_at": "2026-10-18T02:30:16",
       "metadata": {
         "path": "/Users/carter/developer/Bolt/Data/MEMORY.md"
       },
@@ -71586,7 +71586,7 @@
         "markdown",
         "Data"
       ],
-      "updated_at": "2026-10-13T17:11:11",
+      "updated_at": "2026-10-18T02:30:16",
       "metadata": {
         "path": "/Users/carter/developer/Bolt/Data/MEMORY.md"
       },
@@ -71859,7 +71859,7 @@
         "markdown",
         "Data"
       ],
-      "updated_at": "2026-10-13T17:11:11",
+      "updated_at": "2026-10-18T02:30:16",
       "metadata": {
         "path": "/Users/carter/developer/Bolt/Data/MEMORY.md"
       },
@@ -72132,7 +72132,7 @@
         "markdown",
         "Data"
       ],
-      "updated_at": "2026-10-13T17:11:11",
+      "updated_at": "2026-10-18T02:30:16",
       "metadata": {
         "path": "/Users/carter/developer/Bolt/Data/MEMORY.md"
       },
@@ -72405,7 +72405,7 @@
         "markdown",
         "Data"
       ],
-      "updated_at": "2026-10-13T17:11:11",
+      "updated_at": "2026-10-18T02:30:16",
       "metadata": {
         "path": "/Users/carter/developer/Bolt/Data/MEMORY.md"
       },
@@ -72678,7 +72678,7 @@
         "markdown",
         "Data"
       ],
-      "updated_at": "2026-10-13T17:11:11",
+      "updated_at": "2026-10-18T02:30:16",
       "metadata": {
         "path": "/Users/carter/developer/Bolt/Data/MEMORY.md"
       },
@@ -72946,272 +72946,272 @@
       "source": "Data/MEMORY.md",
       "kind": "markdown",
       "title": "Recent Notes",
-      "text": "## Recent Notes\n- [2026-10-13] Held clip 4c52fcf9 (Test): not ready\n- [2026-10-13] Held clip 10ba129d (Ready clip): bad hook\n- [2026-10-11] This week is: gaming / tech\n- [2026-10-05] Held clip 68bee67e (Wolverine just lit up the audio there.): this isn't a clip of wolvering. Its marvel rivals\n- [2026-09-20] Held clip 8290abe1 (007 First Light just hit with that audio spike.): delete\n- [2026-09-20] Held clip b0c26d7f (Hit that perfect 100 in 007 First Light.): i meant to delete. nothing exciting is happening in the video.\n- [2026-09-10] `bolt vods` sample download was listing Helix VODs then failing: it spawned PATH `ffmpeg` against the unsigned usher HLS URL (403 / dyld crash on missing libx265). PATH ffmpeg can exist and still not run. Fix: yt-dlp + `FFmpeg_Bin.working_ffmpeg()` (ffmpeg-full), `bolt vods list` for dry-run. Public VODs do not need `TWITCH_USER_TOKEN`. Check: `bolt vods status`.\n\n- [2026-09-09] This week is: pop culture\n- [2026-09-03] OBS Thunderstone now has Aitum Vertical at 1080\u00d71920. Horizontal scenes are linked (Gaming \u2192 Vertical Gaming, plus Starting Soon / Chatting / BRB / Offline). Twitch stays 16:9. Vertical record/backtrack is the 9:16 path. Notes: `Docs/guides/OBS_VERTICAL.md`, `App/overlay/theme/README.md`.\n- [2026-09-01] Item 12 shipped: conversation / briefing comments write week + mission via Intent_Router (same functions as `bolt week` / `bolt mission update`). Say \u201cI\u2019m ready to continue\u201d, \u201cthis shipped: \u2026\u201d, \u201chours: 6, budget 40\u201d. This week is **tech** (not paused). Amazon pause is last week only.\n- [2026-09-01] Base44 `App/BoltApp` removed. It was a todo template, not a website or Mac/iOS app. Real surfaces: `bolt` CLI, overlay, Drive handbook.\n- [2026-08-31] Canonical handbook is Google Drive (**Bolt Creator OS**), not a parallel markdown book. Pointer: `Docs/GOOGLE_DRIVE_HANDBOOK.md`. IDs: `Core/config.json` \u2192 `google_drive_handbook`. Daily loop: morning briefing + Daily Log / Shared Journal in Drive `02_Daily_Operations`; lasting lessons in `06_Learnings`. Bolt **writes** a briefing section to today's Daily Log (`Google_Drive_Handbook.py`, `bolt drive-auth`). It does **not** yet read the how-to or journal back into decisions.\n\n- [2026-08-30] This week is: tech\n- [2026-08-30] Rotated week. Last week was: general product review / Amazon storefront. This week is unset.\n- [2026-08-30] Year-end bar (not a missed mission field): William does **not** know what the career outcome looks like and has no plan because he does not know what success looks like in this profession. That is why Researcher exists. The date he had is **2026-12-31**: figure that out, or have a roadmap with proof the work is leading somewhere. Do not ask him to invent a measurable result. Daily work does not need a mission. Profile: `near_term_horizon`. Standing question: `bolt research questions` \u2192 `year_end_proof`.\n- [2026-08-30] Communication gap closed 2026-09-01 (item 12): chat / voice / briefing comments now write week and mission through Intent_Router. CLI still works.\n- [2026-08-30] William said earlier this week he was **ready to continue**. That reply was not ingested (briefing comments get overwritten by `bolt morning`; chat does not update `week_card.json`). Week is still PAUSED until he runs `bolt week set \"topic\" --note \"ready to continue\"` (or we take the pause off on purpose). Do not nag film/post/reapply; wait for the topic he wants to reopen.\n- [2026-08-25] Do not suggest again: snail care as this week's post (Leftover from 2026-08-17 beauty week. Closed unless William sets beauty/skincare and asks.)\n- [2026-08-25] New week. This week is general product / Amazon (PAUSED). Last week was beauty/skincare (steamer posted). Snail care leftover is CLOSED. Nexus must not push snail or steamer as this week's post.\n- [2026-08-24] William is pausing. Do not nag film/post/reapply. Influencer rejection hurt; he spent ~6 months writing Amazon customer reviews (~5k helpful views). Those reviews were real buyer reviews, not \"doing everything wrong.\" They were a different Amazon job than Shoppable Video. Leave him space.\n- [2026-08-24] Amazon Influencer Program: **rejected**. Stop Amazon-first shoppable-video instructions. Do not treat the storefront as live. Reapply only after real content/engagement changes \u2014 do not spam the same application.\n- [2026-08-24] Amazon Influencer correction: William thought affiliate reviews had to go on his own socials. They do not. Shoppable Videos upload to Amazon (Creator Hub / storefront / product pages). Social is extra. Bolt must not mark an Amazon review unfinished because it is not on TikTok.\n- [2026-08-24] Four content topics locked: (1) pop culture / TV and film (2) gaming / tech as one lane (3) beauty / skincare (4) general product review / Amazon storefront. Amazon is the shelf, not a fifth topic.\n- [2026-08-24] This week corrected from \"tech\" to general product review / Amazon storefront. Last week remains beauty/skincare (steamer posted).\n- [2026-08-24] This week is: tech\n- [2026-08-23] This week (beauty / skincare) done: Posted facial steamer review on YouTube (https://www.youtube.com/watch?v=gYqRPoCkIy0, 713 views as of 2026-08-21)\n- [2026-08-23] Facial steamer review already posted on YouTube this week (https://www.youtube.com/watch?v=gYqRPoCkIy0 \u2014 713 views / 5 likes as of 2026-08-21). The Aug 17 week-start note was a plan, not an open to-do. Do not tell William to film or post the steamer again. Snail care is optional leftover, not required.\n- [2026-09-08] Vertical clip VHS look was real: 720p crop+unsharp, Aitum vertical record ~160kbps, Game + Game Sound both in the mix. Clip_Factory now blur-fills 720p instead of cropping, skips unsharp, uses a working ffmpeg. OBS still needs Aitum \"Match main\" off and one game-audio source, not two.\n- [2026-08-18] Held clip 1976be1d (Test): not ready\n- [2026-08-18] Held clip 59eb0958 (Ready clip): bad hook\n- [2026-08-18] Held clip 872c1b19 (Test): not ready\n- [2026-08-18] Held clip 65e497eb (Ready clip): bad hook\n- [2026-08-17] Held clip f01b6ff9 (I love this for me #007FirstLight #JamesBond #fyp #IOInteractive #DelphiInteractiveLLC): same issue with the video quality. I will work on making something worth posting first, then come back to both of these videos\n- [2026-08-17] Held clip 97ad1824 (Its a very dapper night #fyp #JamesBond #DelphiInteractiveLLC #IOInteractive #FirstLightGameplay): the video quality isn't good enough to post. Plus, the post this week should be focused on skin care, not gaming. Ill work on that now\"\n- [2026-08-17] Mac automation: launchd fixed (Core/launch.py live --no-checklist). Evening briefing at 17:00 writes Apple Reminders list \"Bolt\" plus a Mac banner. Only financial work stays fully manual; everything else is do-and-notify. Shortcuts: Bolt Morning / Review Queue / Stats / Wrap-Up. OCR shortcut writes an editable .txt via Vision.\n- [2026-08-17] This week is: beauty / skin care. Lets post a video or two, with a full product review on the snail care facial products or the facial steamer and the products that came with it. If bwe do both, The next skin care review would already be done and prepared for the next beauty / skin care run.\n- [2026-08-16] Held clip 357a75a9 (Test): not ready\n- [2026-08-16] Held clip 7fe9e6be (Ready clip): bad hook\n- [2026-08-16] Posted clip be5926ae (I better play like this online too #FirstLightGameplay #fyp #IOInteractive #DelphiInteractiveLLC)\n\n- [2026-08-04] Anchored `seen_clips.json` to `Data/seen_clips.json` (was drifting to the repo root each run). Patched `Clip_Deduplicator.SEEN_FILE`, fixed `Think_Learn_Decide.DATA_DIR` depth (was the pre-2026-07-19 flatten bug), updated `Core/data/source_registry.json`. Added `bolt vector_db` / `bolt reindex` aliases for `refresh_vector_db`; reconciled `bin/bolt` docstring with the actual `~/.zshrc` alias.\n- [2026-08-02] Twitch channel renamed to ItsSimplyBilly to align with other social handles (TikTok, YouTube, X).\n- [2026-05-29] Added the full creator vision: gaming, tech, product testing, Amazon Influencer storefront reviews, beauty/skincare, AI development, and Bolt as a virtual teammate for learning and growth.\n- [2026-05-29] Reframed this hot cache as Bolt's operational memory instead of assistant notes about Billy.\n- [2026-05-27] Phase 3 marked complete.\n- [2026-05-27] Two test clips were posted: `test1` and `test2`.\n- [2026-04-27] Bolt_Chat and Bolt_Voice were working. ChaoticallyRobotical was confirmed as the bot account.\n- [2026-04-27] ElevenLabs was skipped. `edge-tts` was installed as the free neural voice option, with macOS `say` as fallback.\n- [2026-04-27] `max_clips_per_session` was set to 5 and `min_clip_score` was set to 65.",
+      "text": "## Recent Notes\n- [2026-10-15] Held clip 0a2c43fc (Test): not ready\n- [2026-10-15] Held clip b26c654d (Ready clip): bad hook\n- [2026-09-10] `bolt vods` sample download was listing Helix VODs then failing: it spawned PATH `ffmpeg` against the unsigned usher HLS URL (403 / dyld crash on missing libx265). PATH ffmpeg can exist and still not run. Fix: yt-dlp + `FFmpeg_Bin.working_ffmpeg()` (ffmpeg-full), `bolt vods list` for dry-run. Public VODs do not need `TWITCH_USER_TOKEN`. Check: `bolt vods status`.\n\n- [2026-09-09] This week is: pop culture\n- [2026-09-03] OBS Thunderstone now has Aitum Vertical at 1080\u00d71920. Horizontal scenes are linked (Gaming \u2192 Vertical Gaming, plus Starting Soon / Chatting / BRB / Offline). Twitch stays 16:9. Vertical record/backtrack is the 9:16 path. Notes: `Docs/guides/OBS_VERTICAL.md`, `App/overlay/theme/README.md`.\n- [2026-09-01] Item 12 shipped: conversation / briefing comments write week + mission via Intent_Router (same functions as `bolt week` / `bolt mission update`). Say \u201cI\u2019m ready to continue\u201d, \u201cthis shipped: \u2026\u201d, \u201chours: 6, budget 40\u201d. This week is **tech** (not paused). Amazon pause is last week only.\n- [2026-09-01] Base44 `App/BoltApp` removed. It was a todo template, not a website or Mac/iOS app. Real surfaces: `bolt` CLI, overlay, Drive handbook.\n- [2026-08-31] Canonical handbook is Google Drive (**Bolt Creator OS**), not a parallel markdown book. Pointer: `Docs/GOOGLE_DRIVE_HANDBOOK.md`. IDs: `Core/config.json` \u2192 `google_drive_handbook`. Daily loop: morning briefing + Daily Log / Shared Journal in Drive `02_Daily_Operations`; lasting lessons in `06_Learnings`. Bolt **writes** a briefing section to today's Daily Log (`Google_Drive_Handbook.py`, `bolt drive-auth`). It does **not** yet read the how-to or journal back into decisions.\n\n- [2026-08-30] This week is: tech\n- [2026-08-30] Rotated week. Last week was: general product review / Amazon storefront. This week is unset.\n- [2026-08-30] Year-end bar (not a missed mission field): William does **not** know what the career outcome looks like and has no plan because he does not know what success looks like in this profession. That is why Researcher exists. The date he had is **2026-12-31**: figure that out, or have a roadmap with proof the work is leading somewhere. Do not ask him to invent a measurable result. Daily work does not need a mission. Profile: `near_term_horizon`. Standing question: `bolt research questions` \u2192 `year_end_proof`.\n- [2026-08-30] Communication gap closed 2026-09-01 (item 12): chat / voice / briefing comments now write week and mission through Intent_Router. CLI still works.\n- [2026-08-30] William said earlier this week he was **ready to continue**. That reply was not ingested (briefing comments get overwritten by `bolt morning`; chat does not update `week_card.json`). Week is still PAUSED until he runs `bolt week set \"topic\" --note \"ready to continue\"` (or we take the pause off on purpose). Do not nag film/post/reapply; wait for the topic he wants to reopen.\n- [2026-08-25] Do not suggest again: snail care as this week's post (Leftover from 2026-08-17 beauty week. Closed unless William sets beauty/skincare and asks.)\n- [2026-08-25] New week. This week is general product / Amazon (PAUSED). Last week was beauty/skincare (steamer posted). Snail care leftover is CLOSED. Nexus must not push snail or steamer as this week's post.\n- [2026-08-24] William is pausing. Do not nag film/post/reapply. Influencer rejection hurt; he spent ~6 months writing Amazon customer reviews (~5k helpful views). Those reviews were real buyer reviews, not \"doing everything wrong.\" They were a different Amazon job than Shoppable Video. Leave him space.\n- [2026-08-24] Amazon Influencer Program: **rejected**. Stop Amazon-first shoppable-video instructions. Do not treat the storefront as live. Reapply only after real content/engagement changes \u2014 do not spam the same application.\n- [2026-08-24] Amazon Influencer correction: William thought affiliate reviews had to go on his own socials. They do not. Shoppable Videos upload to Amazon (Creator Hub / storefront / product pages). Social is extra. Bolt must not mark an Amazon review unfinished because it is not on TikTok.\n- [2026-08-24] Four content topics locked: (1) pop culture / TV and film (2) gaming / tech as one lane (3) beauty / skincare (4) general product review / Amazon storefront. Amazon is the shelf, not a fifth topic.\n- [2026-08-24] This week corrected from \"tech\" to general product review / Amazon storefront. Last week remains beauty/skincare (steamer posted).\n- [2026-08-24] This week is: tech\n- [2026-08-23] This week (beauty / skincare) done: Posted facial steamer review on YouTube (https://www.youtube.com/watch?v=gYqRPoCkIy0, 713 views as of 2026-08-21)\n- [2026-08-23] Facial steamer review already posted on YouTube this week (https://www.youtube.com/watch?v=gYqRPoCkIy0 \u2014 713 views / 5 likes as of 2026-08-21). The Aug 17 week-start note was a plan, not an open to-do. Do not tell William to film or post the steamer again. Snail care is optional leftover, not required.\n- [2026-09-08] Vertical clip VHS look was real: 720p crop+unsharp, Aitum vertical record ~160kbps, Game + Game Sound both in the mix. Clip_Factory now blur-fills 720p instead of cropping, skips unsharp, uses a working ffmpeg. OBS still needs Aitum \"Match main\" off and one game-audio source, not two.\n- [2026-08-18] Held clip 1976be1d (Test): not ready\n- [2026-08-18] Held clip 59eb0958 (Ready clip): bad hook\n- [2026-08-18] Held clip 872c1b19 (Test): not ready\n- [2026-08-18] Held clip 65e497eb (Ready clip): bad hook\n- [2026-08-17] Held clip f01b6ff9 (I love this for me #007FirstLight #JamesBond #fyp #IOInteractive #DelphiInteractiveLLC): same issue with the video quality. I will work on making something worth posting first, then come back to both of these videos\n- [2026-08-17] Held clip 97ad1824 (Its a very dapper night #fyp #JamesBond #DelphiInteractiveLLC #IOInteractive #FirstLightGameplay): the video quality isn't good enough to post. Plus, the post this week should be focused on skin care, not gaming. Ill work on that now\"\n- [2026-08-17] Mac automation: launchd fixed (Core/launch.py live --no-checklist). Evening briefing at 17:00 writes Apple Reminders list \"Bolt\" plus a Mac banner. Only financial work stays fully manual; everything else is do-and-notify. Shortcuts: Bolt Morning / Review Queue / Stats / Wrap-Up. OCR shortcut writes an editable .txt via Vision.\n- [2026-08-17] This week is: beauty / skin care. Lets post a video or two, with a full product review on the snail care facial products or the facial steamer and the products that came with it. If bwe do both, The next skin care review would already be done and prepared for the next beauty / skin care run.\n- [2026-08-16] Held clip 357a75a9 (Test): not ready\n- [2026-08-16] Held clip 7fe9e6be (Ready clip): bad hook\n- [2026-08-16] Posted clip be5926ae (I better play like this online too #FirstLightGameplay #fyp #IOInteractive #DelphiInteractiveLLC)\n\n- [2026-08-04] Anchored `seen_clips.json` to `Data/seen_clips.json` (was drifting to the repo root each run). Patched `Clip_Deduplicator.SEEN_FILE`, fixed `Think_Learn_Decide.DATA_DIR` depth (was the pre-2026-07-19 flatten bug), updated `Core/data/source_registry.json`. Added `bolt vector_db` / `bolt reindex` aliases for `refresh_vector_db`; reconciled `bin/bolt` docstring with the actual `~/.zshrc` alias.\n- [2026-08-02] Twitch channel renamed to ItsSimplyBilly to align with other social handles (TikTok, YouTube, X).\n- [2026-05-29] Added the full creator vision: gaming, tech, product testing, Amazon Influencer storefront reviews, beauty/skincare, AI development, and Bolt as a virtual teammate for learning and growth.\n- [2026-05-29] Reframed this hot cache as Bolt's operational memory instead of assistant notes about Billy.\n- [2026-05-27] Phase 3 marked complete.\n- [2026-05-27] Two test clips were posted: `test1` and `test2`.\n- [2026-04-27] Bolt_Chat and Bolt_Voice were working. ChaoticallyRobotical was confirmed as the bot account.\n- [2026-04-27] ElevenLabs was skipped. `edge-tts` was installed as the free neural voice option, with macOS `say` as fallback.\n- [2026-04-27] `max_clips_per_session` was set to 5 and `min_clip_score` was set to 65.",
       "tags": [
         "markdown",
         "Data"
       ],
-      "updated_at": "2026-10-13T17:11:11",
+      "updated_at": "2026-10-18T02:30:16",
       "metadata": {
         "path": "/Users/carter/developer/Bolt/Data/MEMORY.md"
       },
       "vector": [
-        0.072314,
-        0.048272,
-        0.024105,
-        0.096482,
-        0.024105,
-        0.048209,
-        0.09644,
-        0.048251,
-        0.072314,
-        0.04823,
-        0.024126,
-        0.024105,
+        0.075097,
+        0.050133,
+        0.025032,
+        0.075165,
+        0.025032,
+        0.050064,
+        0.100152,
+        0.05011,
+        0.075097,
+        0.050087,
+        0.025055,
+        0.025032,
         0.0,
         0.0,
-        0.072335,
+        0.050064,
         0.0,
-        0.048209,
-        0.096586,
-        0.072356,
-        0.024126,
-        0.120795,
-        0.072314,
+        0.050064,
+        0.100311,
+        0.075142,
+        0.025055,
+        0.125457,
+        0.050064,
         0.0,
-        0.072356,
-        0.024105,
-        0.096586,
-        0.048209,
-        0.024105,
-        0.072314,
-        0.024105,
-        0.12067,
-        0.024105,
-        0.096461,
-        0.024105,
-        0.048418,
-        0.024105,
-        0.048209,
-        0.024105,
-        0.072335,
-        0.072314,
-        0.168817,
-        0.072377,
-        0.120523,
+        0.075142,
+        0.025032,
+        0.100312,
+        0.050064,
+        0.025032,
+        0.075097,
+        0.025032,
+        0.125321,
+        0.025032,
+        0.100152,
+        0.025032,
+        0.050247,
+        0.025032,
+        0.050064,
+        0.025032,
+        0.07512,
+        0.075097,
+        0.175317,
+        0.075165,
+        0.125161,
         0.0,
-        0.072544,
-        0.0,
-        0.0,
-        0.168796,
-        0.048209,
-        0.024105,
-        0.024105,
-        0.072419,
-        0.048209,
-        0.0,
-        0.048293,
-        0.0,
-        0.048209,
-        0.048398,
-        0.024105,
-        0.07244,
-        0.120565,
-        0.024126,
-        0.048209,
-        0.024105,
-        0.072314,
-        0.072377,
-        0.0,
-        0.048293,
-        0.07244,
-        0.120544,
-        0.024479,
-        0.12067,
-        0.072314,
-        0.0,
-        0.096544,
-        0.048209,
-        0.04823,
-        0.048209,
-        0.048209,
-        0.168796,
-        0.024105,
-        0.04823,
-        0.024105,
-        0.024105,
+        0.075348,
         0.0,
         0.0,
-        0.024105,
-        0.048209,
-        0.024105,
-        0.048209,
-        0.024105,
-        0.04823,
-        0.072335,
-        0.072896,
-        0.048209,
-        0.04823,
-        0.072419,
-        0.120523,
-        0.024105,
-        0.048209,
+        0.150239,
+        0.050064,
+        0.025032,
+        0.025032,
+        0.075211,
+        0.050064,
         0.0,
-        0.048209,
-        0.024105,
-        0.048251,
-        0.072335,
-        0.048209,
-        0.048251,
-        0.120586,
-        0.024209,
+        0.050156,
         0.0,
-        0.120712,
-        0.024105,
-        0.024147,
-        0.072461,
-        0.024105,
-        0.120586,
-        0.024126,
-        0.096461,
-        0.072419,
-        0.072377,
-        0.096503,
+        0.050064,
+        0.05027,
+        0.025032,
+        0.075234,
+        0.125207,
+        0.025055,
+        0.050064,
+        0.025032,
+        0.075097,
+        0.07512,
         0.0,
-        0.072335,
-        0.048209,
-        0.024105,
-        0.024105,
-        0.096711,
-        0.072377,
-        0.072314,
-        0.024126,
-        0.048209,
+        0.050156,
+        0.075188,
+        0.125184,
+        0.025441,
+        0.125321,
+        0.050064,
         0.0,
-        0.024126,
-        0.096482,
-        0.048209,
-        0.048209,
-        0.024105,
-        0.096461,
-        0.072976,
-        0.0,
-        0.024105,
-        0.14467,
-        0.0,
-        0.048209,
-        0.0,
-        0.024105,
-        0.024126,
-        0.049296,
-        0.096461,
-        0.024105,
-        0.048209,
-        0.0,
-        0.072377,
-        0.048251,
-        0.024147,
-        0.024105,
-        0.048209,
-        0.024105,
-        0.024188,
-        0.120523,
-        0.072335,
-        0.048209,
-        0.096482,
-        0.048209,
-        0.048209,
-        0.120586,
-        0.024105,
-        0.048209,
-        0.048209,
-        0.072335,
-        0.072356,
-        0.04823,
-        0.048293,
-        0.0,
-        0.072314,
-        0.024126,
-        0.072398,
-        0.048335,
-        0.0,
-        0.024105,
-        0.096419,
-        0.048892,
-        0.024105,
-        0.024105,
-        0.072377,
-        0.0,
-        0.072356,
-        0.024105,
-        0.096419,
-        0.024105,
-        0.048272,
-        0.048209,
-        0.048209,
-        0.024105,
-        0.072356,
-        0.024105,
-        0.048293,
-        0.072356,
-        0.048398,
-        0.04823,
-        0.024105,
-        0.144733,
-        0.096586,
-        0.072356,
-        0.120712,
-        0.024126,
-        0.0,
-        0.024105,
-        0.024126,
-        0.12067,
-        0.096461,
-        0.024105,
-        0.072314,
-        0.024126,
-        0.072398,
-        0.048251,
-        0.072314,
+        0.075211,
+        0.050064,
+        0.050087,
+        0.025032,
+        0.050064,
+        0.175294,
+        0.025032,
+        0.050087,
+        0.025032,
+        0.025032,
         0.0,
         0.0,
-        0.096482,
-        0.024105,
-        0.048209,
-        0.072356,
-        0.096419,
-        0.024105,
-        0.048377,
-        0.024126,
-        0.072398,
-        0.024126,
-        0.096523,
-        0.072335,
+        0.025032,
+        0.050064,
+        0.025032,
+        0.050064,
+        0.025032,
+        0.050087,
+        0.07512,
+        0.050676,
+        0.025032,
+        0.025032,
+        0.050179,
+        0.100129,
+        0.025032,
+        0.050064,
         0.0,
-        0.04823,
-        0.048209,
-        0.072377,
-        0.024105,
-        0.09644,
-        0.072606,
-        0.04823,
-        0.072335,
-        0.072544,
-        0.024126,
-        0.09644,
+        0.050064,
+        0.025032,
+        0.05011,
+        0.07512,
+        0.050064,
+        0.05011,
+        0.12523,
+        0.025124,
         0.0,
-        0.048418,
-        0.048209,
-        0.048209,
-        0.07244,
-        0.024105,
-        0.096461,
-        0.04823,
-        0.0245,
+        0.100312,
+        0.025032,
+        0.025078,
+        0.050201,
+        0.025032,
+        0.100198,
+        0.025055,
+        0.100175,
+        0.075211,
+        0.075165,
+        0.10022,
         0.0,
-        0.048272,
+        0.07512,
+        0.050064,
+        0.025032,
+        0.025032,
+        0.10038,
+        0.05011,
+        0.075097,
+        0.025055,
+        0.050064,
         0.0,
-        0.04823
+        0.025055,
+        0.100197,
+        0.050064,
+        0.050064,
+        0.025032,
+        0.100175,
+        0.050786,
+        0.025055,
+        0.025032,
+        0.150239,
+        0.0,
+        0.050064,
+        0.0,
+        0.025032,
+        0.025055,
+        0.051161,
+        0.100175,
+        0.025032,
+        0.050064,
+        0.0,
+        0.075165,
+        0.050064,
+        0.025078,
+        0.025032,
+        0.025032,
+        0.025032,
+        0.025124,
+        0.100129,
+        0.07512,
+        0.050064,
+        0.100198,
+        0.050064,
+        0.025032,
+        0.12523,
+        0.025032,
+        0.050064,
+        0.025032,
+        0.07512,
+        0.050087,
+        0.050087,
+        0.050156,
+        0.0,
+        0.050064,
+        0.025055,
+        0.075188,
+        0.050201,
+        0.0,
+        0.025032,
+        0.100129,
+        0.050809,
+        0.0,
+        0.025032,
+        0.075165,
+        0.0,
+        0.075142,
+        0.025032,
+        0.100129,
+        0.025032,
+        0.050133,
+        0.050064,
+        0.050064,
+        0.025032,
+        0.075142,
+        0.025032,
+        0.050156,
+        0.075142,
+        0.05027,
+        0.050087,
+        0.025032,
+        0.150308,
+        0.100312,
+        0.075142,
+        0.125367,
+        0.025055,
+        0.0,
+        0.025032,
+        0.025055,
+        0.125321,
+        0.100175,
+        0.025032,
+        0.075097,
+        0.025055,
+        0.075188,
+        0.05011,
+        0.075097,
+        0.0,
+        0.0,
+        0.100197,
+        0.025032,
+        0.050064,
+        0.075142,
+        0.125161,
+        0.025032,
+        0.050247,
+        0.025055,
+        0.075188,
+        0.025055,
+        0.100243,
+        0.07512,
+        0.0,
+        0.050087,
+        0.050064,
+        0.075165,
+        0.025032,
+        0.100152,
+        0.075415,
+        0.050087,
+        0.07512,
+        0.075325,
+        0.025055,
+        0.100129,
+        0.0,
+        0.050292,
+        0.050064,
+        0.050064,
+        0.075234,
+        0.025032,
+        0.100175,
+        0.050087,
+        0.025373,
+        0.0,
+        0.025078,
+        0.0,
+        0.050087
       ]
     },
     {
@@ -141557,6 +141557,1710 @@
       ]
     },
     {
+      "id": "data/unified_memory.jsonl#240",
+      "source": "data/unified_memory.jsonl",
+      "kind": "decision_event",
+      "title": "queue_clip: Feedback recorded",
+      "text": "Feedback recorded\nbad hook",
+      "tags": [
+        "decision",
+        "event",
+        "decision_feedback",
+        "user_preference",
+        "queue_clip"
+      ],
+      "updated_at": "2026-10-18T02:27:01.887692",
+      "metadata": {
+        "timestamp": "2026-10-18T02:27:01.887692",
+        "source": "decision_feedback",
+        "intent": "user_preference",
+        "action": "queue_clip",
+        "result": "rejected",
+        "confidence": 0.9,
+        "reason": "Feedback recorded",
+        "feedback": "bad hook",
+        "metadata": {}
+      },
+      "vector": [
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "data/unified_memory.jsonl#241",
+      "source": "data/unified_memory.jsonl",
+      "kind": "decision_event",
+      "title": "queue_clip: Feedback recorded",
+      "text": "Feedback recorded\nnot ready",
+      "tags": [
+        "decision",
+        "event",
+        "decision_feedback",
+        "user_preference",
+        "queue_clip"
+      ],
+      "updated_at": "2026-10-18T02:27:03.147707",
+      "metadata": {
+        "timestamp": "2026-10-18T02:27:03.147707",
+        "source": "decision_feedback",
+        "intent": "user_preference",
+        "action": "queue_clip",
+        "result": "rejected",
+        "confidence": 0.9,
+        "reason": "Feedback recorded",
+        "feedback": "not ready",
+        "metadata": {}
+      },
+      "vector": [
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "data/unified_memory.jsonl#242",
+      "source": "data/unified_memory.jsonl",
+      "kind": "decision_event",
+      "title": "queue_clip: Feedback recorded",
+      "text": "Feedback recorded\nbad hook",
+      "tags": [
+        "decision",
+        "event",
+        "decision_feedback",
+        "user_preference",
+        "queue_clip"
+      ],
+      "updated_at": "2026-10-18T02:27:30.689735",
+      "metadata": {
+        "timestamp": "2026-10-18T02:27:30.689735",
+        "source": "decision_feedback",
+        "intent": "user_preference",
+        "action": "queue_clip",
+        "result": "rejected",
+        "confidence": 0.9,
+        "reason": "Feedback recorded",
+        "feedback": "bad hook",
+        "metadata": {}
+      },
+      "vector": [
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "data/unified_memory.jsonl#243",
+      "source": "data/unified_memory.jsonl",
+      "kind": "decision_event",
+      "title": "queue_clip: Feedback recorded",
+      "text": "Feedback recorded\nnot ready",
+      "tags": [
+        "decision",
+        "event",
+        "decision_feedback",
+        "user_preference",
+        "queue_clip"
+      ],
+      "updated_at": "2026-10-18T02:27:32.001632",
+      "metadata": {
+        "timestamp": "2026-10-18T02:27:32.001632",
+        "source": "decision_feedback",
+        "intent": "user_preference",
+        "action": "queue_clip",
+        "result": "rejected",
+        "confidence": 0.9,
+        "reason": "Feedback recorded",
+        "feedback": "not ready",
+        "metadata": {}
+      },
+      "vector": [
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "data/unified_memory.jsonl#244",
+      "source": "data/unified_memory.jsonl",
+      "kind": "decision_event",
+      "title": "queue_clip: Feedback recorded",
+      "text": "Feedback recorded\nbad hook",
+      "tags": [
+        "decision",
+        "event",
+        "decision_feedback",
+        "user_preference",
+        "queue_clip"
+      ],
+      "updated_at": "2026-10-18T02:28:06.827877",
+      "metadata": {
+        "timestamp": "2026-10-18T02:28:06.827877",
+        "source": "decision_feedback",
+        "intent": "user_preference",
+        "action": "queue_clip",
+        "result": "rejected",
+        "confidence": 0.9,
+        "reason": "Feedback recorded",
+        "feedback": "bad hook",
+        "metadata": {}
+      },
+      "vector": [
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "data/unified_memory.jsonl#245",
+      "source": "data/unified_memory.jsonl",
+      "kind": "decision_event",
+      "title": "queue_clip: Feedback recorded",
+      "text": "Feedback recorded\nnot ready",
+      "tags": [
+        "decision",
+        "event",
+        "decision_feedback",
+        "user_preference",
+        "queue_clip"
+      ],
+      "updated_at": "2026-10-18T02:28:08.133200",
+      "metadata": {
+        "timestamp": "2026-10-18T02:28:08.133200",
+        "source": "decision_feedback",
+        "intent": "user_preference",
+        "action": "queue_clip",
+        "result": "rejected",
+        "confidence": 0.9,
+        "reason": "Feedback recorded",
+        "feedback": "not ready",
+        "metadata": {}
+      },
+      "vector": [
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.348066,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.325717,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
       "id": "seen_clips.json#1",
       "source": "seen_clips.json",
       "kind": "clip",
@@ -141566,7 +143270,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-07-19_22-48-14_clip01_audio_spike_80.mp4', 'size': 25122469, 'timestamp': 80.5, 'phash': 'de33cec8c630c4e3', 'added': 1785647460.452123}"
       },
@@ -141839,7 +143543,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/Replay_2026-07-07_11-57-20_clip01_audio_spike_0.mp4', 'size': 11239201, 'timestamp': 0.5, 'phash': 'ddc86436f33920ce', 'added': 1785647961.399458}"
       },
@@ -142112,7 +143816,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-07-25_14-44-42_clip02_audio_spike_825.mp4', 'size': 46490030, 'timestamp': 825.0, 'phash': 'f0b427230ff4781b', 'added': 1785883774.936705}"
       },
@@ -142385,7 +144089,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-07-25_14-44-42_clip01_audio_spike_685.mp4', 'size': 54293917, 'timestamp': 685.5, 'phash': 'c22d9bd2ca2d39f0', 'added': 1785883808.917747}"
       },
@@ -142658,7 +144362,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-07-25_14-44-42_clip02_audio_spike_772.mp4', 'size': 53125869, 'timestamp': 772.0, 'phash': 'd48e2ee023f4b4c7', 'added': 1785883808.9997509}"
       },
@@ -142931,7 +144635,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-07-19_22-29-16_clip01_audio_spike_35.mp4', 'size': 19371091, 'timestamp': 35.5, 'phash': 'd2d3692c3096cbcd', 'added': 1785884045.888088}"
       },
@@ -143204,7 +144908,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-07-19_22-29-16_clip02_audio_spike_123.mp4', 'size': 12371704, 'timestamp': 123.0, 'phash': 'dff6d74028275846', 'added': 1785884045.9371789}"
       },
@@ -143477,7 +145181,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-07-19_22-29-16_clip03_audio_spike_178.mp4', 'size': 11785751, 'timestamp': 178.5, 'phash': '857649cbb2358d36', 'added': 1785884078.864693}"
       },
@@ -143750,7 +145454,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-06_11-09-23_clip01_audio_spike_16.mp4', 'size': 28386550, 'timestamp': 16.0, 'phash': 'd08703d89f332f9c', 'added': 1786068222.02528}"
       },
@@ -144023,7 +145727,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-06_11-09-23_clip03_audio_spike_168.mp4', 'size': 21192284, 'timestamp': 168.0, 'phash': '93956c6a9393666c', 'added': 1786068222.192101}"
       },
@@ -144296,7 +146000,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-06_11-09-23_clip04_audio_spike_226.mp4', 'size': 27890524, 'timestamp': 226.5, 'phash': 'c9ba2c254754d99b', 'added': 1786068222.271192}"
       },
@@ -144569,7 +146273,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-06_11-09-23_clip05_audio_spike_288.mp4', 'size': 28200939, 'timestamp': 288.0, 'phash': 'a545b43c5bc783b4', 'added': 1786068222.3389282}"
       },
@@ -144842,7 +146546,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-06_11-09-23_clip06_audio_spike_378.mp4', 'size': 31201595, 'timestamp': 378.5, 'phash': 'd85c243327074fee', 'added': 1786068222.426107}"
       },
@@ -145115,7 +146819,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-06_11-09-23_clip07_audio_spike_435.mp4', 'size': 24008655, 'timestamp': 435.0, 'phash': '986e66b9450cee96', 'added': 1786068222.5099142}"
       },
@@ -145388,7 +147092,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-06_11-09-23_clip08_audio_spike_514.mp4', 'size': 28120457, 'timestamp': 514.0, 'phash': '99c96e266aa552ea', 'added': 1786068222.603873}"
       },
@@ -145661,7 +147365,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-06_11-09-23_clip09_audio_spike_577.mp4', 'size': 27289431, 'timestamp': 577.5, 'phash': 'b5414a30bbed24db', 'added': 1786068222.7722208}"
       },
@@ -145934,7 +147638,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-06_11-09-23_clip10_audio_spike_627.mp4', 'size': 26714843, 'timestamp': 627.5, 'phash': 'a5875a78a9bc54d4', 'added': 1786068222.8404999}"
       },
@@ -146207,7 +147911,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-06_11-09-23_clip11_audio_spike_679.mp4', 'size': 23107026, 'timestamp': 679.5, 'phash': '96966969b4599b92', 'added': 1786068222.928759}"
       },
@@ -146480,7 +148184,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-06_11-09-23_clip12_audio_spike_729.mp4', 'size': 28889390, 'timestamp': 729.0, 'phash': '97994c6626d85979', 'added': 1786068222.991263}"
       },
@@ -146753,7 +148457,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-06_22-06-56_clip01_audio_spike_5.mp4', 'size': 20394884, 'timestamp': 5.0, 'phash': 'f5a56b744b5a16c0', 'added': 1786072766.294045}"
       },
@@ -147026,7 +148730,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-06_22-06-56_clip03_audio_spike_140.mp4', 'size': 25836242, 'timestamp': 140.0, 'phash': 'b90f68de92b55642', 'added': 1786072766.429424}"
       },
@@ -147299,7 +149003,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip01_audio_spike_636.mp4', 'size': 30349043, 'timestamp': 636.0, 'phash': 'b5324d142769ab97', 'added': 1786097962.5388181}"
       },
@@ -147572,7 +149276,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip02_audio_spike_984.mp4', 'size': 29253785, 'timestamp': 984.0, 'phash': '9342b7719793a2c3', 'added': 1786097962.607884}"
       },
@@ -147845,7 +149549,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip03_audio_spike_1059.mp4', 'size': 29975554, 'timestamp': 1059.5, 'phash': '9d426da5c67a2c56', 'added': 1786097962.702118}"
       },
@@ -148118,7 +149822,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip04_audio_spike_1145.mp4', 'size': 30104852, 'timestamp': 1145.0, 'phash': 'cc031dec0376a9f9', 'added': 1786097962.799934}"
       },
@@ -148391,7 +150095,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip05_audio_spike_1384.mp4', 'size': 32145354, 'timestamp': 1384.0, 'phash': 'b92e762324d299d5', 'added': 1786097962.873054}"
       },
@@ -148664,7 +150368,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip06_audio_spike_1444.mp4', 'size': 31468743, 'timestamp': 1444.0, 'phash': 'd4fc68332bf784c0', 'added': 1786097962.97889}"
       },
@@ -148937,7 +150641,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip07_audio_spike_1860.mp4', 'size': 31149944, 'timestamp': 1860.5, 'phash': 'c819722676738f99', 'added': 1786097963.067838}"
       },
@@ -149210,7 +150914,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip08_audio_spike_1939.mp4', 'size': 31699159, 'timestamp': 1939.5, 'phash': 'a84a3770cb0e99dd', 'added': 1786097963.1398919}"
       },
@@ -149483,7 +151187,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip09_audio_spike_3186.mp4', 'size': 29885338, 'timestamp': 3186.5, 'phash': 'b449ba2545fea495', 'added': 1786097963.2266428}"
       },
@@ -149756,7 +151460,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip10_audio_spike_3515.mp4', 'size': 32356525, 'timestamp': 3515.5, 'phash': 'ceb1e4c61871c49f', 'added': 1786097963.304234}"
       },
@@ -150029,7 +151733,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip11_audio_spike_3606.mp4', 'size': 31070317, 'timestamp': 3606.5, 'phash': '8778b4934bbc06ce', 'added': 1786097963.402165}"
       },
@@ -150302,7 +152006,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-07_04-06-28_clip12_audio_spike_3969.mp4', 'size': 30168018, 'timestamp': 3969.5, 'phash': 'fc0f7a1f7001cacc', 'added': 1786097963.466919}"
       },
@@ -150575,7 +152279,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-08_08-55-07_clip01_audio_spike_416.mp4', 'size': 29645165, 'timestamp': 416.0, 'phash': 'b5855a7601fd4f12', 'added': 1786259268.7032268}"
       },
@@ -150848,7 +152552,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip02_audio_spike_84.mp4', 'size': 28069251, 'timestamp': 84.5, 'phash': '838f7511384fc73c', 'added': 1786260341.659055}"
       },
@@ -151121,7 +152825,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip03_audio_spike_142.mp4', 'size': 28802034, 'timestamp': 142.5, 'phash': 'd0786d3d263e0e53', 'added': 1786260341.7301152}"
       },
@@ -151394,7 +153098,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip07_audio_spike_2297.mp4', 'size': 30873635, 'timestamp': 2297.5, 'phash': '95946dda25bd0a2d', 'added': 1786260342.0314581}"
       },
@@ -151667,7 +153371,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip08_audio_spike_2488.mp4', 'size': 24932791, 'timestamp': 2488.5, 'phash': 'd1d1062fa92b56d5', 'added': 1786260342.110938}"
       },
@@ -151940,7 +153644,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip09_audio_spike_2545.mp4', 'size': 20604187, 'timestamp': 2545.5, 'phash': 'ccf3640c3b9e8e4c', 'added': 1786260342.193304}"
       },
@@ -152213,7 +153917,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip10_audio_spike_2860.mp4', 'size': 32126192, 'timestamp': 2860.0, 'phash': 'c39879110fe136f3', 'added': 1786260342.25564}"
       },
@@ -152486,7 +154190,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip11_audio_spike_3155.mp4', 'size': 32066122, 'timestamp': 3155.0, 'phash': 'c59c3c40c7cf0fb1', 'added': 1786260342.330411}"
       },
@@ -152759,7 +154463,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip12_audio_spike_3858.mp4', 'size': 32183282, 'timestamp': 3858.5, 'phash': 'aaf9f3e080cc0f17', 'added': 1786260342.395765}"
       },
@@ -153032,7 +154736,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip07_audio_spike_4794.mp4', 'size': 27814971, 'timestamp': 4794.5, 'phash': '8ccb2a63f13b30ba', 'added': 1786280343.964042}"
       },
@@ -153305,7 +155009,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip08_audio_spike_4984.mp4', 'size': 30415835, 'timestamp': 4984.0, 'phash': 'c8db32d0f0663c2f', 'added': 1786280344.034587}"
       },
@@ -153578,7 +155282,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip09_audio_spike_5162.mp4', 'size': 27994081, 'timestamp': 5162.0, 'phash': 'cd668d0b70d13e87', 'added': 1786280344.1135302}"
       },
@@ -153851,7 +155555,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip10_audio_spike_5333.mp4', 'size': 29894981, 'timestamp': 5333.0, 'phash': 'f0f9c94cc85b642e', 'added': 1786280344.180544}"
       },
@@ -154124,7 +155828,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip11_audio_spike_5959.mp4', 'size': 30311775, 'timestamp': 5959.5, 'phash': '8dcdb76a7422a255', 'added': 1786280344.2638872}"
       },
@@ -154397,7 +156101,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-08-09_01-13-33_clip12_audio_spike_6295.mp4', 'size': 15012514, 'timestamp': 6295.0, 'phash': 'bcef774f89032301', 'added': 1786280344.334076}"
       },
@@ -154670,7 +156374,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip03_audio_spike_336.mp4', 'size': 33526293, 'timestamp': 336.0, 'phash': 'ccbc1347c9434e9b', 'added': 1788419733.2755442}"
       },
@@ -154943,7 +156647,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip04_audio_spike_425.mp4', 'size': 17498993, 'timestamp': 425.0, 'phash': 'f1f8526c0f071f16', 'added': 1788419733.33824}"
       },
@@ -155216,7 +156920,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip05_audio_spike_543.mp4', 'size': 33186966, 'timestamp': 543.5, 'phash': 'd16c52fb0f050f96', 'added': 1788419733.4164789}"
       },
@@ -155489,7 +157193,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip07_audio_spike_699.mp4', 'size': 25437322, 'timestamp': 699.0, 'phash': 'e57852e80f1d3e86', 'added': 1788419733.5914629}"
       },
@@ -155762,7 +157466,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip08_audio_spike_778.mp4', 'size': 15800231, 'timestamp': 778.5, 'phash': 'd47852790f271d96', 'added': 1788419733.6906571}"
       },
@@ -156035,7 +157739,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip09_audio_spike_832.mp4', 'size': 22483228, 'timestamp': 832.0, 'phash': '99f872ec27270e92', 'added': 1788419733.750877}"
       },
@@ -156308,7 +158012,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-02_23-25-40_clip11_audio_spike_1096.mp4', 'size': 21024084, 'timestamp': 1096.5, 'phash': 'b0d8567d0f871e85', 'added': 1788419733.961824}"
       },
@@ -156581,7 +158285,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-03_13-57-07_clip01_audio_spike_31.mp4', 'size': 33122273, 'timestamp': 31.5, 'phash': '9d95b9626272563a', 'added': 1788462505.952946}"
       },
@@ -156854,7 +158558,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-03_13-57-07_clip03_audio_spike_132.mp4', 'size': 4799965, 'timestamp': 132.0, 'phash': 'a5a5a59c5a5a5a5a', 'added': 1788462506.078822}"
       },
@@ -157127,7 +158831,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-03_13-57-07_clip04_audio_spike_386.mp4', 'size': 4426346, 'timestamp': 386.0, 'phash': '9998c9cd44dc93d5', 'added': 1788462506.1309628}"
       },
@@ -157400,7 +159104,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-03_13-57-07_clip06_audio_spike_625.mp4', 'size': 2504549, 'timestamp': 625.0, 'phash': 'e4b7a64a4b4a4b4b', 'added': 1788462506.307712}"
       },
@@ -157673,7 +159377,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-03 13-57-07-vertical_clip02_audio_spike_82.mp4', 'size': 16240524, 'timestamp': 82.0, 'phash': '9b1a9aa44cfe44dc', 'added': 1788462657.546439}"
       },
@@ -157946,7 +159650,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-03 13-57-07-vertical_clip03_audio_spike_132.mp4', 'size': 3525787, 'timestamp': 132.0, 'phash': None, 'added': 1788462657.831209}"
       },
@@ -158219,7 +159923,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-03 13-57-07-vertical_clip04_audio_spike_386.mp4', 'size': 3336061, 'timestamp': 386.0, 'phash': None, 'added': 1788462658.118946}"
       },
@@ -158492,7 +160196,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-03 13-57-07-vertical_clip05_audio_spike_540.mp4', 'size': 5874609, 'timestamp': 540.0, 'phash': None, 'added': 1788462658.406674}"
       },
@@ -158765,7 +160469,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-03 13-57-07-vertical_clip06_audio_spike_625.mp4', 'size': 1699066, 'timestamp': 625.0, 'phash': '9c9b63b46f916225', 'added': 1788462658.718905}"
       },
@@ -159038,7 +160742,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip01_audio_spike_18.mp4', 'size': 24351121, 'timestamp': 18.0, 'phash': None, 'added': 1788541240.024889}"
       },
@@ -159311,7 +161015,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip04_audio_spike_187.mp4', 'size': 24476038, 'timestamp': 187.5, 'phash': None, 'added': 1788541240.874609}"
       },
@@ -159584,7 +161288,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip05_audio_spike_235.mp4', 'size': 25047669, 'timestamp': 235.0, 'phash': None, 'added': 1788541242.7926002}"
       },
@@ -159857,7 +161561,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip06_audio_spike_289.mp4', 'size': 24940769, 'timestamp': 289.5, 'phash': None, 'added': 1788541243.1809049}"
       },
@@ -160130,7 +161834,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip07_audio_spike_344.mp4', 'size': 25048427, 'timestamp': 344.0, 'phash': None, 'added': 1788541243.576042}"
       },
@@ -160403,7 +162107,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 11-52-07-vertical_clip08_audio_spike_401.mp4', 'size': 25578201, 'timestamp': 401.5, 'phash': None, 'added': 1788541243.928978}"
       },
@@ -160676,7 +162380,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_11-52-07_clip04_audio_spike_187.mp4', 'size': 31195907, 'timestamp': 187.0, 'phash': 'e8aa23d655555761', 'added': 1788541297.3196428}"
       },
@@ -160949,7 +162653,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_11-52-07_clip06_audio_spike_290.mp4', 'size': 19828328, 'timestamp': 290.0, 'phash': '878d2da765f05a58', 'added': 1788541297.447704}"
       },
@@ -161222,7 +162926,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-05-09-vertical_clip01_audio_spike_64.mp4', 'size': 906604, 'timestamp': 64.5, 'phash': None, 'added': 1788541812.002151}"
       },
@@ -161495,7 +163199,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-05-09-vertical_clip02_audio_spike_116.mp4', 'size': 869685, 'timestamp': 116.5, 'phash': None, 'added': 1788541812.3479419}"
       },
@@ -161768,7 +163472,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-05-09-vertical_clip03_audio_spike_186.mp4', 'size': 702956, 'timestamp': 186.5, 'phash': None, 'added': 1788541812.643481}"
       },
@@ -162041,7 +163745,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-05-09-vertical_clip04_audio_spike_245.mp4', 'size': 513101, 'timestamp': 245.0, 'phash': None, 'added': 1788541812.9487958}"
       },
@@ -162314,7 +164018,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-05-09_clip02_audio_spike_124.mp4', 'size': 43267000, 'timestamp': 124.0, 'phash': 'c73d8d83585a474e', 'added': 1788541830.119648}"
       },
@@ -162587,7 +164291,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-05-09_clip04_audio_spike_244.mp4', 'size': 12898496, 'timestamp': 244.5, 'phash': '85ad2dad5e525a52', 'added': 1788541830.2275589}"
       },
@@ -162860,7 +164564,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip02_audio_spike_486.mp4', 'size': 38700363, 'timestamp': 486.5, 'phash': 'c9e135467a4e46ce', 'added': 1788543262.324506}"
       },
@@ -163133,7 +164837,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip03_audio_spike_568.mp4', 'size': 15391395, 'timestamp': 568.0, 'phash': 'c6392d3f5c4932d2', 'added': 1788543262.397164}"
       },
@@ -163406,7 +165110,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip05_audio_spike_1008.mp4', 'size': 113924939, 'timestamp': 1008.5, 'phash': 'd91dd9ccc86e7026', 'added': 1788543262.5944278}"
       },
@@ -163679,7 +165383,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip06_audio_spike_1096.mp4', 'size': 101168609, 'timestamp': 1096.5, 'phash': 'c58d7a273933701b', 'added': 1788543262.736584}"
       },
@@ -163952,7 +165656,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip07_audio_spike_1178.mp4', 'size': 129723702, 'timestamp': 1178.0, 'phash': '931d3927a5e2ca96', 'added': 1788543262.8788888}"
       },
@@ -164225,7 +165929,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip08_audio_spike_1240.mp4', 'size': 154442651, 'timestamp': 1240.0, 'phash': '97492d2518dad4de', 'added': 1788543263.006453}"
       },
@@ -164498,7 +166202,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip09_audio_spike_1302.mp4', 'size': 145656393, 'timestamp': 1302.0, 'phash': 'c1c0cde0f23c7ace', 'added': 1788543263.113566}"
       },
@@ -164771,7 +166475,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip10_audio_spike_1355.mp4', 'size': 0, 'timestamp': 1355.0, 'phash': None, 'added': 1788543263.2602491}"
       },
@@ -165044,7 +166748,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-10-37_clip10_audio_spike_1355.mp4', 'size': 145040760, 'timestamp': 1355.0, 'phash': 'c1253e7a14ebb1b2', 'added': 1788543265.436278}"
       },
@@ -165317,7 +167021,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip01_audio_spike_17.mp4', 'size': 900616, 'timestamp': 17.5, 'phash': None, 'added': 1788543415.093267}"
       },
@@ -165590,7 +167294,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip02_audio_spike_486.mp4', 'size': 699952, 'timestamp': 486.5, 'phash': None, 'added': 1788543415.609797}"
       },
@@ -165863,7 +167567,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip03_audio_spike_568.mp4', 'size': 837814, 'timestamp': 568.0, 'phash': None, 'added': 1788543416.169495}"
       },
@@ -166136,7 +167840,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip04_audio_spike_715.mp4', 'size': 813305, 'timestamp': 715.0, 'phash': None, 'added': 1788543416.641886}"
       },
@@ -166409,7 +168113,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip05_audio_spike_1008.mp4', 'size': 740676, 'timestamp': 1008.5, 'phash': None, 'added': 1788543417.142505}"
       },
@@ -166682,7 +168386,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip06_audio_spike_1096.mp4', 'size': 715086, 'timestamp': 1096.5, 'phash': None, 'added': 1788543417.649256}"
       },
@@ -166955,7 +168659,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip07_audio_spike_1178.mp4', 'size': 908743, 'timestamp': 1178.0, 'phash': None, 'added': 1788543418.099905}"
       },
@@ -167228,7 +168932,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip08_audio_spike_1240.mp4', 'size': 906731, 'timestamp': 1240.0, 'phash': None, 'added': 1788543418.586164}"
       },
@@ -167501,7 +169205,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip09_audio_spike_1302.mp4', 'size': 936037, 'timestamp': 1302.0, 'phash': None, 'added': 1788543419.096701}"
       },
@@ -167774,7 +169478,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-10-37-vertical_clip10_audio_spike_1355.mp4', 'size': 908968, 'timestamp': 1355.0, 'phash': None, 'added': 1788543419.572327}"
       },
@@ -168047,7 +169751,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip01_audio_spike_81.mp4', 'size': 713377, 'timestamp': 81.5, 'phash': None, 'added': 1788546879.95437}"
       },
@@ -168320,7 +170024,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip02_audio_spike_165.mp4', 'size': 1027853, 'timestamp': 165.0, 'phash': None, 'added': 1788546880.228735}"
       },
@@ -168593,7 +170297,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip03_audio_spike_331.mp4', 'size': 1026123, 'timestamp': 331.0, 'phash': None, 'added': 1788546880.5072908}"
       },
@@ -168866,7 +170570,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip04_audio_spike_1240.mp4', 'size': 1020945, 'timestamp': 1240.5, 'phash': None, 'added': 1788546880.786439}"
       },
@@ -169139,7 +170843,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip06_audio_spike_1832.mp4', 'size': 1030753, 'timestamp': 1832.5, 'phash': None, 'added': 1788546881.34095}"
       },
@@ -169412,7 +171116,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip07_audio_spike_2269.mp4', 'size': 1037408, 'timestamp': 2269.0, 'phash': None, 'added': 1788546881.6307352}"
       },
@@ -169685,7 +171389,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip08_audio_spike_2462.mp4', 'size': 1049888, 'timestamp': 2462.5, 'phash': None, 'added': 1788546881.910798}"
       },
@@ -169958,7 +171662,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip09_audio_spike_2747.mp4', 'size': 1058208, 'timestamp': 2747.5, 'phash': None, 'added': 1788546884.510728}"
       },
@@ -170231,7 +171935,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip10_audio_spike_2838.mp4', 'size': 1026336, 'timestamp': 2838.0, 'phash': None, 'added': 1788546884.802517}"
       },
@@ -170504,7 +172208,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip11_audio_spike_3358.mp4', 'size': 1062368, 'timestamp': 3358.0, 'phash': None, 'added': 1788546885.0763159}"
       },
@@ -170777,7 +172481,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04 12-34-12-vertical_clip12_audio_spike_3422.mp4', 'size': 1066528, 'timestamp': 3422.5, 'phash': None, 'added': 1788546885.36472}"
       },
@@ -171050,7 +172754,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip01_audio_spike_81.mp4', 'size': 62373515, 'timestamp': 81.5, 'phash': '818d0db3c7da466e', 'added': 1788549560.366119}"
       },
@@ -171323,7 +173027,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip02_audio_spike_165.mp4', 'size': 136577045, 'timestamp': 165.0, 'phash': 'c5c79698f11a92ae', 'added': 1788549560.534979}"
       },
@@ -171596,7 +173300,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip03_audio_spike_331.mp4', 'size': 75747544, 'timestamp': 331.0, 'phash': 'c3cdc3d0d0d83e3a', 'added': 1788549560.620789}"
       },
@@ -171869,7 +173573,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip05_audio_spike_1263.mp4', 'size': 82965483, 'timestamp': 1263.0, 'phash': '9964679d4b3a42d6', 'added': 1788549560.777693}"
       },
@@ -172142,7 +173846,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip06_audio_spike_1773.mp4', 'size': 121015233, 'timestamp': 1773.5, 'phash': '8b8e9ad30e33c2bc', 'added': 1788549560.915197}"
       },
@@ -172415,7 +174119,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip07_audio_spike_2210.mp4', 'size': 75635738, 'timestamp': 2210.0, 'phash': 'd129e18e6dc77264', 'added': 1788549560.979897}"
       },
@@ -172688,7 +174392,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip08_audio_spike_2403.mp4', 'size': 130039425, 'timestamp': 2403.5, 'phash': '99cbda861cf2c4a5', 'added': 1788549561.153057}"
       },
@@ -172961,7 +174665,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip09_audio_spike_2688.mp4', 'size': 65439638, 'timestamp': 2688.0, 'phash': '90c69bf0e43b25bc', 'added': 1788549561.289228}"
       },
@@ -173234,7 +174938,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip10_audio_spike_2778.mp4', 'size': 113651630, 'timestamp': 2778.5, 'phash': 'c2c8fab31531e8ad', 'added': 1788549561.398137}"
       },
@@ -173507,7 +175211,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip11_audio_spike_3299.mp4', 'size': 50962982, 'timestamp': 3299.0, 'phash': '916496e1f0fad1e4', 'added': 1788549561.479968}"
       },
@@ -173780,7 +175484,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-09-04_12-34-12_clip12_audio_spike_3363.mp4', 'size': 57316746, 'timestamp': 3363.5, 'phash': 'd1d98f922e2662ad', 'added': 1788549561.580199}"
       },
@@ -174053,7 +175757,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2870015967_clip01_audio_spike_7331.mp4', 'size': 24808748, 'timestamp': 7331.5, 'phash': None, 'added': 1789021885.971502}"
       },
@@ -174326,7 +176030,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2865147408_clip02_audio_spike_482.mp4', 'size': 25207053, 'timestamp': 482.5, 'phash': None, 'added': 1789061935.1328058}"
       },
@@ -174599,7 +176303,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2865147408_clip05_audio_spike_1004.mp4', 'size': 25013419, 'timestamp': 1004.5, 'phash': None, 'added': 1789061935.251811}"
       },
@@ -174872,7 +176576,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2865147408_clip06_audio_spike_1092.mp4', 'size': 25081042, 'timestamp': 1092.5, 'phash': None, 'added': 1789061935.2946718}"
       },
@@ -175145,7 +176849,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2865147408_clip07_audio_spike_1174.mp4', 'size': 25061328, 'timestamp': 1174.0, 'phash': None, 'added': 1789061935.329461}"
       },
@@ -175418,7 +177122,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2865147408_clip08_audio_spike_1236.mp4', 'size': 24964377, 'timestamp': 1236.0, 'phash': None, 'added': 1789061935.364029}"
       },
@@ -175691,7 +177395,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2865147408_clip09_audio_spike_1298.mp4', 'size': 25026946, 'timestamp': 1298.0, 'phash': None, 'added': 1789061935.40802}"
       },
@@ -175964,7 +177668,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2865147408_clip10_audio_spike_1351.mp4', 'size': 15574214, 'timestamp': 1351.0, 'phash': None, 'added': 1789061935.4481611}"
       },
@@ -176237,7 +177941,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-10-01_19-16-50_clip01_audio_spike_20.mp4', 'size': 9178864, 'timestamp': 20.5, 'phash': None, 'added': 1790900308.148242}"
       },
@@ -176510,7 +178214,7 @@
         "clip",
         "seen"
       ],
-      "updated_at": "2026-10-01T19:29:58",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "clip": "{'path': '/Users/carter/developer/Bolt/media/clips/2026-10-01_19-18-50_clip01_audio_spike_115.mp4', 'size': 31694628, 'timestamp': 115.5, 'phash': None, 'added': 1790900998.6182349}"
       },
@@ -176783,7 +178487,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-03-29_03-27-10.mov"
       },
@@ -177056,7 +178760,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-04-08_14-23-27.mov"
       },
@@ -177329,7 +179033,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-04-09_03-23-02.mov"
       },
@@ -177602,7 +179306,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-05-23 23-47-48.mov"
       },
@@ -177875,7 +179579,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-05-24 00-40-40.mov"
       },
@@ -178148,7 +179852,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-05-24 01-05-07.mov"
       },
@@ -178421,7 +180125,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-05-24 20-24-18.mov"
       },
@@ -178694,7 +180398,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-07_07-15-03.mov"
       },
@@ -178967,7 +180671,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-07_07-15-03.mp4"
       },
@@ -179240,7 +180944,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-07_11-32-45.mov"
       },
@@ -179513,7 +181217,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-07_11-32-45.mp4"
       },
@@ -179786,7 +181490,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-07_13-08-49.mov"
       },
@@ -180059,7 +181763,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-07_13-08-49.mp4"
       },
@@ -180332,7 +182036,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-07_22-08-43.mov"
       },
@@ -180605,7 +182309,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-07_22-08-43.mp4"
       },
@@ -180878,7 +182582,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-07_23-36-08.mov"
       },
@@ -181151,7 +182855,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-07_23-36-08.mp4"
       },
@@ -181424,7 +183128,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-09_15-31-04.mov"
       },
@@ -181697,7 +183401,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-09_15-31-04.mp4"
       },
@@ -181970,7 +183674,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-09_16-09-29.mov"
       },
@@ -182243,7 +183947,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-09_16-09-29.mp4"
       },
@@ -182516,7 +184220,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-09_17-20-59.mov"
       },
@@ -182789,7 +184493,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-09_17-20-59.mp4"
       },
@@ -183062,7 +184766,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-10_12-43-22.mov"
       },
@@ -183335,7 +185039,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-10_12-43-22.mp4"
       },
@@ -183608,7 +185312,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-12_11-15-53.mov"
       },
@@ -183881,7 +185585,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-12_11-15-53.mp4"
       },
@@ -184154,7 +185858,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-12_11-53-13.mov"
       },
@@ -184427,7 +186131,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-12_11-53-13.mp4"
       },
@@ -184700,7 +186404,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-12_20-05-11.mov"
       },
@@ -184973,7 +186677,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-12_20-05-11.mp4"
       },
@@ -185246,7 +186950,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-12_20-06-19.mov"
       },
@@ -185519,7 +187223,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-12_20-06-19.mp4"
       },
@@ -185792,7 +187496,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-13_17-10-17.mkv"
       },
@@ -186065,7 +187769,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-13_17-10-17.mp4"
       },
@@ -186338,7 +188042,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-13_18-10-19.mkv"
       },
@@ -186611,7 +188315,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-13_18-10-19.mp4"
       },
@@ -186884,7 +188588,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-13_23-49-47.mov"
       },
@@ -187157,7 +188861,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-13_23-49-47.mp4"
       },
@@ -187430,7 +189134,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-13_23-51-27.mov"
       },
@@ -187703,7 +189407,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-13_23-51-27.mp4"
       },
@@ -187976,7 +189680,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-14_23-33-47.mov"
       },
@@ -188249,7 +189953,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-14_23-33-47.mp4"
       },
@@ -188522,7 +190226,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-19_12-11-35.mkv"
       },
@@ -188795,7 +190499,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-19_12-11-35.mp4"
       },
@@ -189068,7 +190772,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-19_13-11-38.mkv"
       },
@@ -189341,7 +191045,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-19_13-11-38.mp4"
       },
@@ -189614,7 +191318,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-19_22-29-16.mkv"
       },
@@ -189887,7 +191591,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-19_22-29-16.mp4"
       },
@@ -190160,7 +191864,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-19_22-48-14.mov"
       },
@@ -190433,7 +192137,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-19_22-48-14.mp4"
       },
@@ -190706,7 +192410,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-19_22-54-13.mov"
       },
@@ -190979,7 +192683,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-19_22-54-13.mp4"
       },
@@ -191252,7 +192956,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-19_23-19-52.mov"
       },
@@ -191525,7 +193229,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-19_23-19-52.mp4"
       },
@@ -191798,7 +193502,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-25_14-44-42.mkv"
       },
@@ -192071,7 +193775,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-25_14-44-42.mp4"
       },
@@ -192344,7 +194048,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-27_18-32-46.mkv"
       },
@@ -192617,7 +194321,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-27_18-32-46.mp4"
       },
@@ -192890,7 +194594,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-27_19-32-49.mkv"
       },
@@ -193163,7 +194867,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-27_19-32-49.mp4"
       },
@@ -193436,7 +195140,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-28_12-22-28.mkv"
       },
@@ -193709,7 +195413,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-07-28_12-22-28.mp4"
       },
@@ -193982,7 +195686,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-02_15-53-57.mov"
       },
@@ -194255,7 +195959,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-02_15-53-57.mp4"
       },
@@ -194528,7 +196232,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-03_01-40-13.mov"
       },
@@ -194801,7 +196505,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-05_03-33-05.mov"
       },
@@ -195074,7 +196778,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-05_03-33-05.mp4"
       },
@@ -195347,7 +197051,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-06_11-09-23.mov"
       },
@@ -195620,7 +197324,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-06_11-09-23.mp4"
       },
@@ -195893,7 +197597,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-06_21-14-56.mov"
       },
@@ -196166,7 +197870,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-06_21-14-56.mp4"
       },
@@ -196439,7 +198143,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-06_22-06-56.mov"
       },
@@ -196712,7 +198416,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-06_22-06-56.mp4"
       },
@@ -196985,7 +198689,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-07_03-59-30.mov"
       },
@@ -197258,7 +198962,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-07_03-59-30.mp4"
       },
@@ -197531,7 +199235,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-07_04-06-28.mov"
       },
@@ -197804,7 +199508,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-07_04-06-28.mp4"
       },
@@ -198077,7 +199781,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-07_22-53-59.mov"
       },
@@ -198350,7 +200054,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-07_22-53-59.mp4"
       },
@@ -198623,7 +200327,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-08_08-55-07.mov"
       },
@@ -198896,7 +200600,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-08_13-00-51.mov"
       },
@@ -199169,7 +200873,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-09_01-13-33.mov"
       },
@@ -199442,7 +201146,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-09_01-13-33.mp4"
       },
@@ -199715,7 +201419,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-14_13-43-18.mkv"
       },
@@ -199988,7 +201692,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-14_13-43-18.mp4"
       },
@@ -200261,7 +201965,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-18_01-46-12.mkv"
       },
@@ -200534,7 +202238,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-08-18_01-46-12.mp4"
       },
@@ -200807,7 +202511,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-02_23-25-40.mov"
       },
@@ -201080,7 +202784,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-03 12-32-04-vertical.mkv"
       },
@@ -201353,7 +203057,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-03 13-57-07-vertical.mkv"
       },
@@ -201626,7 +203330,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-03_12-32-04.mkv"
       },
@@ -201899,7 +203603,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-03_13-57-07.mkv"
       },
@@ -202172,7 +203876,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-04 11-52-07-vertical.mp4"
       },
@@ -202445,7 +204149,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-04 12-05-09-vertical.mkv"
       },
@@ -202718,7 +204422,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-04 12-10-37-vertical.mkv"
       },
@@ -202991,7 +204695,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-04 12-34-12-vertical.mkv"
       },
@@ -203264,7 +204968,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-04_11-52-07.mov"
       },
@@ -203537,7 +205241,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-04_12-05-09.mkv"
       },
@@ -203810,7 +205514,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-04_12-10-37.mkv"
       },
@@ -204083,7 +205787,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-04_12-34-12.mkv"
       },
@@ -204356,7 +206060,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-04_12-34-12.mp4"
       },
@@ -204629,7 +206333,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-06 00-44-31-vertical.mkv"
       },
@@ -204902,7 +206606,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-09-06_00-44-30.mkv"
       },
@@ -205175,7 +206879,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-10-01 19-16-51.mp4"
       },
@@ -205448,7 +207152,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-10-01 19-18-50.mp4"
       },
@@ -205721,7 +207425,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-10-01_19-16-50.mkv"
       },
@@ -205994,7 +207698,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-10-01_19-18-50.mov"
       },
@@ -206267,7 +207971,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2026-10-01_19-18-50.mp4"
       },
@@ -206540,7 +208244,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2865147408.mp4"
       },
@@ -206813,7 +208517,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2865166953.mp4"
       },
@@ -207086,7 +208790,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2870015967.mp4"
       },
@@ -207359,7 +209063,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2870820279.mp4"
       },
@@ -207632,7 +209336,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "2889961274.mp4"
       },
@@ -207905,7 +209609,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "IMG_2619.MOV"
       },
@@ -208178,7 +209882,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "IMG_2703.MOV"
       },
@@ -208451,7 +210155,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "IMG_2705.MOV"
       },
@@ -208724,7 +210428,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "IMG_2709.MOV"
       },
@@ -208997,7 +210701,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "IMG_2710.MOV"
       },
@@ -209270,7 +210974,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "IMG_2711.MOV"
       },
@@ -209543,7 +211247,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "IMG_2720.MOV"
       },
@@ -209816,7 +211520,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "IMG_2724.MOV"
       },
@@ -210089,7 +211793,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "Replay_2026-07-07_11-57-20.mov"
       },
@@ -210362,7 +212066,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "Replay_2026-07-07_11-57-20.mp4"
       },
@@ -210635,7 +212339,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "Replay_2026-07-12_11-41-08.mov"
       },
@@ -210908,7 +212612,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "Replay_2026-07-12_11-41-08.mp4"
       },
@@ -211181,7 +212885,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "Replay_2026-08-03_01-40-18.mov"
       },
@@ -211454,7 +213158,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "Replay_2026-08-03_01-40-18.mp4"
       },
@@ -211727,7 +213431,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "Replay_2026-08-07_22-57-14.mov"
       },
@@ -212000,7 +213704,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "Replay_2026-08-07_22-57-14.mp4"
       },
@@ -212273,7 +213977,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "Replay_2026-08-08_13-12-12.mov"
       },
@@ -212546,7 +214250,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "Replay_2026-08-08_13-12-12.mp4"
       },
@@ -212819,7 +214523,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "Replay_2026-08-09_01-59-31.mov"
       },
@@ -213092,7 +214796,7 @@
         "recording",
         "processed"
       ],
-      "updated_at": "2026-10-05T18:07:09",
+      "updated_at": "2026-10-15T06:00:13",
       "metadata": {
         "recording": "Replay_2026-08-09_01-59-31.mp4"
       },

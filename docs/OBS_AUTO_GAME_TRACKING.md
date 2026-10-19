@@ -132,6 +132,21 @@ monitor = StreamMonitor(
 
 ---
 
+## Staleness and refresh (`bolt game`, 18 Oct 2026)
+
+`game` once stayed on "007 First Light" for a month: it only changed on a scene switch or a Twitch
+fetch, and the Live Scene can be pinned to a fixed name. Now:
+
+- `Data/configs/game_state.json` records when the game was last **confirmed** (Twitch, `bolt game set`,
+  or a non-live scene) vs merely **checked** (pinned Live Scene).
+- Refresh runs at `bolt launch` (stream start), at tracker start, and on OBS stream start.
+- `bolt game status` also asks Twitch (when the Live Scene follows `__twitch__`) and prints DRIFT if the config game
+  differs from the channel category (`--no-twitch` skips). READY since 18 Oct 2026.
+- `bolt game status`, `bolt obs-game status`, and `bolt doctor` warn when the last confirmation is
+  older than `game_stale_days` (default 7).
+- Pinned Live Scene wins over Twitch, but refresh warns when Twitch's category differs.
+  Fix with `bolt game set "<Game>" --pin` or follow Twitch with `bolt game unpin`.
+
 ## Troubleshooting
 
 | Issue | Fix |

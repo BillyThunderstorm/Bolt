@@ -197,6 +197,15 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
             info["probe_ok"] = False
             info["hint"] = _soft(str(exc) or type(exc).__name__)
 
+    # Game freshness (Game_Refresh; soft) — warns when config game is stale
+    try:
+        _ensure_paths()
+        from modules.Game_Refresh import freshness as _gr_fresh  # noqa: WPS433
+
+        info["game_freshness"] = _gr_fresh()
+    except Exception as exc:
+        info["game_freshness"] = {"error": _soft(f"freshness unavailable ({exc})")}
+
     # Engine import smoke (does not start the loop)
     if info["engine_present"] and info["paths_present"]:
         try:
@@ -437,6 +446,11 @@ def _print_status(info: Dict[str, Any], as_json: bool) -> int:
                 f"password_set={obs.get('password_set')} "
                 f"ws_client={obs.get('has_websocket_client')}"
             )
+        fr = info.get("game_freshness") or {}
+        if fr.get("stale"):
+            print(f"  WARNING game stale: {fr.get('reason')} — {fr.get('fix')}")
+        elif fr.get("reason"):
+            print(f"  freshness: {fr.get('reason')}")
         if info.get("probe"):
             print(f"  probe_ok: {info.get('probe_ok')}")
         if info.get("error"):

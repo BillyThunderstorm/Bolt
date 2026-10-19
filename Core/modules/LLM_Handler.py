@@ -165,12 +165,17 @@ def ask_llm(
     temperature: float = 0.7,
     task_type: str = "chat",
     complexity: str = "medium",
+    fallback: bool = True,
 ) -> str:
     """
     Ask an LLM a question. Tries preferred provider, then fallback.
 
     Pass ``task_type`` / ``complexity`` so light-budget routing can keep
     everyday chat on Ollama and send strategy/research to Grok.
+
+    ``fallback=False`` with ``provider=...`` tries only that provider (when the
+    budget allows it) — for callers that size the prompt per provider, e.g.
+    ``Bolt_Memory.recall`` (big context for Grok, trimmed for Ollama).
     """
     messages: List[Dict[str, str]] = []
     if system:
@@ -181,7 +186,14 @@ def ask_llm(
 
     last_error = "no providers available"
 
-    for prov in _resolve_providers(provider, task_type=task_type, complexity=complexity):
+    providers = _resolve_providers(provider, task_type=task_type, complexity=complexity)
+    if not fallback and provider:
+        only = "xai" if provider.lower().strip() == "grok" else provider.lower().strip()
+        providers = [p for p in providers if p == only]
+        if not providers:
+            last_error = f"{only} not allowed or not reachable right now"
+
+    for prov in providers:
         client = _get_client(prov)
         if not client:
             last_error = f"{prov} client unavailable"

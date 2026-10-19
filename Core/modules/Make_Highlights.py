@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 """
-Make_Highlights.py — Local highlight reel stitch (PARTIAL)
-==========================================================
+Make_Highlights.py — Local highlight reel stitch (READY)
+========================================================
 Soft-fail CLI for the former SHELL ``scripts/make_highlights.py`` (invalid
 Twitch Helix paste / IndentationError). Engine is the real local stitcher
 ``scripts/make_twitch_highlights.py`` (same code path as READY
 ``bolt highlights``).
 
 Soft-fail prefix: ``Highlights unavailable:``.
-Stay PARTIAL — ffmpeg / media gated; Helix "create clip from VOD" from the
-old paste is NOT implemented. Distinct from READY ``bolt vods`` (Helix
+READY (18 Oct 2026): real stitch of the top media/clips into
+media/output/YYYY-MM-DD_highlight_reel.mp4 with the working ffmpeg from
+FFmpeg_Bin. Every clip is normalised (1920x1080/30 fps/AAC stereo; silent
+track added when a clip has none) so mixed sources concat cleanly. Missing
+ffmpeg or zero clips soft-fail with guidance. Helix "create clip from VOD"
+from the old paste is NOT implemented. Distinct from READY ``bolt vods`` (Helix
 list/download) and from READY thin ``bolt highlights`` compile (same
 engine; this surface adds status/list/run soft-fail).
 
@@ -35,6 +39,7 @@ _LEGACY_SHELL = _REPO / "scripts" / "make_highlights.py"
 _CLIPS = _REPO / "media" / "clips"
 _LEGACY_CLIPS = _REPO / "clips"
 _VERTICAL = _REPO / "media" / "vertical_clips"
+_OUTPUT = _REPO / "media" / "output"
 
 
 def _utc_now() -> str:
@@ -67,21 +72,19 @@ def _which(name: str) -> Optional[str]:
 
 
 def _ffmpeg_path() -> Optional[str]:
+    """Working ffmpeg only (ffmpeg_bin() returns "ffmpeg" even when absent)."""
     try:
         if str(_REPO / "Core") not in sys.path:
             sys.path.insert(0, str(_REPO / "Core"))
-        from modules.FFmpeg_Bin import ffmpeg_bin
+        from modules.FFmpeg_Bin import working_ffmpeg
 
-        p = ffmpeg_bin()
-        if p:
-            return str(p)
+        return working_ffmpeg()
     except Exception:
-        pass
-    return _which("ffmpeg")
+        return _which("ffmpeg")
 
 
 def status(*, probe: bool = False) -> Dict[str, Any]:
-    """Readiness for local highlight reel stitch (PARTIAL)."""
+    """Readiness for local highlight reel stitch (READY)."""
     try:
         engine_ok = _ENGINE.is_file()
         legacy = _LEGACY_SHELL.is_file()
@@ -94,8 +97,8 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         out: Dict[str, Any] = {
             "checked_at": _utc_now(),
             "ready": False,
-            "partial": True,
-            "readiness": "PARTIAL",
+            "partial": False,
+            "readiness": "READY",
             "soft_fail_prefix": _SOFT,
             "engine_path": str(_ENGINE),
             "engine_present": engine_ok,
@@ -114,6 +117,7 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
             "ffmpeg_present": bool(ff),
             "cli": "bolt make-highlights",
             "ready_alias": "bolt highlights",
+            "output_dir": str(_OUTPUT),
             "note": (
                 "Local stitch of top media/clips into one reel; "
                 "not Twitch Helix create-clip. Prefer bolt highlights to compile; "
@@ -136,7 +140,10 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
             return out
 
         if not ff:
-            out["error"] = _soft("ffmpeg not on PATH / FFmpeg_Bin")
+            out["error"] = _soft(
+                "no working ffmpeg (FFmpeg_Bin) — brew install ffmpeg-full "
+                "or set BOLT_FFMPEG=/path/to/ffmpeg"
+            )
             out["hint"] = out["error"]
             return out
 
@@ -165,8 +172,8 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         return {
             "checked_at": _utc_now(),
             "ready": False,
-            "partial": True,
-            "readiness": "PARTIAL",
+            "partial": False,
+            "readiness": "READY",
             "soft_fail_prefix": _SOFT,
             "error": _soft(f"status failed ({exc})"),
             "hint": _soft(f"status failed ({exc})"),
@@ -189,14 +196,14 @@ def list_items(*, as_json: bool = False) -> int:
             ("soft-fail CLI (bolt make-highlights)", True),
             ("READY compile alias (bolt highlights)", True),
             ("distinct from bolt vods (Helix)", True),
-            ("ffmpeg/media gated (stay PARTIAL)", True),
+            (f"output → {_OUTPUT.relative_to(_REPO)}/YYYY-MM-DD_highlight_reel.mp4", True),
         ]
         if as_json:
             print(
                 json.dumps(
                     {
                         "ok": True,
-                        "readiness": "PARTIAL",
+                        "readiness": "READY",
                         "items": [{"name": n, "ok": ok} for n, ok in rows],
                         "hint": info.get("hint"),
                         "error": info.get("error"),
@@ -205,7 +212,7 @@ def list_items(*, as_json: bool = False) -> int:
                 )
             )
             return 0
-        print("Make highlights (PARTIAL — ffmpeg/media gated)", flush=True)
+        print("Make highlights (READY)", flush=True)
         for name, ok in rows:
             mark = "OK" if ok else "--"
             print(f"  [{mark}] {name}", flush=True)
@@ -257,7 +264,7 @@ def try_run(
             if as_json:
                 print(
                     json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
+                        {"ok": False, "error": msg, "readiness": "READY"},
                         indent=2,
                     )
                 )
@@ -269,7 +276,7 @@ def try_run(
             if as_json:
                 print(
                     json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
+                        {"ok": False, "error": msg, "readiness": "READY"},
                         indent=2,
                     )
                 )
@@ -281,10 +288,21 @@ def try_run(
             if as_json:
                 print(
                     json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
+                        {"ok": False, "error": msg, "readiness": "READY"},
                         indent=2,
                     )
                 )
+            else:
+                print(msg, file=sys.stderr)
+            return 0
+
+        if int(info.get("mp4_count") or 0) < 1:
+            msg = _soft(
+                f"no mp4 clips in {info.get('clips_dir')} — run bolt wrap "
+                "<vod> or bolt recordings first, then bolt make-highlights run"
+            )
+            if as_json:
+                print(json.dumps({"ok": False, "error": msg, "readiness": "READY"}, indent=2))
             else:
                 print(msg, file=sys.stderr)
             return 0
@@ -305,7 +323,7 @@ def try_run(
                     {
                         "ok": True,
                         "dry_run": True,
-                        "readiness": "PARTIAL",
+                        "readiness": "READY",
                         "cmd": argv[1:],
                         "mp4_count": info.get("mp4_count"),
                         "hint": "dry-run → engine --list only",
@@ -319,13 +337,18 @@ def try_run(
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
         rc = subprocess.call(argv, cwd=str(_REPO), env=env)
+        if rc != 0 and not as_json:
+            print(
+                _soft(f"engine exit {rc} — see the message above"),
+                file=sys.stderr,
+            )
         if as_json and not dry_run:
             print(
                 json.dumps(
                     {
                         "ok": rc == 0,
                         "exit_code": rc,
-                        "readiness": "PARTIAL",
+                        "readiness": "READY",
                         "cmd": argv[1:],
                         "error": "" if rc == 0 else _soft(f"engine exit {rc}"),
                     },
@@ -336,7 +359,7 @@ def try_run(
     except Exception as exc:
         msg = _soft(f"run failed ({exc})")
         if as_json:
-            print(json.dumps({"ok": False, "error": msg, "readiness": "PARTIAL"}, indent=2))
+            print(json.dumps({"ok": False, "error": msg, "readiness": "READY"}, indent=2))
         else:
             print(msg, file=sys.stderr)
         return 0
@@ -349,11 +372,12 @@ def print_status(*, as_json: bool = False, probe: bool = False) -> int:
             print(json.dumps(info, indent=2))
             return 0
         ready = bool(info.get("ready"))
-        print("Make highlights (PARTIAL)")
+        print("Make highlights (READY)")
         print(f"  ready: {ready}")
         print(f"  engine: {info.get('engine_path')}")
         print(f"  clips: {info.get('clips_dir')} ({info.get('mp4_count')} mp4)")
         print(f"  ffmpeg: {info.get('ffmpeg_path') or '(missing)'}")
+        print(f"  output: {info.get('output_dir')}")
         print(f"  READY alias: bolt highlights")
         if info.get("error"):
             print(f"  error: {info['error']}")
@@ -365,7 +389,7 @@ def print_status(*, as_json: bool = False, probe: bool = False) -> int:
         if as_json:
             print(
                 json.dumps(
-                    {"ready": False, "error": msg, "readiness": "PARTIAL"}, indent=2
+                    {"ready": False, "error": msg, "readiness": "READY"}, indent=2
                 )
             )
         else:
@@ -377,7 +401,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in ("-h", "--help", "help"):
         print(
-            """bolt make-highlights — local highlight reel stitch (PARTIAL)
+            """bolt make-highlights — local highlight reel stitch (READY)
 
   bolt make-highlights                              # status (default)
   bolt make-highlights status [--json] [--probe]
@@ -387,7 +411,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 Soft-fail: "Highlights unavailable:".
 Engine: scripts/make_twitch_highlights.py (same as READY bolt highlights).
 Former SHELL scripts/make_highlights.py (broken Helix paste) now forwards here.
-Distinct from READY bolt vods (Helix). Stay PARTIAL (ffmpeg/media gated).
+Output: media/output/YYYY-MM-DD_highlight_reel.mp4 (--output NAME|ABS_PATH).
+Distinct from READY bolt vods (Helix).
 Aliases: make_highlights, make-highlights-status, stitch-highlights.
 """
         )

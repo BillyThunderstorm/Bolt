@@ -76,7 +76,7 @@ def _resolve_game(mapped_value: str) -> str:
     return mapped_value
 
 
-def update_config_game(new_game: str):
+def update_config_game(new_game: str, source: str = "obs_scene"):
     """Update the game field in config.json.
 
     `new_game` is the already-resolved game name (the Stream_Monitor
@@ -96,6 +96,7 @@ def update_config_game(new_game: str):
         current_game = config.get("game", "")
         if current_game == new_game:
             print(f"Game already set to '{new_game}' — no change needed")
+            _stamp_game(new_game, source, current_game)
             return
 
         config["game"] = new_game
@@ -105,16 +106,51 @@ def update_config_game(new_game: str):
             f.write("\n")
 
         print(f"✓ Updated config.json: game = '{new_game}' (was '{current_game}')")
+        _stamp_game(new_game, source, current_game)
 
     except Exception as e:
         print(f"✗ Failed to update config: {e}")
+
+
+def _stamp_game(game: str, source: str, previous: str) -> None:
+    """Record freshness in Data/configs/game_state.json (Game_Refresh). Soft."""
+    try:
+        from modules.Game_Refresh import record_change
+
+        record_change(game, source, previous=previous)
+    except Exception as exc:  # never break the tracker
+        logger.warning("game_state stamp failed: %s", exc)
+
+
+def _refresh_game(trigger: str) -> None:
+    """Stream start / tracker start: re-resolve the game (Twitch → pin → keep)."""
+    try:
+        from modules.Game_Refresh import refresh
+
+        r = refresh(source=trigger)
+        print(f"[game refresh:{trigger}] game = {r.get('game')!r} via {r.get('resolved_via')}")
+        if r.get("warning"):
+            print(f"  WARNING: {r['warning']}")
+    except Exception as exc:
+        logger.warning("game refresh (%s) failed: %s", trigger, exc)
 
 
 def _on_scene_changed(mapped_value: str):
     """Stream_Monitor callback — resolves the sentinel then updates config."""
     game = _resolve_game(mapped_value)
     if game:
-        update_config_game(game)
+        if mapped_value == TWITCH_LIVE_SENTINEL:
+            source = "twitch"
+        else:
+            # A pinned Live Scene value is not proof of what is being played.
+            try:
+                mapping = json.loads(MAPPING_FILE.read_text())
+                live = mapping.get("live_scene") or "Live Scene"
+                pinned = (mapping.get("scenes") or {}).get(live)
+            except Exception:
+                pinned = None
+            source = "obs_mapping_pin" if mapped_value == pinned else "obs_scene"
+        update_config_game(game, source=source)
 
 
 def main():
@@ -130,10 +166,14 @@ def main():
     print("  BRB / Starting Soon / Ending / Intermission -> 'Just Chatting'")
     print("Press Ctrl+C to stop.\n")
 
+    # Refresh once now so a stale value never survives a tracker start.
+    _refresh_game("tracker_start")
+
     monitor = StreamMonitor(
         host="localhost",
         port=4455,
         on_game_changed=_on_scene_changed,
+        on_stream_start=lambda: _refresh_game("stream_start"),
     )
 
     try:

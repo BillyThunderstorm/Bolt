@@ -80,6 +80,8 @@ def next_step(item: Dict[str, Any]) -> str:
     notes = item.get("notes_log") or []
     n = len(notes) if isinstance(notes, list) else 0
     name = item.get("name") or "your test item"
+    if item.get("verdict"):
+        return f"Draft the short for {name} and send it for your OK."
     if n < JOURNAL_DAYS:
         return f"Day {n + 1} journal note on {name} (`bolt manage note \"{name}\" --text \"...\"`)."
     if not item.get("verdict"):

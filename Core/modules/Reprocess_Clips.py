@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-Reprocess_Clips.py — Vertical rebuild + multi-platform queue (PARTIAL)
-=====================================================================
-Soft-fail CLI for the former SHELL ``scripts/reprocess_clips.py`` (wrong
-PROJECT_ROOT under ``scripts/``, legacy ``clips/`` / ``vertical_clips/`` /
-``data/`` paths, FileNotFoundError writing queue).
+Reprocess_Clips.py — Vertical rebuild + multi-platform queue (READY)
+===================================================================
+CLI for ``scripts/reprocess_clips.py``: rebuild 9:16 verticals of
+``media/clips/*.mp4`` into ``media/vertical_clips/`` (verified portrait
+output) and MERGE manual-upload plans into ``Data/multi_platform_queue.json``
+(other queue items kept; no duplicates). READY 18 Oct 2026.
 
-Soft-fail prefix: ``Reprocess unavailable:``.
-Stay PARTIAL — ffmpeg / media / Clip_Factory gated; does NOT auto-upload
-to TikTok. Distinct from READY ``bolt recordings`` / live clip pipeline,
+Soft-fail prefix: ``Reprocess unavailable:``. Needs a working ffmpeg
+(FFmpeg_Bin) + Clip_Factory; does NOT auto-upload to TikTok. Distinct from READY ``bolt recordings`` / live clip pipeline,
 READY ``bolt enhance`` (Smart_Trim + Text_Overlay), READY ``bolt multi``
 (manual platform plans), and the thin vertical path inside Clip_Factory
 during ``process_recording``.
@@ -101,7 +101,7 @@ def _clip_factory_importable() -> bool:
 
 
 def status(*, probe: bool = False) -> Dict[str, Any]:
-    """Readiness for vertical reprocess / queue rebuild (PARTIAL)."""
+    """Readiness for vertical reprocess / queue merge (READY)."""
     try:
         engine_ok = _ENGINE.is_file()
         clips = _clips_dir()
@@ -109,6 +109,17 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         mp4_count = _count_mp4(clips) if clips_ok else 0
         vert = _vertical_dir()
         vert_ok = vert.is_dir()
+        vert_count = 0
+        pending = 0
+        if clips_ok:
+            for c in clips.glob("*.mp4"):
+                if not c.is_file():
+                    continue
+                v = vert / f"{c.stem}_tiktok.mp4"
+                if v.is_file() and v.stat().st_size > 0:
+                    vert_count += 1
+                else:
+                    pending += 1
         ff = _ffmpeg_path()
         cf_ok = _clip_factory_importable()
         queue_parent_ok = _QUEUE.parent.is_dir() or True  # Data/ usually exists
@@ -116,8 +127,8 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         out: Dict[str, Any] = {
             "checked_at": _utc_now(),
             "ready": False,
-            "partial": True,
-            "readiness": "PARTIAL",
+            "partial": False,
+            "readiness": "READY",
             "soft_fail_prefix": _SOFT,
             "engine_path": str(_ENGINE),
             "engine_present": engine_ok,
@@ -133,9 +144,11 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
             "ffmpeg_present": bool(ff),
             "clip_factory_importable": cf_ok,
             "cli": "bolt reprocess",
+            "vertical_count": vert_count,
+            "pending_count": pending,
             "note": (
                 "Rebuild vertical (9:16) versions of existing media/clips and "
-                "rewrite Data/multi_platform_queue.json for manual upload. "
+                "merge manual-upload plans into Data/multi_platform_queue.json. "
                 "Does NOT auto-upload to TikTok. Distinct from bolt recordings / "
                 "enhance / multi / Clip_Factory process_recording vertical path."
             ),
@@ -176,8 +189,8 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
 
         out["ready"] = True
         out["hint"] = (
-            f"ok — {mp4_count} mp4 in {clips.name}; "
-            "run: bolt reprocess run [--dry-run]"
+            f"ok — {mp4_count} mp4 in {clips.name}, {vert_count} already vertical, "
+            f"{pending} to build; run: bolt reprocess run [--dry-run]"
         )
         return out
     except Exception as exc:
@@ -185,7 +198,7 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
             "checked_at": _utc_now(),
             "ready": False,
             "partial": True,
-            "readiness": "PARTIAL",
+            "readiness": "READY",
             "soft_fail_prefix": _SOFT,
             "error": _soft(f"status failed ({exc})"),
             "hint": _soft(f"status failed ({exc})"),
@@ -211,16 +224,17 @@ def list_items(*, as_json: bool = False) -> int:
             ("ffmpeg / FFmpeg_Bin", bool(info.get("ffmpeg_present"))),
             ("Clip_Factory importable", bool(info.get("clip_factory_importable"))),
             ("soft-fail CLI (bolt reprocess)", True),
+            (f"verticals built ({info.get('vertical_count')}) / to build ({info.get('pending_count')})", True),
+            ("queue merge (keeps other items, no duplicates)", True),
             ("no TikTok auto-upload (manual queue)", True),
             ("distinct from bolt recordings / enhance / multi", True),
-            ("ffmpeg/media gated (stay PARTIAL)", True),
         ]
         if as_json:
             print(
                 json.dumps(
                     {
                         "ok": True,
-                        "readiness": "PARTIAL",
+                        "readiness": "READY",
                         "items": [{"name": n, "ok": ok} for n, ok in rows],
                         "hint": info.get("hint"),
                         "error": info.get("error"),
@@ -229,7 +243,7 @@ def list_items(*, as_json: bool = False) -> int:
                 )
             )
             return 0
-        print("Reprocess clips (PARTIAL — ffmpeg/media gated)", flush=True)
+        print("Reprocess clips (READY)", flush=True)
         for name, ok in rows:
             mark = "OK" if ok else "--"
             print(f"  [{mark}] {name}", flush=True)
@@ -249,7 +263,14 @@ def list_items(*, as_json: bool = False) -> int:
         return 0
 
 
-def try_run(*, dry_run: bool = False, as_json: bool = False) -> int:
+def try_run(
+    *,
+    dry_run: bool = False,
+    as_json: bool = False,
+    force: bool = False,
+    limit: Optional[int] = None,
+    names: Optional[List[str]] = None,
+) -> int:
     """Soft-fail invoke reprocess_clips.py (never raises)."""
     try:
         info = status(probe=False)
@@ -258,7 +279,7 @@ def try_run(*, dry_run: bool = False, as_json: bool = False) -> int:
             if as_json:
                 print(
                     json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
+                        {"ok": False, "error": msg, "readiness": "READY"},
                         indent=2,
                     )
                 )
@@ -270,7 +291,7 @@ def try_run(*, dry_run: bool = False, as_json: bool = False) -> int:
             if as_json:
                 print(
                     json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
+                        {"ok": False, "error": msg, "readiness": "READY"},
                         indent=2,
                     )
                 )
@@ -282,7 +303,7 @@ def try_run(*, dry_run: bool = False, as_json: bool = False) -> int:
             if as_json:
                 print(
                     json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
+                        {"ok": False, "error": msg, "readiness": "READY"},
                         indent=2,
                     )
                 )
@@ -294,7 +315,7 @@ def try_run(*, dry_run: bool = False, as_json: bool = False) -> int:
             if as_json:
                 print(
                     json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
+                        {"ok": False, "error": msg, "readiness": "READY"},
                         indent=2,
                     )
                 )
@@ -305,45 +326,38 @@ def try_run(*, dry_run: bool = False, as_json: bool = False) -> int:
         argv: List[str] = [sys.executable, str(_ENGINE)]
         if dry_run:
             argv.append("--dry-run")
-
-        if dry_run and as_json:
-            print(
-                json.dumps(
-                    {
-                        "ok": True,
-                        "dry_run": True,
-                        "readiness": "PARTIAL",
-                        "cmd": argv[1:],
-                        "mp4_count": info.get("mp4_count"),
-                        "hint": "dry-run → engine listing only",
-                    },
-                    indent=2,
-                )
+        if force:
+            argv.append("--force")
+        if limit is not None:
+            argv += ["--limit", str(limit)]
+        if as_json:
+            argv.append("--json")
+        argv += list(names or [])
+        if (info.get("mp4_count") or 0) < 1:
+            msg = _soft(
+                f"no mp4 clips in {info.get('clips_dir')} — run bolt wrap <vod> "
+                "or bolt recordings first"
             )
+            if as_json:
+                print(json.dumps({"ok": False, "error": msg, "readiness": "READY"}, indent=2))
+            else:
+                print(msg, file=sys.stderr)
+            return 0
 
         env = os.environ.copy()
         env["PYTHONPATH"] = f"{_REPO / 'Core'}" + (
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
         rc = subprocess.call(argv, cwd=str(_REPO), env=env)
-        if as_json and not dry_run:
-            print(
-                json.dumps(
-                    {
-                        "ok": rc == 0,
-                        "exit_code": rc,
-                        "readiness": "PARTIAL",
-                        "cmd": argv[1:],
-                        "error": "" if rc == 0 else _soft(f"engine exit {rc}"),
-                    },
-                    indent=2,
-                )
-            )
+        if rc == 1:
+            print(_soft("engine setup error (see above)"), file=sys.stderr)
+        elif rc == 2:
+            print(_soft("some clips failed to convert (see above)"), file=sys.stderr)
         return 0  # soft-fail: never hard-fail the CLI
     except Exception as exc:
         msg = _soft(f"run failed ({exc})")
         if as_json:
-            print(json.dumps({"ok": False, "error": msg, "readiness": "PARTIAL"}, indent=2))
+            print(json.dumps({"ok": False, "error": msg, "readiness": "READY"}, indent=2))
         else:
             print(msg, file=sys.stderr)
         return 0
@@ -356,15 +370,18 @@ def print_status(*, as_json: bool = False, probe: bool = False) -> int:
             print(json.dumps(info, indent=2))
             return 0
         ready = bool(info.get("ready"))
-        print("Reprocess clips (PARTIAL)")
+        print("Reprocess clips (READY)")
         print(f"  ready: {ready}")
         print(f"  engine: {info.get('engine_path')}")
         print(f"  clips: {info.get('clips_dir')} ({info.get('mp4_count')} mp4)")
-        print(f"  vertical: {info.get('vertical_clips_dir')}")
+        print(
+            f"  vertical: {info.get('vertical_clips_dir')} "
+            f"({info.get('vertical_count')} built, {info.get('pending_count')} to build)"
+        )
         print(f"  queue: {info.get('queue_path')}")
         print(f"  ffmpeg: {info.get('ffmpeg_path') or '(missing)'}")
         print(f"  Clip_Factory: {info.get('clip_factory_importable')}")
-        print(f"  readiness: PARTIAL (no TikTok auto-upload)")
+        print("  readiness: READY (manual upload queue; no TikTok auto-upload)")
         if info.get("error"):
             print(f"  error: {info['error']}")
         if info.get("hint"):
@@ -375,7 +392,7 @@ def print_status(*, as_json: bool = False, probe: bool = False) -> int:
         if as_json:
             print(
                 json.dumps(
-                    {"ready": False, "error": msg, "readiness": "PARTIAL"}, indent=2
+                    {"ready": False, "error": msg, "readiness": "READY"}, indent=2
                 )
             )
         else:
@@ -387,16 +404,20 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in ("-h", "--help", "help"):
         print(
-            """bolt reprocess — vertical rebuild + multi-platform queue (PARTIAL)
+            """bolt reprocess — vertical rebuild + multi-platform queue (READY)
 
   bolt reprocess                              # status (default)
   bolt reprocess status [--json] [--probe]
   bolt reprocess list [--json]
-  bolt reprocess run [--dry-run] [--json]
+  bolt reprocess run [NAME ...] [--dry-run] [--force] [--limit N] [--json]
 
+run: media/clips/*.mp4 → media/vertical_clips/<stem>_tiktok.mp4 (config
+tiktok_style; output checked to be a real portrait video) → merged into
+Data/multi_platform_queue.json (other items kept, no duplicates; .bak
+written first). NAME filters clips by substring; --force rebuilds
+existing verticals. Source clips are never moved or deleted.
 Soft-fail: "Reprocess unavailable:".
-Engine: scripts/reprocess_clips.py (fixed REPO_ROOT + media/ paths).
-Does NOT auto-upload to TikTok. Stay PARTIAL (ffmpeg/media gated).
+Does NOT auto-upload to TikTok (manual_upload_ready plans only).
 Distinct from bolt recordings / enhance / multi / Clip_Factory process_recording.
 Aliases: reprocess_clips, reprocess-clips, reprocess-status, vertical-reprocess, tiktok-reprocess.
 """
@@ -406,8 +427,29 @@ Aliases: reprocess_clips, reprocess-clips, reprocess-status, vertical-reprocess,
     json_out = "--json" in args
     probe = "--probe" in args
     dry_run = "--dry-run" in args or "-n" in args
+    force = "--force" in args
+    limit: Optional[int] = None
     cleaned: List[str] = []
-    for a in args:
+    skip = False
+    for i, a in enumerate(args):
+        if skip:
+            skip = False
+            continue
+        if a == "--limit" and i + 1 < len(args):
+            try:
+                limit = int(args[i + 1])
+            except ValueError:
+                print(_soft(f"--limit needs a number, got {args[i + 1]!r}"), file=sys.stderr)
+                return 0
+            skip = True
+            continue
+        if a.startswith("--limit="):
+            try:
+                limit = int(a.split("=", 1)[1])
+            except ValueError:
+                print(_soft(f"bad {a}"), file=sys.stderr)
+                return 0
+            continue
         if a.startswith("-"):
             continue
         cleaned.append(a)
@@ -421,7 +463,13 @@ Aliases: reprocess_clips, reprocess-clips, reprocess-status, vertical-reprocess,
     if cmd in ("list", "ls", "checklist"):
         return list_items(as_json=json_out)
     if cmd in ("run", "go", "exec", "reprocess"):
-        return try_run(dry_run=dry_run, as_json=json_out)
+        return try_run(
+            dry_run=dry_run,
+            as_json=json_out,
+            force=force,
+            limit=limit,
+            names=cleaned[1:],
+        )
 
     print(
         _soft(f"unknown command {cleaned[0]!r} — try status|list|run"),

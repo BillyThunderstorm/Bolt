@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Refresh_Memory.py — soft-fail CLI for memory index rebuild (PARTIAL)
-===================================================================
+Refresh_Memory.py — memory index rebuild CLI (READY, 18 Oct 2026)
+==================================================================
 Soft-fail wrapper around ``scripts/refresh_memory_index.py`` /
 ``modules.Memory_Index.refresh_memory_index`` (writes
 ``Data/memory_index.json``). Soft-fail prefix: ``Memory refresh unavailable:``.
@@ -9,10 +9,13 @@ Soft-fail wrapper around ``scripts/refresh_memory_index.py`` /
 CLI (via ``bolt refresh-memory`` / ``bolt refresh_memory``):
   status [--json] [--probe]
   list   [--json]
-  run    [--dry-run]   # rebuild index (or report counts without write)
+  run    [--dry-run] [--if-stale]   # rebuild index (or count / skip when fresh)
 
-Stay PARTIAL — rebuild is local/data-gated and not a stranger-ready product
-surface by itself. **Distinct from READY briefing retrieve** via
+READY: local only, no keys/models. ``status`` shows whether the index is
+stale vs the newest memory source (same check ``bolt memsearch`` uses);
+``run`` rebuilds atomically, re-reads the written file to verify it, and
+reports before/after entry counts + time. A source-less repo still writes a
+valid empty index. **Distinct from READY briefing retrieve** via
 ``Memory_Index.retrieve_memory`` (used in-process by briefings). Former thin
 SCRIPT_MAP ``refresh_memory`` → ``scripts/refresh_memory_index.py`` (no
 soft-fail status/list/run).
@@ -106,15 +109,51 @@ def _source_flags() -> Dict[str, bool]:
     }
 
 
+def _freshness(idx: Dict[str, Any]) -> Dict[str, Any]:
+    """Same stale check as READY ``bolt memsearch``. Never raises."""
+    try:
+        _ensure_core_path()
+        from modules import Memory_Search as ms  # noqa: WPS433
+
+        return ms._freshness(dict(idx))
+    except Exception as exc:  # pragma: no cover - defensive
+        return {
+            "stale": None,
+            "reason": f"freshness unknown ({type(exc).__name__})",
+            "newest_source": "",
+            "newest_source_at": "",
+        }
+
+
+def _verify_index(path: Path, expected: int) -> Optional[str]:
+    """Re-read the written index. Returns an error string, or None when OK."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return f"index written but unreadable ({type(exc).__name__}: {exc})"
+    if not isinstance(raw, dict):
+        return "index written but is not a JSON object"
+    entries = raw.get("entries")
+    if not isinstance(entries, list):
+        return "index written without an entries list"
+    if len(entries) != expected or int(raw.get("entry_count") or 0) != expected:
+        return (
+            f"index entry count mismatch (wrote {expected}, file has "
+            f"{len(entries)} / entry_count={raw.get('entry_count')})"
+        )
+    return None
+
+
 def status(*, probe: bool = False) -> Dict[str, Any]:
     idx = _index_meta()
+    fresh = _freshness(idx)
     sources = _source_flags()
     any_source = any(sources.values())
     info: Dict[str, Any] = {
         "checked_at": _iso(),
         "ready": False,
-        "partial": True,
-        "readiness": "PARTIAL",
+        "partial": False,
+        "readiness": "READY",
         "soft_fail_prefix": _SOFT,
         "cli": "bolt refresh-memory",
         "engine": str(_ENGINE),
@@ -129,16 +168,21 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         "index_generated_at": idx["generated_at"],
         "index_version": idx["version"],
         "index_size_bytes": idx["size_bytes"],
+        "index_stale": fresh.get("stale"),
+        "index_stale_reason": fresh.get("reason"),
+        "newest_source": fresh.get("newest_source"),
+        "newest_source_at": fresh.get("newest_source_at"),
         "sources": sources,
         "any_source": any_source,
         "probe": bool(probe),
         "probe_ok": None,
         "error": "",
         "hint": (
-            "rebuild Data/memory_index.json · distinct from READY briefing "
-            "retrieve (Memory_Index.retrieve_memory) · stay PARTIAL"
+            "bolt refresh-memory run rebuilds Data/memory_index.json "
+            "(--if-stale skips when up to date; bolt memsearch also rebuilds "
+            "a stale index itself) · distinct from READY briefing retrieve"
         ),
-        "is_stranger_ready": False,
+        "is_stranger_ready": True,
     }
     missing = []
     if not info["engine_present"]:
@@ -155,7 +199,7 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         info["hint"] = _soft(
             "no memory sources yet under Data/memory|content|MEMORY.md / "
             "unified_memory / clip_history / decision_audit / outcomes — "
-            "rebuild still runs (may write empty index)"
+            "rebuild still runs (writes a valid empty index)"
         )
 
     info["ready"] = True
@@ -199,6 +243,14 @@ def list_items() -> List[Dict[str, Any]]:
                 f"generated_at={st.get('index_generated_at') or '-'}"
             ),
         },
+        {
+            "id": "fresh",
+            "ok": st.get("index_stale") is False,
+            "detail": (
+                f"stale={st.get('index_stale')} ({st.get('index_stale_reason')}); "
+                f"newest source {st.get('newest_source_at') or '-'}"
+            ),
+        },
     ]
     for key, ok in sources.items():
         rows.append({"id": f"source:{key}", "ok": bool(ok), "detail": key})
@@ -207,7 +259,7 @@ def list_items() -> List[Dict[str, Any]]:
             "id": "soft_fail",
             "ok": True,
             "detail": (
-                f"prefix {_SOFT!r}; stay PARTIAL; distinct from READY "
+                f"prefix {_SOFT!r}; READY; distinct from READY "
                 "briefing retrieve"
             ),
         }
@@ -225,6 +277,9 @@ def try_run(argv: Optional[List[str]] = None) -> Dict[str, Any]:
         "entry_count": None,
         "index_path": str(_INDEX),
         "dry_run": False,
+        "skipped": False,
+        "before_count": None,
+        "elapsed_s": None,
     }
     st = status(probe=False)
     if not st.get("ready") and st.get("error"):
@@ -233,8 +288,24 @@ def try_run(argv: Optional[List[str]] = None) -> Dict[str, Any]:
 
     argv = list(argv or [])
     dry = "--dry-run" in argv or "-n" in argv
+    if_stale = "--if-stale" in argv
     out["dry_run"] = dry
+    out["before_count"] = st.get("index_entry_count") if st.get("index_present") else None
 
+    if if_stale and not dry and st.get("index_stale") is False:
+        out["ok"] = True
+        out["skipped"] = True
+        out["entry_count"] = st.get("index_entry_count")
+        out["report"] = (
+            f"Index already up to date ({st.get('index_entry_count')} entries, "
+            f"generated {st.get('index_generated_at') or '-'}) -> {_INDEX}\n"
+            "  (drop --if-stale to rebuild anyway)\n"
+        )
+        return out
+
+    import time as _time
+
+    t0 = _time.monotonic()
     try:
         mi = _load_memory_mod()
         if dry:
@@ -250,8 +321,23 @@ def try_run(argv: Optional[List[str]] = None) -> Dict[str, Any]:
         payload = mi.refresh_memory_index(project_root=_REPO, out_file=_INDEX)
         count = int(payload.get("entry_count") or 0)
         out["entry_count"] = count
+        out["elapsed_s"] = round(_time.monotonic() - t0, 2)
+        problem = _verify_index(_INDEX, count)
+        if problem:
+            out["error"] = _soft(problem)
+            return out
         out["ok"] = True
-        out["report"] = f"Indexed {count} memory entries -> {_INDEX}\n"
+        before = out["before_count"]
+        was = f" (was {before})" if before is not None else " (new index)"
+        out["report"] = (
+            f"Indexed {count} memory entries{was} in {out['elapsed_s']} s -> {_INDEX}\n"
+        )
+        if count == 0:
+            out["report"] += (
+                "  note: no memory sources found yet (Data/memory, Data/content, "
+                "Data/MEMORY.md, unified_memory, clip_history, outcomes) — "
+                "wrote a valid empty index\n"
+            )
         return out
     except Exception as exc:
         out["ok"] = False
@@ -275,6 +361,15 @@ def _print_status(info: Dict[str, Any], as_json: bool) -> int:
         )
         if info.get("index_generated_at"):
             print(f"  generated_at: {info.get('index_generated_at')}")
+        print(
+            f"  fresh:   stale={info.get('index_stale')} "
+            f"({info.get('index_stale_reason')})"
+            + (
+                f"  newest source {info.get('newest_source_at')}"
+                if info.get("newest_source_at")
+                else ""
+            )
+        )
         src = info.get("sources") or {}
         on = [k for k, v in src.items() if v]
         print(f"  sources: {', '.join(on) if on else '(none yet)'}")
@@ -297,7 +392,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     parser = argparse.ArgumentParser(
         prog="bolt refresh-memory",
-        description="Rebuild clip/memory index (PARTIAL; soft-fail).",
+        description=(
+            "Rebuild Bolt's local memory index Data/memory_index.json "
+            "(READY; local, no keys)."
+        ),
     )
     parser.add_argument(
         "action",
@@ -318,6 +416,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         action="store_true",
         help="run only: count entries without writing index",
     )
+    parser.add_argument(
+        "--if-stale",
+        action="store_true",
+        help="run only: skip the rebuild when the index is already up to date",
+    )
     args, rest = parser.parse_known_args(argv)
 
     if args.action == "status":
@@ -337,6 +440,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         engine_argv = list(rest)
         if args.dry_run and "--dry-run" not in engine_argv and "-n" not in engine_argv:
             engine_argv.append("--dry-run")
+        if args.if_stale and "--if-stale" not in engine_argv:
+            engine_argv.append("--if-stale")
         result = try_run(engine_argv)
         if result.get("error") and not result.get("ok"):
             if args.json:
@@ -352,6 +457,9 @@ def main(argv: Optional[List[str]] = None) -> int:
                         "exit_code": result.get("exit_code"),
                         "entry_count": result.get("entry_count"),
                         "dry_run": result.get("dry_run"),
+                        "skipped": result.get("skipped"),
+                        "before_count": result.get("before_count"),
+                        "elapsed_s": result.get("elapsed_s"),
                         "index_path": result.get("index_path"),
                         "report": result.get("report"),
                     },
