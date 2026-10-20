@@ -49,7 +49,7 @@ def _speak_line(text: str) -> int:
         try:
             import subprocess
 
-            voice = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Voice 3"
+            voice = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Nathan (Enhanced)"
             subprocess.run(["say", "-v", voice, text], check=False)
             return 0
         except Exception:

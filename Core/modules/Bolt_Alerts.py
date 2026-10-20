@@ -91,7 +91,7 @@ def _speak_alert(text: str) -> bool:
         return macos_say(spoken[:280])
     except Exception:
         pass
-    voice = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Voice 3"
+    voice = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Nathan (Enhanced)"
     try:
         r = subprocess.run(
             ["say", "-v", voice, spoken[:280]],
