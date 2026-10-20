@@ -7,7 +7,7 @@ trio (bolt-fortress / billythunderstorm / billythunderstorm-live) plus the
 API worker.
 
 This is **not** stranger-ready — no in-repo full site apps; deploy needs
-William's wrangler login / CF tokens and usually ``/tmp/sites/...`` trees.
+William's wrangler login / CF tokens. Site sources: ``Sites/<project>/``.
 Soft-fail prefix: ``Pages unavailable:``.
 
   bolt pages                        # status (default)
@@ -34,6 +34,8 @@ _REPO = Path(__file__).resolve().parents[2]
 _DOCS_SITE = _REPO / "Docs" / "site"
 _SITE_DATA = _REPO / "Data" / "site-data.json"
 _SITE_WRITER = _REPO / "scripts" / "site_data_writer.py"
+# Site sources saved from Cloudflare on 20 Oct 2026 (were only in /tmp/sites).
+_SITES = _REPO / "Sites"
 
 # Documented William deploy targets (Docs/PROJECT_STATUS.md).
 _KNOWN_PROJECTS: List[Dict[str, Any]] = [
@@ -41,28 +43,31 @@ _KNOWN_PROJECTS: List[Dict[str, Any]] = [
         "name": "bolt-fortress",
         "kind": "pages",
         "url": "https://bolt.billythunderstorm.us",
-        "default_path": "/tmp/sites/bolt",
+        "default_path": str(_SITES / "bolt-fortress"),
+        "branch": "Hideout",  # Pages production branch (others deploy as previews)
         "description": "Bolt Command Center",
     },
     {
         "name": "billythunderstorm",
         "kind": "pages",
         "url": "https://billythunderstorm.us",
-        "default_path": "/tmp/sites/main",
+        "default_path": str(_SITES / "billythunderstorm"),
+        "branch": "Hub",
         "description": "Creator portfolio",
     },
     {
         "name": "billythunderstorm-live",
         "kind": "pages",
         "url": "https://billythunderstorm.live",
-        "default_path": "/tmp/sites/live",
+        "default_path": str(_SITES / "billythunderstorm-live"),
+        "branch": "Outside",
         "description": "Live status",
     },
     {
         "name": "bolt-api-worker",
         "kind": "worker",
         "url": "https://api.billythunderstorm.us",
-        "default_path": "/tmp/sites/bolt-api-worker",
+        "default_path": str(_SITES / "bolt-api"),
         "description": "API Worker (wrangler deploy, not pages)",
     },
 ]
@@ -452,7 +457,7 @@ def try_deploy(
             "deployed": False,
             "error": _soft(
                 f"deploy path not ready for {proj['name']}: {detail}. "
-                "William stages built sites under /tmp/sites/…"
+                "site sources live in Sites/<project>/ in the Bolt repo"
             ),
             "project": proj["name"],
             "path": str(deploy_path),
@@ -471,6 +476,10 @@ def try_deploy(
             "--project-name",
             str(proj["name"]),
         ]
+        if proj.get("branch"):
+            # Without --branch wrangler uses the current git branch ("main"),
+            # which is a *preview* for these projects, not the live site.
+            cmd += ["--branch", str(proj["branch"])]
         cwd = str(_REPO)
 
     if dry_run:

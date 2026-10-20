@@ -117,3 +117,18 @@ media/output/releases/
 
 # Google Drive Desktop temp uploads (never commit)
 .tmp.driveupload/
+
+# ── Local-only backups, quarantine, scratch (20 Oct 2026) ─────────────────────
+# Any .env variant holds secrets (keep the example template tracked).
+.env.*
+!.env.example
+*.bak
+*.bak-*
+*.bak.*
+Data/backups/
+Data/quarantine/
+quarantine/
+Data/pipeline_errors.jsonl
+Data/.site-data-probe.json
+.pytest_cache/
+.scratch-*/
