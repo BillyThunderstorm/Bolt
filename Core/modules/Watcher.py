@@ -85,11 +85,41 @@ def _save_processed(processed: set):
     This is what prevents duplicate processing across restarts.
     """
     PROCESSED_LOG.parent.mkdir(parents=True, exist_ok=True)
+    tmp = PROCESSED_LOG.with_name(PROCESSED_LOG.name + ".tmp")
     try:
-        with open(PROCESSED_LOG, "w") as f:
-            json.dump(sorted(processed), f, indent=2)
+        # Merge with what is on disk so a concurrent `bolt recordings` mark
+        # is never dropped, then swap atomically (no half-written log).
+        merged = set(processed) | load_processed()
+        with open(tmp, "w") as f:
+            json.dump(sorted(merged), f, indent=2)
+        os.replace(tmp, PROCESSED_LOG)
     except Exception as e:
         print(f"[Watcher] Could not save processed log: {e}")
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
+
+
+def is_video_file(name: str) -> bool:
+    """True for a recording we should watch (.mp4/.mkv/.mov/.avi, any case).
+
+    Skips hidden files and macOS AppleDouble ``._name.mp4`` sidecars that
+    appear on external / network drives.
+    """
+    base = Path(name).name
+    if base.startswith("."):
+        return False
+    return Path(base).suffix.lower() in WATCH_EXTENSIONS
+
+
+def video_files(folder: str | Path) -> list[Path]:
+    """All watchable video files directly in *folder* (case-insensitive)."""
+    target = Path(folder)
+    try:
+        return [p for p in target.iterdir() if p.is_file() and is_video_file(p.name)]
+    except OSError:
+        return []
 
 
 def is_processed(filename: str, processed: set | None = None) -> bool:
@@ -121,9 +151,9 @@ def list_pending_recordings(folder: str | Path | None = None) -> list[Path]:
     target = Path(folder) if folder else Path(RECORDINGS_FOLDER)
     if not target.is_dir():
         return []
-    files: list[Path] = []
-    for ext in WATCH_EXTENSIONS:
-        files.extend(target.glob(f"*{ext}"))
+    # Case-insensitive: iPhone/AirDrop files are ``.MOV`` and a plain
+    # ``*.mov`` glob is case-sensitive, so they were silently never pending.
+    files = video_files(target)
     best: dict[str, Path] = {}
     for path in files:
         prev = best.get(path.stem)
@@ -165,9 +195,12 @@ def watch_folder(folder: str = RECORDINGS_FOLDER):
             time.sleep(WATCH_INTERVAL)
             continue
 
+        # Pick up marks made elsewhere (bolt recordings, process_recording)
+        # so a file handled outside this loop is not clipped twice.
+        processed |= load_processed()
+
         for filename in sorted(files):
-            _, ext = os.path.splitext(filename)
-            if ext.lower() not in WATCH_EXTENSIONS:
+            if not is_video_file(filename):
                 continue
             if is_processed(filename, processed):
                 continue

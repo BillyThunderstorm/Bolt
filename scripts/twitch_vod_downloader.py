@@ -142,6 +142,7 @@ def ytdlp_sample_cmd(
         yt_dlp,
         "--no-progress",
         "--no-update",
+        "--no-mtime",  # fresh mtime: don't stamp the VOD's upload date on the file
         "--force-keyframes-at-cuts",
         "--download-sections",
         f"*{start_seconds}-{end}",

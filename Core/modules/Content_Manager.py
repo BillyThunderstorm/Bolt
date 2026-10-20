@@ -2921,7 +2921,7 @@ def morning(speak_aloud: bool = True) -> Dict[str, Any]:
 
                 subprocess.run(
                     [
-                        "say",
+                        "say", "-v", (__import__("os").getenv("Bolt_VOICE") or __import__("os").getenv("BOLT_VOICE") or "Nathan (Enhanced)"),
                         (
                             briefing.get("spoken_voice")
                             or briefing.get("spoken")

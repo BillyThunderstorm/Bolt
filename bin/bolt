@@ -234,7 +234,7 @@ Script subcommands (each maps to scripts/X.py):
   briefing [--print|--speak|--send]
                           Generate daily briefing; --send writes Reminders + alert
   thumbnails [args]       Generate JPG thumbnails for clips
-  calendar [status|list|run]  Local ICS feeds (PARTIAL; soft-fail)
+  calendar [status|list|run]  Local ICS feeds (READY; soft-fail)
                           status [--json|--probe]; list; run [--dry-run|--days N]
                           aliases: ics, ics-calendar, generate-calendar, calendar-status
                           (former thin SCRIPT_MAP; distinct from READY bolt gcal)
@@ -248,11 +248,11 @@ Script subcommands (each maps to scripts/X.py):
   site [--push]           Write site-data.json (local; --push soft-fails)
   sites [status]            Sites + storage cron readiness (--json|--probe; soft-fail)
                           aliases: site-status, sites-status, storage-cron
-  weekly [status|list|run] Weekly performance insights (PARTIAL; soft-fail)
+  weekly [status|list|run] Weekly report from real numbers, saved + --send (READY)
                           status [--json|--probe]; list; run [--print|--send|--days N]
                           aliases: monthly, week-insights, weekly-analysis
-  filter-backlog [status|list|run]  Clip backlog score filter (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--dry-run]
+  filter-backlog [status|list|run|restore]  Clip backlog score filter (READY; soft-fail)
+                          status [--json|--probe]; list; run [--dry-run] [--include-queued]; restore [NAME|--all]
                           aliases: filter_backlog, backlog-filter, filter-backlog-status
   make-highlights [status|list|run]  Local highlight reel stitch (READY; soft-fail)
                           status [--json|--probe]; list; run [--list][--count N] → media/output/
@@ -267,17 +267,17 @@ Script subcommands (each maps to scripts/X.py):
                           status [--json|--probe]; list; run [--dry-run]
                           aliases: health-check, health_check, health-status, system-health
                           (former SHELL pre-reorg CWD paths; prefer bolt doctor)
-  clip-dedupe [status|list|run]  SHA256 media hash scan (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--dry-run]
-                          aliases: clip_dedupe, hash-dedupe, dedupe-status, sha-dedupe
-                          (former thin SCRIPT_MAP parents[3] wrong root; not pipeline pHash)
+  clip-dedupe [status|list|run]  Find byte-identical media copies (READY; read-only)
+                          status [--json|--probe]; list; run [--dry-run] [--scan DIR]
+                          run --check FILE; run --clear-db; aliases: clip_dedupe,
+                          hash-dedupe, dedupe-status, sha-dedupe (not pipeline pHash)
   personality [status|list|run]  Bolt system prompt (LLM_Handler; not Gemini)
                           status [--json|--probe]; list; run [--dry-run|--once TEXT]
                           aliases: bolt-personality, personality-status, persona,
                           load-personality, load_personality
                           (Data/context/bolt-personality.md; soft-fail if file or model missing)
-  log-perf [status|list|run]  Manual clip performance log (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--trigger|--views|--list]
+  log-perf [status|list|run]  Log a posted clip's views (READY; soft-fail)
+                          status [--json|--probe]; list; run --clip ID --views N [--likes|--platform|--dry-run]; run --list|--history
                           aliases: log_perf, log-performance, log_performance, perf-log
                           (former thin SCRIPT_MAP; distinct from READY bolt stats)
   vods [status|list|download]
@@ -324,8 +324,8 @@ Script subcommands (each maps to scripts/X.py):
   alerts [status|list|test|send]  Mac/Voice/email/iMessage alerts (PARTIAL; soft-fail)
                           status [--json|--probe]; list; test; send "msg"
                           aliases: alert, alert-status, notify-alerts, bolt-alerts
-  checklist [status|list|run]  Pre-stream voice checklist (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--keyboard|--text]
+  checklist [status|list|check|run|reset]  Pre-stream checklist (READY)
+                          status [--json|--probe]; list; check; run [--keyboard] [--resume]; reset
                           aliases: checklist-status, voice-checklist, prestream, pre-stream
   reminders [status|list|test|send]  Apple Reminders.app delivery (PARTIAL; soft-fail)
                           status [--json|--probe]; list; test; send "msg"
@@ -333,8 +333,8 @@ Script subcommands (each maps to scripts/X.py):
   photo-ocr [status|list|run]  Photo/handwriting OCR → .txt (PARTIAL; soft-fail)
                           status [--json|--probe]; list; run <images…> [--open] [--stdout] [-o PATH]
                           aliases: photo_ocr, photo-ocr-status, ocr-photos, ocr_photos, vision-ocr
-  compress [status|list|run]  HandBrake clip compress (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--dry-run]
+  compress [status|list|run|clean-backups]  shrink clips in media/clips (READY; soft-fail)
+                          status [--json]; list; run [--dry-run] [--limit N] [--clip NAME]; clean-backups [--days N] [--dry-run]
                           aliases: video-compress, handbrake, compress-videos, compress_videos
   chat [status|connect]     Twitch chat readiness / connect (Bolt_Chat; soft-fail)
                           status [--json|--probe]; connect [--force][--voice]
@@ -360,7 +360,7 @@ Script subcommands (each maps to scripts/X.py):
   vector_db                Short alias for refresh_vector_db
   reindex                  Short alias for refresh_vector_db
   filter_backlog          Move low-scoring clips to media/clips/_low_score/
-  watch [status|list|run]   Folder watch readiness (PARTIAL; soft-fail)
+  watch [status|list|run]   Watch recordings folder and clip new ones (READY; run --once|--dry-run)
                           status [--json|--probe]; list; run [--once|--folder PATH]
                           aliases: watch-status, folder-watch, watch-folder
                           (former thin SCRIPT_MAP; prefer bolt launch for live)
@@ -391,10 +391,11 @@ Script subcommands (each maps to scripts/X.py):
                           status [--json|--probe]; list; show [game]; set <game> KEY=VALUE …
                           aliases: game_config, gameconfig, games, game-profiles, game-config-status
                           (former unnamed IDEA Core/modules/Game_Config.py; distinct from PARTIAL bolt obs-game)
-  error-recovery [status|list|run]  Pipeline retry/quarantine (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--dry-run|--probe|--json]
+  error-recovery [status|list|run|quarantine|restore|clear]  What failed in the clip pipeline + what to try (READY)
+                          run [--days N|--all-time] [--no-probe] [--json] (log: Data/pipeline_errors.jsonl);
+                          quarantine FILE [--reason …] [--dry-run]; restore [NAME …|--all]; clear (archives log)
                           aliases: error_recovery, recovery, quarantine, error-tracker, error-recovery-status
-                          (former IDEA Core/modules/Error_Recovery.py; distinct from PARTIAL bolt discord / alerts)
+                          (errors logged by notifier.notify_error; distinct from PARTIAL bolt discord / alerts)
   memsearch [status|list|run]  Search Bolt's local memory (READY; auto-rebuilds stale index)
                           status [--json|--probe]; list; run|search|query "…" [--limit N] [--refresh|--no-refresh] [--dry-run]
                           aliases: memory-search, mem-search, search-memory, memory_search, memsearch-status
@@ -453,6 +454,8 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
   vault [status|list|find|add|undo]
                           Obsidian vault (BOLT_VAULT_PATH). Safe writes, backups,
                           activity log. Never deletes. add writes a task note.
+  checkin [--questions|--json|--answer KEY=TEXT]
+                          Evening check-in: up to 3 questions on what's not logged
   stats [status|sync|tiktok|youtube] [--dry-run] [--json] [--probe]
                           Social performance pull readiness + TikTok/YouTube sync
   analytics [--days N] [--top N]
@@ -581,9 +584,10 @@ def _all_cli_names() -> list[str]:
             "today",
             "week",
             "vault",
+            "checkin",
             "voice",
             "talk",
-            "say",
+            "say", "-v", (os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Nathan (Enhanced)"),
             "queue",
             "approve",
             "postnow",
@@ -747,6 +751,16 @@ def main() -> int:
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
         cmd = [py, "-m", "modules.Vault_Store"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: evening check-in (asks what's missing, saves answers locally)
+    if subcommand in ("checkin", "check-in", "evening", "evening-checkin"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Evening_Checkin"] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
@@ -1743,7 +1757,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: pre-stream voice checklist (Voice_Checklist; soft-fail; PARTIAL)
+    # Built-in: pre-stream checklist (Voice_Checklist; READY)
     if subcommand in (
         "checklist",
         "checklist-status",
@@ -1791,7 +1805,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: weekly performance insights (Weekly_Analysis; soft-fail; PARTIAL)
+    # Built-in: weekly performance report (Weekly_Analysis; soft-fail; READY)
     if subcommand in (
         "weekly",
         "monthly",
@@ -1842,7 +1856,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: clip backlog score filter (Filter_Backlog; soft-fail; PARTIAL)
+    # Built-in: clip backlog score filter (Filter_Backlog; soft-fail; READY)
     if subcommand in (
         "filter-backlog",
         "filter_backlog",
@@ -1922,7 +1936,7 @@ print('System is fully upgraded.')
 
 
 
-    # Built-in: local ICS calendar feeds (ICS_Calendar; soft-fail; PARTIAL)
+    # Built-in: local ICS calendar feeds (ICS_Calendar; soft-fail; READY)
     # Former thin SCRIPT_MAP calendar → scripts/generate_calendar.py
     # (no soft-fail status/list/run). Distinct from READY bolt gcal OAuth.
     # Thumbnails stay READY via bolt thumbnails.
@@ -2014,7 +2028,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: folder watch readiness (Folder_Watch; soft-fail; PARTIAL)
+    # Built-in: folder watch → clip new recordings (Folder_Watch; soft-fail; READY)
     # Former thin SCRIPT_MAP watch → scripts/Watcher.py (no soft-fail status/list/run).
     # Distinct from READY bolt launch (live) / bolt recordings (one-shot).
     if subcommand in (
@@ -2170,11 +2184,9 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: pipeline retry/quarantine (Error_Recovery; soft-fail; PARTIAL)
-    # Former IDEA Docs/AI_Guide.md + Core/modules/Error_Recovery.py
-    # (with_retry / ErrorTracker / quarantine existed; CWD-relative quarantine/;
-    # no soft-fail status/list/run CLI; not wired into bot.py). Distinct from
-    # PARTIAL bolt discord (webhook) and PARTIAL bolt alerts (Mac/Voice fan-out).
+    # Built-in: clip pipeline error log + report + quarantine (Error_Recovery; READY
+    # 20 Oct 2026). notifier.notify_error → Data/pipeline_errors.jsonl; run = report;
+    # quarantine FILE / restore. Distinct from PARTIAL bolt discord / bolt alerts.
     if subcommand in (
         "error-recovery",
         "error_recovery",
@@ -2194,8 +2206,23 @@ print('System is fully upgraded.')
             "error_recovery_status",
         ) and not rest:
             rest = ["status"]
+        if subcommand == "quarantine" and rest and rest[0] not in (
+            "status", "list", "run", "summary", "report", "quarantine", "restore", "clear",
+        ):
+            rest = ["quarantine"] + list(rest)
         if not rest:
             rest = ["status"]
+        # quarantine FILE is relative to where William typed the command.
+        _caller = os.getcwd()
+        rest = list(rest)
+        if rest and rest[0] == "quarantine":
+            for _i in range(1, len(rest)):
+                _a = rest[_i]
+                if _a.startswith("-") or (_i > 1 and rest[_i - 1] == "--reason"):
+                    continue
+                _p = os.path.expanduser(_a)
+                if not os.path.isabs(_p) and os.path.exists(os.path.join(_caller, _p)):
+                    rest[_i] = os.path.abspath(os.path.join(_caller, _p))
         cmd = [py, "-m", "modules.Error_Recovery"] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
@@ -2232,7 +2259,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: manual clip performance logger (Log_Perf; soft-fail; PARTIAL)
+    # Built-in: manual clip performance logger (Log_Perf; soft-fail; READY)
     # Former thin SCRIPT_MAP log_perf / log_clip_performance.py (no soft-fail status).
     # Distinct from READY bolt stats (Social_Stats / Performance_Sync API pull).
     if subcommand in (
@@ -2338,7 +2365,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: SHA256 hash dedupe scan (Hash_Dedupe; soft-fail; PARTIAL)
+    # Built-in: SHA256 hash dedupe scan (Hash_Dedupe; soft-fail; READY)
     # Former thin SCRIPT_MAP clip_dedupe (parents[3] wrong root). Distinct from
     # READY pipeline Clip_Deduplicator (pHash / Data/seen_clips.json).
     if subcommand in (
@@ -2364,6 +2391,15 @@ print('System is fully upgraded.')
             "hash_dedupe_status",
         ) and not rest:
             rest = ["status"]
+        # --scan / --check paths are relative to where William typed the command,
+        # not the repo (we chdir below).
+        _caller = os.getcwd()
+        rest = list(rest)
+        for _i in range(len(rest) - 1):
+            if rest[_i] in ("--scan", "--check"):
+                _p = os.path.expanduser(rest[_i + 1])
+                if not os.path.isabs(_p) and os.path.exists(os.path.join(_caller, _p)):
+                    rest[_i + 1] = os.path.abspath(os.path.join(_caller, _p))
         cmd = [py, "-m", "modules.Hash_Dedupe"] + (rest if rest else ["status"])
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
@@ -2419,7 +2455,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: HandBrake clip compression (Video_Compress; soft-fail; PARTIAL)
+    # Built-in: clip compression (Video_Compress; ffmpeg-full first; soft-fail; READY)
     if subcommand in (
         "compress",
         "video-compress",

@@ -1,8 +1,8 @@
 {
   "game": "God of War Sons of Sparta",
   "source": "stream_start_twitch",
-  "checked_at": "2026-10-18T14:39:09Z",
-  "confirmed_at": "2026-10-18T14:39:09Z",
+  "checked_at": "2026-10-20T07:57:31Z",
+  "confirmed_at": "2026-10-20T07:57:31Z",
   "confirmed_source": "stream_start_twitch",
   "changed_at": "2026-10-18T14:39:09Z",
   "history": [
@@ -34,6 +34,60 @@
       "at": "2026-10-18T14:39:09Z",
       "game": "God of War Sons of Sparta",
       "previous": "Wolverine",
+      "source": "stream_start_twitch"
+    },
+    {
+      "at": "2026-10-19T20:10:34Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "God of War Sons of Sparta",
+      "source": "kept"
+    },
+    {
+      "at": "2026-10-19T20:10:34Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "God of War Sons of Sparta",
+      "source": "kept"
+    },
+    {
+      "at": "2026-10-20T06:38:02Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "God of War Sons of Sparta",
+      "source": "twitch"
+    },
+    {
+      "at": "2026-10-20T06:38:20Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "God of War Sons of Sparta",
+      "source": "twitch"
+    },
+    {
+      "at": "2026-10-20T06:38:41Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "God of War Sons of Sparta",
+      "source": "twitch"
+    },
+    {
+      "at": "2026-10-20T07:10:58Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "God of War Sons of Sparta",
+      "source": "twitch"
+    },
+    {
+      "at": "2026-10-20T07:11:39Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "God of War Sons of Sparta",
+      "source": "twitch"
+    },
+    {
+      "at": "2026-10-20T07:18:44Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "God of War Sons of Sparta",
+      "source": "stream_start_twitch"
+    },
+    {
+      "at": "2026-10-20T07:57:31Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "God of War Sons of Sparta",
       "source": "stream_start_twitch"
     }
   ]

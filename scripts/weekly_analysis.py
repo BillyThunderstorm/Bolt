@@ -125,10 +125,17 @@ def _retrieve_weekly_memory(query: str = "", limit: int = 5) -> list:
                 profile = _json.load(f)
             constraints = profile.get("hard_constraints", []) or []
             for c in constraints[:2]:
+                if not isinstance(c, dict):
+                    continue
+                c_text = " ".join(str(c.get("text") or "").split())
+                if len(c_text) > 140:
+                    c_text = c_text[:137].rstrip() + "…"
                 hits.append({
                     "kind": "constraint",
-                    "text": f"Reminder: {c.get('text', '')}",
-                    "title": c.get("id", "constraint"),
+                    "text": f"Reminder: {c_text}",
+                    # Title used to be the bare id ("C1"), which is all the
+                    # report showed; surface the actual rule instead.
+                    "title": f"Reminder: {c_text}" if c_text else str(c.get("id", "constraint")),
                     "score": 0.5,
                     "source": "user_profile",
                     "timestamp": "",
@@ -222,72 +229,213 @@ def _memory_to_recommendations(hits: list, max_items: int = 5) -> list:
     return [rec for _, rec in ordered[:cap]]
 
 
-# ── Outcome + queue loading (lightweight, used by --send flow) ────────────────
+# ── Outcome + queue loading ───────────────────────────────────────────────────
 
 
-def load_outcomes(days: int = 7):
-    """Return performance outcomes from the last `days` days.
+def _parse_ts(value) -> "datetime | None":
+    """Parse an ISO timestamp into a naive *local* datetime (None if bad).
 
-    Returns a list (possibly empty). In production this reads from
-    `Data/performance_outcomes.jsonl`. Lightweight on purpose: this is the
-    weekly side, not the deep analytics side.
+    Outcomes mix naive local stamps and UTC ``...Z`` / ``+00:00`` stamps;
+    comparing those directly raised TypeError and the old loader then kept
+    the row no matter how old it was.
     """
+    s = str(value or "").strip()
+    if not s:
+        return None
     try:
-        from datetime import timedelta
-        path = REPO_ROOT / "Data" / "performance_outcomes.jsonl"
-        if not path.exists():
-            return []
-        cutoff = datetime.now() - timedelta(days=max(1, int(days)))
-        out = []
+        dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except Exception:
+        return None
+    if dt.tzinfo is not None:
+        dt = dt.astimezone().replace(tzinfo=None)
+    return dt
+
+
+def _read_outcome_rows() -> list:
+    path = REPO_ROOT / "Data" / "performance_outcomes.jsonl"
+    rows: list = []
+    if not path.exists():
+        return rows
+    import json as _json
+    try:
         with path.open("r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if not line:
                     continue
                 try:
-                    import json as _json
                     rec = _json.loads(line)
                 except Exception:
                     continue
-                if not isinstance(rec, dict):
-                    continue
-                ts = str(rec.get("timestamp") or "")
-                try:
-                    dt = datetime.fromisoformat(ts.replace("Z", ""))
-                    if dt >= cutoff:
-                        out.append(rec)
-                except Exception:
-                    # If we can't parse the timestamp, skip — prefer quality
-                    out.append(rec)
-                    continue
-        return out
+                if isinstance(rec, dict):
+                    rows.append(rec)
     except Exception:
         return []
+    return rows
 
 
-def load_queue_stats():
-    """Return current post-queue totals.
+def _outcomes_between(start: datetime, end: datetime) -> list:
+    out = []
+    for rec in _read_outcome_rows():
+        dt = _parse_ts(rec.get("timestamp"))
+        if dt is not None and start <= dt < end:
+            out.append(rec)
+    return out
 
-    Shape: {"total": int, "items": list}. In production this calls into
-    Post_Queue or similar. Returned shape is stable for report + SMS code.
+
+def load_outcomes(days: int = 7):
+    """Return performance outcomes logged in the last `days` days.
+
+    Reads `Data/performance_outcomes.jsonl` (written by `bolt stats` sync and
+    `bolt log-perf`). Rows with no readable timestamp are skipped.
     """
-    stats = {"total": 0, "items": []}
+    from datetime import timedelta
+
+    now = datetime.now()
+    return _outcomes_between(now - timedelta(days=max(1, int(days))), now + timedelta(minutes=1))
+
+
+def load_previous_outcomes(days: int = 7):
+    """Outcomes from the window before this one (for week-over-week)."""
+    from datetime import timedelta
+
+    days = max(1, int(days))
+    now = datetime.now()
+    return _outcomes_between(now - timedelta(days=2 * days), now - timedelta(days=days))
+
+
+def last_outcome() -> dict:
+    """Most recent outcome row ever logged ({} if none)."""
+    best, best_dt = {}, None
+    for rec in _read_outcome_rows():
+        dt = _parse_ts(rec.get("timestamp"))
+        if dt is not None and (best_dt is None or dt > best_dt):
+            best, best_dt = rec, dt
+    return best
+
+
+def _num(value) -> int:
+    try:
+        return int(float(value or 0))
+    except Exception:
+        return 0
+
+
+def outcome_stats(outcomes) -> dict:
+    """Totals, per-platform and per-game views, and top clips by views."""
+    stats = {"count": 0, "views": 0, "likes": 0, "platforms": {}, "games": {}, "top": []}
+    if not isinstance(outcomes, list):
+        return stats
+    rows = [r for r in outcomes if isinstance(r, dict)]
+    stats["count"] = len(rows)
+    for r in rows:
+        v, lk = _num(r.get("views")), _num(r.get("likes"))
+        stats["views"] += v
+        stats["likes"] += lk
+        plat = str(r.get("platform") or "unknown").strip() or "unknown"
+        p = stats["platforms"].setdefault(plat, {"count": 0, "views": 0})
+        p["count"] += 1
+        p["views"] += v
+        game = str(r.get("game") or "Unknown").strip() or "Unknown"
+        g = stats["games"].setdefault(game, {"count": 0, "views": 0})
+        g["count"] += 1
+        g["views"] += v
+    ranked = sorted(rows, key=lambda r: _num(r.get("views")), reverse=True)
+    for r in ranked[:3]:
+        title = str(r.get("title") or "").strip()
+        if not title:
+            title = Path(str(r.get("clip_path") or "")).stem or "untitled"
+        title = " ".join(title.split())
+        if len(title) > 80:
+            title = title[:77].rstrip() + "…"
+        stats["top"].append({
+            "title": title,
+            "views": _num(r.get("views")),
+            "likes": _num(r.get("likes")),
+            "platform": str(r.get("platform") or "unknown") or "unknown",
+            "game": str(r.get("game") or "Unknown") or "Unknown",
+        })
+    return stats
+
+
+def load_queue_stats(days: int = 7):
+    """Current post-queue totals from `Data/ready_to_post.json`.
+
+    Shape: {"total": int, "items": list, "by_status": {status: n},
+    "queued_recent": n, "posted_recent": n}. The real file is
+    ``{"clips": [...]}``; the old loader only looked for ``items`` /
+    ``ready_to_post`` and so always reported an empty queue.
+    """
+    from datetime import timedelta
+
+    stats = {"total": 0, "items": [], "by_status": {}, "queued_recent": 0, "posted_recent": 0}
     try:
         queue_path = REPO_ROOT / "Data" / "ready_to_post.json"
-        if queue_path.exists():
-            import json as _json
-            payload = _json.loads(queue_path.read_text(encoding="utf-8") or "[]")
-            if isinstance(payload, list):
-                stats["items"] = payload
-                stats["total"] = len(payload)
-            elif isinstance(payload, dict):
-                items = payload.get("items") or payload.get("ready_to_post") or []
-                if isinstance(items, list):
-                    stats["items"] = items
-                    stats["total"] = len(items)
+        if not queue_path.exists():
+            return stats
+        import json as _json
+        payload = _json.loads(queue_path.read_text(encoding="utf-8") or "[]")
+        items: list = []
+        if isinstance(payload, list):
+            items = payload
+        elif isinstance(payload, dict):
+            for key in ("clips", "items", "ready_to_post"):
+                val = payload.get(key)
+                if isinstance(val, list):
+                    items = val
+                    break
+        items = [i for i in items if isinstance(i, dict)]
+        stats["items"] = items
+        stats["total"] = len(items)
+        cutoff = datetime.now() - timedelta(days=max(1, int(days)))
+        for it in items:
+            st = str(it.get("status") or "queued").strip() or "queued"
+            stats["by_status"][st] = stats["by_status"].get(st, 0) + 1
+            q = _parse_ts(it.get("queued_at"))
+            if q is not None and q >= cutoff:
+                stats["queued_recent"] += 1
+            p = _parse_ts(it.get("posted_at"))
+            if p is not None and p >= cutoff:
+                stats["posted_recent"] += 1
     except Exception:
         pass
     return stats
+
+
+def recent_media(days: int = 7) -> dict:
+    """Clips cut / verticals built in the window (by file mtime) + plans made."""
+    from datetime import timedelta
+
+    cutoff = (datetime.now() - timedelta(days=max(1, int(days)))).timestamp()
+    out = {"clips": 0, "verticals": 0, "plans": 0}
+    for key, folder in (("clips", "media/clips"), ("verticals", "media/vertical_clips")):
+        d = REPO_ROOT / folder
+        try:
+            for p in d.iterdir():
+                if (
+                    p.is_file()
+                    and not p.name.startswith(".")
+                    and p.suffix.lower() in (".mp4", ".mov", ".m4v")
+                    and p.stat().st_mtime >= cutoff
+                ):
+                    out[key] += 1
+        except Exception:
+            pass
+    try:
+        import json as _json
+        mpq = REPO_ROOT / "Data" / "multi_platform_queue.json"
+        if mpq.exists():
+            data = _json.loads(mpq.read_text(encoding="utf-8") or "{}")
+            items = data.get("items", []) if isinstance(data, dict) else data
+            cut_dt = datetime.fromtimestamp(cutoff)
+            for it in items or []:
+                if isinstance(it, dict):
+                    c = _parse_ts(it.get("created_at"))
+                    if c is not None and c >= cut_dt:
+                        out["plans"] += 1
+    except Exception:
+        pass
+    return out
 
 
 # ── Sending (Bolt_Alerts; patch these names in tests) ─────────────────────────
@@ -318,18 +466,71 @@ def send_email(text: str, *args, **kwargs) -> bool:
 # ── Report generation ──────────────────────────────────────────────────────────
 
 
-def _performance_summary(outcomes, queue_data, memory_hits) -> str:
+def _period(days: int) -> str:
+    return "this week" if int(days) == 7 else f"in the last {int(days)} days"
+
+
+def _fmt_delta(now: int, before: int, days: int = 7) -> str:
+    prev = "the week before" if int(days) == 7 else f"the {int(days)} days before"
+    if before <= 0:
+        return f"no views logged {prev}" if now else f"flat (nothing logged {prev} either)"
+    pct = (now - before) * 100.0 / before
+    sign = "+" if pct >= 0 else ""
+    return f"{sign}{pct:.0f}% vs {prev}: {before:,}"
+
+
+def _performance_summary(outcomes, queue_data, memory_hits, extra=None) -> str:
     """Top section of the weekly report. Outcomes can be a list or a dict."""
-    if isinstance(outcomes, list):
-        posted_count = len(outcomes)
-    else:
-        posted_count = 0
+    extra = extra or {}
+    days = int(extra.get("days") or 7)
+    posted_count = len(outcomes) if isinstance(outcomes, list) else 0
     queue_total = queue_data.get("total", 0) if isinstance(queue_data, dict) else 0
-    return (
-        f"- Clips logged this week: {posted_count}\n"
+    per = _period(days)
+    out = (
+        f"- Clips logged {per}: {posted_count}\n"
         f"- Total queue items: {queue_total}\n"
         f"- Memory hits: {len(memory_hits)}\n"
     )
+    st = outcome_stats(outcomes)
+    if st["count"]:
+        prev = outcome_stats(extra.get("previous") or [])
+        out += f"- Views logged: {st['views']:,} · likes {st['likes']:,} ({_fmt_delta(st['views'], prev['views'], days)})\n"
+        plats = sorted(st["platforms"].items(), key=lambda kv: kv[1]["views"], reverse=True)
+        out += "- By platform: " + ", ".join(f"{k} {v['views']:,} views / {v['count']} clip(s)" for k, v in plats) + "\n"
+        games = sorted(st["games"].items(), key=lambda kv: kv[1]["views"], reverse=True)[:3]
+        out += "- By game: " + ", ".join(f"{k} {v['views']:,}" for k, v in games) + "\n"
+        out += "- Top clips:\n"
+        for t in st["top"]:
+            out += f"  - {t['title']} — {t['views']:,} views ({t['platform']}, {t['game']})\n"
+    else:
+        last = extra.get("last_outcome") or {}
+        if last:
+            dt = _parse_ts(last.get("timestamp"))
+            when = dt.strftime("%b %d, %Y") if dt else "unknown date"
+            out += (
+                f"- No views logged in the last {days} days. Last logged: {when} "
+                f"({last.get('platform') or 'unknown'}). Pull YouTube with `bolt stats`, "
+                f"log TikTok/X by hand with `bolt log-perf`.\n"
+            )
+        else:
+            out += (
+                f"- No views logged yet. Pull YouTube with `bolt stats`, "
+                f"log TikTok/X by hand with `bolt log-perf`.\n"
+            )
+    if isinstance(queue_data, dict) and queue_data.get("by_status"):
+        bs = sorted(queue_data["by_status"].items(), key=lambda kv: kv[1], reverse=True)
+        out += "- Queue by status: " + ", ".join(f"{k} {v}" for k, v in bs) + "\n"
+        out += (
+            f"- Queue {per}: {queue_data.get('queued_recent', 0)} queued, "
+            f"{queue_data.get('posted_recent', 0)} posted\n"
+        )
+    media = extra.get("media")
+    if isinstance(media, dict):
+        out += (
+            f"- Made {per}: {media.get('clips', 0)} new clip(s), "
+            f"{media.get('verticals', 0)} vertical(s), {media.get('plans', 0)} multi-platform plan(s)\n"
+        )
+    return out
 
 
 def _memory_highlights_block(memory_hits) -> str:
@@ -358,11 +559,39 @@ def _memory_highlights_block(memory_hits) -> str:
     return out
 
 
+def _data_recommendations(outcomes, queue_data, extra=None) -> list:
+    """Recommendations grounded in this week's numbers (not memory)."""
+    extra = extra or {}
+    days = int(extra.get("days") or 7)
+    recs: list = []
+    st = outcome_stats(outcomes)
+    if not st["count"]:
+        recs.append(
+            f"Start logging performance: no views logged in the last {days} days — "
+            f"run `bolt stats` for YouTube and `bolt log-perf` for TikTok/X after posting"
+        )
+    else:
+        top = st["top"][0] if st["top"] else None
+        if top and top["views"] > 0:
+            recs.append(
+                f"Lean into what worked: \"{top['title']}\" ({top['game']}) led with "
+                f"{top['views']:,} views on {top['platform']}"
+            )
+    if isinstance(queue_data, dict):
+        held = int((queue_data.get("by_status") or {}).get("held", 0))
+        if held:
+            recs.append(f"Review the queue: {held} clip(s) are held — `bolt queue` to post or scrap them")
+    media = extra.get("media")
+    if isinstance(media, dict) and not media.get("clips") and not media.get("verticals"):
+        recs.append(f"Cut fresh clips: nothing new {_period(days)} — `bolt wrap <vod>` or `bolt recordings latest`")
+    return recs
+
+
 def _recommendations_block(recs) -> str:
     """Render the Recommendations for Next Week section.
 
     Falls back to a single generic item (`Start logging performance`) when
-    no memory-grounded recs are available — that string is asserted in
+    no recommendations are available — that string is asserted in
     `test_report_falls_back_when_no_memory`.
     """
     out = "## Recommendations for Next Week\n\n"
@@ -374,18 +603,15 @@ def _recommendations_block(recs) -> str:
     return out
 
 
-def generate_insights(performance_data, queue_data, memory_hits=None):
-    """Generate weekly analysis report.
+def generate_insights(performance_data, queue_data, memory_hits=None, extra=None):
+    """Generate weekly analysis report (markdown).
 
     Args:
-        performance_data: list of outcomes (this week) or, for back-compat,
-            a list/dict. In the current weekly flow this is the return of
-            `load_outcomes()`.
-        queue_data: dict from `load_queue_stats()` — {"total": int, "items": list}.
+        performance_data: list of outcomes in the window (`load_outcomes()`).
+        queue_data: dict from `load_queue_stats()`.
         memory_hits: list of memory hits; if None, calls _retrieve_weekly_memory().
-
-    Returns:
-        report_text: str
+        extra: optional {"days", "previous", "last_outcome", "media"} for the
+            week-over-week, last-logged and made-this-week lines.
     """
     if memory_hits is None:
         memory_hits = _retrieve_weekly_memory(query="weekly insights")
@@ -396,66 +622,140 @@ def generate_insights(performance_data, queue_data, memory_hits=None):
     )
 
     report += "## Performance Summary\n\n"
-    report += _performance_summary(performance_data, queue_data, memory_hits)
-    report += "---\n\n"
+    report += _performance_summary(performance_data, queue_data, memory_hits, extra)
+    report += "\n---\n\n"
 
     report += _memory_highlights_block(memory_hits)
     report += "\n---\n\n"
 
-    recs = _memory_to_recommendations(memory_hits)
+    recs = _memory_to_recommendations(memory_hits) + _data_recommendations(
+        performance_data, queue_data, extra
+    )
     report += _recommendations_block(recs)
     report += "\n---\n\n"
 
     return report
 
 
-def main(print_only=False, send=False, days=7):
+def sms_summary(outcomes, queue_data, memory_hits, saved_path=None, days: int = 7) -> str:
+    st = outcome_stats(outcomes)
+    bits = []
+    if st["count"]:
+        bits.append(f"{st['count']} clip(s) logged, {st['views']:,} views")
+        if st["top"]:
+            bits.append(f"top: {st['top'][0]['title'][:40]} ({st['top'][0]['views']:,})")
+    else:
+        bits.append(f"No clips logged {_period(days)}")
+    if isinstance(queue_data, dict) and queue_data.get("total"):
+        held = int((queue_data.get("by_status") or {}).get("held", 0))
+        bits.append(f"queue {queue_data['total']}" + (f" ({held} held)" if held else ""))
+    bits.append(f"{len(memory_hits)} memory hits")
+    text = "Bolt Weekly: " + " | ".join(bits)
+    if saved_path:
+        text += f" — full report in email + {Path(saved_path).name}"
+    return text
+
+
+def _nexus_context(outcomes, queue_data, extra) -> str:
+    """Real numbers for Nexus (it used to get the literal 'Recent performance data')."""
+    lines = _performance_summary(outcomes, queue_data, [], extra).splitlines()
+    return "\n".join(l for l in lines if not l.startswith("- Memory hits"))
+
+
+def _nexus_block(outcomes, queue_data, extra) -> str:
+    try:
+        from modules.Nexus_Creator import NexusCreator
+
+        nexus = NexusCreator()
+        result = nexus.consult(
+            "Weekly insights and next week recommendations for a Twitch streamer "
+            "who cuts short clips for YouTube Shorts / TikTok. Use the numbers given; "
+            "say so if there is not enough data.",
+            context=_nexus_context(outcomes, queue_data, extra),
+            task_type="strategy",
+            complexity="high",
+        ) or {}
+        advice = str(result.get("advice") or "").strip()
+        if advice:
+            prov = result.get("provider") or "Nexus"
+            return f"## 📈 Nexus Recommendations ({prov})\n\n{advice}\n\n---\n\n"
+        err = str(result.get("error") or "no advice returned").strip()
+        return f"## 📈 Nexus Recommendations\n\n*AI recommendations unavailable: {err}*\n\n---\n\n"
+    except Exception as e:
+        return f"## 📈 Nexus Recommendations\n\n*AI recommendations unavailable: {e}*\n\n---\n\n"
+
+
+def _reports_dir() -> Path:
+    return REPO_ROOT / "Data" / "weekly_reports"
+
+
+def save_report(report: str) -> "str | None":
+    """Write the report to Data/weekly_reports/weekly_YYYYMMDD_HHMMSS.md (blue Finder tag)."""
+    try:
+        d = _reports_dir()
+        d.mkdir(parents=True, exist_ok=True)
+        path = d / f"weekly_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+        n = 1
+        while path.exists():
+            path = d / f"weekly_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{n}.md"
+            n += 1
+        path.write_text(report.rstrip() + "\n", encoding="utf-8")
+        try:
+            from modules.Bolt_Wrap import apply_finder_tag
+
+            apply_finder_tag(path, "Blue")  # docs = blue
+        except Exception:
+            pass
+        return str(path)
+    except Exception as exc:
+        print(f"Weekly unavailable: could not save report ({exc})", file=sys.stderr)
+        return None
+
+
+def main(print_only=False, send=False, days=7, use_ai=True, save=True):
     """CLI entry point.
 
     Flags:
-        --print  : print the report to stdout
-        --send   : attempt to send via sms/email (best-effort)
-        --days N : look back N days for outcomes (default 7)
+        --print   : print the full report to stdout
+        --send    : text the summary + email the full report (Bolt_Alerts)
+        --days N  : look back N days (default 7)
+        --no-ai   : skip the Nexus (LLM) section
+        --no-save : don't write Data/weekly_reports/weekly_*.md
 
-    The `--send` path uses `send_sms` / `send_email` (module-level,
-    patchable; they delegate to Bolt_Alerts).
+    The report is always saved (cron runs `--send` without `--print`; it used
+    to print "Weekly report generated." and keep nothing).
     """
+    days = max(1, int(days))
     outcomes = load_outcomes(days=days)
-    queue_data = load_queue_stats()
+    queue_data = load_queue_stats(days=days)
     memory_hits = _retrieve_weekly_memory(query="weekly insights")
+    extra = {
+        "days": days,
+        "previous": load_previous_outcomes(days=days),
+        "last_outcome": last_outcome(),
+        "media": recent_media(days=days),
+    }
 
-    report = generate_insights(outcomes, queue_data, memory_hits)
+    report = generate_insights(outcomes, queue_data, memory_hits, extra)
+    if use_ai:
+        report += _nexus_block(outcomes, queue_data, extra)
+    report += "*Generated by Bolt*\n"
 
-    if send:
-        posted = len(outcomes) if isinstance(outcomes, list) else 0
-        summary_lines = []
-        summary_lines.append("No clips logged this week" if posted == 0 else f"{posted} clip(s) logged this week")
-        summary_lines.append(f"{len(memory_hits)} memory hits")
-        sms_text = "Bolt Weekly: " + " | ".join(summary_lines)
-        send_sms(sms_text)
-        send_email(sms_text, subject="Bolt weekly")
-
-    # Nexus enrichment (best-effort)
-    try:
-        from modules.Nexus_Creator import NexusCreator
-        nexus = NexusCreator()
-        nexus_result = nexus.consult(
-            "Weekly insights and next week recommendations",
-            context="Recent performance data",
-            task_type="strategy",
-            complexity="high",
-        )
-        weekly_insight = nexus_result["advice"]
-        report += f"\n📈 NEXUS WEEKLY RECOMMENDATIONS:\n{weekly_insight}\n"
-    except Exception as e:
-        print(f"Nexus enrichment skipped: {e}")
-
-    report += "\n*Generated by Bolt*"
+    saved = save_report(report) if save else None
 
     if print_only:
         print(report)
+    if saved:
+        print(f"Weekly report saved: {saved}")
     else:
-        print("Weekly report generated.")
+        print("Weekly report generated (not saved).")
+
+    if send:
+        sms_ok = send_sms(sms_summary(outcomes, queue_data, memory_hits, saved, days))
+        subject = f"Bolt weekly — week ending {datetime.now().strftime('%b %d')}"
+        email_ok = send_email(report, subject=subject)
+        print(f"Weekly send: sms={'sent' if sms_ok else 'failed'} email={'sent' if email_ok else 'failed'}")
+    return 0
 
 
 if __name__ == "__main__":
@@ -468,4 +768,10 @@ if __name__ == "__main__":
             days = int(sys.argv[idx + 1])
         except (ValueError, IndexError):
             pass
-    main(print_only=print_only, send=send, days=days)
+    main(
+        print_only=print_only,
+        send=send,
+        days=days,
+        use_ai="--no-ai" not in sys.argv,
+        save="--no-save" not in sys.argv,
+    )

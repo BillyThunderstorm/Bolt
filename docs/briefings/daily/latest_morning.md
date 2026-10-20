@@ -1,10 +1,12 @@
 # Bolt Daily Briefing
 
-**Sunday, October 18, 2026**
+**Monday, October 19, 2026**
 
 ## Today: Product Testing
 
-- Pick 1 product you already own and add it: bolt manage add "Item" --lane product --status testing
+- Draft the short for capture card and send it for your OK.
+- Draft the short for Facmogu Pink Mic Holder and send it for your OK.
+- Draft the short for K&F Concept Neck Phone Holder and send it for your OK.
 
 Posts still need your approval.
 
@@ -12,7 +14,8 @@ Posts still need your approval.
 
 ## Today's Calendar
 
-Calendar skipped (not authorized). Run `bolt gcal-auth` once.
+Today's schedule (Monday October 19):
+  - 7:00 PM - 7:30 PM: PT · Pick
 
 ---
 
@@ -23,7 +26,7 @@ Canonical journal / briefing / todo / how-to. Do not duplicate into markdown.
 - START HERE: https://docs.google.com/document/d/1u3dRveLkOBsfSpuBXKeFbfj7tVH3EhjZJr-aic5bxjw/edit
 - How-to: https://docs.google.com/document/d/12idgxLR-OzcOyCC6mDQwqmOnZQDuMIZIJCwwMnm_krg/edit
 - Shared Journal: https://docs.google.com/document/d/1paZNFGea-RBAwQ5YMxpuXN8OBRH7R33RAkakYZ23Tfw/edit
-- Today's Daily Log: https://docs.google.com/document/d/1JcKSo9I60vJL0YYyKY8HFRP2_oYqQMXNaD5UCMLKfNQ/edit
+- Today's Daily Log: https://docs.google.com/document/d/1FHnrOmyvI23OUrcUdrqk1B2ZBLoIIZHyQQX7Dhs4Ceg/edit
 - Daily logs (02): https://drive.google.com/drive/folders/1wanq-qUUGc4qF-uqtqnajAwLd877qSQ4
 - Learnings (06): https://drive.google.com/drive/folders/1oPmHtmY28r_fPjr5cYwiYb5BUDdQCWLH
 - Root folder: https://drive.google.com/drive/folders/1GZ93zTznYK97Nv9Do5bidLOd9Im1J1XK
@@ -33,7 +36,9 @@ Canonical journal / briefing / todo / how-to. Do not duplicate into markdown.
 
 ## Action Items For Today
 
-1. Pick 1 product you already own and add it: bolt manage add "Item" --lane product --status testing
+1. Draft the short for capture card and send it for your OK.
+2. Draft the short for Facmogu Pink Mic Holder and send it for your OK.
+3. Draft the short for K&F Concept Neck Phone Holder and send it for your OK.
 
 ---
 

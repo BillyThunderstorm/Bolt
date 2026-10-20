@@ -405,7 +405,7 @@ def collect_paths() -> list[Check]:
                 "paths",
                 "clip_deduplicator.py",
                 "info",
-                "PARTIAL via bolt clip-dedupe (SHA256; fixed parents[3]; not pipeline pHash). Layout audit PARTIAL via bolt layout (report-only soft-fail; never moves).",
+                "READY via bolt clip-dedupe (read-only SHA256 duplicate report; not pipeline pHash). Layout audit PARTIAL via bolt layout (report-only soft-fail; never moves).",
                 found=_rel(clip_dedupe_script),
             )
         )
@@ -481,7 +481,7 @@ def collect_titles(config: dict, ollama: dict[str, Any]) -> list[Check]:
             "live",
             "bolt titles status|train|ab — learns from Data/performance_outcomes.jsonl "
             "into Data/viral_titles_model.json. Preview/edit still: bolt queue title. "
-            "Performance: bolt stats / bolt log-perf (PARTIAL soft-fail).",
+            "Performance: bolt stats / bolt log-perf (READY manual log).",
         )
     )
     return checks
@@ -1037,7 +1037,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # HandBrake clip compression (PARTIAL — soft-fail via bolt compress)
+    # Clip compression (READY — ffmpeg-full first; soft-fail via bolt compress)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1046,7 +1046,8 @@ def collect_integrations(config: dict) -> list[Check]:
         _vc = _compress_status()
         vc_ready = bool(_vc.get("ready"))
         vc_detail = (
-            f"Compress tooling ok; bolt compress status"
+            f"Clip compress ready ({_vc.get('engine')}); {_vc.get('waiting', 0)} waiting, "
+            f"{_vc.get('backup_count', 0)} backup(s); bolt compress status"
             if vc_ready
             else (
                 (_vc.get("hint") or _vc.get("error") or "Compress unavailable: not ready")
@@ -1115,7 +1116,7 @@ def collect_integrations(config: dict) -> list[Check]:
 
 
 
-    # Weekly analysis (PARTIAL — soft-fail via bolt weekly)
+    # Weekly analysis (READY — real-data report; soft-fail via bolt weekly)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1124,7 +1125,9 @@ def collect_integrations(config: dict) -> list[Check]:
         _wk = _weekly_status()
         wk_ready = bool(_wk.get("ready"))
         wk_detail = (
-            f"Weekly tooling ok; bolt weekly status"
+            f"Weekly report ready ({_wk.get('outcomes_count', 0)} outcome(s) in 7d"
+            + (f", last logged {_wk['last_outcome_date']}" if _wk.get("last_outcome_date") else "")
+            + "); bolt weekly run"
             if wk_ready
             else (
                 (_wk.get("hint") or _wk.get("error") or "Weekly unavailable: not ready")
@@ -1152,7 +1155,7 @@ def collect_integrations(config: dict) -> list[Check]:
         )
 
 
-    # Clip backlog score filter (PARTIAL — soft-fail via bolt filter-backlog)
+    # Clip backlog score filter (READY — soft-fail via bolt filter-backlog)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1161,7 +1164,7 @@ def collect_integrations(config: dict) -> list[Check]:
         _fb = _filter_status()
         fb_ready = bool(_fb.get("ready"))
         fb_detail = (
-            f"Backlog filter tooling ok; bolt filter-backlog status"
+            f"Backlog filter READY; bolt filter-backlog run --dry-run (restore undoes)"
             if fb_ready
             else (
                 (_fb.get("hint") or _fb.get("error") or "Backlog unavailable: not ready")
@@ -1340,7 +1343,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # Local ICS calendar feeds (PARTIAL — soft-fail via bolt calendar; not bolt gcal)
+    # Local ICS calendar feeds (READY — bolt calendar; soft-fail; not bolt gcal)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1349,7 +1352,8 @@ def collect_integrations(config: dict) -> list[Check]:
         _ics = _ics_status()
         ics_ready = bool(_ics.get("ready"))
         ics_detail = (
-            f"ICS calendar ok; bolt calendar status (Data/calendar/*.ics)"
+            f"ICS calendar READY ({sum((_ics.get('event_counts') or {}).values())} events; "
+            f"{'STALE — bolt calendar run' if _ics.get('stale') else 'fresh'}; Data/calendar/*.ics)"
             if ics_ready
             else (
                 (_ics.get("hint") or _ics.get("error") or "Calendar unavailable: not ready")
@@ -1453,7 +1457,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # Folder watch CLI (PARTIAL — soft-fail via bolt watch; prefer bolt launch)
+    # Folder watch (READY — bolt watch run clips new recordings; soft-fail)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1462,7 +1466,7 @@ def collect_integrations(config: dict) -> list[Check]:
         _fw = _fw_status()
         fw_ready = bool(_fw.get("ready"))
         fw_detail = (
-            f"Folder watch ok; bolt watch status (Data/processed_recordings.json)"
+            f"Folder watch ready; bolt watch run clips new recordings ({_fw.get('pending_count') or 0} pending)"
             if fw_ready
             else (
                 (_fw.get("hint") or _fw.get("error") or "Watch unavailable: not ready")
@@ -1661,7 +1665,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # Error recovery / quarantine (PARTIAL — soft-fail via bolt error-recovery; not discord/alerts)
+    # Error recovery / quarantine (READY — pipeline error log + report via bolt error-recovery; not discord/alerts)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1670,8 +1674,8 @@ def collect_integrations(config: dict) -> list[Check]:
         _er = _er_status()
         er_ready = bool(_er.get("ready"))
         er_detail = (
-            "Error recovery ok; bolt error-recovery status "
-            f"(quarantine={_er.get('quarantine_count', 0)})"
+            "Error recovery ok; bolt error-recovery run "
+            f"(errors 7d={_er.get('errors_last_7_days', 0)}, quarantine={_er.get('quarantine_count', 0)})"
             if er_ready
             else (
                 (_er.get("hint") or _er.get("error") or "Error recovery unavailable: not ready")
@@ -1737,7 +1741,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # Manual clip performance logger (PARTIAL — soft-fail via bolt log-perf; not bolt stats)
+    # Manual clip performance logger (READY — bolt log-perf run --clip … --views N; not bolt stats)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1746,7 +1750,7 @@ def collect_integrations(config: dict) -> list[Check]:
         _lp = _lp_status()
         lp_ready = bool(_lp.get("ready"))
         lp_detail = (
-            f"Log perf ok; bolt log-perf status (Data/performance_outcomes.jsonl)"
+            f"Log perf READY; after posting: bolt log-perf run --clip <queue id> --views N"
             if lp_ready
             else (
                 (_lp.get("hint") or _lp.get("error") or "Log perf unavailable: not ready")
@@ -1773,7 +1777,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # SHA256 hash dedupe (PARTIAL — soft-fail via bolt clip-dedupe; not pipeline pHash)
+    # SHA256 hash dedupe (READY — read-only duplicate finder via bolt clip-dedupe; not pipeline pHash)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))

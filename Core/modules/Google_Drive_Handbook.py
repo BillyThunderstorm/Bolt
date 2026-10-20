@@ -92,6 +92,25 @@ def _load_handbook() -> dict:
     return hb if isinstance(hb, dict) else {}
 
 
+def drive_daily_log_enabled(hb: dict | None = None) -> bool:
+    """Bolt's own Drive Daily Log create/append switch (default OFF since 2026-10-19).
+
+    Config: google_drive_handbook.drive_daily_log (bool). Env override:
+    BOLT_DRIVE_DAILY_LOG=1 forces on, =0 forces off. The real daily logs are
+    "Daily Log YYYY-MM-DD" docs made by William's morning routine; this code is
+    kept so it can be re-enabled.
+    """
+    import os
+
+    env = os.getenv("BOLT_DRIVE_DAILY_LOG", "").strip().lower()
+    if env in ("1", "true", "yes", "on"):
+        return True
+    if env in ("0", "false", "no", "off"):
+        return False
+    hb = hb if hb is not None else _load_handbook()
+    return bool(hb.get("drive_daily_log", False))
+
+
 def _daily_ops_id(hb: dict | None = None) -> str:
     hb = hb if hb is not None else _load_handbook()
     folders = hb.get("folders") or {}
@@ -312,6 +331,11 @@ def push_briefing_to_daily_log(
     folder_id = _daily_ops_id(hb)
     day = chicago_today()
     title = daily_log_title(day)
+
+    if not drive_daily_log_enabled(hb):
+        msg = "Drive Daily Log off (google_drive_handbook.drive_daily_log=false); local briefing only."
+        print(msg)
+        return {"ok": False, "skipped": True, "reason": "disabled", "message": msg}
 
     if not CREDENTIALS.exists():
         msg = skip_line("no Core/credentials.json", folder_id)

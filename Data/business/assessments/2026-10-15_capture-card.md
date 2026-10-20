@@ -16,6 +16,6 @@
 - **Pros:** Everything it says it does, it does. Nothing complicated. No extra software to download.
 - **Cons:** Short cords. Nothing else yet, but it's only been 2 weeks.
 - **Who it's for:** Anyone who needs a capture card, especially a first one.
-- **Who it's NOT for:** _(not filled yet)_
+- **Who it's NOT for:** Name-brand buyers, or anyone who wants all their gear from the same brand. It's an unknown maker (which I actually like), so beyond 'it does 4K' there's no brand story to point to.
 - **Verdict + score (10/10):** Before you get pulled toward the big-name brand, buy this first. It does everything at a much lower price. Nothing was complicated or a hassle: plug it in, open OBS, pick the output, done. It honestly upset me that I bought the other one first just because it's advertised so much. I'd recommend this over Elgato 1,000 times over.
 - **Disclosure:** Bought with my own money.

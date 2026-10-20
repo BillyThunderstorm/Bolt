@@ -106,9 +106,14 @@ def find_recordings(folder: Path, dedupe_stems: bool = True) -> list:
     """
     extensions = [".mp4", ".mkv", ".mov", ".avi"]
     prefer = {".mp4": 0, ".mkv": 1, ".mov": 2, ".avi": 3}
-    files = []
-    for ext in extensions:
-        files.extend(folder.glob(f"*{ext}"))
+    # Case-insensitive (iPhone/AirDrop ``.MOV``); skip hidden/AppleDouble files.
+    files = [
+        f
+        for f in folder.iterdir()
+        if f.is_file()
+        and not f.name.startswith(".")
+        and f.suffix.lower() in extensions
+    ] if folder.is_dir() else []
 
     if dedupe_stems:
         best: dict[str, Path] = {}

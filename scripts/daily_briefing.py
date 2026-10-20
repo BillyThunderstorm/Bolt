@@ -7,6 +7,7 @@ import os
 import sys
 from pathlib import Path
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # Ensure paths
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -494,10 +495,12 @@ def _handbook_block() -> str:
             lines.append(f"- How-to: {handbook}")
         if journal:
             lines.append(f"- Shared Journal: {journal}")
+        # Only point at a Bolt-made log when it is actually today's (2026-10-19).
+        _today_iso = datetime.now(ZoneInfo("America/Chicago")).date().isoformat()
         today_log = _doc(
             docs.get("daily_log_today")
-            or docs.get("daily_log_2026_08_31")
-            or ""
+            if str(docs.get("daily_log_today_date") or "") == _today_iso
+            else ""
         )
         if today_log:
             lines.append(f"- Today's Daily Log: {today_log}")
@@ -777,7 +780,7 @@ def _speak(text: str) -> None:
     try:
         import subprocess
 
-        voice = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Voice 3"
+        voice = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Nathan (Enhanced)"
         subprocess.run(["say", "-v", voice, text], check=False)
     except Exception:
         print(f"[voice unavailable] {text}")
@@ -793,18 +796,40 @@ def _dated_briefing_copy(output_dir: Path, briefing_text: str) -> Path:
 
 
 def _refresh_calendar_feeds() -> list:
-    """Best-effort ICS refresh so --send can attach current feeds."""
-    try:
-        from scripts.generate_calendar import build_all_feeds
+    """Best-effort ICS refresh; returns the feed files to attach to the email.
 
-        return list(build_all_feeds() or [])
-    except Exception:
+    ``build_all_feeds`` returns {feed_name: Path}; the old code did
+    ``list(dict)`` and got feed *names*, so nothing was ever attached.
+    Only ``scheduled_posts.ics`` is attached, and only when it has at least
+    one upcoming post — the recurring feeds (briefing / weekly / peak
+    windows) don't change day to day, so import them once with
+    ``bolt calendar``. Set BOLT_BRIEFING_ICS=0 to stop attaching.
+    """
+    def _build():
         try:
-            import generate_calendar as gc  # type: ignore
-
-            return list(gc.build_all_feeds() or [])
+            from scripts.generate_calendar import build_all_feeds
         except Exception:
-            return []
+            from generate_calendar import build_all_feeds  # type: ignore
+        return build_all_feeds() or {}
+
+    try:
+        written = _build()
+    except Exception:
+        return []
+    if os.getenv("BOLT_BRIEFING_ICS", "1").strip().lower() in ("0", "false", "no", "off"):
+        return []
+    paths = written.values() if isinstance(written, dict) else written
+    out = []
+    for p in paths:
+        try:
+            path = Path(p)
+            if path.name != "scheduled_posts.ics" or not path.is_file():
+                continue
+            if "BEGIN:VEVENT" in path.read_text(encoding="utf-8"):
+                out.append(path)
+        except Exception:
+            continue
+    return out
 
 
 def _deliver_briefing(
@@ -851,7 +876,8 @@ def _deliver_briefing(
     for p in calendar_files:
         path = Path(p)
         if path.is_file():
-            attachments.append((path.name, path))
+            # send_notification appends ".ics" to the name itself.
+            attachments.append((path.stem, path))
 
     try:
         from send_notification import send_briefing
