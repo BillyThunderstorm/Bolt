@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20 07:53:52",
+  "generated_at": "2026-10-20 07:55:43",
   "status": {
     "clips_made": 0,
     "vertical_clips": 2,
@@ -58,7 +58,8 @@
       "end_hour": 9,
       "start_display": "7 AM",
       "end_display": "9 AM",
-      "active": true
+      "in_window": true,
+      "active": false
     },
     {
       "label": "Lunch",
@@ -66,6 +67,7 @@
       "end_hour": 14,
       "start_display": "12 PM",
       "end_display": "2 PM",
+      "in_window": false,
       "active": false
     },
     {
@@ -74,6 +76,7 @@
       "end_hour": 22,
       "start_display": "7 PM",
       "end_display": "10 PM",
+      "in_window": false,
       "active": false
     }
   ],
