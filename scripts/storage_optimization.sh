@@ -2,8 +2,10 @@
 # Comprehensive Storage Optimization Script for Bolt
 # Combines age-based cleanup, size-based limits, and deduplication
 #
-# Post-reorg paths (macOS-safe). Size enforcement DELETES oldest files
-# (moving to an archive on the same volume does not free disk space).
+# Post-reorg paths (macOS-safe). Since 2026-10-20 every removal goes through
+# Core/modules/Media_Retention.py: queued clips are skipped, age = Bolt creation
+# time, and files are moved to the macOS Trash (never rm). This nightly job is
+# Bolt's only age-based clip cleaner (launch.py no longer deletes on startup).
 
 set -uo pipefail
 
@@ -40,6 +42,20 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Media retention helper (2026-10-20): protects clips still in the post queue,
+# ages files by Bolt's creation time (not a carried-over VOD mtime), and moves
+# files to the macOS Trash instead of rm. Log: logs/media_retention.log
+RETENTION_PY="${RETENTION_PY:-$REPO_ROOT/.venv/bin/python}"
+[[ -x "$RETENTION_PY" ]] || RETENTION_PY="$(command -v python3)"
+RETENTION="$REPO_ROOT/Core/modules/Media_Retention.py"
+retention() {
+    if [[ ! -f "$RETENTION" || -z "$RETENTION_PY" ]]; then
+        echo -e "${RED}Media_Retention.py or python missing — skipping cleanup (nothing removed)${NC}"
+        return 1
+    fi
+    "$RETENTION_PY" "$RETENTION" "$@"
+}
 
 # Function to get directory size in GB (cross-platform)
 get_dir_size_gb() {
@@ -219,10 +235,9 @@ find_and_handle_duplicates() {
                 echo -e "${YELLOW}Duplicate found: $file (original: $original_file)${NC}"
                 
                 if [[ "$DRY_RUN" = true ]]; then
-                    echo -e "${YELLOW}[DRY RUN] Would remove duplicate: $file (${file_size_mb}MB)${NC}"
+                    retention trash-file "$file" --reason "duplicate of $original_file" --dry-run
                 else
-                    rm "$file"
-                    echo -e "${GREEN}Removed duplicate: $file (${file_size_mb}MB)${NC}"
+                    retention trash-file "$file" --reason "duplicate of $original_file"
                 fi
                 
                 duplicates_found=$((duplicates_found + 1))
@@ -247,8 +262,8 @@ find_and_handle_duplicates() {
     return $duplicates_found
 }
 
-# Function to enforce size limit by DELETING oldest files (frees disk space).
-# Same-volume "archive" moves do not free space, so we remove files instead.
+# Function to enforce size limit — trashes oldest unqueued files via Media_Retention.
+# (Files sit in the Trash until it is emptied; that is when disk space is freed.)
 archive_files_by_size() {
     local dir="$1"
     local max_size_gb="$2"
@@ -258,126 +273,26 @@ archive_files_by_size() {
         echo -e "${YELLOW}Directory $dir does not exist, skipping...${NC}"
         return 0
     fi
-
-    local current_size
-    current_size=$(get_dir_size_gb "$dir")
-
-    if ! [[ "$current_size" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-        echo -e "${YELLOW}Could not determine size for $dir, skipping...${NC}"
-        return 0
-    fi
-
-    if ! command -v bc &>/dev/null; then
-        echo -e "${RED}bc required for size comparisons (brew install bc)${NC}"
-        return 1
-    fi
-
-    local within_limit
-    within_limit=$(echo "$current_size <= $max_size_gb" | bc -l)
-
-    if [[ "$within_limit" -eq 1 ]]; then
-        echo -e "${GREEN}$type directory is within size limit: ${current_size}GB <= ${max_size_gb}GB${NC}"
-        return 0
-    fi
-
-    echo -e "${YELLOW}$type exceeds size limit: ${current_size}GB > ${max_size_gb}GB${NC}"
-    echo -e "${YELLOW}Removing oldest files until under limit (this frees disk space)…${NC}"
-
-    local to_free_size=0
-    local removed_count=0
-    local projected_size="$current_size"
-
-    while IFS= read -r file; do
-        [[ -z "$file" || ! -f "$file" ]] && continue
-
-        local should_stop
-        should_stop=$(echo "$projected_size <= $max_size_gb" | bc -l)
-        if [[ "$should_stop" -eq 1 ]]; then
-            break
-        fi
-
-        local file_size file_size_gb
-        file_size=$(get_file_size_bytes "$file")
-        file_size_gb=$(echo "$file_size" | awk '{printf "%.4f", $1/1024/1024/1024}')
-
-        if [[ "$DRY_RUN" = true ]]; then
-            echo -e "${YELLOW}[DRY RUN] Would remove: $file (${file_size_gb}GB)${NC}"
-        else
-            rm -f "$file"
-            echo -e "${GREEN}Removed (size limit): $file (${file_size_gb}GB)${NC}"
-        fi
-
-        to_free_size=$(echo "$to_free_size + $file_size_gb" | bc -l)
-        projected_size=$(echo "$projected_size - $file_size_gb" | bc -l)
-        removed_count=$((removed_count + 1))
-
-        if (( removed_count % 10 == 0 )); then
-            echo -e "${YELLOW}Progress: $removed_count files, ~${to_free_size}GB${NC}"
-        fi
-    done < <(get_oldest_files "$dir")
-
-    local new_size
-    new_size=$(get_dir_size_gb "$dir")
-    if [[ "$DRY_RUN" = true ]]; then
-        echo -e "${YELLOW}[DRY RUN] Would remove $removed_count files (~${to_free_size}GB) from $type${NC}"
-    else
-        echo -e "${GREEN}Removed $removed_count files (~${to_free_size}GB). $type now ${new_size}GB${NC}"
-    fi
+    local dry=""
+    [[ "$DRY_RUN" = true ]] && dry="--dry-run"
+    retention size --dir "$dir" --max-gb "$max_size_gb" --label "$type" $dry
+    return 0
 }
 
-# Function to cleanup files by age
+# Function to cleanup files by age — via Media_Retention (queue-protected, Trash)
 cleanup_by_age() {
     local dir="$1"
     local max_days="$2"
     local type="$3"
-    
-    if [[ -d "$dir" ]]; then
-        local old_files=$(get_old_files "$dir" "$max_days")
-        local file_count=0
-        local space_freed=0
-        
-        if [[ -z "$old_files" ]]; then
-            echo -e "${GREEN}No files older than $max_days days found in $type${NC}"
-            return 0
-        fi
-        
-        echo -e "${YELLOW}Finding files older than $max_days days in $type...${NC}"
-        
-        while IFS= read -r file; do
-            if [[ -z "$file" ]]; then
-                continue
-            fi
-            
-            local file_size=$(get_file_size_bytes "$file")
-            local file_size_mb=$(get_file_size_mb "$file")
-            
-            if [[ "$DRY_RUN" = true ]]; then
-                echo -e "${YELLOW}[DRY RUN] Would remove old file: $file (${file_size_mb}MB)${NC}"
-            else
-                rm "$file"
-                echo -e "${GREEN}Removed old file: $file (${file_size_mb}MB)${NC}"
-            fi
-            
-            space_freed=$((space_freed + file_size))
-            ((file_count++))
-            
-            # Progress update every 10 files
-            if (( file_count % 10 == 0 )); then
-                echo -e "${YELLOW}Progress: Removed $file_count files, freed $(echo "$space_freed" | awk '{printf "%.1f", $1/1024/1024}')MB${NC}"
-            fi
-        done <<< "$old_files"
-        
-        if [[ "$DRY_RUN" = true ]]; then
-            echo -e "${YELLOW}[DRY RUN] Would remove $file_count files older than $max_days days, freeing $(echo "$space_freed" | awk '{printf "%.1f", $1/1024/1024}')MB${NC}"
-        else
-            echo -e "${GREEN}Removed $file_count files older than $max_days days, freed $(echo "$space_freed" | awk '{printf "%.1f", $1/1024/1024}')MB${NC}"
-        fi
-        
-        return $file_count
-    else
+
+    if [[ ! -d "$dir" ]]; then
         echo -e "${YELLOW}Directory $dir does not exist, skipping age-based cleanup...${NC}"
         return 0
     fi
+    local dry=""
+    [[ "$DRY_RUN" = true ]] && dry="--dry-run"
+    retention age --dir "$dir" --days "$max_days" --label "$type" $dry
+    return 0
 }
 
 # Function to compress media files (requires HandBrakeCLI or FFmpeg)
