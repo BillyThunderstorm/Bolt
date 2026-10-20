@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-19 02:00:01",
+  "generated_at": "2026-10-20 07:45:56",
   "status": {
-    "clips_made": 2,
+    "clips_made": 0,
     "vertical_clips": 2,
-    "ready_to_post": 2,
+    "ready_to_post": 4,
     "recordings_processed": 134,
     "api_keys": {
       "twitch": true,
@@ -26,17 +26,30 @@
       "title": "Wolverine highlight (clip 02)",
       "platforms": 4,
       "status": "manual_upload_ready"
+    },
+    {
+      "id": "3b8de19f",
+      "created": "2026-10-19T10:51:39.691479",
+      "title": "2889961274 clip01 audio spike 132 tiktok \ud83d\udd25 #Gaming",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "671f95cd",
+      "created": "2026-10-19T10:51:39.696210",
+      "title": "2889961274 clip02 audio spike 182 tiktok \ud83d\udd25 #Gaming",
+      "platforms": 4,
+      "status": "manual_upload_ready"
     }
   ],
   "briefing": {
-    "date": "Saturday, July 04, 2026",
+    "date": "Monday, October 19, 2026",
     "action_items": [
-      "Review last clip performance and log outcomes",
-      "Memory flagged: Clip performance: audio_spike for Marvel Rivals \u2014 Posted clip outcome for Marvel Rivals: trigger=audio_spike, views=71, likes=0, success=False, clip=. \ud83d\udd25 Rivals gaming cli",
-      "Memory flagged: Clip performance: manual for Marvel Rivals \u2014 Posted clip outcome for Marvel Rivals: trigger=manual, views=1, likes=0, success=False, clip=. no idea",
-      "Upload 96 clip(s) from queue to TikTok/Shorts/Reels",
-      "Check for new recordings to process"
-    ]
+      "Draft the short for capture card and send it for your OK.",
+      "Draft the short for Facmogu Pink Mic Holder and send it for your OK.",
+      "Draft the short for K&F Concept Neck Phone Holder and send it for your OK."
+    ],
+    "source": "morning_2026-10-19.md"
   },
   "peaks": [
     {
@@ -45,7 +58,7 @@
       "end_hour": 9,
       "start_display": "7 AM",
       "end_display": "9 AM",
-      "active": false
+      "active": true
     },
     {
       "label": "Lunch",
@@ -63,5 +76,44 @@
       "end_display": "10 PM",
       "active": false
     }
-  ]
+  ],
+  "progress": {
+    "counts": {
+      "READY": 70,
+      "PARTIAL": 19,
+      "SHELL": 0,
+      "IDEA": 0
+    },
+    "total": 89,
+    "percent_ready": 79,
+    "recent": [
+      {
+        "name": "Error recovery (pipeline errors + quarantine)",
+        "date": "2026-10-20",
+        "display": "Oct 20, 7:45 AM CT"
+      },
+      {
+        "name": "Clip cleanup (retention)",
+        "date": "2026-10-20",
+        "display": "Oct 20, 7:10 AM CT"
+      },
+      {
+        "name": "Clip compress (shrink clips)",
+        "date": "2026-10-20",
+        "display": "Oct 20, 5:40 AM CT"
+      },
+      {
+        "name": "Pre-stream checklist",
+        "date": "2026-10-20",
+        "display": "Oct 20, 1:45 AM CT"
+      },
+      {
+        "name": "ICS calendar (local feeds)",
+        "date": "2026-10-19",
+        "display": "Oct 19, 11:45 PM CT"
+      }
+    ],
+    "updated": "20 Oct 2026, ~7:45 AM CT",
+    "available": true
+  }
 }

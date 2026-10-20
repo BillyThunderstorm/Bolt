@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Billy Thunderstorm — Live</title>
+<meta name="description" content="Is Billy live? Find out here.">
+<meta property="og:title" content="Billy Thunderstorm — Live">
+<meta property="og:description" content="Is Billy streaming right now? Check live status and upcoming schedule.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://billythunderstorm.live">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Billy Thunderstorm — Live">
+<meta name="twitter:description" content="Is Billy streaming right now? Check live status.">
+<link rel="icon" type="image/png" href="bolt-avatar-transparent.png">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080c18;--bg-card:rgba(12,18,38,0.85);--border:rgba(100,140,255,0.1);
+  --text:#c8d6e8;--text-bright:#e8f0ff;--text-dim:#5a7090;
+  --accent:#4da6ff;--green:#34d399;--red:#f87171;--gold:#ffb84d;
+  --rainbow:linear-gradient(90deg,#ff6b6b,#feca57,#48dbfb,#a29bfe,#ff6bdb);
+  --font-mono:'SF Mono','Fira Code',monospace;--font-sans:'Inter',-apple-system,system-ui,sans-serif;
+  --radius:12px;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-sans);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+
+/* Atmosphere */
+.atmosphere{position:fixed;inset:0;z-index:0;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:0.06;animation:pulse-orb 8s ease-in-out infinite alternate}
+.orb-1{width:600px;height:600px;background:#4da6ff;top:-20%;left:-10%;animation-delay:0s}
+.orb-2{width:500px;height:500px;background:#a29bfe;bottom:-15%;right:-10%;animation-delay:-3s}
+.orb-3{width:400px;height:400px;background:#ff6bdb;top:40%;left:40%;animation-delay:-6s}
+@keyframes pulse-orb{0%{opacity:0.04;transform:scale(1)}100%{opacity:0.08;transform:scale(1.15)}}
+
+.container{position:relative;z-index:2;text-align:center;padding:2rem;max-width:520px;width:100%}
+
+/* Live indicator */
+.live-indicator{display:inline-flex;align-items:center;gap:0.6rem;padding:0.5rem 1.25rem;border-radius:999px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:2rem;transition:all 0.5s}
+.live-indicator.offline{background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text-dim)}
+.live-indicator.live{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);color:var(--red);animation:live-pulse 2s infinite}
+.live-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.offline .live-dot{background:var(--text-dim)}
+.live .live-dot{background:var(--red);box-shadow:0 0 12px var(--red)}
+@keyframes live-pulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,0.3)}50%{box-shadow:0 0 0 8px rgba(248,113,113,0)}}
+
+h1{font-size:clamp(2rem,6vw,3.2rem);font-weight:800;letter-spacing:-0.03em;margin-bottom:0.5rem}
+h1 span{background:var(--rainbow);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.subtitle{font-size:1rem;color:var(--text-dim);margin-bottom:2.5rem;line-height:1.6}
+
+/* Status card */
+.status-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;margin-bottom:1.5rem;backdrop-filter:blur(12px)}
+.status-row{display:flex;justify-content:space-between;align-items:center;padding:0.65rem 0;border-bottom:1px solid var(--border)}
+.status-row:last-child{border-bottom:none}
+.status-label{font-size:0.78rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;font-weight:600}
+.status-value{font-size:0.88rem;color:var(--text-bright);font-weight:500}
+.status-value.game{color:var(--gold)}
+
+/* CTA buttons */
+.ctas{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem}
+.cta{display:inline-flex;align-items:center;gap:0.5rem;padding:0.7rem 1.5rem;border-radius:999px;text-decoration:none;font-weight:600;font-size:0.88rem;transition:transform 0.2s,box-shadow 0.2s}
+.cta:hover{transform:translateY(-2px)}
+.cta.primary{background:var(--rainbow);color:#080c18}
+.cta.secondary{border:1px solid var(--border);color:var(--text);background:var(--bg-card)}
+
+/* Social links */
+.socials{display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap}
+.social-link{display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 1rem;border-radius:999px;border:1px solid var(--border);color:var(--text-dim);text-decoration:none;font-size:0.78rem;font-weight:500;transition:border-color 0.2s,color 0.2s}
+.social-link:hover{border-color:var(--accent);color:var(--text-bright)}
+
+/* Footer */
+.bottom-note{margin-top:2.5rem;font-size:0.7rem;color:var(--text-dim)}
+.bottom-note span{background:var(--rainbow);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:600}
+
+@media(max-width:500px){
+  .container{padding:1.5rem 1rem}
+  .ctas{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<div class="atmosphere">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<div class="container">
+
+  <div class="live-indicator offline" id="liveIndicator">
+    <div class="live-dot"></div>
+    <span id="liveText">OFFLINE</span>
+  </div>
+
+  <img src="bolt-avatar-transparent.png" alt="Bolt" style="width:100px;height:100px;border-radius:50%;border:3px solid rgba(80,130,255,0.15);margin-bottom:1.5rem;box-shadow:0 0 30px rgba(77,166,255,0.1)">
+  <h1>Billy <span>Thunderstorm</span></h1>
+  <p class="subtitle" id="statusMessage">Not streaming right now. Check back during peak hours or follow for notifications.</p>
+
+  <div class="status-card" id="statusCard">
+    <div class="status-row">
+      <span class="status-label">Status</span>
+      <span class="status-value" id="streamStatus">Offline</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Game</span>
+      <span class="status-value game" id="streamGame">Marvel Rivals</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Next Stream</span>
+      <span class="status-value" id="nextStream">Evening — 7 PM CT</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Peak Window</span>
+      <span class="status-value" id="peakWindow">7 – 10 PM CT</span>
+    </div>
+  </div>
+
+  <div class="ctas">
+    <a href="https://twitch.tv/BillyandRandy" class="cta primary" id="watchBtn">Watch on Twitch</a>
+    <a href="https://bolt.billythunderstorm.us" class="cta secondary">⚡ Bolt Command Center</a>
+  </div>
+
+  <div class="socials">
+    <a href="https://twitch.tv/BillyandRandy" class="social-link">🎮 Twitch</a>
+    <a href="https://tiktok.com/@billythunderstorm" class="social-link">🎵 TikTok</a>
+    <a href="https://billythunderstorm.us" class="social-link">🌐 Website</a>
+    <a href="#" class="social-link">🐦 Twitter</a>
+  </div>
+
+  <div class="bottom-note">
+    Powered by <span>Bolt</span> · billythunderstorm.live
+  </div>
+
+</div>
+
+<script>
+// In production, fetch from Twitch API or Bolt's status endpoint
+// For now, show offline state with the right info
+function updateStatus() {
+  const now = new Date();
+  const h = now.getHours();
+  const indicator = document.getElementById('liveIndicator');
+  const text = document.getElementById('liveText');
+  const msg = document.getElementById('statusMessage');
+  const status = document.getElementById('streamStatus');
+
+  // Simulated: live between 7-10 PM CT (hours 19-22)
+  if (h >= 19 && h < 22) {
+    indicator.className = 'live-indicator live';
+    text.textContent = 'LIVE';
+    msg.textContent = 'Billy is streaming right now! Come watch.';
+    status.textContent = 'Live Now';
+    status.style.color = 'var(--red)';
+  }
+}
+updateStatus();
+</script>
+<script src="live-data.js"></script>
+</body>
+</html>

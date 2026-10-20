@@ -1,0 +1,6 @@
+name = "bolt-api"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+workers_dev = true
+
+# Custom domain api.billythunderstorm.us is already attached in the dashboard.
