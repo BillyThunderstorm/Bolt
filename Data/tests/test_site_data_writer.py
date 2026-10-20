@@ -191,6 +191,15 @@ class ScopedPushTests(unittest.TestCase):
         self.assertFalse((self.repo / ".git" / "site-data-push.index").exists())
 
 
+class PeakTests(unittest.TestCase):
+    def test_peaks_never_claim_live(self):
+        cfg = {"peak_notifications": {"windows": [{"label": "All day", "start_hour": 0, "end_hour": 24}]}}
+        with patch.object(w, "_load_json", return_value=cfg):
+            peaks = w._peak_hours()
+        self.assertFalse(peaks[0]["active"])
+        self.assertTrue(peaks[0]["in_window"])
+
+
 class WriteTests(unittest.TestCase):
     def test_write_includes_progress_and_custom_path_skips_push(self):
         with tempfile.TemporaryDirectory() as d:
