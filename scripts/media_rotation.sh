@@ -7,9 +7,9 @@
 #
 # macOS-safe (no GNU-only du -sb / find -printf).
 #
-# NOTE: Moving files to an archive on the *same* volume does not free disk
-# space. Size enforcement therefore *deletes* oldest media files once over
-# the limit. Use --dry-run first.
+# Since 2026-10-20 over-limit files are moved to the macOS Trash (oldest first
+# by Bolt creation time, queued clips skipped) via Core/modules/Media_Retention.py.
+# Disk space is freed when the Trash is emptied. Use --dry-run first.
 
 set -euo pipefail
 
@@ -103,7 +103,13 @@ get_file_bytes() {
   fi
 }
 
-# Delete oldest files until dir is under max_size_gb
+# Trash oldest unqueued files until dir is under max_size_gb.
+# Goes through Core/modules/Media_Retention.py (2026-10-20): clips still in the
+# post queue are kept, age = Bolt creation time, files go to the macOS Trash.
+RETENTION_PY="${RETENTION_PY:-$REPO_ROOT/.venv/bin/python}"
+[[ -x "$RETENTION_PY" ]] || RETENTION_PY="$(command -v python3 || true)"
+RETENTION="$REPO_ROOT/Core/modules/Media_Retention.py"
+
 enforce_size_limit() {
   local dir="$1"
   local max_size_gb="$2"
@@ -113,56 +119,16 @@ enforce_size_limit() {
     log "${YELLOW}$type: directory missing ($dir) — skip${NC}"
     return 0
   fi
-
-  local current_size
-  current_size=$(get_dir_size_gb "$dir")
-  log "${GREEN}$type: ${current_size}GB (limit ${max_size_gb}GB) — $dir${NC}"
-
-  if ! command -v bc &>/dev/null; then
-    log "${RED}bc not installed; cannot compare sizes. brew install bc${NC}"
-    return 1
-  fi
-
-  if (( $(echo "$current_size <= $max_size_gb" | bc -l) )); then
-    log "${GREEN}$type within limit${NC}"
+  if [[ ! -f "$RETENTION" || -z "$RETENTION_PY" ]]; then
+    log "${RED}$type: Media_Retention.py or python missing — nothing removed${NC}"
     return 0
   fi
-
-  log "${YELLOW}$type over limit — removing oldest files…${NC}"
-
-  local freed_gb=0
-  local removed=0
-  local projected="$current_size"
-
-  while IFS= read -r file; do
-    [[ -z "$file" || ! -f "$file" ]] && continue
-    if (( $(echo "$projected <= $max_size_gb" | bc -l) )); then
-      break
-    fi
-
-    local bytes file_gb
-    bytes=$(get_file_bytes "$file")
-    file_gb=$(awk -v b="$bytes" 'BEGIN { printf "%.4f", b/1024/1024/1024 }')
-
-    if [[ "$DRY_RUN" == true ]]; then
-      log "${YELLOW}[DRY RUN] would remove: $file (${file_gb}GB)${NC}"
-    else
-      rm -f "$file"
-      log "${GREEN}removed: $file (${file_gb}GB)${NC}"
-    fi
-
-    projected=$(echo "$projected - $file_gb" | bc -l)
-    freed_gb=$(echo "$freed_gb + $file_gb" | bc -l)
-    removed=$((removed + 1))
-  done < <(get_oldest_files "$dir")
-
-  local new_size
-  new_size=$(get_dir_size_gb "$dir")
-  if [[ "$DRY_RUN" == true ]]; then
-    log "${YELLOW}[DRY RUN] $type: would remove $removed files (~${freed_gb}GB); size now ${new_size}GB (unchanged in dry-run)${NC}"
-  else
-    log "${GREEN}$type: removed $removed files (~${freed_gb}GB); now ${new_size}GB${NC}"
-  fi
+  local dry=""
+  [[ "$DRY_RUN" == true ]] && dry="--dry-run"
+  local line
+  while IFS= read -r line; do
+    log "$type: $line"
+  done < <("$RETENTION_PY" "$RETENTION" size --dir "$dir" --max-gb "$max_size_gb" --label "$type" $dry 2>&1 || true)
 }
 
 main() {

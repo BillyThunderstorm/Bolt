@@ -252,67 +252,21 @@ def main():
 
 def _cleanup_old_clips(max_age_days: int = 14, config: dict | None = None):
     """
-    Delete clips and vertical clips older than max_age_days.
+    Launch no longer deletes clips (changed 2026-10-20).
 
-    Why auto-delete? Clips pile up fast. After 14 days they're either
-    already posted or not worth posting — keeping them just wastes space.
-    Runs silently on every launch so you never have to think about it.
-
-    Targets the live media folders from config (media/clips + media/vertical_clips),
-    not the pre-reorg CWD stubs clips/ and vertical_clips/.
+    The old version permanently deleted any clip whose mtime was >14 days old
+    on every launch, even one still waiting in the post queue (2026-10-20 02:18
+    it removed the two 2889961274 clips cut Oct 5 and queued Oct 19). Cleanup now happens only in the nightly 3 AM job
+    (scripts/storage_optimization.sh → Core/modules/Media_Retention.py), which
+    skips queued clips, ages by Bolt creation time, and moves files to the Trash.
     """
-    import time
-
-    cutoff = time.time() - (max_age_days * 86400)  # 86400 seconds in a day
-    cfg = config if isinstance(config, dict) else {}
-    clip_rel = cfg.get("clips_folder") or "media/clips"
-    vert_rel = cfg.get("vertical_clips_folder") or "media/vertical_clips"
-
-    # Resolve against repo root (launch.py already chdirs there).
-    folders: list[Path] = []
-    seen: set[Path] = set()
-    for rel in (clip_rel, vert_rel, "media/clips", "media/vertical_clips"):
-        folder = (_REPO / rel).resolve() if not Path(rel).is_absolute() else Path(rel).resolve()
-        if folder in seen:
-            continue
-        seen.add(folder)
-        folders.append(folder)
-
-    # Also sweep legacy pre-reorg folders if they still exist beside the repo root.
-    for legacy in (_REPO / "clips", _REPO / "vertical_clips"):
-        resolved = legacy.resolve()
-        if resolved not in seen and legacy.is_dir():
-            seen.add(resolved)
-            folders.append(resolved)
-
-    extensions = {".mp4", ".mkv", ".mov"}
-    deleted = []
-
-    for folder in folders:
-        if not folder.is_dir():
-            continue
-        for f in folder.iterdir():
-            if not f.is_file():
-                continue
-            if f.suffix.lower() in extensions and f.stat().st_mtime < cutoff:
-                try:
-                    f.unlink()
-                    deleted.append(f.name)
-                except Exception:
-                    pass  # skip if file is locked or in use
-
-    if deleted:
-        notify(
-            f"🗑️  Cleaned up {len(deleted)} clip{'s' if len(deleted) != 1 else ''} older than {max_age_days} days.",
-            level="info",
-            reason="Old clips auto-deleted on launch from media/clips + media/vertical_clips (plus any leftover legacy folders).",
-        )
-    else:
-        notify(
-            f"✅ No clips older than {max_age_days} days — nothing to clean up.",
-            level="info",
-            reason="Clip folder check passed under media/clips + media/vertical_clips. All clips are recent.",
-        )
+    notify(
+        "Clip cleanup moved to the nightly job — nothing deleted at launch.",
+        level="info",
+        reason="scripts/storage_optimization.sh (3 AM cron) is Bolt's only clip cleaner now. "
+        "It keeps anything still in the post queue and sends old files to the Trash. "
+        "Log: logs/media_retention.log",
+    )
 
 
 # ── Phase 3: Personality layer ─────────────────────────────────────────────────
@@ -854,7 +808,10 @@ def _run_voice_checklist(config: dict):
         use_voice = config.get("use_voice_checklist", True)
         timeout = config.get("checklist_timeout_minutes", 15)
 
-        checklist = VoiceChecklist(use_voice=use_voice)
+        # Resume an unfinished checklist from the last few hours (relaunch after a crash).
+        checklist = VoiceChecklist(
+            use_voice=use_voice, resume=config.get("checklist_resume", True)
+        )
         tasks = checklist.run(timeout_minutes=timeout)
 
         done = sum(1 for t in tasks if t["done"])
@@ -871,7 +828,7 @@ def _run_voice_checklist(config: dict):
         notify(
             f"Checklist error: {e}",
             level="warning",
-            reason="Install speech_recognition to enable voice: pip3 install SpeechRecognition pyaudio --break-system-packages. Bolt will continue in keyboard mode; run 'python3 -m modules.Voice_Checklist --keyboard' to test.",
+            reason="Launch continues without it. Try it on its own with: bolt checklist run (or bolt checklist check for a quick report).",
         )
 
 
