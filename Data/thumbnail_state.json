@@ -3,28 +3,28 @@
     "dry_run": false,
     "results": [
       {
-        "duration_sec": 34.042011,
+        "duration_sec": null,
         "error": null,
-        "output": "media/clips/2889961274_clip01_audio_spike_132.jpg",
-        "seek_seconds": 11.347337,
-        "skipped": false,
-        "source": "media/clips/2889961274_clip01_audio_spike_132.mp4",
+        "output": "/Users/carter/developer/Bolt/media/vertical_clips/2889961274_clip01_audio_spike_132_tiktok.jpg",
+        "seek_seconds": null,
+        "skipped": true,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2889961274_clip01_audio_spike_132_tiktok.mp4",
         "strategy": "smart",
         "width": 1280
       },
       {
-        "duration_sec": 34.042011,
+        "duration_sec": null,
         "error": null,
-        "output": "media/clips/2889961274_clip02_audio_spike_182.jpg",
-        "seek_seconds": 11.347337,
-        "skipped": false,
-        "source": "media/clips/2889961274_clip02_audio_spike_182.mp4",
+        "output": "/Users/carter/developer/Bolt/media/vertical_clips/2889961274_clip02_audio_spike_182_tiktok.jpg",
+        "seek_seconds": null,
+        "skipped": true,
+        "source": "/Users/carter/developer/Bolt/media/vertical_clips/2889961274_clip02_audio_spike_182_tiktok.mp4",
         "strategy": "smart",
         "width": 1280
       }
     ],
     "strategy": "smart",
-    "timestamp": "2026-10-19T00:16:57.971594",
+    "timestamp": "2026-10-20T05:00:00.647762",
     "width": 1280
   }
 }

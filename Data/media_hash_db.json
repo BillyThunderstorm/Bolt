@@ -1,4 +1,400 @@
 {
-  "files": {},
-  "duplicates": []
+  "version": 2,
+  "updated_at": "2026-10-19T14:36:14Z",
+  "files": {
+    "media/Recordings/2026-09-04 11-52-07-vertical.hybrid_mov": {
+      "sha256": "2982f82814139a4b17a45d8124ebcc702a7e312304ca361e536de4f84952aa70",
+      "size": 372588414,
+      "mtime_ns": 1788541212181840007,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/Recordings/2026-10-01 19-16-51.mp4": {
+      "sha256": "eef0a867862fce631970107358ba00ddc0a47407d5a5463de38449de427064cf",
+      "size": 34100567,
+      "mtime_ns": 1790900256554191885,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/Recordings/2026-10-01 19-18-50.mp4": {
+      "sha256": "7454aac3bdec3766c8ee5f89059bf7368bbce8210465086ce4c0d891576f583d",
+      "size": 495945823,
+      "mtime_ns": 1790900979240326571,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/Recordings/2026-10-01_19-16-50.mkv": {
+      "sha256": "16a39d22376ec8f7bc09cea28d8850b64b929edc75b18a9be8108d4a6e7f83ec",
+      "size": 20510231,
+      "mtime_ns": 1790900256572722933,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/Recordings/2026-10-01_19-16-50.mp4": {
+      "sha256": "b5d01ea3a977916c73574ae179dab204faf8ae41ec0dd98f64c6197ed1655ce7",
+      "size": 20616324,
+      "mtime_ns": 1790900256623568140,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/Recordings/2026-10-01_19-18-50.mov": {
+      "sha256": "b0b74144202a1979add463ca8f123499b9072e70eb8d37aff25e136f28ebc982",
+      "size": 574337181,
+      "mtime_ns": 1790900979257103173,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/Recordings/2026-10-01_19-18-50.mp4": {
+      "sha256": "57380e9604edd7af09b7577a840638cbf25d1e2a90e537b4be1f0a733e7cf9ff",
+      "size": 574278997,
+      "mtime_ns": 1790900979615197163,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/Recordings/IMG_2709.MOV": {
+      "sha256": "007f9acbcadf2450b9aa810e87b487a304e16e359de0ed82340ee587302da4ea",
+      "size": 26087949,
+      "mtime_ns": 1785991678541800521,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/Recordings/IMG_2720.MOV": {
+      "sha256": "c6e488b8822c34952a7674c13763b12f5da96e72ccbb93d85407ce7e3ec8603b",
+      "size": 58705841,
+      "mtime_ns": 1785991462136184729,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/clips/2889961274_clip01_audio_spike_132.jpg": {
+      "sha256": "904c9c9bba66aae49ef0631e6e9777c4eb398794552546d7df8e2bd21c097f2d",
+      "size": 88231,
+      "mtime_ns": 1792387017809391847,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/clips/2889961274_clip01_audio_spike_132.mp4": {
+      "sha256": "f486cd20dd3cde5043a7044ad50a121eb99e773c63eaeb572d4812728e9645c8",
+      "size": 24913601,
+      "mtime_ns": 1791241629156611885,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/clips/2889961274_clip02_audio_spike_182.jpg": {
+      "sha256": "5541893e988f85061925f31dbf75c579d8fe096e1eb204f96036c1aa4533afc7",
+      "size": 86997,
+      "mtime_ns": 1792387017944330308,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/clips/2889961274_clip02_audio_spike_182.mp4": {
+      "sha256": "bc6b87953b1412c263597fcb7fcc496d463634feb03f6319664de0e254b2bdc9",
+      "size": 24928824,
+      "mtime_ns": 1791241629545357900,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/covers/heart_3000_extended.jpg": {
+      "sha256": "bba59ff048c44d491bb62b18c2378046b837be34238172456a60fe0555f8c248",
+      "size": 2304189,
+      "mtime_ns": 1792394800309914271,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/covers/throne_3000.jpg": {
+      "sha256": "943cf278b3e2eee02c0ee727abea889a3b5db1127a6ea63af87432e47c3899e5",
+      "size": 2385800,
+      "mtime_ns": 1792394800316169759,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/2026-07-25_highlight_reel.mp4": {
+      "sha256": "0e67374b38d5e82661d6c84f9820cfa485bfa3b72ba4e285bba7b66aa768c41b",
+      "size": 528850324,
+      "mtime_ns": 1785011886075326724,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/2026-08-20_highlight_reel.mp4": {
+      "sha256": "e74137814ccd3913bc417c6ff41542b74b275e35d5bc5c94fe69c8588a34c484",
+      "size": 541126997,
+      "mtime_ns": 1787285642210061247,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/2026-09-03_highlight_reel.mp4": {
+      "sha256": "b51931f9b0e9efc32564e9e02607c873a08305f7d25ae7da77e50b5ca8313112",
+      "size": 320199172,
+      "mtime_ns": 1788451655460584841,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/2026-10-18_highlight_reel.mp4": {
+      "sha256": "809c96d55e12c4e7fa2cbeee27727c728faa157079a3d0080831e0d0e9042e01",
+      "size": 37032531,
+      "mtime_ns": 1792356051301072466,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/releases/2026-10-18_My-Manic-Chaotic-Gay-Disco-Party_release/audio/01 - Sinner.wav": {
+      "sha256": "e39b27f1a0153893483b29e2b117ecbf78155dc5e6047d0067b44d5e245c1195",
+      "size": 40462002,
+      "mtime_ns": 1792363146999234576,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/releases/2026-10-18_My-Manic-Chaotic-Gay-Disco-Party_release/audio/02 - Spirit Breaker.wav": {
+      "sha256": "6f579beefe4f47689a47fa99e8818a93616a0cb2229fb8b0c7a4bf1652bd116d",
+      "size": 44797214,
+      "mtime_ns": 1792363147417795782,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/releases/2026-10-18_My-Manic-Chaotic-Gay-Disco-Party_release/audio/03 - Hiding.wav": {
+      "sha256": "c31dc34bd5671f8e9b5929c9c46245e1eca6315de495dbf4341bf62faa3b48f5",
+      "size": 40462002,
+      "mtime_ns": 1792363147835327617,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/releases/2026-10-18_My-Manic-Chaotic-Gay-Disco-Party_release/audio/04 - Dont Swallow Me.wav": {
+      "sha256": "aa4fc34b06d4e567a37a4c5bcd20d9e64fa8a2a6cc3dd36383c2336e1b580f79",
+      "size": 44315522,
+      "mtime_ns": 1792363148253951448,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/releases/2026-10-18_My-Manic-Chaotic-Gay-Disco-Party_release/audio/05 - Light.wav": {
+      "sha256": "269757b4c98db68442e8422257ba26bc2e2b6ac45074337a42d648a338a6d301",
+      "size": 43592990,
+      "mtime_ns": 1792363148694847530,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/releases/2026-10-18_My-Manic-Chaotic-Gay-Disco-Party_release/audio/06 - Dance.wav": {
+      "sha256": "09f14908ac7c38dc6cc94ad04296e8b34374b8be748ab14c9886865bfbddc659",
+      "size": 44074674,
+      "mtime_ns": 1792363149117359763,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/releases/2026-10-18_My-Manic-Chaotic-Gay-Disco-Party_release/audio/07 - Weightless Tonight.wav": {
+      "sha256": "49efad36c1fde12d783b01f5ffcb4a132da657908c4e74c139d8d8d2e3bfd8af",
+      "size": 44797214,
+      "mtime_ns": 1792363149562835871,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/releases/2026-10-18_My-Manic-Chaotic-Gay-Disco-Party_release/audio/08 - Falling.wav": {
+      "sha256": "948709488334ca462d69f0b292a397a7cb17667e45009f8acb2c2ad9beff92e0",
+      "size": 42870450,
+      "mtime_ns": 1792363149976382053,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/releases/2026-10-18_My-Manic-Chaotic-Gay-Disco-Party_release/audio/09 - World Is Gonna Be.wav": {
+      "sha256": "5e5f11f07877bea3eaecd6aeac79027598916cc25fb22090e530a2bd0a66e9bc",
+      "size": 41907074,
+      "mtime_ns": 1792363150399813992,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/releases/2026-10-18_My-Manic-Chaotic-Gay-Disco-Party_release/audio/10 - Break Your Spirit.wav": {
+      "sha256": "290def51acfbd62f4b03f6542f7d79e04b5f8a535d7fc2455914b8e2c121fdb7",
+      "size": 53949314,
+      "mtime_ns": 1792363150848845169,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/releases/2026-10-18_My-Manic-Chaotic-Gay-Disco-Party_release/audio/11 - Sinner (Duet).wav": {
+      "sha256": "f36e6306c3b062656a859cc48c91d03f0bc3289b76e06e30dc33a44da820a1ce",
+      "size": 39739470,
+      "mtime_ns": 1792363151272652897,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap-2/2026-10-18_2889961274-2_highlight_reel.mp4": {
+      "sha256": "da7d5169de5e71f280a62d58f30dfb2e64c64b0b3e9d76f789e09762f22b877c",
+      "size": 80573222,
+      "mtime_ns": 1792341726912354485,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap-2/captions/2889961274_clip01_audio_spike_132_captioned.mp4": {
+      "sha256": "ccae2c073f3795901dfede61f318acc6284c3690f44423887d5dd2542c3d446e",
+      "size": 13538212,
+      "mtime_ns": 1792341684437730615,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap-2/captions/2889961274_clip02_audio_spike_182_captioned.mp4": {
+      "sha256": "24acf332f5e23bc0f64d0e1212ab92586c6a1d19691681dfaf26c7ac866b14c6",
+      "size": 10247614,
+      "mtime_ns": 1792341688109858735,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap-2/clips/2889961274_clip01_audio_spike_132.mp4": {
+      "sha256": "077fdec3353936c72c1202df59744771ec28fcdf42cbce91887b6a967a348b3e",
+      "size": 15875541,
+      "mtime_ns": 1792341676487967954,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap-2/clips/2889961274_clip02_audio_spike_182.mp4": {
+      "sha256": "5e08950c6387d59ff7f7e3e63c17318843525c29856dd82ff5af211a5223725d",
+      "size": 15691213,
+      "mtime_ns": 1792341676807189581,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap-2/clips/2889961274_clip03_motion_1083.mp4": {
+      "sha256": "2531ba8601e962c9fcb0bb171b34ea14a666734bd670c2a663d57fb3f7b52aa2",
+      "size": 16834863,
+      "mtime_ns": 1792341677598564215,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap-2/clips/2889961274_clip04_motion_1133.mp4": {
+      "sha256": "ac9e7fa32bfc62fb1f8e38eb73083f08528f4b6c41c2eff9e0b97379ccb1afdd",
+      "size": 16713939,
+      "mtime_ns": 1792341678432162533,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap-2/clips/2889961274_clip05_motion_1570.mp4": {
+      "sha256": "9fd7ad526c9a63ec7631f8a3a00b407303b152a75ae1b59f9b7de54ebed620d9",
+      "size": 15463174,
+      "mtime_ns": 1792341679518087422,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap/2026-10-18_2889961274_highlight_reel.mp4": {
+      "sha256": "da7d5169de5e71f280a62d58f30dfb2e64c64b0b3e9d76f789e09762f22b877c",
+      "size": 80573222,
+      "mtime_ns": 1792308235049617180,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap/clips/2889961274_clip01_audio_spike_132.mp4": {
+      "sha256": "077fdec3353936c72c1202df59744771ec28fcdf42cbce91887b6a967a348b3e",
+      "size": 15875541,
+      "mtime_ns": 1792308231934025923,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap/clips/2889961274_clip02_audio_spike_182.mp4": {
+      "sha256": "5e08950c6387d59ff7f7e3e63c17318843525c29856dd82ff5af211a5223725d",
+      "size": 15691213,
+      "mtime_ns": 1792308232252124268,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap/clips/2889961274_clip03_motion_1083.mp4": {
+      "sha256": "2531ba8601e962c9fcb0bb171b34ea14a666734bd670c2a663d57fb3f7b52aa2",
+      "size": 16834863,
+      "mtime_ns": 1792308233021757727,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap/clips/2889961274_clip04_motion_1133.mp4": {
+      "sha256": "ac9e7fa32bfc62fb1f8e38eb73083f08528f4b6c41c2eff9e0b97379ccb1afdd",
+      "size": 16713939,
+      "mtime_ns": 1792308233843956702,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/output/wraps/2026-10-18_2889961274_wrap/clips/2889961274_clip05_motion_1570.mp4": {
+      "sha256": "9fd7ad526c9a63ec7631f8a3a00b407303b152a75ae1b59f9b7de54ebed620d9",
+      "size": 15463174,
+      "mtime_ns": 1792308234866348807,
+      "hashed_at": "2026-10-19T12:42:44Z"
+    },
+    "media/vertical_clips/2889961274_clip01_audio_spike_132_tiktok.mp4": {
+      "sha256": "3d93c4ff110161cb352d4b9eca247b43c0d1eff3dcc988d685cbbc36231e5209",
+      "size": 17291036,
+      "mtime_ns": 1792370304577302643,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    },
+    "media/vertical_clips/2889961274_clip02_audio_spike_182_tiktok.mp4": {
+      "sha256": "c1cb51ac7e5b7e8856bdcb08cec6b35075adcff92bb1f0a13e9e7a428a71b059",
+      "size": 18364240,
+      "mtime_ns": 1792370321996018173,
+      "hashed_at": "2026-10-19T12:42:43Z"
+    }
+  },
+  "last_run": {
+    "ran_at": "2026-10-19T14:36:14Z",
+    "dry_run": false,
+    "rehash": false,
+    "scan_dirs": [
+      "media/clips",
+      "media/Recordings",
+      "media/vertical_clips",
+      "media/output",
+      "media/covers"
+    ],
+    "missing_dirs": [],
+    "per_dir": {
+      "media/clips": {
+        "files": 4,
+        "bytes": 50017653
+      },
+      "media/Recordings": {
+        "files": 9,
+        "bytes": 2177171327
+      },
+      "media/vertical_clips": {
+        "files": 2,
+        "bytes": 35655276
+      },
+      "media/output": {
+        "files": 29,
+        "bytes": 2254266680
+      },
+      "media/covers": {
+        "files": 2,
+        "bytes": 4689989
+      }
+    },
+    "files_scanned": 46,
+    "bytes_scanned": 4521800925,
+    "hashed": 0,
+    "reused": 46,
+    "bytes_hashed": 0,
+    "pruned": 0,
+    "skipped_appledouble": 0,
+    "skipped_symlinks": 0,
+    "errors": [],
+    "duplicate_groups": 6,
+    "duplicate_files": 6,
+    "reclaimable_bytes": 161151952,
+    "elapsed_s": 0.0,
+    "db_path": "/Users/carter/developer/Bolt/Data/media_hash_db.json",
+    "db_saved": true,
+    "groups": [
+      {
+        "sha256": "da7d5169de5e71f280a62d58f30dfb2e64c64b0b3e9d76f789e09762f22b877c",
+        "size": 80573222,
+        "count": 2,
+        "keep": "media/output/wraps/2026-10-18_2889961274_wrap/2026-10-18_2889961274_highlight_reel.mp4",
+        "duplicates": [
+          "media/output/wraps/2026-10-18_2889961274_wrap-2/2026-10-18_2889961274-2_highlight_reel.mp4"
+        ],
+        "hardlinks": [],
+        "reclaimable_bytes": 80573222
+      },
+      {
+        "sha256": "2531ba8601e962c9fcb0bb171b34ea14a666734bd670c2a663d57fb3f7b52aa2",
+        "size": 16834863,
+        "count": 2,
+        "keep": "media/output/wraps/2026-10-18_2889961274_wrap/clips/2889961274_clip03_motion_1083.mp4",
+        "duplicates": [
+          "media/output/wraps/2026-10-18_2889961274_wrap-2/clips/2889961274_clip03_motion_1083.mp4"
+        ],
+        "hardlinks": [],
+        "reclaimable_bytes": 16834863
+      },
+      {
+        "sha256": "ac9e7fa32bfc62fb1f8e38eb73083f08528f4b6c41c2eff9e0b97379ccb1afdd",
+        "size": 16713939,
+        "count": 2,
+        "keep": "media/output/wraps/2026-10-18_2889961274_wrap/clips/2889961274_clip04_motion_1133.mp4",
+        "duplicates": [
+          "media/output/wraps/2026-10-18_2889961274_wrap-2/clips/2889961274_clip04_motion_1133.mp4"
+        ],
+        "hardlinks": [],
+        "reclaimable_bytes": 16713939
+      },
+      {
+        "sha256": "077fdec3353936c72c1202df59744771ec28fcdf42cbce91887b6a967a348b3e",
+        "size": 15875541,
+        "count": 2,
+        "keep": "media/output/wraps/2026-10-18_2889961274_wrap/clips/2889961274_clip01_audio_spike_132.mp4",
+        "duplicates": [
+          "media/output/wraps/2026-10-18_2889961274_wrap-2/clips/2889961274_clip01_audio_spike_132.mp4"
+        ],
+        "hardlinks": [],
+        "reclaimable_bytes": 15875541
+      },
+      {
+        "sha256": "5e08950c6387d59ff7f7e3e63c17318843525c29856dd82ff5af211a5223725d",
+        "size": 15691213,
+        "count": 2,
+        "keep": "media/output/wraps/2026-10-18_2889961274_wrap/clips/2889961274_clip02_audio_spike_182.mp4",
+        "duplicates": [
+          "media/output/wraps/2026-10-18_2889961274_wrap-2/clips/2889961274_clip02_audio_spike_182.mp4"
+        ],
+        "hardlinks": [],
+        "reclaimable_bytes": 15691213
+      },
+      {
+        "sha256": "9fd7ad526c9a63ec7631f8a3a00b407303b152a75ae1b59f9b7de54ebed620d9",
+        "size": 15463174,
+        "count": 2,
+        "keep": "media/output/wraps/2026-10-18_2889961274_wrap/clips/2889961274_clip05_motion_1570.mp4",
+        "duplicates": [
+          "media/output/wraps/2026-10-18_2889961274_wrap-2/clips/2889961274_clip05_motion_1570.mp4"
+        ],
+        "hardlinks": [],
+        "reclaimable_bytes": 15463174
+      }
+    ]
+  }
 }
