@@ -160,13 +160,22 @@ def notify_skip(clip: str, reason_str: str = "", **kwargs):
 
 def notify_error(ctx: str, err, recoverable: bool = True, **kwargs):
     msg = f"Error in {ctx}: {err}"
+    # notify(level="error") already posts to the Discord webhooks once — the old
+    # extra _send_discord here sent every error twice.
     notify(
         msg,
         level="error",
-        reason="Recoverable — will retry." if recoverable else "Non-recoverable.",
+        reason="Recoverable — continuing." if recoverable else "Non-recoverable.",
     )
-    if _discord_webhooks():
-        _send_discord(msg, "error", str(err))
+    # Keep a lasting record for `bolt error-recovery run` (Data/pipeline_errors.jsonl).
+    try:
+        try:
+            from modules.Error_Recovery import record_error, current_context
+        except ImportError:
+            from Error_Recovery import record_error, current_context  # type: ignore
+        record_error(ctx, kwargs.get("recording") or current_context(), err, quiet=True)
+    except Exception:
+        pass
 
 
 def daily_summary():

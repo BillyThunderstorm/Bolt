@@ -159,6 +159,7 @@ def download_vod(vod_url: str, output_path: Path) -> bool:
     cmd = [
         yt_dlp_bin,
         "--no-progress",
+        "--no-mtime",  # fresh mtime: don't stamp the VOD's upload date on the file
         "-o", str(output_path),
         "-f", "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
         "--merge-output-format", "mp4",

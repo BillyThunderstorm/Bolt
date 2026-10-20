@@ -5,12 +5,36 @@ X-WR-CALNAME:Peak Hours
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
-UID:bolt-peak-hours@bolt
-DTSTAMP:20261018T170043
-DTSTART:20261018T190000
-DTEND:20261018T210000
-SUMMARY:Peak posting window (7-9pm)
-DESCRIPTION:Billy's peak audience hours per memory/content/live-streaming.md. Best time to post clips\, run a stream\, or send social announcements.
+UID:bolt-peak-morning-07@bolt
+DTSTAMP:20261020T044039Z
+DTSTART:20261020T070000
+DTEND:20261020T090000
+SUMMARY:Peak posting window: Morning (7 AM-9 AM)
+DESCRIPTION:Posting window from Core/config.json peak_notifications (same w
+ indows Bolt's peak-hour notifier uses). Good time to post clips or send so
+ cial announcements.
+RRULE:FREQ=DAILY
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-peak-lunch-12@bolt
+DTSTAMP:20261020T044039Z
+DTSTART:20261020T120000
+DTEND:20261020T140000
+SUMMARY:Peak posting window: Lunch (12 PM-2 PM)
+DESCRIPTION:Posting window from Core/config.json peak_notifications (same w
+ indows Bolt's peak-hour notifier uses). Good time to post clips or send so
+ cial announcements.
+RRULE:FREQ=DAILY
+END:VEVENT
+BEGIN:VEVENT
+UID:bolt-peak-prime-time-19@bolt
+DTSTAMP:20261020T044039Z
+DTSTART:20261020T190000
+DTEND:20261020T220000
+SUMMARY:Peak posting window: Prime Time (7 PM-10 PM)
+DESCRIPTION:Posting window from Core/config.json peak_notifications (same w
+ indows Bolt's peak-hour notifier uses). Good time to post clips or send so
+ cial announcements.
 RRULE:FREQ=DAILY
 END:VEVENT
 END:VCALENDAR

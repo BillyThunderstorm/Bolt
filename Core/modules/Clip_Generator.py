@@ -333,6 +333,12 @@ def _cut_clip_ffmpeg(source: str, output: str, start: float, duration: float) ->
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
         if result.returncode == 0:
+            # A new clip is "made now" — never inherit the source/VOD date
+            # (cleanup used to treat VOD-dated clips as old and delete them).
+            try:
+                os.utime(output, None)
+            except OSError:
+                pass
             return True, None
         return False, result.stderr[-400:] if result.stderr else "unknown ffmpeg error"
     except FileNotFoundError:

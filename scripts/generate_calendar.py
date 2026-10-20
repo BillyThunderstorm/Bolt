@@ -13,11 +13,18 @@ Four feeds are produced:
                               the SMS summary line.
   2. weekly_insights.ics   — recurring Sunday 9:00am event with weekly
                               insights preview.
-  3. peak_hours.ics        — recurring daily 7:00pm-9:00pm posting window
-                              (Billy's peak audience hours per memory).
-  4. scheduled_posts.ics   — one VEVENT per queued post in
-                              data/multi_platform_queue.json, each with
-                              platform-specific timing.
+  3. peak_hours.ics        — one recurring daily event per posting window
+                              in Core/config.json peak_notifications.windows
+                              (the same windows Peak_Hour_Notifier uses;
+                              falls back to 7-9 AM / 12-2 PM / 7-10 PM).
+  4. scheduled_posts.ics   — one VEVENT per still-to-post clip/platform in
+                              Data/multi_platform_queue.json, at the right
+                              local (America/Chicago) time. Already posted /
+                              rejected / scrapped entries are skipped, and the
+                              same clip queued twice for one platform shows
+                              once (earliest upcoming time). UIDs are stable
+                              per queue item + platform, so a reschedule
+                              updates the event instead of duplicating it.
 
 These are static local files. To subscribe, Billy can either:
   - Open the .ics file from Finder (Apple Calendar imports on open), or
@@ -39,11 +46,17 @@ Library use:
 import argparse
 import json
 import sys
+import os
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterable, Optional
+
+try:  # Python 3.9+
+    from zoneinfo import ZoneInfo
+except Exception:  # pragma: no cover
+    ZoneInfo = None  # type: ignore
 # Make _paths importable in BOTH direct invocation (script dir on
 # sys.path) and `from scripts import X` (tests). The helper also adds
 # Core/ and 3rd_Party/llm/ to sys.path so `from modules import Y` works
@@ -91,6 +104,19 @@ PEAK_HOUR_START = 19      # 7pm
 PEAK_HOUR_END = 21        # 9pm
 DEFAULT_LOOKAHEAD_DAYS = 30
 TIMEZONE = "America/Chicago"  # matches POSTING_TIMEZONE in Multi_Publisher
+CONFIG_PATH = DATA_DIR.parent / "Core" / "config.json"
+# Fallback = Peak_Hour_Notifier.PEAK_WINDOWS (used when config has none).
+DEFAULT_PEAK_WINDOWS = [
+    ("Morning", 7, 9),
+    ("Lunch", 12, 14),
+    ("Prime Time", 19, 22),
+]
+# Queue/platform statuses that mean "nothing left to post".
+DONE_STATUSES = {
+    "posted", "published", "uploaded", "done", "complete", "completed",
+    "rejected", "scrapped", "scrapped_missing_file", "missing_file", "skipped",
+    "cancelled", "canceled", "removed", "archived",
+}
 
 
 # --- Event model ----------------------------------------------------------
@@ -129,10 +155,34 @@ def _escape_ics_text(text: str) -> str:
     )
 
 
+def _fold_ics_line(line: str, limit: int = 75) -> str:
+    """Fold a content line at 75 octets (RFC 5545 3.1), never splitting a
+    UTF-8 character. Continuation lines start with a single space."""
+    if len(line.encode("utf-8")) <= limit:
+        return line
+    parts: list[str] = []
+    cur = ""
+    cur_len = 0
+    budget = limit
+    for ch in line:
+        n = len(ch.encode("utf-8"))
+        if cur_len + n > budget:
+            parts.append(cur)
+            cur, cur_len = ch, n
+            budget = limit - 1  # room for the leading space
+        else:
+            cur += ch
+            cur_len += n
+    parts.append(cur)
+    return "\r\n ".join(parts)
+
+
 def render_vevent(event: CalendarEvent) -> str:
     """Render a single VEVENT block."""
     uid = event.uid or f"{uuid.uuid4()}@bolt"
-    lines = ["BEGIN:VEVENT", f"UID:{uid}", f"DTSTAMP:{_format_ics_datetime(datetime.now())}"]
+    # RFC 5545: DTSTAMP must be UTC ("Z"); DTSTART/DTEND stay floating local.
+    dtstamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    lines = ["BEGIN:VEVENT", f"UID:{uid}", f"DTSTAMP:{dtstamp}"]
     lines.append(f"DTSTART:{_format_ics_datetime(event.start)}")
     lines.append(f"DTEND:{_format_ics_datetime(event.end)}")
     lines.append(f"SUMMARY:{_escape_ics_text(event.summary)}")
@@ -143,7 +193,7 @@ def render_vevent(event: CalendarEvent) -> str:
     if event.rrule:
         lines.append(f"RRULE:{event.rrule}")
     lines.append("END:VEVENT")
-    return "\r\n".join(lines)
+    return "\r\n".join(_fold_ics_line(line) for line in lines)
 
 
 def render_calendar(name: str, events: Iterable[CalendarEvent]) -> str:
@@ -226,6 +276,72 @@ def build_peak_hours_event(today: Optional[datetime] = None) -> CalendarEvent:
     )
 
 
+def load_peak_windows(config_path: Optional[Path] = None) -> list[tuple[str, int, int]]:
+    """(label, start_hour, end_hour) from Core/config.json
+    peak_notifications.windows — the windows Bolt's peak notifier actually
+    uses. Falls back to DEFAULT_PEAK_WINDOWS when missing/invalid."""
+    path = Path(config_path) if config_path else CONFIG_PATH
+    try:
+        cfg = json.loads(path.read_text(encoding="utf-8"))
+        raw = (cfg.get("peak_notifications") or {}).get("windows") or []
+        out: list[tuple[str, int, int]] = []
+        for w in raw:
+            start = int(w.get("start_hour"))
+            end = int(w.get("end_hour"))
+            if 0 <= start < end <= 24:
+                out.append((str(w.get("label") or "Peak"), start, end))
+        if out:
+            return out
+    except Exception:
+        pass
+    return list(DEFAULT_PEAK_WINDOWS)
+
+
+def _hour_label(h: int) -> str:
+    h = h % 24
+    suffix = "AM" if h < 12 else "PM"
+    return f"{(h % 12) or 12} {suffix}"
+
+
+def build_peak_hours_events(
+    today: Optional[datetime] = None,
+    windows: Optional[list[tuple[str, int, int]]] = None,
+) -> list[CalendarEvent]:
+    """One recurring daily event per configured peak posting window."""
+    now = today or datetime.now()
+    events: list[CalendarEvent] = []
+    for label, start_h, end_h in (windows if windows is not None else load_peak_windows()):
+        start = now.replace(hour=start_h, minute=0, second=0, microsecond=0)
+        if start <= now:
+            start = start + timedelta(days=1)
+        end = start + timedelta(hours=end_h - start_h)
+        slug = "".join(c if c.isalnum() else "-" for c in label.lower()).strip("-") or "peak"
+        events.append(
+            CalendarEvent(
+                summary=f"Peak posting window: {label} ({_hour_label(start_h)}-{_hour_label(end_h)})",
+                start=start,
+                end=end,
+                description=(
+                    "Posting window from Core/config.json peak_notifications "
+                    "(same windows Bolt's peak-hour notifier uses). Good time "
+                    "to post clips or send social announcements."
+                ),
+                uid=f"bolt-peak-{slug}-{start_h:02d}@bolt",
+                rrule="FREQ=DAILY",
+            )
+        )
+    return events
+
+
+def _local_tz():
+    if ZoneInfo is None:
+        return None
+    try:
+        return ZoneInfo(os.getenv("BOLT_TZ") or TIMEZONE)
+    except Exception:
+        return None
+
+
 def _parse_iso(value: str) -> Optional[datetime]:
     """Parse an ISO 8601 timestamp; return None on failure."""
     if not value:
@@ -236,10 +352,13 @@ def _parse_iso(value: str) -> Optional[datetime]:
         dt = datetime.fromisoformat(value)
     except (TypeError, ValueError):
         return None
-    # Treat naive timestamps as floating local time (no conversion).
+    # Naive timestamps are already floating local time. Aware ones are
+    # converted to Bolt's posting zone (America/Chicago) FIRST, then made
+    # floating — a "-04:00" or "Z" time used to be stripped as-is and land
+    # an hour (or five) off in the calendar.
     if dt.tzinfo is not None:
-        # Strip tzinfo so we render as floating local.
-        dt = dt.replace(tzinfo=None)
+        tz = _local_tz()
+        dt = (dt.astimezone(tz) if tz is not None else dt.astimezone()).replace(tzinfo=None)
     return dt
 
 
@@ -259,37 +378,81 @@ def build_scheduled_post_events(
     except (json.JSONDecodeError, OSError):
         return []
 
-    events: list[CalendarEvent] = []
     items = queue.get("items", []) if isinstance(queue, dict) else queue
+    if not isinstance(items, list):
+        return []
+    # (clip file, platform) -> chosen entry; same clip queued twice for one
+    # platform (e.g. by bolt multi + bolt reprocess) shows up once.
+    chosen: dict[tuple[str, str], dict] = {}
     for item in items:
-        queue_id = item.get("queue_id") or item.get("id") or uuid.uuid4().hex[:8]
-        for platform in item.get("platforms", []):
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("status") or "").lower() in DONE_STATUSES:
+            continue
+        queue_id = str(item.get("queue_id") or item.get("id") or uuid.uuid4().hex[:8])
+        for platform in item.get("platforms", []) or []:
+            if not isinstance(platform, dict):
+                continue
+            if str(platform.get("status") or "").lower() in DONE_STATUSES:
+                continue
             scheduled_raw = platform.get("scheduled_for")
             scheduled = _parse_iso(scheduled_raw) if scheduled_raw else None
             if scheduled is None:
                 continue
             if scheduled < now or scheduled > cutoff:
                 continue
-            label = platform.get("label") or platform.get("platform") or "post"
-            caption = (platform.get("caption") or "").strip()
-            first_line = caption.splitlines()[0] if caption else ""
-            title = first_line[:80] or f"Clip {queue_id}"
-            summary = f"Post to {label}: {title}"
-            events.append(
-                CalendarEvent(
-                    summary=summary[:120],
-                    start=scheduled,
-                    end=scheduled + timedelta(minutes=10),
-                    description=(
-                        f"queue_id: {queue_id}\n"
-                        f"platform: {label}\n"
-                        f"clip: {platform.get('clip_path', 'unknown')}\n"
-                        f"instructions: {platform.get('instructions', '')}"
-                    ),
-                    location=f"Bolt queue ({queue_id})",
-                    uid=f"bolt-post-{queue_id}-{platform.get('platform', 'x')}-{int(scheduled.timestamp())}@bolt",
-                )
+            pkey = str(platform.get("platform") or platform.get("label") or "post")
+            clip = str(platform.get("clip_path") or item.get("original_clip_path") or f"queue:{queue_id}")
+            key = (clip, pkey)
+            entry = chosen.get(key)
+            if entry is None:
+                chosen[key] = {
+                    "scheduled": scheduled,
+                    "queue_id": queue_id,
+                    "queue_ids": [queue_id],
+                    "platform": platform,
+                    "pkey": pkey,
+                    "clip": clip,
+                }
+            else:
+                if queue_id not in entry["queue_ids"]:
+                    entry["queue_ids"].append(queue_id)
+                if scheduled < entry["scheduled"]:
+                    entry.update(scheduled=scheduled, queue_id=queue_id, platform=platform)
+
+    events: list[CalendarEvent] = []
+    for entry in chosen.values():
+        platform = entry["platform"]
+        queue_id = entry["queue_id"]
+        scheduled = entry["scheduled"]
+        label = platform.get("label") or platform.get("platform") or "post"
+        caption = (platform.get("caption") or platform.get("title") or "").strip()
+        first_line = caption.splitlines()[0] if caption else ""
+        title = first_line[:80] or f"Clip {queue_id}"
+        clip_path = platform.get("clip_path") or "unknown"
+        missing = bool(platform.get("clip_path")) and not Path(str(clip_path)).exists()
+        summary = f"Post to {label}: {title}" + (" (clip file missing)" if missing else "")
+        desc = [
+            f"queue_id: {queue_id}",
+            f"platform: {label}",
+            f"clip: {clip_path}" + ("  [file not found]" if missing else ""),
+            f"instructions: {platform.get('instructions', '')}",
+        ]
+        if caption:
+            desc.append(f"caption: {caption}")
+        others = [q for q in entry["queue_ids"] if q != queue_id]
+        if others:
+            desc.append("also queued as: " + ", ".join(others))
+        events.append(
+            CalendarEvent(
+                summary=summary[:120],
+                start=scheduled,
+                end=scheduled + timedelta(minutes=10),
+                description="\n".join(desc),
+                location=f"Bolt queue ({queue_id})",
+                uid=f"bolt-post-{queue_id}-{entry['pkey']}@bolt",
             )
+        )
     events.sort(key=lambda e: e.start)
     return events
 
@@ -311,7 +474,7 @@ def build_all_feeds(
     feeds = {
         "daily_briefing": [build_daily_briefing_event()],
         "weekly_insights": [build_weekly_insights_event()],
-        "peak_hours": [build_peak_hours_event()],
+        "peak_hours": build_peak_hours_events(),
         "scheduled_posts": build_scheduled_post_events(lookahead_days=lookahead_days),
     }
     feed_names = {
@@ -329,7 +492,9 @@ def build_all_feeds(
             continue
         target_dir.mkdir(parents=True, exist_ok=True)
         path = target_dir / f"{key}.ics"
-        path.write_text(ics_text, encoding="utf-8")
+        tmp = path.with_name(f".{path.name}.tmp")
+        tmp.write_text(ics_text, encoding="utf-8")
+        os.replace(tmp, path)  # atomic: a subscriber never reads half a feed
         written[key] = path
     return written
 
@@ -374,10 +539,11 @@ def main() -> int:
     if not args.dry_run:
         for key, path in written.items():
             if path:
-                events = (
-                    1 if key in ("daily_briefing", "weekly_insights", "peak_hours") else "varies"
-                )
-                print(f"  events {key}: {events}")
+                try:
+                    n = path.read_text(encoding="utf-8").count("BEGIN:VEVENT")
+                except OSError:
+                    n = "?"
+                print(f"  events {key}: {n}")
     return 0
 
 

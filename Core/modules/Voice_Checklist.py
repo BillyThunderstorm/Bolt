@@ -5,8 +5,10 @@ Displays a pre-session checklist and listens for you to say tasks out loud.
 When you say a task (or a keyword from it), Bolt doesn't just check it off —
 it actually VERIFIES or COMPLETES the item by running a check function.
 
-Soft-fail CLI (PARTIAL): ``bolt checklist`` status / list / run
-Prefix: ``Checklist unavailable:``. Mic/STT/permission gated — stay PARTIAL.
+CLI (READY since 20 Oct 2026): ``bolt checklist`` status / list / check / run / reset
+Prefix: ``Checklist unavailable:``. Typing always works (even while the mic
+listens); voice needs SpeechRecognition + PyAudio + mic permission for the
+terminal and internet for Google speech-to-text.
 Wired from ``bolt launch`` (skip with ``--no-checklist`` / ``skip_checklist``).
 
 How it works:
@@ -14,13 +16,17 @@ How it works:
   2. Google Speech Recognition converts it to text (free, needs internet)
   3. Each spoken phrase is compared to every unchecked task using keyword matching
   4. On a match, Bolt runs that task's "verify" function for status feedback
-  5. The task is marked ✅ either way (verify is feedback, not a hard gate)
+  5. The task is marked ✅ either way (verify is feedback, not a hard gate);
+     anything whose check failed is listed at the end under "needs a look"
   6. When all tasks are done, Bolt congratulates you and exits
+  You can type a keyword + Enter at any time, voice or not.
 
   bolt checklist                         # status (default)
   bolt checklist status [--json] [--probe]
   bolt checklist list [--json]
-  bolt checklist run [--keyboard|--text] [--timeout N]
+  bolt checklist check [--json]          # run every check now, no typing needed
+  bolt checklist run [--keyboard|--text] [--timeout N] [--resume]
+  bolt checklist reset                   # clear saved progress
 
 Aliases: checklist-status, voice-checklist, prestream, pre-stream.
 
@@ -37,6 +43,7 @@ Or import into launch.py / bot.py:
 import json
 import os
 import platform
+import select
 import sys
 import threading
 import time
@@ -111,32 +118,54 @@ def _verify_obs() -> tuple:
         return False, f"OBS is running but WebSocket is not reachable: {e}"
 
 
+def _twitch_channel_info() -> Dict[str, str]:
+    """Current channel game + title from Helix /channels (works while offline)."""
+    _load_env()
+    from modules import Twitch_API
+
+    channel = Twitch_API.twitch_auth.TWITCH_CHANNEL
+    if not channel:
+        raise RuntimeError("TWITCH_CHANNEL not set in .env")
+    user_id = Twitch_API.get_user_id(channel)
+    if not user_id:
+        raise RuntimeError(f"could not look up Twitch user {channel!r} (check Twitch creds in .env)")
+    data = Twitch_API._request("GET", "/channels", params={"broadcaster_id": user_id})
+    rows = data.get("data") or []
+    if not rows:
+        raise RuntimeError("Twitch returned no channel info")
+    row = rows[0]
+    return {"game": (row.get("game_name") or "").strip(), "title": (row.get("title") or "").strip()}
+
+
 def _verify_twitch_title_game() -> tuple:
-    """Check that the Twitch channel has a title and game set. Bolt can also
-    sync the game from Twitch to config.json."""
+    """Check the Twitch channel's *current* title and category (what viewers will
+    see when you go live), then sync Bolt's game through Game_Refresh so OBS
+    pins and game-state history are respected."""
     try:
-        from modules.Twitch_API import get_current_game, get_last_stream_info
-
-        _load_env()
-        game = get_current_game()
-        info = get_last_stream_info()
-        title = info.get("title", "")
-
-        if game == "Unknown" or not game:
-            return False, "No game set on your Twitch channel — set it before going live"
-        if not title or title in ("No recent streams", "Error fetching stream data"):
-            return False, f"Game is '{game}' but no stream title found — set a title on Twitch"
-
-        # Sync to config.json
-        config_path = CORE / "config.json"
-        if config_path.exists():
-            config = json.loads(config_path.read_text())
-            config["game"] = game
-            config_path.write_text(json.dumps(config, indent=2) + "\n")
-
-        return True, f"Twitch is ready — game: {game}, title: {title}"
+        info = _twitch_channel_info()
     except Exception as e:
         return False, f"Could not check Twitch: {e}"
+
+    game, title = info.get("game", ""), info.get("title", "")
+    if not game:
+        return False, "No category set on your Twitch channel — set the game before going live"
+    if not title:
+        return False, f"Category is '{game}' but the stream title is empty — set a title on Twitch"
+
+    sync = ""
+    try:
+        from modules import Game_Refresh
+
+        res = Game_Refresh.refresh(source="checklist")
+        if res.get("ok"):
+            g = res.get("game") or game
+            sync = f" · Bolt game: {g}" + (" (updated)" if res.get("changed") else "")
+            if res.get("warning"):
+                sync += f" · note: {res['warning']}"
+    except Exception as e:
+        sync = f" · (game sync skipped: {e})"
+
+    return True, f"Twitch is ready — game: {game}, title: {title}{sync}"
 
 
 def _verify_streamlabs() -> tuple:
@@ -145,7 +174,10 @@ def _verify_streamlabs() -> tuple:
     token = os.getenv("STREAMLABS_SOCKET_TOKEN", "").strip()
     if token:
         return True, "Streamlabs token is configured"
-    return False, "Streamlabs socket token not set in .env — alerts won't fire"
+    return False, (
+        "Streamlabs socket token not set — Bolt won't hear alerts. Add STREAMLABS_SOCKET_TOKEN "
+        "to .env (streamlabs.com/dashboard → Settings → API Settings → Socket API)"
+    )
 
 
 def _verify_content_plan() -> tuple:
@@ -271,6 +303,10 @@ def _verify_test_stream() -> tuple:
             return True, "OBS is recording (not streaming yet, but capture is active)"
         else:
             return False, "OBS is not streaming or recording — start one to test"
+    except ConnectionRefusedError:
+        return False, "OBS isn't running (or its WebSocket server is off) — open OBS, then start a test recording or stream"
+    except ImportError:
+        return False, "Can't check OBS output — websocket-client isn't installed (uv sync)"
     except Exception as e:
         return False, f"Could not check OBS output status: {e}"
 
@@ -342,19 +378,94 @@ DEFAULT_TASKS = [
 # ── Main class ─────────────────────────────────────────────────────────────────
 
 
+VERIFY_TIMEOUT_SEC = 12
+RESUME_MAX_HOURS = 6
+
+
+def _run_verify(fn, timeout: float = VERIFY_TIMEOUT_SEC) -> tuple:
+    """Run a verify function with a hard timeout so a slow network check
+    (Twitch, OBS WebSocket) can never freeze the checklist."""
+    box: Dict[str, Any] = {"res": (False, f"check timed out after {timeout:.0f}s")}
+
+    def _work() -> None:
+        try:
+            res = fn()
+            if isinstance(res, tuple) and len(res) == 2:
+                box["res"] = (bool(res[0]), str(res[1]))
+            else:
+                box["res"] = (bool(res), "")
+        except Exception as e:  # pragma: no cover - defensive
+            box["res"] = (False, f"Verify error: {e}")
+
+    t = threading.Thread(target=_work, daemon=True)
+    t.start()
+    t.join(timeout)
+    return box["res"]
+
+
+def _write_progress(tasks: list, *, completed: Optional[bool] = None) -> None:
+    """Atomic write of logs/checklist_progress.json (no verify callables)."""
+    PROGRESS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    rows = [{k: v for k, v in t.items() if k != "verify"} for t in tasks]
+    payload: Dict[str, Any] = {
+        "saved_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "saved_epoch": int(time.time()),
+        "done": sum(1 for t in tasks if t.get("done")),
+        "total": len(tasks),
+        "tasks": rows,
+    }
+    if completed is not None:
+        payload["completed"] = bool(completed)
+    tmp = PROGRESS_FILE.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(payload, indent=2))
+    os.replace(tmp, PROGRESS_FILE)
+
+
+def _recent_progress(max_hours: float = RESUME_MAX_HOURS) -> Dict[str, Dict[str, Any]]:
+    """Done/verify state by task id from a progress file saved in the last few
+    hours (same session). Older progress is ignored. Never raises."""
+    try:
+        if not PROGRESS_FILE.is_file():
+            return {}
+        data = json.loads(PROGRESS_FILE.read_text())
+        epoch = data.get("saved_epoch")
+        if epoch is None:
+            try:
+                epoch = time.mktime(time.strptime(data.get("saved_at", ""), "%Y-%m-%d %H:%M:%S"))
+            except Exception:
+                return {}
+        if time.time() - float(epoch) > max_hours * 3600:
+            return {}
+        if data.get("completed"):
+            return {}  # finished session — a new run starts fresh
+        out = {}
+        for t in data.get("tasks") or []:
+            if isinstance(t, dict) and t.get("id"):
+                out[t["id"]] = t
+        return out
+    except Exception:
+        return {}
+
+
 class VoiceChecklist:
     """
     Runs a voice-activated session checklist.
     Tasks come from session_tasks.json (or DEFAULT_TASKS if file doesn't exist).
-    Say a task out loud → Bolt verifies it and marks it done if the check passes.
+    Say a task out loud (or type a keyword + Enter) → Bolt runs its check and
+    ticks it off. Typing works in both modes; the mic is an extra.
     """
 
-    def __init__(self, tasks: list = None, use_voice: bool = True):
+    def __init__(self, tasks: list = None, use_voice: bool = True, resume: bool = False):
         self.tasks = tasks or self._load_tasks()
         self.use_voice = use_voice
         self._lock = threading.Lock()
+        self._print_lock = threading.Lock()
         self._listening = False
         self._done_event = threading.Event()
+        self._skipped = False
+        self.resumed = 0
+        if resume:
+            self._apply_resume()
 
     # ── Task loading / saving ──────────────────────────────────────────────────
 
@@ -365,9 +476,14 @@ class VoiceChecklist:
                 data = json.loads(TASKS_FILE.read_text())
                 # Support both {"tasks": [...]} and plain [...]
                 tasks = data.get("tasks", data) if isinstance(data, dict) else data
+                tasks = [dict(t) for t in tasks if isinstance(t, dict) and t.get("id")]
+                if not tasks:
+                    raise ValueError("no tasks with an id")
                 # Reset done state for a fresh session
                 for t in tasks:
                     t["done"] = False
+                    t.setdefault("task", t["id"])
+                    t.setdefault("keywords", [])
                 # Merge in verify functions from DEFAULT_TASKS by id
                 default_verify = {t["id"]: t["verify"] for t in DEFAULT_TASKS if "verify" in t}
                 for t in tasks:
@@ -381,74 +497,66 @@ class VoiceChecklist:
 
         return [dict(t) for t in DEFAULT_TASKS]  # copy so defaults aren't mutated
 
+    def _apply_resume(self) -> None:
+        prev = _recent_progress()
+        for t in self.tasks:
+            row = prev.get(t["id"])
+            if row and row.get("done"):
+                t["done"] = True
+                for k in ("verified", "note", "checked_at"):
+                    if k in row:
+                        t[k] = row[k]
+                self.resumed += 1
+        if self.tasks and all(t["done"] for t in self.tasks):
+            self._done_event.set()
+
     def _save_progress(self):
         """Save current progress to logs so you can resume if Bolt crashes."""
-        PROGRESS_FILE.parent.mkdir(parents=True, exist_ok=True)
-        # Don't serialize the verify functions
-        tasks_copy = []
-        for t in self.tasks:
-            t_copy = {k: v for k, v in t.items() if k != "verify"}
-            tasks_copy.append(t_copy)
-        PROGRESS_FILE.write_text(
-            json.dumps(
-                {
-                    "saved_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-                    "tasks": tasks_copy,
-                },
-                indent=2,
-            )
-        )
+        try:
+            _write_progress(self.tasks, completed=all(t["done"] for t in self.tasks))
+        except Exception as e:
+            self._say(f"  {YELLOW}Could not save checklist progress: {e}{RESET}")
 
     # ── Display ────────────────────────────────────────────────────────────────
 
-    def _print_checklist(self, clear: bool = True):
-        """Render the checklist to the terminal."""
-        if clear:
-            # Move cursor up N lines instead of clearing whole screen
-            lines = len(self.tasks) + 6
-            sys.stdout.write(f"\033[{lines}A\033[J")
+    def _say(self, text: str = "") -> None:
+        with self._print_lock:
+            print(text, flush=True)
 
+    def _render(self) -> str:
         done_count = sum(1 for t in self.tasks if t["done"])
         total = len(self.tasks)
-
-        print(
+        lines = [
             f"\n{BOLD}{CYAN}  ⚡ Bolt Pre-Stream Checklist{RESET}  "
-            f"{GRAY}({done_count}/{total} done){RESET}"
-        )
-        print(f"  {GRAY}{'─' * 42}{RESET}")
-
+            f"{GRAY}({done_count}/{total} done){RESET}",
+            f"  {GRAY}{'─' * 42}{RESET}",
+        ]
         for t in self.tasks:
-            if t["done"]:
-                print(f"  {GREEN}✅  {t['task']}{RESET}")
+            if t["done"] and t.get("verified") is False:
+                lines.append(f"  {YELLOW}✅  {t['task']}  ⚠ check failed (see end){RESET}")
+            elif t["done"]:
+                lines.append(f"  {GREEN}✅  {t['task']}{RESET}")
             else:
-                print(f"  {GRAY}○   {t['task']}{RESET}")
+                lines.append(f"  {GRAY}○   {t['task']}{RESET}")
+        return "\n".join(lines)
 
-        print(
-            f"\n  {GRAY}🎤 Say a task keyword (e.g. 'OBS ready', 'title set')  │  Ctrl+C to skip{RESET}\n"
-        )
+    def _print_checklist(self, clear: bool = False):
+        """Print the checklist. (Never moves the cursor up — that used to wipe
+        the check results printed just above it.)"""
+        self._say(self._render())
 
     def _print_initial(self):
-        """Print the checklist for the first time (no clear)."""
-        done_count = sum(1 for t in self.tasks if t["done"])
-        total = len(self.tasks)
+        """Print the checklist for the first time, with how-to."""
+        self._say(self._render())
+        if self.use_voice:
+            how = "🎤 Say a task (e.g. 'OBS ready', 'title set') or type a keyword + Enter"
+        else:
+            how = "⌨️  Type a keyword + Enter (e.g. 'obs', 'title', 'streamlabs')"
+        self._say(f"\n  {GRAY}{how}  │  'skip' or Ctrl+C to move on{RESET}\n")
+        if self.resumed:
+            self._say(f"  {GRAY}(resumed {self.resumed} item(s) already done this session){RESET}\n")
 
-        print(
-            f"\n{BOLD}{CYAN}  ⚡ Bolt Pre-Stream Checklist{RESET}  "
-            f"{GRAY}({done_count}/{total} done){RESET}"
-        )
-        print(f"  {GRAY}{'─' * 42}{RESET}")
-
-        for t in self.tasks:
-            if t["done"]:
-                print(f"  {GREEN}✅  {t['task']}{RESET}")
-            else:
-                print(f"  {GRAY}○   {t['task']}{RESET}")
-
-        print(
-            f"\n  {GRAY}🎤 Say a task keyword (e.g. 'OBS ready', 'title set')  │  Ctrl+C to skip{RESET}\n"
-        )
-
-    # ── Voice matching ─────────────────────────────────────────────────────────
+    # ── Matching ───────────────────────────────────────────────────────────────
 
     def _match_task(self, spoken: str) -> Optional[str]:
         """
@@ -457,10 +565,17 @@ class VoiceChecklist:
 
         Short/generic keywords (e.g. "on", "set", "x") only count when paired
         with another hit, so casual speech does not latch onto the wrong row.
+        Typing a task id (e.g. "obs_setup") or the start of a task name also works.
         """
         spoken_lower = spoken.lower().strip()
         if not spoken_lower:
             return None
+
+        for task in self.tasks:
+            if task["done"]:
+                continue
+            if spoken_lower == str(task.get("id", "")).lower():
+                return task["id"]
 
         best_id = None
         best_score = 0
@@ -507,13 +622,22 @@ class VoiceChecklist:
                 best_score = score
                 best_id = task["id"]
 
-        return best_id if best_score >= 1 else None
+        if best_id:
+            return best_id
+
+        # Last resort: typed the start of a task name ("announce", "review").
+        if len(spoken_lower) >= 4:
+            for task in self.tasks:
+                if not task["done"] and str(task.get("task", "")).lower().startswith(spoken_lower):
+                    return task["id"]
+        return None
 
     def _verify_task(self, task_id: str) -> bool:
         """Run the task's verify function for feedback, then mark it done.
 
         Verify is advisory: if the user named the task, we check it off even when
-        the automated check fails (missing API keys, OBS not streaming yet, etc.).
+        the automated check fails (missing API keys, OBS not streaming yet, etc.),
+        but the result is remembered and listed under "needs a look" at the end.
         Returns True if the task was marked done.
         """
         with self._lock:
@@ -527,23 +651,19 @@ class VoiceChecklist:
                 return False
 
         verify_fn = task.get("verify")
-        if not verify_fn:
-            self.mark_done(task_id)
-            return True
-
-        # Run the verify function outside the lock (it may take time)
-        print(f"  {CYAN}⚡ Checking: {task['task']}...{RESET}")
-        try:
-            success, message = verify_fn()
-        except Exception as e:
-            success, message = False, f"Verify error: {e}"
-
-        if success:
-            print(f"  {GREEN}✓ {message}{RESET}")
-        else:
-            # Still mark done — user claimed the task by voice/keyboard.
-            print(f"  {YELLOW}⚠ {message}{RESET}")
-            print(f"  {GRAY}  (marking done anyway — you said this one){RESET}")
+        if verify_fn:
+            # Run the verify function outside the lock (it may take time)
+            self._say(f"  {CYAN}⚡ Checking: {task['task']}...{RESET}")
+            success, message = _run_verify(verify_fn)
+            task["verified"] = bool(success)
+            task["note"] = message
+            task["checked_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+            if success:
+                self._say(f"  {GREEN}✓ {message}{RESET}")
+            else:
+                # Still mark done — user claimed the task by voice/keyboard.
+                self._say(f"  {YELLOW}⚠ {message}{RESET}")
+                self._say(f"  {GRAY}  (ticked anyway — you said this one; listed at the end){RESET}")
 
         self.mark_done(task_id)
         return True
@@ -571,37 +691,46 @@ class VoiceChecklist:
                 return True
         return False
 
+    def _handle_text(self, text: str, *, spoken: bool = False) -> None:
+        task_id = self._match_task(text)
+        if task_id:
+            self._verify_task(task_id)
+            return
+        remaining = [t for t in self.tasks if not t["done"]]
+        hints = ", ".join(
+            (t.get("keywords") or [t["id"]])[0] for t in remaining[:4]
+        )
+        src = f'Heard "{text}"' if spoken else f'No unchecked task matches "{text}"'
+        self._say(f"  {YELLOW}{src} — try: {hints}{RESET}")
+
     # ── Voice listener ─────────────────────────────────────────────────────────
+
+    def _voice_off(self, why: str, fix: str = "") -> None:
+        self._say(f"\n  {YELLOW}🎤 Voice is off: {why}{RESET}")
+        if fix:
+            self._say(f"  {GRAY}{fix}{RESET}")
+        self._say(f"  {CYAN}Typing still works — type a keyword + Enter.{RESET}\n")
 
     def _listen_loop(self):
         """Background thread — continuously listens to the mic and checks for matches.
 
-        If speech_recognition or PyAudio is missing (or the mic can't open), fall
-        back to keyboard mode instead of crashing the thread with a traceback.
+        If speech_recognition or PyAudio is missing, the mic can't open, or the
+        speech service keeps failing, voice switches off with a clear note.
+        Typing keeps working the whole time (the input loop runs alongside).
         """
         try:
             import speech_recognition as sr
         except ImportError:
-            print(f"\n{YELLOW}  speech_recognition not installed.{RESET}")
-            print(
-                f"  Run:  uv pip install SpeechRecognition pyaudio\n"
-                f"  (PyAudio also needs PortAudio: brew install portaudio)\n"
+            self._voice_off(
+                "SpeechRecognition isn't installed",
+                "Fix: uv pip install SpeechRecognition pyaudio (PyAudio needs: brew install portaudio)",
             )
-            print(f"  Falling back to keyboard mode — type task names instead.\n")
-            self._keyboard_fallback()
             return
 
-        # Probe mic availability before entering the listen loop so a missing
-        # PyAudio install becomes a clean keyboard fallback, not a Thread-1 boom.
         try:
             import pyaudio  # noqa: F401
         except ImportError:
-            print(f"\n{YELLOW}  PyAudio not installed — voice checklist needs it.{RESET}")
-            print(
-                f"  Run:  brew install portaudio && uv pip install pyaudio\n"
-            )
-            print(f"  Falling back to keyboard mode — type task names instead.\n")
-            self._keyboard_fallback()
+            self._voice_off("PyAudio isn't installed", "Fix: brew install portaudio && uv pip install pyaudio")
             return
 
         recognizer = sr.Recognizer()
@@ -612,11 +741,10 @@ class VoiceChecklist:
         try:
             mic = sr.Microphone()
         except (AttributeError, OSError) as e:
-            print(f"\n{YELLOW}  Could not open microphone: {e}{RESET}")
-            print(f"  Falling back to keyboard mode — type task names instead.\n")
-            self._keyboard_fallback()
+            self._voice_off(f"could not open the microphone ({e})")
             return
 
+        api_errors = 0
         try:
             with mic as source:
                 recognizer.adjust_for_ambient_noise(source, duration=1)
@@ -627,100 +755,152 @@ class VoiceChecklist:
                             source, timeout=5, phrase_time_limit=6
                         )
                         text = recognizer.recognize_google(audio)
-                        print(f'  {GRAY}🎤 Heard: "{text}"{RESET}')
-
-                        task_id = self._match_task(text)
-                        if task_id:
-                            self._verify_task(task_id)
-                        else:
-                            print(
-                                f'  {YELLOW}No matching task — try a keyword '
-                                f'(e.g. "OBS ready", "title set", "Streamlabs", "TikTok"){RESET}'
-                            )
+                        api_errors = 0
+                        if not self._listening:
+                            break
+                        self._say(f'  {GRAY}🎤 Heard: "{text}"{RESET}')
+                        self._handle_text(text, spoken=True)
 
                     except sr.WaitTimeoutError:
                         pass
                     except sr.UnknownValueError:
                         pass
                     except sr.RequestError as e:
-                        print(f"\n  {YELLOW}Speech API error: {e}{RESET}")
+                        api_errors += 1
+                        if api_errors >= 3:
+                            self._voice_off(
+                                f"Google speech-to-text keeps failing ({e})",
+                                "Check your internet connection.",
+                            )
+                            return
                         time.sleep(3)
                     except Exception as e:
-                        print(f"\n  {YELLOW}Listener error: {e}{RESET}")
+                        self._say(f"\n  {YELLOW}Listener error: {e}{RESET}")
                         time.sleep(1)
         except Exception as e:
-            print(f"\n{YELLOW}  Microphone listen failed: {e}{RESET}")
-            print(f"  Falling back to keyboard mode — type task names instead.\n")
-            self._keyboard_fallback()
+            self._voice_off(
+                f"microphone listen failed ({e})",
+                "If macOS blocked it: System Settings → Privacy & Security → Microphone → allow your terminal app.",
+            )
 
+    # ── Keyboard input ─────────────────────────────────────────────────────────
+
+    def _read_line(self, poll: float = 0.5) -> Optional[str]:
+        """Return a typed line, '' if nothing yet, or None on EOF.
+        Uses select so the thread can stop cleanly when the checklist ends
+        (a blocked input() would swallow the next line typed into Bolt)."""
+        stream = sys.stdin
+        try:
+            ready, _, _ = select.select([stream], [], [], poll)
+        except (ValueError, OSError, TypeError):
+            try:
+                return input()
+            except EOFError:
+                return None
+        if not ready:
+            return ""
+        line = stream.readline()
+        if line == "":
+            return None
+        return line.rstrip("\n") or " "
 
     def _keyboard_fallback(self):
-        """If speech_recognition isn't installed, fall back to typing."""
-        print(
-            f"  {CYAN}Type part of a task name and press Enter — Bolt will verify it.{RESET}"
-        )
-        print(f"  {GRAY}(Type 'skip' to exit the checklist){RESET}\n")
+        """Typed input loop. Runs in both modes (alongside the mic in voice mode)."""
+        if not self.use_voice:
+            self._say(f"  {CYAN}Type part of a task name and press Enter — Bolt will check it.{RESET}")
+            self._say(f"  {GRAY}(Type 'skip' to exit the checklist){RESET}\n")
 
         while self._listening and not self._done_event.is_set():
             try:
-                text = input("  > ").strip()
-                if text.lower() in ("skip", "exit", "done", "quit"):
-                    self._done_event.set()
-                    break
-                if text:
-                    task_id = self._match_task(text)
-                    if task_id:
-                        self._verify_task(task_id)
-                    else:
-                        print(f'  {YELLOW}No matching task found for "{text}"{RESET}')
+                line = self._read_line()
             except (EOFError, KeyboardInterrupt):
+                line = None
+            if line is None:
+                # stdin closed: stop typing input; voice (if on) keeps going
+                if not self.use_voice:
+                    self._skipped = True
+                    self._done_event.set()
+                return
+            text = line.strip()
+            if not text:
+                continue
+            if text.lower() in ("skip", "exit", "quit", "q", "done"):
+                self._skipped = True
                 self._done_event.set()
-                break
+                return
+            if text.lower() in ("list", "ls", "?"):
+                self._print_checklist()
+                continue
+            self._handle_text(text)
 
     # ── Run ────────────────────────────────────────────────────────────────────
 
+    def needs_attention(self) -> list:
+        return [t for t in self.tasks if t.get("done") and t.get("verified") is False]
+
     def run(self, timeout_minutes: int = 15) -> list:
         """
-        Show the checklist and start listening.
-        Blocks until all tasks are done or timeout_minutes elapses.
+        Show the checklist and start listening (voice + typing, or typing only).
+        Blocks until all tasks are done, 'skip', Ctrl+C, or timeout_minutes.
         Returns the final task list.
         """
         self._print_initial()
+        if self._done_event.is_set():
+            self._say(f"\n{GREEN}{BOLD}  🎉 Already all done this session.{RESET}\n")
+            return self.tasks
         self._listening = True
 
+        threading.Thread(target=self._keyboard_fallback, daemon=True).start()
         if self.use_voice:
-            listener = threading.Thread(target=self._listen_loop, daemon=True)
-            listener.start()
-        else:
-            fallback = threading.Thread(target=self._keyboard_fallback, daemon=True)
-            fallback.start()
+            threading.Thread(target=self._listen_loop, daemon=True).start()
 
-        timeout_sec = timeout_minutes * 60
-        completed = self._done_event.wait(timeout=timeout_sec)
-        self._listening = False
+        completed = False
+        try:
+            self._done_event.wait(timeout=max(1, int(timeout_minutes * 60)))
+        finally:
+            self._listening = False
+            completed = all(t["done"] for t in self.tasks)
+            self._save_progress()
 
         done_count = sum(1 for t in self.tasks if t["done"])
         total = len(self.tasks)
 
         if completed:
-            print(
-                f"\n{GREEN}{BOLD}  🎉 All verified! Let's get this stream started.{RESET}\n"
-            )
+            self._say(f"\n{GREEN}{BOLD}  🎉 All done! Let's get this stream started.{RESET}")
         else:
-            print(
-                f"\n{YELLOW}  ⏩ Skipping checklist — {done_count}/{total} tasks verified.{RESET}\n"
-            )
-
-        self._save_progress()
+            why = "skipped" if self._skipped else f"timed out after {timeout_minutes} min"
+            self._say(f"\n{YELLOW}  ⏩ Checklist {why} — {done_count}/{total} done.{RESET}")
+            left = [t["task"] for t in self.tasks if not t["done"]]
+            if left:
+                self._say(f"  {GRAY}Not done: {'; '.join(left)}{RESET}")
+        attn = self.needs_attention()
+        if attn:
+            self._say(f"  {YELLOW}Needs a look:{RESET}")
+            for t in attn:
+                self._say(f"  {YELLOW}  • {t['task']}: {t.get('note', '')}{RESET}")
+        self._say("")
         return self.tasks
 
     def run_keyboard_only(self, timeout_minutes: int = 15) -> list:
-        """Same as run() but forces keyboard mode (no mic needed)."""
+        """Same as run() but typing only (no mic)."""
         self.use_voice = False
         return self.run(timeout_minutes)
 
 
-# ── Soft-fail CLI (PARTIAL): bolt checklist ───────────────────────────────────
+def check_all(tasks: Optional[list] = None) -> List[Dict[str, Any]]:
+    """Run every task's check now (non-interactive). Marks nothing done."""
+    rows = []
+    for t in tasks or VoiceChecklist(use_voice=False).tasks:
+        fn = t.get("verify")
+        if fn:
+            ok, msg = _run_verify(fn)
+        else:
+            ok, msg = None, "no automatic check — tick it yourself in `bolt checklist run`"
+        rows.append({"id": t.get("id"), "task": t.get("task"), "ok": ok, "message": msg})
+    return rows
+
+
+# ── CLI (READY): bolt checklist ───────────────────────────────────
 
 _SOFT = "Checklist unavailable:"
 _LAUNCH_PY = CORE / "launch.py"
@@ -867,8 +1047,9 @@ def _launch_wiring() -> Dict[str, Any]:
 
 def status(*, probe: bool = False) -> Dict[str, Any]:
     """
-    Pre-stream checklist readiness. Never raises. Always PARTIAL
-    (mic/STT/permission + William session tasks).
+    Pre-stream checklist readiness. Never raises. READY when the module,
+    tasks and launch wiring are present (typing always works); voice is an
+    extra that needs SpeechRecognition + PyAudio + mic permission.
     """
     try:
         module_path = Path(__file__).resolve()
@@ -910,23 +1091,21 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         if probe and not mic_ready:
             missing.append("mic probe failed (permissions / PortAudio)")
 
-        # Usable soft surface: module + tasks (defaults OK) + launch wiring.
-        # Keyboard path works without mic — still PARTIAL readiness.
+        # Module + tasks (defaults OK) + launch wiring. Typing works without a mic.
         ready = bool(module_present and rows and launch_ok)
 
         if ready:
             error = None
             hint = (
-                "Pre-stream checklist wired via bolt launch. "
-                "Try: bolt checklist list · bolt checklist run --keyboard · "
-                "bolt launch --no-checklist"
+                "Runs at bolt launch (skip: --no-checklist). "
+                "Try: bolt checklist check · bolt checklist run · type a keyword + Enter anytime"
             )
             if not speech_ok or not pyaudio_ok:
-                hint += " · voice gated until SpeechRecognition + PyAudio"
+                hint += " · voice off until SpeechRecognition + PyAudio are installed (typing works)"
             elif probe and not mic_ready:
-                hint += " · mic probe failed — use --keyboard / keyboard fallback"
+                hint += " · mic didn't open — allow your terminal under Privacy & Security → Microphone (typing works)"
             if not tasks_file_present:
-                hint += " · using DEFAULT_TASKS (no Core/session_tasks.json)"
+                hint += " · using DEFAULT_TASKS (add Core/session_tasks.json to customise)"
         else:
             error = _soft("; ".join(missing[:3]) if missing else "checklist not ready")
             hint = error
@@ -934,8 +1113,8 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         out: Dict[str, Any] = {
             "checked_at": _utc_now(),
             "ready": ready,
-            "partial": True,
-            "readiness": "PARTIAL",
+            "partial": not ready,
+            "readiness": "READY" if ready else "PARTIAL",
             "soft_fail_prefix": _SOFT,
             "module_present": module_present,
             "module_path": str(module_path),
@@ -950,6 +1129,8 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
             "mic_ready": bool(mic_ready and speech_ok and pyaudio_ok),
             "mic_presumed": bool(mic_presumed),
             "keyboard_fallback": True,
+            "typing_alongside_voice": True,
+            "voice_available": bool(speech_ok and pyaudio_ok),
             "launch_wiring": wiring,
             "launch_wired": launch_ok,
             "darwin": platform.system() == "Darwin",
@@ -1010,7 +1191,7 @@ def list_items(*, as_json: bool = False) -> int:
                 json.dumps(
                     {
                         "ok": True,
-                        "readiness": "PARTIAL",
+                        "readiness": info.get("readiness", "PARTIAL"),
                         "source": source_note,
                         "tasks_file_present": bool(info.get("tasks_file_present")),
                         "items": [
@@ -1030,7 +1211,7 @@ def list_items(*, as_json: bool = False) -> int:
             )
             return 0
 
-        print("Pre-stream checklist tasks (PARTIAL)")
+        print(f"Pre-stream checklist tasks ({info.get('readiness', 'PARTIAL')})")
         print(f"  source: {source_note}")
         print(f"  tasks file: {TASKS_FILE} ({'present' if TASKS_FILE.is_file() else 'missing → defaults'})")
         for r in rows:
@@ -1053,6 +1234,7 @@ def try_run(
     keyboard: bool = False,
     timeout_minutes: int = 15,
     as_json: bool = False,
+    resume: bool = False,
 ) -> int:
     """
     Soft-fail interactive run. Without a TTY (or without mic when voice
@@ -1073,8 +1255,8 @@ def try_run(
 
         if not interactive:
             msg = _soft(
-                "run needs an interactive TTY — try: bolt checklist run --keyboard "
-                "(or bolt launch); status/list are safe non-interactive"
+                "run needs an interactive terminal (it waits for you to type) — for a quick report use: bolt checklist check "
+                "(it also runs at bolt launch)"
             )
             payload = {
                 "ok": False,
@@ -1102,7 +1284,7 @@ def try_run(
             keyboard = True
             use_voice = False
 
-        cl = VoiceChecklist(use_voice=use_voice)
+        cl = VoiceChecklist(use_voice=use_voice, resume=resume)
         if keyboard:
             cl.run_keyboard_only(timeout_minutes=timeout_minutes)
         else:
@@ -1114,10 +1296,13 @@ def try_run(
                 json.dumps(
                     {
                         "ok": True,
-                        "readiness": "PARTIAL",
+                        "readiness": "READY",
                         "done": done,
                         "total": len(cl.tasks),
                         "keyboard": keyboard or not use_voice,
+                        "needs_attention": [
+                            {"id": t["id"], "note": t.get("note", "")} for t in cl.needs_attention()
+                        ],
                     },
                     indent=2,
                 )
@@ -1139,13 +1324,50 @@ def try_run(
         return 0
 
 
+def print_check(*, as_json: bool = False) -> int:
+    """Run every check now and print a report. Non-interactive; marks nothing."""
+    try:
+        rows = check_all()
+        ok_n = sum(1 for r in rows if r["ok"])
+        if as_json:
+            print(json.dumps({"ok": True, "passed": ok_n, "total": len(rows), "checks": rows}, indent=2))
+            return 0
+        print(f"Pre-stream checks — {ok_n}/{len(rows)} look good")
+        for r in rows:
+            mark = "✓" if r["ok"] else ("·" if r["ok"] is None else "⚠")
+            print(f"  {mark} {r['task']}: {r['message']}")
+        print("  → Tick items off with: bolt checklist run (or it runs at bolt launch)")
+        return 0
+    except Exception as exc:
+        msg = _soft(f"check failed ({exc})")
+        if as_json:
+            print(json.dumps({"ok": False, "error": msg}, indent=2))
+        else:
+            print(msg, file=sys.stderr)
+        return 0
+
+
+def reset_progress(*, as_json: bool = False) -> int:
+    """Clear saved progress so the next run starts fresh."""
+    try:
+        existed = PROGRESS_FILE.is_file()
+        if existed:
+            PROGRESS_FILE.unlink()
+        msg = "Checklist progress cleared." if existed else "No saved checklist progress."
+        print(json.dumps({"ok": True, "cleared": existed}) if as_json else msg)
+        return 0
+    except Exception as exc:
+        print(_soft(f"reset failed ({exc})"), file=sys.stderr)
+        return 0
+
+
 def print_status(*, as_json: bool = False, probe: bool = False) -> int:
     try:
         info = status(probe=probe)
         if as_json:
             print(json.dumps(info, indent=2, default=str))
             return 0
-        print("Bolt pre-stream checklist readiness (PARTIAL)")
+        print(f"Bolt pre-stream checklist readiness ({info.get('readiness')})")
         print(f"  ready: {info.get('ready')}")
         print(f"  readiness: {info.get('readiness')}")
         print(
@@ -1160,6 +1382,7 @@ def print_status(*, as_json: bool = False, probe: bool = False) -> int:
             f"  speech_recognition: {info.get('speech_recognition')} · "
             f"pyaudio: {info.get('pyaudio')} · mic_ready: {info.get('mic_ready')}"
             + (" (presumed)" if info.get("mic_presumed") else "")
+            + " · typing: always on"
         )
         lw = info.get("launch_wiring") or {}
         print(
@@ -1191,15 +1414,19 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in ("-h", "--help", "help"):
         print(
-            """bolt checklist — pre-stream voice checklist readiness (PARTIAL)
+            """bolt checklist — pre-stream checklist (READY)
 
   bolt checklist                                      # status (default)
   bolt checklist status [--json] [--probe]
   bolt checklist list [--json]
-  bolt checklist run [--keyboard|--text] [--timeout N] [--json]
+  bolt checklist check [--json]                       # run every check now
+  bolt checklist run [--keyboard|--text] [--timeout N] [--resume] [--json]
+  bolt checklist reset                                # clear saved progress
 
+In run, type a keyword + Enter any time (voice listens alongside unless
+--keyboard). 'skip' or Ctrl+C moves on. --resume keeps items already done in
+an unfinished session from the last 6 hours (bolt launch does this).
 Soft-fail: "Checklist unavailable:".
-Mic/STT gated — keyboard fallback via --keyboard / --text.
 Skip on launch: bolt launch --no-checklist
 """
         )
@@ -1208,6 +1435,7 @@ Skip on launch: bolt launch --no-checklist
     json_out = "--json" in args
     probe = "--probe" in args
     keyboard = any(a in ("--keyboard", "--text", "--no-voice") for a in args)
+    resume = "--resume" in args
     timeout = 15
     if "--timeout" in args:
         try:
@@ -1217,23 +1445,32 @@ Skip on launch: bolt launch --no-checklist
             timeout = 15
 
     positionals = [a for a in args if not a.startswith("-")]
+    if "--timeout" in args:
+        try:
+            positionals.remove(args[args.index("--timeout") + 1])
+        except Exception:
+            pass
     # Allow legacy: python -m modules.Voice_Checklist --keyboard  (no subcommand)
     if not positionals:
         if keyboard or "--timeout" in args:
-            return try_run(keyboard=True, timeout_minutes=timeout, as_json=json_out)
+            return try_run(keyboard=True, timeout_minutes=timeout, as_json=json_out, resume=resume)
         return print_status(as_json=json_out, probe=probe)
 
     cmd = positionals[0].lower()
-    if cmd in ("status", "check", "ready"):
+    if cmd in ("status", "ready"):
         return print_status(as_json=json_out, probe=probe)
     if cmd in ("list", "ls", "tasks"):
         return list_items(as_json=json_out)
+    if cmd in ("check", "verify", "test"):
+        return print_check(as_json=json_out)
+    if cmd in ("reset", "clear"):
+        return reset_progress(as_json=json_out)
     if cmd in ("run", "start", "interactive"):
-        return try_run(keyboard=keyboard, timeout_minutes=timeout, as_json=json_out)
+        return try_run(keyboard=keyboard, timeout_minutes=timeout, as_json=json_out, resume=resume)
 
     print(f"unknown checklist action: {cmd}", file=sys.stderr)
     print(
-        "  try: bolt checklist status|list|run [--json] [--probe] [--keyboard]",
+        "  try: bolt checklist status|list|check|run|reset [--json] [--probe] [--keyboard] [--resume]",
         file=sys.stderr,
     )
     return 0

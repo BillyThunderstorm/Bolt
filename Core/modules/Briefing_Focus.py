@@ -76,6 +76,22 @@ def testing_items() -> List[Dict[str, Any]]:
     ]
 
 
+ACTIVE_STATUSES = ("testing", "drafting")
+
+
+def active_items() -> List[Dict[str, Any]]:
+    """Lane items still in progress: testing (journaling) or drafting (short not posted)."""
+    try:
+        data = json.loads(CATALOG.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    want = lane()
+    return [
+        i for i in data.get("items", [])
+        if isinstance(i, dict) and i.get("lane") == want and i.get("status") in ACTIVE_STATUSES
+    ]
+
+
 def next_step(item: Dict[str, Any]) -> str:
     notes = item.get("notes_log") or []
     n = len(notes) if isinstance(notes, list) else 0
@@ -90,10 +106,10 @@ def next_step(item: Dict[str, Any]) -> str:
 
 
 def todays_steps() -> List[str]:
-    items = testing_items()
+    items = active_items()
     if not items:
         return [
-            'Pick 1 product you already own and add it: '
-            'bolt manage add "Item" --lane product --status testing'
+            f'Pick your next {lane()} product to test and add it: '
+            f'bolt manage add "Item" --lane {lane()} --status testing'
         ]
     return [next_step(i) for i in items]

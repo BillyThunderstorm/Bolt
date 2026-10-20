@@ -332,6 +332,13 @@ def process_recording(
         level="info",
         reason="Starting the full processing pipeline.",
     )
+    # Errors from any stage are logged with this recording (bolt error-recovery run).
+    try:
+        from modules.Error_Recovery import set_context, record_error
+    except Exception:  # pragma: no cover - never block the pipeline
+        set_context = lambda *_a, **_k: None  # noqa: E731
+        record_error = lambda *_a, **_k: None  # noqa: E731
+    set_context(recording_path)
     try:
         return _process_recording_body(
             recording_path,
@@ -341,7 +348,11 @@ def process_recording(
             chat_bot=chat_bot,
             intelligence=intelligence,
         )
+    except Exception as exc:
+        record_error("process_recording", recording_path, exc)
+        raise
     finally:
+        set_context(None)
         try:
             from modules.Watcher import mark_processed
 
@@ -358,6 +369,29 @@ def _process_recording_body(
     chat_bot=None,
     intelligence: ThinkLearnDecideEngine = None,
 ):
+
+    # ── Readability check (Error_Recovery) ───────────────────────────────────
+    # A file ffprobe can't open used to fall through to "No highlights found —
+    # try lowering highlight_sensitivity" (wrong advice) after a paid Nexus call.
+    # Now it's logged as an error with the real reason and skipped.
+    try:
+        from modules.Error_Recovery import probe_readable
+
+        _check = probe_readable(recording_path)
+    except Exception:
+        _check = {"readable": None}
+    if _check.get("readable") is False:
+        notify_error(
+            "Recording unreadable",
+            f"{filename} {_check.get('detail', 'will not open')}",
+            recoverable=False,
+        )
+        notify(
+            "Skipped — see `bolt error-recovery run`; quarantine with "
+            f'`bolt error-recovery quarantine "{recording_path}"`',
+            level="warning",
+        )
+        return "unreadable"
 
     if hasattr(intelligence, "record_event"):
         intelligence.record_event(

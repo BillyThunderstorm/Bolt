@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-10-18T00:02:09",
+  "updated_at": "2026-10-20T01:20:20",
   "preferred_lanes": [
     "game",
     "tech"
@@ -54,7 +54,7 @@
           "at": "2026-08-13T20:15:46"
         }
       ],
-      "verdict": "4 stars on Amazon — Its nice.",
+      "verdict": "4 stars on Amazon \u2014 Its nice.",
       "priority": 10,
       "last_draft": {
         "item_id": "mouse",
@@ -68,9 +68,9 @@
           "what_worked": "Its cute, lightweight, easy to charge and connect, and very affordable. | Corrected: review was Amazon-only (not social). Silent social default removed from CLI. | Corrected to Amazon-only ship (no social). | Amazon review title: Its nice. Reviewed May 24, 2026. Color: Rose Gold. Verified Purchase. Product: TENMOS Wireless Bluetooth Mouse. Its fine. Not bad. Kind of goes to sleep after about a minute. Battery gets low a little quicker than I expected, but charging it takes maybe an hour or so. Its good enough that if I saw this company [print cut off]",
           "what_got_in_the_way": "Call out friction honestly when logged.",
           "who_it_is_for": "Gamers and tech buyers who want practical takes, not hype.",
-          "verdict": "4 stars on Amazon — Its nice."
+          "verdict": "4 stars on Amazon \u2014 Its nice."
         },
-        "script": "Hook: I've been testing the Mouse — honest take.\nWhat it is: Mouse (tech)\nDemo notes: Its cute, lightweight, easy to charge and connect, and very affordable. | Corrected: review was Amazon-only (not social). Silent social default removed from CLI. | Corrected to Amazon-only ship (no social). | Amazon review title: Its nice. Reviewed May 24, 2026. Color: Rose Gold. Verified Purchase. Product: TENMOS Wireless Bluetooth Mouse. Its fine. Not bad. Kind of goes to sleep after about a minute. Battery gets low a little quicker than I expected, but charging it takes maybe an hour or so. Its good enough that if I saw this company [print cut off]\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: 4 stars on Amazon — Its nice.\nAffiliate: https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20\nDisclosure: honest opinion; links may earn commission.",
+        "script": "Hook: I've been testing the Mouse \u2014 honest take.\nWhat it is: Mouse (tech)\nDemo notes: Its cute, lightweight, easy to charge and connect, and very affordable. | Corrected: review was Amazon-only (not social). Silent social default removed from CLI. | Corrected to Amazon-only ship (no social). | Amazon review title: Its nice. Reviewed May 24, 2026. Color: Rose Gold. Verified Purchase. Product: TENMOS Wireless Bluetooth Mouse. Its fine. Not bad. Kind of goes to sleep after about a minute. Battery gets low a little quicker than I expected, but charging it takes maybe an hour or so. Its good enough that if I saw this company [print cut off]\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: 4 stars on Amazon \u2014 Its nice.\nAffiliate: https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20\nDisclosure: honest opinion; links may earn commission.",
         "affiliate_link": "https://www.amazon.com/dp/B085HNRKPX/?tag=billycarter-20",
         "platforms": [
           "tiktok",
@@ -907,7 +907,7 @@
       "notes_log": [
         {
           "day": 1,
-          "text": "YouTube Short posted this week: https://www.youtube.com/watch?v=gYqRPoCkIy0 — 713 views, 5 likes as of 2026-08-21. Title: if sputtering sounds make you nervous. 4/5.",
+          "text": "YouTube Short posted this week: https://www.youtube.com/watch?v=gYqRPoCkIy0 \u2014 713 views, 5 likes as of 2026-08-21. Title: if sputtering sounds make you nervous. 4/5.",
           "at": "2026-08-23T16:08:00"
         },
         {
@@ -1007,7 +1007,7 @@
           "who_it_is_for": "Gamers and tech buyers who want practical takes, not hype.",
           "verdict": "10/10 - does everything it claims for $21.49; recommend over Elgato. Con: short cords."
         },
-        "script": "Hook: I've been testing the capture card — honest take.\nWhat it is: capture card (tech)\nDemo notes: Simple and easy to set up. | Cords are pretty short; hard to place it somewhere stable. | Would have saved hundreds of dollars and time buying this first.\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: 10/10 - does everything it claims for $21.49; recommend over Elgato. Con: short cords.\nAffiliate: (add ASIN; tag=billycarter-20)\nDisclosure: honest opinion; links may earn commission.",
+        "script": "Hook: I've been testing the capture card \u2014 honest take.\nWhat it is: capture card (tech)\nDemo notes: Simple and easy to set up. | Cords are pretty short; hard to place it somewhere stable. | Would have saved hundreds of dollars and time buying this first.\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: 10/10 - does everything it claims for $21.49; recommend over Elgato. Con: short cords.\nAffiliate: (add ASIN; tag=billycarter-20)\nDisclosure: honest opinion; links may earn commission.",
         "affiliate_link": "(add ASIN; tag=billycarter-20)",
         "platforms": [
           "tiktok",
@@ -1055,7 +1055,7 @@
           "who_it_is_for": "Gamers and tech buyers who want practical takes, not hype.",
           "verdict": "7/10 - works, holds up outside, but needs precise aiming and the hot pink reads as a prop."
         },
-        "script": "Hook: I've been testing the Facmogu Pink Mic Holder — honest take.\nWhat it is: Facmogu Pink Mic Holder (tech)\nDemo notes: Cute but difficult to hear. | Very precise aiming needed, probably the mic. | Eh. Sure?\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: 7/10 - works, holds up outside, but needs precise aiming and the hot pink reads as a prop.\nAffiliate: (add ASIN; tag=billycarter-20)\nDisclosure: honest opinion; links may earn commission.",
+        "script": "Hook: I've been testing the Facmogu Pink Mic Holder \u2014 honest take.\nWhat it is: Facmogu Pink Mic Holder (tech)\nDemo notes: Cute but difficult to hear. | Very precise aiming needed, probably the mic. | Eh. Sure?\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: 7/10 - works, holds up outside, but needs precise aiming and the hot pink reads as a prop.\nAffiliate: (add ASIN; tag=billycarter-20)\nDisclosure: honest opinion; links may earn commission.",
         "affiliate_link": "(add ASIN; tag=billycarter-20)",
         "platforms": [
           "tiktok",
@@ -1075,6 +1075,12 @@
         {
           "day": 90,
           "text": "3 months frequent use; chest strap is the real stability piece, hard to fit."
+        },
+        {
+          "day": null,
+          "date": "2026-10-20",
+          "text": "Short: Format chosen: mix of POV footage (filmed from the holder) and desk talk (phone propped at eye level). Mirror format dropped.",
+          "at": "2026-10-20T01:20:20"
         }
       ],
       "verdict": "8/10 - Highly recommend; almost a necessity for active creators. Con: chest strap fit.",
@@ -1090,20 +1096,28 @@
         "shape": {
           "what_it_is": "K&F Concept Neck Phone Holder (tech)",
           "why_tested": "Real-world game/tech testing for honest creator reviews.",
-          "first_impression": "3 months frequent use; chest strap is the real stability piece, hard to fit.",
-          "what_worked": "3 months frequent use; chest strap is the real stability piece, hard to fit.",
-          "what_got_in_the_way": "Call out friction honestly when logged.",
-          "who_it_is_for": "Gamers and tech buyers who want practical takes, not hype.",
+          "first_impression": "3 months of frequent use.",
+          "what_worked": "Rotates portrait/landscape in one turn; holds the phone hands-free.",
+          "what_got_in_the_way": "Chest strap does the stabilizing and is hard to fit, especially on thinner builds.",
+          "who_it_is_for": "Active creators who film hands-free.",
           "verdict": "8/10 - Highly recommend; almost a necessity for active creators. Con: chest strap fit."
         },
-        "script": "Hook: I've been testing the K&F Concept Neck Phone Holder — honest take.\nWhat it is: K&F Concept Neck Phone Holder (tech)\nDemo notes: 3 months frequent use; chest strap is the real stability piece, hard to fit.\nWho it's for: Gamers and tech buyers who want practical takes, not hype.\nVerdict: 8/10 - Highly recommend; almost a necessity for active creators. Con: chest strap fit.\nAffiliate: (add ASIN; tag=billycarter-20)\nDisclosure: honest opinion; links may earn commission.",
+        "script": "Format: desk talk + POV mix.\n[DESK] Hook: I've worn this K&F neck phone holder for 3 months. Here's the honest take.\n[POV] Real footage filmed from the holder (gaming/desk/walking), hands-free.\n[DESK] Demo: Holder in hand, flips portrait to landscape in one turn. Close-up.\n[DESK] Catch: The chest strap is what really keeps it steady, and it's hard to fit, especially if you're on the thinner side. (show strap)\n[DESK] Who it's for: Active creators who film hands-free.\n[DESK] Verdict: 8/10. It's almost a must if you film while moving.\nDisclosure: I bought this with my own money. Links may earn a commission.",
         "affiliate_link": "(add ASIN; tag=billycarter-20)",
         "platforms": [
           "tiktok",
           "youtube_shorts",
           "x"
         ],
-        "created_at": "2026-10-18T00:02:09"
+        "created_at": "2026-10-18T00:02:09",
+        "approved_at": "2026-10-19T17:34:10",
+        "approved_by": "William (chat 2026-10-19)",
+        "needs": [
+          "desk talk takes (phone propped at eye level)",
+          "POV clip filmed from the holder",
+          "strap close-up"
+        ],
+        "format_style": "desk talk + POV mix"
       },
       "asin": "B0FTWQG28M"
     }

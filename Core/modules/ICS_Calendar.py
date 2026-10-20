@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ICS_Calendar.py — soft-fail CLI for local ICS calendar feeds (PARTIAL)
+ICS_Calendar.py — local ICS calendar feeds (READY, soft-fail)
 =====================================================================
 Soft-fail wrapper around ``scripts/generate_calendar.py`` (writes
 ``Data/calendar/*.ics``). Soft-fail prefix: ``Calendar unavailable:``.
@@ -10,8 +10,13 @@ CLI (via ``bolt calendar``):
   list   [--json]
   run    [--dry-run] [--days N] [--output-dir PATH]
 
-Stay PARTIAL — local ICS subscribe/host is optional William workflow, not a
-stranger-ready product surface. **Distinct from READY Google Calendar OAuth**
+READY (19 Oct 2026, Shells): feeds are correct (queue times converted to
+America/Chicago, posted/rejected entries skipped, duplicate clip+platform
+merged, stable UIDs, RFC 5545 DTSTAMP + line folding, peak windows from
+Core/config.json), written atomically, refreshed daily by the 5 PM briefing
+cron (which now really attaches scheduled_posts.ics to the briefing email
+when posts are coming up). Hosting / webcal subscribe stays optional.
+**Distinct from READY Google Calendar OAuth**
 via ``bolt gcal`` / ``bolt gcal-auth``. Former thin SCRIPT_MAP ``calendar`` →
 ``scripts/generate_calendar.py`` (no soft-fail status/list/run). Thumbnails
 stay READY via ``bolt thumbnails``.
@@ -40,6 +45,7 @@ _FEEDS = (
     "peak_hours.ics",
     "scheduled_posts.ics",
 )
+_STALE_HOURS = 26  # briefing cron refreshes daily at 5 PM
 
 
 def _soft(msg: str) -> str:
@@ -77,9 +83,17 @@ def _feed_meta() -> List[Dict[str, Any]]:
             "size_bytes": 0,
             "mtime": "",
         }
+        row["events"] = 0
+        row["age_hours"] = None
         if row["present"]:
             try:
                 st = path.stat()
+                row["age_hours"] = round(
+                    (datetime.now().timestamp() - st.st_mtime) / 3600.0, 1
+                )
+                text = path.read_text(encoding="utf-8", errors="replace")
+                row["events"] = text.count("BEGIN:VEVENT")
+                row["valid"] = text.startswith("BEGIN:VCALENDAR") and text.rstrip().endswith("END:VCALENDAR")
                 row["size_bytes"] = int(st.st_size)
                 row["mtime"] = datetime.fromtimestamp(
                     st.st_mtime, tz=timezone.utc
@@ -90,14 +104,45 @@ def _feed_meta() -> List[Dict[str, Any]]:
     return rows
 
 
+def _next_post() -> Optional[Dict[str, str]]:
+    """Earliest upcoming event in scheduled_posts.ics (DTSTART is floating
+    local time, so a plain string compare against now works)."""
+    path = _OUT / "scheduled_posts.ics"
+    if not path.is_file():
+        return None
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        return None
+    text = text.replace("\r\n ", "").replace("\n ", "")  # unfold
+    now = datetime.now().strftime("%Y%m%dT%H%M%S")
+    best = None
+    for block in text.split("BEGIN:VEVENT")[1:]:
+        start = summary = ""
+        for line in block.splitlines():
+            if line.startswith("DTSTART"):
+                start = line.split(":", 1)[-1].strip()
+            elif line.startswith("SUMMARY:"):
+                summary = line[8:].replace("\\,", ",").replace("\\;", ";")
+        if start and start >= now and (best is None or start < best[0]):
+            best = (start, summary)
+    if not best:
+        return None
+    try:
+        when = datetime.strptime(best[0][:15], "%Y%m%dT%H%M%S").strftime("%a %b %d %I:%M %p")
+    except Exception:
+        when = best[0]
+    return {"when": when, "summary": best[1]}
+
+
 def status(*, probe: bool = False) -> Dict[str, Any]:
     feeds = _feed_meta()
     present_count = sum(1 for f in feeds if f["present"])
     info: Dict[str, Any] = {
         "checked_at": _iso(),
         "ready": False,
-        "partial": True,
-        "readiness": "PARTIAL",
+        "partial": False,
+        "readiness": "READY",
         "soft_fail_prefix": _SOFT,
         "cli": "bolt calendar",
         "engine": str(_ENGINE),
@@ -115,8 +160,9 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         "probe_ok": None,
         "error": "",
         "hint": (
-            "local ICS feeds under Data/calendar/ · distinct from READY "
-            "bolt gcal OAuth · stay PARTIAL"
+            "local ICS feeds under Data/calendar/ · refreshed by the 5 PM "
+            "briefing · bolt calendar run to refresh now · import a feed "
+            "once (open it in Calendar) · distinct from bolt gcal OAuth"
         ),
         "is_stranger_ready": False,
     }
@@ -130,6 +176,11 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         return info
 
     info["ready"] = True
+    ages = [f["age_hours"] for f in feeds if f.get("age_hours") is not None]
+    info["newest_age_hours"] = min(ages) if ages else None
+    info["stale"] = (not ages) or min(ages) > _STALE_HOURS
+    info["event_counts"] = {f["name"]: f.get("events", 0) for f in feeds}
+    info["next_post"] = _next_post()
     if probe:
         try:
             eng = _load_engine()
@@ -175,7 +226,8 @@ def list_items() -> List[Dict[str, Any]]:
                 "id": f"feed:{feed['name']}",
                 "ok": bool(feed.get("present")),
                 "detail": (
-                    f"{feed['path']} size={feed.get('size_bytes', 0)} "
+                    f"{feed['path']} events={feed.get('events', 0)} "
+                    f"size={feed.get('size_bytes', 0)} "
                     f"mtime={feed.get('mtime') or '-'}"
                 ),
             }
@@ -185,7 +237,7 @@ def list_items() -> List[Dict[str, Any]]:
             "id": "soft_fail",
             "ok": True,
             "detail": (
-                f"prefix {_SOFT!r}; stay PARTIAL; distinct from READY bolt gcal"
+                f"prefix {_SOFT!r}; READY; distinct from READY bolt gcal"
             ),
         }
     )
@@ -276,8 +328,30 @@ def try_run(argv: Optional[List[str]] = None) -> Dict[str, Any]:
             )
         else:
             lines = [f"Wrote ICS feeds -> {out['output_dir']}\n"]
+            counts: Dict[str, int] = {}
             for key, path in written_map.items():
-                lines.append(f"  {key}: {path}\n")
+                n = 0
+                try:
+                    n = Path(path).read_text(encoding="utf-8").count("BEGIN:VEVENT")
+                except Exception:
+                    pass
+                counts[key] = n
+                lines.append(f"  {key}: {n} event(s)  {path}\n")
+            out["event_counts"] = counts
+            if output_dir is None:
+                nxt = _next_post()
+                if nxt:
+                    lines.append(f"  next post: {nxt['when']} · {nxt['summary']}\n")
+                elif counts.get("scheduled_posts", 0) == 0:
+                    lines.append(
+                        f"  no posts scheduled in the next {days} days "
+                        "(queue clips with bolt multi / bolt reprocess)\n"
+                    )
+            lines.append(
+                "  add to Calendar: double-click a .ics in Finder (recurring "
+                "feeds only need importing once); the 5 PM briefing email "
+                "attaches scheduled_posts.ics when posts are coming up\n"
+            )
             out["report"] = "".join(lines)
         return out
     except Exception as exc:
@@ -300,6 +374,17 @@ def _print_status(info: Dict[str, Any], as_json: bool) -> int:
             f"feeds={info.get('feeds_present_count')}/{info.get('feeds_expected')}"
         )
         print(f"  queue:   {_QUEUE}  present={info.get('queue_present')}")
+        counts = info.get("event_counts") or {}
+        if counts:
+            print("  events:  " + " · ".join(
+                f"{k.replace('.ics', '')}={v}" for k, v in counts.items()))
+        age = info.get("newest_age_hours")
+        if age is not None:
+            fresh = "STALE — run bolt calendar run" if info.get("stale") else "fresh"
+            print(f"  updated: {age} h ago ({fresh}; 5 PM briefing refreshes daily)")
+        nxt = info.get("next_post")
+        if nxt:
+            print(f"  next post: {nxt['when']} · {nxt['summary']}")
         if info.get("probe"):
             print(f"  probe_ok: {info.get('probe_ok')}")
         if info.get("error"):
@@ -319,7 +404,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     parser = argparse.ArgumentParser(
         prog="bolt calendar",
-        description="Generate local ICS calendar feeds (PARTIAL; soft-fail).",
+        description="Generate local ICS calendar feeds (READY; soft-fail).",
     )
     parser.add_argument(
         "action",
