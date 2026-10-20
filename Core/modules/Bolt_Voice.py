@@ -67,7 +67,7 @@ except ImportError:
 # ── Config ─────────────────────────────────────────────────────────────────────
 
 # macOS `say` voice — "Voice 3" is Siri Voice 3 on current macOS
-VOICE = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Voice 3"
+VOICE = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Nathan (Enhanced)"
 RATE = int(os.getenv("Bolt_VOICE_RATE") or os.getenv("BOLT_VOICE_RATE") or "190")
 MUTED = (
     os.getenv("Bolt_VOICE_MUTE") or os.getenv("BOLT_VOICE_MUTE") or "false"
@@ -156,6 +156,14 @@ def _speak_now(text: str):
     ElevenLabs only if both key and voice id are set, after the primary path fails.
     """
     if MUTED:
+        return
+
+    if TTS_PROVIDER in ("elevenlabs", "eleven") and ELEVENLABS_KEY and ELEVENLABS_VOICE_ID:
+        if _try_elevenlabs(text):
+            return
+        if _try_macos_say(text):
+            return
+        _try_edge_tts(text)
         return
 
     prefer_macos = TTS_PROVIDER in ("macos", "say", "siri")
