@@ -231,7 +231,7 @@ def _peak_hours():
         start = w.get("start_hour", 0)
         end = w.get("end_hour", 0)
         label = w.get("label", "")
-        active = start <= current_hour < end
+        in_window = start <= current_hour < end
         result.append(
             {
                 "label": label,
@@ -239,7 +239,11 @@ def _peak_hours():
                 "end_hour": end,
                 "start_display": f"{start % 12 or 12} {'AM' if start < 12 else 'PM'}",
                 "end_display": f"{end % 12 or 12} {'AM' if end < 12 else 'PM'}",
-                "active": active,
+                "in_window": in_window,
+                # "active" is read by the deployed billythunderstorm.live page as
+                # "Billy is streaming right now". A peak window is not a stream,
+                # and this file is only refreshed every ~2h, so never claim live.
+                "active": False,
             }
         )
     return result
