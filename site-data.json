@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21 06:11:27",
+  "generated_at": "2026-10-21 14:10:00",
   "status": {
     "clips_made": 0,
     "vertical_clips": 2,
@@ -43,13 +43,13 @@
     }
   ],
   "briefing": {
-    "date": "Tuesday, October 20, 2026",
+    "date": "Wednesday, October 21, 2026",
     "action_items": [
       "Draft the short for capture card and send it for your OK.",
       "Draft the short for Facmogu Pink Mic Holder and send it for your OK.",
       "Draft the short for K&F Concept Neck Phone Holder and send it for your OK."
     ],
-    "source": "morning_2026-10-20.md"
+    "source": "latest_morning.md"
   },
   "peaks": [
     {
@@ -82,14 +82,19 @@
   ],
   "progress": {
     "counts": {
-      "READY": 77,
-      "PARTIAL": 12,
+      "READY": 78,
+      "PARTIAL": 11,
       "SHELL": 0,
       "IDEA": 0
     },
     "total": 89,
-    "percent_ready": 87,
+    "percent_ready": 88,
     "recent": [
+      {
+        "name": "Layout migrate (tidy the top folder)",
+        "date": "2026-10-21",
+        "display": "Oct 21, 1:45 PM CT"
+      },
       {
         "name": "Layout check (tidy top folder)",
         "date": "2026-10-21",
@@ -109,14 +114,9 @@
         "name": "Mac automation (launchd / cron / Shortcuts)",
         "date": "2026-10-20",
         "display": "Oct 20, 8:15 PM CT"
-      },
-      {
-        "name": "Photo OCR (photo/handwriting)",
-        "date": "2026-10-20",
-        "display": "Oct 20, 5:45 PM CT"
       }
     ],
-    "updated": "20 Oct 2026, ~5:45 PM CT",
+    "updated": "21 Oct 2026, ~1:45 PM CT",
     "available": true
   }
 }
