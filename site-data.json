@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21 16:10:00",
+  "generated_at": "2026-10-21 18:10:00",
   "status": {
     "clips_made": 0,
     "vertical_clips": 2,
@@ -49,7 +49,7 @@
       "Draft the short for Facmogu Pink Mic Holder and send it for your OK.",
       "Draft the short for K&F Concept Neck Phone Holder and send it for your OK."
     ],
-    "source": "latest_morning.md"
+    "source": "morning_2026-10-21.md"
   },
   "peaks": [
     {
@@ -82,14 +82,19 @@
   ],
   "progress": {
     "counts": {
-      "READY": 79,
-      "PARTIAL": 10,
+      "READY": 80,
+      "PARTIAL": 9,
       "SHELL": 0,
       "IDEA": 0
     },
     "total": 89,
-    "percent_ready": 89,
+    "percent_ready": 90,
     "recent": [
+      {
+        "name": "Learning notes (study log)",
+        "date": "2026-10-21",
+        "display": "Oct 21, 5:45 PM CT"
+      },
       {
         "name": "Mac app (Bolt.app in the menu bar)",
         "date": "2026-10-21",
@@ -109,14 +114,9 @@
         "name": "Quick health check (bolt health)",
         "date": "2026-10-21",
         "display": "Oct 21, 3:45 AM CT"
-      },
-      {
-        "name": "Performance baseline (Bolt speed check)",
-        "date": "2026-10-20",
-        "display": "Oct 20, 9:45 PM CT"
       }
     ],
-    "updated": "21 Oct 2026, ~1:45 PM CT",
+    "updated": "21 Oct 2026, ~5:45 PM CT",
     "available": true
   }
 }
