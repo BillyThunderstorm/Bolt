@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20 20:10:00",
+  "generated_at": "2026-10-21 02:10:00",
   "status": {
     "clips_made": 0,
     "vertical_clips": 2,
@@ -76,20 +76,30 @@
       "end_hour": 22,
       "start_display": "7 PM",
       "end_display": "10 PM",
-      "in_window": true,
+      "in_window": false,
       "active": false
     }
   ],
   "progress": {
     "counts": {
-      "READY": 73,
-      "PARTIAL": 16,
+      "READY": 75,
+      "PARTIAL": 14,
       "SHELL": 0,
       "IDEA": 0
     },
     "total": 89,
-    "percent_ready": 82,
+    "percent_ready": 84,
     "recent": [
+      {
+        "name": "Performance baseline (Bolt speed check)",
+        "date": "2026-10-20",
+        "display": "Oct 20, 9:45 PM CT"
+      },
+      {
+        "name": "Mac automation (launchd / cron / Shortcuts)",
+        "date": "2026-10-20",
+        "display": "Oct 20, 8:15 PM CT"
+      },
       {
         "name": "Photo OCR (photo/handwriting)",
         "date": "2026-10-20",
@@ -104,16 +114,6 @@
         "name": "Mac / Voice / email / iMessage alerts",
         "date": "2026-10-20",
         "display": "Oct 20, 9:40 AM CT"
-      },
-      {
-        "name": "Error recovery (pipeline errors + quarantine)",
-        "date": "2026-10-20",
-        "display": "Oct 20, 7:45 AM CT"
-      },
-      {
-        "name": "Clip cleanup (retention)",
-        "date": "2026-10-20",
-        "display": "Oct 20, 7:10 AM CT"
       }
     ],
     "updated": "20 Oct 2026, ~5:45 PM CT",
