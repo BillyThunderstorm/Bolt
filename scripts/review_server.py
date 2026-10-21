@@ -19,7 +19,7 @@ import secrets
 import sys
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import unquote, urlparse
 
@@ -45,7 +45,15 @@ LOOPBACK = "127.0.0.1"
 MAX_BODY = 16_384
 _ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 _ASSET_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+_RANGE_RE = re.compile(r"^bytes=(\d*)-(\d*)$", re.IGNORECASE)
 _TOKEN_HEADER = "X-Bolt-Review-Token"
+_VIDEO_CHUNK = 64 * 1024
+_VIDEO_TYPES = {
+    ".mp4": "video/mp4",
+    ".mov": "video/quicktime",
+    ".m4v": "video/x-m4v",
+    ".webm": "video/webm",
+}
 
 
 class ReviewHTTPServer(ThreadingHTTPServer):
@@ -179,8 +187,130 @@ def _unsafe_path(path: str) -> bool:
     return False
 
 
+def _parse_byte_range(header: str, size: int) -> tuple[int, int] | None:
+    """One `bytes=` range. None means the range cannot be satisfied."""
+    if size < 0:
+        return None
+    match = _RANGE_RE.fullmatch(header.strip())
+    if match is None:
+        return None
+    start_text, end_text = match.group(1), match.group(2)
+    if start_text == "" and end_text == "":
+        return None
+    if start_text == "":
+        length = int(end_text)
+        if length <= 0 or size == 0:
+            return None
+        if length > size:
+            length = size
+        return size - length, size - 1
+    start = int(start_text)
+    if start >= size:
+        return None
+    if end_text == "":
+        end = size - 1
+    else:
+        end = int(end_text)
+        if end >= size:
+            end = size - 1
+    if end < start:
+        return None
+    return start, end
+
+
+def _casefold_child(parent: Path, name: str) -> Path | None:
+    """One path segment, case-insensitive. Does not require the target to stay inside a root."""
+    if name in ("", ".", "..") or "/" in name or "\\" in name or "\x00" in name:
+        return None
+    direct = parent / name
+    try:
+        if direct.exists() or direct.is_symlink():
+            return direct
+    except OSError:
+        return None
+    if not parent.is_dir():
+        return None
+    folded = name.casefold()
+    try:
+        for child in parent.iterdir():
+            if child.name.casefold() == folded:
+                return child
+    except OSError:
+        return None
+    return None
+
+
+def _video_path_denied(raw: str) -> bool:
+    """True when a clip path points at a file the board must not stream.
+
+    Missing files are not denied — the caller answers those with 404.
+    A file outside REVIEW_MEDIA_ROOT, including a symlink that leaves it,
+    and a file whose suffix is not a playable video, are denied.
+    """
+    base = checkup.REVIEW_MEDIA_ROOT.resolve()
+    text = str(raw or "").strip()
+    if not text or "\x00" in text:
+        return False
+    direct = Path(text)
+    if direct.is_absolute():
+        try:
+            if direct.exists() or direct.is_symlink():
+                resolved = direct.resolve()
+                try:
+                    resolved.relative_to(base)
+                except ValueError:
+                    return resolved.is_file()
+        except OSError:
+            return False
+    posix = text.replace("\\", "/")
+    parts = [part for part in PurePosixPath(posix).parts if part not in ("/", "")]
+    if any(part in ("", ".", "..") for part in parts):
+        return True
+    lowers = [part.casefold() for part in parts]
+    rel: list[str] | None = None
+    for index, name in enumerate(lowers):
+        if name == "media":
+            rel = parts[index:]
+            break
+    if rel is None:
+        for index, name in enumerate(lowers):
+            if name in ("clips", "vertical_clips") and (
+                index == 0 or lowers[index - 1] != "media"
+            ):
+                rel = parts[index:]
+                break
+    if not rel:
+        return False
+    current = base
+    escaped = False
+    for part in rel:
+        nxt = _casefold_child(current, part)
+        if nxt is None:
+            return False
+        try:
+            resolved = nxt.resolve()
+            resolved.relative_to(base)
+        except ValueError:
+            escaped = True
+            current = nxt
+            break
+        except OSError:
+            return False
+        current = nxt
+    try:
+        final = current.resolve()
+    except OSError:
+        return escaped
+    if escaped:
+        return final.is_file()
+    if final.is_file() and final.suffix.lower() not in _VIDEO_TYPES:
+        return True
+    return False
+
+
 class ReviewHandler(BaseHTTPRequestHandler):
     server: ReviewHTTPServer
+    protocol_version = "HTTP/1.1"
 
     def log_message(self, fmt: str, *args: Any) -> None:
         sys.stderr.write("[review] " + (fmt % args) + "\n")
@@ -276,6 +406,9 @@ class ReviewHandler(BaseHTTPRequestHandler):
             return
         if route.startswith("/thumb/"):
             self._serve_thumb(route[len("/thumb/") :])
+            return
+        if route.startswith("/video/"):
+            self._serve_video(route[len("/video/") :])
             return
         if route.startswith("/assets/"):
             self._serve_asset(route[len("/assets/") :])
@@ -374,6 +507,94 @@ class ReviewHandler(BaseHTTPRequestHandler):
             self._deny(403, "refused")
             return
         self._bytes(200, thumb.read_bytes(), "image/jpeg")
+
+    def _serve_video(self, clip_id: str) -> None:
+        if not _ID_RE.fullmatch(clip_id):
+            self._deny(403, "refused")
+            return
+        clip_path = ""
+        found = False
+        for row in checkup._load_queue():
+            if not isinstance(row, dict) or str(row.get("id") or "") != clip_id:
+                continue
+            found = True
+            clip_path = str(row.get("clip_path") or "")
+            break
+        if not found:
+            self._deny(404, "No video.")
+            return
+        video = checkup.resolve_clip_in_root(clip_path)
+        if video is None or not video.is_file():
+            if _video_path_denied(clip_path):
+                self._deny(403, "refused")
+                return
+            self._deny(404, "No video.")
+            return
+        try:
+            video.relative_to(checkup.REVIEW_MEDIA_ROOT.resolve())
+        except ValueError:
+            self._deny(403, "refused")
+            return
+        kind = _VIDEO_TYPES.get(video.suffix.lower())
+        if kind is None:
+            self._deny(403, "refused")
+            return
+        self._stream_video(video, kind)
+
+    def _stream_video(self, path: Path, content_type: str) -> None:
+        """Send a video, honoring a single Range so Safari can play it.
+
+        Reads the file in chunks. The whole clip is never loaded into memory.
+        """
+        try:
+            size = path.stat().st_size
+        except OSError:
+            self._deny(404, "No video.")
+            return
+        range_header = self.headers.get("Range")
+        start = 0
+        end = size - 1 if size else -1
+        status = 200
+        if range_header is not None:
+            parsed = _parse_byte_range(range_header, size)
+            if parsed is None:
+                self.send_response(416)
+                self.send_header("Content-Type", content_type)
+                self.send_header("Content-Range", f"bytes */{size}")
+                self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Content-Length", "0")
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.end_headers()
+                return
+            start, end = parsed
+            status = 206
+        length = 0 if end < start else end - start + 1
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Accept-Ranges", "bytes")
+        self.send_header("Content-Length", str(length))
+        if status == 206:
+            self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        if length <= 0:
+            return
+        try:
+            with path.open("rb") as handle:
+                handle.seek(start)
+                remaining = length
+                while remaining > 0:
+                    chunk = handle.read(min(_VIDEO_CHUNK, remaining))
+                    if not chunk:
+                        break
+                    self.wfile.write(chunk)
+                    remaining -= len(chunk)
+        except (BrokenPipeError, ConnectionResetError, TimeoutError):
+            return
+        except OSError:
+            return
 
 
 def create_server(host: str, port: int, token: str | None = None) -> ReviewHTTPServer:

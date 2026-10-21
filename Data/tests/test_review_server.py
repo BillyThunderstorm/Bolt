@@ -84,7 +84,21 @@ def board(review_root):
         thread.join(timeout=3)
 
 
-def _request(httpd, method, path, *, token=None, body=None, host=None, origin=None):
+def _request(httpd, method, path, *, token=None, body=None, host=None, origin=None, extra_headers=None):
+    status, raw, _headers = _exchange(
+        httpd,
+        method,
+        path,
+        token=token,
+        body=body,
+        host=host,
+        origin=origin,
+        extra_headers=extra_headers,
+    )
+    return status, raw
+
+
+def _exchange(httpd, method, path, *, token=None, body=None, host=None, origin=None, extra_headers=None):
     port = httpd.server_address[1]
     conn = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
     headers = {"Host": host or f"127.0.0.1:{port}"}
@@ -92,6 +106,8 @@ def _request(httpd, method, path, *, token=None, body=None, host=None, origin=No
         headers["Origin"] = origin
     if token is not None:
         headers["X-Bolt-Review-Token"] = token
+    if extra_headers:
+        headers.update(extra_headers)
     data = None
     if body is not None:
         data = json.dumps(body).encode("utf-8")
@@ -100,8 +116,9 @@ def _request(httpd, method, path, *, token=None, body=None, host=None, origin=No
     resp = conn.getresponse()
     raw = resp.read()
     status = resp.status
+    response_headers = {key.lower(): value for key, value in resp.getheaders()}
     conn.close()
-    return status, raw
+    return status, raw, response_headers
 
 
 def _json_body(raw: bytes) -> dict:
@@ -160,16 +177,19 @@ def test_gather_review_shape_and_mac_thumbnail(review_root):
     assert first["clip_index"] == 1
     assert first["file_exists"] is True
     assert first["has_thumbnail"] is True
+    assert first["has_video"] is True
     assert first["ghost"] is False
     assert first["pill"] == "ready"
     ghost = next(clip for clip in board["clips"] if clip["id"] == "c33ce003")
     assert ghost["ghost"] is True
     assert ghost["file_exists"] is False
     assert ghost["has_thumbnail"] is False
+    assert ghost["has_video"] is False
     held = next(clip for clip in board["clips"] if clip["id"] == "d44ce004")
     assert held["pill"] == "held"
     assert held["hold_reason"] == "boring"
     assert held["has_thumbnail"] is False
+    assert held["has_video"] is True
     mid = next(clip for clip in board["clips"] if clip["id"] == "g77ce007")
     assert mid["pill"] == "queued"
     assert mid["actionable"] is True
@@ -213,6 +233,10 @@ def test_api_clips_and_real_thumbnail(board):
     html = page.decode("utf-8")
     assert board.review_token in html
     assert "window.BOLT_REVIEW_LIVE=true" in html
+    assert 'playsinline' in html and "/video/" in html
+    clips = {clip["id"]: clip for clip in payload["clips"]}
+    assert clips["a11ce001"]["has_video"] is True
+    assert clips["c33ce003"]["has_video"] is False
     status, thumb = _request(board, "GET", "/thumb/a11ce001")
     assert status == 200
     assert thumb[:2] == b"\xff\xd8"
@@ -398,3 +422,114 @@ def test_path_traversal_is_refused(board, review_root):
         review_root,
     )
     assert escaped is None
+
+
+def _write_queue(root: Path, data: dict) -> None:
+    (root / "ready_to_post.json").write_text(
+        json.dumps(data, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
+def test_video_range_full_request_outside_root_and_missing(board, review_root, monkeypatch):
+    assert set(checkup._PLAYABLE_VIDEO_SUFFIXES) == set(review_server._VIDEO_TYPES)
+    status, raw = _request(board, "GET", "/api/clips")
+    clips = {clip["id"]: clip for clip in _json_body(raw)["clips"]}
+    assert clips["a11ce001"]["has_video"] is True
+    assert clips["g77ce007"]["has_video"] is True
+    assert clips["c33ce003"]["has_video"] is False
+
+    kinds = {
+        ".mp4": "video/mp4",
+        ".mov": "video/quicktime",
+        ".m4v": "video/x-m4v",
+        ".webm": "video/webm",
+    }
+    clip_dir = review_root / "media" / "clips"
+    source = clip_dir / "SAMPLE2889961274_clip07_manual_mark_40.mp4"
+    original = source.read_bytes()
+    for suffix, content_type in kinds.items():
+        target = clip_dir / f"SAMPLE2889961274_clip07_manual_mark_40{suffix}"
+        target.write_bytes(original)
+        data = _queue(review_root)
+        for row in data["clips"]:
+            if row["id"] == "g77ce007":
+                row["clip_path"] = str(target)
+        _write_queue(review_root, data)
+        status, body, headers = _exchange(board, "GET", "/video/g77ce007")
+        assert status == 200, suffix
+        assert body == original
+        assert headers["content-type"] == content_type
+        assert headers["accept-ranges"] == "bytes"
+        assert headers["content-length"] == str(len(original))
+
+    payload = bytes(index % 251 for index in range(200_000))
+    video = clip_dir / "SAMPLE2889961274_clip01_audio_spike_132.mp4"
+    video.write_bytes(payload)
+
+    def _refuse_slurp(self, *args, **kwargs):
+        raise AssertionError(f"video response loaded the whole file: {self}")
+
+    monkeypatch.setattr(Path, "read_bytes", _refuse_slurp)
+
+    status, body, headers = _exchange(board, "GET", "/video/a11ce001")
+    assert status == 200
+    assert body == payload
+    assert headers["content-type"] == "video/mp4"
+    assert headers["accept-ranges"] == "bytes"
+    assert headers["content-length"] == str(len(payload))
+    assert "content-range" not in headers
+
+    start, end = 70_000, 139_999
+    status, body, headers = _exchange(
+        board,
+        "GET",
+        "/video/a11ce001",
+        extra_headers={"Range": f"bytes={start}-{end}"},
+    )
+    assert status == 206
+    assert body == payload[start : end + 1]
+    assert headers["content-range"] == f"bytes {start}-{end}/{len(payload)}"
+    assert headers["content-length"] == str(end - start + 1)
+    assert headers["accept-ranges"] == "bytes"
+    assert headers["content-type"] == "video/mp4"
+
+    status, body, headers = _exchange(
+        board,
+        "GET",
+        "/video/a11ce001",
+        extra_headers={"Range": "bytes=4-"},
+    )
+    assert status == 206
+    assert body == payload[4:]
+    assert headers["content-range"] == f"bytes 4-{len(payload) - 1}/{len(payload)}"
+
+    status, missing, headers = _exchange(board, "GET", "/video/c33ce003")
+    assert status == 404
+    assert _json_body(missing)["ok"] is False
+    assert b"SECRET-VIDEO-OUTSIDE" not in missing
+    status, missing, _headers = _exchange(board, "GET", "/video/missing1")
+    assert status == 404
+
+    secret = review_root.parent / "secret.mp4"
+    secret.write_bytes(b"SECRET-VIDEO-OUTSIDE" + payload[:24])
+    data = _queue(review_root)
+    data["clips"].append(
+        {
+            "id": "outsid02",
+            "title": "SAMPLE outside video",
+            "score": 10,
+            "status": "ready",
+            "clip_path": str(secret),
+        }
+    )
+    _write_queue(review_root, data)
+    status, body, _headers = _exchange(board, "GET", "/video/outsid02")
+    assert status == 403
+    assert b"SECRET-VIDEO-OUTSIDE" not in body
+
+    video.unlink()
+    video.symlink_to(secret)
+    status, body, _headers = _exchange(board, "GET", "/video/a11ce001")
+    assert status == 403
+    assert b"SECRET-VIDEO-OUTSIDE" not in body
