@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21 04:10:00",
+  "generated_at": "2026-10-21 06:11:27",
   "status": {
     "clips_made": 0,
     "vertical_clips": 2,
@@ -82,14 +82,19 @@
   ],
   "progress": {
     "counts": {
-      "READY": 76,
-      "PARTIAL": 13,
+      "READY": 77,
+      "PARTIAL": 12,
       "SHELL": 0,
       "IDEA": 0
     },
     "total": 89,
-    "percent_ready": 85,
+    "percent_ready": 87,
     "recent": [
+      {
+        "name": "Layout check (tidy top folder)",
+        "date": "2026-10-21",
+        "display": "Oct 21, 5:50 AM CT"
+      },
       {
         "name": "Quick health check (bolt health)",
         "date": "2026-10-21",
@@ -109,11 +114,6 @@
         "name": "Photo OCR (photo/handwriting)",
         "date": "2026-10-20",
         "display": "Oct 20, 5:45 PM CT"
-      },
-      {
-        "name": "SMS/email notify (bolt send)",
-        "date": "2026-10-20",
-        "display": "Oct 20, 3:45 PM CT"
       }
     ],
     "updated": "20 Oct 2026, ~5:45 PM CT",
