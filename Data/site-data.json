@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20 07:55:43",
+  "generated_at": "2026-10-20 20:10:00",
   "status": {
     "clips_made": 0,
     "vertical_clips": 2,
@@ -43,13 +43,13 @@
     }
   ],
   "briefing": {
-    "date": "Monday, October 19, 2026",
+    "date": "Tuesday, October 20, 2026",
     "action_items": [
       "Draft the short for capture card and send it for your OK.",
       "Draft the short for Facmogu Pink Mic Holder and send it for your OK.",
       "Draft the short for K&F Concept Neck Phone Holder and send it for your OK."
     ],
-    "source": "morning_2026-10-19.md"
+    "source": "morning_2026-10-20.md"
   },
   "peaks": [
     {
@@ -58,7 +58,7 @@
       "end_hour": 9,
       "start_display": "7 AM",
       "end_display": "9 AM",
-      "in_window": true,
+      "in_window": false,
       "active": false
     },
     {
@@ -76,20 +76,35 @@
       "end_hour": 22,
       "start_display": "7 PM",
       "end_display": "10 PM",
-      "in_window": false,
+      "in_window": true,
       "active": false
     }
   ],
   "progress": {
     "counts": {
-      "READY": 70,
-      "PARTIAL": 19,
+      "READY": 73,
+      "PARTIAL": 16,
       "SHELL": 0,
       "IDEA": 0
     },
     "total": 89,
-    "percent_ready": 79,
+    "percent_ready": 82,
     "recent": [
+      {
+        "name": "Photo OCR (photo/handwriting)",
+        "date": "2026-10-20",
+        "display": "Oct 20, 5:45 PM CT"
+      },
+      {
+        "name": "SMS/email notify (bolt send)",
+        "date": "2026-10-20",
+        "display": "Oct 20, 3:45 PM CT"
+      },
+      {
+        "name": "Mac / Voice / email / iMessage alerts",
+        "date": "2026-10-20",
+        "display": "Oct 20, 9:40 AM CT"
+      },
       {
         "name": "Error recovery (pipeline errors + quarantine)",
         "date": "2026-10-20",
@@ -99,24 +114,9 @@
         "name": "Clip cleanup (retention)",
         "date": "2026-10-20",
         "display": "Oct 20, 7:10 AM CT"
-      },
-      {
-        "name": "Clip compress (shrink clips)",
-        "date": "2026-10-20",
-        "display": "Oct 20, 5:40 AM CT"
-      },
-      {
-        "name": "Pre-stream checklist",
-        "date": "2026-10-20",
-        "display": "Oct 20, 1:45 AM CT"
-      },
-      {
-        "name": "ICS calendar (local feeds)",
-        "date": "2026-10-19",
-        "display": "Oct 19, 11:45 PM CT"
       }
     ],
-    "updated": "20 Oct 2026, ~7:45 AM CT",
+    "updated": "20 Oct 2026, ~5:45 PM CT",
     "available": true
   }
 }
