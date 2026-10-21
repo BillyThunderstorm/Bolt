@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21 14:10:00",
+  "generated_at": "2026-10-21 16:10:00",
   "status": {
     "clips_made": 0,
     "vertical_clips": 2,
@@ -82,14 +82,19 @@
   ],
   "progress": {
     "counts": {
-      "READY": 78,
-      "PARTIAL": 11,
+      "READY": 79,
+      "PARTIAL": 10,
       "SHELL": 0,
       "IDEA": 0
     },
     "total": 89,
-    "percent_ready": 88,
+    "percent_ready": 89,
     "recent": [
+      {
+        "name": "Mac app (Bolt.app in the menu bar)",
+        "date": "2026-10-21",
+        "display": "Oct 21, 3:45 PM CT"
+      },
       {
         "name": "Layout migrate (tidy the top folder)",
         "date": "2026-10-21",
@@ -109,11 +114,6 @@
         "name": "Performance baseline (Bolt speed check)",
         "date": "2026-10-20",
         "display": "Oct 20, 9:45 PM CT"
-      },
-      {
-        "name": "Mac automation (launchd / cron / Shortcuts)",
-        "date": "2026-10-20",
-        "display": "Oct 20, 8:15 PM CT"
       }
     ],
     "updated": "21 Oct 2026, ~1:45 PM CT",
