@@ -663,7 +663,7 @@ bolt review --port 8767
 
 Opened as a file (`App/Clip_Review.html`), the page is read-only. Toss copies `bolt dontpost <id> "<reason>"`. Undo copies `bolt queue unhold <id>`. Keep has no safe shell command — use `bolt review`.
 
-Thumbnails are the `.jpg` `bolt thumbnails` writes next to a clip. Paths in the queue may be absolute Mac paths; the board resolves them inside the repo and will not serve a file outside it.
+Thumbnails are the `.jpg` `bolt thumbnails` writes next to a clip. Tap a thumbnail that has a play badge to watch the clip inline (`GET /video/<id>`, with HTTP Range so Safari can play it). Paths in the queue may be absolute Mac paths; the board resolves them inside the repo and will not serve a file outside it. Playable files are `.mp4`, `.mov`, `.m4v`, and `.webm`.
 
 Checkup shows a Clip review card from `Bolt_DATA.review` after `bolt checkup`. Ranking does **not** read keep/toss yet. That is a later upgrade.
 

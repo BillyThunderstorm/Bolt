@@ -184,7 +184,47 @@
       align-items: center;
       justify-content: center;
     }
-    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb img,
+    .thumb video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: #0b0f17;
+    }
+    .thumb-hit {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font: inherit;
+    }
+    .play-badge {
+      position: absolute;
+      z-index: 2;
+      right: 6px;
+      bottom: 6px;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(11, 15, 23, 0.8);
+      color: #fff;
+      pointer-events: none;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+    }
+    .play-badge svg { display: block; }
     .placeholder {
       text-align: center; color: var(--muted); padding: 12px;
     }
@@ -239,6 +279,7 @@
     .toss:focus-visible,
     .confirm:focus-visible,
     .undo:focus-visible,
+    .thumb-hit:focus-visible,
     .reason-input:focus-visible {
       outline: 2px solid #fffaf3;
       outline-offset: 2px;
@@ -702,24 +743,25 @@
       function thumbNode(clip) {
         var thumb = document.createElement("div");
         thumb.className = "thumb";
+        var playable = !!(clip.has_video && clip.id);
+        var host = thumb;
+        if (playable) {
+          host = document.createElement("button");
+          host.type = "button";
+          host.className = "thumb-hit";
+          host.setAttribute("data-act", "play");
+          host.setAttribute("aria-label", "Play " + (clip.title || "clip"));
+          thumb.appendChild(host);
+        }
         if (clip.has_thumbnail && clip.id) {
           var img = document.createElement("img");
           img.alt = "";
           img.src = "/thumb/" + encodeURIComponent(clip.id);
-          thumb.appendChild(img);
+          host.appendChild(img);
         } else {
-          var placeholder = document.createElement("div");
-          placeholder.className = "placeholder";
-          var mark = document.createElement("span");
-          mark.className = "mark";
-          mark.textContent = "⚡";
-          var who = document.createElement("div");
-          who.className = "who";
-          who.textContent = clip.trigger || "no trigger";
-          placeholder.appendChild(mark);
-          placeholder.appendChild(who);
-          thumb.appendChild(placeholder);
+          host.appendChild(placeholderNode(clip));
         }
+        if (playable) host.appendChild(playBadge());
         if (clip.ghost) {
           var badge = document.createElement("span");
           badge.className = "ghost-badge";
@@ -727,6 +769,65 @@
           thumb.appendChild(badge);
         }
         return thumb;
+      }
+
+      function placeholderNode(clip) {
+        var placeholder = document.createElement("div");
+        placeholder.className = "placeholder";
+        var mark = document.createElement("span");
+        mark.className = "mark";
+        mark.textContent = "⚡";
+        var who = document.createElement("div");
+        who.className = "who";
+        who.textContent = clip.trigger || "no trigger";
+        placeholder.appendChild(mark);
+        placeholder.appendChild(who);
+        return placeholder;
+      }
+
+      function playBadge() {
+        var badge = document.createElement("span");
+        badge.className = "play-badge";
+        badge.setAttribute("aria-hidden", "true");
+        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.setAttribute("width", "12");
+        svg.setAttribute("height", "12");
+        svg.setAttribute("aria-hidden", "true");
+        var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("fill", "currentColor");
+        path.setAttribute("d", "M8 5v14l11-7z");
+        svg.appendChild(path);
+        badge.appendChild(svg);
+        return badge;
+      }
+
+      function playThumb(thumb, id) {
+        if (!thumb || !id || thumb.querySelector("video")) return;
+        var clip = clipById(id);
+        var video = document.createElement("video");
+        video.controls = true;
+        video.playsInline = true;
+        video.setAttribute("playsinline", "");
+        video.preload = "metadata";
+        video.autoplay = true;
+        video.poster = "/thumb/" + encodeURIComponent(id);
+        video.src = "/video/" + encodeURIComponent(id);
+        video.setAttribute("aria-label", (clip && clip.title) || "Clip");
+        video.addEventListener("play", function () { pauseOtherVideos(video); });
+        var hit = thumb.querySelector(".thumb-hit");
+        if (hit) hit.replaceWith(video);
+        else thumb.appendChild(video);
+        pauseOtherVideos(video);
+        var started = video.play();
+        if (started && typeof started.catch === "function") started.catch(function () {});
+      }
+
+      function pauseOtherVideos(current) {
+        var nodes = boardEl.querySelectorAll("video");
+        for (var i = 0; i < nodes.length; i += 1) {
+          if (nodes[i] !== current) nodes[i].pause();
+        }
       }
 
       function scorePill(score) {
@@ -769,6 +870,10 @@
         if (!card) return;
         var act = button.getAttribute("data-act");
         var id = card.getAttribute("data-id") || "";
+        if (act === "play") {
+          playThumb(button.closest(".thumb"), id);
+          return;
+        }
         if (act === "toss") {
           var panel = card.querySelector(".toss-panel");
           if (panel) panel.hidden = false;
@@ -842,7 +947,7 @@
         if (state.busy) return;
         state.busy = true;
         clearError(card);
-        var buttons = card.querySelectorAll("button");
+        var buttons = card.querySelectorAll("button:not(.thumb-hit)");
         buttons.forEach(function (button) { button.disabled = true; });
         request().then(function (data) {
           state.busy = false;
