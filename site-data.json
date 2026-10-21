@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21 02:10:00",
+  "generated_at": "2026-10-21 04:10:00",
   "status": {
     "clips_made": 0,
     "vertical_clips": 2,
@@ -82,14 +82,19 @@
   ],
   "progress": {
     "counts": {
-      "READY": 75,
-      "PARTIAL": 14,
+      "READY": 76,
+      "PARTIAL": 13,
       "SHELL": 0,
       "IDEA": 0
     },
     "total": 89,
-    "percent_ready": 84,
+    "percent_ready": 85,
     "recent": [
+      {
+        "name": "Quick health check (bolt health)",
+        "date": "2026-10-21",
+        "display": "Oct 21, 3:45 AM CT"
+      },
       {
         "name": "Performance baseline (Bolt speed check)",
         "date": "2026-10-20",
@@ -109,11 +114,6 @@
         "name": "SMS/email notify (bolt send)",
         "date": "2026-10-20",
         "display": "Oct 20, 3:45 PM CT"
-      },
-      {
-        "name": "Mac / Voice / email / iMessage alerts",
-        "date": "2026-10-20",
-        "display": "Oct 20, 9:40 AM CT"
       }
     ],
     "updated": "20 Oct 2026, ~5:45 PM CT",
