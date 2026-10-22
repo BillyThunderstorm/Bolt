@@ -242,8 +242,8 @@ Script subcommands (each maps to scripts/X.py):
                           Nexus advice (Ollama free; --paid = Grok)
                           status [--json|--probe]; soft-fail LLM unavailable:
                           aliases: advice, nexus-status, nexus_status
-  performance [status|list|run]  Local import/startup baseline (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--dry-run]
+  performance [status|run|last|list]  Bolt speed check (READY; soft-fail)
+                          run [--quick] [--no-save] [--json]; last = newest report
                           aliases: baseline, perf-baseline, performance-baseline
   site [--push]           Write site-data.json (local; --push soft-fails)
   sites [status]            Sites + storage cron readiness (--json|--probe; soft-fail)
@@ -263,10 +263,10 @@ Script subcommands (each maps to scripts/X.py):
                           aliases: reprocess_clips, reprocess-clips, reprocess-status,
                           vertical-reprocess, tiktok-reprocess
                           (former SHELL wrong PROJECT_ROOT; no TikTok auto-upload)
-  health [status|list|run]  Lightweight post-reorg health smoke (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--dry-run]
+  health [status|list|run]  Quick "ready to make clips?" check, fix for every problem (READY)
+                          run [--json] [--no-network]; status [--json|--probe]; list
                           aliases: health-check, health_check, health-status, system-health
-                          (former SHELL pre-reorg CWD paths; prefer bolt doctor)
+                          (full audit of every feature: bolt doctor)
   clip-dedupe [status|list|run]  Find byte-identical media copies (READY; read-only)
                           status [--json|--probe]; list; run [--dry-run] [--scan DIR]
                           run --check FILE; run --clear-db; aliases: clip_dedupe,
@@ -303,11 +303,11 @@ Script subcommands (each maps to scripts/X.py):
   discord [status|test|send]  Optional Discord webhook alerts (not a bot; soft-fail)
                           status [--json|--probe]; test; send "msg"
                           aliases: discord-status, webhook, notify-discord
-  learning [status|list|show]  Browse Data/learning study notes (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; show <slug>
+  learning [status|list|show|search|new|edit]  Study log in Data/learning (READY)
+                          status [--json|--probe]; list; show <slug|N>; search "words"; new "Title"; edit <slug>
                           aliases: learn, notes, study-notes
-  domains [status|list|show]   Browse creator-domain requirements (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; show <slug|N>
+  domains [status|list|show|search|open]   Creator-domain specs browser (READY; spec only)
+                          status [--json|--probe]; list; show <N|word> [--req|--behavior]; search "words"; open [instructions]
                           aliases: domain, creator-domains, creator_domains
   pages [status|list|deploy]   Cloudflare Pages deploy readiness (PARTIAL; soft-fail)
                           status [--json|--probe]; list; deploy [project] [--dry-run]
@@ -315,14 +315,14 @@ Script subcommands (each maps to scripts/X.py):
   license [status|list|show|set]  Repo LICENSE / README placeholder (PARTIAL; soft-fail)
                           status [--json|--probe]; list; show; set <spdx> [--dry-run]
                           aliases: licence, SPDX, license-status
-  mac-app [status|list|build]  Local macOS .app assemble (PARTIAL; soft-fail)
+  mac-app [status|list|build|install|open]  Bolt.app menu bar app in ~/Applications (READY; not notarized)
                           status [--json|--probe]; list; build [--dry-run]
                           aliases: macapp, bolt-app, app-bundle, app-status
-  mac-auto [status|list|install]  Mac launchd/cron/Shortcuts (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; install [step] [--dry-run]
+  mac-auto [status|list|install]  Is each cron job / launchd agent / Shortcut working? (READY)
+                          status [--json|--probe]; list; install [step] [--apply] (dry run by default)
                           aliases: mac_auto, mac-automation, automation, shortcuts-status, launchd-status
-  alerts [status|list|test|send]  Mac/Voice/email/iMessage alerts (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; test; send "msg"
+  alerts [status|list|test|send]  Mac/Voice/email/iMessage alerts (READY)
+                          status [--json|--probe|--banner]; list; test [--no-sms|--only …]; send "msg"
                           aliases: alert, alert-status, notify-alerts, bolt-alerts
   checklist [status|list|check|run|reset]  Pre-stream checklist (READY)
                           status [--json|--probe]; list; check; run [--keyboard] [--resume]; reset
@@ -330,7 +330,7 @@ Script subcommands (each maps to scripts/X.py):
   reminders [status|list|test|send]  Apple Reminders.app delivery (PARTIAL; soft-fail)
                           status [--json|--probe]; list; test; send "msg"
                           aliases: reminder, reminders-status, apple-reminders, remind
-  photo-ocr [status|list|run]  Photo/handwriting OCR → .txt (PARTIAL; soft-fail)
+  photo-ocr [status|list|run]  Photo/handwriting OCR → .txt (READY; soft-fail)
                           status [--json|--probe]; list; run <images…> [--open] [--stdout] [-o PATH]
                           aliases: photo_ocr, photo-ocr-status, ocr-photos, ocr_photos, vision-ocr
   compress [status|list|run|clean-backups]  shrink clips in media/clips (READY; soft-fail)
@@ -342,7 +342,7 @@ Script subcommands (each maps to scripts/X.py):
   brain [status|test]   Legacy Brain_Controller readiness (compat; Think_Learn_Decide is canonical; soft-fail)
   sync_tiktok_stats       Pull TikTok views/likes into performance log
   sync_youtube_stats      Pull YouTube/Shorts views/likes into performance log
-  send [status|list|send|run]  SMS/email notify (PARTIAL; soft-fail)
+  send [status|list|send|run]  Text + email yourself (READY; --dry-run)
                           status [--json|--probe]; list; send "msg" [--sms-only|--email-only]
                           aliases: notify, send-notify, send-status, notify-status
                           (former thin SCRIPT_MAP; prefers Bolt_Alerts; distinct from bolt alerts/discord)
@@ -364,8 +364,8 @@ Script subcommands (each maps to scripts/X.py):
                           status [--json|--probe]; list; run [--once|--folder PATH]
                           aliases: watch-status, folder-watch, watch-folder
                           (former thin SCRIPT_MAP; prefer bolt launch for live)
-  obs-game [status|list|run]  OBS scene→config game tracker (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--once|--background]
+  obs-game [status|list|run|stop]  OBS scene→config game tracker (READY; soft-fail)
+                          status [--json|--no-obs]; list; run [--dry-run|--watch|--background]; stop
                           aliases: obs_game, game-tracker, game_tracker, obs-game-tracker, obs_game_tracker, obs-game-status, obs_game_status
                           (former thin IDEA update_game_from_obs; distinct from READY bolt obs)
   game [status|refresh|set|unpin|history]  Current game freshness (READY; follows Twitch)
@@ -383,33 +383,33 @@ Script subcommands (each maps to scripts/X.py):
                           run <folder> [--artist NAME] [--title NAME] [--cover FILE] [--dry-run] [--json]
                           → WAV 44.1k/16-bit + metadata.csv/json + CHECKLIST.md
                           aliases: song-release, music-release, release-status
-  icloud [status|list|run]  iCloud Drive multi-Mac sync (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--dry-run|--apply] [--script move|shared|setup]
+  icloud [status|list|run]  iCloud Drive multi-Mac sync (READY 22 Oct 2026; run = dry-run report, --apply copies)
+                          status [--json|--probe]; list; run [--dry-run|--apply] [--only PATH] [--max-mb N]
                           aliases: icloud-sync, iCloud, move-to-icloud, icloud-status
-                          (former unnamed IDEA scripts/move_to_icloud.sh; distinct from PARTIAL bolt mac-auto)
+                          (former unnamed IDEA scripts/move_to_icloud.sh; distinct from READY bolt mac-auto)
   game-config [status|list|show|set]  Per-game sensitivity profiles used by clips/wrap/OBS (READY)
                           status [--json|--probe]; list; show [game]; set <game> KEY=VALUE …
                           aliases: game_config, gameconfig, games, game-profiles, game-config-status
-                          (former unnamed IDEA Core/modules/Game_Config.py; distinct from PARTIAL bolt obs-game)
+                          (former unnamed IDEA Core/modules/Game_Config.py; distinct from READY bolt obs-game)
   error-recovery [status|list|run|quarantine|restore|clear]  What failed in the clip pipeline + what to try (READY)
                           run [--days N|--all-time] [--no-probe] [--json] (log: Data/pipeline_errors.jsonl);
                           quarantine FILE [--reason …] [--dry-run]; restore [NAME …|--all]; clear (archives log)
                           aliases: error_recovery, recovery, quarantine, error-tracker, error-recovery-status
-                          (errors logged by notifier.notify_error; distinct from PARTIAL bolt discord / alerts)
+                          (errors logged by notifier.notify_error; distinct from READY bolt discord / alerts)
   memsearch [status|list|run]  Search Bolt's local memory (READY; auto-rebuilds stale index)
                           status [--json|--probe]; list; run|search|query "…" [--limit N] [--refresh|--no-refresh] [--dry-run]
                           aliases: memory-search, mem-search, search-memory, memory_search, memsearch-status
                           (former IDEA Phase 4 memory-search; distinct from READY bolt search web
                           + READY bolt memory / bolt refresh-memory)
-  layout [status|list|run]  Repo-root layout audit (PARTIAL; soft-fail)
+  layout [status|list|run]  Tidy-top-folder check (READY; report only; run --all)
                           status [--json|--probe]; list; run [--quiet|--json]
                           aliases: check-layout, check_layout, layout-status
                           (former thin SCRIPT_MAP; report-only — never moves)
-  migrate-layout [status|list|run]
-                          Layout drift migrator (PARTIAL; soft-fail)
-                          status [--json|--probe]; list; run [--apply|--yes|--dry-run|--json]
+  migrate-layout [status|list|run|undo]
+                          Move stray top-folder files home (READY; soft-fail)
+                          status [--json|--probe]; list; run [--apply|--tidy-empty|--dry-run|--json]; undo
                           aliases: migrate_layout, layout-migrate, migrate-status
-                          (dry-run default; companion to bolt layout; never apply on status)
+                          (dry-run default; never overwrites; logged + undo; companion to bolt layout)
   merge-py [status|run|--dry-run|--list] [-o PATH]
                           Concatenate local .py sources → Data/merged_bot.py
                           (aliases: merge_py, merge-sources). Soft-fail.
@@ -1639,7 +1639,7 @@ print('System is fully upgraded.')
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
 
-    # Built-in: local macOS .app assemble (Bolt_Mac_App; soft-fail; PARTIAL)
+    # Built-in: local macOS Bolt.app (Bolt_Mac_App; soft-fail; READY 21 Oct 2026)
     if subcommand in (
         "mac-app",
         "mac_app",
@@ -1666,7 +1666,7 @@ print('System is fully upgraded.')
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
 
-    # Built-in: Mac automation launchd/cron/Shortcuts (Mac_Automation; soft-fail; PARTIAL)
+    # Built-in: Mac automation launchd/cron/Shortcuts (Mac_Automation; soft-fail; READY 20 Oct 2026)
     if subcommand in (
         "mac-auto",
         "mac_auto",
@@ -1694,11 +1694,11 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: SMS/email notify (Send_Notify; soft-fail; PARTIAL)
+    # Built-in: SMS/email notify (Send_Notify; soft-fail; READY 20 Oct 2026)
     # Former thin SCRIPT_MAP send/notify -> scripts/send_notification.py
     # (no soft-fail status/list/run). Prefers Bolt_Alerts.notify (same path as
-    # weekly --send / bolt alerts). Distinct from PARTIAL bolt alerts (full
-    # Mac/Voice surface) and PARTIAL bolt discord (webhooks).
+    # weekly --send / bolt alerts). Distinct from READY bolt alerts (full
+    # Mac/Voice surface) and READY bolt discord (webhooks).
     if subcommand in (
         "send",
         "notify",
@@ -1732,7 +1732,7 @@ print('System is fully upgraded.')
         cmd = [py, "-m", "modules.Send_Notify"] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
-    # Built-in: Mac/Voice/email/iMessage alerts (Bolt_Alerts; soft-fail; PARTIAL)
+    # Built-in: Mac/Voice/email/iMessage alerts (Bolt_Alerts; soft-fail; READY)
     if subcommand in (
         "alerts",
         "alert",
@@ -1831,7 +1831,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: local performance baseline (Performance_Baseline; soft-fail; PARTIAL)
+    # Built-in: Bolt speed check (Performance_Baseline; soft-fail; READY)
     # NOTE: do NOT catch "performance-sync" — that stays bolt stats.
     if subcommand in (
         "performance",
@@ -2055,7 +2055,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: OBS scene→config.json game tracker (OBS_Game_Tracker; soft-fail; PARTIAL)
+    # Built-in: OBS scene→config.json game tracker (OBS_Game_Tracker; soft-fail; READY 21 Oct 2026)
     # Former thin/IDEA scripts/update_game_from_obs.py (no soft-fail status/list/run).
     # Distinct from READY bolt obs (WebSocket status/monitor).
     if subcommand in (
@@ -2125,10 +2125,10 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: iCloud Drive multi-Mac sync (ICloud_Sync; soft-fail; PARTIAL)
+    # Built-in: iCloud Drive multi-Mac sync (ICloud_Sync; soft-fail; READY 22 Oct 2026)
     # Former unnamed IDEA Docs/AI_Guide.md + scripts/move_to_icloud.sh /
     # migrate_to_shared.sh / setup_icloud.sh (no soft-fail status/list/run).
-    # Distinct from PARTIAL bolt mac-auto (launchd/cron/Shortcuts). William glue.
+    # Distinct from READY bolt mac-auto (launchd/cron/Shortcuts). William glue.
     if subcommand in (
         "icloud",
         "icloud-sync",
@@ -2157,7 +2157,7 @@ print('System is fully upgraded.')
     # Built-in: per-game sensitivity profiles (Game_Config; soft-fail; READY 19 Oct 2026)
     # Former unnamed IDEA Docs/AI_Guide.md + Core/modules/Game_Config.py
     # (built-in profiles existed; CWD-relative game_configs.json / config.json;
-    # no soft-fail status/list/show/set CLI). Distinct from PARTIAL bolt obs-game
+    # no soft-fail status/list/show/set CLI). Distinct from READY bolt obs-game
     # (OBS scene→Core/config.json game) and READY bolt obs.
     if subcommand in (
         "game-config",
@@ -2186,7 +2186,7 @@ print('System is fully upgraded.')
 
     # Built-in: clip pipeline error log + report + quarantine (Error_Recovery; READY
     # 20 Oct 2026). notifier.notify_error → Data/pipeline_errors.jsonl; run = report;
-    # quarantine FILE / restore. Distinct from PARTIAL bolt discord / bolt alerts.
+    # quarantine FILE / restore. Distinct from READY bolt discord / READY bolt alerts.
     if subcommand in (
         "error-recovery",
         "error_recovery",
@@ -2291,7 +2291,7 @@ print('System is fully upgraded.')
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
 
-    # Built-in: repo-root layout audit (Layout_Check; soft-fail; PARTIAL)
+    # Built-in: repo-root layout audit (Layout_Check; soft-fail; READY 21 Oct 2026)
     # Former thin SCRIPT_MAP layout/check_layout (no soft-fail status/list/run).
     # Report-only — never moves files. Distinct from READY bolt doctor / verify.
     if subcommand in (
@@ -2316,10 +2316,9 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: repo-root layout migrator (Migrate_Layout; soft-fail; PARTIAL)
-    # Companion to PARTIAL bolt layout (report-only). Dry-run default; --apply moves.
-    # Former thin/IDEA scripts/migrate_layout.py (no soft-fail status/list/run).
-    # Distinct from READY bolt doctor / bolt verify. Stay PARTIAL (William glue).
+    # Built-in: repo-root layout migrator (Migrate_Layout; soft-fail; READY 21 Oct 2026)
+    # Companion to READY bolt layout (report-only). Dry-run default; --apply moves,
+    # never overwrites, logs to Data/layout_moves.jsonl; undo puts the last run back.
     if subcommand in (
         "migrate-layout",
         "migrate_layout",
@@ -2341,8 +2340,8 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: lightweight health smoke (Health_Check; soft-fail; PARTIAL)
-    # Former SHELL scripts/health_check.py (pre-reorg CWD paths). Prefer bolt doctor.
+    # Built-in: quick health check (Health_Check; soft-fail; READY 21 Oct 2026)
+    # Engine scripts/health_check.py. Full audit: bolt doctor.
     if subcommand in (
         "health",
         "health-check",
@@ -2431,7 +2430,7 @@ print('System is fully upgraded.')
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 
-    # Built-in: Photo / handwriting OCR (Photo_OCR; soft-fail; PARTIAL)
+    # Built-in: Photo / handwriting OCR (Photo_OCR; soft-fail; READY)
     if subcommand in (
         "photo-ocr",
         "photo_ocr",

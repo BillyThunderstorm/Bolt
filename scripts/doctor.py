@@ -381,7 +381,7 @@ def collect_paths() -> list[Check]:
                 "paths",
                 "check_layout.py",
                 "info",
-                "PARTIAL via bolt layout (report-only soft-fail; never moves; prefer this doctor for full audit).",
+                "READY via bolt layout run (tidy-top-folder check: in place / wrong spot / to look at / notes; report only; never moves).",
                 found=_rel(layout_check),
             )
         )
@@ -393,7 +393,7 @@ def collect_paths() -> list[Check]:
                 "paths",
                 "health_check.py",
                 "info",
-                "PARTIAL via bolt health (post-reorg _paths); prefer this doctor for full audit.",
+                "READY via bolt health run (quick ready-to-clip check with fixes); this doctor is the full audit.",
                 found=_rel(health_check),
             )
         )
@@ -405,7 +405,7 @@ def collect_paths() -> list[Check]:
                 "paths",
                 "clip_deduplicator.py",
                 "info",
-                "READY via bolt clip-dedupe (read-only SHA256 duplicate report; not pipeline pHash). Layout audit PARTIAL via bolt layout (report-only soft-fail; never moves).",
+                "READY via bolt clip-dedupe (read-only SHA256 duplicate report; not pipeline pHash). Tidy-top-folder check READY via bolt layout run (report only; never moves).",
                 found=_rel(clip_dedupe_script),
             )
         )
@@ -770,7 +770,7 @@ def collect_integrations(config: dict) -> list[Check]:
             "integrations",
             "discord",
             "live" if discord else "disabled",
-            "DISCORD_WEBHOOK_URL set" if discord else "unset (optional; bolt discord status — not a bot; preferred alerts: bolt alerts status)",
+            "DISCORD_WEBHOOK_URL set (READY: bolt discord status --probe checks without posting)" if discord else "unset (optional; bolt discord status — not a bot; preferred alerts: bolt alerts status)",
         )
     )
 
@@ -809,7 +809,7 @@ def collect_integrations(config: dict) -> list[Check]:
             "creator-domains",
             "live" if domains_ok else "disabled",
             (
-                "requirements + instructions present; bolt domains status"
+                "READY spec browser — requirements + instructions present; bolt domains show <N|word> / search"
                 if domains_ok
                 else "missing creator-domains docs (optional spec browser; bolt domains status)"
             ),
@@ -891,7 +891,7 @@ def collect_integrations(config: dict) -> list[Check]:
         )
 
 
-    # Mac .app assemble (PARTIAL — soft-fail via bolt mac-app)
+    # Bolt.app menu bar app (READY 21 Oct 2026 — soft-fail via bolt mac-app)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -900,7 +900,11 @@ def collect_integrations(config: dict) -> list[Check]:
         _ms = _macapp_status()
         mac_ready = bool(_ms.get("ready"))
         mac_detail = (
-            f"dist/Bolt.app valid; bolt mac-app status"
+            (
+                ("Bolt.app in ~/Applications" if _ms.get("installed") else "dist/Bolt.app built (not in ~/Applications: bolt mac-app install)")
+                + ("; out of date: bolt mac-app install" if (_ms.get("installed_stale") or _ms.get("dist_stale")) else "")
+                + ("; running" if _ms.get("running") else "")
+            )
             if mac_ready
             else (
                 (_ms.get("hint") or "Mac app unavailable: not ready")
@@ -928,7 +932,7 @@ def collect_integrations(config: dict) -> list[Check]:
         )
 
 
-    # Mac automation launchd/cron/Shortcuts (PARTIAL — soft-fail via bolt mac-auto)
+    # Mac automation launchd/cron/Shortcuts (READY 20 Oct 2026 — bolt mac-auto status)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -936,13 +940,9 @@ def collect_integrations(config: dict) -> list[Check]:
 
         _ma = _macauto_status()
         ma_ready = bool(_ma.get("ready"))
-        ma_detail = (
-            f"launchd/cron/shortcuts pieces ok; bolt mac-auto status"
-            if ma_ready
-            else (
-                (_ma.get("hint") or _ma.get("error") or "Mac automation unavailable: not ready")
-                + " (optional; bolt mac-auto status)"
-            )
+        ma_detail = (_ma.get("hint") or "bolt mac-auto status") if ma_ready else (
+            (_ma.get("error") or _ma.get("hint") or "Mac automation unavailable: not ready")
+            + " (bolt mac-auto status)"
         )
         if len(ma_detail) > 160:
             ma_detail = ma_detail[:157] + "..."
@@ -1077,7 +1077,7 @@ def collect_integrations(config: dict) -> list[Check]:
 
 
 
-    # Performance baseline (PARTIAL — soft-fail via bolt performance)
+    # Performance baseline (READY — Bolt speed check via bolt performance)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1266,7 +1266,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # Lightweight health smoke (PARTIAL — soft-fail via bolt health; prefer this doctor)
+    # Quick health check (READY — bolt health run; this doctor is the full audit)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1275,7 +1275,7 @@ def collect_integrations(config: dict) -> list[Check]:
         _hc = _hc_status()
         hc_ready = bool(_hc.get("ready"))
         hc_detail = (
-            f"Health smoke ok; bolt health status (prefer bolt doctor)"
+            f"Quick check ready; run: bolt health run (ffmpeg, whisper, modules, AI, disk)"
             if hc_ready
             else (
                 (_hc.get("hint") or _hc.get("error") or "Health check unavailable: not ready")
@@ -1307,7 +1307,7 @@ def collect_integrations(config: dict) -> list[Check]:
 
 
 
-    # SMS/email notify CLI (PARTIAL — soft-fail via bolt send; prefers Bolt_Alerts)
+    # SMS/email notify CLI (READY 20 Oct 2026 — bolt send via Bolt_Alerts; soft-fail)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1316,7 +1316,7 @@ def collect_integrations(config: dict) -> list[Check]:
         _sn = _send_status()
         sn_ready = bool(_sn.get("ready"))
         sn_detail = (
-            "send/notify ok; bolt send status (Bolt_Alerts / send_notification)"
+            "bolt send ready (text + email via Bolt_Alerts); bolt send \"msg\" --dry-run to preview"
             if sn_ready
             else (
                 (_sn.get("hint") or _sn.get("error") or "Notify unavailable: not ready")
@@ -1493,7 +1493,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # OBS scene→config game tracker (PARTIAL — soft-fail via bolt obs-game; not bolt obs)
+    # OBS scene→config game tracker (READY 21 Oct 2026 — bolt obs-game; soft-fail; not bolt obs)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1502,7 +1502,7 @@ def collect_integrations(config: dict) -> list[Check]:
         _ogt = _ogt_status()
         ogt_ready = bool(_ogt.get("ready"))
         ogt_detail = (
-            f"OBS game tracker ok; bolt obs-game status (Data/configs/scene_game_mapping.json)"
+            f"OBS game tracker ok; bolt obs-game status shows scene/game match; bolt obs-game run syncs"
             if ogt_ready
             else (
                 (_ogt.get("hint") or _ogt.get("error") or "Game tracker unavailable: not ready")
@@ -1591,7 +1591,7 @@ def collect_integrations(config: dict) -> list[Check]:
             )
         )
 
-    # iCloud Drive multi-Mac sync (PARTIAL — soft-fail via bolt icloud; not bolt mac-auto)
+    # iCloud Drive multi-Mac sync (READY 22 Oct 2026 — bolt icloud run --apply; not bolt mac-auto)
     try:
         if str(CORE_DIR) not in sys.path:
             sys.path.insert(0, str(CORE_DIR))
@@ -1600,7 +1600,7 @@ def collect_integrations(config: dict) -> list[Check]:
         _icl = _icl_status()
         icl_ready = bool(_icl.get("ready"))
         icl_detail = (
-            "iCloud sync ok; bolt icloud status (scripts/move_to_icloud.sh)"
+            "iCloud sync ready; " + (_icl.get("hint") or "bolt icloud run --apply")
             if icl_ready
             else (
                 (_icl.get("hint") or _icl.get("error") or "iCloud unavailable: not ready")

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-Health_Check.py — Lightweight post-reorg health smoke (PARTIAL)
+Health_Check.py — Bolt quick health check (READY, 21 Oct 2026)
 ===============================================================
-Soft-fail CLI for the former SHELL ``scripts/health_check.py`` (pre-reorg
-CWD-relative ``config.json`` / ``bot.py`` / ``clips/`` / ``vertical_clips/``
-/ ``data/`` / ``modules/`` paths — every check failed after the Core/Data/
-media split; not wired into the CLI).
+``bolt health run`` answers "is Bolt ready to make clips right now?" in about
+a second: files, folders, a working ffmpeg/ffprobe, Whisper (venv package or
+the Mac's whisper CLI), pipeline packages + modules, Core/config.json, which
+AI is available (Grok key / Ollama running / OpenAI key) and free disk. Every
+WARN/FAIL line carries the exact fix. Reads .env.local then .env like the
+rest of Bolt. Engine: ``scripts/health_check.py``.
 
 Soft-fail prefix: ``Health check unavailable:``.
-Stay PARTIAL — prefer READY ``bolt doctor`` / ``bolt verify`` for the full
-live/mocked/stale audit. This surface is a quick path + import smoke only.
-Optional deps / env gated.
+For the full live/mocked/stale audit of every feature use ``bolt doctor``.
 
 Public API:
   status() / list_items() / try_run() / print_status() / main()
@@ -50,7 +50,7 @@ def _soft(msg: str) -> str:
 
 
 def status(*, probe: bool = False) -> Dict[str, Any]:
-    """Readiness for lightweight health check (PARTIAL)."""
+    """Readiness for the quick health check (READY)."""
     try:
         engine_ok = _ENGINE.is_file()
         core_ok = _CORE.is_dir()
@@ -80,8 +80,8 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         out: Dict[str, Any] = {
             "checked_at": _utc_now(),
             "ready": False,
-            "partial": True,
-            "readiness": "PARTIAL",
+            "partial": False,
+            "readiness": "READY",
             "soft_fail_prefix": _SOFT,
             "engine_path": str(_ENGINE),
             "engine_present": engine_ok,
@@ -100,9 +100,9 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
             "prefer_cli": "bolt doctor",
             "cli": "bolt health",
             "note": (
-                "Lightweight post-reorg path + import smoke. Prefer READY "
-                "bolt doctor / bolt verify for the full audit. Former SHELL "
-                "pre-reorg CWD paths fixed via scripts/_paths.py."
+                "Quick 'ready to make clips?' check with fixes (ffmpeg, "
+                "whisper, packages, modules, config, AI, disk). Full audit: "
+                "bolt doctor."
             ),
             "is_stranger_ready": False,
             "probe": bool(probe),
@@ -143,27 +143,30 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
 
         out["ready"] = True
         out["hint"] = (
-            "ok — run: bolt health run | prefer: bolt doctor"
+            "ok — run: bolt health run (full audit: bolt doctor)"
             + ("" if clips_ok else " (media/clips missing — creatable)")
         )
         if probe:
-            # quick import probe of Config_Loader
-            try:
-                if str(_CORE) not in sys.path:
-                    sys.path.insert(0, str(_CORE))
-                from modules.Config_Loader import load_config  # noqa: F401
-
-                out["probe_config_loader"] = True
-            except Exception as exc:
-                out["probe_config_loader"] = False
-                out["hint"] = _soft(f"probe Config_Loader failed ({exc})")
+            # Run the real check quietly and summarise it.
+            rep = _engine_json()
+            if rep is None:
+                out["probe_ok"] = False
+                out["hint"] = _soft("probe: engine gave no report (run: bolt health run)")
+            else:
+                out["probe_ok"] = bool(rep.get("ok"))
+                out["probe_verdict"] = rep.get("verdict")
+                out["probe_counts"] = rep.get("counts")
+                out["probe_problems"] = [
+                    f"{c.get('state')} {c.get('name')}: {c.get('fix') or c.get('detail')}"
+                    for c in rep.get("problems") or []
+                ]
         return out
     except Exception as exc:
         return {
             "checked_at": _utc_now(),
             "ready": False,
-            "partial": True,
-            "readiness": "PARTIAL",
+            "partial": False,
+            "readiness": "READY",
             "soft_fail_prefix": _SOFT,
             "error": _soft(f"status failed ({exc})"),
             "hint": _soft(f"status failed ({exc})"),
@@ -172,6 +175,23 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
             "is_stranger_ready": False,
             "probe": bool(probe),
         }
+
+
+def _engine_json(*, no_network: bool = False, timeout: int = 60) -> Optional[Dict[str, Any]]:
+    """Run the engine with --json and return its report (None on failure)."""
+    argv = [sys.executable, str(_ENGINE), "--json"]
+    if no_network:
+        argv.append("--no-network")
+    env = os.environ.copy()
+    env["PYTHONPATH"] = f"{_CORE}" + (f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else "")
+    try:
+        res = subprocess.run(argv, cwd=str(_REPO), env=env, capture_output=True,
+                             text=True, timeout=timeout)
+        text = res.stdout.strip()
+        start = text.find("{")
+        return json.loads(text[start:]) if start >= 0 else None
+    except Exception:
+        return None
 
 
 def list_items(*, as_json: bool = False) -> int:
@@ -191,15 +211,14 @@ def list_items(*, as_json: bool = False) -> int:
             (f"media/clips ({info.get('clips_dir')})", bool(info.get("clips_present"))),
             ("scripts/doctor.py (prefer bolt doctor)", bool(info.get("doctor_present"))),
             ("soft-fail CLI (bolt health)", True),
-            ("distinct from READY bolt doctor / verify", True),
-            ("optional deps/env gated (stay PARTIAL)", True),
+            ("full audit lives in bolt doctor / verify", True),
         ]
         if as_json:
             print(
                 json.dumps(
                     {
                         "ok": True,
-                        "readiness": "PARTIAL",
+                        "readiness": "READY",
                         "items": [{"name": n, "ok": ok} for n, ok in rows],
                         "hint": info.get("hint"),
                         "error": info.get("error"),
@@ -208,7 +227,7 @@ def list_items(*, as_json: bool = False) -> int:
                 )
             )
             return 0
-        print("Health check (PARTIAL — prefer bolt doctor)", flush=True)
+        print("Health check (READY) — what `bolt health run` checks needs:", flush=True)
         for name, ok in rows:
             mark = "OK" if ok else "--"
             print(f"  [{mark}] {name}", flush=True)
@@ -225,7 +244,7 @@ def list_items(*, as_json: bool = False) -> int:
         return 0
 
 
-def try_run(*, dry_run: bool = False, as_json: bool = False) -> int:
+def try_run(*, dry_run: bool = False, as_json: bool = False, no_network: bool = False) -> int:
     """Soft-fail invoke health_check.py (never raises)."""
     try:
         info = status(probe=False)
@@ -234,7 +253,7 @@ def try_run(*, dry_run: bool = False, as_json: bool = False) -> int:
             if as_json:
                 print(
                     json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
+                        {"ok": False, "error": msg, "readiness": "READY"},
                         indent=2,
                     )
                 )
@@ -246,7 +265,7 @@ def try_run(*, dry_run: bool = False, as_json: bool = False) -> int:
             if as_json:
                 print(
                     json.dumps(
-                        {"ok": False, "error": msg, "readiness": "PARTIAL"},
+                        {"ok": False, "error": msg, "readiness": "READY"},
                         indent=2,
                     )
                 )
@@ -255,6 +274,16 @@ def try_run(*, dry_run: bool = False, as_json: bool = False) -> int:
             return 0
 
         argv: List[str] = [sys.executable, str(_ENGINE)]
+        if no_network:
+            argv.append("--no-network")
+        if as_json and not dry_run:
+            rep = _engine_json(no_network=no_network)
+            if rep is None:
+                print(json.dumps({"ok": False, "readiness": "READY",
+                                  "error": _soft("engine gave no report")}, indent=2))
+            else:
+                print(json.dumps(rep, indent=2))
+            return 0
         if dry_run:
             if as_json:
                 print(
@@ -262,7 +291,7 @@ def try_run(*, dry_run: bool = False, as_json: bool = False) -> int:
                         {
                             "ok": True,
                             "dry_run": True,
-                            "readiness": "PARTIAL",
+                            "readiness": "READY",
                             "cmd": argv[1:],
                             "hint": "dry-run → would exec engine (no run)",
                         },
@@ -278,26 +307,19 @@ def try_run(*, dry_run: bool = False, as_json: bool = False) -> int:
         env["PYTHONPATH"] = f"{_CORE}" + (
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
-        rc = subprocess.call(argv, cwd=str(_REPO), env=env)
-        if as_json:
-            print(
-                json.dumps(
-                    {
-                        "ok": rc == 0,
-                        "exit_code": rc,
-                        "readiness": "PARTIAL",
-                        "cmd": argv[1:],
-                        "error": "" if rc == 0 else _soft(f"engine exit {rc}"),
-                        "hint": "prefer bolt doctor for full audit",
-                    },
-                    indent=2,
-                )
-            )
+        try:
+            rc = subprocess.call(argv, cwd=str(_REPO), env=env, timeout=120)
+        except subprocess.TimeoutExpired:
+            print(_soft("check took over 2 minutes and was stopped — run: bolt doctor"),
+                  file=sys.stderr)
+            return 0
+        if rc not in (0, 1):
+            print(_soft(f"engine crashed (exit {rc}) — run: bolt doctor"), file=sys.stderr)
         return 0  # soft-fail: never hard-fail the CLI
     except Exception as exc:
         msg = _soft(f"run failed ({exc})")
         if as_json:
-            print(json.dumps({"ok": False, "error": msg, "readiness": "PARTIAL"}, indent=2))
+            print(json.dumps({"ok": False, "error": msg, "readiness": "READY"}, indent=2))
         else:
             print(msg, file=sys.stderr)
         return 0
@@ -310,14 +332,16 @@ def print_status(*, as_json: bool = False, probe: bool = False) -> int:
             print(json.dumps(info, indent=2))
             return 0
         ready = bool(info.get("ready"))
-        print("Health check (PARTIAL)")
+        print("Health check (READY) — quick 'ready to make clips?' check")
         print(f"  ready: {ready}")
         print(f"  engine: {info.get('engine_path')}")
-        print(f"  stale_cwd_paths: {info.get('engine_stale_cwd_paths')}")
         print(f"  config: {info.get('config_path')} present={info.get('config_present')}")
         print(f"  clips: {info.get('clips_dir')} present={info.get('clips_present')}")
-        print(f"  prefer: {info.get('prefer_cli')}")
-        print("  readiness: PARTIAL (lightweight smoke; prefer bolt doctor)")
+        if probe and "probe_ok" in info:
+            print(f"  probe: {info.get('probe_verdict') or 'no report'}  {info.get('probe_counts') or ''}")
+            for line in info.get("probe_problems") or []:
+                print(f"    • {line}")
+        print("  full audit: bolt doctor")
         if info.get("error"):
             print(f"  error: {info['error']}")
         if info.get("hint"):
@@ -328,7 +352,7 @@ def print_status(*, as_json: bool = False, probe: bool = False) -> int:
         if as_json:
             print(
                 json.dumps(
-                    {"ready": False, "error": msg, "readiness": "PARTIAL"}, indent=2
+                    {"ready": False, "error": msg, "readiness": "READY"}, indent=2
                 )
             )
         else:
@@ -340,17 +364,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in ("-h", "--help", "help"):
         print(
-            """bolt health — lightweight post-reorg health smoke (PARTIAL)
+            """bolt health — quick "is Bolt ready to make clips?" check (READY)
 
-  bolt health                              # status (default)
-  bolt health status [--json] [--probe]
+  bolt health                              # status (default; safe)
+  bolt health run [--json] [--no-network]  # the check (~1 s), fixes for every problem
+  bolt health status [--json] [--probe]    # --probe runs the check quietly
   bolt health list [--json]
-  bolt health run [--dry-run] [--json]
 
-Soft-fail: "Health check unavailable:".
-Engine: scripts/health_check.py (fixed via scripts/_paths.py).
-Prefer READY bolt doctor / bolt verify for the full audit.
-Stay PARTIAL (optional deps/env gated; legacy lightweight surface).
+Checks files, folders, ffmpeg/ffprobe, Whisper (venv or Mac CLI), packages,
+pipeline modules, Core/config.json, AI (Grok / Ollama / OpenAI) and disk.
+Reads .env.local then .env. --no-network skips the 2 s Ollama ping.
+Soft-fail: "Health check unavailable:". Full audit: bolt doctor.
 Aliases: health-check, health_check, health-status, system-health.
 """
         )
@@ -359,6 +383,7 @@ Aliases: health-check, health_check, health-status, system-health.
     json_out = "--json" in args
     probe = "--probe" in args
     dry_run = "--dry-run" in args or "-n" in args
+    no_network = "--no-network" in args
     cleaned: List[str] = []
     for a in args:
         if a.startswith("-"):
@@ -374,7 +399,7 @@ Aliases: health-check, health_check, health-status, system-health.
     if cmd in ("list", "ls", "checklist"):
         return list_items(as_json=json_out)
     if cmd in ("run", "go", "exec", "health"):
-        return try_run(dry_run=dry_run, as_json=json_out)
+        return try_run(dry_run=dry_run, as_json=json_out, no_network=no_network)
 
     print(
         _soft(f"unknown command {cleaned[0]!r} — try status|list|run"),

@@ -396,7 +396,24 @@ def _log_push(msg):
         pass
 
 
+_EXTRA_PATH = ("/opt/homebrew/bin", "/opt/homebrew/sbin", "/usr/local/bin")
+
+
+def _git_env(env=None):
+    """cron runs with PATH=/usr/bin:/bin, so the repo's Git LFS pre-push hook
+    can't find git-lfs (Homebrew) and every cron push failed with
+    "failed to push some refs". Make sure Homebrew's bin is on PATH."""
+    env = dict(env if env is not None else os.environ)
+    parts = [p for p in (env.get("PATH") or "/usr/bin:/bin").split(os.pathsep) if p]
+    for extra in reversed(_EXTRA_PATH):
+        if extra not in parts and os.path.isdir(extra):
+            parts.insert(0, extra)
+    env["PATH"] = os.pathsep.join(parts)
+    return env
+
+
 def _git(args, *, repo, env=None, timeout=60, check=True):
+    env = _git_env(env)
     r = subprocess.run(
         ["git", *args], cwd=str(repo), capture_output=True, text=True,
         timeout=timeout, env=env,
@@ -448,14 +465,20 @@ def push_site_data(repo=None, files=None, remote=None, branch=None, attempts=2):
             r = subprocess.run(
                 ["git", "push", "--quiet", remote, f"{commit}:refs/heads/{branch}"],
                 cwd=str(repo), capture_output=True, text=True, timeout=90,
+                env=_git_env(),
             )
             if r.returncode == 0:
                 _git(["update-ref", f"refs/remotes/{remote}/{branch}", commit], repo=repo, check=False)
                 _fast_forward_local(repo, branch, base, commit, blobs)
                 _log_push(f"pushed site data {commit[:8]} ({', '.join(rels)})")
                 return "pushed"
-            err = (r.stderr or "").strip().splitlines()
+            err = [ln for ln in (r.stderr or "").strip().splitlines() if ln.strip()]
+            # The last line is always the generic "failed to push some refs";
+            # keep the first real cause too (e.g. a hook message) so the log says why.
+            cause = next((ln.strip() for ln in err if "failed to push some refs" not in ln), "")
             reason = err[-1] if err else f"exit {r.returncode}"
+            if cause and cause not in reason:
+                reason = f"{cause[:200]} | {reason}"
             if attempt < attempts and ("rejected" in r.stderr or "fetch first" in r.stderr or "non-fast-forward" in r.stderr):
                 _log_push(f"push raced another update ({reason}); retrying on fresh {remote}/{branch}")
                 continue

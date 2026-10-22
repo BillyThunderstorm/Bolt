@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 """
-Layout_Check.py — soft-fail CLI for scripts/check_layout.py (PARTIAL)
-====================================================================
+Layout_Check.py — tidy-top-folder check for Bolt (READY, 21 Oct 2026)
+=====================================================================
 Report-only repo-root layout audit. Wraps ``scripts/check_layout.py`` +
 ``scripts/_layout_rules.py``. Soft-fail prefix: ``Layout unavailable:``.
 
 CLI (via ``bolt layout``):
   status [--json] [--probe]
   list   [--json]
-  run    [--json] [--quiet] [--root PATH]
+  run    [--json] [--quiet] [--all] [--root PATH]
 
-Stay PARTIAL — diagnostic only; never moves files; not stranger-ready product.
-Distinct from READY ``bolt doctor`` / ``bolt verify``.
+``run`` lists every item at the top of the Bolt folder: in place (with what
+it's for under ``--all``), in the wrong spot (has a home; ``bolt
+migrate-layout`` can move it), to look at (not part of the layout, with a
+fix), and notes (key backups, Google Drive temp folders). Report only —
+never moves or deletes. Distinct from READY ``bolt doctor`` / ``bolt verify``.
 """
 
 from __future__ import annotations
@@ -60,8 +63,8 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
     info: Dict[str, Any] = {
         "checked_at": _iso(),
         "ready": False,
-        "partial": True,
-        "readiness": "PARTIAL",
+        "partial": False,
+        "readiness": "READY",
         "soft_fail_prefix": _SOFT,
         "cli": "bolt layout",
         "engine": str(_SCRIPT),
@@ -74,9 +77,11 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         "probe": bool(probe),
         "probe_ok": None,
         "findings_count": None,
+        "look_at_count": None,
+        "notes_count": None,
         "layout_clean": None,
         "error": "",
-        "hint": "report-only root layout audit · never moves files · prefer bolt doctor for live/mocked audit",
+        "hint": "bolt layout run — what's at the top of the Bolt folder and what to tidy (report only; --all explains every item)",
     }
     missing = []
     if not info["engine_present"]:
@@ -93,10 +98,12 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         eng = _load_engine()
         info["ready"] = True
         if probe:
-            findings = eng.find_misplaced(_REPO)
+            scan = eng.scan_root(_REPO)
             info["probe_ok"] = True
-            info["findings_count"] = len(findings)
-            info["layout_clean"] = len(findings) == 0
+            info["findings_count"] = scan["counts"]["misplaced"]
+            info["look_at_count"] = scan["counts"]["look_at"]
+            info["notes_count"] = scan["counts"]["notes"]
+            info["layout_clean"] = scan["clean"]
     except Exception as exc:
         info["ready"] = False
         info["error"] = _soft(str(exc) or type(exc).__name__)
@@ -115,7 +122,7 @@ def list_items() -> List[Dict[str, Any]]:
         {
             "id": "soft_fail",
             "ok": True,
-            "detail": f"prefix {_SOFT!r}; stay PARTIAL",
+            "detail": f"prefix {_SOFT!r}",
         },
         {
             "id": "report_only",
@@ -131,6 +138,7 @@ def try_run(
     quiet: bool = False,
     as_json: bool = False,
     root: Optional[str] = None,
+    show_all: bool = False,
 ) -> Dict[str, Any]:
     """Run the layout scan. Soft-fails instead of raising."""
     out: Dict[str, Any] = {
@@ -141,6 +149,8 @@ def try_run(
         "layout_clean": None,
         "report": "",
         "findings": [],
+        "look_at": [],
+        "notes": [],
         "repo_root": str(Path(root).resolve() if root else _REPO),
     }
     st = status(probe=False)
@@ -151,10 +161,14 @@ def try_run(
     try:
         eng = _load_engine()
         repo = Path(root).resolve() if root else _REPO
-        findings = eng.find_misplaced(repo)
+        scan = eng.scan_root(repo)
+        findings = scan["misplaced"]
         out["findings"] = findings
+        out["look_at"] = scan["look_at"]
+        out["notes"] = scan["notes"]
+        out["counts"] = scan["counts"]
         out["findings_count"] = len(findings)
-        out["layout_clean"] = len(findings) == 0
+        out["layout_clean"] = scan["clean"]
         out["ok"] = True
         out["exit_code"] = 0 if not findings else 1
         if as_json:
@@ -164,14 +178,22 @@ def try_run(
                     "ok": not findings,
                     "count": len(findings),
                     "findings": findings,
+                    "clean": scan["clean"],
+                    "counts": scan["counts"],
+                    "look_at": scan["look_at"],
+                    "notes": scan["notes"],
+                    "in_place": scan["in_place"],
                 },
                 indent=2,
             )
         elif quiet:
             status_word = "OK" if not findings else "WARN"
-            out["report"] = f"[{status_word}] {len(findings)} misplaced file(s) at {repo}"
+            out["report"] = (
+                f"[{status_word}] {len(findings)} misplaced file(s), "
+                f"{scan['counts']['look_at']} to look at, at {repo}"
+            )
         else:
-            out["report"] = eng.format_text(findings, repo)
+            out["report"] = eng.format_inventory(scan, show_all=show_all)
     except Exception as exc:
         out["ok"] = False
         out["error"] = _soft(str(exc) or type(exc).__name__)
@@ -190,8 +212,9 @@ def _print_status(info: Dict[str, Any], as_json: bool) -> int:
         print(f"  rules:  {_RULES}  present={info.get('rules_present')}")
         if info.get("probe"):
             print(
-                f"  probe: clean={info.get('layout_clean')} "
-                f"findings={info.get('findings_count')}"
+                f"  probe: tidy={info.get('layout_clean')} "
+                f"wrong_spot={info.get('findings_count')} "
+                f"look_at={info.get('look_at_count')} notes={info.get('notes_count')}"
             )
         if info.get("error"):
             print(f"  {info['error']}")
@@ -205,7 +228,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     parser = argparse.ArgumentParser(
         prog="bolt layout",
-        description="Repo-root layout audit (PARTIAL; soft-fail; report only).",
+        description="What's at the top of the Bolt folder and what to tidy (report only).",
     )
     parser.add_argument(
         "action",
@@ -221,6 +244,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         help="status only: run a live scan and include findings_count",
     )
     parser.add_argument("--quiet", action="store_true", help="run: one-line summary")
+    parser.add_argument("--all", action="store_true", dest="show_all",
+                        help="run: also explain every item that is in place")
     parser.add_argument("--root", default=None, help="run: override repo root")
     args = parser.parse_args(argv)
 
@@ -238,7 +263,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
 
     if args.action == "run":
-        result = try_run(quiet=args.quiet, as_json=args.json, root=args.root)
+        result = try_run(quiet=args.quiet, as_json=args.json, root=args.root,
+                         show_all=args.show_all)
         if result.get("error"):
             if args.json:
                 print(json.dumps(result, indent=2))

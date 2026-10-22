@@ -9,13 +9,13 @@ deep in a game.
 macOS `say` and free edge-tts are both available. Pick the path with
 Bolt_TTS_PROVIDER in .env:
 
-  macos / say / siri  — use macOS `say` first (Siri Voice 3 = "Voice 3")
+  elevenlabs          — William's ElevenLabs voice first, then macOS `say`
+  macos / say         — macOS `say` first (Nathan (Enhanced))
   edge / auto         — edge-tts first, then `say`
 
 Voice options (set Bolt_VOICE for macOS `say`):
-  Voice 3            — Siri Voice 3 (current pick; `say -v ?`)
-  Nathan (Enhanced)  — clear US male
-  Samantha           — natural female
+  Nathan (Enhanced)  — clear US male (default fallback)
+  Siri voices ("Voice 1–5") are never used — they are swapped for Nathan (Enhanced).
 
 edge-tts voices (set Bolt_EDGE_VOICE; used when provider is edge/auto):
   en-US-AndrewNeural — warm US male
@@ -48,10 +48,14 @@ try:
     from dotenv import load_dotenv
     from pathlib import Path
 
-    _repo_env = Path(__file__).resolve().parents[2] / ".env"
-    if _repo_env.is_file():
-        load_dotenv(_repo_env)
-    else:
+    _repo_root = Path(__file__).resolve().parents[2]
+    # .env.local (William's local keys, e.g. ElevenLabs) wins over .env
+    _loaded = False
+    for _repo_env in (_repo_root / ".env.local", _repo_root / ".env"):
+        if _repo_env.is_file():
+            load_dotenv(_repo_env, override=False)
+            _loaded = True
+    if not _loaded:
         load_dotenv()
 except ImportError:
     pass
@@ -66,8 +70,10 @@ except ImportError:
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
-# macOS `say` voice — "Voice 3" is Siri Voice 3 on current macOS
+# macOS `say` voice — fixed male voice. Siri voices ("Voice 3" etc.) are never used.
 VOICE = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Nathan (Enhanced)"
+if __import__("re").match(r"^\s*(voice\s*\d+|siri\b.*)\s*$", VOICE, __import__("re").I):
+    VOICE = "Nathan (Enhanced)"
 RATE = int(os.getenv("Bolt_VOICE_RATE") or os.getenv("BOLT_VOICE_RATE") or "190")
 MUTED = (
     os.getenv("Bolt_VOICE_MUTE") or os.getenv("BOLT_VOICE_MUTE") or "false"
@@ -151,7 +157,8 @@ def _speak_now(text: str):
     The actual TTS call.
 
     Bolt_TTS_PROVIDER:
-      macos / say / siri — macOS `say` first (Siri Voice 3)
+      elevenlabs         — ElevenLabs first, then macOS `say` (Nathan)
+      macos / say        — macOS `say` first (Nathan (Enhanced))
       edge / auto        — edge-tts first, then `say`
     ElevenLabs only if both key and voice id are set, after the primary path fails.
     """
@@ -233,15 +240,18 @@ def _try_edge_tts(text: str) -> bool:
 
 
 def macos_say(text: str, *, wait: bool = True) -> bool:
-    """Speak with Siri Voice 3 (`Bolt_VOICE`, default 'Voice 3').
+    """Speak with macOS `say` (`Bolt_VOICE`, default Nathan (Enhanced); never Siri).
 
     Always pass `-v` so alerts never fall back to Samantha/Alex/Damon.
     """
     if not (text or "").strip() or MUTED:
         return False
+    voice = VOICE
+    if __import__("re").match(r"^\s*(voice\s*\d+|siri\b.*)\s*$", voice or "", __import__("re").I):
+        voice = "Nathan (Enhanced)"  # never the Siri voice William hates
     try:
         subprocess.run(
-            ["say", "-v", VOICE, "-r", str(RATE), text],
+            ["say", "-v", voice, "-r", str(RATE), text],
             check=True,
             capture_output=True,
         )
@@ -494,7 +504,7 @@ if __name__ == "__main__":
         print("  Done. If you heard Bolt, TTS is working ✓")
         print()
         print("  Tips:")
-        print("    • Change voice:  add Bolt_VOICE='Voice 3' to .env  (Siri Voice 3)")
+        print("    • Change voice:  add Bolt_VOICE='Nathan (Enhanced)' to .env.local  (Siri voices are ignored)")
         print("    • Use macOS:     add Bolt_TTS_PROVIDER=macos to .env")
         print("    • Change speed:  add Bolt_VOICE_RATE=160 to .env")
         print("    • Mute Bolt:     add Bolt_VOICE_MUTE=true to .env")

@@ -1,8 +1,8 @@
 {
   "game": "God of War Sons of Sparta",
   "source": "stream_start_twitch",
-  "checked_at": "2026-10-20T07:57:31Z",
-  "confirmed_at": "2026-10-20T07:57:31Z",
+  "checked_at": "2026-10-22T08:47:31Z",
+  "confirmed_at": "2026-10-22T08:47:31Z",
   "confirmed_source": "stream_start_twitch",
   "changed_at": "2026-10-18T14:39:09Z",
   "history": [
@@ -86,6 +86,30 @@
     },
     {
       "at": "2026-10-20T07:57:31Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "God of War Sons of Sparta",
+      "source": "stream_start_twitch"
+    },
+    {
+      "at": "2026-10-22T02:39:14Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "God of War Sons of Sparta",
+      "source": "twitch"
+    },
+    {
+      "at": "2026-10-22T02:39:23Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "God of War Sons of Sparta",
+      "source": "twitch"
+    },
+    {
+      "at": "2026-10-22T02:39:29Z",
+      "game": "God of War Sons of Sparta",
+      "previous": "God of War Sons of Sparta",
+      "source": "twitch"
+    },
+    {
+      "at": "2026-10-22T08:47:31Z",
       "game": "God of War Sons of Sparta",
       "previous": "God of War Sons of Sparta",
       "source": "stream_start_twitch"

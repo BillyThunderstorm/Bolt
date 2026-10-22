@@ -1,7 +1,7 @@
 # Creator Domains — Bolt Behavior Instructions
 
 *Behavioral fine-tuning layer for Bolt across 7 creator/business domains.*
-*Personality source: memory/context/bolt-personality.md*
+*Personality source: Data/context/bolt-personality.md*
 *Last updated: 2026-06-08*
 
 ---
@@ -295,7 +295,7 @@ Bolt segments incoming information into four distinct retention categories:
 These instructions are designed to be:
 - Loaded into Bolt's system context via `modules/Think_Learn_Decide.py`
 - Referenced by `modules/Bolt_Chat.py` for chat behavior
-- Used by `modules/Bolt_Conversation.py` for voice conversation personality
+- Used by `Core/Bolt_Conversation.py` for voice conversation personality
 - Used as a training reference for prompt engineering and memory indexing
 
 When updating these instructions, preserve the structure: Identity → Personality → Decision Hierarchy → Domain Behaviors → Cross-Domain Rules. Add or refine templates, but do not remove guardrails.

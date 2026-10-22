@@ -1,15 +1,18 @@
 """
-Learning_Notes.py — local LLM study-note browser (PARTIAL)
-==========================================================
-Browse ``Data/learning/`` chapter markdown (textbook / study log).
+Learning_Notes.py — local LLM study-note log (READY)
+=====================================================
+Browse, search and add ``Data/learning/`` chapter markdown (study log).
 
-This is **not** Bolt product architecture — just a soft-fail CLI so the
-notes are findable. Soft-fail prefix: ``Learning unavailable:``.
+This is **not** Bolt product architecture — it is William's study log, kept
+findable. Soft-fail prefix: ``Learning unavailable:``.
 
   bolt learning                 # status (default)
   bolt learning status [--json] [--probe]
   bolt learning list [--json]
-  bolt learning show <slug|stem> [--json]
+  bolt learning show <slug|stem|number> [--json]
+  bolt learning search "words" [--json]
+  bolt learning new "Chapter title" [--source "..."] [--open]
+  bolt learning edit <slug>     # open the note in the Mac's default app
 """
 
 from __future__ import annotations
@@ -109,6 +112,15 @@ def resolve_note(query: str) -> Optional[Path]:
     for p in files:
         if _stem_key(p) == lower or p.name.lower() == q.lower():
             return p
+    # Bare chapter number: "3" / "03" / "ch3" → unique chNN note
+    m = re.fullmatch(r"(?:ch)?\s*0*(\d+)", lower)
+    if m:
+        n = int(m.group(1))
+        num_hits = [p for p in files if _chapter_number(p) == n]
+        if len(num_hits) == 1:
+            return num_hits[0]
+        if len(num_hits) > 1:
+            return None
     # Unique substring match on stem or title
     hits: List[Path] = []
     for p in files:
@@ -119,6 +131,186 @@ def resolve_note(query: str) -> Optional[Path]:
     if len(hits) == 1:
         return hits[0]
     return None
+
+
+def _chapter_number(path: Path) -> Optional[int]:
+    m = re.match(r"ch(\d+)", path.stem.lower())
+    return int(m.group(1)) if m else None
+
+
+def _slugify(title: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", (title or "").lower()).strip("-")
+    return slug[:60].strip("-") or "note"
+
+
+def _soft(msg: str, as_json: bool, **extra: Any) -> int:
+    if as_json:
+        print(json.dumps({"ok": False, "error": msg, **extra}, indent=2, default=str))
+    else:
+        print(msg, file=sys.stderr)
+    return 0
+
+
+def search_notes(query: str, *, as_json: bool = False, limit: int = 40) -> int:
+    """Find study-note lines that contain every word of ``query``."""
+    words = [w for w in re.split(r"\s+", (query or "").strip().lower()) if w]
+    if not words:
+        return _soft(
+            'Learning unavailable: search needs words, e.g. bolt learning search "attention"',
+            as_json,
+        )
+    files = _chapter_files()
+    if not files:
+        return _soft(status().get("hint") or "Learning unavailable: no notes", as_json)
+
+    hits: List[Dict[str, Any]] = []
+    notes_hit: Dict[str, int] = {}
+    for path in files:
+        try:
+            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        except OSError:
+            continue
+        for i, line in enumerate(lines, 1):
+            low = line.lower()
+            if all(w in low for w in words):
+                notes_hit[path.stem] = notes_hit.get(path.stem, 0) + 1
+                hits.append({"stem": path.stem, "line": i, "text": line.strip()})
+
+    if as_json:
+        print(json.dumps({"ok": True, "query": query, "matches": hits[:limit],
+                          "match_count": len(hits), "notes": notes_hit},
+                         indent=2, default=str))
+        return 0
+
+    print(f'\n  Study notes matching "{query}"')
+    print("  " + "─" * 40)
+    if not hits:
+        print("  No lines contain all of those words.")
+        print("  Try fewer words, or: bolt learning list")
+        print()
+        return 0
+    last = None
+    for h in hits[:limit]:
+        if h["stem"] != last:
+            print(f"  •  {h['stem']}")
+            last = h["stem"]
+        text = h["text"]
+        if len(text) > 110:
+            text = text[:107] + "…"
+        print(f"      line {h['line']}: {text}")
+    if len(hits) > limit:
+        print(f"  …  +{len(hits) - limit} more lines")
+    print()
+    print(f"  {len(hits)} line(s) in {len(notes_hit)} note(s). Read one: bolt learning show <name>")
+    print()
+    return 0
+
+
+def _open_file(path: Path) -> Optional[str]:
+    """Open with the Mac's default app. Returns an error string or None."""
+    import shutil
+    import subprocess
+
+    opener = shutil.which("open") or shutil.which("xdg-open")
+    if not opener:
+        return "no 'open' command on this computer"
+    try:
+        subprocess.Popen([opener, str(path)], stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL)
+    except OSError as exc:
+        return str(exc)
+    return None
+
+
+def new_note(title: str, *, source: str = "", open_after: bool = False,
+             as_json: bool = False) -> int:
+    """Create the next chapter note from _TEMPLATE.md. Never overwrites."""
+    title = (title or "").strip()
+    if not title:
+        return _soft(
+            'Learning unavailable: new needs a title, e.g. bolt learning new "Embeddings"',
+            as_json,
+        )
+    if not _LEARNING.is_dir():
+        try:
+            _LEARNING.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            return _soft(f"Learning unavailable: cannot create {_LEARNING} ({exc})", as_json)
+
+    nums = [n for n in (_chapter_number(p) for p in _chapter_files()) if n is not None]
+    num = (max(nums) + 1) if nums else 1
+    # Title like "Ch09 — Foo" keeps its own number.
+    m = re.match(r"(?i)ch\s*0*(\d+)\s*[-—:–]?\s*(.*)$", title)
+    if m and m.group(2).strip():
+        num = int(m.group(1))
+        title = m.group(2).strip()
+    stem = f"ch{num:02d}-{_slugify(title)}"
+    path = _LEARNING / f"{stem}.md"
+    if path.exists():
+        return _soft(
+            f"Learning unavailable: {path.name} already exists — nothing overwritten. "
+            f"Read it: bolt learning show {stem}",
+            as_json, path=str(path),
+        )
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    src = source.strip() or "[book / video / experiment / conversation]"
+    tpl_path = _LEARNING / "_TEMPLATE.md"
+    try:
+        body = tpl_path.read_text(encoding="utf-8")
+    except OSError:
+        body = "# Ch0X — [Chapter Title]\n*Captured: YYYY-MM-DD | Source: [book / video / experiment / conversation]*\n\n## The core idea\n\n\n## Why this matters for Bolt\n\n"
+    lines = body.splitlines()
+    out: List[str] = []
+    did_title = did_meta = False
+    for line in lines:
+        if not did_title and line.strip().startswith("#"):
+            out.append(f"# Ch{num:02d} — {title}")
+            did_title = True
+            continue
+        if not did_meta and "Captured:" in line:
+            out.append(f"*Captured: {today} | Source: {src}*")
+            did_meta = True
+            continue
+        out.append(line)
+    text = "\n".join(out).rstrip() + "\n"
+    try:
+        with open(path, "x", encoding="utf-8") as fh:  # x = never overwrite
+            fh.write(text)
+    except FileExistsError:
+        return _soft(f"Learning unavailable: {path.name} already exists — nothing overwritten.", as_json)
+    except OSError as exc:
+        return _soft(f"Learning unavailable: cannot write {path.name} ({exc})", as_json)
+
+    open_err = _open_file(path) if open_after else None
+    if as_json:
+        print(json.dumps({"ok": True, "path": str(path), "stem": stem,
+                          "opened": open_after and not open_err,
+                          "open_error": open_err}, indent=2))
+        return 0
+    print(f"\n  ✓  New study note: Data/learning/{path.name}")
+    print(f"      Ch{num:02d} — {title}  (captured {today})")
+    if open_after:
+        print("      Opened it." if not open_err else f"      Couldn't open it ({open_err}).")
+    else:
+        print(f"      Fill it in: bolt learning edit {stem}")
+    print()
+    return 0
+
+
+def edit_note(query: str, *, as_json: bool = False) -> int:
+    path = resolve_note(query) if (query or "").strip() else None
+    if path is None:
+        return show_note(query, as_json=as_json)  # same clear not-found / ambiguous text
+    err = _open_file(path)
+    if err:
+        return _soft(f"Learning unavailable: couldn't open {path.name} ({err}). "
+                     f"File is at {path}", as_json)
+    if as_json:
+        print(json.dumps({"ok": True, "opened": str(path)}, indent=2))
+    else:
+        print(f"  Opened Data/learning/{path.name}")
+    return 0
 
 
 def status(*, probe: bool = False) -> Dict[str, Any]:
@@ -142,7 +334,7 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         if ready:
             hint = (
                 f"{len(files)} chapter note(s) under Data/learning/. "
-                "Try: bolt learning list / bolt learning show ch01"
+                "Try: bolt learning list / show 3 / search \"words\" / new \"Title\""
             )
         else:
             hint = " | ".join(hints) if hints else "Try: bolt learning status --json"
@@ -261,11 +453,16 @@ def show_note(query: str, *, as_json: bool = False) -> int:
         # Ambiguous or missing
         stems = [p.stem for p in _chapter_files()]
         lower = query.strip().lower()
-        amb = [s for s in stems if lower in s.lower()]
+        m = re.fullmatch(r"(?:ch)?\s*0*(\d+)", lower)
+        if m:
+            amb = [p.stem for p in _chapter_files() if _chapter_number(p) == int(m.group(1))]
+        else:
+            amb = [s for s in stems if lower in s.lower()]
         if len(amb) > 1:
             msg = (
-                "Learning unavailable: ambiguous chapter "
-                f"{query!r} — matches: " + ", ".join(amb)
+                f"Learning unavailable: more than one note matches {query!r}: "
+                + ", ".join(amb)
+                + f". Use the full name, e.g. bolt learning show {amb[0]}"
             )
         else:
             msg = (
@@ -346,8 +543,9 @@ def print_status(*, as_json: bool = False, probe: bool = False) -> int:
     print()
     print("  Try:")
     print("    bolt learning list")
-    print("    bolt learning show ch01")
-    print("    bolt learning status --json")
+    print("    bolt learning show 3")
+    print('    bolt learning search "attention"')
+    print('    bolt learning new "Embeddings" --open')
     print("  Note: study log only — not clip/queue product architecture.")
     print()
     return 0
@@ -357,12 +555,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in ("-h", "--help", "help"):
         print(
-            """bolt learning — browse local LLM study notes (PARTIAL)
+            """bolt learning — your LLM study log in Data/learning/
 
   bolt learning                      # readiness (default)
   bolt learning status [--json] [--probe]
   bolt learning list [--json]
-  bolt learning show <slug> [--json]
+  bolt learning show <slug|number> [--json]   e.g. show 3, show attention
+  bolt learning search "words" [--json]       lines containing every word
+  bolt learning new "Title" [--source "..."] [--open]
+                                     next chapter from _TEMPLATE.md, never overwrites
+  bolt learning edit <slug>          open a note in the Mac's default app
 
 Soft-fail: "Learning unavailable:". Study log under Data/learning/ —
 not product architecture. Template _TEMPLATE.md is ignored in counts.
@@ -372,7 +574,21 @@ not product architecture. Template _TEMPLATE.md is ignored in counts.
 
     json_out = "--json" in args
     probe = "--probe" in args
-    positionals = [a for a in args if not a.startswith("-")]
+    open_after = "--open" in args
+    source = ""
+    cleaned: List[str] = []
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a == "--source" and i + 1 < len(args):
+            source = args[i + 1]
+            i += 2
+            continue
+        if a.startswith("--source="):
+            source = a.split("=", 1)[1]
+        cleaned.append(a)
+        i += 1
+    positionals = [a for a in cleaned if not a.startswith("-")]
     if not positionals:
         return print_status(as_json=json_out, probe=probe)
 
@@ -384,13 +600,20 @@ not product architecture. Template _TEMPLATE.md is ignored in counts.
     if cmd in ("show", "read", "cat", "view", "open"):
         q = " ".join(positionals[1:]).strip()
         return show_note(q, as_json=json_out)
+    if cmd in ("search", "find", "grep"):
+        return search_notes(" ".join(positionals[1:]), as_json=json_out)
+    if cmd in ("new", "add", "create"):
+        return new_note(" ".join(positionals[1:]), source=source,
+                        open_after=open_after, as_json=json_out)
+    if cmd in ("edit",):
+        return edit_note(" ".join(positionals[1:]), as_json=json_out)
     # Bare slug → show (bolt learning ch01)
     if cmd.startswith("ch") or cmd.endswith(".md"):
         return show_note(" ".join(positionals), as_json=json_out)
 
     print(f"unknown learning action: {cmd}", file=sys.stderr)
     print(
-        "  try: bolt learning status|list|show <slug> [--json]",
+        "  try: bolt learning status|list|show|search|new|edit [--json]",
         file=sys.stderr,
     )
     return 0  # soft-fail informational
