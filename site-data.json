@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-22 04:10:00",
+  "generated_at": "2026-10-22 06:10:01",
   "status": {
     "clips_made": 0,
     "vertical_clips": 2,
@@ -82,14 +82,19 @@
   ],
   "progress": {
     "counts": {
-      "READY": 84,
-      "PARTIAL": 5,
+      "READY": 85,
+      "PARTIAL": 4,
       "SHELL": 0,
       "IDEA": 0
     },
     "total": 89,
-    "percent_ready": 94,
+    "percent_ready": 96,
     "recent": [
+      {
+        "name": "Cloudflare Pages / Websites",
+        "date": "2026-10-22",
+        "display": "Oct 22, 5:45 AM CT"
+      },
       {
         "name": "iCloud Drive (multi-Mac sync)",
         "date": "2026-10-22",
@@ -109,14 +114,9 @@
         "name": "Learning notes (study log)",
         "date": "2026-10-21",
         "display": "Oct 21, 5:45 PM CT"
-      },
-      {
-        "name": "Mac app (Bolt.app in the menu bar)",
-        "date": "2026-10-21",
-        "display": "Oct 21, 3:45 PM CT"
       }
     ],
-    "updated": "22 Oct 2026, ~1:45 AM CT",
+    "updated": "22 Oct 2026, ~5:45 AM CT",
     "available": true
   }
 }
