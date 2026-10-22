@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21 18:10:00",
+  "generated_at": "2026-10-21 20:10:01",
   "status": {
     "clips_made": 0,
     "vertical_clips": 2,
@@ -76,20 +76,25 @@
       "end_hour": 22,
       "start_display": "7 PM",
       "end_display": "10 PM",
-      "in_window": false,
+      "in_window": true,
       "active": false
     }
   ],
   "progress": {
     "counts": {
-      "READY": 80,
-      "PARTIAL": 9,
+      "READY": 81,
+      "PARTIAL": 8,
       "SHELL": 0,
       "IDEA": 0
     },
     "total": 89,
-    "percent_ready": 90,
+    "percent_ready": 91,
     "recent": [
+      {
+        "name": "Discord webhook alerts",
+        "date": "2026-10-21",
+        "display": "Oct 21, 7:40 PM CT"
+      },
       {
         "name": "Learning notes (study log)",
         "date": "2026-10-21",
@@ -109,11 +114,6 @@
         "name": "Layout check (tidy top folder)",
         "date": "2026-10-21",
         "display": "Oct 21, 5:50 AM CT"
-      },
-      {
-        "name": "Quick health check (bolt health)",
-        "date": "2026-10-21",
-        "display": "Oct 21, 3:45 AM CT"
       }
     ],
     "updated": "21 Oct 2026, ~5:45 PM CT",
