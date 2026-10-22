@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21 22:10:00",
+  "generated_at": "2026-10-22 00:10:00",
   "status": {
     "clips_made": 0,
     "vertical_clips": 2,
@@ -82,13 +82,13 @@
   ],
   "progress": {
     "counts": {
-      "READY": 82,
-      "PARTIAL": 7,
+      "READY": 83,
+      "PARTIAL": 6,
       "SHELL": 0,
       "IDEA": 0
     },
     "total": 89,
-    "percent_ready": 92,
+    "percent_ready": 93,
     "recent": [
       {
         "name": "OBS auto game tracker (scene \u2192 config game)",
