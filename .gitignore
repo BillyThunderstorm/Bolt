@@ -132,3 +132,6 @@ Data/pipeline_errors.jsonl
 Data/.site-data-probe.json
 .pytest_cache/
 .scratch-*/
+
+# Private evening check-in notes (personal; never publish — repo is public)
+Data/memory/checkins/
