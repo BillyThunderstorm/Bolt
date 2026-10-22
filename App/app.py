@@ -23,9 +23,11 @@ Result:
 from __future__ import annotations
 
 import os
+import queue
 import subprocess
 import sys
-import webbrowser
+import threading
+import time
 from pathlib import Path
 
 
@@ -62,14 +64,30 @@ except ImportError:
     )
     raise SystemExit(1)
 
-APP_ICON = APP_ROOT / "assets" / "menu_bar_icon.png"
-APP_ICNS = APP_ROOT / "assets" / "AppIcon.icns"
+def _first(*paths: Path) -> Path:
+    for path in paths:
+        if path.exists():
+            return path
+    return paths[0]
+
+
+# Icons live in App/assets (older checkouts used a top-level assets/ folder).
+APP_ICON = _first(
+    APP_ROOT / "App" / "assets" / "menu_bar_icon.png",
+    APP_ROOT / "assets" / "menu_bar_icon.png",
+)
+APP_ICNS = _first(
+    APP_ROOT / "App" / "assets" / "AppIcon.icns",
+    APP_ROOT / "assets" / "AppIcon.icns",
+)
 
 LAUNCH_SCRIPT = APP_ROOT / "Core" / "launch.py"
 DASHBOARD_FILE = APP_ROOT / "App" / "Bolt_Checkup.html"
 LOG_DIR = APP_ROOT / "logs"
+LAUNCH_LOG = LOG_DIR / "menubar_bolt.log"
 CONFIG_FILE = APP_ROOT / "Core" / "config.json"
-ENV_FILE = APP_ROOT / ".env"
+# Bolt reads .env.local before .env, so open the one that actually wins.
+ENV_FILE = _first(APP_ROOT / ".env.local", APP_ROOT / ".env")
 BOLT_SHIM = APP_ROOT / ".venv" / "bin" / "bolt"
 VENV_PYTHON = APP_ROOT / ".venv" / "bin" / "python3"
 
@@ -97,7 +115,11 @@ def _bolt_cmd(args: list[str]) -> list[str]:
 
 def _run_env() -> dict:
     env = os.environ.copy()
-    env["PATH"] = env.get("PATH", "") + ":/opt/homebrew/bin:/usr/local/bin"
+    parts = [p for p in env.get("PATH", "").split(":") if p]
+    for extra in ("/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin"):
+        if extra not in parts:
+            parts.append(extra)
+    env["PATH"] = ":".join(parts)
     core = str(APP_ROOT / "Core")
     env["PYTHONPATH"] = core + (f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else "")
     return env
@@ -110,9 +132,13 @@ class BoltApp(rumps.App):
             "Bolt",
             icon=icon_path,
             template=True,
-            quit_button="Quit",
+            quit_button=None,
         )
         self.process: subprocess.Popen | None = None
+        self._busy: set[str] = set()
+        # Background jobs post (title, message, is_error) here; the main-thread
+        # timer shows them, so the menu never freezes while Bolt works.
+        self._events: "queue.Queue[tuple[str, str, bool]]" = queue.Queue()
 
         self.status_item = rumps.MenuItem("Status: idle", callback=None)
 
@@ -127,12 +153,62 @@ class BoltApp(rumps.App):
             rumps.MenuItem("Open Config", callback=self.open_config),
             None,
             rumps.MenuItem("Stop Bolt", callback=self.stop_bolt),
+            rumps.MenuItem("Quit", callback=self.quit_app),
         ]
+        self._timer = rumps.Timer(self._tick, 2)
+        self._timer.start()
 
     def _title(self, status: str):
-        self.title = f"Bolt ({status})"
         self.status_item.title = f"Status: {status}"
 
+    # ---- main-thread housekeeping -------------------------------------
+    def _tick(self, _):
+        while True:
+            try:
+                title, message, is_error = self._events.get_nowait()
+            except queue.Empty:
+                break
+            if is_error:
+                rumps.alert(title, message)
+            else:
+                rumps.notification("Bolt", title, message)
+        if self.process is not None:
+            code = self.process.poll()
+            if code is not None:
+                self.process = None
+                if code == 0:
+                    self._title("stopped")
+                    rumps.notification("Bolt", "Stopped", "Bolt finished.")
+                else:
+                    self._title(f"stopped (error {code})")
+                    rumps.notification(
+                        "Bolt", "Bolt stopped with an error",
+                        f"See logs/{LAUNCH_LOG.name} (Open Logs Folder).",
+                    )
+            elif "processing" not in self._busy:
+                self._title("running")
+        elif self._busy:
+            self._title("processing..." if "processing" in self._busy else "working...")
+        elif self.status_item.title in ("Status: processing...", "Status: working..."):
+            self._title("ready")
+
+    def _in_background(self, key: str, func):
+        if key in self._busy:
+            rumps.notification("Bolt", "Already working", "That job is still running.")
+            return
+
+        def runner():
+            try:
+                func()
+            except Exception as exc:  # never let a job kill the menu bar
+                self._events.put(("Something went wrong", str(exc)[:500], True))
+            finally:
+                self._busy.discard(key)
+
+        self._busy.add(key)
+        threading.Thread(target=runner, daemon=True).start()
+
+    # ---- menu actions ---------------------------------------------------
     def launch_bolt(self, _):
         if self.process and self.process.poll() is None:
             rumps.alert("Bolt is already running")
@@ -143,14 +219,20 @@ class BoltApp(rumps.App):
 
         self._title("starting...")
         try:
+            LOG_DIR.mkdir(parents=True, exist_ok=True)
+            log = open(LAUNCH_LOG, "a", encoding="utf-8")
+            log.write(f"\n===== Bolt launched from the menu bar {time.strftime('%Y-%m-%d %H:%M:%S')} =====\n")
+            log.flush()
             # --no-checklist: menu-bar launch must not block on the voice checklist
             self.process = subprocess.Popen(
                 _bolt_cmd(["launch", "--no-checklist"]),
                 cwd=str(APP_ROOT),
                 env=_run_env(),
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stdin=subprocess.DEVNULL,
+                stdout=log,
+                stderr=subprocess.STDOUT,
             )
+            log.close()
             self._title("running")
             rumps.notification("Bolt", "Launched", "Bolt is now running in the background")
         except Exception as exc:
@@ -158,50 +240,56 @@ class BoltApp(rumps.App):
             rumps.alert(f"Failed to launch Bolt: {exc}")
 
     def process_recording(self, _):
+        def job():
+            try:
+                result = subprocess.run(
+                    _bolt_cmd(["recordings", "latest"]),
+                    cwd=str(APP_ROOT),
+                    env=_run_env(),
+                    stdin=subprocess.DEVNULL,
+                    capture_output=True,
+                    text=True,
+                    timeout=1800,
+                )
+            except subprocess.TimeoutExpired:
+                self._events.put(("Processing took too long", "Stopped after 30 minutes. Try: bolt recordings latest", True))
+                return
+            _append_log("Process Recording", result.stdout, result.stderr, result.returncode)
+            if result.returncode == 0:
+                self._events.put(("Processing complete", "Latest recording processed", False))
+            else:
+                err = (result.stderr or result.stdout or f"exit {result.returncode}").strip()[-500:]
+                self._events.put(("Processing failed", err, True))
+
         self._title("processing...")
-        try:
-            result = subprocess.run(
-                _bolt_cmd(["recordings", "latest"]),
-                cwd=str(APP_ROOT),
-                env=_run_env(),
-                check=True,
-                capture_output=True,
-                text=True,
-                timeout=600,
-            )
-            self._title("ready")
-            rumps.notification("Bolt", "Processing complete", "Latest recording processed")
-            if result.stdout.strip():
-                print(result.stdout[-500:])
-        except subprocess.CalledProcessError as exc:
-            self._title("process error")
-            err = (exc.stderr or exc.stdout or str(exc))[:500]
-            rumps.alert(f"Processing failed:\n{err}")
-        except Exception as exc:
-            self._title("process error")
-            rumps.alert(f"Processing failed: {exc}")
+        rumps.notification("Bolt", "Processing", "Working on your latest recording…")
+        self._in_background("processing", job)
 
     def open_dashboard(self, _):
-        # Refresh Bolt_data.js when Checkup_Writer is available, then open HTML
-        try:
-            subprocess.run(
-                _bolt_cmd(["checkup"]),
-                cwd=str(APP_ROOT),
-                env=_run_env(),
-                capture_output=True,
-                text=True,
-                timeout=60,
-            )
-        except Exception:
-            pass
-        if DASHBOARD_FILE.exists():
-            webbrowser.open(DASHBOARD_FILE.resolve().as_uri())
-        else:
-            rumps.alert(
-                "Dashboard HTML not found.\n"
-                f"Expected: {DASHBOARD_FILE}\n"
-                "Run: bolt checkup"
-            )
+        def job():
+            # Refresh Bolt_data.js when Checkup_Writer is available, then open HTML
+            try:
+                subprocess.run(
+                    _bolt_cmd(["checkup"]),
+                    cwd=str(APP_ROOT),
+                    env=_run_env(),
+                    stdin=subprocess.DEVNULL,
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                )
+            except Exception:
+                pass
+            if DASHBOARD_FILE.exists():
+                subprocess.run(["open", str(DASHBOARD_FILE)])
+            else:
+                self._events.put((
+                    "Dashboard not found",
+                    f"Expected: {DASHBOARD_FILE}\nRun: bolt checkup",
+                    True,
+                ))
+
+        self._in_background("dashboard", job)
 
     def open_logs(self, _):
         if LOG_DIR.exists():
@@ -230,10 +318,32 @@ class BoltApp(rumps.App):
                 self.process.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 self.process.kill()
+            self.process = None
             self._title("stopped")
             rumps.notification("Bolt", "Stopped", "Bolt process terminated")
         else:
             rumps.alert("Bolt is not running")
+
+    def quit_app(self, _):
+        # Don't leave a launched Bolt running headless after the icon is gone.
+        if self.process and self.process.poll() is None:
+            self.process.terminate()
+            try:
+                self.process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                self.process.kill()
+        rumps.quit_application()
+
+
+def _append_log(label: str, out: str, err: str, code: int) -> None:
+    try:
+        LOG_DIR.mkdir(parents=True, exist_ok=True)
+        with open(LAUNCH_LOG, "a", encoding="utf-8") as fh:
+            fh.write(f"\n===== {label} {time.strftime('%Y-%m-%d %H:%M:%S')} (exit {code}) =====\n")
+            fh.write((out or "")[-4000:])
+            fh.write((err or "")[-4000:])
+    except OSError:
+        pass
 
 
 def main():

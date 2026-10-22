@@ -37,7 +37,11 @@ except ImportError:
 try:
     from dotenv import load_dotenv
 
-    load_dotenv()
+    # .env.local first, then .env (first value wins, like the rest of Bolt).
+    for _env_name in (".env.local", ".env"):
+        _env_path = Path(__file__).resolve().parents[2] / _env_name
+        if _env_path.exists():
+            load_dotenv(_env_path, override=False)
 except ImportError:
     pass
 
@@ -602,16 +606,41 @@ def _send_discord(message: str):
     optional comma-separated DISCORD_WEBHOOK_URLS in .env.
     """
     webhooks = _discord_webhooks()
-    if not webhooks or not requests:
+    if not webhooks:
+        return
+    # Shared sender (notifier.post_webhooks): status check, 2000-char split,
+    # 429 retry, no @everyone pings, logged to logs/discord.jsonl.
+    try:
+        try:
+            from modules.notifier import post_webhooks
+        except ImportError:
+            from notifier import post_webhooks  # type: ignore
+    except Exception:
+        post_webhooks = None  # type: ignore
+    if post_webhooks is not None:
+        result = post_webhooks(message, source="peak_hour")
+        if result.get("errors") or not result.get("ok"):
+            notify(
+                f"Discord notify failed: {result.get('error') or '; '.join(result.get('errors') or [])}",
+                level="warning",
+                reason="Check the Discord webhooks with `bolt discord status --probe`. Clip still saved locally.",
+            )
+        return
+    if not requests:
         return
     for webhook in webhooks:
         try:
-            requests.post(webhook, json={"content": message}, timeout=10)
+            r = requests.post(
+                webhook,
+                json={"content": message[:2000], "allowed_mentions": {"parse": []}},
+                timeout=10,
+            )
+            r.raise_for_status()
         except Exception as exc:
             notify(
                 f"Discord notify failed: {exc}",
                 level="warning",
-                reason="Check Discord webhook values in .env. Clip still saved locally.",
+                reason="Check Discord webhook values in .env.local. Clip still saved locally.",
             )
 
 

@@ -24,5 +24,8 @@ PY="$REPO_ROOT/.venv/bin/python"
 [[ -x "$PY" ]] || PY="$(command -v python3)"
 
 cd "$REPO_ROOT" || exit 0
+# Heartbeat: the run is quiet when nothing is new, so the log alone can't show
+# cron is still firing. `bolt mac-auto status` reads this file.
+mkdir -p "$REPO_ROOT/logs/heartbeats" 2>/dev/null && date '+%Y-%m-%d %H:%M:%S' > "$REPO_ROOT/logs/heartbeats/compress_videos.last" 2>/dev/null || true
 PYTHONPATH="$REPO_ROOT/Core${PYTHONPATH:+:$PYTHONPATH}" \
   exec "$PY" -m modules.Video_Compress run --cron "$@"

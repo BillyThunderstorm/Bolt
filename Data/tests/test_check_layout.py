@@ -116,5 +116,87 @@ class FindMisplacedTests(unittest.TestCase):
         self.assertEqual(payload["findings"][0]["expected"], "Data/clip_history.json")
 
 
+class ScanRootTests(unittest.TestCase):
+    """scan_root(): full inventory (in place / wrong spot / look at / notes)."""
+
+    def _root(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        return Path(tmp.name)
+
+    def test_tidy_repo_is_clean(self):
+        root = self._root()
+        for d in ("Core", "Data", "Sites", "bolt_cli"):
+            (root / d).mkdir()
+        for f in ("README.md", "uv.lock", "site-data.json", "_config.yml", ".env", ".gitignore"):
+            (root / f).touch()
+        (root / ".git").mkdir()
+        scan = check_layout.scan_root(root)
+        self.assertTrue(scan["clean"])
+        self.assertEqual(scan["counts"]["look_at"], 0)
+        self.assertEqual(scan["counts"]["misplaced"], 0)
+        names = {i["name"] for i in scan["in_place"]}
+        self.assertIn("Sites", names)
+        self.assertIn("site-data.json", names)
+        self.assertEqual(scan["counts"]["hidden_ok"], 3)
+
+    def test_unknown_items_are_look_at_with_fix(self):
+        root = self._root()
+        (root / "state").mkdir()            # empty -> safe to delete
+        (root / "junk_folder").mkdir()
+        (root / "junk_folder" / "a.txt").touch()
+        (root / "some_script.py").touch()
+        scan = check_layout.scan_root(root)
+        self.assertFalse(scan["clean"])
+        by = {i["name"]: i for i in scan["look_at"]}
+        self.assertEqual(set(by), {"state", "junk_folder", "some_script.py"})
+        self.assertIn("Safe to delete", by["state"]["fix"])
+        self.assertIn("KNOWN_TOP_LEVEL_DIRS", by["junk_folder"]["fix"])
+        self.assertIn("ROOT_ALLOWED", by["some_script.py"]["fix"])
+        # find_misplaced stays rule-only (unknowns don't count as misplaced)
+        self.assertEqual(check_layout.find_misplaced(root), [])
+
+    def test_misplaced_not_double_listed(self):
+        root = self._root()
+        (root / "clip.mp4").touch()
+        scan = check_layout.scan_root(root)
+        self.assertEqual(scan["counts"]["misplaced"], 1)
+        self.assertEqual(scan["counts"]["look_at"], 0)
+
+    def test_hidden_notes_not_problems(self):
+        root = self._root()
+        (root / ".env.local.bak-voice").touch()
+        (root / ".tmp.driveupload").mkdir()
+        scan = check_layout.scan_root(root)
+        self.assertTrue(scan["clean"])
+        self.assertEqual({n["name"] for n in scan["notes"]},
+                         {".env.local.bak-voice", ".tmp.driveupload"})
+
+    def test_report_never_touches_files(self):
+        root = self._root()
+        (root / "state").mkdir()
+        (root / "x.rtf").touch()
+        before = sorted(p.name for p in root.iterdir())
+        text = check_layout.format_inventory(check_layout.scan_root(root), show_all=True)
+        self.assertIn("Nothing was moved or deleted", text)
+        self.assertIn("x.rtf", text)
+        self.assertEqual(before, sorted(p.name for p in root.iterdir()))
+
+    def test_layout_check_module_ready_and_run(self):
+        core = _repo_root / "Core"
+        if str(core) not in sys.path:
+            sys.path.insert(0, str(core))
+        from modules import Layout_Check
+        st = Layout_Check.status(probe=False)
+        self.assertEqual(st["readiness"], "READY")
+        root = self._root()
+        (root / "state").mkdir()
+        out = Layout_Check.try_run(root=str(root), show_all=True)
+        self.assertTrue(out["ok"])
+        self.assertEqual(out["exit_code"], 0)
+        self.assertFalse(out["layout_clean"])
+        self.assertIn("state/", out["report"])
+
+
 if __name__ == "__main__":
     unittest.main()

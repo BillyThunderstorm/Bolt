@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Bolt_Mac_App.py — local macOS .app assemble readiness (PARTIAL)
+Bolt_Mac_App.py — local macOS Bolt.app (menu bar) — READY 21 Oct 2026; not notarized
 ===============================================================
 Honest status for a drag-to-Applications ``dist/Bolt.app`` wrapper.
 
@@ -12,6 +12,8 @@ Day-to-day use remains ``bolt menubar`` (rumps). Soft-fail prefix:
   bolt mac-app status [--json] [--probe]
   bolt mac-app list [--json]
   bolt mac-app build [--dry-run] [--json]   # thin assemble into dist/Bolt.app
+  bolt mac-app install [--dry-run]          # build + copy to ~/Applications/Bolt.app
+  bolt mac-app open                         # start the menu bar app (once)
 
 Aliases: macapp, mac_app, bolt-app, app-bundle, app-status.
 """
@@ -43,6 +45,9 @@ _MENU_ICON_CANDIDATES = (
     _REPO / "App" / "bolt_icon.png",
 )
 _DIST_APP = _REPO / "dist" / "Bolt.app"
+_INSTALLED_APP = Path.home() / "Applications" / "Bolt.app"
+_APP_LOG = _REPO / "logs" / "menubar.log"
+_VENV_PY = _REPO / ".venv" / "bin" / "python3"
 _BUNDLE_ID = "com.thunderstormbilly.bolt"
 
 
@@ -82,15 +87,18 @@ def _py2app_ok() -> Tuple[bool, str]:
         return False, str(exc)
 
 
-def _launcher_path(app: Path = _DIST_APP) -> Path:
+def _launcher_path(app: Optional[Path] = None) -> Path:
+    app = _DIST_APP if app is None else app
     return app / "Contents" / "MacOS" / "Bolt"
 
 
-def _plist_path(app: Path = _DIST_APP) -> Path:
+def _plist_path(app: Optional[Path] = None) -> Path:
+    app = _DIST_APP if app is None else app
     return app / "Contents" / "Info.plist"
 
 
-def _bundle_looks_valid(app: Path = _DIST_APP) -> bool:
+def _bundle_looks_valid(app: Optional[Path] = None) -> bool:
+    app = _DIST_APP if app is None else app
     return (
         app.is_dir()
         and _launcher_path(app).is_file()
@@ -137,7 +145,7 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
     out: Dict[str, Any] = {
         "checked_at": _utc_now(),
         "ready": ready,
-        "partial": True,
+        "partial": False,
         "is_shipping": False,
         "notarized": False,
         "is_ios": False,
@@ -164,17 +172,26 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         "soft_fail_prefix": "Mac app unavailable:",
     }
 
+    out["dist_stale"] = bool(valid and _bundle_stale(_DIST_APP))
+    out["installed_app"] = str(_INSTALLED_APP)
+    out["installed"] = _bundle_looks_valid(_INSTALLED_APP)
+    out["installed_stale"] = bool(out["installed"] and _bundle_stale(_INSTALLED_APP))
+    out["running"] = _menubar_running() if is_darwin else False
+    out["log"] = str(_APP_LOG)
+    if ready and out["dist_stale"]:
+        out["hint"] = "dist/Bolt.app is out of date — run: bolt mac-app install"
+    elif ready and out["installed_stale"]:
+        out["hint"] = "~/Applications/Bolt.app is out of date — run: bolt mac-app install"
+    elif ready and not out["installed"]:
+        out["hint"] = "not in ~/Applications yet — run: bolt mac-app install (then find Bolt in Spotlight / Launchpad)"
+
     if probe and is_darwin and valid:
-        # Light probe: ensure launcher is a readable script / binary.
-        try:
-            raw = launcher.read_bytes()[:80]
-            out["probe_launcher_magic"] = raw[:2].hex()
-            out["probe_ok"] = True
-        except OSError as exc:
-            out["probe_ok"] = False
-            out["probe_error"] = _soft(str(exc))
+        ok, problems = _probe(_DIST_APP)
+        out["probe_ok"] = ok
+        out["probe_problems"] = problems
+        if not ok:
             out["ready"] = False
-            out["hint"] = _soft(f"launcher unreadable ({exc})")
+            out["hint"] = _soft(problems[0])
     elif probe and not is_darwin:
         out["probe_ok"] = False
         out["probe_error"] = _soft("not macOS")
@@ -241,7 +258,7 @@ def _info_plist_xml() -> str:
   <key>LSHighResolutionCapable</key>
   <true/>
   <key>LSUIElement</key>
-  <false/>
+  <true/>
   <key>LSHumanReadableCopyright</key>
   <string>Local Bolt wrapper — not notarized</string>
 </dict>
@@ -251,29 +268,91 @@ def _info_plist_xml() -> str:
 
 def _launcher_script() -> str:
     # Thin wrapper: always launch menubar from this checkout (not a frozen copy).
+    # Finder starts apps with a bare PATH and no terminal, so add Homebrew,
+    # write everything to logs/menubar.log, and never start a second icon.
     repo = str(_REPO)
     app_py = str(_APP_PY)
-    venv_py = _REPO / ".venv" / "bin" / "python3"
-    bolt_shim = _REPO / ".venv" / "bin" / "bolt"
+    venv_py = str(_VENV_PY)
+    log = str(_APP_LOG)
     return f"""#!/bin/bash
-# Bolt.app launcher — thin checkout wrapper (PARTIAL; not notarized)
-set -euo pipefail
+# Bolt.app launcher — thin checkout wrapper (not notarized). Built by: bolt mac-app build
 REPO={repo!r}
+LOG={log!r}
+APP_PY={app_py!r}
 cd "$REPO" || exit 1
+mkdir -p "$REPO/logs"
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin${{PATH:+:$PATH}}"
 export PYTHONPATH="$REPO/Core${{PYTHONPATH:+:$PYTHONPATH}}"
-if [ -x {str(bolt_shim)!r} ]; then
-  exec {str(bolt_shim)!r} menubar
+export PYTHONUNBUFFERED=1
+if [ -f "$LOG" ] && [ "$(stat -f%z "$LOG" 2>/dev/null || echo 0)" -gt 1048576 ]; then
+  tail -c 262144 "$LOG" > "$LOG.tmp" && mv "$LOG.tmp" "$LOG"
 fi
-PY={str(venv_py)!r}
+echo "===== Bolt.app start $(date '+%Y-%m-%d %H:%M:%S') =====" >> "$LOG"
+if pgrep -f "$APP_PY" >/dev/null 2>&1; then
+  echo "already running — not starting a second menu bar icon" >> "$LOG"
+  exit 0
+fi
+PY={venv_py!r}
 if [ ! -x "$PY" ]; then
   PY="$(command -v python3 || true)"
 fi
 if [ -z "$PY" ]; then
-  echo "Mac app unavailable: no python3 for menubar" >&2
+  echo "Mac app unavailable: no python3 for menubar (run: uv sync --extra menubar)" >> "$LOG"
+  osascript -e 'display alert "Bolt cannot start" message "No Python found. In Terminal run: cd ~/developer/Bolt && uv sync --extra menubar"' >/dev/null 2>&1 || true
   exit 1
 fi
-exec "$PY" {app_py!r}
+if ! "$PY" -c "import rumps" >> "$LOG" 2>&1; then
+  echo "Mac app unavailable: rumps missing (run: uv sync --extra menubar)" >> "$LOG"
+  osascript -e 'display alert "Bolt cannot start" message "The menu bar package is missing. In Terminal run: cd ~/developer/Bolt && uv sync --extra menubar"' >/dev/null 2>&1 || true
+  exit 1
+fi
+exec "$PY" "$APP_PY" >> "$LOG" 2>&1
 """
+
+
+def _bundle_stale(app: Path) -> bool:
+    """True when the bundle's launcher/plist differ from what build would write now."""
+    try:
+        return (
+            _launcher_path(app).read_text(encoding="utf-8") != _launcher_script()
+            or _plist_path(app).read_text(encoding="utf-8") != _info_plist_xml()
+        )
+    except OSError:
+        return True
+
+
+def _menubar_running() -> bool:
+    try:
+        r = subprocess.run(["pgrep", "-f", str(_APP_PY)], capture_output=True, text=True, timeout=3)
+        return r.returncode == 0 and bool(r.stdout.strip())
+    except Exception:
+        return False
+
+
+def _probe(app: Path) -> Tuple[bool, List[str]]:
+    """Check the bundle would really start: launcher syntax, venv rumps, app.py compiles."""
+    problems: List[str] = []
+    launcher = _launcher_path(app)
+    try:
+        r = subprocess.run(["bash", "-n", str(launcher)], capture_output=True, text=True, timeout=5)
+        if r.returncode != 0:
+            problems.append(f"launcher script has a syntax error ({r.stderr.strip()[:120]}) — fix: bolt mac-app build")
+    except Exception as exc:
+        problems.append(f"could not check launcher ({exc})")
+    py = str(_VENV_PY) if _VENV_PY.exists() else sys.executable
+    try:
+        r = subprocess.run([py, "-c", "import rumps"], capture_output=True, text=True, timeout=15)
+        if r.returncode != 0:
+            problems.append("rumps not importable in .venv — fix: uv sync --extra menubar")
+    except Exception as exc:
+        problems.append(f"could not import rumps ({exc})")
+    try:
+        r = subprocess.run([py, "-m", "py_compile", str(_APP_PY)], capture_output=True, text=True, timeout=15)
+        if r.returncode != 0:
+            problems.append(f"App/app.py does not compile ({r.stderr.strip()[-160:]})")
+    except Exception as exc:
+        problems.append(f"could not compile App/app.py ({exc})")
+    return (not problems), problems
 
 
 def try_build(*, dry_run: bool = False, as_json: bool = False) -> int:
@@ -388,12 +467,93 @@ def try_build(*, dry_run: bool = False, as_json: bool = False) -> int:
     return 0
 
 
+def try_install(*, dry_run: bool = False, as_json: bool = False) -> int:
+    """Build dist/Bolt.app, then copy it to ~/Applications/Bolt.app (easy to find)."""
+    dest = _INSTALLED_APP
+    if dest.exists() and not _bundle_looks_valid(dest):
+        msg = _soft(f"{dest} exists but isn't a Bolt wrapper — left alone; move it aside first")
+        print(json.dumps({"ok": False, "error": msg}) if as_json else msg, file=None if as_json else sys.stderr)
+        return 1
+    if dest.exists():
+        try:
+            ident = _plist_path(dest).read_text(encoding="utf-8")
+        except OSError:
+            ident = ""
+        if _BUNDLE_ID not in ident:
+            msg = _soft(f"{dest} is a different app (not {_BUNDLE_ID}) — left alone")
+            print(json.dumps({"ok": False, "error": msg}) if as_json else msg, file=None if as_json else sys.stderr)
+            return 1
+    if dry_run:
+        msg = {"ok": True, "dry_run": True, "would": [f"build {_DIST_APP}", f"copy → {dest}"]}
+        if as_json:
+            print(json.dumps(msg, indent=2))
+        else:
+            print(f"Mac app install dry-run: would build {_DIST_APP} and copy it to {dest}")
+        return 0
+    import io
+    import contextlib
+    with contextlib.redirect_stdout(io.StringIO()):
+        try_build()
+    if not _bundle_looks_valid(_DIST_APP):
+        msg = _soft("build did not produce a valid dist/Bolt.app — run: bolt mac-app build")
+        print(json.dumps({"ok": False, "error": msg}) if as_json else msg, file=None if as_json else sys.stderr)
+        return 1
+    try:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        tmp = dest.with_name("Bolt.app.installing")
+        if tmp.exists():
+            shutil.rmtree(tmp)
+        shutil.copytree(_DIST_APP, tmp, symlinks=True)
+        if dest.exists():
+            shutil.rmtree(dest)
+        tmp.rename(dest)
+    except OSError as exc:
+        msg = _soft(f"copy to {dest} failed ({exc})")
+        print(json.dumps({"ok": False, "error": msg}) if as_json else msg, file=None if as_json else sys.stderr)
+        return 1
+    # Let Spotlight / Launchpad notice it straight away (best effort).
+    lsreg = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+    if Path(lsreg).exists():
+        try:
+            subprocess.run([lsreg, "-f", str(dest)], capture_output=True, timeout=10)
+        except Exception:
+            pass
+    if as_json:
+        print(json.dumps({"ok": True, "installed": str(dest)}, indent=2))
+    else:
+        print(f"Installed {dest}")
+        print("  Open it from Spotlight (type Bolt) or Finder → Applications. It lives in the menu bar (no Dock icon).")
+        print(f"  Log: {_APP_LOG}")
+    return 0
+
+
+def try_open(*, as_json: bool = False) -> int:
+    """Start the menu bar app via the installed (or dist) bundle; never a second copy."""
+    if _menubar_running():
+        msg = "Bolt menu bar app is already running (look for the Bolt icon in the menu bar)."
+        print(json.dumps({"ok": True, "already_running": True}) if as_json else msg)
+        return 0
+    app = _INSTALLED_APP if _bundle_looks_valid(_INSTALLED_APP) else _DIST_APP
+    if not _bundle_looks_valid(app):
+        msg = _soft("no Bolt.app built yet — run: bolt mac-app install")
+        print(json.dumps({"ok": False, "error": msg}) if as_json else msg, file=None if as_json else sys.stderr)
+        return 1
+    try:
+        subprocess.run(["open", str(app)], capture_output=True, timeout=10, check=True)
+    except Exception as exc:
+        msg = _soft(f"open failed ({exc})")
+        print(json.dumps({"ok": False, "error": msg}) if as_json else msg, file=None if as_json else sys.stderr)
+        return 1
+    print(json.dumps({"ok": True, "opened": str(app)}) if as_json else f"Opened {app} — Bolt icon should appear in the menu bar.")
+    return 0
+
+
 def print_status(*, as_json: bool = False, probe: bool = False) -> int:
     info = status(probe=probe)
     if as_json:
         print(json.dumps(info, indent=2, default=str))
         return 0
-    print("Bolt macOS .app readiness (PARTIAL)")
+    print("Bolt Mac app (menu bar) — READY, local only, not notarized")
     print(f"  ready: {info.get('ready')}")
     print(f"  platform: {info.get('platform')} (darwin={info.get('platform_is_darwin')})")
     print(f"  rumps: {info.get('rumps_ok')} · py2app: {info.get('py2app_ok')}")
@@ -401,6 +561,13 @@ def print_status(*, as_json: bool = False, probe: bool = False) -> int:
     print(f"  notarized: false · iOS: false · prefer: {info.get('prefer')}")
     if info.get("icon_icns"):
         print(f"  icon: {info['icon_icns']}")
+    print(f"  installed: {info.get('installed_app')} ({'yes' if info.get('installed') else 'no'}"
+          f"{', out of date' if info.get('installed_stale') else ''})")
+    print(f"  running now: {'yes' if info.get('running') else 'no'} · log: {info.get('log')}")
+    if probe:
+        print(f"  probe: {'ok — would start' if info.get('probe_ok') else 'problems'}")
+        for prob in info.get("probe_problems") or []:
+            print(f"    - {prob}")
     if info.get("hint"):
         print(f"  → {info['hint']}")
     elif not info.get("ready"):
@@ -412,12 +579,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in ("-h", "--help", "help"):
         print(
-            """bolt mac-app — local macOS .app assemble (PARTIAL)
+            """bolt mac-app — local macOS Bolt.app (menu bar)
 
   bolt mac-app                       # readiness (default)
   bolt mac-app status [--json] [--probe]
   bolt mac-app list [--json]
   bolt mac-app build [--dry-run] [--json]
+  bolt mac-app install [--dry-run]   # build + copy to ~/Applications/Bolt.app
+  bolt mac-app open                  # start the menu bar app (never twice)
 
 Soft-fail: "Mac app unavailable:".
 Not notarized, not iOS. Prefer: bolt menubar.
@@ -439,10 +608,14 @@ Not notarized, not iOS. Prefer: bolt menubar.
         return list_pieces(as_json=json_out)
     if cmd in ("build", "assemble", "make", "bundle"):
         return try_build(dry_run=dry_run, as_json=json_out)
+    if cmd in ("install",):
+        return try_install(dry_run=dry_run, as_json=json_out)
+    if cmd in ("open", "start", "run"):
+        return try_open(as_json=json_out)
 
     print(f"unknown mac-app action: {cmd}", file=sys.stderr)
     print(
-        "  try: bolt mac-app status|list|build [--json] [--dry-run] [--probe]",
+        "  try: bolt mac-app status|list|build|install|open [--json] [--dry-run] [--probe]",
         file=sys.stderr,
     )
     return 0

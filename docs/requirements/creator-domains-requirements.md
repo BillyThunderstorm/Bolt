@@ -41,8 +41,8 @@ The core output layer. Bolt must help plan, draft, edit, and package content acr
 ### Integration Points
 - `modules/Clip_Generator.py`, `modules/Clip_Ranker.py` — clip pipeline
 - `modules/Title_Generator.py`, `modules/AI_Title_Generator.py` — titling
-- `memory/content/content-ideas.md` — idea backlog
-- `memory/content/posted-content-log.md` — results
+- `Data/content/content-ideas.md` — idea backlog
+- `Data/content/posted-content-log.md` — results
 
 ### Quality Gates
 - Every suggestion must tie back to Billy's review/testing angle (the brand).
@@ -75,7 +75,7 @@ Bolt should reduce friction in Billy's daily workflow: task management, focus, d
 - `modules/Think_Learn_Decide.py` — canonical intake/decision layer
 - `modules/Google_Calendar.py` — schedule awareness
 - `modules/Gmail_Briefing.py` — morning digest
-- `memory/content/daily-briefing.md` — template and history
+- `Data/content/daily-briefing.md` — template and history
 
 ### Quality Gates
 - Suggest one clear next step, never five options.
@@ -107,8 +107,8 @@ Gaming is a primary lane, but it serves the larger review/testing brand. Bolt mu
 ### Integration Points
 - `modules/Highlight_Detector.py` — smart detection with context
 - `modules/Game_Config.py` — game-specific settings
-- `memory/content/game-testing.md` — catalog and reviews
-- `memory/content/product-reviews.md` — gear crossover
+- `Data/content/game-testing.md` — catalog and reviews
+- `Data/content/product-reviews.md` — gear crossover
 
 ### Quality Gates
 - Reviews must be honest, not hype. If Billy did not like it, the tone should reflect that.
@@ -139,8 +139,8 @@ Billy's brand centers on honest, real-world assessments. This covers non-gaming 
 ### Integration Points
 - `modules/Skincare_Analyzer.py` — beauty/skincare-specific
 - `modules/Amazon_Analyzer.py` — storefront and product parsing
-- `memory/content/product-reviews.md` — master catalog
-- `memory/content/beauty-skincare.md` — skincare subset
+- `Data/content/product-reviews.md` — master catalog
+- `Data/content/beauty-skincare.md` — skincare subset
 
 ### Quality Gates
 - Never fake excitement. If a product is mid, say it is mid.
@@ -204,7 +204,7 @@ Billy is learning AI by building Bolt. This domain covers Billy's education, exp
 
 ### Integration Points
 - `modules/LLM_Handler.py` — model usage and fallback logic
-- `memory/content/ai-development.md` — learning notes
+- `Data/content/ai-development.md` — learning notes
 - `teaching/rag/` — RAG study materials
 - `llm/` — local neural model experiments
 
@@ -240,7 +240,7 @@ Cross-platform presence without burnout. Bolt should help schedule, post, track,
 - `modules/Post_Queue.py` — queue state
 - `modules/Peak_Hour_Notifier.py` — timing alerts
 - `modules/TikTok_Publisher.py`, `modules/Multi_Publisher.py` — posting
-- `memory/content/posted-content-log.md` — results
+- `Data/content/posted-content-log.md` — results
 
 ### Quality Gates
 - Never post without Billy approval unless explicitly configured otherwise.

@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
 """
-Bolt_Alerts.py — SMS + email + Mac banner notifications (no Discord)
-====================================================================
-Preferred channels for budget and system alerts.
+Bolt_Alerts.py — Mac banner + spoken line + iMessage/SMS + email (no Discord)
+=============================================================================
+Preferred channels for budget, system, briefing and weekly alerts.
 
-Soft-fail CLI (PARTIAL): ``bolt alerts`` status / list / test / send
-Prefix: ``Alerts unavailable:``. Discord webhooks stay on ``bolt discord``.
+READY CLI: ``bolt alerts`` status / list / test / send
+Soft-fail prefix: ``Alerts unavailable:``. Discord webhooks stay on ``bolt discord``.
 
-SMS uses carrier email-to-SMS via scripts/send_notification.py
-(requires SMTP_* in Data/configs/storage_alerts.env or .env).
+Channels:
+  mac    — native macOS banner (osascript ``display notification``; local, free)
+  voice  — one spoken line: William's ElevenLabs voice first
+           (Bolt_TTS_PROVIDER=elevenlabs + ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID,
+           normally in .env.local), then the fixed male macOS voice
+           "Nathan (Enhanced)". Siri voices ("Voice 1–5", "Siri …") are never
+           used — if Bolt_VOICE is set to one, Nathan (Enhanced) is used instead.
+  sms    — iMessage via the Mac's Messages app to ALERT_PHONE (AT&T email-to-text
+           died 2025-06-17), else carrier email-to-SMS gateway
+  email  — SMTP (Gmail App Password) to ALERT_EMAIL
 
-Mac banner uses osascript display notification (always free, local).
+Config is read from Data/configs/storage_alerts.env (SMTP_* / ALERT_* / CARRIER),
+then .env.local, then .env (first value wins, like the rest of Bolt).
+Every fan-out is logged (title + per-channel result, no bodies) to logs/alerts.jsonl.
 
-Env:
+Env switches:
   BOLT_ALERT_SMS=true|false     (default true)
   BOLT_ALERT_EMAIL=true|false   (default true)
   BOLT_ALERT_MAC=true|false     (default true)
@@ -21,10 +31,10 @@ Env:
   BOLT_ALERT_DISCORD=false      (default false — kept off on purpose)
 
   bolt alerts                         # status (default)
-  bolt alerts status [--json] [--probe]
+  bolt alerts status [--json] [--probe] [--banner]
   bolt alerts list [--json]
-  bolt alerts test [--json]           # soft-fail fan-out test
-  bolt alerts send "msg" [--json]
+  bolt alerts test [--only mac,voice,sms,email] [--no-sms] [--no-email] [--no-speak] [--json]
+  bolt alerts send "msg" [same channel flags] [--json]
 
 Aliases: alert, alert-status, notify-alerts, bolt-alerts.
 """
@@ -45,9 +55,20 @@ _SOFT = "Alerts unavailable:"
 _ALERT_ENV_CANDIDATES = (
     _REPO / "Data" / "configs" / "storage_alerts.env",
     _REPO / "configs" / "storage_alerts.env",
+)
+# Bolt-wide env: .env.local (William's local keys, e.g. ElevenLabs) beats .env
+_BOLT_ENV_CANDIDATES = (
+    _REPO / ".env.local",
     _REPO / ".env",
 )
 _SEND_SCRIPT = _REPO / "scripts" / "send_notification.py"
+_ALERT_LOG = _REPO / "logs" / "alerts.jsonl"
+
+# The only macOS voice Bolt falls back to. Never a Siri voice.
+FALLBACK_VOICE = "Nathan (Enhanced)"
+_SIRI_VOICE_RE = None  # compiled lazily
+CHANNELS = ("mac", "voice", "sms", "email")
+_LAST_VOICE: str = ""
 
 
 def _utc_now() -> str:
@@ -68,40 +89,109 @@ def _env_bool(name: str, default: bool = True) -> bool:
 
 
 def _load_alert_env() -> None:
-    """Load storage_alerts.env from post-reorg or legacy paths."""
+    """Load storage_alerts.env, then .env.local, then .env (first value wins)."""
     try:
         from dotenv import load_dotenv
     except ImportError:
         return
-    for candidate in _ALERT_ENV_CANDIDATES:
+    for candidate in _ALERT_ENV_CANDIDATES + _BOLT_ENV_CANDIDATES:
         if candidate.exists():
             load_dotenv(candidate, override=False)
 
 
-def _speak_alert(text: str) -> bool:
-    """Speak an alert with Siri Voice 3 — same voice as bolt say / briefings."""
-    if not _env_bool("BOLT_ALERT_SPEAK", True):
-        return False
-    spoken = " ".join((text or "").split())
-    if not spoken:
-        return False
-    try:
-        from modules.Bolt_Voice import macos_say
+def _is_siri_voice(name: str) -> bool:
+    global _SIRI_VOICE_RE
+    import re
 
-        return macos_say(spoken[:280])
-    except Exception:
-        pass
-    voice = os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "Nathan (Enhanced)"
+    if _SIRI_VOICE_RE is None:
+        _SIRI_VOICE_RE = re.compile(r"^\s*(voice\s*\d+|siri\b.*)\s*$", re.I)
+    return bool(_SIRI_VOICE_RE.match(name or ""))
+
+
+def fallback_voice() -> str:
+    """macOS voice for the spoken line when ElevenLabs can't speak.
+
+    Uses Bolt_VOICE when set, but never a Siri voice ("Voice 3" etc.) —
+    those are swapped for Nathan (Enhanced).
+    """
+    voice = (os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "").strip()
+    if not voice or _is_siri_voice(voice):
+        return FALLBACK_VOICE
+    return voice
+
+
+def _voice_rate() -> str:
+    raw = os.getenv("Bolt_VOICE_RATE") or os.getenv("BOLT_VOICE_RATE") or "190"
+    return raw if str(raw).strip().isdigit() else "190"
+
+
+def _voice_muted() -> bool:
+    raw = os.getenv("Bolt_VOICE_MUTE") or os.getenv("BOLT_VOICE_MUTE") or "false"
+    return str(raw).strip().lower() in ("1", "true", "yes", "on")
+
+
+def elevenlabs_configured() -> bool:
+    provider = (
+        os.getenv("Bolt_TTS_PROVIDER") or os.getenv("BOLT_TTS_PROVIDER") or ""
+    ).strip().lower()
+    return provider in ("elevenlabs", "eleven") and bool(
+        os.getenv("ELEVENLABS_API_KEY") and os.getenv("ELEVENLABS_VOICE_ID")
+    )
+
+
+def _say_fallback(text: str) -> bool:
     try:
         r = subprocess.run(
-            ["say", "-v", voice, spoken[:280]],
+            ["say", "-v", fallback_voice(), "-r", _voice_rate(), text],
             capture_output=True,
             text=True,
-            timeout=30,
+            timeout=60,
         )
         return r.returncode == 0
     except Exception:
         return False
+
+
+def _speak_elevenlabs(text: str) -> bool:
+    """William's ElevenLabs voice via Bolt_Voice (keys read at call time)."""
+    try:
+        from modules import Bolt_Voice as bv  # type: ignore
+    except Exception:
+        return False
+    try:
+        # Bolt_Voice reads keys at import time and only loads .env — sync them
+        # from the env we just loaded (.env.local holds William's key).
+        bv.ELEVENLABS_KEY = os.getenv("ELEVENLABS_API_KEY", "") or bv.ELEVENLABS_KEY
+        bv.ELEVENLABS_VOICE_ID = (
+            os.getenv("ELEVENLABS_VOICE_ID", "") or bv.ELEVENLABS_VOICE_ID
+        )
+        if not (bv.ELEVENLABS_KEY and bv.ELEVENLABS_VOICE_ID):
+            return False
+        return bool(bv._try_elevenlabs(text))
+    except Exception:
+        return False
+
+
+def _speak_alert(text: str) -> str:
+    """Speak one alert line. Returns which voice spoke ("" = nothing spoke).
+
+    Order: William's ElevenLabs voice → Nathan (Enhanced). Never Siri.
+    """
+    global _LAST_VOICE
+    _LAST_VOICE = ""
+    if not _env_bool("BOLT_ALERT_SPEAK", True):
+        return ""
+    _load_alert_env()
+    if _voice_muted():
+        return ""
+    spoken = " ".join((text or "").split())[:280]
+    if not spoken:
+        return ""
+    if elevenlabs_configured() and _speak_elevenlabs(spoken):
+        _LAST_VOICE = "elevenlabs"
+    elif _say_fallback(spoken):
+        _LAST_VOICE = fallback_voice()
+    return _LAST_VOICE
 
 
 def mac_banner(
@@ -111,7 +201,7 @@ def mac_banner(
     *,
     speak: bool = True,
 ) -> bool:
-    """Show a native macOS Notification Center banner, spoken in Voice 3."""
+    """Show a native macOS banner and (optionally) speak it — ElevenLabs, else Nathan."""
     if not _env_bool("BOLT_ALERT_MAC", True):
         return False
     # Escape for AppleScript string
@@ -180,6 +270,16 @@ def send_email(subject: str, body: str) -> bool:
         return False
 
 
+def _log_alert(title: str, results: dict) -> None:
+    try:
+        _ALERT_LOG.parent.mkdir(parents=True, exist_ok=True)
+        row = {"at": _utc_now(), "title": (title or "")[:120], "results": results}
+        with _ALERT_LOG.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row) + "\n")
+    except Exception:
+        pass
+
+
 def notify(
     message: str,
     *,
@@ -188,21 +288,26 @@ def notify(
     sms: bool = True,
     email: bool = True,
     banner: bool = True,
+    speak: bool = True,
     email_body: Optional[str] = None,
 ) -> dict:
     """
-    Fan-out alert to Mac banner + SMS + email (never Discord by default).
+    Fan-out alert to Mac banner + spoken line + iMessage/SMS + email
+    (never Discord by default).
 
-    Returns channel success map.
+    Returns channel success map: mac / sms / email (bool) and voice
+    (which voice spoke, "" when nothing spoke).
     """
     _load_alert_env()
-    results = {"mac": False, "sms": False, "email": False}
+    results: Dict[str, Any] = {"mac": False, "voice": "", "sms": False, "email": False}
     short = (message or "").strip()
     if not short:
         return results
 
     if banner:
-        results["mac"] = mac_banner(title, short)
+        results["mac"] = mac_banner(title, short, speak=False)
+    if speak:
+        results["voice"] = _speak_alert(f"{title}. {short}" if title else short)
 
     if sms:
         results["sms"] = send_sms(f"{title}: {short}"[:160])
@@ -213,6 +318,7 @@ def notify(
             email_body or short,
         )
 
+    _log_alert(title, results)
     return results
 
 
@@ -246,8 +352,95 @@ def channels_status() -> dict:
     }
 
 
-def status(*, probe: bool = False) -> Dict[str, Any]:
-    """Alert-channel readiness. Never raises. PARTIAL — SMTP/phone gate SMS/email."""
+def _voice_installed(name: str) -> bool:
+    try:
+        r = subprocess.run(
+            ["say", "-v", "?"], capture_output=True, text=True, timeout=10, check=False
+        )
+        return any(line.startswith(name + " ") for line in (r.stdout or "").splitlines())
+    except Exception:
+        return False
+
+
+def voice_status() -> Dict[str, Any]:
+    _load_alert_env()
+    fb = fallback_voice()
+    configured = (os.getenv("Bolt_VOICE") or os.getenv("BOLT_VOICE") or "").strip()
+    return {
+        "speak_enabled": _env_bool("BOLT_ALERT_SPEAK", True),
+        "muted": _voice_muted(),
+        "first_choice": "elevenlabs" if elevenlabs_configured() else fb,
+        "elevenlabs_configured": elevenlabs_configured(),
+        "elevenlabs_voice_id_set": bool(os.getenv("ELEVENLABS_VOICE_ID")),
+        "fallback_voice": fb,
+        "fallback_installed": _voice_installed(fb) if platform.system() == "Darwin" else False,
+        "siri_voice_blocked": bool(configured and _is_siri_voice(configured)),
+        "never_siri": True,
+    }
+
+
+def _probe_smtp() -> Dict[str, Any]:
+    """Log in to SMTP and quit — proves the password works, sends nothing."""
+    import smtplib
+
+    _load_alert_env()
+    user = os.getenv("SMTP_USERNAME", "")
+    pw = os.getenv("SMTP_PASSWORD", "")
+    if not (user and pw):
+        return {"ok": False, "detail": "SMTP_USERNAME / SMTP_PASSWORD not set"}
+    server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+    port = int(os.getenv("SMTP_PORT", "587") or 587)
+    try:
+        with smtplib.SMTP(server, port, timeout=15) as smtp:
+            smtp.starttls()
+            smtp.login(user, pw)
+        return {"ok": True, "detail": f"login ok ({server}:{port}; nothing sent)"}
+    except smtplib.SMTPAuthenticationError:
+        return {
+            "ok": False,
+            "detail": "SMTP login rejected — make a new Gmail App Password "
+            "(https://myaccount.google.com/apppasswords) and put it in "
+            "Data/configs/storage_alerts.env as SMTP_PASSWORD",
+        }
+    except Exception as exc:
+        return {"ok": False, "detail": f"SMTP connect failed ({exc.__class__.__name__}: {exc})"[:200]}
+
+
+def _probe_elevenlabs() -> Dict[str, Any]:
+    """Check the ElevenLabs key can see William's voice — no audio, no credits."""
+    _load_alert_env()
+    if not elevenlabs_configured():
+        return {"ok": False, "detail": "ElevenLabs not set (Nathan (Enhanced) will speak)"}
+    try:
+        import requests
+
+        vid = os.getenv("ELEVENLABS_VOICE_ID", "")
+        r = requests.get(
+            f"https://api.elevenlabs.io/v1/voices/{vid}",
+            headers={"xi-api-key": os.getenv("ELEVENLABS_API_KEY", "")},
+            timeout=10,
+        )
+        if r.status_code == 200:
+            name = (r.json() or {}).get("name") or vid
+            return {"ok": True, "detail": f"voice found: {name}"}
+        if r.status_code in (401, 403):
+            # Restricted keys may speak but not read voices — not a hard fail
+            return {
+                "ok": None,
+                "detail": f"key can't read voice info (HTTP {r.status_code}); "
+                "speaking may still work — try bolt alerts test",
+            }
+        return {"ok": False, "detail": f"ElevenLabs HTTP {r.status_code}"}
+    except Exception as exc:
+        return {"ok": False, "detail": f"ElevenLabs check failed ({exc.__class__.__name__})"}
+
+
+def status(*, probe: bool = False, banner_probe: bool = False) -> Dict[str, Any]:
+    """Alert-channel readiness. Never raises.
+
+    READY when the Mac banner works locally; email / iMessage are reported
+    per channel with the exact fix when something is missing.
+    """
     try:
         ch = channels_status()
         is_darwin = platform.system() == "Darwin"
@@ -271,37 +464,58 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
                 check=False,
             ).stdout.strip()
         ) if is_darwin else False
+        voice = voice_status() if is_darwin else {"speak_enabled": False}
 
         mac_ok = bool(ch.get("mac_banner")) and is_darwin and osascript
         email_ok = bool(ch.get("email_enabled") and ch.get("smtp_configured") and ch.get("alert_email_set"))
-        sms_ok = bool(ch.get("sms_enabled") and ch.get("smtp_configured") and ch.get("alert_phone_set"))
-        # Local Mac banner alone is enough for a usable status surface
+        imessage_path = bool(
+            is_darwin and ch.get("imessage_enabled") and ch.get("alert_phone_set")
+        )
+        gateway_path = bool(
+            ch.get("smtp_configured")
+            and ch.get("alert_phone_set")
+            and ch.get("att_email_to_text") == "n/a"
+        )
+        sms_ok = bool(ch.get("sms_enabled") and (imessage_path or gateway_path))
+        voice_ok = bool(
+            is_darwin
+            and voice.get("speak_enabled")
+            and not voice.get("muted")
+            and (voice.get("elevenlabs_configured") or (say_cli and voice.get("fallback_installed")))
+        )
         ready = bool(mac_ok or email_ok or sms_ok)
 
         missing: List[str] = []
         if not is_darwin:
-            missing.append("not macOS (Darwin) — Mac banner/Voice unavailable")
+            missing.append("not macOS (Darwin) — Mac banner/voice/iMessage unavailable")
         if ch.get("mac_banner") and is_darwin and not osascript:
             missing.append("osascript missing")
         if ch.get("email_enabled") and not ch.get("smtp_configured"):
-            missing.append("SMTP not configured (storage_alerts.env)")
+            missing.append(
+                "SMTP not configured — add SMTP_USERNAME + SMTP_PASSWORD (Gmail App Password) "
+                "to Data/configs/storage_alerts.env"
+            )
         if ch.get("email_enabled") and not ch.get("alert_email_set"):
-            missing.append("ALERT_EMAIL unset")
+            missing.append("ALERT_EMAIL unset in Data/configs/storage_alerts.env")
         if ch.get("sms_enabled") and not ch.get("alert_phone_set"):
-            missing.append("ALERT_PHONE unset")
+            missing.append("ALERT_PHONE unset in Data/configs/storage_alerts.env")
+        if is_darwin and voice.get("speak_enabled") and not voice.get("muted"):
+            if not voice.get("elevenlabs_configured") and not voice.get("fallback_installed"):
+                missing.append(
+                    f"voice: '{voice.get('fallback_voice')}' not installed — System Settings → "
+                    "Accessibility → Read & Speak → System Voice → Manage Voices → Nathan (Enhanced)"
+                )
         if not send_script_present:
             missing.append("missing scripts/send_notification.py")
 
         if ready:
             error = None
-            hint = (
-                "Mac / Voice / email / iMessage path present. "
-                "Try: bolt alerts test · Discord stays bolt discord"
-            )
-            if not email_ok and ch.get("email_enabled"):
-                hint += " · email gated until SMTP + ALERT_EMAIL"
-            if not sms_ok and ch.get("sms_enabled"):
-                hint += " · SMS gated until SMTP + ALERT_PHONE"
+            hint = "Try: bolt alerts test --no-sms (one banner + one spoken line + one email)"
+            gated = [m for m in missing if not m.startswith("voice:")]
+            if gated:
+                hint += " · still missing: " + "; ".join(gated[:2])
+            elif any(m.startswith("voice:") for m in missing):
+                hint += " · " + next(m for m in missing if m.startswith("voice:"))
         else:
             error = _soft("; ".join(missing[:3]) if missing else "no alert channel ready")
             hint = error
@@ -309,8 +523,8 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
         out: Dict[str, Any] = {
             "checked_at": _utc_now(),
             "ready": ready,
-            "partial": True,
-            "readiness": "PARTIAL",
+            "partial": not ready,
+            "readiness": "READY" if ready else "PARTIAL",
             "is_discord_bot": False,
             "discord_default_off": True,
             "soft_fail_prefix": _SOFT,
@@ -320,18 +534,30 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
             "say_present": say_cli,
             "send_script_present": send_script_present,
             "alert_env_file": env_file,
+            "alert_log": str(_ALERT_LOG),
             "channels": ch,
+            "voice": voice,
             "mac_ready": mac_ok,
+            "voice_ready": voice_ok,
             "email_ready": email_ok,
             "sms_ready": sms_ok,
+            "sms_path": (
+                "iMessage (Messages app)" if imessage_path
+                else ("carrier email-to-SMS" if gateway_path else "none")
+            ),
             "missing": missing,
             "error": error,
             "hint": hint,
         }
 
         if probe:
+            # Silent probes: SMTP login + ElevenLabs voice lookup. Nothing is sent.
             out["probe"] = True
-            # Probe = local Mac banner only (never SMS/email spam on status --probe)
+            out["smtp_probe"] = _probe_smtp()
+            out["elevenlabs_probe"] = _probe_elevenlabs()
+            if out["smtp_probe"].get("ok") is False and ch.get("email_enabled"):
+                out["email_ready"] = False
+        if banner_probe:
             if not is_darwin or not ch.get("mac_banner"):
                 out["probe_ok"] = False
                 out["probe_detail"] = _soft("Mac banner probe skipped (not Darwin or disabled)")
@@ -339,7 +565,7 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
                 try:
                     ok = mac_banner(
                         "Bolt alerts probe",
-                        "status --probe (banner only; no SMS/email)",
+                        "status --banner (banner only; no voice, SMS or email)",
                         speak=False,
                     )
                     out["probe_ok"] = bool(ok)
@@ -373,29 +599,31 @@ def list_items(*, as_json: bool = False) -> int:
     try:
         info = status()
         ch = info.get("channels") or {}
+        v = info.get("voice") or {}
         rows = [
             ("platform_darwin", bool(info.get("darwin"))),
             ("osascript (Mac banner)", bool(info.get("osascript_present"))),
-            ("say (Voice 3)", bool(info.get("say_present"))),
             ("mac_banner enabled", bool(ch.get("mac_banner"))),
-            ("speak enabled", bool(ch.get("speak_enabled"))),
+            ("speak enabled", bool(ch.get("speak_enabled")) and not v.get("muted")),
+            ("ElevenLabs (William's voice) configured", bool(v.get("elevenlabs_configured"))),
+            (f"fallback voice installed ({v.get('fallback_voice', FALLBACK_VOICE)})", bool(v.get("fallback_installed"))),
+            ("never Siri / Voice 3", True),
             ("email enabled", bool(ch.get("email_enabled"))),
-            ("sms enabled", bool(ch.get("sms_enabled"))),
-            ("imessage enabled", bool(ch.get("imessage_enabled"))),
-            ("discord enabled (default off)", bool(ch.get("discord_enabled"))),
             ("SMTP configured", bool(ch.get("smtp_configured"))),
             ("ALERT_EMAIL set", bool(ch.get("alert_email_set"))),
+            ("sms enabled", bool(ch.get("sms_enabled"))),
+            ("imessage enabled", bool(ch.get("imessage_enabled"))),
             ("ALERT_PHONE set", bool(ch.get("alert_phone_set"))),
+            ("discord enabled (default off)", bool(ch.get("discord_enabled"))),
             ("scripts/send_notification.py", bool(info.get("send_script_present"))),
-            ("storage_alerts.env / .env present", bool(info.get("alert_env_file"))),
-            ("is Discord bot (never)", False),
+            ("Data/configs/storage_alerts.env present", bool(info.get("alert_env_file"))),
         ]
         if as_json:
             print(
                 json.dumps(
                     {
                         "ok": True,
-                        "readiness": "PARTIAL",
+                        "readiness": info.get("readiness"),
                         "is_discord_bot": False,
                         "items": [{"name": n, "ok": ok} for n, ok in rows],
                         "hint": info.get("hint"),
@@ -405,7 +633,7 @@ def list_items(*, as_json: bool = False) -> int:
                 )
             )
             return 0
-        print("Alert channels (PARTIAL — Mac/Voice/email/iMessage; not Discord)")
+        print(f"Alert channels ({info.get('readiness')} — Mac banner / voice / iMessage / email; not Discord)")
         for name, ok in rows:
             mark = "OK" if ok else "--"
             print(f"  [{mark}] {name}")
@@ -421,51 +649,137 @@ def list_items(*, as_json: bool = False) -> int:
         return 0
 
 
-def try_test(*, as_json: bool = False) -> int:
-    """Soft-fail fan-out test (Mac + SMS + email). Never raises."""
+def _parse_channels(args: List[str]) -> Dict[str, bool]:
+    """--only mac,voice,sms,email  and/or  --no-mac --no-speak --no-sms --no-email."""
+    chosen = {c: True for c in CHANNELS}
+    for i, a in enumerate(args):
+        val = None
+        if a.startswith("--only="):
+            val = a.split("=", 1)[1]
+        elif a == "--only" and i + 1 < len(args):
+            val = args[i + 1]
+        if val is not None:
+            names = {x.strip().lower() for x in val.split(",") if x.strip()}
+            names = {"voice" if n in ("speak", "say") else n for n in names}
+            names = {"sms" if n in ("imessage", "text") else n for n in names}
+            names = {"mac" if n in ("banner",) else n for n in names}
+            chosen = {c: (c in names) for c in CHANNELS}
+    flag_map = {
+        "--no-mac": "mac", "--no-banner": "mac",
+        "--no-speak": "voice", "--no-voice": "voice", "--quiet": "voice",
+        "--no-sms": "sms", "--no-imessage": "sms", "--no-text": "sms",
+        "--no-email": "email",
+    }
+    for a in args:
+        if a in flag_map:
+            chosen[flag_map[a]] = False
+    return chosen
+
+
+def _strip_channel_args(args: List[str]) -> List[str]:
+    out: List[str] = []
+    skip = False
+    for i, a in enumerate(args):
+        if skip:
+            skip = False
+            continue
+        if a == "--only":
+            skip = True
+            continue
+        if a.startswith("-"):
+            continue
+        out.append(a)
+    return out
+
+
+def _fanout(
+    message: str,
+    *,
+    title: str,
+    chosen: Dict[str, bool],
+    subject: Optional[str] = None,
+    email_body: Optional[str] = None,
+) -> Dict[str, Any]:
+    return notify(
+        message,
+        title=title,
+        subject=subject,
+        email_body=email_body,
+        banner=chosen.get("mac", True),
+        speak=chosen.get("voice", True),
+        sms=chosen.get("sms", True),
+        email=chosen.get("email", True),
+    )
+
+
+def _print_results(results: Dict[str, Any], chosen: Dict[str, bool], *, stream=None) -> None:
+    stream = stream or sys.stdout
+    for c in CHANNELS:
+        if not chosen.get(c, True):
+            print(f"  {c:<5} skipped", file=stream)
+            continue
+        val = results.get(c)
+        if c == "voice":
+            label = (
+                "spoke in William's ElevenLabs voice" if val == "elevenlabs"
+                else (f"spoke in {val}" if val else "did not speak")
+            )
+            print(f"  {c:<5} {label}", file=stream)
+        else:
+            print(f"  {c:<5} {'sent' if val else 'FAILED'}", file=stream)
+
+
+def try_test(*, as_json: bool = False, chosen: Optional[Dict[str, bool]] = None) -> int:
+    """One test alert across the chosen channels. Never raises."""
+    chosen = chosen or {c: True for c in CHANNELS}
     try:
         info = status()
         if not info.get("ready"):
             msg = info.get("error") or _soft("no alert channel ready")
-            payload = {"ok": False, "error": msg, "readiness": "PARTIAL", "results": {}}
+            payload = {"ok": False, "error": msg, "readiness": info.get("readiness"), "results": {}}
             if as_json:
                 print(json.dumps(payload, indent=2))
             else:
                 print(msg, file=sys.stderr)
             return 0
 
-        results = notify(
-            "Bolt alerts test — if you got this, Mac/SMS/email paths are working.",
+        results = _fanout(
+            "Bolt alerts test. If you can see or hear this, alerts are working.",
             title="Bolt test",
+            chosen=chosen,
             subject="Bolt alert test",
             email_body=(
                 "Bolt alerts test.\n\n"
-                "If you see this email, SMTP is working.\n"
-                "SMS uses the same path via your carrier gateway / iMessage.\n"
+                "If you see this email, Bolt's email alerts are working.\n"
+                "Budget, system, briefing and weekly alerts use this same path.\n"
             ),
         )
-        any_ok = any(bool(v) for v in results.values())
+        failed = [
+            c for c in CHANNELS
+            if chosen.get(c, True) and not results.get(c)
+        ]
+        any_ok = any(bool(results.get(c)) for c in CHANNELS if chosen.get(c, True))
         payload: Dict[str, Any] = {
-            "ok": any_ok,
+            "ok": any_ok and not failed,
             "results": results,
-            "readiness": "PARTIAL",
+            "channels_tested": [c for c in CHANNELS if chosen.get(c, True)],
+            "failed": failed,
+            "readiness": info.get("readiness"),
             "is_discord_bot": False,
-            "hint": info.get("hint"),
         }
-        if not any_ok:
+        if failed:
             payload["error"] = _soft(
-                "test sent to no channel — check SMTP / ALERT_* / Mac notification permission"
+                "test did not reach: " + ", ".join(failed)
+                + " — run bolt alerts status --probe for the fix"
             )
         if as_json:
             print(json.dumps(payload, indent=2))
         else:
-            if any_ok:
-                print("Bolt alerts test finished")
-                print(f"  results: {results}")
-            else:
+            print("Bolt alerts test")
+            _print_results(results, chosen)
+            if failed:
                 print(payload["error"], file=sys.stderr)
-                print(f"  results: {results}", file=sys.stderr)
-            print("  Discord stays off here — use: bolt discord test")
+            print("  (Discord stays off here — use: bolt discord test)")
         return 0
     except Exception as exc:
         msg = _soft(f"test failed ({exc})")
@@ -476,12 +790,13 @@ def try_test(*, as_json: bool = False) -> int:
         return 0
 
 
-def try_send(message: str, *, as_json: bool = False) -> int:
+def try_send(message: str, *, as_json: bool = False, chosen: Optional[Dict[str, bool]] = None) -> int:
     """Soft-fail send. Empty message → soft-fail."""
+    chosen = chosen or {c: True for c in CHANNELS}
     try:
         text = (message or "").strip()
         if not text:
-            msg = _soft("empty message")
+            msg = _soft('empty message — try: bolt alerts send "Stream starts in 10"')
             if as_json:
                 print(json.dumps({"ok": False, "error": msg}, indent=2))
             else:
@@ -495,12 +810,12 @@ def try_send(message: str, *, as_json: bool = False) -> int:
             else:
                 print(msg, file=sys.stderr)
             return 0
-        results = notify(text, title="Bolt")
-        any_ok = any(bool(v) for v in results.values())
+        results = _fanout(text, title="Bolt", chosen=chosen)
+        any_ok = any(bool(results.get(c)) for c in CHANNELS if chosen.get(c, True))
         payload = {
             "ok": any_ok,
             "results": results,
-            "readiness": "PARTIAL",
+            "readiness": info.get("readiness"),
             "is_discord_bot": False,
         }
         if not any_ok:
@@ -508,11 +823,8 @@ def try_send(message: str, *, as_json: bool = False) -> int:
         if as_json:
             print(json.dumps(payload, indent=2))
         else:
-            if any_ok:
-                print(f"sent: {results}")
-            else:
-                print(payload["error"], file=sys.stderr)
-                print(f"  results: {results}", file=sys.stderr)
+            print("Bolt alert sent" if any_ok else payload["error"])
+            _print_results(results, chosen)
         return 0
     except Exception as exc:
         msg = _soft(f"send failed ({exc})")
@@ -523,37 +835,43 @@ def try_send(message: str, *, as_json: bool = False) -> int:
         return 0
 
 
-def print_status(*, as_json: bool = False, probe: bool = False) -> int:
+def _yn(v: Any) -> str:
+    return "yes" if v else "no"
+
+
+def print_status(*, as_json: bool = False, probe: bool = False, banner_probe: bool = False) -> int:
     try:
-        info = status(probe=probe)
+        info = status(probe=probe, banner_probe=banner_probe)
         if as_json:
             print(json.dumps(info, indent=2, default=str))
             return 0
         ch = info.get("channels") or {}
-        print("Bolt alerts readiness (PARTIAL)")
-        print(f"  ready: {info.get('ready')}")
-        print(
-            f"  readiness: {info.get('readiness')} · discord_bot: {info.get('is_discord_bot')}"
-        )
-        print(
-            f"  mac: {info.get('mac_ready')} · email: {info.get('email_ready')} · "
-            f"sms: {info.get('sms_ready')}"
-        )
-        print(
-            f"  flags: mac={ch.get('mac_banner')} speak={ch.get('speak_enabled')} "
-            f"email={ch.get('email_enabled')} sms={ch.get('sms_enabled')} "
-            f"discord={ch.get('discord_enabled')}"
-        )
-        print(
-            f"  smtp: {ch.get('smtp_configured')} · ALERT_EMAIL: {ch.get('alert_email_set')} · "
-            f"ALERT_PHONE: {ch.get('alert_phone_set')}"
-        )
-        if ch.get("phone_path"):
-            print(f"  phone path: {ch.get('phone_path')}")
+        v = info.get("voice") or {}
+        print(f"Bolt alerts — {info.get('readiness')}")
+        print(f"  Mac banner : {_yn(info.get('mac_ready'))}")
+        if v.get("muted") or not v.get("speak_enabled"):
+            vline = "off (Bolt_VOICE_MUTE / BOLT_ALERT_SPEAK)"
+        elif v.get("elevenlabs_configured"):
+            vline = f"William's ElevenLabs voice, then {v.get('fallback_voice')}"
+        else:
+            vline = f"{v.get('fallback_voice')} (ElevenLabs not set)"
+        if v.get("siri_voice_blocked"):
+            vline += " · Bolt_VOICE is a Siri voice — ignored"
+        print(f"  Voice      : {vline}  (never Siri)")
+        print(f"  iMessage   : {_yn(info.get('sms_ready'))} · via {info.get('sms_path')}")
+        print(f"  Email      : {_yn(info.get('email_ready'))}")
+        print(f"  Discord    : off (use bolt discord)")
         if info.get("alert_env_file"):
-            print(f"  env file: {info['alert_env_file']}")
+            print(f"  config     : {info['alert_env_file']}")
+        print(f"  log        : {info.get('alert_log')}")
         if info.get("probe"):
-            print(f"  probe_ok: {info.get('probe_ok')} · {info.get('probe_detail')}")
+            sp = info.get("smtp_probe") or {}
+            ep = info.get("elevenlabs_probe") or {}
+            print(f"  probe smtp : {'ok' if sp.get('ok') else 'FAILED'} — {sp.get('detail')}")
+            emark = "ok" if ep.get("ok") else ("?" if ep.get("ok") is None else "FAILED")
+            print(f"  probe 11labs: {emark} — {ep.get('detail')}")
+        if "probe_ok" in info:
+            print(f"  banner probe: {info.get('probe_ok')} · {info.get('probe_detail')}")
         if info.get("error"):
             print(f"  → {info['error']}")
         elif info.get("hint"):
@@ -572,15 +890,22 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in ("-h", "--help", "help"):
         print(
-            """bolt alerts — Mac / Voice / email / iMessage readiness (PARTIAL)
+            """bolt alerts — Mac banner / voice / iMessage / email alerts (READY)
 
   bolt alerts                                      # status (default)
-  bolt alerts status [--json] [--probe]
+  bolt alerts status [--json] [--probe] [--banner]
+      --probe   silent checks: SMTP login + ElevenLabs voice (sends nothing)
+      --banner  show one test banner only
   bolt alerts list [--json]
-  bolt alerts test [--json]
-  bolt alerts send "message" [--json]
+  bolt alerts test [channel flags] [--json]        # one test alert
+  bolt alerts send "message" [channel flags] [--json]
 
-Soft-fail: "Alerts unavailable:".
+Channel flags: --only mac,voice,sms,email · --no-mac · --no-speak · --no-sms · --no-email
+  e.g. bolt alerts test --no-sms   (banner + one spoken line + one email)
+
+Voice: William's ElevenLabs voice first, then Nathan (Enhanced). Never Siri.
+Config: Data/configs/storage_alerts.env (SMTP_*, ALERT_EMAIL, ALERT_PHONE, CARRIER).
+Log: logs/alerts.jsonl. Soft-fail: "Alerts unavailable:".
 Not a Discord bot — use bolt discord for webhooks.
 budget --test-alert still works (same module).
 """
@@ -589,30 +914,28 @@ budget --test-alert still works (same module).
 
     json_out = "--json" in args
     probe = "--probe" in args
-    positionals = [a for a in args if not a.startswith("-")]
+    banner_probe = "--banner" in args and not any(
+        a in ("test", "send", "notify", "message", "probe-send", "selftest") for a in args
+    )
+    chosen = _parse_channels(args)
+    positionals = _strip_channel_args(args)
     if not positionals:
-        return print_status(as_json=json_out, probe=probe)
+        return print_status(as_json=json_out, probe=probe, banner_probe=banner_probe)
 
     cmd = positionals[0].lower()
     if cmd in ("status", "check", "ready"):
-        return print_status(as_json=json_out, probe=probe)
+        return print_status(as_json=json_out, probe=probe, banner_probe=banner_probe)
     if cmd in ("list", "ls", "channels", "checklist"):
         return list_items(as_json=json_out)
     if cmd in ("test", "probe-send", "selftest"):
-        return try_test(as_json=json_out)
+        return try_test(as_json=json_out, chosen=chosen)
     if cmd in ("send", "notify", "message"):
         msg = " ".join(positionals[1:]).strip()
-        # Allow: bolt alerts send -- "…" already stripped of flags
-        if not msg:
-            # leftover after removing flags might be empty
-            msg = ""
-        return try_send(msg, as_json=json_out)
+        return try_send(msg, as_json=json_out, chosen=chosen)
 
-    # Bare message after unknown? treat first token as send if it looks like text
-    # Prefer explicit send. Unknown → soft help.
     print(f"unknown alerts action: {cmd}", file=sys.stderr)
     print(
-        "  try: bolt alerts status|list|test|send [--json] [--probe]",
+        "  try: bolt alerts status|list|test|send [--json] [--probe] [--no-sms] [--only …]",
         file=sys.stderr,
     )
     return 0

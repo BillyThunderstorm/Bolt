@@ -1,6 +1,6 @@
 # Bolt Daily Briefing
 
-**Monday, October 19, 2026**
+**Wednesday, October 21, 2026**
 
 ## Today: Product Testing
 
@@ -14,8 +14,9 @@ Posts still need your approval.
 
 ## Today's Calendar
 
-Today's schedule (Monday October 19):
-  - 7:00 PM - 7:30 PM: PT · Pick
+Today's schedule (Wednesday October 21):
+  - 8:30 AM - 9:00 AM: 30 Minute Consultation with Richard Glass
+  - 7:00 PM - 8:00 PM: PT · Test + notes
 
 ---
 
@@ -26,7 +27,6 @@ Canonical journal / briefing / todo / how-to. Do not duplicate into markdown.
 - START HERE: https://docs.google.com/document/d/1u3dRveLkOBsfSpuBXKeFbfj7tVH3EhjZJr-aic5bxjw/edit
 - How-to: https://docs.google.com/document/d/12idgxLR-OzcOyCC6mDQwqmOnZQDuMIZIJCwwMnm_krg/edit
 - Shared Journal: https://docs.google.com/document/d/1paZNFGea-RBAwQ5YMxpuXN8OBRH7R33RAkakYZ23Tfw/edit
-- Today's Daily Log: https://docs.google.com/document/d/1FHnrOmyvI23OUrcUdrqk1B2ZBLoIIZHyQQX7Dhs4Ceg/edit
 - Daily logs (02): https://drive.google.com/drive/folders/1wanq-qUUGc4qF-uqtqnajAwLd877qSQ4
 - Learnings (06): https://drive.google.com/drive/folders/1oPmHtmY28r_fPjr5cYwiYb5BUDdQCWLH
 - Root folder: https://drive.google.com/drive/folders/1GZ93zTznYK97Nv9Do5bidLOd9Im1J1XK

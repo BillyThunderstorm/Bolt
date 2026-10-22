@@ -22,7 +22,7 @@ CLI (via ``bolt game-config``):
   show [game] [--json]
   set <game> [--json] KEY=VALUE …
 
-READY (19 Oct 2026). Overrides optional. Distinct from PARTIAL ``bolt obs-game`` (OBS scene→config game tracker) and
+READY (19 Oct 2026). Overrides optional. Distinct from READY ``bolt obs-game`` (OBS scene→config game tracker) and
 READY ``bolt obs`` (WebSocket monitor).
 
 Public API (in-process):
@@ -466,7 +466,7 @@ def list_items() -> List[Dict[str, Any]]:
             "id": "soft_fail",
             "ok": True,
             "detail": (
-                f"prefix {_SOFT!r}; READY (used by clip pipeline); distinct from PARTIAL bolt obs-game"
+                f"prefix {_SOFT!r}; READY (used by clip pipeline); distinct from READY bolt obs-game"
             ),
         }
     )

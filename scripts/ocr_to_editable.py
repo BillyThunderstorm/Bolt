@@ -3,7 +3,7 @@
 ocr_to_editable.py — scan writing in photos into a .txt you can edit
 ====================================================================
 Reads one or more image files (JPG/HEIC/PNG/WebP/TIFF), extracts text
-with Apple Vision (handwriting + print) and writes a UTF-8 .txt file.
+with Apple Vision (handwriting + print), falling back to tesseract\n(HEIC/WebP converted with `sips`), and writes a UTF-8 .txt file.\nNever moves or deletes the source photos.
 
 Usage:
   python3 scripts/ocr_to_editable.py photo1.jpg photo2.heic
@@ -15,8 +15,10 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -92,30 +94,95 @@ def ocr_vision(path: Path) -> str:
     return "\n".join(lines).strip()
 
 
-def ocr_tesseract(path: Path) -> str:
+# Formats tesseract (Leptonica) can't read directly; convert with macOS `sips`.
+_TESS_NEEDS_CONVERT = {".heic", ".heif", ".webp", ".gif"}
+
+
+def vision_available() -> bool:
+    """True when Apple Vision (pyobjc-framework-Vision) imports."""
+    try:
+        import Vision  # noqa: F401
+        from Foundation import NSURL  # noqa: F401
+
+        return True
+    except Exception:
+        return False
+
+
+def tesseract_available() -> bool:
+    return bool(shutil.which("tesseract"))
+
+
+def convert_for_tesseract(path: Path, workdir: Path) -> Path:
+    """Return a PNG copy tesseract can read (HEIC/WebP/GIF via `sips`).
+
+    Never touches the source photo; the copy lives in ``workdir``.
+    """
+    if path.suffix.lower() not in _TESS_NEEDS_CONVERT:
+        return path
+    sips = shutil.which("sips") or "/usr/bin/sips"
+    if not Path(sips).exists():
+        raise RuntimeError(
+            f"{path.suffix} needs converting but `sips` (macOS) is missing — "
+            "convert the photo to JPG/PNG first"
+        )
+    dest = workdir / (path.stem + ".png")
     result = subprocess.run(
-        ["tesseract", str(path), "stdout", "--oem", "1", "--psm", "6"],
+        [sips, "-s", "format", "png", str(path), "--out", str(dest)],
         capture_output=True,
         text=True,
     )
+    if result.returncode != 0 or not dest.is_file():
+        err = (result.stderr or result.stdout or "sips failed").strip()
+        raise RuntimeError(f"could not convert {path.name} to PNG: {err}")
+    return dest
+
+
+def ocr_tesseract(path: Path) -> str:
+    if not tesseract_available():
+        raise RuntimeError("tesseract not installed — fix: brew install tesseract")
+    with tempfile.TemporaryDirectory(prefix="bolt-ocr-") as td:
+        src = convert_for_tesseract(path, Path(td))
+        result = subprocess.run(
+            ["tesseract", str(src), "stdout", "--oem", "1", "--psm", "6"],
+            capture_output=True,
+            text=True,
+        )
     if result.returncode != 0:
         err = (result.stderr or result.stdout or "tesseract failed").strip()
         raise RuntimeError(err)
     return (result.stdout or "").strip()
 
 
-def extract_text(path: Path) -> tuple[str, str]:
-    """Return (text, engine_name)."""
-    try:
-        text = ocr_vision(path)
-        return text, "vision"
-    except Exception:
-        pass
-    try:
-        text = ocr_tesseract(path)
-        return text, "tesseract"
-    except Exception as exc:
-        return f"[could not read text: {exc}]", "none"
+def extract_text(path: Path, engine: str = "auto") -> tuple[str, str]:
+    """Return (text, engine_name). engine: auto | vision | tesseract.
+
+    auto: Apple Vision first (handwriting + HEIC native); if Vision is missing,
+    errors or finds nothing, fall back to tesseract.
+    """
+    errors: list[str] = []
+    vision_text = ""
+    if engine in ("auto", "vision"):
+        try:
+            vision_text = ocr_vision(path)
+            if vision_text or engine == "vision":
+                return vision_text, "vision"
+        except Exception as exc:
+            errors.append(f"vision: {exc}")
+            if engine == "vision":
+                return f"[could not read text: vision: {exc}]", "none"
+    if engine in ("auto", "tesseract"):
+        try:
+            text = ocr_tesseract(path)
+            if text or not vision_text:
+                return text, "tesseract"
+        except Exception as exc:
+            errors.append(f"tesseract: {exc}")
+    if vision_text:
+        return vision_text, "vision"
+    if not errors:
+        return "", "vision" if engine != "tesseract" else "tesseract"
+    return f"[could not read text: {'; '.join(errors)}]", "none"
 
 
 def format_document(results: list[tuple[Path, str, str]]) -> str:
@@ -123,7 +190,7 @@ def format_document(results: list[tuple[Path, str, str]]) -> str:
     parts = [
         "Extracted text (editable copy)",
         f"Scanned: {now}",
-        "Fix anything Vision misread, then save.",
+        "Fix anything the OCR misread, then save.",
         "",
     ]
     for path, text, engine in results:

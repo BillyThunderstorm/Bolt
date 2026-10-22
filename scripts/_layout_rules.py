@@ -115,7 +115,11 @@ RULES: List[Tuple[str, str, str]] = [
 # the canonical "do not flag these" list - keep it small and obvious.
 ROOT_ALLOWED: List[str] = [
     # Tooling / build
-    "setup.py", "requirements.txt", "Makefile", "pyproject.toml",
+    "setup.py", "requirements.txt", "Makefile", "pyproject.toml", "uv.lock",
+    ".python-version",
+    # Website numbers mirror (site_data_writer writes it for the bolt-api
+    # Worker) and the legacy Jekyll CI config.
+    "site-data.json", "_config.yml",
     # Top-level docs
     "README.md", "AGENTS.md", "LICENSE",
     # Env (gitignored, but if they're committed somewhere we want to see them)
@@ -138,7 +142,7 @@ ROOT_ALLOWED: List[str] = [
 KNOWN_TOP_LEVEL_DIRS: List[str] = [
     "Core", "App", "Data", "Docs", "3rd_Party", "media",
     "scripts", "bin", "tests", "logs", "memory", "api",
-    "dist", "archive", "vod_samples",
+    "dist", "archive", "vod_samples", "Sites", "bolt_cli",
     # macOS / vendored noise that should never trigger a finding
     ".venv", ".git", ".vscode", "node_modules", "__pycache__",
 ]
@@ -148,3 +152,58 @@ def is_root_allowed(name: str) -> bool:
     """Return True if `name` is on the explicit allow-list of files
     that are allowed to live at the repo root."""
     return name in ROOT_ALLOWED
+
+
+# Plain-words description of everything that is SUPPOSED to sit at the
+# repo root. `bolt layout run --all` prints these so William can see what
+# each top-level item is for. Anything at the root that is not here, not
+# on ROOT_ALLOWED and not in KNOWN_TOP_LEVEL_DIRS is listed as "look at".
+ROOT_EXPLAINED = {
+    "Core": "Bolt's code (bot, modules, config).",
+    "App": "Menu bar app and the checkup page.",
+    "Data": "Bolt's data: queue, memory, configs, backups, tests.",
+    "Docs": "Guides and status docs (READINESS, BOLT_NOW).",
+    "3rd_Party": "Outside code Bolt borrows (colabs, vendored tools).",
+    "media": "Recordings, clips, vertical clips and reels.",
+    "scripts": "Helper scripts the bolt command and cron run.",
+    "bin": "The bolt command itself (bin/bolt).",
+    "logs": "Log files.",
+    "dist": "Built Bolt.app.",
+    "vod_samples": "Sample VODs for testing.",
+    "Sites": "Website source (Cloudflare Pages pages + the bolt-api Worker).",
+    "bolt_cli": "Small shim so `bolt` works after `uv sync` (pyproject).",
+    "tests": "Tests.", "memory": "Memory files.", "api": "API code.",
+    "archive": "Archived old files.",
+    "README.md": "Project readme.", "AGENTS.md": "Notes for AI helpers.",
+    "LICENSE": "License file.",
+    "pyproject.toml": "Python project settings.", "uv.lock": "Package versions lock (uv).",
+    "site-data.json": "Copy of Data/site-data.json that the website Worker reads (written by site_data_writer) - leave it.",
+    "_config.yml": "Config for the old GitHub Jekyll check - leave it.",
+    "setup.py": "Old install script.", "requirements.txt": "Old package list.",
+    "launch.py": "Old launcher kept at the root on purpose.",
+    "Bolt_Personality.txt": "Bolt's personality notes.",
+    "Bolt_Personality.pages": "Bolt's personality notes (Pages).",
+}
+
+# Hidden items at the root that are normal (tools, git, env files).
+HIDDEN_OK = {
+    ".git", ".github", ".gitignore", ".gitattributes", ".DS_Store",
+    ".venv", ".vscode", ".pytest_cache", ".ruff_cache", ".mypy_cache",
+    ".python-version", ".env", ".env.local", ".env.example", ".example.env",
+    ".cursor", ".idea",
+}
+
+# Hidden items worth a note, as (glob, note, fix). Notes are never
+# counted as problems - they are just things William may want to know.
+HIDDEN_NOTES = [
+    (
+        ".env*.bak*",
+        "Backup copy of your keys file (made during an earlier settings change). Git ignores it, so it is safe, but it holds API keys.",
+        "Keep it, or move it into Data/backups/ if you want the top folder tidier.",
+    ),
+    (
+        ".tmp.drive*",
+        "Temporary folder made by the Google Drive app.",
+        "Leave it alone; Google Drive manages it.",
+    ),
+]

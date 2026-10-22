@@ -4,32 +4,4 @@ PRODID:-//Bolt//Calendar Feeds//EN
 X-WR-CALNAME:Scheduled Posts
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-BEGIN:VEVENT
-UID:bolt-post-3b8de19f-youtube_shorts@bolt
-DTSTAMP:20261020T044039Z
-DTSTART:20261020T072000
-DTEND:20261020T073000
-SUMMARY:Post to YouTube Shorts: 2889961274 clip01 audio spike 132 tiktok 
- 🔥 #Gaming
-DESCRIPTION:queue_id: 3b8de19f\nplatform: YouTube Shorts\nclip: /Users/cart
- er/developer/Bolt/media/vertical_clips/2889961274_clip01_audio_spike_132_t
- iktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the ver
- tical file and original audio.\ncaption: 2889961274 clip01 audio spike 132
-  tiktok 🔥 #Gaming
-LOCATION:Bolt queue (3b8de19f)
-END:VEVENT
-BEGIN:VEVENT
-UID:bolt-post-671f95cd-youtube_shorts@bolt
-DTSTAMP:20261020T044039Z
-DTSTART:20261020T072000
-DTEND:20261020T073000
-SUMMARY:Post to YouTube Shorts: 2889961274 clip02 audio spike 182 tiktok 
- 🔥 #Gaming
-DESCRIPTION:queue_id: 671f95cd\nplatform: YouTube Shorts\nclip: /Users/cart
- er/developer/Bolt/media/vertical_clips/2889961274_clip02_audio_spike_182_t
- iktok.mp4\ninstructions: Upload manually as a YouTube Short\; keep the ver
- tical file and original audio.\ncaption: 2889961274 clip02 audio spike 182
-  tiktok 🔥 #Gaming
-LOCATION:Bolt queue (671f95cd)
-END:VEVENT
 END:VCALENDAR

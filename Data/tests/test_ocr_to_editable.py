@@ -53,5 +53,29 @@ class MainTests(unittest.TestCase):
         self.assertEqual(ocr.main([]), 2)
 
 
+class ExtractTextFallbackTests(unittest.TestCase):
+    def test_falls_back_to_tesseract_when_vision_fails(self):
+        with patch.object(ocr, "ocr_vision", side_effect=RuntimeError("no Vision")), \
+             patch.object(ocr, "ocr_tesseract", return_value="from tess"):
+            self.assertEqual(ocr.extract_text(Path("/tmp/x.png")), ("from tess", "tesseract"))
+
+    def test_falls_back_when_vision_finds_nothing(self):
+        with patch.object(ocr, "ocr_vision", return_value=""), \
+             patch.object(ocr, "ocr_tesseract", return_value="tess text"):
+            self.assertEqual(ocr.extract_text(Path("/tmp/x.png"))[1], "tesseract")
+
+    def test_both_fail_reports_errors(self):
+        with patch.object(ocr, "ocr_vision", side_effect=RuntimeError("v")), \
+             patch.object(ocr, "ocr_tesseract", side_effect=RuntimeError("t")):
+            text, eng = ocr.extract_text(Path("/tmp/x.png"))
+        self.assertEqual(eng, "none")
+        self.assertIn("could not read text", text)
+
+    def test_png_not_converted(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = Path(td) / "a.png"
+            self.assertEqual(ocr.convert_for_tesseract(src, Path(td)), src)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
 """
-Migrate_Layout.py — soft-fail CLI for scripts/migrate_layout.py (PARTIAL)
-=========================================================================
+Migrate_Layout.py — tidy the top of the Bolt folder (READY)
+==========================================================
 Safe-by-default drift migrator wrapping ``scripts/migrate_layout.py`` +
 ``scripts/_layout_rules.py``. Soft-fail prefix: ``Migrate unavailable:``.
 
 CLI (via ``bolt migrate-layout``):
   status [--json] [--probe]
   list   [--json]
-  run    [--apply] [--yes] [--dry-run] [--json] [--root PATH]
+  run    [--apply] [--tidy-empty] [--dry-run] [--json] [--root PATH]
+  undo   [--json] [--root PATH]
 
 ``run`` without ``--apply`` = dry-run plan (safe default). ``--apply``
-performs moves. ``status --probe`` plans only — never applies.
+moves stray files to their home, never overwrites (exact duplicates /
+stale leftovers go to the Trash, different files are skipped with the
+fix), never prompts, and logs every step to ``Data/layout_moves.jsonl``.
+``--tidy-empty`` also trashes empty folders that aren't part of the
+layout. ``undo`` puts the last applied run back. ``status --probe``
+plans only — never applies.
 
-Stay PARTIAL — William layout glue / mutator gated; not stranger-ready.
-Distinct from PARTIAL ``bolt layout`` (report-only, never moves) and
+Distinct from READY ``bolt layout`` (report-only, never moves) and
 READY ``bolt doctor`` / ``bolt verify``.
 """
 
@@ -65,8 +70,8 @@ def status(*, probe: bool = False, root: Optional[str] = None) -> Dict[str, Any]
     info: Dict[str, Any] = {
         "checked_at": _iso(),
         "ready": False,
-        "partial": True,
-        "readiness": "PARTIAL",
+        "partial": False,
+        "readiness": "READY",
         "soft_fail_prefix": _SOFT,
         "cli": "bolt migrate-layout",
         "engine": str(_SCRIPT),
@@ -81,12 +86,13 @@ def status(*, probe: bool = False, root: Optional[str] = None) -> Dict[str, Any]
         "planned_ops": None,
         "layout_clean": None,
         "error": "",
+        "last_run": None,
+        "log": str((Path(root).resolve() if root else _REPO) / "Data" / "layout_moves.jsonl"),
         "hint": (
-            "safe-by-default layout migrator · dry-run unless --apply · "
-            "distinct from bolt layout (report-only) · prefer bolt doctor for audit · "
-            "stay PARTIAL (William layout glue)"
+            "puts stray top-folder files where bolt layout says they belong · "
+            "dry run unless --apply · never overwrites · undo with 'bolt migrate-layout undo'"
         ),
-        "is_stranger_ready": False,
+        "is_stranger_ready": True,
     }
     missing = []
     if not info["engine_present"]:
@@ -102,8 +108,19 @@ def status(*, probe: bool = False, root: Optional[str] = None) -> Dict[str, Any]
     try:
         eng = _load_engine()
         info["ready"] = True
+        repo = Path(root).resolve() if root else _REPO
+        log_rows = eng.read_log(repo)
+        undone = {r.get("of") for r in log_rows if r.get("action") == "undo"}
+        rows = [r for r in log_rows if r.get("action") != "undo"]
+        if rows:
+            last = rows[-1]["run_id"]
+            info["last_run"] = {
+                "run_id": last,
+                "at": rows[-1].get("at"),
+                "steps": sum(1 for r in rows if r["run_id"] == last),
+                "undone": last in undone,
+            }
         if probe:
-            repo = Path(root).resolve() if root else _REPO
             ops = eng.plan_moves(repo)
             info["probe_ok"] = True
             info["planned_ops"] = len(ops)
@@ -126,12 +143,12 @@ def list_items(*, root: Optional[str] = None) -> List[Dict[str, Any]]:
         {
             "id": "soft_fail",
             "ok": True,
-            "detail": f"prefix {_SOFT!r}; stay PARTIAL",
+            "detail": f"prefix {_SOFT!r}",
         },
         {
             "id": "safe_default",
             "ok": True,
-            "detail": "run without --apply = dry-run; status/probe never apply",
+            "detail": "run without --apply = dry-run; never overwrites; never prompts; undo available",
         },
         {
             "id": "distinct_from_layout",
@@ -160,6 +177,7 @@ def try_run(
     dry_run: bool = False,
     as_json: bool = False,
     root: Optional[str] = None,
+    tidy_empty: bool = False,
 ) -> Dict[str, Any]:
     """Plan (default) or apply moves. Soft-fails instead of raising."""
     # dry_run flag forces plan-only even if apply was also set
@@ -183,7 +201,7 @@ def try_run(
     try:
         eng = _load_engine()
         repo = Path(root).resolve() if root else _REPO
-        ops = eng.plan_moves(repo)
+        ops = eng.plan_moves(repo, tidy_empty=bool(tidy_empty))
         out["ops"] = ops
         out["planned_ops"] = len(ops)
         out["layout_clean"] = len(ops) == 0
@@ -211,29 +229,37 @@ def try_run(
                 )
             return out
 
-        # --apply path
-        rc = eng.apply(ops, assume_yes=bool(yes))
-        out["ok"] = rc == 0
-        out["exit_code"] = int(rc)
+        # --apply path (engine prints each step as it goes)
+        if not as_json:
+            print(plan_text + "\n")
+        import contextlib, io
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf) if as_json else contextlib.nullcontext():
+            res = eng.apply(ops, assume_yes=bool(yes), repo_root=repo)
+        rc = int(res["rc"])
+        out["ok"] = not res["failed"]
+        out["exit_code"] = rc
+        out["run_id"] = res["run_id"]
+        summary = (
+            f"Done: {len(res['done'])} step(s), {len(res['skipped'])} skipped, "
+            f"{len(res['failed'])} failed (run {res['run_id']}). "
+            "Undo with 'bolt migrate-layout undo'; check with 'bolt layout run'."
+        )
         if as_json:
             out["report"] = json.dumps(
                 {
                     "repo_root": str(repo),
                     "apply": True,
-                    "count": len(ops),
-                    "ops": ops,
+                    "run_id": res["run_id"],
+                    "done": res["done"],
+                    "skipped": res["skipped"],
+                    "failed": res["failed"],
                     "exit_code": rc,
-                    "plan": plan_text,
                 },
                 indent=2,
             )
         else:
-            suffix = (
-                "\nDone. Run 'bolt layout' to confirm the repo is clean."
-                if rc == 0
-                else "\nMigrate finished with conflicts (exit 1)."
-            )
-            out["report"] = plan_text + "\n\n=== Applying moves ===\n" + suffix
+            out["report"] = "\n" + summary
         return out
     except Exception as exc:
         out["ok"] = False
@@ -249,6 +275,17 @@ def _print_status(info: Dict[str, Any], as_json: bool) -> int:
     else:
         ready = "yes" if info.get("ready") else "no"
         print(f"migrate-layout readiness: {info.get('readiness')}  ready={ready}")
+        lr = info.get("last_run")
+        print(
+            "  last applied run: "
+            + (
+                f"{lr['run_id']} ({lr['steps']} step(s), {lr['at']}"
+                + (", undone" if lr.get("undone") else "")
+                + ")"
+                if lr
+                else "none yet"
+            )
+        )
         print(f"  engine: {_SCRIPT}  present={info.get('engine_present')}")
         print(f"  rules:  {_RULES}  present={info.get('rules_present')}")
         print(f"  paths:  {_PATHS}  present={info.get('paths_present')}")
@@ -269,15 +306,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         prog="bolt migrate-layout",
         description=(
-            "Repo-root layout migrator (PARTIAL; soft-fail; dry-run default)."
+            "Put stray top-folder files where they belong (READY; dry-run default; undo)."
         ),
     )
     parser.add_argument(
         "action",
         nargs="?",
         default="status",
-        choices=["status", "list", "run"],
-        help="status (default) | list | run",
+        choices=["status", "list", "run", "undo"],
+        help="status (default) | list | run | undo",
     )
     parser.add_argument("--json", action="store_true", help="JSON output")
     parser.add_argument(
@@ -299,6 +336,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         "--dry-run",
         action="store_true",
         help="run: force plan-only even if --apply was passed",
+    )
+    parser.add_argument(
+        "--tidy-empty",
+        action="store_true",
+        help="run: also send empty folders that aren't part of the layout to the Trash",
     )
     parser.add_argument("--root", default=None, help="override repo root")
     try:
@@ -332,8 +374,21 @@ def main(argv: Optional[List[str]] = None) -> int:
                     print(f"[{mark}] {r['id']}: {r['detail']}")
             return 0
 
+        if args.action == "undo":
+            eng = _load_engine()
+            repo = Path(args.root).resolve() if args.root else _REPO
+            res = eng.undo_last(repo)
+            if args.json:
+                print(json.dumps(res, indent=2))
+            else:
+                print(res["message"])
+                for x in res["left"]:
+                    print(f"  left: {x['name']} — {x['why']}")
+            return 0
+
         if args.action == "run":
             result = try_run(
+                tidy_empty=args.tidy_empty,
                 apply=args.apply,
                 yes=args.yes,
                 dry_run=args.dry_run,

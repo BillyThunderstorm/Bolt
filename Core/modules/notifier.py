@@ -4,19 +4,28 @@ Notifier
 Colored console output + optional Discord webhook + daily log file.
 Every pipeline decision includes a 'reason' string explaining why.
 
-Discord surface (PARTIAL): webhook alerts only — not a Discord bot.
-``status`` / ``try_send`` / ``bolt discord`` soft-fail with
-``Discord unavailable:`` when no webhook is set or POST fails.
-Budget / system alerts stay on Mac / Voice 3 / email / iMessage
-(``Bolt_Alerts``; ``BOLT_ALERT_DISCORD`` defaults off).
+Discord surface (READY): webhook alerts only — not a Discord bot.
+Every Discord post in Bolt (errors, startup, peak-hour clip alerts) goes
+through ``post_webhooks``: proper User-Agent (Discord's firewall answers
+403 to Python's default one), real HTTP status check, one retry on a 429
+rate limit, long messages split at 2000 characters, @everyone/@here never
+pings, and every send logged to ``logs/discord.jsonl``.
+Settings: ``.env.local`` then ``.env`` at the Bolt folder (first value wins).
+``status --probe`` checks each webhook with a GET (posts nothing).
+``bolt discord`` soft-fails with ``Discord unavailable:`` when no webhook
+is set or a POST fails. Budget / system alerts stay on Mac / voice / email /
+iMessage (``Bolt_Alerts``; ``BOLT_ALERT_DISCORD`` defaults off).
 """
 
 import argparse
 import os
 import json
 import sys
+import time
+import urllib.error
 import urllib.request
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 try:
@@ -27,7 +36,27 @@ except ImportError:
         return False
 
 
-load_dotenv()
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_LOG_DIR = _REPO_ROOT / "logs"
+DISCORD_LOG = _LOG_DIR / "discord.jsonl"
+DISCORD_LIMIT = 2000
+# Discord's Cloudflare front end rejects Python's default urllib User-Agent
+# with HTTP 403 (error 1010), so every post sends a real one.
+USER_AGENT = "Bolt-Notifier/1.0 (+local Bolt on macOS)"
+
+
+def _load_env_files() -> None:
+    """Load .env.local then .env from the Bolt folder (first value wins)."""
+    for name in (".env.local", ".env"):
+        path = _REPO_ROOT / name
+        if path.exists():
+            try:
+                load_dotenv(path, override=False)
+            except Exception:
+                pass
+
+
+_load_env_files()
 
 DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK_URL", "")
 
@@ -188,8 +217,74 @@ def daily_summary():
     notify(msg, level="info", force_discord=bool(errors))
 
 
-def _send_discord(msg: str, level: str, reason: Optional[str] = None) -> Dict[str, Any]:
-    """POST to configured webhooks. Never raises. Returns ok/sent/errors."""
+def _split_message(text: str, limit: int = DISCORD_LIMIT) -> List[str]:
+    """Split text into Discord-sized pieces, preferring line breaks."""
+    text = text or ""
+    if len(text) <= limit:
+        return [text]
+    parts: List[str] = []
+    rest = text
+    while len(rest) > limit:
+        cut = rest.rfind("\n", 0, limit)
+        if cut < limit // 2:
+            cut = limit
+        parts.append(rest[:cut].rstrip("\n"))
+        rest = rest[cut:].lstrip("\n")
+    if rest:
+        parts.append(rest)
+    return parts
+
+
+def _log_send(entry: Dict[str, Any]) -> None:
+    try:
+        _LOG_DIR.mkdir(parents=True, exist_ok=True)
+        with open(DISCORD_LOG, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(entry) + "\n")
+    except Exception:
+        pass
+
+
+def _post_one(webhook: str, content: str) -> Optional[str]:
+    """POST one piece to one webhook. Returns None on success, else an error."""
+    body = json.dumps(
+        {"content": content, "allowed_mentions": {"parse": []}}
+    ).encode()
+    for attempt in range(2):
+        req = urllib.request.Request(
+            webhook,
+            data=body,
+            headers={"Content-Type": "application/json", "User-Agent": USER_AGENT},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                code = getattr(resp, "status", 200)
+                if 200 <= code < 300:
+                    return None
+                return f"HTTP {code}"
+        except urllib.error.HTTPError as exc:
+            if exc.code == 429 and attempt == 0:
+                wait = 1.0
+                try:
+                    wait = float(json.loads(exc.read() or b"{}").get("retry_after", 1.0))
+                except Exception:
+                    pass
+                time.sleep(min(max(wait, 0.5), 5.0))
+                continue
+            hint = {
+                401: "webhook token is wrong — copy the webhook URL again",
+                403: "Discord refused the request",
+                404: "webhook was deleted in Discord — make a new one and update .env.local",
+                429: "rate limited by Discord — try again in a minute",
+            }.get(exc.code, "")
+            return f"HTTP {exc.code}" + (f" ({hint})" if hint else "")
+        except Exception as exc:
+            return f"{type(exc).__name__}: {exc}"
+    return "rate limited"
+
+
+def post_webhooks(content: str, *, source: str = "bolt") -> Dict[str, Any]:
+    """Send ``content`` to every configured webhook. Never raises."""
     webhooks = _discord_webhooks()
     if not webhooks:
         return {
@@ -197,28 +292,33 @@ def _send_discord(msg: str, level: str, reason: Optional[str] = None) -> Dict[st
             "sent": 0,
             "attempted": 0,
             "error": "Discord unavailable: no webhook URL "
-            "(set DISCORD_WEBHOOK_URL in .env; optional CAPTAIN_HOOK_WEBHOOK_URL / DISCORD_WEBHOOK_URLS)",
+            "(set DISCORD_WEBHOOK_URL in .env.local; optional CAPTAIN_HOOK_WEBHOOK_URL / DISCORD_WEBHOOK_URLS)",
         }
-    emoji = {"error": "❌", "success": "✅", "warning": "⚠️", "startup": "🦊"}.get(
-        level, "ℹ️"
-    )
-    body = {
-        "content": f"{emoji} **Bolt** | {msg}" + (f"\n> {reason}" if reason else "")
-    }
+    pieces = _split_message((content or "").strip())
     sent = 0
     errors: List[str] = []
     for webhook in webhooks:
-        try:
-            req = urllib.request.Request(
-                webhook,
-                data=json.dumps(body).encode(),
-                headers={"Content-Type": "application/json"},
-                method="POST",
-            )
-            urllib.request.urlopen(req, timeout=5)
+        failed = None
+        for piece in pieces:
+            failed = _post_one(webhook, piece)
+            if failed:
+                break
+        if failed:
+            errors.append(f"{_redact_webhook(webhook)}: {failed}")
+        else:
             sent += 1
-        except Exception as exc:
-            errors.append(f"{type(exc).__name__}: {exc}")
+    _log_send(
+        {
+            "time": datetime.now().isoformat(timespec="seconds"),
+            "source": source,
+            "chars": len(content or ""),
+            "pieces": len(pieces),
+            "sent": sent,
+            "attempted": len(webhooks),
+            "errors": errors,
+            "preview": (content or "")[:120],
+        }
+    )
     if sent:
         return {"ok": True, "sent": sent, "attempted": len(webhooks), "errors": errors}
     return {
@@ -229,6 +329,36 @@ def _send_discord(msg: str, level: str, reason: Optional[str] = None) -> Dict[st
         f"({'; '.join(errors) if errors else 'unknown'})",
         "errors": errors,
     }
+
+
+def _send_discord(msg: str, level: str, reason: Optional[str] = None) -> Dict[str, Any]:
+    """POST a Bolt-formatted alert to configured webhooks. Never raises."""
+    emoji = {"error": "❌", "success": "✅", "warning": "⚠️", "startup": "🦊"}.get(
+        level, "ℹ️"
+    )
+    content = f"{emoji} **Bolt** | {msg}" + (f"\n> {reason}" if reason else "")
+    return post_webhooks(content, source=f"notifier:{level}")
+
+
+def check_webhook(webhook: str) -> Dict[str, Any]:
+    """GET a webhook (posts nothing): is it still valid, and where does it go?"""
+    req = urllib.request.Request(webhook, headers={"User-Agent": USER_AGENT})
+    try:
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read() or b"{}")
+        return {
+            "ok": True,
+            "webhook": _redact_webhook(webhook),
+            "name": data.get("name"),
+            "channel_id": data.get("channel_id"),
+        }
+    except urllib.error.HTTPError as exc:
+        why = {401: "token is wrong", 404: "webhook was deleted in Discord"}.get(
+            exc.code, "Discord refused it"
+        )
+        return {"ok": False, "webhook": _redact_webhook(webhook), "error": f"HTTP {exc.code} ({why})"}
+    except Exception as exc:
+        return {"ok": False, "webhook": _redact_webhook(webhook), "error": f"{type(exc).__name__}: {exc}"}
 
 
 def _discord_webhooks() -> List[str]:
@@ -250,8 +380,8 @@ def _discord_webhooks() -> List[str]:
 
 def _write_log(entry: dict):
     try:
-        log_file = f"logs/Bolt_{datetime.now().strftime('%Y-%m-%d')}.log"
-        os.makedirs("logs", exist_ok=True)
+        _LOG_DIR.mkdir(parents=True, exist_ok=True)
+        log_file = _LOG_DIR / f"Bolt_{datetime.now().strftime('%Y-%m-%d')}.log"
         with open(log_file, "a") as f:
             f.write(json.dumps(entry) + "\n")
     except Exception:
@@ -273,23 +403,15 @@ def _redact_webhook(url: str) -> str:
 
 
 def _reload_dotenv() -> None:
-    try:
-        from dotenv import load_dotenv as _load
-        from pathlib import Path as _P
-
-        env_path = _P(__file__).resolve().parents[2] / ".env"
-        if env_path.exists():
-            _load(env_path, override=False)
-    except Exception:
-        pass
+    _load_env_files()
 
 
 def status(*, probe: bool = False) -> Dict[str, Any]:
     """Discord webhook readiness. Not a Discord bot.
 
     ``ready`` = at least one webhook URL configured (optional alerts can fire).
-    Soft-fail hint uses ``Discord unavailable:``. ``probe`` POSTs a tiny
-    test message when a webhook is set; without a webhook, probe stays soft-fail.
+    Soft-fail hint uses ``Discord unavailable:``. ``probe`` checks each
+    webhook with a GET (nothing is posted); ``probe_ok`` only when all pass.
     """
     _reload_dotenv()
     webhooks = _discord_webhooks()
@@ -313,6 +435,8 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
             "Peak_Hour_Notifier (queue / peak alerts)",
             "notifier (startup / errors when webhook set)",
         ],
+        "log": str(DISCORD_LOG),
+        "last_send": _last_send(),
         "hint": (
             "Webhook alerts optional. Not a Discord bot — Core README. "
             "Budget alerts use Mac/Voice/email/iMessage (Bolt_Alerts)."
@@ -326,17 +450,21 @@ def status(*, probe: bool = False) -> Dict[str, Any]:
             info["probe_ok"] = False
             info["probe_error"] = info["hint"]
         else:
-            result = try_send(
-                "[Bolt] discord status --probe (safe test ping)",
-                level="info",
-                reason="bolt discord status --probe",
-            )
-            info["probe_ok"] = bool(result.get("ok"))
-            if not result.get("ok"):
-                info["probe_error"] = result.get("error")
-            else:
-                info["probe_sent"] = result.get("sent")
+            checks = [check_webhook(u) for u in webhooks]
+            info["probe"] = checks
+            info["probe_ok"] = all(c.get("ok") for c in checks)
+            bad = [f"{c['webhook']}: {c.get('error')}" for c in checks if not c.get("ok")]
+            if bad:
+                info["probe_error"] = "Discord unavailable: " + "; ".join(bad)
     return info
+
+
+def _last_send() -> Optional[Dict[str, Any]]:
+    try:
+        lines = DISCORD_LOG.read_text(encoding="utf-8").strip().splitlines()
+        return json.loads(lines[-1]) if lines else None
+    except Exception:
+        return None
 
 
 def try_send(
@@ -373,10 +501,19 @@ def print_status(*, as_json: bool = False, probe: bool = False) -> int:
         for red in info.get("webhooks_redacted") or []:
             print(f"  webhook: {red}")
         if probe:
-            if info.get("probe_ok"):
-                print(f"  probe: ok (sent={info.get('probe_sent')})")
-            else:
+            for c in info.get("probe") or []:
+                if c.get("ok"):
+                    print(f"  check {c['webhook']}: ok — \"{c.get('name')}\" (channel {c.get('channel_id')}), nothing posted")
+                else:
+                    print(f"  check {c['webhook']}: {c.get('error')}")
+            if not info.get("probe") and not info.get("probe_ok"):
                 print(f"  probe: {info.get('probe_error') or 'failed'}")
+        last = info.get("last_send")
+        if last:
+            state = "ok" if last.get("sent") else "FAILED"
+            print(f"  last send: {last.get('time')} {state} ({last.get('sent')}/{last.get('attempted')} webhooks) — {last.get('source')}")
+            if last.get("errors"):
+                print(f"    error: {'; '.join(last['errors'])}")
         print(f"  hint: {info.get('hint')}")
     return 0  # soft-fail informational
 
@@ -400,7 +537,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         "--probe",
         action="store_true",
-        help="status: POST a tiny test ping when webhook is set",
+        help="status: check each webhook with a GET (posts nothing)",
     )
     args = parser.parse_args(list(argv) if argv is not None else None)
     action = (args.action or "status").lower().replace("_", "-")
