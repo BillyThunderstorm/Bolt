@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-22 00:10:00",
+  "generated_at": "2026-10-22 02:10:00",
   "status": {
     "clips_made": 0,
     "vertical_clips": 2,
@@ -82,14 +82,19 @@
   ],
   "progress": {
     "counts": {
-      "READY": 83,
-      "PARTIAL": 6,
+      "READY": 84,
+      "PARTIAL": 5,
       "SHELL": 0,
       "IDEA": 0
     },
     "total": 89,
-    "percent_ready": 93,
+    "percent_ready": 94,
     "recent": [
+      {
+        "name": "iCloud Drive (multi-Mac sync)",
+        "date": "2026-10-22",
+        "display": "Oct 22, 1:45 AM CT"
+      },
       {
         "name": "OBS auto game tracker (scene \u2192 config game)",
         "date": "2026-10-21",
@@ -109,14 +114,9 @@
         "name": "Mac app (Bolt.app in the menu bar)",
         "date": "2026-10-21",
         "display": "Oct 21, 3:45 PM CT"
-      },
-      {
-        "name": "Layout migrate (tidy the top folder)",
-        "date": "2026-10-21",
-        "display": "Oct 21, 1:45 PM CT"
       }
     ],
-    "updated": "21 Oct 2026, ~9:45 PM CT",
+    "updated": "22 Oct 2026, ~1:45 AM CT",
     "available": true
   }
 }
