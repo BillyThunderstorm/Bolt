@@ -764,6 +764,17 @@ def _guess_trigger(clip_path: str, highlights: list) -> str:
         return getattr(first, "trigger", None) or getattr(first, "type", "highlight")
     return "highlight"
 
+def _start_monday_watch():
+    """Phone board sync while Bolt is live. Off unless MONDAY_API_TOKEN is set."""
+    try:
+        from modules.Monday_Sync import start_background_watch
+
+        if start_background_watch():
+            notify("Monday board sync is on.", level="info")
+    except Exception as exc:
+        notify(f"Monday sync skipped: {exc}", level="info")
+
+
 def _start_chat_bot(creator_brain: str, config: dict = None):
     """Start Bolt's Twitch chat bot in a background thread (respects use_twitch)."""
     try:
@@ -841,6 +852,7 @@ def main():
         )
 
     notify(f"Live mode — watching {RECORDINGS_DIR} for new clips", level="startup")
+    _start_monday_watch()
     try:
         from modules.Watcher import watch_folder
         # Watcher targets your specific media path configured below

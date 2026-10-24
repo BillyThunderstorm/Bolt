@@ -17,6 +17,7 @@ This is the entry point for human-facing project documentation. Keep current-sta
 | Document | Purpose |
 |---|---|
 | [GOOGLE_DRIVE_HANDBOOK.md](GOOGLE_DRIVE_HANDBOOK.md) | Daily operations and shared Drive handbook |
+| [MONDAY.md](MONDAY.md) | Phone board: Obsidian vault synced with Monday |
 | [architecture/SYSTEM_README.md](architecture/SYSTEM_README.md) | System purpose and architecture |
 | [guides/OBS_VERTICAL.md](guides/OBS_VERTICAL.md) | Vertical OBS workflow |
 | [reports/DEBUG_REPORT.md](reports/DEBUG_REPORT.md) | Debugging reference, when present |
