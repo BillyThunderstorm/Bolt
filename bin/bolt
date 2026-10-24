@@ -454,6 +454,10 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
   vault [status|list|find|add|undo]
                           Obsidian vault (BOLT_VAULT_PATH). Safe writes, backups,
                           activity log. Never deletes. add writes a task note.
+  monday [status|sync|watch]
+                          Phone board on monday.com. Syncs tasks, events, and
+                          pages with the vault when MONDAY_API_TOKEN is set.
+                          sync --dry-run shows the plan. Off when the token is empty.
   checkin [--questions|--json|--answer KEY=TEXT]
                           Evening check-in: up to 3 questions on what's not logged
   stats [status|sync|tiktok|youtube] [--dry-run] [--json] [--probe]
@@ -751,6 +755,15 @@ def main() -> int:
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
         cmd = [py, "-m", "modules.Vault_Store"] + (rest if rest else ["status"])
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    if subcommand in ("monday", "monday-sync", "monday_sync"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Monday_Sync"] + (rest if rest else ["status"])
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 

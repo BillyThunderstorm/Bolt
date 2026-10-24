@@ -619,10 +619,13 @@ class VaultStore:
         if not title:
             raise VaultError("A note needs a title.")
         area_name = resolve_area(area) if area else ("10 Bolt" if kind == "task" else "00 Inbox")
-        if kind == "task":
+        chosen = folder_rel.strip("/")
+        if chosen:
+            folder = chosen
+        elif kind == "task":
             folder = TASKS_REL
         else:
-            folder = folder_rel.strip("/") if folder_rel else area_name
+            folder = area_name
         rel = self._unique_rel(f"{folder}/{safe_note_filename(title)}")
         created = now_ct().isoformat(timespec="seconds")
         meta: Dict[str, Any] = {
@@ -874,6 +877,22 @@ class VaultStore:
             }
         )
         self._save_undo(stack[-20:])
+        self._notify_monday([snap.rel for snap in txn.files.values()])
+
+    def _notify_monday(self, rels: List[str]) -> None:
+        """Push saved tasks, events, and pages to Monday. Never raises.
+
+        Imported lazily: Monday_Sync imports this module, and a missing token
+        or a down Monday must not block the vault write.
+        """
+        try:
+            from modules.Monday_Sync import push_after_commit
+        except Exception:
+            return
+        try:
+            push_after_commit(self, rels)
+        except Exception:
+            return
 
     def _rollback(self) -> None:
         txn = self._txn

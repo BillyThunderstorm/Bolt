@@ -242,6 +242,7 @@ Post-stream + music (18 Oct 2026; `bolt motion` + `bolt game` + `bolt wrap` + `b
 | `bolt layout` | READY | Tidy-top-folder check (`Layout_Check`): in place / wrong spot / to look at / notes; `run --all`; report only |
 | `bolt migrate-layout` | READY | Move stray top-folder files home (`Migrate_Layout`); dry run unless `--apply`; never overwrites; `undo` |
 | `bolt calendar` | READY | Local ICS feeds (`ICS_Calendar`): briefing, weekly, peak windows, upcoming posts; soft-fail `Calendar unavailable:` |
+| `bolt monday` | READY | Vault ↔ Monday phone board (`Monday_Sync`): `sync`, `sync --dry-run`, `watch`; off without `MONDAY_API_TOKEN`; soft-fail `Monday unavailable:` |
 | `bolt send` | READY | Text + email yourself in one command (`Send_Notify` via Bolt_Alerts); `--dry-run`, `status --probe`; soft-fail `Notify unavailable:` |
 | `bolt refresh-memory` | READY | Memory index rebuild (`Refresh_Memory`; atomic + verified, `--if-stale`, status shows stale/fresh); soft-fail `Memory refresh unavailable:` |
 | `bolt memory` | READY | Long-term memory: `recall "q"` via LLM_Handler (Grok → Ollama → OpenAI) + `remember "fact"` (`Bolt_Memory`); soft-fail `Bolt memory unavailable:` |

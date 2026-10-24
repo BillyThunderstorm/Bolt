@@ -906,6 +906,23 @@ Path: `BOLT_VAULT_PATH`, or `vault_path` in `Core/config.json`, or `/Users/carte
 
 Times Bolt says out loud use America/Chicago and the label CT. `10 Bolt/Bolt Calendar.md` is an index, not an event.
 
+## Monday phone board (`bolt monday`)
+
+The vault stays the source of truth. Monday is the phone view of the same lanes (Inbox, This Week, Doing, Done), calendar events, and pages. Sync is off until `MONDAY_API_TOKEN` is set. A down or rate-limited Monday is logged; Bolt keeps going.
+
+```bash
+bolt monday                          # on or off, board id, how often it checks
+bolt monday sync                    # push the vault, pull phone edits
+bolt monday sync --dry-run          # show the plan, change nothing
+bolt monday watch                    # keep checking (MONDAY_SYNC_INTERVAL, default 300 seconds)
+```
+
+Saving a task, event, or page pushes that note (matched on the `vault_note` column, the vault-relative path). Lane sets the Monday group. Done is status Done, Doing is Working on it, and the other lanes are To do. Area comes from the note's top folder: `00 Inbox`, `10 Bolt`, `20 Creator HQ & Content`, `30 Product Testing`, `40 Career & Creator Plan`, `50 Personal`.
+
+`bolt monday sync` also pulls group moves, status, due date, event time, and name edits. A card made on the phone with an empty `vault_note` becomes a new task in `00 Inbox`, or another area when smart filing recognizes it. Events land in `10 Bolt/Calendar`. The newest edit wins; the vault wins a tie. A Monday card that disappeared does not delete the vault note.
+
+While Bolt is live (`bolt launch`), it checks the phone on the same interval when the token is set. The 5 PM briefing does one pass. `bolt mac-auto install cron` adds a repeating sync only after the token is in `.env` or the environment. Token steps: [Docs/MONDAY.md](../../Docs/MONDAY.md).
+
 ## Title A/B trainer (`bolt titles`)
 
 Local learning loop: read titled rows from `Data/performance_outcomes.jsonl`,

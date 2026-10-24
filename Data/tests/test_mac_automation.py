@@ -206,7 +206,7 @@ def test_plan_cron_never_duplicates_and_apply_backs_up(tmp_path):
     # commented-out line doesn't count as installed
     text = "# 0 17 * * * python daily_briefing.py --send\n0 * * * * echo keep\n"
     missing = ma.plan_cron(text)
-    assert len(missing) == 2
+    assert len(missing) == len(ma.desired_cron_entries())
     written = {}
     r = ma.apply_cron(text, missing, backup_dir=tmp_path / "bk", writer=lambda b: written.setdefault("b", b))
     assert r["changed"] and Path(r["backup"]).read_text() == text

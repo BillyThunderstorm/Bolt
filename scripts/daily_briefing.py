@@ -956,6 +956,18 @@ def main(
         print(f"Speaking: {spoken}")
         _speak(spoken)
 
+    _sync_monday()
+
+
+def _sync_monday() -> None:
+    """One Monday pass after the briefing. Off without a token. Never raises."""
+    try:
+        from modules.Monday_Sync import maybe_sync_from_scheduler
+
+        maybe_sync_from_scheduler()
+    except Exception as exc:
+        print(f"Monday sync skipped ({exc}).")
+
 
 if __name__ == "__main__":
     print_only = "--print" in sys.argv

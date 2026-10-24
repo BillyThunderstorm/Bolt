@@ -9,7 +9,8 @@ It is a personal project, not a hosted SaaS product. It keeps creator data and g
 - Product-testing workflow: catalog items, daily notes, drafts, assessments, and manual posting plans.
 - Media workflow: recordings/VODs → highlight candidates → clips, vertical renders, captions where available, and review queues.
 - Creator operations: daily/weekly briefings, missions, research, local memory, and cost-aware LLM routing.
-- Local integrations: optional OBS, Twitch, Google services, voice, macOS notifications, and Apple Reminders.
+- Local integrations: optional OBS, Twitch, Google services, voice, macOS notifications, Apple Reminders, and a Monday phone board for vault tasks.
+
 - Post-stream helpers: game freshness, motion detection, wrap packages, release packages, and per-game clip settings.
 
 The live command reference is [Core/modules/BOLT_COMMANDS.md](Core/modules/BOLT_COMMANDS.md). Capability maturity and prerequisites are tracked in [Docs/READINESS.md](Docs/READINESS.md).
@@ -48,6 +49,16 @@ uv run bolt wrap --dry-run    # preview a post-stream package
 uv run bolt memory recall "what should I do next?"
 uv run bolt doctor            # installation/integration diagnostics
 ```
+
+## Monday board on your phone
+
+Bolt's notes stay in the Obsidian vault. When you add a Monday API token, the same tasks, events, and pages also show up on your Monday board so you can glance at them and make small edits from your phone.
+
+1. On monday.com, click your avatar (top right), then **Developers**, and copy the API token.
+2. Put it in `.env` as `MONDAY_API_TOKEN`. Leave `MONDAY_BOARD_ID` as `18436882096` unless you made a new board.
+3. Run `bolt monday sync` once. After that, Bolt updates Monday whenever it saves a task, and `bolt monday watch` (or a live `bolt launch`) pulls phone edits back into the vault.
+
+The vault wins if both sides change at the same moment. Bolt will not delete a note just because a Monday card disappeared. Details: [Docs/MONDAY.md](Docs/MONDAY.md).
 
 ## Safety and publishing
 

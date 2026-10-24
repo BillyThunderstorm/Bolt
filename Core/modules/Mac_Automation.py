@@ -99,6 +99,8 @@ _KNOWN: Tuple[Dict[str, Any], ...] = (
                      ".venv/bin/python3 scripts/site_data_writer.py --push ; then read logs/site_data_push.log")},
     {"key": "creative-hour.sh", "name": "Creative Hour (yours, not Bolt)",
      "does": "Plays your Creative Hour song and shows a 'Time to Create!' banner.", "bolt": False},
+    {"key": "Monday_Sync", "name": "Monday board sync",
+     "does": "Keeps the Monday phone board in step with the Obsidian vault."},
 )
 
 _ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
@@ -1028,7 +1030,7 @@ def list_items(*, as_json: bool = False) -> int:
 def desired_cron_entries() -> List[Dict[str, str]]:
     py = _VENV_PY
     logs = _REPO / "logs"
-    return [
+    entries = [
         {"key": "daily_briefing.py", "comment": f"# {_BRIEFING_CRON_MARK} → Apple Reminders + Mac banner + email",
          "line": (f"0 17 * * * cd {_REPO} && {py} {_REPO / 'scripts' / 'daily_briefing.py'} --send "
                   f">> {logs / 'daily_briefing.log'} 2>&1")},
@@ -1036,6 +1038,15 @@ def desired_cron_entries() -> List[Dict[str, str]]:
          "line": (f"0 */2 * * * cd {_REPO} && {py} {_REPO / 'Core' / 'launch.py'} process --no-checklist "
                   f">> {logs / 'auto_process.log'} 2>&1")},
     ]
+    # Optional. Monday_Sync reads .env itself; a missing module must not break mac-auto.
+    try:
+        from modules.Monday_Sync import desired_cron_entry
+    except Exception:
+        return entries
+    extra = desired_cron_entry(str(py), _REPO, logs)
+    if extra:
+        entries.append(extra)
+    return entries
 
 
 def plan_cron(text: str) -> List[Dict[str, str]]:
