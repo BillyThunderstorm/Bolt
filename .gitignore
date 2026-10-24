@@ -135,3 +135,8 @@ Data/.site-data-probe.json
 
 # Private evening check-in notes (personal; never publish — repo is public)
 Data/memory/checkins/
+
+# Generated daily/morning briefings (contain personal calendar + inbox info; repo is public)
+Docs/briefings/daily/
+docs/briefings/daily/
+briefings/daily/
