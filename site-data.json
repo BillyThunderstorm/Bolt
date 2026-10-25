@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-24 18:10:00",
+  "generated_at": "2026-10-24 20:10:00",
   "status": {
     "clips_made": 24,
     "vertical_clips": 9,
@@ -94,9 +94,7 @@
   "briefing": {
     "date": "Saturday, October 24, 2026",
     "action_items": [
-      "Draft the short for capture card and send it for your OK.",
-      "Draft the short for Facmogu Pink Mic Holder and send it for your OK.",
-      "Draft the short for K&F Concept Neck Phone Holder and send it for your OK."
+      "Post K&F Concept Neck Phone Holder tonight. Open piece: POV clip filmed from the holder (10-20s). If that piece slips, post the cut already approved. Then `bolt manage posted \"K&F Concept Neck Phone Holder\"`."
     ],
     "source": "morning_2026-10-24.md"
   },
@@ -125,7 +123,7 @@
       "end_hour": 22,
       "start_display": "7 PM",
       "end_display": "10 PM",
-      "in_window": false,
+      "in_window": true,
       "active": false
     }
   ],
