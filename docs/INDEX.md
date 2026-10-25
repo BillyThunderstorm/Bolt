@@ -1,109 +1,38 @@
-# Bolt Documentation Index
+# Bolt documentation index
 
-Use this page as the central map for Bolt.
+This is the entry point for human-facing project documentation. Keep current-state material here or linked from here; do not duplicate daily logs.
 
-## Color / Label Map
+## Start here
 
-| Label | Path root | Use for |
-|-------|-----------|---------|
-| 🟡 CORE | `Core/` | Code, modules, brain, config |
-| 🔵 DATA | `Data/` | Catalog, storefront, sponsors, memory |
-| 🟢 DOCS | `Docs/` | Commands, status, briefings, reviews |
-| 🟣 APP | `App/` | UI / brand |
-| 🟠 MEDIA | `media/` | Clips / recordings |
-| 🔴 MANAGER | `Content_Manager` + `bin/bolt` | Daily creator OS |
+| Document | Purpose |
+|---|---|
+| [../README.md](../README.md) | Installation, safety posture, and project overview |
+| [BOLT_NOW.md](BOLT_NOW.md) | Current focus, next steps, and longer-term direction |
+| [READINESS.md](READINESS.md) | Capability maturity, prerequisites, and known limits |
+| [../Core/modules/BOLT_COMMANDS.md](../Core/modules/BOLT_COMMANDS.md) | Canonical CLI command reference |
+| [../AGENTS.md](../AGENTS.md) | Rules for maintaining Bolt |
 
-## Start Here
+## Operations and architecture
 
-| Label | File | Description |
-|-------|------|-------------|
-| 🔴 | `AGENTS.md` | **Teacher Grok rules** (how this session builds Bolt) |
-| 🔴 | `Core/modules/BOLT_COMMANDS.md` | **All commands** (manager + researcher + Grok conversation) |
-| 🟢 | `Docs/BOLT_NOW.md` | **Living status / plan / future** |
-| 🟢 | `Docs/archive/status/` | Archived status/roadmap copies (stubs remain at old paths) |
-| 🟢 | `Docs/PROJECT_STATUS.md` | Stub → Bolt NOW (full copy in archive) |
-| 🟢 | `docs/upgrade/SHIP_LOG_2026-08-02.md` | **Grok layer ship log** |
-| 🟢 | `docs/INDEX.md` | This map |
-| 🟢 | `Docs/GOOGLE_DRIVE_HANDBOOK.md` | **Canonical handbook pointer** (Drive journal / briefing / todo / how-to) |
-| 🟡 | `Core/modules/LLM_Handler.py` | Multi-provider LLM (OpenAI + xAI/Grok) |
-| 🟡 | `Core/modules/Intent_Router.py` | Natural-language → real Bolt actions |
-| 🟡 | `Core/Bolt_Conversation.py` | Voice/text conversation (Grok + intents) |
-| 🟡 | `Core/modules/Content_Manager.py` | Creator manager implementation |
-| 🟡 | `Core/modules/Researcher.py` | Direction-finding research role (C5/C6/C7) |
-| 🟡 | `Core/modules/Command_Center.py` | Creator Command Center (`bolt mission` / `ccc`) |
-| 🟡 | `Core/skills/creator-command-center/` | Mission playbook skill (SKILL.md) |
-| 🟡 | `Core/modules/Clip_Ranker.py` | Recency-weighted learned clip-rank model |
-| 🟡 | `Core/bolt_brain.md` | William creator profile |
-| 🔵 | `Data/memory/user_profile.json` | Hard constraints + vision for Researcher |
-| 🟡 | `bin/bolt` | Single CLI entry |
+| Document | Purpose |
+|---|---|
+| [GOOGLE_DRIVE_HANDBOOK.md](GOOGLE_DRIVE_HANDBOOK.md) | Daily operations and shared Drive handbook |
+| [MONDAY.md](MONDAY.md) | Phone board: Obsidian vault synced with Monday |
+| [architecture/SYSTEM_README.md](architecture/SYSTEM_README.md) | System purpose and architecture |
+| [guides/OBS_VERTICAL.md](guides/OBS_VERTICAL.md) | Vertical OBS workflow |
+| [reports/DEBUG_REPORT.md](reports/DEBUG_REPORT.md) | Debugging reference, when present |
 
-## LLM / conversation (Aug 2, 2026)
+## Current source-of-truth files
 
-| Piece | Path | Notes |
-|-------|------|-------|
-| Provider switch | `Core/modules/LLM_Handler.py` | `BOLT_LLM_PROVIDER=xai` |
-| Intent router | `Core/modules/Intent_Router.py` | morning / next / status / queue |
-| Voice + text chat | `Core/Bolt_Conversation.py` | Grok replies + intents |
-| Twitch personality | `Core/modules/Bolt_Chat.py` | `!Bolt` via same handler |
-| Commands | `Core/modules/BOLT_COMMANDS.md` | LLM + conversation section |
+- `Data/MEMORY.md`: current operating memory and recent decisions.
+- `Data/memory/week_card.json`: the active week and explicit do-not-suggest choices.
+- `Data/business/product-testing-plan.md`: phased career plan, assessment template, this week, and today.
+- `Data/business/product-tester-plan.md`: short card Bolt follows (lane, career bar, how to talk).
+- `Core/config.json`: runtime defaults. Secrets belong only in `.env`.
+- `pyproject.toml`: Python dependencies and optional feature groups.
 
-```bash
-PYTHONPATH=Core python3 -m modules.LLM_Handler
-PYTHONPATH=Core python3 -m Bolt_Conversation --text
-```
+## Maintenance rule
 
-## Canonical Runtime Docs
+When a capability changes, update its command reference and readiness status first. Update `BOLT_NOW.md` only for a material change in current focus, plan, or operating policy.
 
-| File | Description |
-|------|-------------|
-| `Docs/BOLT_NOW.md` | Living status / short-term plan / future |
-| `docs/upgrade/SHIP_LOG_2026-08-02.md` | Latest engineering ship |
-| `modules/Think_Learn_Decide.py` | Ingestion, reasoning, decisions, feedback loop |
-| `memory/content/full-creator-vision.md` | North star across all creator lanes |
-| `docs/requirements/creator-domains-requirements.md` | System requirements for 7 creator domains |
-| `.github/instructions/creator-domains.instructions.md` | Behavioral instructions with full personality |
-
-## Setup and Integration
-
-| File | Description |
-|------|-------------|
-| `docs/guides/SETUP_GUIDE.md` | Setup, prerequisites, and troubleshooting |
-| `docs/guides/STREAM_DECK_SETUP.md` | Stream Deck setup notes |
-| `Docs/guides/OBS_VERTICAL.md` | Aitum 9:16 canvas on Thunderstone (linked to 16:9 scenes) |
-| `Docs/MY_DIAMOND_OVERLAY.md` | **My Diamond** overlay brief (OBS + FCP; separate from Storm Cast) |
-| `scripts/setup.sh` | First-time setup and dependency install |
-| `scripts/verify.py` | Project verification checks |
-| `scripts/doctor.py` | Live vs mocked vs stale-path / missing-key audit (`bolt doctor`) |
-
-## Runtime Modules (high-signal)
-
-| Module | Description |
-|--------|-------------|
-| `modules/LLM_Handler.py` | Shared LLM entry (Grok / OpenAI) |
-| `modules/Intent_Router.py` | Natural language action routing |
-| `Bolt_Conversation.py` | Voice/text conversation |
-| `modules/Bolt_Chat.py` | Twitch personality layer |
-| `modules/Content_Manager.py` | Creator manager OS |
-| `modules/Researcher.py` | Direction-finding research |
-| `modules/Command_Center.py` | Missions / CCC |
-| `modules/Think_Learn_Decide.py` | Decision engine |
-| `modules/Clip_Ranker.py` | Ranking and tiering |
-| `modules/Memory_Index.py` | Local searchable memory index |
-| `modules/Word_Lookup.py` | Dictionary / spellcheck / thesaurus (`bolt word`) |
-
-## User Interfaces Summary
-
-| Interface | Command | Description |
-|-----------|---------|-------------|
-| CLI | `bolt <cmd>` / `bin/bolt` | Primary entry |
-| Conversation (text) | `PYTHONPATH=Core python3 -m Bolt_Conversation --text` | Grok + intents |
-| Conversation (voice) | `PYTHONPATH=Core python3 -m Bolt_Conversation` | Mic + TTS |
-| LLM health | `PYTHONPATH=Core python3 -m modules.LLM_Handler` | Provider status |
-| Twitch chat | `PYTHONPATH=Core python3 -m modules.Bolt_Chat` | Live chat bot |
-| Morning | `bolt morning` | Spoken briefing |
-| Research | `bolt research …` | C5 direction loop |
-| Mission | `bolt mission …` | Command Center |
-
----
-
-*Last updated: September 1, 2026 — Teacher Grok `AGENTS.md` added.*
+*Last reviewed: 2026-10-24*

@@ -26,7 +26,8 @@ This is the entry point for human-facing project documentation. Keep current-sta
 
 - `Data/MEMORY.md`: current operating memory and recent decisions.
 - `Data/memory/week_card.json`: the active week and explicit do-not-suggest choices.
-- `Data/business/product-tester-plan.md`: product-testing plan and assessment template.
+- `Data/business/product-testing-plan.md`: phased career plan, assessment template, this week, and today.
+- `Data/business/product-tester-plan.md`: short card Bolt follows (lane, career bar, how to talk).
 - `Core/config.json`: runtime defaults. Secrets belong only in `.env`.
 - `pyproject.toml`: Python dependencies and optional feature groups.
 
@@ -34,4 +35,4 @@ This is the entry point for human-facing project documentation. Keep current-sta
 
 When a capability changes, update its command reference and readiness status first. Update `BOLT_NOW.md` only for a material change in current focus, plan, or operating policy.
 
-*Last reviewed: 2026-10-19*
+*Last reviewed: 2026-10-24*

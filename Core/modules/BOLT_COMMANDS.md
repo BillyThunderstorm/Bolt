@@ -35,6 +35,61 @@ uv run python bin/bolt <command> [options]
 
 Run `bolt help` to show the built-in summary. Commands that expose their own help accept `--help`.
 
+## Command chart — how to use Bolt
+
+Bolt is already able to run the career loop. The efficient path is one owned product, one approved short, then a log line so the next morning cannot assign it again. Publishing stays in your hands. Paid model calls stay on high-value strategy (`bolt nexus --paid`), and everyday talk stays on Ollama.
+
+`bolt morning --quiet` is the product-testing day. `bolt day --decide` is the clip queue. They are different jobs. A gaming clip you already held is not a substitute for the product post.
+
+### The week
+
+| When | Do this | Leave closed |
+|---|---|---|
+| Wake window | `bolt morning --quiet` and do the one step it prints | A second product, a new lane, a Bolt rebuild |
+| Mon | `bolt manage add "Item" --lane tech --status testing` for the one product you already own | Picking three at once |
+| Tue–Thu | `bolt manage note "Item" --day N --text "what was true"` (5–10 min) | Extra filming for a product that has no verdict |
+| Fri | Finish the assessment, then `bolt manage draft "Item" --format short` and approve it in chat | Auto-publish |
+| Sat | Post that one short yourself. Then `bolt manage posted "Item" --tiktok --where URL` and `bolt week done "what shipped"` | Redrafting the other items in the catalog |
+| Sun | `bolt log-perf run --clip "Item" --views N` when numbers exist. Ten minutes. | A new mission |
+
+Hands-only footage counts. Comments are optional. The week card (`bolt week`) beats an old briefing. `briefing_focus.focus_item` in `Core/config.json` is the one product the morning is allowed to name. On 2026-10-24 that item is the K&F Concept Neck Phone Holder.
+
+### Where each surface fits
+
+| Surface | Use it for |
+|---|---|
+| Terminal `bolt …` | Catalog, drafts, queue review, logging a post |
+| `bolt morning --quiet` | The one product step, without spoken audio |
+| `bolt voice --text` | A question when the mic is unavailable. Same writes as the CLI |
+| `bolt menubar` | Launch, stop, dashboard, logs, config |
+| Apple Reminders | The evening briefing, after you have asked for `--send` |
+| Twitch chat `!Bolt` | A question while live. Clip decisions still happen in the terminal |
+
+`bolt day` with no flags can sit on text-to-speech. Prefer `bolt morning --quiet` for this lane, or `bolt day --decide --quiet` when the job really is the clip queue.
+
+### After a stream (separate from the product post)
+
+`bolt wrap` packages the latest VOD into clips, a reel, and captions under `media/output/wraps/`. `bolt recordings latest` is the same pipeline for one file. `bolt queue decide` is where you approve, hold, or retitle. You still upload the file yourself, then `bolt queue mark-posted` or `bolt manage posted`. `bolt postnow` hits the paused TikTok API, so the manual upload is the path that finishes.
+
+### Potential when this loop is finished
+
+The tools below are largely built. The potential shows up when the loop runs through the roadmap in `Data/business/product-testing-plan.md`, through **Nov 4, 2026** and on to **Aug 2027**.
+
+| Horizon | What a finished loop produces |
+|---|---|
+| **Now → Nov 4, 2026 (Foundation)** | Three public honest assessments of products you already own, each with one short. Proof the voice exists in public. Today the writing is done and the posts are not. |
+| **Nov 5, 2026 → Jan 31, 2027 (Proof)** | About ten public assessments and a simple portfolio page a stranger can open. The sustainable floor after the first three is two posts a week, and never zero two weeks in a row. |
+| **Feb–Apr 2027 (Credibility)** | One product-testing or honest-review program, disclosed affiliate links (`billycarter-20` when it is live), and a real portfolio to bring back to Amazon Influencer. Vine stays invite-only. |
+| **May–Jul 2027 (Outreach)** | A one-page media kit. `bolt sponsors pitch "Brand"` prints a draft you send yourself. First gifted unit, assessed on honest-review terms. |
+| **Aug 2027 → (Career)** | A paid review, a UGC or testing contract, a retainer, or a tester job. **$1,000 / month** is the first proof. **$3,000 / month** is the job you would stand behind. Commonly 12–24 months if the reviews keep going. |
+| **By 2026-12-31** | You know what success looks like in this profession, or the roadmap plus the public posts are the proof the work is leading somewhere. The roadmap is written. The missing proof is the public record. |
+
+Used this way, Bolt becomes the manager that remembers every test, turns it into one short you approve, keeps the week on one lane, and learns which posts actually landed. Sponsor pitches stay drafts until the portfolio exists. Nothing posts and nothing spends without your approval.
+
+The north star, from your own profile, sits past that floor: companies send products, some tests happen on site, the work can reach a stage like Dream Con or a Marvel-adjacent collaboration, and the income comes from sponsors, partnerships, and disclosed affiliate links. That is the direction the posts are collecting evidence for. It is not this Saturday's job.
+
+A second CLI lives in `bolt/command.py` (`morning`, `night`, `pipeline`, `serve`, and others). The commands in this file are the ones to use.
+
 ## LLM provider (SuperGrok + light API)
 
 Grok (the coding session) is Bolt’s teacher — see repo-root `AGENTS.md`. This section is Bolt’s **runtime** brain: how the student calls models. Conversation, titles, and Nexus go through `Core/modules/LLM_Handler.py` + `LLM_Budget.py`. OpenAI and Ollama are fallbacks, not other teachers.
@@ -195,6 +250,11 @@ bolt obs [status] [--json] [--probe]
                                       # OBS WebSocket readiness (Stream_Monitor)
                                       # Soft-fail when OBS closed / no password / no websocket-client
                                       # Aliases: obs-status, stream-monitor
+                                      # Live monitor (bolt launch) subscribes to General, Scenes,
+                                      #   Outputs (stream/record/replay events), SceneItems and
+                                      #   InputVolumeMeters = 65733. Fixed 22 Oct 2026: old mask
+                                      #   asked for Transitions/Filters instead of Outputs, so
+                                      #   stream/record start-stop + replay saves never arrived.
 bolt obs-game [status|list|run|stop] [--json]
                                       # OBS scene→Core/config.json game (READY 21 Oct 2026)
                                       # status: OBS scene, mapped game, config game, match
@@ -754,6 +814,8 @@ bolt morning --quiet
 | `bolt advance next` | Show the next concrete Bolt improvement to ship (roadmap pull) |
 | `bolt morning` | Run the full "Good Morning Bolt" spoken daily briefing |
 | `bolt morning --quiet` | Same as `morning`, but skip the spoken audio output |
+
+While `briefing_focus` is on, the morning names one product. `focus_item` in `Core/config.json` wins over the rest of the drafting list. A draft that already exists is "review" or "post", and an approved draft is the post.
 
 ## How to reply to Bolt
 

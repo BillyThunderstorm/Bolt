@@ -83,10 +83,39 @@ Programs: Amazon Vine is invite-only (Amazon picks reviewers, largely from helpf
 - **Protect energy:** one product at a time. Engagement is optional; family privacy is fine — hands-only/product-only content counts.
 - **No same-day Amazon Influencer reapply.** Revisit only with a real portfolio (Phase 3+).
 
-## This week (Oct 11–17, 2026)
+## Where Phase 1 stands (2026-10-24)
 
-1. **Pick 3 products I already own** (one can be a dud) and add them: `bolt manage add "Item" --lane product --status testing`.
-2. **Start product #1:** fill in price/where bought/claims in the template and log Day 1 with `bolt manage note "Item" --day 1 --text "..."`.
-3. **Friday:** write the first verdict + score, then `bolt manage draft "Item" --format short` and approve it when ready.
+The three owned products are in the catalog, assessed, and drafted. None are posted. Phase 1 still ends **Nov 4, 2026**: three public shorts, one per assessment. Eleven days remain. One post per sitting.
 
-**If only one thing happens:** do step 1.
+| Product | Score | Draft | Saturday job |
+|---|---|---|---|
+| K&F Concept Neck Phone Holder | 8/10 | Approved 2026-10-19. Desk footage Oct 20–21. Open piece: 10–20s POV from the holder. | **This is the post.** |
+| Rybozen capture card | 10/10 | Generic short drafted. Desk demo filmed Oct 21. | Stays drafting until the K&F short is public. |
+| Facmogu Pink Mic Holder | 7/10 | Generic short drafted. In the Oct 21 desk take. Honest con: aiming and the hot-pink look. | Same. After the capture card. |
+
+## This week (Mon Oct 19 – Sun Oct 25, 2026)
+
+Lane is still product testing (started Oct 11). This card is the week you post the first of the three.
+
+- **Mon–Fri (already happened):** assessments exist, shorts are drafted, K&F script is approved, desk footage is filmed.
+- **Sat Oct 24 — post one thing.** The K&F neck phone holder. Film the 10–20s POV if it is in reach. If it is not, post the desk cut already approved (strap and flip are on tape). Then stop.
+- **Sun Oct 25 — 10 minutes.** `bolt log-perf` once numbers exist. `bolt weekly run` if you want the page. Pick nothing new.
+
+After the post:
+
+```bash
+bolt manage posted "K&F Concept Neck Phone Holder" --tiktok --where "URL"
+bolt week done "Posted the K&F neck phone holder short"
+```
+
+**If only one thing happens:** post the K&F short.
+
+## Today (Saturday, Oct 24, 2026)
+
+1. Open the approved K&F script (`bolt manage list --status drafting` — the neck holder is the focus item).
+2. Either film 10–20 seconds from the holder, or cut the Oct 20–21 desk footage.
+3. Post that one short yourself on TikTok. YouTube Shorts and X can wait.
+4. Log it with the two commands above.
+5. Leave the capture card and the Facmogu holder alone until this one is public.
+
+Calendar block already on the day: **7:00–7:30 PM PT · Approve 1 post.** That block is the whole session.

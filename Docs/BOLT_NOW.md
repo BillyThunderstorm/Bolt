@@ -2,9 +2,9 @@
 
 Living local one-pager. **This file is the human-facing summary** of where Bolt is, what to do next, and where it could go. Update it when something material changes. Do not duplicate Daily Logs here.
 
-- **Last rolled up:** 2026-10-11 (America/Chicago) — **reset to one lane: product testing**
+- **Last rolled up:** 2026-10-24 (America/Chicago) — Phase 1, three drafts in, zero posted. Saturday is one post.
 - **Lives in:** `Docs/BOLT_NOW.md` (repo on Goddess). Not a Google Drive Doc.
-- **Plan:** `Data/business/product-tester-plan.md` · **Roadmap:** `Data/business/product-testing-roadmap.png`
+- **Plan:** `Data/business/product-testing-plan.md` · **Short card:** `Data/business/product-tester-plan.md` · **Roadmap image:** `Data/business/product-testing-roadmap.png`
 
 ## How to use
 
@@ -19,8 +19,8 @@ Living local one-pager. **This file is the human-facing summary** of where Bolt 
 - **Single focus:** **product testing** as a career path. Products from any category, as long as they are tested.
 - **The one rule:** every test produces a **detailed assessment** (claims tested, method + duration, day-by-day notes, measurable results, pros/cons, who it's for/not for, verdict + score with reasoning, disclosure). Template is in the plan.
 - **No more separate lanes:** games, pop culture, skincare-as-a-lane, and Amazon Influencer are folded into product testing or dropped.
-- **Week card:** this week = product testing (started 2026-10-11, nothing done yet).
-- **Phase:** 1 — Foundation (Oct 11 – Nov 4, 2026). Target: 3 detailed assessments of things already owned, each with 1 short. (Old target of 20 shorts + 4 long-form is set aside.)
+- **Week card:** product testing, week of Oct 19–25. Lane started Oct 11.
+- **Phase:** 1 — Foundation (Oct 11 – Nov 4, 2026). Target: 3 detailed assessments posted, each with 1 short. As of Oct 24 the three assessments are written (capture card 10/10, Facmogu mic holder 7/10, K&F neck holder 8/10) and drafted. **Zero are posted.** K&F was approved Oct 19 and is the only open post. (Old target of 20 shorts + 4 long-form stays set aside.)
 - **Platforms:** TikTok `@itssimplybilly`, Twitch `ItsSimplyBilly`, YouTube `@SimplyBilly`, X `@SimplyBilly_`.
 - **Amazon:** Influencer rejected 2026-08-24; no same-day reapply. Written buyer reviews (~20) still count as practice; tag `billycarter-20` may exist.
 - **Posting:** always needs William's approval. TikTok API auto-publish paused; manual post + `bolt log-perf`.
@@ -42,17 +42,22 @@ Living local one-pager. **This file is the human-facing summary** of where Bolt 
 
 ---
 
-## 2. NEXT (Oct 11 – Nov 4)
+## 2. NEXT (through Nov 4, 2026)
 
-**One clear next step:** pick 3 products already owned (one can be a dud) and add them to Bolt.
+**One clear next step (Sat Oct 24):** post the K&F Concept Neck Phone Holder short. Script approved Oct 19. Desk footage from Oct 20–21 covers the strap and the flip. Film a 10–20s POV from the holder if it is in reach. If it is not, post the desk cut. Then:
 
-Then, this week:
-1. Start product #1: fill in price / where bought / claims; log Day 1 note.
-2. Friday: write verdict + score; draft the short; approve when ready.
+```bash
+bolt manage posted "K&F Concept Neck Phone Holder" --tiktok --where "URL"
+bolt week done "Posted the K&F neck phone holder short"
+```
+
+**Sun Oct 25:** ten minutes. Log views when they exist (`bolt log-perf`). Do not pick a fourth product.
+
+**After that, still inside Phase 1:** rewrite and post the capture-card short, then the Facmogu mic holder. One sitting each. Both verdicts already exist. Their current scripts are still the generic template, so the hook gets a rewrite before they go up.
 
 Weekly rhythm (low social load): Mon pick · Tue–Thu test + 5-min notes · Fri verdict · Sat approve 1 post · Sun 10-min look back. Comments optional. Hands/product-only footage is fine.
 
-**Not in this window:** Amazon Influencer reapply · new lanes · TikTok auto-publish · brand pitching before a portfolio exists.
+**Outside this window:** Amazon Influencer reapply · new lanes · TikTok auto-publish · brand pitching before a portfolio exists.
 
 ---
 

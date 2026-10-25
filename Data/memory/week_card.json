@@ -1,11 +1,15 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-11T20:49:49",
+  "updated_at": "2026-10-24T19:45:00",
   "this_week": {
     "topic": "product testing",
-    "note": "Reset 2026-10-11: single lane, every test = detailed assessment. Plan: Data/business/product-testing-plan.md",
-    "started": "2026-10-11",
-    "done": []
+    "note": "Week of 2026-10-19 to 2026-10-25. Lane started 2026-10-11. Saturday job is one post: the K&F Concept Neck Phone Holder short (script approved 2026-10-19). Film the 10-20s POV or post the desk cut already filmed. Leave the capture card and the Facmogu mic holder until this one is posted. Plan: Data/business/product-testing-plan.md",
+    "started": "2026-10-19",
+    "done": [
+      "Three owned assessments written: Rybozen capture card 10/10, Facmogu Pink Mic Holder 7/10, K&F Concept Neck Phone Holder 8/10",
+      "Shorts drafted for all three; K&F script approved 2026-10-19",
+      "Desk footage filmed Oct 20-21 (K&F strap and flip, capture card demo, Facmogu in the desk take). K&F still not posted."
+    ]
   },
   "last_week": {
     "topic": "gaming / tech",

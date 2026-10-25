@@ -1,13 +1,12 @@
 # Product Tester Plan (Bolt follows this)
 
-*Saved 2026-10-11 from William's plan notes. This is the plan Bolt follows.*
-*Earlier draft (5-phase roadmap): `product-testing-plan.md` and `product-testing-roadmap.png`, kept for reference.*
+*Saved 2026-10-11. Updated 2026-10-24. Bolt follows this card.*
+*Phases, template, and this week: `product-testing-plan.md`. Roadmap image: `product-testing-roadmap.png`.*
 
 ## Focus
-- The four-lane content calendar is **parked**. Every posted review stays in the catalog.
-- **One lane at a time.** Pop culture, skincare, and general products stay on the back burner until one lane has **8 published tests**.
-- Recommended first lane: **gaming / tech**, because the gear reviews and streams already exist.
-- Every test ends in a **detailed assessment**.
+- **One lane:** product testing. Gaming and tech gear count when they get a full assessment. Pop culture and skincare stay parked.
+- The phased plan, template, and this week's job are in `product-testing-plan.md`.
+- Every test ends in a **detailed assessment**, then one short you approve.
 
 ## Career bar
 | Milestone | Meaning |
@@ -21,12 +20,11 @@
 - $3,000 / month, when it happens: commonly **12–24 months**.
 
 ## How to talk to Bolt
-- "This week is gaming tech" (or skincare, or general products): sets the lane.
+- "This week is product testing": the lane is already set. Stay on it.
 - "Testing the …": one product you already own.
 - "Log: …": what was true when you used it.
-- "What's my test": Bolt speaks the product, the last note, and the next to-do.
-- "Done: apply to UserTesting": checks that item off.
+- "What's my test": Bolt speaks the focus product, the last note, and the next to-do.
+- "Done: posted the K&F short": checks that item off (`bolt week done` does the same).
 
 ## Morning
-Morning speaks those three lines (product, last note, next to-do) and stops. `bolt week test` prints the same thing.
-Until a lane is set, the next line is: **"Say the first lane."**
+Morning speaks one step and stops. On 2026-10-24 that step is the K&F Concept Neck Phone Holder short. The capture card and the Facmogu mic holder wait until that short is posted.

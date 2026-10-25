@@ -92,24 +92,49 @@ def active_items() -> List[Dict[str, Any]]:
     ]
 
 
+def _draft(item: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    draft = item.get("last_draft")
+    return draft if isinstance(draft, dict) and draft else None
+
+
 def next_step(item: Dict[str, Any]) -> str:
+    """One next action. A draft that already exists is reviewed or posted."""
     notes = item.get("notes_log") or []
     n = len(notes) if isinstance(notes, list) else 0
     name = item.get("name") or "your test item"
+    draft = _draft(item)
+    if draft:
+        posted = f'bolt manage posted "{name}"'
+        needs = [str(x).strip() for x in (draft.get("needs") or []) if str(x).strip()]
+        if draft.get("approved_at"):
+            if needs:
+                return (
+                    f"Post {name} tonight. Open piece: {needs[0]}. "
+                    f"If that piece slips, post the cut already approved. Then `{posted}`."
+                )
+            return f"Post the approved short for {name} by hand, then `{posted}`."
+        return f"Review the draft for {name} and approve it, or say what to change."
     if item.get("verdict"):
         return f"Draft the short for {name} and send it for your OK."
     if n < JOURNAL_DAYS:
         return f"Day {n + 1} journal note on {name} (`bolt manage note \"{name}\" --text \"...\"`)."
-    if not item.get("verdict"):
-        return f"Write the detailed assessment and verdict for {name}."
-    return f"Draft the short for {name} and send it for your OK."
+    return f"Write the detailed assessment and verdict for {name}."
 
 
 def todays_steps() -> List[str]:
+    """Today's list. `briefing_focus.focus_item` keeps the list to one product."""
     items = active_items()
     if not items:
         return [
             f'Pick your next {lane()} product to test and add it: '
             f'bolt manage add "Item" --lane {lane()} --status testing'
         ]
+    focus = str(settings().get("focus_item") or "").strip()
+    if focus:
+        chosen = [
+            i for i in items
+            if str(i.get("id") or "") == focus or str(i.get("name") or "") == focus
+        ]
+        if chosen:
+            items = chosen[:1]
     return [next_step(i) for i in items]

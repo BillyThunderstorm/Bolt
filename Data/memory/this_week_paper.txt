@@ -1,6 +1,6 @@
 WILLIAM — THIS WEEK
 (one page for the fridge — not a computer briefing)
-Printed: Sunday, 2026-08-30
+Printed: Saturday, 2026-10-24
 
 THE BIG GOAL  (by 2026-12-31)
 Not a finished career and not a content calendar. By 2026-12-31: either
@@ -9,20 +9,22 @@ roadmap plus proof that the work already done is leading somewhere.
 This is figuring out the map. It is not a finished career plan.
 
 THIS WEEK
-  Topic:  general product review / Amazon storefront
-  Status: PAUSED — stepping back. Not behind. Not a skipped plan.
-  Started: 2026-08-24
+  Topic:  product testing
+  Status: In progress. Stay on this week's topic.
+  Started: 2026-10-19
+  Note: Week of 2026-10-19 to 2026-10-25. Lane started 2026-10-11. Saturday job is one post: the K&F Concept Neck Phone Holder short (script approved 2026-10-19). Film the 10-20s POV or post the desk cut already filmed. Leave the capture card and the Facmogu mic holder until this one is posted. Plan: Data/business/product-testing-plan.md
 
 DONE (tick when it actually happened)
-  (nothing logged on the computer yet)
+  [x] Three owned assessments written: Rybozen capture card 10/10, Facmogu Pink Mic Holder 7/10, K&F Concept Neck Phone Holder 8/10
+  [x] Shorts drafted for all three; K&F script approved 2026-10-19
+  [x] Desk footage filmed Oct 20-21 (K&F strap and flip, capture card demo, Facmogu in the desk take). K&F still not posted.
   [ ] ________________________________
   [ ] ________________________________
   [ ] ________________________________
 
 LAST WEEK (already happened — not this week's job)
-  Topic: beauty / skincare
-  [x] Posted facial steamer review on YouTube (https://www.youtube.com/watch?v=gYqRPoCkIy0, 713 views as of 2026-08-21)
-  [x] Snail care leftover closed — not carried into later weeks
+  Topic: gaming / tech
+  (nothing logged)
 
 HOW TO READ THIS
   A blank week is not failure. Daily computer work does not
