@@ -29,6 +29,7 @@ This is the entry point for human-facing project documentation. Keep current-sta
 - `Data/business/product-testing-plan.md`: phased career plan, assessment template, this week, and today.
 - `Data/business/product-tester-plan.md`: short card Bolt follows (lane, career bar, how to talk).
 - `Core/config.json`: runtime defaults. Secrets belong only in `.env`.
+- `Data/configs/buffer_product_posting.json`: locked product-cut rule. After William approves a finished product cut, Bolt schedules it on Buffer (TikTok @itssimplybilly and YouTube Shorts “Tune in, it’s SimplyBilly”) with no second confirmation. Video Editor edits this file. Tokens stay in `.env`.
 - `pyproject.toml`: Python dependencies and optional feature groups.
 
 ## Maintenance rule

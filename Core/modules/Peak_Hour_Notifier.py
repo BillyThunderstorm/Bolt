@@ -45,6 +45,12 @@ try:
 except ImportError:
     pass
 
+from modules.Buffer_Product_Posting import (
+    main as buffer_main,
+    queue_brief as buffer_queue_brief,
+    schedule_approved_product_cut,
+)
+
 try:
     from modules.notifier import notify
 except ImportError:
@@ -1004,12 +1010,43 @@ def approve_next_clip(clip_id: str = None) -> dict:
     # Audit #2: Billy responded, clear the escalation counter.
     _reset_ignored_reviews(data)
     _save_ready(data)
+    _schedule_product_cut_if_needed(clip, data)
     notify(
         f"Approved clip {clip.get('id')} for auto-post",
         level="success",
         reason="Bolt will post at the scheduled peak time, or you can use !postnow / bolt postnow to publish immediately.",
     )
     return clip
+
+
+def _schedule_product_cut_if_needed(clip: dict, data: dict) -> dict | None:
+    """Product cuts go to Buffer as soon as they are approved. Stream clips do not.
+
+    The approval that just happened is the only confirmation. A missing
+    Buffer token still leaves a queue job; it does not ask again.
+    """
+    if str(clip.get("content_kind") or "") != "product":
+        return None
+    name = str(clip.get("product_name") or "").strip()
+    if not name:
+        clip["buffer_status"] = "missing_product_name"
+        _save_ready(data)
+        return None
+    try:
+        job = schedule_approved_product_cut(
+            name,
+            str(clip.get("clip_path") or ""),
+            title=str(clip.get("title") or "") or None,
+        )
+    except Exception as exc:
+        clip["buffer_status"] = "enqueue_failed"
+        clip["buffer_error"] = str(exc)[:300]
+        _save_ready(data)
+        return None
+    clip["buffer_job_id"] = job.get("id")
+    clip["buffer_status"] = job.get("status")
+    _save_ready(data)
+    return job
 
 
 def reject_next_clip(reason: str = "", clip_id: str = None) -> dict:
@@ -1194,6 +1231,23 @@ def post_now(clip_id: str = None, force: bool = True) -> dict:
                 "error": "No ready clip with a local video file found",
             },
         }
+    if str(clip.get("content_kind") or "") == "product":
+        job = _schedule_product_cut_if_needed(clip, data)
+        detail = (job or {}).get("detail") or (
+            "Product cuts schedule through Buffer, not the paused TikTok API."
+        )
+        return {
+            "clip": clip,
+            "result": {
+                "success": bool(job and job.get("scheduled")),
+                "skipped": not bool(job and job.get("scheduled")),
+                "via": "buffer",
+                "paused": False,
+                "buffer_status": (job or {}).get("status") or clip.get("buffer_status"),
+                "error": "" if job and job.get("scheduled") else detail,
+                "detail": detail,
+            },
+        }
     try:
         from modules.TikTok_Auth import TIKTOK_API_PAUSE_MESSAGE, tiktok_api_enabled
 
@@ -1230,6 +1284,9 @@ def process_auto_post_queue(now: datetime = None) -> dict:
         _tiktok_api_on = True
 
     for clip in data["clips"]:
+        if str(clip.get("content_kind") or "") == "product":
+            # Product cuts are scheduled by Buffer at approval time.
+            continue
         if not _is_alertable_clip(clip):
             continue
         plan = _ensure_auto_post_plan(clip, now)
@@ -1905,6 +1962,7 @@ def add_manual_clip(
     *,
     approve: bool = False,
     suggest_title: bool = False,
+    product_name: str | None = None,
 ) -> dict:
     """
     Register a hand-edited video (usually under media/vertical_clips/) into
@@ -1927,10 +1985,16 @@ def add_manual_clip(
             continue
         try:
             if Path(existing.get("clip_path") or "").resolve() == path:
+                if product_name:
+                    existing["content_kind"] = "product"
+                    existing["product_name"] = product_name
                 if approve:
                     plan = _ensure_auto_post_plan(existing)
                     plan["status"] = "approved"
                     plan["approved_at"] = _now().isoformat()
+                    _save_ready(data)
+                    _schedule_product_cut_if_needed(existing, data)
+                elif product_name:
                     _save_ready(data)
                 return existing
         except Exception:
@@ -1958,6 +2022,15 @@ def add_manual_clip(
         score=float(resolved_score),
         tier="queue",
     )
+    if product_name:
+        data = _load_ready()
+        for row in data.get("clips") or []:
+            if row.get("id") == item.get("id"):
+                row["content_kind"] = "product"
+                row["product_name"] = product_name
+                item = row
+                break
+        _save_ready(data)
     if approve:
         approved = approve_next_clip(item.get("id"))
         return approved or item
@@ -2446,6 +2519,9 @@ In decide mode keys:
 Already edited files in media/vertical_clips/ (your final cuts):
   bolt queue add Stress.mp4 Hands.mp4 Leaving.mp4
   bolt queue add Stress.mp4 --approve          # queue + mark approved for peak
+  bolt queue add cut.mp4 --product "Name" --approve
+                                             # product cut → Buffer, no second yes
+  bolt queue buffer                        # Buffer jobs for product cuts
   bolt queue add Stress.mp4 --title "My hook"  # custom caption title
   bolt queue add Stress.mp4 --suggest-title    # AI/template title options applied
   # Editing a file does NOT register it — you must `queue add` once.
@@ -2542,6 +2618,12 @@ def _print_summary() -> None:
             )
         else:
             print()
+
+    try:
+        brief = buffer_queue_brief()
+        print(f"      product cuts: {brief.get('line')}\n")
+    except Exception:
+        pass
 
     if with_file:
         print("  Postable now (real files only):")
@@ -2735,6 +2817,11 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
                 _print_summary()
         return 0
 
+    if action in ("buffer", "buffer-status", "product-buffer"):
+        report_json = "--json" in rest
+        buffer_argv = ["status", "--json"] if report_json else ["status"]
+        return buffer_main(buffer_argv)
+
     if action in ("list", "dashboard", "qstatus"):
         show_all = "--all" in rest or "-a" in rest
         if show_all:
@@ -2787,6 +2874,7 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
         flags = set()
         title = None
         score = None
+        product_name = None
         paths: list[str] = []
         i = 0
         while i < len(rest):
@@ -2794,6 +2882,11 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
             if tok in ("--approve", "-a"):
                 flags.add("approve")
                 i += 1
+                continue
+            if tok == "--product" and i + 1 < len(rest):
+                flags.add("product")
+                product_name = rest[i + 1]
+                i += 2
                 continue
             if tok in ("--suggest-title", "--ai-title", "--gen-title"):
                 flags.add("suggest_title")
@@ -2819,7 +2912,7 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
         if not paths:
             print(
                 "usage: bolt queue add <file> [file…] [--approve] [--suggest-title] "
-                "[--title TEXT] [--score N]",
+                "[--title TEXT] [--score N] [--product NAME]",
                 file=sys.stderr,
             )
             print(
@@ -2842,6 +2935,7 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
                     score=score,
                     approve="approve" in flags,
                     suggest_title="suggest_title" in flags and use_title is None,
+                    product_name=product_name,
                 )
             except FileNotFoundError as exc:
                 print(str(exc), file=sys.stderr)
@@ -2852,6 +2946,11 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
                 f"  + {item.get('id')}  {state}  "
                 f"⭐{item.get('score')}  {_clip_display_name(item)}"
             )
+            if item.get("buffer_status"):
+                print(
+                    f"      Buffer: {item.get('buffer_status')} "
+                    "(product cut, no second confirmation)"
+                )
             if item.get("title"):
                 print(f"      title: {item.get('title')}")
         if not added:
@@ -2933,6 +3032,11 @@ def run_queue_cli(argv: list[str] | None = None) -> int:
             f"  ({clip.get('title', '')[:60]})"
         )
         print(f"  file: {_clip_display_name(clip)}")
+        if clip.get("content_kind") == "product":
+            print(
+                f"  Buffer: {clip.get('buffer_status') or 'queued'} "
+                "(no second confirmation)"
+            )
         return 0
 
     if action in ("reject", "hold", "dontpost", "dont-post", "stopclip"):

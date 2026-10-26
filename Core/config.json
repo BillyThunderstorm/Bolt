@@ -92,7 +92,7 @@
     "auto_post_if_deadline_missed": false,
     "require_rejection_reason": true,
     "privacy": "PUBLIC_TO_EVERYONE",
-    "_comment": "Publishing requires William's explicit approval. TikTok API auto-publishing is paused."
+    "_comment": "Publishing requires William's explicit approval. TikTok API auto-publishing is paused. Finished product cuts use Data/configs/buffer_product_posting.json (Buffer schedule, no second confirmation)."
   },
   "title_generation": {
     "enabled": true
