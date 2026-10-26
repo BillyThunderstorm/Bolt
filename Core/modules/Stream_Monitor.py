@@ -39,16 +39,28 @@ try:
 except ImportError:
     HAS_WEBSOCKET = False
 
-# OBS WebSocket 5.x eventSubscriptions bitmask
-# Bit 0  = General, Bit 1 = Config, Bit 2 = Scenes, Bit 4 = Outputs, Bit 5 = SceneItems,
-# Bit 16 = InputVolumeMeters
+# OBS WebSocket 5.x EventSubscription flags (obs-websocket docs/generated/protocol.md).
+# Fixed 22 Oct 2026: the old mask used bit 4 for "Outputs" and bit 5 for
+# "SceneItems", but in v5 bit 4 = Transitions and bit 5 = Filters. Outputs is
+# bit 6 and SceneItems is bit 7, so OBS never sent StreamStateChanged,
+# RecordStateChanged or ReplayBufferSaved to the live monitor.
+SUB_GENERAL = 1 << 0
+SUB_CONFIG = 1 << 1
+SUB_SCENES = 1 << 2  # CurrentProgramSceneChanged
+SUB_INPUTS = 1 << 3
+SUB_TRANSITIONS = 1 << 4
+SUB_FILTERS = 1 << 5
+SUB_OUTPUTS = 1 << 6  # StreamStateChanged, RecordStateChanged, ReplayBufferSaved
+SUB_SCENE_ITEMS = 1 << 7
+SUB_INPUT_VOLUME_METERS = 1 << 16  # high-volume; must be requested explicitly
+
 EVENT_SUBSCRIPTIONS = (
-    (1 << 0)  # General
-    | (1 << 2)  # Scenes (for CurrentProgramSceneChanged)
-    | (1 << 4)  # Outputs (replay buffer, stream, record)
-    | (1 << 5)  # SceneItems
-    | (1 << 16)  # InputVolumeMeters
-)  # = 67621
+    SUB_GENERAL
+    | SUB_SCENES
+    | SUB_OUTPUTS
+    | SUB_SCENE_ITEMS
+    | SUB_INPUT_VOLUME_METERS
+)  # = 65733
 
 
 class StreamMonitor:

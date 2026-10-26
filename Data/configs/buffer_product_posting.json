@@ -24,15 +24,15 @@
       "service": "tiktok",
       "handle": "@itssimplybilly",
       "label": "TikTok @itssimplybilly",
-      "buffer_channel_id": ""
+      "buffer_channel_id": "6ad5ac69778b240e2f546985"
     },
     {
       "key": "youtube_shorts",
       "platform": "youtube_shorts",
       "service": "youtube",
-      "display_name": "Tune in, it’s SimplyBilly",
-      "label": "YouTube Shorts — Tune in, it’s SimplyBilly",
-      "buffer_channel_id": ""
+      "display_name": "Tune in, it\u2019s SimplyBilly",
+      "label": "YouTube Shorts \u2014 Tune in, it\u2019s SimplyBilly",
+      "buffer_channel_id": "6ad64404778b240e2f5ac6a9"
     }
   ],
   "notes": "William's approval of the finished product cut is the only yes. Bolt then adds the cut to Buffer's queue for both channels (automatic, not a reminder) and does not ask again. Buffer createPost needs a public https video URL and BUFFER_ACCESS_TOKEN. Until those exist, the job stays in Data/buffer_product_queue.json with an honest status. Bolt never invents a token or a channel id."
