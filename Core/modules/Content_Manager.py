@@ -34,6 +34,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 from uuid import uuid4
 
+from modules.Buffer_Product_Posting import schedule_approved_product_cut
+
 # Repo root: Core/modules/thisfile -> parents[2]
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = REPO_ROOT / "Data"
@@ -638,6 +640,26 @@ def tiktok_publish_item(
         "publish_id": result.get("publish_id"),
         "post_record": post_record,
     }
+
+
+def approve_product_cut(
+    name: str,
+    video_path: str,
+    title: str = "",
+    video_url: str = "",
+) -> Dict[str, Any]:
+    """William approved this finished product cut. Schedule it on Buffer.
+
+    The standing rule is Data/configs/buffer_product_posting.json.
+    This approval is the only confirmation. Bolt does not ask again.
+    """
+    return schedule_approved_product_cut(
+        name,
+        video_path,
+        title=title or None,
+        video_url=video_url or None,
+        catalog_path=CATALOG_FILE,
+    )
 
 
 def mark_ready(name: str, verdict: str = "", note: str = "") -> Dict[str, Any]:
@@ -2962,7 +2984,7 @@ def _print_item(item: Dict[str, Any]) -> None:
 
 # Canonical subcommand names accepted by argparse.
 _CANONICAL_CMDS = [
-    "add", "list", "note", "draft", "mark-ready", "mark-posted", "shipped",
+    "add", "list", "note", "draft", "mark-ready", "approve-cut", "mark-posted", "shipped",
     "import",
     "post", "post-dry-run", "tiktok-status", "youtube-pkg", "x-pkg",
     "youtube-status", "x-status", "sponsors-add", "sponsors-enrich",
@@ -2982,6 +3004,9 @@ _CMD_ALIASES = {
     "mark-reade": "mark-ready",   # common typo
     "reade": "mark-ready",
     "mark-rady": "mark-ready",
+    "approve-cut": "approve-cut",
+    "approvecut": "approve-cut",
+    "approve_cut": "approve-cut",
     # mark-posted
     "posted": "mark-posted",
     "post-it": "mark-posted",
@@ -3032,6 +3057,8 @@ Bolt manage — daily cheat sheet (short names work)
   bolt manage note "Name" --text "…"
   bolt manage draft "Name"
   bolt manage ready "Name"           (alias: mark-ready)
+  bolt manage approve-cut "Name" --video path.mp4
+                                      # product cut approved → Buffer, no second yes
   bolt manage posted "Name" --amazon --where "https://…"
                                       # Amazon-only is valid (no social required)
   bolt manage posted "Name" --tiktok --youtube --x
@@ -3220,6 +3247,18 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_ready.add_argument("name")
     p_ready.add_argument("--verdict", default="")
     p_ready.add_argument("--note", default="")
+
+    p_cut = sub.add_parser(
+        "approve-cut",
+        help=(
+            "Approve a finished product cut and schedule it on Buffer "
+            "(TikTok + YouTube Shorts, no second confirmation)"
+        ),
+    )
+    p_cut.add_argument("name")
+    p_cut.add_argument("--video", default="", help="Local finished cut")
+    p_cut.add_argument("--video-url", default="", help="Public https URL Buffer can fetch")
+    p_cut.add_argument("--title", default="")
 
     p_posted = sub.add_parser(
         "mark-posted",
@@ -3441,6 +3480,22 @@ def main(argv: Optional[List[str]] = None) -> int:
             print(f"Marked ready: {item['name']} (status={item['status']})")
             print(f"Next: bolt manage posted \"{item['name']}\" --tiktok --youtube --x")
             print(f"  or: bolt manage posted \"{item['name']}\" --amazon --where <url>")
+            print(
+                "  A finished product cut uses "
+                "`bolt manage approve-cut \"NAME\" --video path.mp4` "
+                "(Buffer, no second yes)."
+            )
+        elif args.cmd == "approve-cut":
+            result = approve_product_cut(
+                args.name,
+                args.video,
+                title=args.title,
+                video_url=args.video_url,
+            )
+            print(json.dumps(result, indent=2, default=str))
+            if not result.get("ok"):
+                return 1
+            print("No second confirmation. Buffer job queued.")
         elif args.cmd == "mark-posted":
             plats = _platforms_from_args(args)
             if not plats and not (args.where or args.note):
@@ -3510,10 +3565,31 @@ def main(argv: Optional[List[str]] = None) -> int:
             if report["unparsed"] and not args.dry_run:
                 print("Unparsed files stayed in the inbox — drop a reviews.json or tell Bolt to read them.")
         elif args.cmd == "post":
-            result = tiktok_publish_item(
-                args.name, approve=args.approve, video_path=args.video
-            )
-            print(json.dumps(result, indent=2, default=str))
+            if not args.approve:
+                result = tiktok_publish_item(
+                    args.name, approve=False, video_path=args.video
+                )
+                print(json.dumps(result, indent=2, default=str))
+            else:
+                # --approve is the product-cut yes. Buffer schedules both
+                # channels from buffer_product_posting.json. No second prompt.
+                video = args.video or ""
+                if not video:
+                    try:
+                        preview = tiktok_publish_dry_run(args.name)
+                        video = preview.get("video_path") or ""
+                    except ValueError as exc:
+                        print(json.dumps({
+                            "ok": False,
+                            "status": "video_missing",
+                            "detail": str(exc),
+                        }, indent=2))
+                        return 1
+                result = approve_product_cut(args.name, video)
+                print(json.dumps(result, indent=2, default=str))
+                if not result.get("ok"):
+                    return 1
+                print("No second confirmation. Buffer job queued.")
         elif args.cmd == "post-dry-run":
             result = tiktok_publish_dry_run(args.name)
             print(json.dumps(result, indent=2, default=str))

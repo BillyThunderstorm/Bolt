@@ -420,7 +420,10 @@ Script subcommands (each maps to scripts/X.py):
                           aliases: title-train, train-titles
 
 Content manager / creator business (Core/modules/Content_Manager.py):
-  manage add|list|note|draft|next|status|youtube-pkg|x-pkg
+  manage add|list|note|draft|ready|approve-cut|next|status|youtube-pkg|x-pkg
+                          approve-cut "Name" --video PATH
+                          Product cut → Buffer (TikTok + YouTube Shorts), no second yes
+                          Rule: Data/configs/buffer_product_posting.json
   store add|list|feature-next|status
   social status|package|queue
   sponsors find|pitch|log|next
@@ -477,6 +480,10 @@ Voice (listen → interpret → speak via Core/bolt_live_voice.py):
                           Multi-platform plans + honest auto-upload soft-fail
                           (Kick/IG unavailable:; Data/multi_platform_queue.json)
                           (aliases: platforms, multi-publish)
+  buffer [status|flush|approve]  Product-cut Buffer schedule (PARTIAL)
+                          status shows Data/configs/buffer_product_posting.json
+                          approve "Name" --video PATH  (no second confirmation)
+                          Missing BUFFER_ACCESS_TOKEN queues the job honestly
   enhance [--dry-run] [--limit N]
                           Smart_Trim → Text_Overlay on media/vertical_clips/
                           (aliases: enhance_clips, smart_trim)
@@ -523,9 +530,12 @@ Creator Command Center (Core/modules/Command_Center.py):
   ccc …                   Short alias for mission
 
 Post queue / peak posting (Core/modules/Peak_Hour_Notifier.py):
-  queue [status|list|next|decide|clean|approve|…]
+  queue [status|list|next|decide|clean|approve|buffer|…]
                           Ready-to-post queue (Data/ready_to_post.json)
                           NOT media/vertical_clips/ — that folder is videos only
+                          queue buffer           Buffer jobs for approved product cuts
+                          queue add FILE --product "Name" --approve
+                                              Product cut → Buffer, no second yes
   queue decide            Interactive: open / approve / hold / post (easiest)
   queue next [--open]     Show next postable clip card
   queue package [id]      Manual upload package (paste-ready captions)
@@ -601,6 +611,7 @@ def _all_cli_names() -> list[str]:
             "anomaly",
             "predict",
             "multi",
+            "buffer",
             "ocr",
             "amazon",
             "search",
@@ -1199,6 +1210,16 @@ print('System is fully upgraded.')
             f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
         )
         cmd = [py, "-m", "modules.Multi_Publisher"] + rest
+        os.chdir(REPO_ROOT)
+        return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
+
+    # Built-in: Buffer schedule for an approved product cut
+    if subcommand in ("buffer", "buffer-post", "buffer_post"):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = f"{CORE_DIR}" + (
+            f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else ""
+        )
+        cmd = [py, "-m", "modules.Buffer_Product_Posting"] + rest
         os.chdir(REPO_ROOT)
         return subprocess.call(cmd, cwd=str(REPO_ROOT), env=env)
 

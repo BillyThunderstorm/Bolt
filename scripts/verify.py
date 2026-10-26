@@ -74,6 +74,7 @@ def check_files():
         "Core/modules/Peak_Hour_Notifier.py",
         "Core/modules/Think_Learn_Decide.py",
         "Core/modules/Multi_Publisher.py",
+        "Core/modules/Buffer_Product_Posting.py",
     ]
     missing = []
     for rel in required_files + required_modules:

@@ -41,7 +41,7 @@ Help William become a stronger creator across **game + tech testing first**, the
 Priority lanes: **games + tech**.  
 Platforms: TikTok `@itssimplybilly`, Twitch `ItsSimplyBilly`, YouTube `@SimplyBilly`, X `@SimplyBilly_`.  
 Amazon Influencer: **rejected 2026-08-24**. Tag `billycarter-20` may still exist; do not treat storefront or shoppable video as live. Public product reviews go on William's socials if he wants them. Written Amazon customer reviews as a buyer still work.  
-Posting rule: **always require approval**.
+Posting rule: **approval still gates every post**. The approval of a finished product cut is the only yes: Bolt then schedules it through Buffer to TikTok `@itssimplybilly` and YouTube Shorts “Tune in, it’s SimplyBilly” (`Data/configs/buffer_product_posting.json`, confirmations after approval = 0). Stream clips stay on the peak queue. TikTok API auto-post stays paused.
 
 Clip everything from Twitch, but do not treat every saved moment as post-worthy. For non-gaming content, capture tests, first impressions, routines, results, mistakes, and lessons. A strong content idea needs at least one of these signals:
 
@@ -81,6 +81,7 @@ Avoid generic excitement, fake certainty, and empty motivational language.
 | `modules/Title_Generator.py` | Local/template title generation with optional AI support |
 | `modules/Word_Lookup.py` | Dictionary / spellcheck / thesaurus (`bolt word`) |
 | `modules/Multi_Publisher.py` | Manual posting packets and platform plans |
+| `modules/Buffer_Product_Posting.py` | Approved product cuts → Buffer queue (no second confirmation) |
 | `data/performance_outcomes.jsonl` | Reusable lessons from posted content |
 | `data/memory_index.json` | Built retrieval index; refresh after memory changes |
 
@@ -122,6 +123,10 @@ Use `memory/content/` for broad creator growth:
 The best memory entry is specific: date, platform, content idea, result, and lesson.
 
 ## Recent Notes
+- [2026-10-26] Held clip f29d0c19 (Test): not ready
+- [2026-10-26] Held clip 46db1bf7 (Ready clip): bad hook
+- [2026-10-26] Held clip a39deb80 (Test): not ready
+- [2026-10-26] Held clip 6ea517bd (Ready clip): bad hook
 - [2026-10-19] Held clip 3b8de19f (2889961274 clip01 audio spike 132 tiktok 🔥 #Gaming): duplicate
 - [2026-10-15] Held clip 0a2c43fc (Test): not ready
 - [2026-10-15] Held clip b26c654d (Ready clip): bad hook

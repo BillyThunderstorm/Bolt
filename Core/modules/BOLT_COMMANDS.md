@@ -69,7 +69,9 @@ Hands-only footage counts. Comments are optional. The week card (`bolt week`) be
 
 ### After a stream (separate from the product post)
 
-`bolt wrap` packages the latest VOD into clips, a reel, and captions under `media/output/wraps/`. `bolt recordings latest` is the same pipeline for one file. `bolt queue decide` is where you approve, hold, or retitle. You still upload the file yourself, then `bolt queue mark-posted` or `bolt manage posted`. `bolt postnow` hits the paused TikTok API, so the manual upload is the path that finishes.
+`bolt wrap` packages the latest VOD into clips, a reel, and captions under `media/output/wraps/`. `bolt recordings latest` is the same pipeline for one file. `bolt queue decide` is where you approve, hold, or retitle a stream clip. You still upload that stream clip yourself, then `bolt queue mark-posted` or `bolt manage posted`. `bolt postnow` hits the paused TikTok API, so the manual upload is the path that finishes a stream clip.
+
+A finished **product** cut is different. Approving it (`bolt manage approve-cut "Name" --video cut.mp4`, or `bolt queue add cut.mp4 --product "Name" --approve`) schedules it through Buffer to TikTok @itssimplybilly and YouTube Shorts “Tune in, it’s SimplyBilly”. That approval is the only yes. The standing rule is `Data/configs/buffer_product_posting.json`. `bolt queue` prints the Buffer job line. `bolt buffer status` shows the jobs.
 
 ### Potential when this loop is finished
 
@@ -84,7 +86,7 @@ The tools below are largely built. The potential shows up when the loop runs thr
 | **Aug 2027 → (Career)** | A paid review, a UGC or testing contract, a retainer, or a tester job. **$1,000 / month** is the first proof. **$3,000 / month** is the job you would stand behind. Commonly 12–24 months if the reviews keep going. |
 | **By 2026-12-31** | You know what success looks like in this profession, or the roadmap plus the public posts are the proof the work is leading somewhere. The roadmap is written. The missing proof is the public record. |
 
-Used this way, Bolt becomes the manager that remembers every test, turns it into one short you approve, keeps the week on one lane, and learns which posts actually landed. Sponsor pitches stay drafts until the portfolio exists. Nothing posts and nothing spends without your approval.
+Used this way, Bolt becomes the manager that remembers every test, turns it into one short you approve, keeps the week on one lane, and learns which posts actually landed. Sponsor pitches stay drafts until the portfolio exists. Nothing spends without your approval. A finished product cut you approve is scheduled on Buffer with no second yes. Stream clips still wait for you to upload them.
 
 The north star, from your own profile, sits past that floor: companies send products, some tests happen on site, the work can reach a stage like Dream Con or a Marvel-adjacent collaboration, and the income comes from sponsors, partnerships, and disclosed affiliate links. That is the direction the posts are collecting evidence for. It is not this Saturday's job.
 
@@ -473,7 +475,8 @@ bolt manage import [--dry-run] [--no-storefront] [--open]
 | `bolt manage list [--lane …] [--status …]` | List items filtered by lane and/or status |
 | `bolt manage note "Name" --text "…"` | Append a day-keyed note to an item's history |
 | `bolt manage draft "Name" --format short|long` | Build a draft post from notes (uses the LLM) |
-| `bolt manage mark-ready "Name" [--verdict …]` | Mark an item as ready to post (requires a draft) |
+| `bolt manage mark-ready "Name" [--verdict …]` | Mark an item as ready to post (requires a draft). Does not publish. |
+| `bolt manage approve-cut "Name" --video PATH` | Approve a finished product cut and schedule it on Buffer (no second confirmation). Rule: `Data/configs/buffer_product_posting.json` |
 | `bolt manage mark-posted "Name" --platforms … --where …` | Mark an item as posted, recording publish URLs |
 | `bolt manage shipped` | List every item that has been marked posted |
 | `bolt manage import` | Import Amazon reviews dropped in `Docs/reviews/inbox/` (alias: `inbox`) |
@@ -505,7 +508,7 @@ bolt multi publish <platform> [--clip PATH] [--title TITLE] [--json]
 
 ### Publishing and platform readiness
 
-`post-dry-run` previews a TikTok post. `post` remains a dry run unless `--approve` is present.
+`post-dry-run` previews a TikTok post. `bolt manage post` without `--approve` stays a dry run. `bolt manage post "Name" --approve` is the product-cut yes: Bolt schedules TikTok @itssimplybilly and YouTube Shorts “Tune in, it’s SimplyBilly” through Buffer and does not ask again. The direct TikTok Content Posting API stays paused.
 
 YouTube / X catalog packages are **manual paste by design** (Studio / compose UI). They do **not** call the YouTube Data API or X API.
 
@@ -529,7 +532,7 @@ bolt manage x-status
 |---------|--------------|
 | `bolt manage post-dry-run "Name"` | Preview a TikTok post without sending anything live |
 | `bolt manage post "Name"` | Default: dry-run only; refuses to publish |
-| `bolt manage post "Name" --approve` | Actually publish to TikTok (still requires `--video` if no draft video) |
+| `bolt manage post "Name" --approve` | Approve the product cut and schedule it on Buffer for both locked channels. Needs `--video` when the file is not already next to the catalog id. Does not call the paused TikTok API. |
 | `bolt manage tiktok-status` | Show whether the TikTok publisher is configured and ready |
 | `bolt youtube-pkg "Name"` | Paste-ready YouTube Studio package (title, description, tags, upload URL, next step). Default = plain text |
 | `bolt youtube-pkg "Name" --json` | Same package as JSON |
@@ -623,6 +626,12 @@ bolt queue add Stress.mp4 Hands.mp4 Leaving.mp4 Ate.mp4 close.mp4 almost.mp4 yes
 
 # Or register + approve for peak in one step
 bolt queue add Stress.mp4 --approve --title "When the stress hits"
+
+# Finished product cut: approval schedules Buffer (no second yes)
+bolt queue add neck-holder.mp4 --product "K&F Concept Neck Phone Holder" --approve
+bolt manage approve-cut "K&F Concept Neck Phone Holder" --video neck-holder.mp4
+bolt queue buffer                      # Buffer jobs for product cuts
+bolt buffer status                     # same rule + queue
 
 # Titles
 bolt queue title                      # Suggest captions for the next clip

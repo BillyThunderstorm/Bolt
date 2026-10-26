@@ -62,6 +62,7 @@ Data/unified_memory.jsonl
 Data/conversations/
 Data/clip_history.json
 Data/multi_platform_queue.json
+Data/buffer_product_queue.json
 Data/performance_outcomes.jsonl
 Data/post_rejections.jsonl
 Data/seen_clips.json

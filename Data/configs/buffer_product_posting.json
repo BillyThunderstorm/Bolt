@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "edit_this_file": true,
+  "who_edits": "Video Editor and Bolt both read this file. Change the locked product-posting rule here. Do not put API tokens in this file.",
+  "locked": true,
+  "locked_by": "William",
+  "locked_via": "Video Editor",
+  "enabled": true,
+  "trigger": "product_cut_approved",
+  "confirmations_after_approval": 0,
+  "via": "buffer",
+  "mode": "addToQueue",
+  "scheduling_type": "automatic",
+  "youtube_category_id": "26",
+  "youtube_category_note": "Howto & Style. Video Editor can change this id. Product reviews stay out of the Gaming category.",
+  "applies_to": "Finished product review cuts only. Stream and gaming clips stay on the peak queue. TikTok API auto-post stays paused in Core/config.json auto_posting.",
+  "credentials_env": "BUFFER_ACCESS_TOKEN",
+  "api_url": "https://api.buffer.com",
+  "queue_file": "Data/buffer_product_queue.json",
+  "channels": [
+    {
+      "key": "tiktok",
+      "platform": "tiktok",
+      "service": "tiktok",
+      "handle": "@itssimplybilly",
+      "label": "TikTok @itssimplybilly",
+      "buffer_channel_id": ""
+    },
+    {
+      "key": "youtube_shorts",
+      "platform": "youtube_shorts",
+      "service": "youtube",
+      "display_name": "Tune in, it’s SimplyBilly",
+      "label": "YouTube Shorts — Tune in, it’s SimplyBilly",
+      "buffer_channel_id": ""
+    }
+  ],
+  "notes": "William's approval of the finished product cut is the only yes. Bolt then adds the cut to Buffer's queue for both channels (automatic, not a reminder) and does not ask again. Buffer createPost needs a public https video URL and BUFFER_ACCESS_TOKEN. Until those exist, the job stays in Data/buffer_product_queue.json with an honest status. Bolt never invents a token or a channel id."
+}
