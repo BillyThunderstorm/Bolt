@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-26 06:10:00",
+  "generated_at": "2026-10-26 08:10:01",
   "status": {
     "clips_made": 24,
-    "vertical_clips": 9,
-    "ready_to_post": 11,
-    "recordings_processed": 136,
+    "vertical_clips": 12,
+    "ready_to_post": 7,
+    "recordings_processed": 134,
     "api_keys": {
       "twitch": true,
       "obs": true,
@@ -42,51 +42,23 @@
       "status": "manual_upload_ready"
     },
     {
-      "id": "a8d19452",
-      "created": "2026-10-24T13:51:55.340099",
-      "title": "Scored a clean 100 in God of War Sons of Sparta.",
+      "id": "b1c1741d",
+      "created": "2026-10-26T08:04:12.814784",
+      "title": "Audio spike hit hard in Sons of Sparta.",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "e0a89653",
-      "created": "2026-10-24T13:51:57.009792",
-      "title": "Scored a clean 100 in God of War Sons of Sparta.",
+      "id": "5008870f",
+      "created": "2026-10-26T08:06:26.474738",
+      "title": "Audio spike hit hard in Sons of Sparta.",
       "platforms": 4,
       "status": "manual_upload_ready"
     },
     {
-      "id": "6d9b2cd8",
-      "created": "2026-10-24T13:51:58.655714",
-      "title": "Scored a clean 100 in God of War Sons of Sparta.",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "c87f523f",
-      "created": "2026-10-24T13:52:00.374827",
-      "title": "Scored a clean 100 in God of War Sons of Sparta.",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "381f5a8d",
-      "created": "2026-10-24T13:52:02.066007",
-      "title": "Scored a clean 100 in God of War Sons of Sparta.",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "49b2d036",
-      "created": "2026-10-24T13:52:53.174917",
-      "title": "Scored a clean 100 in God of War Sons of Sparta.",
-      "platforms": 4,
-      "status": "manual_upload_ready"
-    },
-    {
-      "id": "090b21a7",
-      "created": "2026-10-24T13:53:08.239549",
-      "title": "Scored a clean 100 in God of War Sons of Sparta.",
+      "id": "eddd7b7b",
+      "created": "2026-10-26T08:08:13.110513",
+      "title": "Audio spike hit hard in Sons of Sparta.",
       "platforms": 4,
       "status": "manual_upload_ready"
     }
@@ -105,7 +77,7 @@
       "end_hour": 9,
       "start_display": "7 AM",
       "end_display": "9 AM",
-      "in_window": false,
+      "in_window": true,
       "active": false
     },
     {
@@ -129,19 +101,14 @@
   ],
   "progress": {
     "counts": {
-      "READY": 85,
-      "PARTIAL": 4,
+      "READY": 84,
+      "PARTIAL": 6,
       "SHELL": 0,
       "IDEA": 0
     },
-    "total": 89,
-    "percent_ready": 96,
+    "total": 90,
+    "percent_ready": 93,
     "recent": [
-      {
-        "name": "Cloudflare Pages / Websites",
-        "date": "2026-10-22",
-        "display": "Oct 22, 5:45 AM CT"
-      },
       {
         "name": "iCloud Drive (multi-Mac sync)",
         "date": "2026-10-22",
@@ -161,9 +128,14 @@
         "name": "Learning notes (study log)",
         "date": "2026-10-21",
         "display": "Oct 21, 5:45 PM CT"
+      },
+      {
+        "name": "Mac app (Bolt.app in the menu bar)",
+        "date": "2026-10-21",
+        "display": "Oct 21, 3:45 PM CT"
       }
     ],
-    "updated": "22 Oct 2026, ~5:45 AM CT",
+    "updated": "22 Oct 2026, ~1:45 AM CT",
     "available": true
   }
 }
