@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-26 20:10:00",
+  "generated_at": "2026-10-26 22:10:00",
   "status": {
     "clips_made": 24,
     "vertical_clips": 14,
@@ -116,7 +116,7 @@
       "end_hour": 22,
       "start_display": "7 PM",
       "end_display": "10 PM",
-      "in_window": true,
+      "in_window": false,
       "active": false
     }
   ],
