@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-27 12:10:00",
+  "generated_at": "2026-10-27 14:10:00",
   "status": {
-    "clips_made": 24,
-    "vertical_clips": 14,
-    "ready_to_post": 10,
-    "recordings_processed": 136,
+    "clips_made": 48,
+    "vertical_clips": 20,
+    "ready_to_post": 16,
+    "recordings_processed": 139,
     "api_keys": {
       "twitch": true,
       "obs": true,
@@ -82,6 +82,20 @@
       "title": "Audio spike hit hard in Sons of Sparta.",
       "platforms": 4,
       "status": "manual_upload_ready"
+    },
+    {
+      "id": "1961be1a",
+      "created": "2026-10-27T13:23:48.426309",
+      "title": "Audio spike hit hard in Sons of Sparta.",
+      "platforms": 4,
+      "status": "manual_upload_ready"
+    },
+    {
+      "id": "0f114c27",
+      "created": "2026-10-27T13:24:04.029394",
+      "title": "Audio spike hit hard in Sons of Sparta.",
+      "platforms": 4,
+      "status": "manual_upload_ready"
     }
   ],
   "briefing": {
@@ -107,7 +121,7 @@
       "end_hour": 14,
       "start_display": "12 PM",
       "end_display": "2 PM",
-      "in_window": true,
+      "in_window": false,
       "active": false
     },
     {
