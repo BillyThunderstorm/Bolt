@@ -1,4 +1,9 @@
-"""Product-cut approval schedules Buffer with no second confirmation."""
+"""Product-cut approval schedules Buffer with no second confirmation.
+
+Scheduling cases copy the standing rule and put their own channel ids on
+that copy. A filled-in Data/configs/buffer_product_posting.json, or
+BUFFER_* values already in the environment, must not change the result.
+"""
 
 import json
 import os
@@ -21,6 +26,32 @@ from modules import Peak_Hour_Notifier as notifier
 
 RULE = _repo_root / "Data" / "configs" / "buffer_product_posting.json"
 
+# Cleared for every scheduling case. _skip_dotenv keeps .env from refilling them.
+_HERMETIC_ENV = {
+    "BUFFER_ACCESS_TOKEN": "",
+    "BUFFER_ORGANIZATION_ID": "",
+    "BUFFER_API_URL": "",
+}
+
+
+def _skip_dotenv() -> None:
+    """Tests set BUFFER_* themselves. Do not read .env or .env.local."""
+
+
+def _isolated_rule(dest: Path, channel_ids: tuple[str, ...] = ("", "")) -> Path:
+    """Write a test copy of the standing rule with the given channel ids."""
+    rule = json.loads(RULE.read_text(encoding="utf-8"))
+    channels = list(rule.get("channels") or [])
+    if len(channels) != len(channel_ids):
+        raise AssertionError(
+            f"standing rule has {len(channels)} channels, test passed {len(channel_ids)}"
+        )
+    for channel, channel_id in zip(channels, channel_ids):
+        channel["buffer_channel_id"] = channel_id
+    rule.pop("buffer_organization_id", None)
+    dest.write_text(json.dumps(rule, indent=2) + "\n", encoding="utf-8")
+    return dest
+
 
 class RuleFileTests(unittest.TestCase):
     def test_locked_rule_names_both_channels_and_zero_extra_confirmations(self):
@@ -37,10 +68,22 @@ class RuleFileTests(unittest.TestCase):
         self.assertIn("SimplyBilly", channels[1]["display_name"])
         self.assertIn("Tune in", channels[1]["display_name"])
         self.assertEqual(channels[1]["service"], "youtube")
-        self.assertEqual(channels[0]["buffer_channel_id"], "")
-        self.assertEqual(channels[1]["buffer_channel_id"], "")
         self.assertEqual(rule["credentials_env"], "BUFFER_ACCESS_TOKEN")
-        self.assertNotIn("Bearer ", json.dumps(rule))
+        blob = json.dumps(rule)
+        self.assertNotIn("Bearer ", blob)
+        self.assertNotIn("BUFFER_ACCESS_TOKEN=", blob)
+        # Ids are optional. William may paste them here. The test checks
+        # the shape, not a particular live Buffer channel id.
+        for channel in channels:
+            channel_id = channel["buffer_channel_id"]
+            self.assertIsInstance(channel_id, str)
+            self.assertNotRegex(channel_id, r"\s")
+            folded = channel_id.casefold()
+            self.assertNotIn("bearer", folded)
+            self.assertNotIn("token", folded)
+            self.assertNotIn("secret", folded)
+            if channel_id:
+                self.assertRegex(channel_id, r"^[A-Za-z0-9_-]{8,}$")
 
 
 class ScheduleTests(unittest.TestCase):
@@ -67,11 +110,13 @@ class ScheduleTests(unittest.TestCase):
         )
         self.video = root / "cut.mp4"
         self.video.write_bytes(b"fake")
+        self.rule = _isolated_rule(root / "buffer_product_posting.json")
         self.patches = [
             patch.object(buffer, "QUEUE_FILE", self.queue),
             patch.object(buffer, "CATALOG_FILE", self.catalog),
-            patch.object(buffer, "RULE_FILE", RULE),
-            patch.dict(os.environ, {"BUFFER_ACCESS_TOKEN": ""}, clear=False),
+            patch.object(buffer, "RULE_FILE", self.rule),
+            patch.object(buffer, "_load_env", _skip_dotenv),
+            patch.dict(os.environ, _HERMETIC_ENV, clear=False),
         ]
         for item in self.patches:
             item.start()
@@ -248,6 +293,51 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(youtube["channelId"], "bbbbbbbbbbbbbbbbbbbbbbbb")
         self.assertNotIn("secret-token", self.queue.read_text(encoding="utf-8"))
 
+    def test_saved_channel_ids_schedule_without_a_channel_lookup(self):
+        saved = ("cccccccccccccccccccccccc", "dddddddddddddddddddddddd")
+        _isolated_rule(self.rule, saved)
+        calls = []
+        sent_ids = []
+
+        def poster(token, query, variables):
+            calls.append(query)
+            if "CreatePost" not in query:
+                raise AssertionError(query)
+            channel_id = variables["input"]["channelId"]
+            sent_ids.append(channel_id)
+            return {
+                "ok": True,
+                "body": {
+                    "data": {
+                        "createPost": {
+                            "post": {
+                                "id": f"post-{channel_id[:4]}",
+                                "dueAt": "2026-10-27T01:00:00Z",
+                            }
+                        }
+                    }
+                },
+            }
+
+        with patch.dict(os.environ, {"BUFFER_ACCESS_TOKEN": "secret-token"}):
+            job = buffer.schedule_approved_product_cut(
+                "Neck Holder",
+                video_url="https://cdn.example.com/neck.mp4",
+                poster=poster,
+                catalog_path=self.catalog,
+            )
+
+        self.assertTrue(job["scheduled"])
+        self.assertEqual(job["status"], "scheduled")
+        self.assertEqual(sent_ids, list(saved))
+        self.assertEqual(
+            [ch["buffer_channel_id"] for ch in job["channels"]],
+            list(saved),
+        )
+        self.assertNotIn("AccountOrgs", " ".join(calls))
+        self.assertNotIn("GetChannels", " ".join(calls))
+        self.assertNotIn("secret-token", self.queue.read_text(encoding="utf-8"))
+
     def test_missing_video_does_not_write_a_job(self):
         job = buffer.schedule_approved_product_cut(
             "Neck Holder",
@@ -302,8 +392,9 @@ class PeakQueueTests(unittest.TestCase):
                 patch.object(mp, "PLATFORM_QUEUE_FILE", platform_file),
                 patch.object(buffer, "QUEUE_FILE", buffer_file),
                 patch.object(buffer, "CATALOG_FILE", catalog),
-                patch.object(buffer, "RULE_FILE", RULE),
-                patch.dict(os.environ, {"BUFFER_ACCESS_TOKEN": ""}, clear=False),
+                patch.object(buffer, "RULE_FILE", _isolated_rule(tmp_path / "rule.json")),
+                patch.object(buffer, "_load_env", _skip_dotenv),
+                patch.dict(os.environ, _HERMETIC_ENV, clear=False),
             ):
                 item = notifier.add_manual_clip(
                     clip,
