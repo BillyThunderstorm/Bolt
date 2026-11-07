@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-06 17:10:16",
+  "generated_at": "2026-11-06 19:10:01",
   "status": {
     "clips_made": 82,
     "vertical_clips": 28,
@@ -99,11 +99,11 @@
     }
   ],
   "briefing": {
-    "date": "Thursday, November 05, 2026",
+    "date": "Friday, November 06, 2026",
     "action_items": [
       "Post K&F Concept Neck Phone Holder tonight. Open piece: desk talk takes (phone propped at eye level). If that piece slips, post the cut already approved. Then `bolt manage posted \"K&F Concept Neck Phone Holder\"`."
     ],
-    "source": "morning_2026-11-05.md"
+    "source": "morning_2026-11-06.md"
   },
   "peaks": [
     {
@@ -130,7 +130,7 @@
       "end_hour": 22,
       "start_display": "7 PM",
       "end_display": "10 PM",
-      "in_window": false,
+      "in_window": true,
       "active": false
     }
   ],
