@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-20 17:10:00",
+  "generated_at": "2026-11-20 19:10:00",
   "status": {
     "clips_made": 57,
     "vertical_clips": 36,
@@ -99,11 +99,11 @@
     }
   ],
   "briefing": {
-    "date": "Thursday, November 19, 2026",
+    "date": "Friday, November 20, 2026",
     "action_items": [
       "Pick your next tech product to test and add it: bolt manage add \"Item\" --lane tech --status testing"
     ],
-    "source": "morning_2026-11-19.md"
+    "source": "morning_2026-11-20.md"
   },
   "peaks": [
     {
@@ -130,7 +130,7 @@
       "end_hour": 22,
       "start_display": "7 PM",
       "end_display": "10 PM",
-      "in_window": false,
+      "in_window": true,
       "active": false
     }
   ],
